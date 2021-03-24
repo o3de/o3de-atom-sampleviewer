@@ -1,0 +1,154 @@
+/*
+* All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
+* its licensors.
+*
+* For complete copyright and license terms please see the LICENSE at the root of this
+* distribution (the "License"). All use of this software is governed by the License,
+* or, if provided, by the license below or the license accompanying this file. Do not
+* remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*
+*/
+
+#include <Atom/Features/SrgSemantics.azsli>
+
+#include <viewsrg.srgi>
+
+ShaderResourceGroup ShadowSrg : SRG_PerObject
+{
+    row_major float4x4 m_worldMatrix;
+    row_major float4x4 m_lightViewProjectionMatrix;
+    float4 m_lightPosition;
+	
+    float4 m_ambientColor;
+    float4 m_diffuseColor;
+	
+    Texture2D m_depthMapTexture;
+    
+    SamplerComparisonState m_shadowSampler
+    {
+        MagFilter = Linear;
+        MinFilter = Linear;
+        MipFilter = Point;
+        ComparisonFunc = Less;
+        MaxAnisotropy = 16;
+        ReductionType = Comparison;
+    };
+}    
+
+struct VSInput
+{
+    float3 m_position : POSITION;
+    float3 m_normal: NORMAL;
+};
+
+struct VSOutput
+{
+    float4 m_position : SV_Position;
+    float3 m_normal: NORMAL;
+    float4 m_lightViewPosition : TEXCOORD1;
+    float3 m_worldPosition : TEXCOORD2;
+};
+
+VSOutput MainVS(VSInput vsInput)
+{
+    VSOutput OUT;
+    
+    OUT.m_worldPosition = mul(ShadowSrg::m_worldMatrix, float4(vsInput.m_position, 1.0)).xyz;
+	
+    OUT.m_position = mul(ViewSrg::m_viewProjectionMatrix, float4(OUT.m_worldPosition, 1.0));
+	
+    OUT.m_lightViewPosition = mul(ShadowSrg::m_lightViewProjectionMatrix, float4(OUT.m_worldPosition, 1.0));
+
+    float4 normalsToWorld = mul(ShadowSrg::m_worldMatrix, float4(vsInput.m_normal, 0.0));
+    OUT.m_normal = normalsToWorld.xyz;
+    OUT.m_normal = normalize(OUT.m_normal);
+	
+    return OUT;
+}
+
+struct PSOutput
+{
+    float4 m_color : SV_Target0;
+};
+
+
+//--------------------------------------------------------------------------------------------------
+// Computes shadows using a 5x5 kernel, but optimized to 9-taps using bilinear fetches.
+//
+// https://vec3.ca/bicubic-filtering-in-fewer-taps/
+//--------------------------------------------------------------------------------------------------
+
+float ShadowResolve_5x5PCF(const Texture2D shadowMap, const float3 shadowPos, const float shadowMapSize, const SamplerComparisonState samplerState)
+{
+    const float invShadowMapSize = 1.0 / shadowMapSize;
+
+    // Compute the shadow map UV and fractionals.
+    float2 shadowScaled = shadowPos.xy * shadowMapSize + float2(0.5, 0.5);
+    float2 shadowUv = floor(shadowScaled);
+    float2 st = shadowScaled - shadowUv;
+
+    shadowUv = (shadowUv - float2(0.5, 0.5)) * invShadowMapSize;
+
+    // Compute the offsets and weights for the 9 bilinear taps.
+    float2 uvw0 = 4.0 - 3.0 * st;
+    float2 uvw1 = 7.0;
+    float2 uvw2 = 1.0 + 3.0 * st;
+
+    float2 vUV0 = ((3.0 - 2.0 * st) / uvw0) - 2.0;
+    float2 vUV1 = (3.0 + st) / uvw1;
+    float2 vUV2 = (st / uvw2) + 2.0;
+
+    // Accumulate the shadow results and return the resolve value.
+    float shadowResult;
+     
+    shadowResult  = uvw0.x * uvw0.y * shadowMap.SampleCmpLevelZero(samplerState, shadowUv + float2(vUV0.x, vUV0.y) * invShadowMapSize, shadowPos.z);
+    shadowResult += uvw1.x * uvw0.y * shadowMap.SampleCmpLevelZero(samplerState, shadowUv + float2(vUV1.x, vUV0.y) * invShadowMapSize, shadowPos.z);
+    shadowResult += uvw2.x * uvw0.y * shadowMap.SampleCmpLevelZero(samplerState, shadowUv + float2(vUV2.x, vUV0.y) * invShadowMapSize, shadowPos.z);
+
+    shadowResult += uvw0.x * uvw1.y * shadowMap.SampleCmpLevelZero(samplerState, shadowUv + float2(vUV0.x, vUV1.y) * invShadowMapSize, shadowPos.z);
+    shadowResult += uvw1.x * uvw1.y * shadowMap.SampleCmpLevelZero(samplerState, shadowUv + float2(vUV1.x, vUV1.y) * invShadowMapSize, shadowPos.z);
+    shadowResult += uvw2.x * uvw1.y * shadowMap.SampleCmpLevelZero(samplerState, shadowUv + float2(vUV2.x, vUV1.y) * invShadowMapSize, shadowPos.z);
+
+    shadowResult += uvw0.x * uvw2.y * shadowMap.SampleCmpLevelZero(samplerState, shadowUv + float2(vUV0.x, vUV2.y) * invShadowMapSize, shadowPos.z);
+    shadowResult += uvw1.x * uvw2.y * shadowMap.SampleCmpLevelZero(samplerState, shadowUv + float2(vUV1.x, vUV2.y) * invShadowMapSize, shadowPos.z);
+    shadowResult += uvw2.x * uvw2.y * shadowMap.SampleCmpLevelZero(samplerState, shadowUv + float2(vUV2.x, vUV2.y) * invShadowMapSize, shadowPos.z);
+
+    shadowResult /= 144.0;
+    return shadowResult * shadowResult;
+}
+
+float GetShadowMapDimensions()
+{
+    float shadowMapWidth, shadowMapHeight;
+    ShadowSrg::m_depthMapTexture.GetDimensions(shadowMapWidth, shadowMapHeight);
+    return shadowMapWidth;
+}
+
+PSOutput MainPS(VSOutput vsOutput)
+{
+    PSOutput OUT;
+    float bias = 0.001f;
+    float shadowMask;
+    float lightIntensity;
+    float3 projectTexCoord;
+    float3 lightDirection;
+    
+    OUT.m_color = ShadowSrg::m_ambientColor;
+    
+    lightDirection = ShadowSrg::m_lightPosition.xyz - vsOutput.m_worldPosition;
+    lightDirection = normalize(lightDirection);
+      
+    projectTexCoord.xyz = vsOutput.m_lightViewPosition.xyz / vsOutput.m_lightViewPosition.w;	
+    projectTexCoord.xy = (projectTexCoord.xy / float2(2.0f, -2.0f)) + 0.5f;  
+    projectTexCoord.z -= bias;
+              
+    shadowMask = ShadowResolve_5x5PCF(ShadowSrg::m_depthMapTexture, projectTexCoord, GetShadowMapDimensions(), ShadowSrg::m_shadowSampler);
+    
+    lightIntensity = shadowMask * saturate(dot(normalize(vsOutput.m_normal), lightDirection));
+
+    OUT.m_color += (ShadowSrg::m_diffuseColor * lightIntensity);
+    OUT.m_color = saturate(OUT.m_color);
+
+    return OUT;
+}

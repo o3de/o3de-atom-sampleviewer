@@ -1,0 +1,59 @@
+/*
+ * All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
+ * its licensors.
+ *
+ * For complete copyright and license terms please see the LICENSE at the root of this
+ * distribution (the "License"). All use of this software is governed by the License,
+ * or, if provided, by the license below or the license accompanying this file. Do not
+ * remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *
+ */
+
+#include <Atom/Features/SrgSemantics.azsli>
+#include <viewsrg.srgi>
+
+ShaderResourceGroup PerContextSrg : SRG_PerSubPass
+{
+    float m_scale;
+}
+
+ShaderResourceGroup PerDrawSrg : SRG_PerDraw
+{
+    float3 m_positionOffset;
+}
+
+struct VSInput
+{
+    float3 m_position : POSITION;
+    float4 m_color : COLOR0;
+};
+
+struct VSOutput
+{
+    float4 m_position : SV_Position;
+    float4 m_color : COLOR0;
+};
+
+VSOutput MainVS(VSInput IN)
+{
+    VSOutput OUT;
+    
+    OUT.m_position = float4(IN.m_position + PerDrawSrg::m_positionOffset, 1.0f);// * PerContextSrg::m_scale;    
+    OUT.m_position = mul(ViewSrg::m_viewProjectionMatrix, OUT.m_position);    
+    OUT.m_color = IN.m_color;
+    return OUT;
+};
+
+struct PSOutput
+{
+    float4 m_diffuse : SV_Target0;
+};
+
+PSOutput MainPS(VSOutput IN)
+{
+    PSOutput OUT;
+    OUT.m_diffuse = IN.m_color;
+    return OUT;
+}; 
+

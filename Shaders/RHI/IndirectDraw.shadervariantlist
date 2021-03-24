@@ -1,0 +1,17 @@
+{
+    "Shader" : "IndirectDraw.shader",
+    "Variants" : [
+        {
+          "StableId": 1,
+          "Options": {
+            "o_useRootConstants": "false"
+          }
+        },
+        {
+          "StableId": 2,
+          "Options": {
+            "o_useRootConstants": "true"
+          }
+        }
+    ]
+}

@@ -1,0 +1,20 @@
+{
+    "description": "",
+    "materialType": "Materials\\Types\\StandardPBR.materialtype",
+    "parentMaterial": "",
+    "propertyLayoutVersion": 3,
+    "properties": {
+        "baseColor": {
+            "textureMap": "Materials/SSRExample/wood_planks_512_diff.tif"
+        },
+        "metallic": {
+            "factor": 0.0
+        },
+        "roughness": {
+            "factor": 0.5
+        },
+	"normal": {
+            "textureMap": "Materials/SSRExample/wood_planks_512_ddna.tif"
+        }
+    }
+}

@@ -1,0 +1,1 @@
+This test file is a placeholder until we get vertex painting on our standard preview models. At that point, any tests using this model should be updated to use a standard preview model, and delete this model.

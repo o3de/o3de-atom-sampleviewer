@@ -1,0 +1,19 @@
+{
+    "Shader" : "Shaders/OptimizationTests/DummyTransformColor.shader",
+    "Variants" : [
+        {
+            "StableId": 1,
+            "Options": {
+                "o_textureColorSpace": "ColorSpaceId::SRGB",
+                "o_workingColorSpace": "ColorSpaceId::ACEScg"
+            }
+        },
+        {
+            "StableId": 2,
+            "Options": {
+                "o_textureColorSpace": "ColorSpaceId::LinearSRGB",
+                "o_workingColorSpace": "ColorSpaceId::ACEScg"
+            }
+        }
+    ]
+}

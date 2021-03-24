@@ -1,0 +1,16 @@
+{
+    "Amazon":
+    {
+        "Gems":
+        {
+            "AtomSampleViewer.Assets":
+            {
+                "SourcePaths":
+                [
+                    "Gems/Atom/Tools/MaterialEditor",
+                    "Gems/UiBasics"
+                ]
+            }
+        }
+    }
+}

@@ -1,0 +1,287 @@
+/*
+* All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
+* its licensors.
+*
+* For complete copyright and license terms please see the LICENSE at the root of this
+* distribution (the "License"). All use of this software is governed by the License,
+* or, if provided, by the license below or the license accompanying this file. Do not
+* remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*
+*/
+
+#include <viewsrg.srgi>
+#include <Atom/Features/SphericalHarmonicsUtility.azsli>
+#include <Atom/RPI/Math.azsli>
+
+// RGB per row
+// first 3 bands for Grace Cathedral probe available at here:
+// https://www.pauldebevec.com/Probes/
+// calculated as c_l_m = integral{ Radiance(s) * SHBasis(l, m, s) } for all sampled direction s on sphere S
+// which runs for each color channel separately (c_l_m_r, c_l_m_g, c_l_m_b)
+// the lower hemi sphere radiances under the surface are filtered by lambertian cosine term
+static const float GraceCathedralSH[27] = {
+    // R
+    2.53951384635872, 
+    1.0775523857285165, 1.239229205484427 , 0.9458659067630454 ,
+    1.782942445353695 , 0.8193052111265798, -0.3359348352648975, 0.3709499352580087, 0.7844904694566587,
+    
+    // G
+    1.405939440477567,
+    0.5737359819468685, 1.0978087141208104, 0.18506274053816416,
+    0.6811688402789957, 0.7023431983214563, 0.3056738462214631 , 0.1753565473744576, 0.1778660985880454,
+    
+    // B
+    1.748271935016665,
+    0.8526870003819748, 1.9101990711004575, -0.025668773449626654,
+    0.4438016469839106, 1.5102998945629529, 1.093993744201323, 0.4109905263687058, -0.07419514044613942
+};
+
+// SH coefficients for Eucalyptus Grove probe
+static const float RNLSH[27] = {
+    // R
+    3.766055529641367,
+    -0.40406140148206865, 2.877179048074897, 1.0167815002471956,
+    -0.5853821006554704, -0.09935292918366617, 0.28423834881566207, 0.6222773907470484, 0.8885327769488396,
+    
+    // G
+    4.2447416994629465,
+    -0.3207608858594331, 3.5761459663568447, 1.014234018050483,
+    -0.5164785598628846, 0.12420621153110219, 0.6557821044358743, 0.556331752796699, 1.0410020790843508,
+    
+    // B
+    4.491401630981911,
+    -0.12215412094184247, 4.136091787179279, 0.8658157727284175,
+    -0.377989948123863, 0.4461962278000395, 1.1430202258191537, 0.4006585445306217, 1.0740016349582413
+};
+
+// SH coefficients for St Peter's Basilica probe
+static const float StPeterSH[27] = {
+    // R
+    3.5803230858525286,
+    0.266039684453623, 1.6925803298077324, -0.35934100317952267,
+    0.04656037807347018, 0.4358724537888737, 1.2687743552404271, -0.18570076550676343, 0.33246625615466635,
+    
+    // G
+    2.5747666746640654,
+    0.10749801820011659, 1.3790985820712267, -0.2352465711852622,
+    0.037522972624484646, 0.23694792243134288, 0.7304912926110536, -0.1382374891588147, 0.46604897024599046,
+    
+    // B
+    2.2780129003295295,
+    0.013810896524256528, 1.2053005811787343, -0.10786941964227027,
+    0.001560121273374082, 0.10741082229332044, 0.3891549382974423, -0.038006070134113876, 0.6299315230288755
+};
+
+ShaderResourceGroup SphericalHarmonicsInstanceSrg : SRG_PerObject
+{
+    int    m_presetIndex;
+    float  m_exposure; 
+    bool   m_enableGammaCorrection;
+    float3 m_rotationAngle;
+
+    column_major float4x4 m_objectMatrix;
+    row_major    float4x4 m_fakeLightSH;
+}
+
+struct VSInput 
+{
+    float3 m_position : POSITION;
+    float2 m_uv : UV0;
+};
+
+struct VSOutput
+{
+    float4 m_position : SV_Position;
+    float2 m_uv : UV0;
+};
+
+VSOutput MainVS(VSInput vsInput)
+{
+    VSOutput OUT;
+    OUT.m_position = mul(float4(vsInput.m_position, 1.0), SphericalHarmonicsInstanceSrg::m_objectMatrix);
+    OUT.m_uv = vsInput.m_uv;
+    return OUT;
+}
+
+struct PSOutput
+{
+    float4 m_color : SV_Target0;
+};
+
+float3 CalFakeLight(float3 dir)
+{
+    float3 radiance = float3(0.0, 0.0, 0.0);
+
+    // RGB, band 0
+    radiance.xyz += SphericalHarmonicsInstanceSrg::m_fakeLightSH[0][0] * SHBasisPoly3(0,  0, dir);
+    // RGB, band 1
+    radiance.xyz += SphericalHarmonicsInstanceSrg::m_fakeLightSH[0][1] * SHBasisPoly3(1, -1, dir);
+    radiance.xyz += SphericalHarmonicsInstanceSrg::m_fakeLightSH[0][2] * SHBasisPoly3(1,  0, dir);
+    radiance.xyz += SphericalHarmonicsInstanceSrg::m_fakeLightSH[0][3] * SHBasisPoly3(1,  1, dir);
+    // RGB, band 2
+    radiance.xyz += SphericalHarmonicsInstanceSrg::m_fakeLightSH[1][0] * SHBasisPoly3(2, -2, dir);
+    radiance.xyz += SphericalHarmonicsInstanceSrg::m_fakeLightSH[1][1] * SHBasisPoly3(2, -1, dir);
+    radiance.xyz += SphericalHarmonicsInstanceSrg::m_fakeLightSH[1][2] * SHBasisPoly3(2,  0, dir);
+    radiance.xyz += SphericalHarmonicsInstanceSrg::m_fakeLightSH[1][3] * SHBasisPoly3(2,  1, dir);
+    radiance.xyz += SphericalHarmonicsInstanceSrg::m_fakeLightSH[2][0] * SHBasisPoly3(2,  2, dir);
+    // RGB, band 3
+    radiance.xyz += SphericalHarmonicsInstanceSrg::m_fakeLightSH[2][1] * SHBasisPoly3(3, -3, dir);
+    radiance.xyz += SphericalHarmonicsInstanceSrg::m_fakeLightSH[2][2] * SHBasisPoly3(3, -2, dir);
+    radiance.xyz += SphericalHarmonicsInstanceSrg::m_fakeLightSH[2][3] * SHBasisPoly3(3,  1, dir);
+    radiance.xyz += SphericalHarmonicsInstanceSrg::m_fakeLightSH[3][0] * SHBasisPoly3(3,  0, dir);
+    radiance.xyz += SphericalHarmonicsInstanceSrg::m_fakeLightSH[3][1] * SHBasisPoly3(3,  1, dir);
+    radiance.xyz += SphericalHarmonicsInstanceSrg::m_fakeLightSH[3][2] * SHBasisPoly3(3,  2, dir);
+    radiance.xyz += SphericalHarmonicsInstanceSrg::m_fakeLightSH[3][3] * SHBasisPoly3(3,  3, dir);
+    
+    return radiance;
+}
+
+float3 CalFakeLightOriginal(float3 dir)
+{
+    float theta = acos(dir.y);
+    float phi = atan2(dir.z, dir.x);
+    
+    float3 res = float3(0.0, 0.0, 0.0);
+    res = 5.0 * (max(0.0, 5.0 * cos(theta) - 4.0) +
+          max(0.0, -4.0 * sin(theta - PI) * cos(phi - 2.5) - 3.0));
+    return res;
+}
+
+float3x3 EulerToRotMatrix(float3 angle)
+{
+    row_major float3x3 rotationMat;
+
+    row_major float3x3 Rx = {
+        1.0,          0.0,           0.0,
+        0.0, cos(angle.x), -sin(angle.x),
+        0.0, sin(angle.x),  cos(angle.x)
+    };
+    
+    row_major float3x3 Ry = {
+        cos(angle.y),  0.0, sin(angle.y),
+                 0.0,  1.0,          0.0,
+        -sin(angle.y), 0.0, cos(angle.y)
+    };
+    
+    row_major float3x3 Rz = {
+        cos(angle.z), -sin(angle.z), 0.0,
+        sin(angle.z),  cos(angle.z), 0.0,
+                 0.0,           0.0, 1.0
+    };
+    
+    rotationMat = mul(Rz, mul(Ry, Rx));
+    return rotationMat;
+}
+
+float3 CalFakeLightRotated(float3 dir, float3 angle)
+{
+    float3 radiance = float3(0.0, 0.0, 0.0);
+
+    // include first 3 bands only since the rotation function only support 3,
+    // rotation of higher band is recommended to use standard WignerD provided on CPU side
+    row_major float3x3 Rot = EulerToRotMatrix(angle);
+    float sh[9] = {
+        SphericalHarmonicsInstanceSrg::m_fakeLightSH[0][0], 
+        SphericalHarmonicsInstanceSrg::m_fakeLightSH[0][1], 
+        SphericalHarmonicsInstanceSrg::m_fakeLightSH[0][2], 
+        SphericalHarmonicsInstanceSrg::m_fakeLightSH[0][3],
+        SphericalHarmonicsInstanceSrg::m_fakeLightSH[1][0], 
+        SphericalHarmonicsInstanceSrg::m_fakeLightSH[1][1], 
+        SphericalHarmonicsInstanceSrg::m_fakeLightSH[1][2], 
+        SphericalHarmonicsInstanceSrg::m_fakeLightSH[1][3], 
+        SphericalHarmonicsInstanceSrg::m_fakeLightSH[2][0]
+    };
+    
+    float shRot[9];
+    SHRotationZHF3(Rot, sh, shRot);
+    
+    // RGB, band 0
+    radiance.xyz += shRot[0] * SHBasisPoly3(0,  0, dir);
+    // RGB, band 1
+    radiance.xyz += shRot[1] * SHBasisPoly3(1, -1, dir);
+    radiance.xyz += shRot[2] * SHBasisPoly3(1,  0, dir);
+    radiance.xyz += shRot[3] * SHBasisPoly3(1,  1, dir);
+    // RGB, band 2
+    radiance.xyz += shRot[4] * SHBasisPoly3(2, -2, dir);
+    radiance.xyz += shRot[5] * SHBasisPoly3(2, -1, dir);
+    radiance.xyz += shRot[6] * SHBasisPoly3(2,  0, dir);
+    radiance.xyz += shRot[7] * SHBasisPoly3(2,  1, dir);
+    radiance.xyz += shRot[8] * SHBasisPoly3(2,  2, dir);
+    
+    return radiance;
+}
+
+// The name of variable follows following resource:
+// https://www.gdcvault.com/play/1012351/Uncharted-2-HDR
+float3 Uncharted2ToneMapping(float3 color, float exposure)
+{
+    float A = 0.15;
+    float B = 0.50;
+    float C = 0.10;
+    float D = 0.20;
+    float E = 0.02;
+    float F = 0.30;
+    float W = 11.2;
+    color *= exposure;
+    color = ((color * (A * color + C * B) + D * E) / (color * (A * color + B) + D * F)) - E / F;
+    float white = ((W * (A * W + C * B) + D * E) / (W * (A * W + B) + D * F)) - E / F;
+    color /= white;
+    return color;
+}
+
+// Ray marcher for SH visualisation, based on https://www.shadertoy.com/view/lsfXWH
+PSOutput MainPS(VSOutput psInput)
+{
+    // all following calculations and coordinates are in world space
+
+    PSOutput OUT;
+
+    float3 hdrColor = float3(0.0, 0.0, 0.0);
+
+    // inverse of rotation matrix is its transpose due to orthogonality
+    // position of translation part won't affect result since it's not used here
+    float4x4 invView = transpose(ViewSrg::m_viewMatrix);
+    
+    float2 recenteredUV = psInput.m_uv - float2(0.5, 0.5);
+    
+    // -1 because -z forward frame is used
+    float3 viewSpaceRayDir = float3(recenteredUV.x, recenteredUV.y, -1.0);
+    
+    // world space ray origin & direction
+    float3 rayDir = normalize(mul(invView, float4(viewSpaceRayDir, 0.0)).xyz);  
+    float3 rayOrigin = ViewSrg::m_worldPosition.xyz; 
+
+    // length of ray at intersection point, -1 if miss
+    float t = RaySphereClosestHitWS(float3(0, 0, 0), 0.5, rayOrigin, rayDir);
+    
+    // only do shading if hit anything
+    if(t > 0.0)
+    {
+        float3 pos = rayOrigin + rayDir * t;
+            
+        // the normal of points on unit sphere at the origin is its position
+        float3 normal = normalize(pos);
+
+        float3 outRadiance = float3(0.0, 0.0, 0.0);
+        switch(SphericalHarmonicsInstanceSrg::m_presetIndex)
+        {
+            case 0: outRadiance = EvalSH2RadianceRGB(normal, GraceCathedralSH); break;
+            case 1: outRadiance = EvalSH2RadianceRGB(normal, RNLSH           ); break;
+            case 2: outRadiance = EvalSH2RadianceRGB(normal, StPeterSH       ); break;
+            case 3: outRadiance = CalFakeLight(normal); break;
+            case 4: outRadiance = CalFakeLightOriginal(normal); break;
+            case 5: outRadiance = CalFakeLightRotated(normal, SphericalHarmonicsInstanceSrg::m_rotationAngle);
+        }
+
+        hdrColor = Uncharted2ToneMapping(max(outRadiance, 0.0), SphericalHarmonicsInstanceSrg::m_exposure);
+    }
+
+    if(SphericalHarmonicsInstanceSrg::m_enableGammaCorrection)
+    {
+        hdrColor = sqrt(hdrColor);
+    }
+ 
+    OUT.m_color = float4(hdrColor, 1.0);
+    return OUT;
+}

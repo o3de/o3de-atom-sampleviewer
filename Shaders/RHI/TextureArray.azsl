@@ -1,0 +1,64 @@
+/*
+* All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
+* its licensors.
+*
+* For complete copyright and license terms please see the LICENSE at the root of this
+* distribution (the "License"). All use of this software is governed by the License,
+* or, if provided, by the license below or the license accompanying this file. Do not
+* remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*
+*/
+
+#include <Atom/Features/SrgSemantics.azsli>
+
+ShaderResourceGroup TextureArraySrg : SRG_PerScene
+{
+    Texture2D m_textureArray[8];
+
+    Sampler m_sampler
+    {
+        MaxAnisotropy = 16;
+        AddressU = Wrap;
+        AddressV = Wrap;
+        AddressW = Wrap;
+    };
+}
+
+ShaderResourceGroup TextureIndexSrg : SRG_PerObject
+{
+    uint m_textureArrayIndex;
+}
+
+struct VSInput
+{
+    float3 m_position : POSITION;
+    float2 m_uv : UV0;
+};
+
+struct VSOutput
+{
+    float4 m_position : SV_Position;
+    float2 m_uv : UV0;
+};
+
+VSOutput MainVS(VSInput vsInput)
+{
+    VSOutput OUT;
+    OUT.m_position = float4(vsInput.m_position, 1.0);
+    OUT.m_uv = vsInput.m_uv;
+    return OUT;
+}
+
+struct PSOutput
+{
+    float4 m_color : SV_Target0;
+};
+
+PSOutput MainPS(VSOutput psInput)
+{
+    PSOutput OUT;
+    Texture2D texture = TextureArraySrg::m_textureArray[TextureIndexSrg::m_textureArrayIndex];
+    OUT.m_color = texture.Sample(TextureArraySrg::m_sampler, psInput.m_uv);
+    return OUT;
+}

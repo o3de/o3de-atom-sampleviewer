@@ -1,0 +1,14 @@
+{
+    "materialType": "Comprehensive.materialtype",
+    "propertyLayoutVersion": 1,
+    "properties": {
+        "stacks": {
+            "stackCount": 2,
+            "sliceThickness": 0.025
+        },
+        "light": {
+            "azimuthDegrees": 45.0,
+            "elevationDegrees": -45.0
+        }
+    }
+}

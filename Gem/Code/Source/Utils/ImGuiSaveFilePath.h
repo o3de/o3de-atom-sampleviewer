@@ -1,0 +1,87 @@
+/*
+* All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
+* its licensors.
+*
+* For complete copyright and license terms please see the LICENSE at the root of this
+* distribution (the "License"). All use of this software is governed by the License,
+* or, if provided, by the license below or the license accompanying this file. Do not
+* remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*
+*/
+
+#pragma once
+
+#include <AzCore/RTTI/ReflectContext.h>
+#include <AzCore/IO/SystemFile.h>
+#include <AzCore/std/string/string.h>
+
+namespace AtomSampleViewer
+{
+    //! Provides a common utility for either auto-generating or manually selecting a file path for saving.
+    class ImGuiSaveFilePath
+    {
+    public:
+        struct WidgetSettings
+        {
+            struct Labels
+            {
+                const char* m_filePath = "File Path";
+            } m_labels;
+        };
+
+        static void Reflect(AZ::ReflectContext* context);
+
+        void Activate();
+        void Deactivate();
+
+        //! @param configFilePath - Path to a local file for maintaining state between runs. Should start with "@user@/"
+        explicit ImGuiSaveFilePath(AZStd::string_view configFilePath);
+
+        void SetDefaultFolder(const AZStd::string& folderPath);
+        void SetDefaultFileName(const AZStd::string& fileNameNoExt);
+
+        //! Sets a list of available extensions that can be used in Auto mode. The first one will be the default.
+        void SetAvailableExtensions(const AZStd::vector<AZStd::string>& extensions);
+
+        //! Draw the ImGui
+        //! @return true if the asset selection changed
+        void Tick(const WidgetSettings& widgetSettings);
+
+        //! Returns the save file path chosen by the user, either manually entered or auto-generated.
+        AZStd::string GetSaveFilePath() const;
+
+        //! Returns the path to a new file that doesn't exist, in the form:
+        //! "[default folder]/[default file name]_[counter].[current extension]"
+        //! Note, the function you probably want is GetSaveFilePath(). GetNextAutoSaveFilePath() is only for special cases.
+        AZStd::string GetNextAutoSaveFilePath();
+
+    private:
+
+        struct Config final
+        {
+            AZ_TYPE_INFO(Config, "{FE014766-4D51-4FBB-B610-21A877C6F34D}");
+            AZ_CLASS_ALLOCATOR(Config, AZ::SystemAllocator, 0);
+
+            static void Reflect(AZ::ReflectContext* context);
+
+            bool m_autoMode = true;
+            int m_currentExtension = 0;
+            AZStd::string m_filePath;
+        };
+
+        static bool GetExtension(void* data, int index, const char** out);
+
+        bool LoadConfigFile();
+        void SaveConfigFile();
+
+        AZStd::string m_configFilePath;
+        Config m_config;
+
+        AZStd::string m_defaultFolder;
+        AZStd::string m_defaultFileName;
+        AZStd::vector<AZStd::string> m_availableExtensions;
+        uint32_t m_autoFileIndex = 0;
+        char m_filePath[AZ_MAX_PATH_LEN] = "";
+    };
+} // namespace AtomSampleViewer

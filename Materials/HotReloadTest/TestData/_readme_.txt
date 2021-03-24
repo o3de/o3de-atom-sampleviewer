@@ -1,0 +1,2 @@
+This folder contains a bunch of txt files that the "MaterialReloadTest" sample will copy into a temp folder to create usable materials.
+It also contains a few "VariantSelection" files that are used to display which shader variant is currently being used.

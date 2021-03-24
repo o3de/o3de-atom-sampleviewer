@@ -1,0 +1,30 @@
+{
+    "description": "",
+    "materialType": "Materials/Types/StandardPBR.materialtype",
+    "parentMaterial": "",
+    "propertyLayoutVersion": 3,
+    "properties": {
+        "baseColor": {
+            "color": [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+            ]
+        },
+        "emissive": {
+            "color": [
+                1.0,
+                0.5789272785186768,
+                0.19980163872241975,
+                1.0
+            ],
+            "enable": true,
+            "intensity": 3.0,
+            "textureMap": "Materials/HotReloadTest/TestData/VariantSelection_FullyBaked.png"
+        },
+        "opacity": {
+            "doubleSided": true
+        }
+    }
+}

@@ -1,0 +1,74 @@
+/*
+* All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
+* its licensors.
+*
+* For complete copyright and license terms please see the LICENSE at the root of this
+* distribution (the "License"). All use of this software is governed by the License,
+* or, if provided, by the license below or the license accompanying this file. Do not
+* remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*
+*/
+
+#include <viewsrg.srgi>
+#include <Atom/Features/PBR/ForwardPassSrg.azsli>
+#include <Atom/Features/PBR/DefaultObjectSrg.azsli>
+#include <Atom/RPI/ShaderResourceGroups/DefaultDrawSrg.azsli>
+
+option bool o_wavyLines = false;
+
+ShaderResourceGroup MaterialSrg : SRG_PerMaterial
+{
+    float4 m_colorA;
+    float4 m_colorB;
+}
+
+struct VertexInput
+{
+    float3 m_position : POSITION;
+};
+
+struct VertexOutput
+{
+    float4 m_position : SV_Position;
+    float3 m_worldPosition : TexCoord;
+};
+
+VertexOutput MainVS(VertexInput input)
+{
+    const float4x4 objectToWorldMatrix = ObjectSrg::GetWorldMatrix();
+
+    VertexOutput output;
+    float3 worldPosition = mul(objectToWorldMatrix, float4(input.m_position, 1)).xyz;
+    output.m_worldPosition = worldPosition;
+    output.m_position = mul(ViewSrg::m_viewProjectionMatrix, float4(worldPosition, 1.0));
+
+    return output;
+}
+
+struct PixelOutput
+{
+    float4 m_color : SV_Target0;
+};
+
+PixelOutput MainPS(VertexOutput input)
+{
+    PixelOutput output;
+
+    float scale = 10;
+    float stripeThickness = 0.3;
+    float stripeShift = 0.66;
+
+    float position = input.m_worldPosition.x;
+    if(o_wavyLines)
+    {
+        position += sin(input.m_worldPosition.z * 10) * 0.05;
+    }
+
+    float t = step(frac(position * scale + stripeShift), stripeThickness);
+
+    output.m_color = lerp(MaterialSrg::m_colorA, MaterialSrg::m_colorB, t);
+    output.m_color.a = 0.5;
+        
+    return output;
+}

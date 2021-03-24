@@ -1,0 +1,3 @@
+{
+    "materialType": "HotReloadTest.materialtype"
+}

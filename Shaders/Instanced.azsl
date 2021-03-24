@@ -1,0 +1,66 @@
+#include <viewsrg.srgi>
+
+struct CubeTransform
+{
+    float4 m_worldPosition; //XYZ world pos; ignore W
+    float4 m_rotation;      //Quaternion
+};
+
+struct PerChunk
+{
+    uint m_chunkIndex;
+};
+
+// RootConstantBuffer<PerChunk> g_RootConstants;  // we don't support RootConstantBuffer
+
+ShaderResourceGroup GlobalInstancedSrg : SRG_PerObject
+{
+    StructuredBuffer<CubeTransform> g_CubeTransforms;
+}
+
+struct VSInput
+{
+    float3 m_position : POSITION;
+    float4 m_color : COLOR0;
+    
+    uint m_instanceId : SV_InstanceID;
+};
+
+struct VSOutput
+{
+    float4 m_position : SV_Position;
+    float4 m_color : COLOR0;
+};
+
+float3 RotatePositionByQuaternion(float3 pos, float4 quat)
+{
+    float3 t = 2 * cross(quat.xyz, pos);
+    return pos + quat.w * t + cross(quat.xyz, t);
+}
+
+VSOutput InstancedVS(VSInput vsInput)
+{
+    VSOutput OUT;
+ 
+    uint chunkIndex = 0;
+    CubeTransform transform = GlobalInstancedSrg::g_CubeTransforms[vsInput.m_instanceId + chunkIndex];
+ 
+    float3 objectPos = RotatePositionByQuaternion(vsInput.m_position, transform.m_rotation);
+    float3 worldPosition = objectPos + transform.m_worldPosition.xyz;
+    
+    OUT.m_position = mul(float4(worldPosition, 1.0), ViewSrg::m_worldToClipMatrix);
+    OUT.m_color = vsInput.m_color;
+    return OUT;
+}
+
+struct PSOutput
+{
+    float4 m_color : SV_Target0;
+};
+
+PSOutput InstancedPS(VSOutput vsOutput)
+{
+    PSOutput OUT;
+    OUT.m_color = vsOutput.m_color;
+    return OUT;
+}

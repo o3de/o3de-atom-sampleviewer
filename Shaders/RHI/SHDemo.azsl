@@ -1,0 +1,180 @@
+/*
+* All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
+* its licensors.
+*
+* For complete copyright and license terms please see the LICENSE at the root of this
+* distribution (the "License"). All use of this software is governed by the License,
+* or, if provided, by the license below or the license accompanying this file. Do not
+* remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*
+*/
+
+#include <viewsrg.srgi>
+#include <Atom/Features/SphericalHarmonicsUtility.azsli>
+
+ShaderResourceGroup SphericalHarmonicsInstanceSrg : SRG_PerObject
+{
+    int m_shBand;
+    int m_shOrder;
+    int m_shSolver;
+
+    bool m_enableDistortion;
+
+    column_major float4x4 m_objectMatrix;
+}
+
+struct VSInput 
+{
+    float3 m_position : POSITION;
+    float2 m_uv : UV0;
+};
+
+struct VSOutput
+{
+    float4 m_position : SV_Position;
+    float2 m_uv : UV0;
+};
+
+VSOutput MainVS(VSInput vsInput)
+{
+    VSOutput OUT;
+    OUT.m_position = mul(float4(vsInput.m_position, 1.0), SphericalHarmonicsInstanceSrg::m_objectMatrix);
+    OUT.m_uv = vsInput.m_uv;
+    return OUT;
+}
+
+struct PSOutput
+{
+    float4 m_color : SV_Target0;
+};
+
+// compare against the length of marched point (i.e. distance from world origin) against the magnitude spherical harmonics 
+// evaluation centered around the world origin (0, 0, 0), if "m_enableDistortion" is set to false it will compare with
+// a unit sphere at the origin with radius = 0.35
+float3 EvalMarchResultWS(float3 marchedPoint)
+{
+    // distance between reached point (not necessarily hit) in this step and world origin
+    float d = length(marchedPoint);
+    
+    // closest surface point on target unit sphere (could change each step)
+    // used as sample to evaluate SH basis
+    float3 samplePoint = marchedPoint / d;
+
+    // ideally radius of SH basis at each point
+    float r = 0.0;
+    switch(int(SphericalHarmonicsInstanceSrg::m_shSolver))
+    {
+        case 0: r = SHBasisPoly3(SphericalHarmonicsInstanceSrg::m_shBand, SphericalHarmonicsInstanceSrg::m_shOrder, samplePoint); break;
+        case 1: r = SHBasisNaive16(SphericalHarmonicsInstanceSrg::m_shBand, SphericalHarmonicsInstanceSrg::m_shOrder, samplePoint); break;
+        case 2: r = SHBasisNaiveEx(SphericalHarmonicsInstanceSrg::m_shBand, SphericalHarmonicsInstanceSrg::m_shOrder, samplePoint); break;
+    }
+    
+    float3 result = float3(0.0, 0.0, 0.0);
+    if(SphericalHarmonicsInstanceSrg::m_enableDistortion)
+    {
+        result = float3(d - abs(r), sign(r), d);
+    }
+    else
+    {
+        // second element generate weight for color interpolation later based on the value of r
+        // constants only used to tune the color, don't have special meaning
+        result = float3(d - 0.35, -1.0 + 2.0*clamp(0.5 + 16.0*r,0.0,1.0), d);
+    }
+    
+    // output contains:
+    //     x: distance away from closest surface point on target object 
+    //        (distorted by SH value if controlValues.w is 0, otherwise target is a sphere at origin with radius = 0.35)
+    //     y: normalized sign of SH value for color interpolation
+    //     z: distance between reached point (not necessarily hit) in this step and world origin
+    return float3(result.x, 0.5 + 0.5*result.y, result.z);
+}
+
+// This function marches a ray spawn from "rayOrigin" along the given direction "rayDir" and check if it 
+// hits the shape of SH basis with given band and order which centered at world origin (0, 0, 0) at each step
+float3 RayMarchIntersectWS(float3 rayOrigin, float3 rayDir)
+{
+    float3 result = float3(1e10, -1.0, 1.0);
+    
+    float maxTraceDepth = 10.0;
+    float nextStep = 1.0;
+    
+    // length of ray
+    float t = 0.0;
+
+    // ray payload where:
+    //    x holds sign of result
+    //    y holds distance between hit point and axis origin (not used in this shader)
+    float2 payload = float2(-1.0, -1.0);
+
+    for(int i = 0; i < 600; i++)
+    {
+        // stop either next step is too small (hit) or ray length exceed depth limit (miss)
+        if(nextStep < 0.001 || t > maxTraceDepth) break;
+        
+        float3 res = EvalMarchResultWS(rayOrigin + rayDir*t);
+        
+        nextStep = res.x;
+        payload = res.yz;
+        t += nextStep * 0.1;
+    }
+    if(t < maxTraceDepth && t < result.x) 
+        result = float3(t, payload.x, payload.y);
+    
+    return result;
+}
+
+// evaluate normal by computing first derivative on the edge by definition
+float3 EvalNormalWS(float3 pos)
+{
+    float3 epsilon = float3(0.001, 0.0, 0.0);
+    return normalize( float3(
+        EvalMarchResultWS(pos+epsilon.xyy).x - EvalMarchResultWS(pos-epsilon.xyy).x,
+        EvalMarchResultWS(pos+epsilon.yxy).x - EvalMarchResultWS(pos-epsilon.yxy).x,
+        EvalMarchResultWS(pos+epsilon.yyx).x - EvalMarchResultWS(pos-epsilon.yyx).x
+    ) );
+}
+
+// Ray marcher for SH visualisation, based on https://www.shadertoy.com/view/lsfXWH
+PSOutput MainPS(VSOutput psInput)
+{
+    // all following calculations and coordinates are in world space
+
+    PSOutput OUT;
+    float3 hdrColor = float3(0.5, 0.5, 0.5);
+
+    // inverse of rotation matrix is its transpose due to orthogonality
+    // position of translation part won't affect result since it's not used here
+    float4x4 invView = transpose(ViewSrg::m_viewMatrix);
+     
+    float2 recenteredUV = psInput.m_uv - float2(0.5, 0.5);
+    
+    // -1 because -z forward frame is used
+    float3 viewSpaceRayDir = float3(recenteredUV.x, recenteredUV.y, -1.0);
+    
+    // world space ray origin & direction
+    float3 rayDir = normalize(mul(invView, float4(viewSpaceRayDir, 0.0)).xyz);  
+    float3 rayOrigin = ViewSrg::m_worldPosition.xyz; 
+
+    // hit record include:
+    //     x: length of ray at intersection point, -1 if miss
+    //     y: sign of SH basis value, normalized to {0(negative), 1(positive)}
+    //     z: maginitude of SH basis value, larger value result in brighter color in visulisation
+    float3 hitRecord = RayMarchIntersectWS(rayOrigin, rayDir);
+    
+    // only do shading if hit anything
+    if(hitRecord.y > -0.5)
+    {
+        float3 pos = rayOrigin + rayDir * hitRecord.x;
+        float3 normal = EvalNormalWS(pos);
+        
+        // interpolate two colors based on the sign of SH value
+        float3 mat = 0.5*lerp( float3(0.2,0.4,0.5), float3(0.6,0.3,0.2), hitRecord.y );
+
+        // tinted depth for simple visualisation, constants only used to tune the color, don't have special meaning
+        hdrColor = mat * hitRecord.z * 5.0 + 0.2;
+    }
+ 
+    OUT.m_color = float4(hdrColor, 1.0);
+    return OUT;
+}

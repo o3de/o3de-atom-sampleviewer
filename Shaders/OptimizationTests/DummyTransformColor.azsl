@@ -1,0 +1,130 @@
+// We don't actually run this shader anywhere. It is used to test that optimization successfully strips away shader option constants.
+// When the shader options are *unspecified* at build time, the pixel shader should have 9 dynamic branches in DirectX and 22 dynamic branches in Vulkan.
+// When the shader options are *specificed* at build time, the pixel shader should have 0 dynamic branches on all platforms.
+
+float3 srgb_to_linearsrgb(float3 color)
+{
+    return color * 2;
+}
+
+
+float3 linearsrgb_to_acescg(float3 color)
+{
+    return color * 3;
+}
+
+float3 AcesCgToAces2065(float3 color)
+{
+    return color * 5;
+}
+
+enum class ColorSpaceId
+{
+    SRGB,
+    LinearSRGB,
+    ACEScg,
+    ACES2065,
+    Invalid
+};
+
+float3 TransformColor(float3 color, ColorSpaceId fromColorSpace, ColorSpaceId toColorSpace)
+{
+    float3 transformedColor = color;
+
+    static const float3 invalidColor = float3(1,0,1);
+
+    if(fromColorSpace == ColorSpaceId::Invalid || toColorSpace == ColorSpaceId::Invalid)
+    {
+        transformedColor = invalidColor;
+    }
+    else if(fromColorSpace == toColorSpace)
+    {
+        return color;
+    }
+    else if(fromColorSpace == ColorSpaceId::SRGB && toColorSpace == ColorSpaceId::LinearSRGB)
+    {
+        transformedColor = srgb_to_linearsrgb(transformedColor);
+    }
+    else if(fromColorSpace == ColorSpaceId::LinearSRGB && toColorSpace == ColorSpaceId::ACEScg)
+    {
+        transformedColor = linearsrgb_to_acescg(transformedColor);
+    }
+    else if(fromColorSpace == ColorSpaceId::SRGB && toColorSpace == ColorSpaceId::ACEScg)
+    {
+        transformedColor = srgb_to_linearsrgb(transformedColor);
+        transformedColor = linearsrgb_to_acescg(transformedColor);
+    }
+    else if(fromColorSpace == ColorSpaceId::ACEScg && toColorSpace == ColorSpaceId::ACES2065)
+    {
+        transformedColor = AcesCgToAces2065(transformedColor);
+    }
+    else
+    {
+        transformedColor = invalidColor;
+    }
+    
+    return transformedColor;
+}
+
+ShaderResourceGroupSemantic SRG_Main
+{
+    FrequencyId = 0;
+    ShaderVariantFallback = 128;
+}
+
+ShaderResourceGroup MainSrg : SRG_Main
+{
+    float4x4 m_modelToWorld;
+    float4x4 m_viewProjectionMatrix;
+    Texture2D m_texture;
+    
+    Sampler m_sampler
+    {
+        MaxAnisotropy = 16;
+        AddressU = Wrap;
+        AddressV = Wrap;
+        AddressW = Wrap;
+    };
+}
+
+option ColorSpaceId o_textureColorSpace = ColorSpaceId::Invalid;
+option ColorSpaceId o_workingColorSpace = ColorSpaceId::Invalid;
+
+struct VertexInput
+{
+    float3 m_position : POSITION;
+    float2 m_uv : UV0;
+};
+
+struct VertexOutput
+{
+    float4 m_position : SV_Position;
+    float2 m_uv : UV0;
+};
+
+struct PixelOutput
+{
+    float4 m_color : SV_Target0;
+};
+
+VertexOutput MainVS(VertexInput input)
+{
+    VertexOutput output;
+    float4 worldPosition = mul(MainSrg::m_modelToWorld, float4(input.m_position, 1));
+    output.m_position = mul(MainSrg::m_viewProjectionMatrix, worldPosition);
+    output.m_uv = input.m_uv;
+        
+    return output;
+}
+
+
+PixelOutput MainPS(VertexOutput input)
+{
+    PixelOutput output;
+
+    float4 sampledColor = MainSrg::m_texture.Sample(MainSrg::m_sampler, input.m_uv);
+    output.m_color.xyz = TransformColor(sampledColor.xyz, o_textureColorSpace, o_workingColorSpace);
+    output.m_color.a = 1.0;
+
+    return output;
+}

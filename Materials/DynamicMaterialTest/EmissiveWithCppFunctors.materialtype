@@ -1,0 +1,96 @@
+{
+    "description": "Simple material for comparing the performance of hard-coded C++ material functors.",
+    "propertyLayout": {
+        "version": 3,
+        "groups": [
+            {
+                "id": "emissive",
+                "displayName": "Settings"
+            }
+        ],
+        "properties": {
+            "emissive": [
+                {
+                    "id": "unit",
+                    "displayName": "Units",
+                    "description": "The photometric units of the Intensity property.",
+                    "type": "Enum",
+                    "enumValues": ["Ev100"],
+                    "defaultValue": "Ev100"
+                },
+                {
+                    "id": "color",
+                    "displayName": "Color",
+                    "description": "Color is displayed as sRGB but the values are stored as linear color.",
+                    "type": "Color",
+                    "defaultValue": [ 1.0, 1.0, 1.0 ],
+                    "connection": {
+                        "type": "ShaderInput",
+                        "id": "m_emissiveColor"
+                    }
+                },
+                {
+                    "id": "intensity",
+                    "displayName": "Intensity",
+                    "description": "The amount of energy emitted.",
+                    "type": "Float",
+                    "defaultValue": 4,
+                    "min": -10,
+                    "max": 20,
+                    "softMin": -6,
+                    "softMax": 16
+                },
+                {
+                    "id": "textureMap",
+                    "displayName": "Texture Map",
+                    "description": "Texture map for defining emissive area.",
+                    "type": "Image",
+                    "connection": {
+                        "type": "ShaderInput",
+                        "id": "m_emissiveMap"
+                    }
+                },
+                {
+                    "id": "useTexture",
+                    "displayName": "Use Texture",
+                    "description": "Whether to use the texture map.",
+                    "type": "Bool",
+                    "defaultValue": true
+                }
+            ]
+        }
+    },
+    "shaders": [
+        {
+            "file": "./EmissiveMaterial.shader"
+        },
+        {
+            "file": "Shaders/Shadow/Shadowmap.shader"
+        },
+        {
+            "file": "Shaders/Depth/DepthPass.shader"
+        }
+    ],
+    "functors": [
+        {
+            "type": "ConvertEmissiveUnit",
+            "args": {
+                "intensityProperty": "emissive.intensity",
+                "lightUnitProperty": "emissive.unit",
+                "shaderInput": "m_emissiveIntensity",
+                "ev100Index": 0,
+                "nitIndex" : 1,
+                "ev100MinMax": [-10, 20],
+                "nitMinMax": [0.001, 100000.0]
+            }
+        },
+        {
+            "type": "UseTexture",
+            "args": {
+                "textureProperty": "emissive.textureMap",
+                "useTextureProperty": "emissive.useTexture",
+                "shaderOption": "o_emissive_useTexture"
+            }
+        }
+    ]
+}

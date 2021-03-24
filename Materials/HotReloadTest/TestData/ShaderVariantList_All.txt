@@ -1,0 +1,17 @@
+{
+    "Shader" : "HotReloadTest.shader",
+    "Variants": [
+        {
+            "StableId": 1,
+            "Options": {
+                "o_wavyLines": "true"
+            }
+        },
+        {
+            "StableId": 2,
+            "Options": {
+                "o_wavyLines": "false"
+            }
+        }
+    ] 
+} 

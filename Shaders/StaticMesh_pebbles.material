@@ -1,0 +1,11 @@
+{
+    "materialType": "StaticMesh.materialtype",
+    "propertyLayoutVersion": 1,
+    "properties": {
+        "general": {
+            "DiffuseMap": "Textures/Streaming/streaming12.dds",
+            "NormalMap": "Textures/left_mask.png",
+            "SpecularMap": "Textures/left_mask.png"
+        }
+    }
+}

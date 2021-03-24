@@ -1,0 +1,29 @@
+{
+    "Type": "JsonSerialization",
+    "Version": 1,
+    "ClassName": "GlobalBuildOptions",
+    "ClassData": {
+        "PreprocessorOptions" : {
+            "predefinedMacros": ["AZSL=17"],
+            "projectIncludePaths": [
+                "AtomSampleViewer",
+                // These include paths are already part of the automatic include folders list.
+                // By specifying them here, we are boosting the priority of these folders above all the other automatic include folders.
+                // (This is not necessary for the project, but just shown as a usage example.)
+                "Gems/Atom/RPI/Assets/ShaderLib",
+                "Gems/Atom/Feature/Common/Assets/ShaderLib"
+            ]
+        },
+        "ShaderCompilerArguments" : {
+            "AzslcWarningLevel" : 1,
+            "AzslcWarningAsError" : false,
+            "AzslcAdditionalFreeArguments" : "--strip-unused-srgs",
+            "DxcDisableWarnings" : false,
+            "DxcWarningAsError" : false,
+            "DxcDisableOptimizations" : false,
+            "DxcOptimizationLevel" : 3,
+            "DxcAdditionalFreeArguments" : "", 
+            "DefaultMatrixOrder" : "Row"
+        }
+    }
+}

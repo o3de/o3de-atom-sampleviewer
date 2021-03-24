@@ -1,0 +1,19 @@
+{
+    "Source": "HotReloadTest.azsl",
+
+    "DepthStencilState": {
+        "Depth": {
+            "Enable": true,
+            "CompareFunc": "GreaterEqual"
+        }
+    },
+
+    "BlendState": {
+        "Enable": true,
+        "BlendSource": "AlphaSource",
+        "BlendDest": "AlphaSourceInverse",
+        "BlendOp": "Add"
+    },
+
+    "DrawList": "transparent"
+}

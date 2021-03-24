@@ -1,0 +1,17 @@
+{
+    "description": "",
+    "materialType": "TestData/Materials/Types/MinimalPBR.materialtype",
+    "parentMaterial": "",
+    "propertyLayoutVersion": 3,
+    "properties": {
+        "settings": {
+            "color": [
+                1.0,
+                0.0,
+                0.0,
+                1.0
+            ],
+            "roughness": 0.2727273106575012
+        }
+    }
+}

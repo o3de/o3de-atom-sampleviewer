@@ -1,0 +1,24 @@
+{
+    "description": "",
+    "materialType": "Materials\\Types\\StandardPBR.materialtype",
+    "propertyLayoutVersion": 3,
+    "properties": {
+        "baseColor": {
+            "color": [
+                1.0,
+                1.0,
+                0.0,
+                1.0
+            ],
+            "useTexture": false
+        },
+        "irradiance": {
+            "color": [
+                1.0,
+                1.0,
+                0.0,
+                1.0
+            ]
+        }
+    }
+}

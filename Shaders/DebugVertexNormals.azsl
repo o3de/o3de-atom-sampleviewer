@@ -1,0 +1,56 @@
+/*
+* All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
+* its licensors.
+*
+* For complete copyright and license terms please see the LICENSE at the root of this
+* distribution (the "License"). All use of this software is governed by the License,
+* or, if provided, by the license below or the license accompanying this file. Do not
+* remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*
+*/
+
+#include <scenesrg.srgi>
+#include <viewsrg.srgi>
+#include <Atom/RPI/ShaderResourceGroups/DefaultObjectSrg.azsli>
+
+struct VertexInput
+{
+    float3 m_position : POSITION;
+    float3 m_normal : NORMAL;
+};
+
+struct VertexOutput
+{
+    float4 m_position : SV_Position;
+    float3 m_normal : NORMAL;
+};
+
+VertexOutput MainVS(VertexInput input)
+{
+    const float4x4 objectToWorldMatrix = ObjectSrg::GetWorldMatrix();
+
+    VertexOutput output;
+    float4 worldPosition = mul(objectToWorldMatrix, float4(input.m_position, 1.0));
+    output.m_position = mul(ViewSrg::m_viewProjectionMatrix, worldPosition);
+    
+    float3x3 objectToWorldMatrixIT = ObjectSrg::GetWorldMatrixInverseTranspose();
+    output.m_normal = mul(objectToWorldMatrixIT, input.m_normal);
+    output.m_normal = normalize(output.m_normal);
+    return output;
+}
+
+struct PixelOutput
+{
+    float4 m_color : SV_Target0;
+};
+
+PixelOutput MainPS(VertexOutput input)
+{
+    PixelOutput output;
+
+    output.m_color.rgb = normalize(input.m_normal) * 0.5 + 0.5;
+	output.m_color.a = 1.0;
+
+    return output;
+} 

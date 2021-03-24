@@ -1,0 +1,8 @@
+{
+    "description": "A simple default base material for Atom testing.",
+    "shaders": [
+        {
+            "file": "Shaders/DebugVertexNormals.shader"
+        }
+    ]
+}

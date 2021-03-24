@@ -1,0 +1,76 @@
+/*
+* All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
+* its licensors.
+*
+* For complete copyright and license terms please see the LICENSE at the root of this
+* distribution (the "License"). All use of this software is governed by the License,
+* or, if provided, by the license below or the license accompanying this file. Do not
+* remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*
+*/
+
+#include <viewsrg.srgi>
+
+ShaderResourceGroup ImageSrg : SRG_PerDraw
+{
+    Texture3D m_texture3D;
+    uint m_sliceCount;
+    float2 m_position;
+    float2 m_size;
+    uint2 m_resolution;
+}
+
+struct VSInput
+{
+    uint m_vertexIndex :SV_VertexID;
+    uint m_instanceIndex :SV_InstanceID;
+};
+
+struct VSOutput
+{
+    float4 m_position : SV_Position;
+    float2 m_uv : UV0;
+    uint slice : SLICE;
+};
+
+struct PSOutput
+{
+    float4 m_color : SV_Target0;
+    float4 m_specular : SV_Target1;
+    float4 m_scatterDistance : SV_Target2;
+};
+
+VSOutput MainVS(VSInput vsInput)
+{
+    VSOutput OUT;
+    float2 uvs[4] = { {0.0, 0.0}, {1.0, 0.0}, {0.0, 1.0}, {1.0, 1.0} };
+    uint index = vsInput.m_vertexIndex%4;
+    uint sliceIndex = vsInput.m_instanceIndex;
+    float seam = 0.01;
+
+    float2 startPosition = ImageSrg::m_position + float2((ImageSrg::m_size.x + seam) * sliceIndex, 0.0);
+    OUT.m_position = float4(startPosition + uvs[index] * ImageSrg::m_size, 0, 1.0);
+    OUT.m_uv = uvs[index];
+    OUT.slice = sliceIndex;
+    return OUT;
+}
+
+PSOutput MainPS(VSOutput psInput)
+{
+    PSOutput OUT;
+
+    // Get the image dimensions
+    uint width;
+    uint height;
+    uint depth;
+    uint numberOfLevels;
+    ImageSrg::m_texture3D.GetDimensions(0, width, height, depth, numberOfLevels);
+
+    OUT.m_color = ImageSrg::m_texture3D.Load(int4(width * psInput.m_uv.x, height * psInput.m_uv.y, psInput.slice, 0));
+    
+    OUT.m_specular = float4(0,0,0,1);
+    OUT.m_scatterDistance = float4(0,0,0,0);
+    return OUT;
+}
+

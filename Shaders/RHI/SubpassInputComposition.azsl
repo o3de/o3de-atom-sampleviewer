@@ -1,0 +1,93 @@
+/*
+* All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
+* its licensors.
+*
+* For complete copyright and license terms please see the LICENSE at the root of this
+* distribution (the "License"). All use of this software is governed by the License,
+* or, if provided, by the license below or the license accompanying this file. Do not
+* remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*
+*/
+
+#include <viewsrg.srgi>
+
+#include "SubpassInputSceneSrg.azsli"
+
+ShaderResourceGroup SubpassInputsSrg : SRG_PerSubPass
+{
+    [[input_attachment_index(0)]]
+    SubpassInput m_position;
+
+    [[input_attachment_index(1)]]
+    SubpassInput m_normal;
+
+    [[input_attachment_index(2)]]
+    SubpassInput m_albedo;
+}
+
+struct VSInput
+{
+    uint m_vertexIndex : SV_VertexID;
+};
+
+struct VSOutput
+{
+    float4 m_position : SV_Position;
+};
+
+VSOutput MainVS(VSInput input)
+{
+    VSOutput OUT;
+    float2 uv = float2((input.m_vertexIndex << 1) & 2, input.m_vertexIndex & 2);
+    OUT.m_position = float4(uv * 2.0f - 1.0f, 0.0f, 1.0f);
+    return OUT;
+}
+
+struct PSOutput
+{
+    float4 m_outScene : SV_Target0;
+};
+
+PSOutput MainPS(float4 screenPos : SV_POSITION)
+{
+    const float3 ambient = float3(0.15, 0.15, 0.15);
+
+    PSOutput OUT;
+
+    float3 position = SubpassInputsSrg::m_position.SubpassLoad().xyz;
+    float3 normal = SubpassInputsSrg::m_normal.SubpassLoad().xyz;
+    float4 albedo = SubpassInputsSrg::m_albedo.SubpassLoad();
+
+    // Ambient part
+    const float3 lightDir = normalize(float3(-1, -1, -1));
+    float3 fragcolor  = albedo.rgb * saturate(dot(lightDir, normal)) + ambient;
+    
+    for(int i = 0; i < NUM_LIGHTS; ++i)
+    {
+        // Vector to light
+        float3 L = SubpassInputSceneSrg::m_lights[i].m_position.xyz - position;
+        // Distance from light to fragment position
+        float dist = length(L);
+
+        // Viewer to fragment
+        float3 V = position - ViewSrg::m_worldPosition;
+        V = normalize(V);
+        
+        // Light to fragment
+        L = normalize(L);
+
+        // Attenuation
+        float atten = SubpassInputSceneSrg::m_lights[i].m_radius / (pow(dist, 2.0) + 1.0);
+
+        // Diffuse part
+        float3 N = normalize(normal);
+        float NdotL = max(0.0, dot(N, L));
+        float3 diff = SubpassInputSceneSrg::m_lights[i].m_color * albedo.rgb * NdotL * atten;
+
+        fragcolor += diff;
+    }       
+   
+    OUT.m_outScene = float4(fragcolor, 1.0);
+    return OUT;
+}

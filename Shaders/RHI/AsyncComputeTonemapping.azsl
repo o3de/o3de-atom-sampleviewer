@@ -1,0 +1,57 @@
+/*
+* All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
+* its licensors.
+*
+* For complete copyright and license terms please see the LICENSE at the root of this
+* distribution (the "License"). All use of this software is governed by the License,
+* or, if provided, by the license below or the license accompanying this file. Do not
+* remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*
+*/
+
+#include <Atom/Features/SrgSemantics.azsli>
+ 
+ShaderResourceGroup TexturesSrg : SRG_PerObject
+{
+    RWTexture2D<float4> m_inOutTexture;
+    Texture2D<float> m_luminanceTexture;
+};
+
+float3 ToneMapFilmicALU(float3 color)
+{
+    color = max(0, color - 0.004f);
+    color = (color * (6.2f * color + 0.5f)) / (color * (6.2f * color + 1.7f)+ 0.06f);
+
+    return pow(color, 2.2f);
+}
+
+#define ThreadGroupSize 16
+[numthreads(ThreadGroupSize, ThreadGroupSize, 1)]
+void MainCS(uint3 groupID : SV_GroupID, uint3 groupThreadID : SV_GroupThreadID)
+{
+    uint2 samplePos = groupID.xy * ThreadGroupSize + groupThreadID.xy;
+    uint2 dimensions;
+    TexturesSrg::m_inOutTexture.GetDimensions(dimensions.x, dimensions.y);
+    if (samplePos.x >= dimensions.x || samplePos.y >= dimensions.y)
+    {
+        return;
+    }
+    
+    const float epsilon = 0.0001f;
+    float avgLuminance = max(exp(TexturesSrg::m_luminanceTexture[uint2(0,0)]), epsilon);
+    float4 inputColor = TexturesSrg::m_inOutTexture[samplePos];
+
+    // Calculate color based on exposure settings
+    float keyValue = 0.4f;
+    float linearExposure = (keyValue / avgLuminance);
+    float exposure = max(linearExposure, epsilon);
+    float3 color = exposure * inputColor.rgb;
+
+    // Applies the filmic curve
+    color = max(0, color - 0.004f);
+    color = (color * (6.2f * color + 0.5f)) / (color * (6.2f * color + 1.7f)+ 0.06f);
+    color = pow(color, 2.2f);
+
+    TexturesSrg::m_inOutTexture[samplePos] = float4(color, inputColor.a);
+}

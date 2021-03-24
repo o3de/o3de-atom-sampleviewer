@@ -1,0 +1,22 @@
+{
+    "project_name": "AtomSampleViewer",
+    "product_name": "AtomSampleViewer",
+    "executable_name": "AtomSampleViewer.GameLauncher",
+    "code_folder": "Code/Viewers/AtomSampleViewer",
+    "modules": [],
+    "project_id": "{D882E365-54D6-586E-BD78-2650F3057D49}",
+    "android_settings": {
+        "package_name": "com.lumberyard.atomsampleviewer",
+        "version_number": 1,
+        "version_name": "1.0.0.0",
+        "orientation": "landscape",
+        "place_assets_in_apk": 0,
+        "app_public_key": "MY_APP_PUBLIC_KEY",
+        "app_obfuscator_salt": "MY_OBFUSCATOR_SALT_BASE_64",
+        "enable_obb_in_dev": "false",
+        "use_main_obb": "false",
+        "use_patch_obb": "false",
+        "rc_obb_job": "RCJob_Generic_Android_MakeObb.xml"
+    },
+    "engine": "o3de"
+}

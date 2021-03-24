@@ -1,0 +1,163 @@
+/*
+* All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
+* its licensors.
+*
+* For complete copyright and license terms please see the LICENSE at the root of this
+* distribution (the "License"). All use of this software is governed by the License,
+* or, if provided, by the license below or the license accompanying this file. Do not
+* remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*
+*/
+
+#include "IndirectRendering.azsli"
+#include <Atom/Features/IndirectRendering.azsli>
+
+#define ThreadBlockSize 128
+
+ShaderResourceGroupSemantic SRG_Frequency1
+{
+    FrequencyId = 1;
+};
+
+ShaderResourceGroupSemantic SRG_Frequency2
+{
+    FrequencyId = 2;
+};
+
+ShaderResourceGroupSemantic SRG_Frequency3
+{
+    FrequencyId = 3;
+};
+
+ShaderResourceGroup CullSrg : SRG_Frequency1
+{
+    float2 m_cullOffset;    // The culling plane offset in homogenous space.
+    uint m_inNumCommands;
+    uint m_maxDrawIndirectCount;
+
+    RWStructuredBuffer<uint> m_outNumCommands;
+};
+
+// This SRG contains the commands when using SequenceType::Draw option.
+ShaderResourceGroup IndirectDrawCommandsSrg : SRG_Frequency2
+{
+    // Commands in one sequence
+    struct IndirectCommandSequence
+    {
+        DrawIndexedIndirectCommand m_drawCommand;
+    };
+
+    StructuredBuffer<IndirectCommandSequence> m_inputCommands;
+    RWStructuredBuffer<IndirectCommandSequence> m_outputCommands;
+
+    // Copy a command from the input list or clear it's value to 0.
+    void SetCommand(uint srcIndex, uint destIndex, bool clear = false)
+    {
+        if(clear)
+        {
+            m_outputCommands[destIndex] = (IndirectCommandSequence)0;
+        }
+        else
+        {
+            m_outputCommands[destIndex] = m_inputCommands[srcIndex];
+        }
+    }
+};
+
+// This SRG contains the commands when using SequenceType::IAInlineConstDraw option.
+ShaderResourceGroup IndirectIAInlineConstCommandsSrg : SRG_Frequency3
+{
+    // Commands in one sequence
+    struct IndirectCommandSequence
+    {
+        uint m_rootConstantsCommand;
+        VertexViewIndirectCommand m_vertexCommand;
+        IndexViewIndirectCommand m_indexCommand;
+        DrawIndexedIndirectCommand m_drawCommand;
+    };
+
+    StructuredBuffer<IndirectCommandSequence> m_inputCommands;
+    RWStructuredBuffer<IndirectCommandSequence> m_outputCommands;
+
+    // Copy a command using from the input list or clear it's value to 0.
+    void SetCommand(uint srcIndex, uint destIndex, bool clear = false)
+    {
+        if(clear)
+        {
+            m_outputCommands[destIndex] = (IndirectCommandSequence)0;
+        }
+        else
+        {
+            m_outputCommands[destIndex] = m_inputCommands[srcIndex];
+        }
+    }
+};
+
+option enum class SequenceType { Draw, IAInlineConstDraw} o_sequenceType = SequenceType::Draw;
+option bool o_countBufferSupported = false;
+
+[numthreads(ThreadBlockSize, 1, 1)]
+void MainCS(uint3 groupId : SV_GroupID, uint groupIndex : SV_GroupIndex)
+{
+    // Each thread of the CS operates on one of the indirect commands.
+    uint index = (groupId.x * ThreadBlockSize) + groupIndex;
+    if(index < CullSrg::m_inNumCommands)
+    {
+        // We cull only in the X axis.
+        // Calculate the left and right limits of the cull area.
+        float4 left = mul(IndirectSceneSrg::m_matrix, float4(TransformInstancePos(float3(-1.0, 0, 0), IndirectSceneSrg::m_instancesData[index]), 1.0));
+        left /= left.w;
+        float4 right = mul(IndirectSceneSrg::m_matrix, float4(TransformInstancePos(float3(1.0, 0, 0), IndirectSceneSrg::m_instancesData[index]), 1.0));
+        right /= right.w;
+
+        uint outputIndex = index;
+        bool setCommand = o_countBufferSupported ? false : true;
+        bool clearCommand = true;
+
+        // Check if we need to cull the primitive.
+        if (CullSrg::m_cullOffset.x < right.x && left.x < CullSrg::m_cullOffset.y)
+        {
+            setCommand = true;
+            clearCommand = false;
+            // If count buffer is not supported, the output index is the same as the input index
+            // and we just set the number of vertices to draw to 0 so no triangles are rendered.
+            // If it is supported, the output index is calculated from the count buffer.
+            if (o_countBufferSupported)
+            {
+                // The current value of the count buffer will be our output index. This value start with 0
+                // and is increment by 1 after each thread writes a new command.
+                // If multi indirect is not supported, then we need to divide the total draw calls in
+                // multiple "groups". The count buffer will contain multiple values, one for each of these
+                // groups, and we just apply an offset to the count buffer when submitting the indirect draw in CPU.
+                uint i = 0;
+                do
+                {
+                    // Increment and retrieve the number atomically to get the output index. 
+                    // If the value is over the allowed limit, we need to move to the next
+                    // "group". Since we already called InterlockedAdd (and incremented the value),
+                    // the count for the group will be greater than the allowed limit, but since the Indirect Draw
+                    // call on CPU will limit the max number of operations, it doesn't matter that the count
+                    // buffer value is over the limit.
+                    InterlockedAdd(CullSrg::m_outNumCommands[i++], uint(1), outputIndex);
+                } while (outputIndex >= CullSrg::m_maxDrawIndirectCount);
+                outputIndex = (i - 1) * CullSrg::m_maxDrawIndirectCount + outputIndex;
+            }
+        }
+
+        if(setCommand)
+        {
+            // Copy or clear the output command
+            switch(o_sequenceType)
+            {
+                case SequenceType::Draw:
+                    IndirectDrawCommandsSrg::SetCommand(index, outputIndex, clearCommand);
+                    break;
+                case SequenceType::IAInlineConstDraw:
+                    IndirectIAInlineConstCommandsSrg::SetCommand(index, outputIndex, clearCommand);
+                    break;
+            }            
+        }
+    }
+}
+

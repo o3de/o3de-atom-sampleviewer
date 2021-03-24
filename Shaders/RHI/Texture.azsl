@@ -1,0 +1,75 @@
+/*
+* All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
+* its licensors.
+*
+* For complete copyright and license terms please see the LICENSE at the root of this
+* distribution (the "License"). All use of this software is governed by the License,
+* or, if provided, by the license below or the license accompanying this file. Do not
+* remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*
+*/
+
+#include <Atom/Features/SrgSemantics.azsli>
+
+ShaderResourceGroup TextureInstanceSrg : SRG_PerObject
+{
+	bool m_useStaticSampler;
+	column_major float4x4 m_objectMatrix;
+	column_major float3x3 m_uvMatrix;
+
+	Texture2D m_albedoMap;
+
+	Sampler m_sampler
+    {
+        MaxAnisotropy = 16;
+        AddressU = Wrap;
+        AddressV = Wrap;
+        AddressW = Wrap;
+    };
+
+    Sampler m_dynamicSampler;
+    
+    float m_padding; 	// align on 8 byte, 124 -> 128
+}
+
+struct VSInput 
+{
+	float3 m_position : POSITION;
+	float2 m_uv : UV0;
+};
+
+struct VSOutput
+{
+	float4 m_position : SV_Position;
+	float2 m_uv : UV0;
+};
+
+VSOutput MainVS(VSInput vsInput)
+{
+	VSOutput OUT;
+	OUT.m_position = mul(float4(vsInput.m_position, 1.0), TextureInstanceSrg::m_objectMatrix);
+	OUT.m_uv = mul(float3(vsInput.m_uv, 1.0), TextureInstanceSrg::m_uvMatrix).xy;
+	return OUT;
+}
+
+struct PSOutput
+{
+	float4 m_color : SV_Target0;
+};
+
+PSOutput MainPS(VSOutput psInput)
+{
+	PSOutput OUT;
+	float3 albedo;
+	if (TextureInstanceSrg::m_useStaticSampler)
+	{
+		albedo = TextureInstanceSrg::m_albedoMap.Sample(TextureInstanceSrg::m_sampler, psInput.m_uv).rgb;
+	}
+	else
+	{
+		albedo = TextureInstanceSrg::m_albedoMap.Sample(TextureInstanceSrg::m_dynamicSampler, psInput.m_uv).rgb;
+	}
+	OUT.m_color = float4(albedo, 1.0);
+	return OUT;
+}

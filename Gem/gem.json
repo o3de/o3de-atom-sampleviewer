@@ -1,0 +1,98 @@
+{
+    "gem_name": "AtomSampleViewerGem",
+    "Dependencies": [
+        {
+            "Uuid": "e011969cf32442fdaac2443a960ab5ff",
+            "VersionConstraints": [
+                "~>0.1.0"
+            ],
+            "_comment": "Atom RHI DX12"
+        },
+        {
+            "Uuid": "150d40d376124d98a388dfe890551c03",
+            "VersionConstraints": [
+                "~>0.1.0"
+            ],
+            "_comment": "Atom RHI Vulkan"
+        },
+        {
+            "Uuid": "5f27cdc951e64fe0be9d823dc7acbc28",
+            "VersionConstraints": [
+                "~>0.1.0"
+            ],
+            "_comment": "Atom RHI Metal"
+        },
+        {
+            "Uuid": "a218db9eb2114477b46600fea4441a6c",
+            "VersionConstraints": [
+                "~>0.1.0"
+            ],
+            "_comment": "Atom RPI"
+        },
+        {
+            "Uuid": "013d1b42ad314c929b292c143bcbf045",
+            "VersionConstraints": [
+                "~>0.1"
+            ],
+            "_comment": "Atom.Component.DebugCamera"
+        },
+        {
+            "Uuid": "d32452026dae4b7dba2ad89dbde9c48f",
+            "VersionConstraints": [
+                "~>0.1"
+            ],
+            "_comment": "Atom.Asset.Shader"
+        },
+        {
+            "Uuid": "b58e5eed0901428ca78544b04dbd61bd",
+            "VersionConstraints": [
+                "~>0.1"
+            ],
+            "_comment": "Atom.Feature.Common"
+        },
+        {
+            "Uuid": "5c850809e890497c82cd9999ecb33250",
+            "VersionConstraints": [
+                "~>0.1"
+            ],
+            "_comment": "Atom.Utils"
+        },
+        {
+            "Uuid": "c7ff89ad6e8b4b45b2fadef2bcf12d6e",
+            "VersionConstraints": [
+                "~>0.1"
+            ],
+            "_comment": "Atom_Bootstrap"
+        },
+        {
+            "Uuid": "b55b2738aa4a46c8b034fe98e6e5158b",
+            "VersionConstraints": [
+                "~>0.1"
+            ],
+            "_comment": "Atom_AtomBridge"
+        }
+    ],
+    "GemFormatVersion": 4,
+    "Uuid": "2114099d7a8940c2813e93b8b417277e",
+    "Name": "AtomSampleViewerGem",
+    "DisplayName": "AtomSampleViewerGem",
+    "Version": "0.1.0",
+    "LinkType": "Dynamic",
+    "Summary": "A short description of my Gem.",
+    "Tags": ["Game", "Asset"],
+    "IconPath": "preview.png",
+    "IsGameGem": true,
+    "Modules": [
+        {
+            "Type": "GameModule"
+        },
+        {
+            "Name": "Tools",
+            "Type": "EditorModule"
+        },
+        {
+            "Name": "Lib",
+            "Type": "StaticLib"
+        }
+    ]
+}

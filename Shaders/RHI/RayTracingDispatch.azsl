@@ -1,0 +1,34 @@
+/*
+* All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
+* its licensors.
+*
+* For complete copyright and license terms please see the LICENSE at the root of this
+* distribution (the "License"). All use of this software is governed by the License,
+* or, if provided, by the license below or the license accompanying this file. Do not
+* remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*
+*/
+
+#include <Atom/Features/SrgSemantics.azsli>
+#include <Shaders/RHI/RayTracingCommon.azsli>
+
+// top level ray generation shader, each thread casts a ray straight into the scene
+[shader("raygeneration")]
+void RayGenerationShader()
+{
+    float2 dims = (float2)DispatchRaysDimensions();
+    float2 halfDims = dims / 2;
+    float2 lerpValues = (float2)DispatchRaysIndex() / dims;
+    
+    RayDesc ray;
+    ray.Origin = float3(lerp(-halfDims.x, halfDims.x, lerpValues.x), lerp(halfDims.y, -halfDims.y, lerpValues.y), 0.0f);
+    ray.Direction = float3(0.0f, 0.0f, 1.0f);
+    ray.TMin = 0.001f;
+    ray.TMax = 10000.0f;
+
+    RayPayload payload = { float4(0.0f, 0.0f, 0.0f, 0.0f) };
+    TraceRay(RayTracingGlobalSrg::m_scene, RAY_FLAG_CULL_BACK_FACING_TRIANGLES, 0xFF, 0, 0, 0, ray, payload);
+
+    RayTracingGlobalSrg::m_output[DispatchRaysIndex().xy] = payload.color;
+}

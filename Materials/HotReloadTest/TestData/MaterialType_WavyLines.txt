@@ -1,0 +1,35 @@
+{
+    "propertyLayout": {
+        "version": 1,
+        "properties": {
+            "general": [
+                {
+                    "id": "colorA",
+                    "type": "color",
+                    "defaultValue": [ 1.0, 1.0, 1.0 ],
+                    "connection": {
+                        "type": "shaderInput",
+                        "id": "m_colorA"
+                    }
+                },
+                {
+                    "id": "colorB",
+                    "type": "color",
+                    "defaultValue": [ 0.0, 0.0, 0.0 ],
+                    "connection": {
+                        "type": "shaderInput",
+                        "id": "m_colorB"
+                    }
+                }
+            ]
+        }
+    },
+    "shaders": [
+        {
+            "file": "HotReloadTest.shader",
+            "options": {
+                "o_wavyLines": "true"
+            }
+        }        
+    ]
+}

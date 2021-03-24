@@ -1,0 +1,29 @@
+{
+    "Shader" : "Shaders/RHI/Triangle.shader",
+    "Variants" : [
+        {
+            "StableId": 1,
+            "Options": {
+                "o_drawMode": "DrawMode::Red"
+            }
+        },
+        {
+            "StableId": 2,
+            "Options": {
+                "o_drawMode": "DrawMode::Green"
+            }
+        },
+        {
+            "StableId": 3,
+            "Options": {
+                "o_drawMode": "DrawMode::Blue"
+            }
+        },
+        {
+            "StableId": 4,
+            "Options": {
+                "o_drawMode": "DrawMode::White"
+            }
+        }
+    ]
+}

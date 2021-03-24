@@ -1,0 +1,10 @@
+{
+    "materialType": "StaticMesh.materialtype",
+    "parentMaterial": "StaticMesh_pebbles.material",
+    "propertyLayoutVersion": 1,
+    "properties": {
+        "general": {
+            "DiffuseColor": [ 1.0, 0.5, 0.5, 1.0 ]
+        }
+    }
+}

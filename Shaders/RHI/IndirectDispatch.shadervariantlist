@@ -1,0 +1,33 @@
+{
+    "Shader": "Shaders/RHI/IndirectDispatch.shader",
+    "Variants" : [
+        {
+          "StableId": 1,
+          "Options": {
+            "o_sequenceType": "SequenceType::Draw",
+            "o_countBufferSupported": "false"
+          }
+        },
+        {
+          "StableId": 2,
+          "Options": {
+            "o_sequenceType": "SequenceType::Draw",
+            "o_countBufferSupported": "true"
+          }
+        },
+        {
+          "StableId": 3,
+          "Options": {
+            "o_sequenceType": "SequenceType::IAInlineConstDraw",
+            "o_countBufferSupported": "false"
+          }
+        },
+        {
+          "StableId": 4,
+          "Options": {
+            "o_sequenceType": "SequenceType::IAInlineConstDraw",
+            "o_countBufferSupported": "true"
+          }
+        }
+    ]
+}

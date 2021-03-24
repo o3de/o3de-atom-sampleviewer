@@ -1,0 +1,29 @@
+{
+    "Type": "JsonSerialization",
+    "Version": 1,
+    "ClassName": "PassAsset",
+    "ClassData": {
+        "PassTemplate": {
+            "Name": "ImGuiNoInputPassTemplate",
+            "PassClass": "ImGuiPass",
+            "Slots": [
+                {
+                    "Name": "Output",
+                    "SlotType": "Output",
+                    "ScopeAttachmentUsage": "RenderTarget",
+                    "LoadStoreAction": {
+                        "ClearValue": {
+                            "Value": [
+                                0.5,
+                                0.5,
+                                0.5,
+                                {}
+                            ]
+                        },
+                        "LoadAction": "Clear"
+                    }
+                }
+            ]
+        }
+    }
+}

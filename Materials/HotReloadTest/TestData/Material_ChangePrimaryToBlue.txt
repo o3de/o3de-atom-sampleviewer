@@ -1,0 +1,8 @@
+{
+    "materialType": "HotReloadTest.materialtype",
+    "properties": {
+        "general": {
+            "colorA": [0.0, 0.0, 1.0]
+        }
+    }
+}

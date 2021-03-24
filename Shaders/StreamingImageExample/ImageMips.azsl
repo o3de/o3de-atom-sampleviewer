@@ -1,0 +1,95 @@
+/*
+* All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
+* its licensors.
+*
+* For complete copyright and license terms please see the LICENSE at the root of this
+* distribution (the "License"). All use of this software is governed by the License,
+* or, if provided, by the license below or the license accompanying this file. Do not
+* remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*
+*/
+
+#include <viewsrg.srgi>
+
+ShaderResourceGroup ImageMipsSrg : SRG_PerDraw
+{
+    Texture2D m_texture;
+    int m_residentMip;
+    float2 m_position;
+    float2 m_size;
+
+    Sampler m_sampler
+    {
+        MaxAnisotropy = 16;
+        AddressU = Wrap;
+        AddressV = Wrap;
+        AddressW = Wrap;
+    };
+}
+
+struct VSInput
+{
+    uint m_vertexIndex :SV_VertexID;
+    uint m_instanceIndex :SV_InstanceID;
+};
+
+struct VSOutput
+{
+    float4 m_position : SV_Position;
+    float3 m_uvlod : UV0;
+};
+
+struct PSOutput
+{
+    float4 m_color : SV_Target0;
+    float4 m_specular : SV_Target1;
+    float4 m_scatterDistance : SV_Target2;
+};
+
+VSOutput MainVS(VSInput vsInput)
+{
+    VSOutput OUT;
+    float2 uvs[4] = { {0.0, 0.0}, {1.0, 0.0}, {0.0, 1.0}, {1.0, 1.0} };
+    int index = vsInput.m_vertexIndex%4;
+    int mipLevel = vsInput.m_instanceIndex;
+
+    float2 mipSize = ImageMipsSrg::m_size;
+    float2 offset = {0.0, 0.0};
+    bool offsetX = true;
+    for (int mip = 0; mip<mipLevel; mip++)
+    {
+        if (offsetX)
+        {
+            offset.x += mipSize.x;
+        }
+        else
+        {
+            offset.y += mipSize.y;
+        }
+        offsetX = !offsetX;
+        mipSize /= 2;
+    }
+    float2 startPosition = ImageMipsSrg::m_position + offset;
+    OUT.m_position = float4(startPosition + uvs[index]*mipSize, 0, 1.0);
+    OUT.m_uvlod.xy = uvs[index];
+    OUT.m_uvlod.z = mipLevel-ImageMipsSrg::m_residentMip;
+    return OUT;
+}
+ 
+PSOutput MainPS(VSOutput psInput)
+{
+    PSOutput OUT;
+    if (psInput.m_uvlod.z < 0)
+    {
+         OUT.m_color = float4(1.0, 1.0, 1.0, 1.0);
+    }
+    else
+    {
+         OUT.m_color = ImageMipsSrg::m_texture.SampleLevel(ImageMipsSrg::m_sampler, psInput.m_uvlod.xy, psInput.m_uvlod.z);
+    }
+    OUT.m_specular = float4(0,0,0,1);
+    OUT.m_scatterDistance = float4(0,0,0,0);
+    return OUT;
+}
+
