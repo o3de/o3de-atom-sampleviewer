@@ -3,11 +3,17 @@
     {
         "Gems":
         {
-            "AtomSampleViewer.Assets":
+            "MaterialEditor":
             {
                 "SourcePaths":
                 [
-                    "Gems/Atom/Tools/MaterialEditor",
+                    "Gems/Atom/Tools/MaterialEditor"
+                ]
+            },
+            "UiBasics":
+            {
+                "SourcePaths":
+                [
                     "Gems/UiBasics"
                 ]
             }
