@@ -52,7 +52,6 @@ ly_add_target(
 ly_add_target(
     NAME AtomSampleViewer ${PAL_TRAIT_MONOLITHIC_DRIVEN_MODULE_TYPE}
     NAMESPACE Gem
-    OUTPUT_NAME Gem.AtomSampleViewerGem.2114099d7a8940c2813e93b8b417277e.v0.1.0
     FILES_CMAKE
         atomsampleviewergem_private_shared_files.cmake
         ../../atomsampleviewer_asset_files.cmake
@@ -91,9 +90,9 @@ if(PAL_TRAIT_BUILD_HOST_TOOLS)
     )
 
     ly_add_target(
-        NAME AtomSampleViewer.Tools MODULE
+        NAME AtomSampleViewer.Tools GEM_MODULE
+
         NAMESPACE Gem
-        OUTPUT_NAME Gem.AtomSampleViewerGem.Tools.2114099d7a8940c2813e93b8b417277e.v0.1.0
         FILES_CMAKE
             atomsampleviewergem_tools_shared_files.cmake
         COMPILE_DEFINITIONS
@@ -153,6 +152,7 @@ endif()
 if(PAL_TRAIT_BUILD_SUPPORTS_TESTS)
     ly_add_target(
         NAME AtomSampleViewer.Tests MODULE
+
         NAMESPACE Gem
         FILES_CMAKE
             atomsampleviewer_tests_files.cmake

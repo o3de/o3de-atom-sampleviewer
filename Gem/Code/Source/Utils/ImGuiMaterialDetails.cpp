@@ -52,13 +52,19 @@ namespace AtomSampleViewer
                                     AZ::RPI::ShaderVariantId requestedVariantId = shaderItem.GetShaderVariantId();
                                     AZ::Data::Asset<AZ::RPI::ShaderVariantAsset> selectedVariantAsset =
                                         shaderItem.GetShaderAsset()->GetVariant(requestedVariantId);
-                                    AZ::RPI::ShaderVariantId selectedVariantId = selectedVariantAsset->GetShaderVariantId();
 
-                                    ImGui::Indent();
+                                    if (selectedVariantAsset)
+                                    {
+                                        AZ::RPI::ShaderVariantId selectedVariantId = selectedVariantAsset->GetShaderVariantId();
 
-                                    ImGuiShaderUtils::DrawShaderVariantTable(shaderItem.GetShaderAsset()->GetShaderOptionGroupLayout(), requestedVariantId, selectedVariantId);
+                                        ImGui::Indent();
 
-                                    ImGui::Unindent();
+                                        ImGuiShaderUtils::DrawShaderVariantTable(
+                                            shaderItem.GetShaderAsset()->GetShaderOptionGroupLayout(), requestedVariantId,
+                                            selectedVariantId);
+
+                                        ImGui::Unindent();
+                                    }
                                 }
 
                                 ImGui::TreePop();

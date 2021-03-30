@@ -35,6 +35,8 @@ if (NOT LY_MONOLITHIC_GAME)
                     AZ::AzGameFramework
                     Gem::Atom_RPI.Public
                     Gem::AtomSampleViewer.Private.Static
+            RUNTIME_DEPENDENCIES
+                AZ::AssetProcessor
         )
 
         add_subdirectory(PythonTests)
@@ -44,7 +46,6 @@ if (NOT LY_MONOLITHIC_GAME)
                 AtomSampleViewerStandalone
             DEPENDENCIES_FILES 
                 ../Gem/Code/runtime_dependencies.cmake
-                runtime_dependencies.cmake
         )
 
         # Adds the AtomSampleViewerStandalone target as a C preprocessor define so that it can be used as a Settings Registry

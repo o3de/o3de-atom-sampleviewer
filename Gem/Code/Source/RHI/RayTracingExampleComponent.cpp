@@ -579,10 +579,10 @@ namespace AtomSampleViewer
                 };
 
                 AZStd::array<HitSolidData, 4> hitSolidData = {{
-                    {AZ::Vector4(0.0f, 0.0f, 0.0f, 0.0f), 0.0f, 0.0f, 0.0f, 0.0f, AZ::Vector4(0.0f, 0.0f, 0.0f, 0.0f)}, // unused
-                    {AZ::Vector4(0.0f, 0.0f, 0.0f, 0.0f), 0.0f, 0.0f, 0.0f, 0.0f, AZ::Vector4(0.0f, 0.0f, 0.0f, 0.0f)}, // unused
-                    {AZ::Vector4(1.0f, 0.0f, 0.0f, 1.0f), 0.5f, 0.0f, 0.0f, 0.0f, AZ::Vector4(0.0f, 1.0f, 0.0f, 1.0f)}, // triangle3
-                    {AZ::Vector4(1.0f, 0.0f, 0.0f, 1.0f), 0.5f, 0.0f, 0.0f, 0.0f, AZ::Vector4(0.0f, 0.0f, 1.0f, 1.0f)}, // rectangle
+                    {AZ::Vector4(0.0f, 0.0f, 0.0f, 0.0f), 0.0f, {0.0f, 0.0f, 0.0f}, AZ::Vector4(0.0f, 0.0f, 0.0f, 0.0f)}, // unused
+                    {AZ::Vector4(0.0f, 0.0f, 0.0f, 0.0f), 0.0f, {0.0f, 0.0f, 0.0f}, AZ::Vector4(0.0f, 0.0f, 0.0f, 0.0f)}, // unused
+                    {AZ::Vector4(1.0f, 0.0f, 0.0f, 1.0f), 0.5f, {0.0f, 0.0f, 0.0f}, AZ::Vector4(0.0f, 1.0f, 0.0f, 1.0f)}, // triangle3
+                    {AZ::Vector4(1.0f, 0.0f, 0.0f, 1.0f), 0.5f, {0.0f, 0.0f, 0.0f}, AZ::Vector4(0.0f, 0.0f, 1.0f, 1.0f)}, // rectangle
                 }};
 
                 m_globalSrg->SetConstantArray(hitSolidDataConstantIndex, hitSolidData);
