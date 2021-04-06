@@ -1445,7 +1445,7 @@ namespace AtomSampleViewer
         AZ_Assert(scenes.size() > 0, "Error: Scenes missing during system component initialization"); // This should never happen unless scene creation has changed.
         // Add RPI::Scene as a sub system for the default AzFramework Scene
         const uint32_t DefaultAzSceneIndex = 0;
-        scenes[DefaultAzSceneIndex]->SetSubsystem(m_rpiScene.get());
+        scenes[DefaultAzSceneIndex]->SetSubsystem(m_rpiScene);
 
         m_rpiScene->Activate();
 

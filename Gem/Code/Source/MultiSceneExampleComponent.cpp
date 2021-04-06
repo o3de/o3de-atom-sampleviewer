@@ -113,7 +113,7 @@ namespace AtomSampleViewer
         m_scene->SetShaderResourceGroupCallback(srgCallback);
 
         // Link our RPI::Scene to the AzFramework::Scene
-        m_frameworkScene->SetSubsystem(m_scene.get());
+        m_frameworkScene->SetSubsystem(m_scene);
 
         // Create a custom pipeline descriptor
         RPI::RenderPipelineDescriptor pipelineDesc;
