@@ -28,8 +28,15 @@
 
 #include <RHI/BasicRHIComponent.h>
 
+
 namespace AtomSampleViewer
 {
+    namespace
+    {
+        static constexpr char* TargetMeshName = "objects/plane.azmodel";
+        static constexpr char* TargetMaterialName = "materials/defaultpbr.azmaterial";
+    }
+
     void DecalExampleComponent::Reflect(AZ::ReflectContext* context)
     {
         if (AZ::SerializeContext* serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
@@ -72,8 +79,9 @@ namespace AtomSampleViewer
 
     void DecalExampleComponent::CreatePlaneObject()
     {
-        auto meshAsset = m_assetLoadManager.GetAsset<AZ::RPI::ModelAsset>("objects/plane.azmodel");
-        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(meshAsset);
+        const auto meshAsset = m_assetLoadManager.GetAsset<AZ::RPI::ModelAsset>(TargetMeshName);
+        const auto materialAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::MaterialAsset>(TargetMaterialName, AZ::RPI::AssetUtils::TraceLevel::Assert);
+        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(meshAsset, AZ::RPI::Material::FindOrCreate(materialAsset));
         ScaleObjectToFitDecals();
     }
 

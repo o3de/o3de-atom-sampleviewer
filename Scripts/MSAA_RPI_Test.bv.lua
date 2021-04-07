@@ -27,7 +27,7 @@ Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 OpenSample('RPI/MSAA')
 ResizeViewport(800, 600)
 
-SelectImageComparisonToleranceLevel("Level F")
+SelectImageComparisonToleranceLevel("Level G")
 TakeScreenShot4xCylinder()
 
 OpenSample(nil)

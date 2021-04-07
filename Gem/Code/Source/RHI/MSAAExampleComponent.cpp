@@ -392,6 +392,10 @@ namespace AtomSampleViewer
         AZ::RHI::PipelineStateDescriptorForDraw pipelineStateDescriptor;
         pipelineStateDescriptor.m_inputStreamLayout = m_quadInputStreamLayout;
 
+        if (!m_customMSAAResolveShader)
+        {
+            return;
+        }
         auto shaderVariant = m_customMSAAResolveShader->GetVariant(AZ::RPI::ShaderAsset::RootShaderVariantStableId);
         shaderVariant.ConfigurePipelineState(pipelineStateDescriptor);
 

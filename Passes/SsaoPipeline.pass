@@ -32,6 +32,80 @@
                     ]
                 },
                 {
+                    "Name": "RayTracingAccelerationStructurePass",
+                    "TemplateName": "RayTracingAccelerationStructurePassTemplate"
+                },
+                {
+                    "Name": "CascadedShadowmapsPass",
+                    "TemplateName": "CascadedShadowmapsTemplate",
+                    "PassData": {
+                        "$type": "RasterPassData",
+                        "DrawListTag": "shadow",
+                        "PipelineViewTag": "DirectionalLightView"
+                    },
+                    "Connections": [
+                        {
+                            "LocalSlot": "SkinnedMeshes",
+                            "AttachmentRef": {
+                                "Pass": "SkinningPass",
+                                "Attachment": "SkinnedMeshOutputStream"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "SpotLightShadowmapsPass",
+                    "TemplateName": "SpotLightShadowmapsTemplate",
+                    "PassData": {
+                        "$type": "RasterPassData",
+                        "DrawListTag": "shadow",
+                        "PipelineViewTag": "SpotLightView"
+                    },
+                    "Connections": [
+                        {
+                            "LocalSlot": "SkinnedMeshes",
+                            "AttachmentRef": {
+                                "Pass": "SkinningPass",
+                                "Attachment": "SkinnedMeshOutputStream"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "EsmShadowmapsPassDirectional",
+                    "TemplateName": "EsmShadowmapsTemplate",
+                    "PassData": {
+                        "$type": "EsmShadowmapsPassData",
+                        "LightType": "directional"
+                    },
+                    "Connections": [
+                        {
+                            "LocalSlot": "DepthShadowmaps",
+                            "AttachmentRef": {
+                                "Pass": "CascadedShadowmapsPass",
+                                "Attachment": "Shadowmap"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "EsmShadowmapsPassSpot",
+                    "TemplateName": "EsmShadowmapsTemplate",
+                    "PassData": {
+                        "$type": "EsmShadowmapsPassData",
+                        "LightType": "spot"
+                    },
+                    "Connections": [
+                        {
+                            "LocalSlot": "DepthShadowmaps",
+                            "AttachmentRef": {
+                                "Pass": "SpotLightShadowmapsPass",
+                                "Attachment": "Shadowmap"
+                            }
+                        }
+                    ]
+                },
+                {
                     "Name": "DepthPass",
                     "TemplateName": "DepthPassTemplate",
                     "PassData": {
@@ -45,6 +119,59 @@
                             "AttachmentRef": {
                                 "Pass": "SkinningPass",
                                 "Attachment": "SkinnedMeshOutputStream"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "LightCullingTilePreparePass",
+                    "TemplateName": "LightCullingTilePrepareTemplate",
+                    "Connections": [
+                        {
+                            "LocalSlot": "Depth",
+                            "AttachmentRef": {
+                                "Pass": "DepthPass",
+                                "Attachment": "Output"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "LightCullingPass",
+                    "TemplateName": "LightCullingTemplate",
+                    "Connections": [
+                        {
+                            "LocalSlot": "TileLightData",
+                            "AttachmentRef": {
+                                "Pass": "LightCullingTilePreparePass",
+                                "Attachment": "TileLightData"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "LightCullingRemapPass",
+                    "TemplateName": "LightCullingRemapTemplate",
+                    "Connections": [
+                        {
+                            "LocalSlot": "TileLightData",
+                            "AttachmentRef": {
+                                "Pass": "LightCullingTilePreparePass",
+                                "Attachment": "TileLightData"
+                            }
+                        },
+                        {
+                            "LocalSlot": "LightCount",
+                            "AttachmentRef": {
+                                "Pass": "LightCullingPass",
+                                "Attachment": "LightCount"
+                            }
+                        },
+                        {
+                            "LocalSlot": "LightList",
+                            "AttachmentRef": {
+                                "Pass": "LightCullingPass",
+                                "Attachment": "LightList"
                             }
                         }
                     ]
@@ -85,6 +212,89 @@
                     ]
                 },
                 {
+                    "Name": "ForwardPass",
+                    "TemplateName": "ForwardPassTemplate",
+                    "Connections": [
+                        {
+                            "LocalSlot": "DirectionalLightShadowmap",
+                            "AttachmentRef": {
+                                "Pass": "CascadedShadowmapsPass",
+                                "Attachment": "Shadowmap"
+                            }
+                        },
+                        {
+                            "LocalSlot": "ExponentialShadowmapDirectional",
+                            "AttachmentRef": {
+                                "Pass": "EsmShadowmapsPassDirectional",
+                                "Attachment": "EsmShadowmaps"
+                            }
+                        },
+                        {
+                            "LocalSlot": "SpotLightShadowmap",
+                            "AttachmentRef": {
+                                "Pass": "SpotLightShadowmapsPass",
+                                "Attachment": "Shadowmap"
+                            }
+                        },
+                        {
+                            "LocalSlot": "ExponentialShadowmapSpot",
+                            "AttachmentRef": {
+                                "Pass": "EsmShadowmapsPassSpot",
+                                "Attachment": "EsmShadowmaps"
+                            }
+                        },
+                        {
+                            "LocalSlot": "DepthStencilInputOutput",
+                            "AttachmentRef": {
+                                "Pass": "DepthPass",
+                                "Attachment": "Output"
+                            }
+                        },
+                        {
+                            "LocalSlot": "TileLightData",
+                            "AttachmentRef": {
+                                "Pass": "LightCullingTilePreparePass",
+                                "Attachment": "TileLightData"
+                            }
+                        },
+                        {
+                            "LocalSlot": "LightListRemapped",
+                            "AttachmentRef": {
+                                "Pass": "LightCullingRemapPass",
+                                "Attachment": "LightListRemapped"
+                            }
+                        }
+                    ],
+                    "PassData": {
+                        "$type": "RasterPassData",
+                        "DrawListTag": "forward",
+                        "PipelineViewTag": "MainCamera",
+                        "PassSrgAsset": {
+                            "FilePath": "shaderlib/atom/features/pbr/forwardpasssrg.azsli:PassSrg"
+                        }
+                    }
+                },
+                {
+                    "Name": "RayTracingAmbientOcclusionPass",
+                    "TemplateName": "RayTracingAmbientOcclusionPassTemplate",
+                    "Connections": [
+                        {
+                            "LocalSlot": "InputDepth",
+                            "AttachmentRef": {
+                                "Pass": "ForwardPass",
+                                "Attachment": "DepthStencilInputOutput"
+                            }
+                        },
+                        {
+                            "LocalSlot": "WorldNormal",
+                            "AttachmentRef": {
+                                "Pass": "ForwardPass",
+                                "Attachment": "NormalOutput"
+                            }
+                        }
+                    ]
+                },
+                {
                     "Name": "DepthToLinearDepthPass",
                     "TemplateName": "DepthToLinearTemplate",
                     "Connections": [
@@ -113,6 +323,30 @@
                 {
                     "Name": "DebugWhiteTexture",
                     "TemplateName": "FullscreenOutputOnlyTemplate",
+                    "ImageAttachments": [
+                        {
+                            "Name": "OutputAttachment",
+                            "SizeSource": {
+                                "Source": {
+                                    "Pass": "Parent",
+                                    "Attachment": "SwapChainOutput"
+                                }
+                            },
+                            "FormatSource": {
+                                "Pass": "Parent",
+                                "Attachment": "SwapChainOutput"
+                            }
+                        }
+                    ],
+                    "Connections": [
+                        {
+                            "LocalSlot": "Output",
+                            "AttachmentRef": {
+                                "Pass": "This",
+                                "Attachment": "OutputAttachment"
+                            }
+                        }
+                    ],
                     "PassData": {
                         "$type": "FullscreenTrianglePassData",
                         "ShaderDataMappings": {
@@ -157,6 +391,27 @@
                     }
                 },
                 {
+                    "Name": "SelectorPass",
+                    "TemplateName": "SelectorPassTemplate",
+                    "Enabled": true,
+                    "Connections": [
+                        {
+                            "LocalSlot": "Input1",
+                            "AttachmentRef": {
+                                "Pass": "RayTracingAmbientOcclusionPass",
+                                "Attachment": "OutputAO"
+                            }
+                        },
+                        {
+                            "LocalSlot": "Input2",
+                            "AttachmentRef": {
+                                "Pass": "ModulateWithSsao",
+                                "Attachment": "InputOutput"
+                            }
+                        }
+                    ]
+                },
+                {
                     "Name": "DisplayMapperPass",
                     "TemplateName": "DisplayMapperTemplate",
                     "Enabled": true,
@@ -164,8 +419,8 @@
                         {
                             "LocalSlot": "Input",
                             "AttachmentRef": {
-                                "Pass": "ModulateWithSsao",
-                                "Attachment": "InputOutput"
+                                "Pass": "SelectorPass",
+                                "Attachment": "Output"
                             }
                         },
                         {
@@ -202,7 +457,7 @@
                         "$type": "ImGuiPassData",
                         "IsDefaultImGui": true
                     }
-                },
+                },		
                 {
                     "Name": "2DPass",
                     "TemplateName": "UIPassTemplate",

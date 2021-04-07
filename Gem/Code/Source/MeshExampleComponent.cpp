@@ -127,6 +127,8 @@ namespace AtomSampleViewer
 
         GetMeshFeatureProcessor()->ReleaseMesh(m_meshHandle);
 
+        m_modelAsset = {};
+
         m_materialOverrideInstance = nullptr;
 
         ShutdownLightingPresets();
@@ -234,10 +236,10 @@ namespace AtomSampleViewer
 
     void MeshExampleComponent::ModelChange()
     {
-        GetMeshFeatureProcessor()->ReleaseMesh(m_meshHandle);
-
         if (!m_modelBrowser.GetSelectedAssetId().IsValid())
         {
+            m_modelAsset = {};
+            GetMeshFeatureProcessor()->ReleaseMesh(m_meshHandle);
             return;
         }
 
@@ -255,30 +257,33 @@ namespace AtomSampleViewer
             }
         }
 
-        AZ::Render::MaterialAssignmentMap materialMap;
         if (m_enableMaterialOverride && selectedMaterialAssetId.IsValid())
         {
             AZ::Data::Asset<AZ::RPI::MaterialAsset> materialAsset;
             materialAsset.Create(selectedMaterialAssetId);
-
             m_materialOverrideInstance = AZ::RPI::Material::FindOrCreate(materialAsset);
-
-            materialMap[AZ::Render::DefaultMaterialAssignmentId].m_materialAsset = materialAsset;
-            materialMap[AZ::Render::DefaultMaterialAssignmentId].m_materialInstance = m_materialOverrideInstance;
         }
         else
         {
             m_materialOverrideInstance = nullptr;
         }
 
-        ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::PauseScript);
 
-        AZ::Data::Asset<AZ::RPI::ModelAsset> modelAsset;
-        modelAsset.Create(m_modelBrowser.GetSelectedAssetId());
-        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(modelAsset, materialMap);
-        GetMeshFeatureProcessor()->SetTransform(m_meshHandle, AZ::Transform::CreateIdentity());
-        GetMeshFeatureProcessor()->ConnectModelChangeEventHandler(m_meshHandle, m_changedHandler);
-        GetMeshFeatureProcessor()->SetLodOverride(m_meshHandle, m_lodOverride);
+        if (m_modelAsset.GetId() != m_modelBrowser.GetSelectedAssetId())
+        {
+            ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::PauseScript);
+
+            m_modelAsset.Create(m_modelBrowser.GetSelectedAssetId());
+            GetMeshFeatureProcessor()->ReleaseMesh(m_meshHandle);
+            m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(m_modelAsset, m_materialOverrideInstance);
+            GetMeshFeatureProcessor()->SetTransform(m_meshHandle, AZ::Transform::CreateIdentity());
+            GetMeshFeatureProcessor()->ConnectModelChangeEventHandler(m_meshHandle, m_changedHandler);
+            GetMeshFeatureProcessor()->SetLodOverride(m_meshHandle, m_lodOverride);
+        }
+        else
+        {
+            GetMeshFeatureProcessor()->SetMaterialAssignmentMap(m_meshHandle, m_materialOverrideInstance);
+        }
     }
 
     void MeshExampleComponent::OnEntityDestruction(const AZ::EntityId& entityId)
@@ -306,24 +311,18 @@ namespace AtomSampleViewer
 
     void MeshExampleComponent::SetArcBallControllerParams()
     {
-        if (!m_modelBrowser.GetSelectedAssetId().IsValid())
+        if (!m_modelBrowser.GetSelectedAssetId().IsValid() || !m_modelAsset.IsReady())
         {
             return;
         }
 
         // Adjust the arc-ball controller so that it has bounds that make sense for the current model
-        AZ::Data::Asset<AZ::RPI::ModelAsset> asset = AZ::Data::AssetManager::Instance().GetAsset(m_modelBrowser.GetSelectedAssetId(), azrtti_typeid<AZ::RPI::ModelAsset>(),
-            AZ::Data::AssetLoadBehavior::PreLoad);
-        asset.BlockUntilLoadComplete();
-
-        AZ::RPI::ModelAsset* modelAsset = asset.Get();
-        const AZ::Aabb& aabb = modelAsset->GetAabb();
-
+        
         AZ::Vector3 center;
         float radius;
-        aabb.GetAsSphere(center, radius);
+        m_modelAsset->GetAabb().GetAsSphere(center, radius);
 
-        const float startingDistance = radius;
+        const float startingDistance = radius * ArcballRadiusDefaultModifier;
         const float minDistance = radius * ArcballRadiusMinModifier;
         const float maxDistance = radius * ArcballRadiusMaxModifier;
 

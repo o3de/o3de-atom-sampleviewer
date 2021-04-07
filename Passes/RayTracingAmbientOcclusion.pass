@@ -1,0 +1,72 @@
+{
+    "Type": "JsonSerialization",
+    "Version": 1,
+    "ClassName": "PassAsset",
+    "ClassData": {
+        "PassTemplate": {
+            "Name": "RayTracingAmbientOcclusionPassTemplate",
+            "PassClass": "RayTracingAmbientOcclusionPass",
+            "Slots": [
+                {
+                    "Name": "InputDepth",
+                    "ShaderInputName": "m_depth",
+                    "SlotType": "Input",
+                    "ScopeAttachmentUsage": "Shader",
+                    "ImageViewDesc": {
+                        "AspectFlags": [
+                            "Depth"
+                        ]
+                    }
+                },
+                {
+                    "Name": "WorldNormal",
+                    "ShaderInputName": "m_worldNormalMap",
+                    "SlotType": "Input",
+                    "ScopeAttachmentUsage": "Shader"
+                },
+                {
+                    "Name": "OutputAO",
+                    "ShaderInputName": "m_outputAO",
+                    "SlotType": "Output",
+                    "ScopeAttachmentUsage": "Shader",
+                    "LoadStoreAction": {
+                        "ClearValue": {
+                            "Value": [
+                                0.5,
+                                0.0,
+                                0.0,
+                                {}
+                            ]
+                        },
+                        "LoadAction": "Clear",
+                        "LoadActionStencil": "Clear"
+                    }
+                }
+            ],
+            "ImageAttachments": [
+                {
+                    "Name": "OutputAOImage",
+                    "SizeSource": {
+                        "Source": {
+                            "Pass": "Parent",
+                            "Attachment": "SwapChainOutput"
+                        }
+                    },
+                    "FormatSource": {
+                        "Pass": "Parent",
+                        "Attachment": "SwapChainOutput"
+                    }
+                }
+            ],
+            "Connections": [
+                {
+                    "LocalSlot": "OutputAO",
+                    "AttachmentRef": {
+                        "Pass": "This",
+                        "Attachment": "OutputAOImage"
+                    }
+                }
+            ]
+        }
+    }
+}

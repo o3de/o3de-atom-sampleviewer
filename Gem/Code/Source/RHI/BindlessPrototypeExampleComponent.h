@@ -125,10 +125,10 @@ namespace AtomSampleViewer
         // Simple intermediate structure that represents a submesh instance
         struct SubMeshInstance
         {
-            AZ::RHI::ShaderInputConstantIndex m_viewHandleIndex;
-            AZ::RHI::ShaderInputConstantIndex m_objecHandleIndex;
-            AZ::RHI::ShaderInputConstantIndex m_materialHandleIndex;
-            AZ::RHI::ShaderInputConstantIndex m_lightHandleIndex;
+            AZ::RHI::ShaderInputNameIndex m_viewHandleIndex = "m_perViewHandle";
+            AZ::RHI::ShaderInputNameIndex m_objecHandleIndex = "m_perObjectHandle";
+            AZ::RHI::ShaderInputNameIndex m_materialHandleIndex = "m_materialHandle";
+            AZ::RHI::ShaderInputNameIndex m_lightHandleIndex = "m_lightHandle";
 
             AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_perSubMeshSrg;
 

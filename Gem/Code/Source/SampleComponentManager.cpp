@@ -116,6 +116,8 @@
 #include <AzFramework/Scene/Scene.h>
 #include <AzFramework/Scene/SceneSystemBus.h>
 
+#include <Passes/RayTracingAmbientOcclusionPass.h>
+
 #include <Utils/Utils.h>
 
 #include "ExampleComponentBus.h"
@@ -271,7 +273,7 @@ namespace AtomSampleViewer
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/Shading", azrtti_typeid<ShadingExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/StreamingImage", azrtti_typeid<StreamingImageExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/AreaLight", azrtti_typeid<AreaLightExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample("Features/Bloom", azrtti_typeid<BloomExampleComponent>() ));
+        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Bloom", azrtti_typeid<BloomExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Checkerboard", azrtti_typeid<CheckerboardExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/DepthOfField", azrtti_typeid<DepthOfFieldExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/DiffuseGI", azrtti_typeid<DiffuseGIExampleComponent>(), []() {return Utils::GetRHIDevice()->GetFeatures().m_rayTracing; }));
@@ -295,6 +297,12 @@ namespace AtomSampleViewer
         // We can only initialize this component after the asset catalog has been loaded.
         AzFramework::AssetCatalogEventBus::Handler::BusConnect();
         AZ::Render::ImGuiSystemNotificationBus::Handler::BusConnect();
+
+        auto* passSystem = AZ::RPI::PassSystemInterface::Get();
+        AZ_Assert(passSystem, "Cannot get the pass system.");
+
+        passSystem->AddPassCreator(Name("RayTracingAmbientOcclusionPass"), &AZ::Render::RayTracingAmbientOcclusionPass::Create);
+ 
     }
 
     void SampleComponentManager::ActivateInternal()

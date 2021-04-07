@@ -101,7 +101,9 @@ namespace AtomSampleViewer
         AZ::RHI::InputStreamLayout m_rectangleInputStreamLayout;
 
         // Shader Resource
-        AZ::RHI::ShaderInputConstantIndex m_worldMatrixIndex;
+        AZ::RHI::ShaderInputNameIndex m_worldMatrixIndex = "m_worldMatrix";
+        AZ::RHI::ShaderInputNameIndex m_viewProjectionMatrixIndex = "m_viewProjectionMatrix";
+        AZ::RHI::ShaderInputNameIndex m_alphaTestRefValueIndex = "m_alphaTestRefValue";
         AZ::RHI::AttachmentId m_depthImageAttachmentId, m_multisamleDepthImageAttachmentId;
         AZ::RHI::AttachmentId m_resolveImageAttachmentId;
         AZStd::array<AZStd::array<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, s_numRectangles>, s_numBlendTypes> m_shaderResourceGroups;

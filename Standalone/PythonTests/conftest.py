@@ -16,29 +16,27 @@ import os
 
 import pytest
 
+import ly_test_tools.builtin.helpers as helpers
 import ly_test_tools.environment.file_system as file_system
 
 logger = logging.getLogger(__name__)
 
 
-def pytest_addoption(parser):
-    parser.addoption("--clean-logs", action="store_true", default=False,
-                     help="Deletes any existing AssetProcessor, AtomSampleViewer, Editor, or Game log files.")
-
-
 @pytest.fixture(scope="function", autouse=True)
-def clean_logs(request, workspace):
-    enable_clean_logs = request.config.getoption('--clean-logs')
-    logs = ['AP_GUI.log', 'atomsampleviewer.log', 'Editor.log', 'Game.log']
+def clean_atomsampleviewer_logs(request, workspace):
+    """Deletes any AtomSampleViewer log files so that the test run can start with empty logs."""
+    logs = ['atomsampleviewer.log']
+    logger.info(f'Deleting log files for AtomSampleViewer tests: {logs}')
 
-    if not enable_clean_logs:
-        logger.info(f'--clean-logs is "{enable_clean_logs}" - skipping the deletion of existing log files: {logs}')
-        return
-
-    logger.info(f'--clean-logs is "{enable_clean_logs}" - deleting log files: {logs}')
     for log in logs:
         log_file = os.path.join(workspace.paths.project_log(), log)
         if os.path.exists(log_file):
             file_system.delete(file_list=[log_file],
                                del_files=True,
                                del_dirs=False)
+
+
+@pytest.fixture(scope="function", autouse=True)
+def setup_atomsampleviewer_assets(project, workspace):
+    """Sets up bootstrap.cfg to target AtomSampleViewer before starting the tests (prevents AssetProcessor errors)."""
+    helpers.setup_bootstrap_project(workspace, project)

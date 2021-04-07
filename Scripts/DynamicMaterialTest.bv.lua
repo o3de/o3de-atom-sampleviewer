@@ -31,7 +31,7 @@ function SetDefaultLatticeConfiguration()
 end
 
 function TakeScreenshotSeries(filenamePrefix)
-    SelectImageComparisonToleranceLevel("Level G")
+    SelectImageComparisonToleranceLevel("Level H")
 
     -- There could be variation in how long prior activities took so reset the clock for each series of screenshots
     SetImguiValue('Reset Clock', true) 

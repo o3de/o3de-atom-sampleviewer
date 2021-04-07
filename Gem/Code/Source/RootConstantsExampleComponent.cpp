@@ -176,16 +176,17 @@ namespace AtomSampleViewer
             for (uint32_t i = 0; i < m_models.size(); ++i)
             {
                 auto model = m_models[i];
-                Data::Instance<AZ::RPI::ModelLod> modelLod = model->GetLods()[0];
-                m_modelStreamBufferViews[i].resize(modelLod->GetMeshes().size());
-
-                for (uint32_t j = 0; j < m_modelStreamBufferViews[i].size(); ++j)
+                if (model)
                 {
-                    modelLod->GetStreamsForMesh(
-                        pipelineStateDescriptor.m_inputStreamLayout,
-                        m_modelStreamBufferViews[i][j],
-                        shaderVariant.GetInputContract(),
-                        j);
+                    Data::Instance<AZ::RPI::ModelLod> modelLod = model->GetLods()[0];
+                    m_modelStreamBufferViews[i].resize(modelLod->GetMeshes().size());
+
+                    for (uint32_t j = 0; j < m_modelStreamBufferViews[i].size(); ++j)
+                    {
+                        modelLod->GetStreamsForMesh(
+                            pipelineStateDescriptor.m_inputStreamLayout, m_modelStreamBufferViews[i][j], shaderVariant.GetInputContract(),
+                            j);
+                    }
                 }
             }            
         }
@@ -300,28 +301,31 @@ namespace AtomSampleViewer
         m_rootConstantData.SetConstant(m_modelMatrixInputIndex, m_modelMatrices[modelIndex]);
 
         const auto& model = m_models[modelIndex];
-        const auto& meshes = model->GetLods()[0]->GetMeshes();
-        for (uint32_t i = 0; i < meshes.size(); ++i)
+        if (model)
         {
-            auto const& mesh = meshes[i];
+            const auto& meshes = model->GetLods()[0]->GetMeshes();
+            for (uint32_t i = 0; i < meshes.size(); ++i)
+            {
+                auto const& mesh = meshes[i];
 
-            // Build draw packet and set the values of the inline constants.
-            RHI::DrawPacketBuilder drawPacketBuilder;
-            drawPacketBuilder.Begin(nullptr);
-            drawPacketBuilder.SetDrawArguments(mesh.m_drawArguments);
-            drawPacketBuilder.SetIndexBufferView(mesh.m_indexBufferView);
-            drawPacketBuilder.SetRootConstants(m_rootConstantData.GetConstantData());
-            drawPacketBuilder.AddShaderResourceGroup(m_srg->GetRHIShaderResourceGroup());
+                // Build draw packet and set the values of the inline constants.
+                RHI::DrawPacketBuilder drawPacketBuilder;
+                drawPacketBuilder.Begin(nullptr);
+                drawPacketBuilder.SetDrawArguments(mesh.m_drawArguments);
+                drawPacketBuilder.SetIndexBufferView(mesh.m_indexBufferView);
+                drawPacketBuilder.SetRootConstants(m_rootConstantData.GetConstantData());
+                drawPacketBuilder.AddShaderResourceGroup(m_srg->GetRHIShaderResourceGroup());
 
-            RHI::DrawPacketBuilder::DrawRequest drawRequest;
-            drawRequest.m_listTag = m_drawListTag;
-            drawRequest.m_pipelineState = m_pipelineState.get();
-            drawRequest.m_streamBufferViews = m_modelStreamBufferViews[modelIndex][i];
-            drawRequest.m_sortKey = 0;
-            drawPacketBuilder.AddDrawItem(drawRequest);
+                RHI::DrawPacketBuilder::DrawRequest drawRequest;
+                drawRequest.m_listTag = m_drawListTag;
+                drawRequest.m_pipelineState = m_pipelineState.get();
+                drawRequest.m_streamBufferViews = m_modelStreamBufferViews[modelIndex][i];
+                drawRequest.m_sortKey = 0;
+                drawPacketBuilder.AddDrawItem(drawRequest);
 
-            AZStd::unique_ptr<const RHI::DrawPacket> drawPacket(drawPacketBuilder.End());
-            m_dynamicDraw->AddDrawPacket(RPI::RPISystemInterface::Get()->GetDefaultScene().get(), AZStd::move(drawPacket));
+                AZStd::unique_ptr<const RHI::DrawPacket> drawPacket(drawPacketBuilder.End());
+                m_dynamicDraw->AddDrawPacket(RPI::RPISystemInterface::Get()->GetDefaultScene().get(), AZStd::move(drawPacket));
+            }
         }
     }
 }

@@ -272,16 +272,7 @@ namespace AtomSampleViewer
             SubMeshInstance& subMeshInstance = m_subMeshInstanceArray.back();
 
             subMeshInstance.m_perSubMeshSrg = CreateShaderResourceGroup(m_shader, "HandleSrg", InternalBP::SampleName);
-
-            subMeshInstance.m_viewHandleIndex = subMeshInstance.m_perSubMeshSrg->FindShaderInputConstantIndex(PerViewHandleId);
-            subMeshInstance.m_objecHandleIndex = subMeshInstance.m_perSubMeshSrg->FindShaderInputConstantIndex(PerObjectHandleId);
-            subMeshInstance.m_materialHandleIndex = subMeshInstance.m_perSubMeshSrg->FindShaderInputConstantIndex(MaterialHandleId);
-            subMeshInstance.m_lightHandleIndex = subMeshInstance.m_perSubMeshSrg->FindShaderInputConstantIndex(LightHandleId);
             subMeshInstance.m_mesh = &mesh;
-            AZ_Assert(subMeshInstance.m_viewHandleIndex.IsValid(), "Invalid view index.");
-            AZ_Assert(subMeshInstance.m_objecHandleIndex.IsValid(), "Invalid object index.");
-            AZ_Assert(subMeshInstance.m_materialHandleIndex.IsValid(), "Invalid material index.");
-            AZ_Assert(subMeshInstance.m_lightHandleIndex.IsValid(), "Invalid light index.");
 
             // Set the buffer stream
             RHI::InputStreamLayout layout;
@@ -545,7 +536,7 @@ namespace AtomSampleViewer
                     for (uint32_t subMeshIdx = objectInterval.m_min; subMeshIdx < objectInterval.m_max; subMeshIdx++)
                     {
                         // Update the constant data
-                        const SubMeshInstance& subMesh = m_subMeshInstanceArray[subMeshIdx];
+                        SubMeshInstance& subMesh = m_subMeshInstanceArray[subMeshIdx];
                         // Set the view handle
                         bool set = subMesh.m_perSubMeshSrg->SetConstant(subMesh.m_viewHandleIndex, m_worldToClipHandle);
                         AZ_Assert(set, "Failed to set the view constant");
@@ -688,12 +679,10 @@ namespace AtomSampleViewer
         // Update the worldToClipMatrix 
         Matrix4x4 worldToClipMatrix = m_viewToClipMatrix * worldToViewMatrix;
         bool set = m_floatBuffer->AllocateOrUpdateBuffer(m_worldToClipHandle, static_cast<void*>(&worldToClipMatrix), static_cast<uint32_t>(sizeof(Matrix4x4)));
-        AZ_Assert(set, "Failed to set the perspective matrix constant");
-
+        
         // Update the light direction
         set = m_floatBuffer->AllocateOrUpdateBuffer(m_lightDirectionHandle, static_cast<void*>(&m_lightDir), static_cast<uint32_t>(sizeof(Vector3)));
-        AZ_Assert(set, "Failed to set the perspective matrix constant");
-
+       
         BasicRHIComponent::OnFramePrepare(frameGraphBuilder);
     }
 
@@ -816,15 +805,15 @@ namespace AtomSampleViewer
     {
         RHI::BufferMapResponse response;
         RHI::ResultCode result = m_bufferPool->MapBuffer(mapRequest, response);
-        if (result != RHI::ResultCode::Success || !response.m_data)
+        // ResultCode::Unimplemented is used by Null Renderer and hence is a valid use case
+        AZ_Assert(result == RHI::ResultCode::Success || result == RHI::ResultCode::Unimplemented, "Failed to map object buffer]");
+        if (response.m_data)
         {
-            AZ_Assert(response.m_data, "Failed to map object buffer");
-            return false;
+            memcpy(response.m_data, data, mapRequest.m_byteCount);
+            m_bufferPool->UnmapBuffer(*m_buffer);
+            return true;
         }
 
-        memcpy(response.m_data, data, mapRequest.m_byteCount);
-        m_bufferPool->UnmapBuffer(*m_buffer);
-
-        return true;
+        return false;
     }
 }; // namespace AtomSampleViewer

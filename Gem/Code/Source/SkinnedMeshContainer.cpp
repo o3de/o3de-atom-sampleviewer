@@ -176,9 +176,13 @@ namespace AtomSampleViewer
             materialMap[AZ::Render::DefaultMaterialAssignmentId].m_materialAsset = materialAsset;
             materialMap[AZ::Render::DefaultMaterialAssignmentId].m_materialInstance = materialOverrideInstance;
             bool isSkinnedMeshWithMotion = true;
-            renderData.m_meshHandle = AZStd::make_shared<AZ::Render::MeshFeatureProcessorInterface::MeshHandle>(m_meshFeatureProcessor->AcquireMesh(renderData.m_skinnedMeshInstance->m_model->GetModelAsset(), materialMap, isSkinnedMeshWithMotion));
-            m_meshFeatureProcessor->SetTransform(*renderData.m_meshHandle, renderData.m_rootTransform);
-
+            if (renderData.m_skinnedMeshInstance->m_model)
+            {
+                renderData.m_meshHandle =
+                    AZStd::make_shared<AZ::Render::MeshFeatureProcessorInterface::MeshHandle>(m_meshFeatureProcessor->AcquireMesh(
+                        renderData.m_skinnedMeshInstance->m_model->GetModelAsset(), materialMap, isSkinnedMeshWithMotion));
+                m_meshFeatureProcessor->SetTransform(*renderData.m_meshHandle, renderData.m_rootTransform);
+            }
             // If render proxies already exist, they will be auto-freed
             AZ::Render::SkinnedMeshShaderOptions defaultShaderOptions;
             AZ::Render::SkinnedMeshFeatureProcessorInterface::SkinnedMeshRenderProxyDesc desc{ skinnedMesh.m_skinnedMeshInputBuffers, renderData.m_skinnedMeshInstance, renderData.m_meshHandle, renderData.m_boneTransformBuffer, defaultShaderOptions };

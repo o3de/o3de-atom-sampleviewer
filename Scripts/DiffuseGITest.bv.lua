@@ -20,7 +20,7 @@ else
 
     OpenSample('Features/DiffuseGI')
     ResizeViewport(800, 600)
-    SelectImageComparisonToleranceLevel("Level E")
+    SelectImageComparisonToleranceLevel("Level G")
 
     IdleSeconds(5)
 

@@ -121,10 +121,17 @@ namespace AtomSampleViewer
             const auto worldMatrix1 = translate * rotate1 * scale;
             auto& srg0 = m_shaderResourceGroups[blendIndex][0];
             auto& srg1 = m_shaderResourceGroups[blendIndex][1];
-            srg0->SetConstant(m_worldMatrixIndex, worldMatrix0);
-            srg1->SetConstant(m_worldMatrixIndex, worldMatrix1);
-            srg0->Compile();
-            srg1->Compile();
+            if(srg0)
+            {
+                srg0->SetConstant(m_worldMatrixIndex, worldMatrix0);
+                srg0->Compile();
+            }
+
+            if (srg1)
+            {
+                srg1->SetConstant(m_worldMatrixIndex, worldMatrix1);
+                srg1->Compile();
+            }
         }
 
         BasicRHIComponent::OnFramePrepare(frameGraphBuilder);
@@ -186,15 +193,10 @@ namespace AtomSampleViewer
                 m_shaderResourceGroups[blendIndex][rectIndex] = CreateShaderResourceGroup(m_shader, "TexturedSurfaceSrg", AlphaToCoverage::SampleName);
             }
         }
-        const Name worldMatrixId{"m_worldMatrix"};
-        const Name viewProjectionMatrixId{"m_viewProjectionMatrix"};
-        const Name alphaRefValueId{ "m_alphaTestRefValue" };
-        AZ::RHI::ShaderInputConstantIndex viewProjectionMatrixIndex;
-        AZ::RHI::ShaderInputConstantIndex alphaTestRefValueIndex;
 
-        FindShaderInputIndex(&m_worldMatrixIndex, m_shaderResourceGroups[0][0], worldMatrixId, AlphaToCoverage::SampleName);
-        FindShaderInputIndex(&viewProjectionMatrixIndex, m_shaderResourceGroups[0][0], viewProjectionMatrixId, AlphaToCoverage::SampleName);
-        FindShaderInputIndex(&alphaTestRefValueIndex, m_shaderResourceGroups[0][0], alphaRefValueId, AlphaToCoverage::SampleName);
+        m_worldMatrixIndex.Reset();
+        m_viewProjectionMatrixIndex.Reset();
+        m_alphaTestRefValueIndex.Reset();
 
         const AZ::Vector3 upVector{0.f, 1.f, 0.f};
         const AZ::Vector3 lookAtPos{0.f, 0.f, 0.f};
@@ -227,12 +229,12 @@ namespace AtomSampleViewer
                     AZ_Error(AlphaToCoverage::SampleName, false, "Failed to set image into shader resource group.");
                     return;
                 }
-                if (!m_shaderResourceGroups[blendIndex][rectIndex]->SetConstant(viewProjectionMatrixIndex, viewProjectionMatrix))
+                if (!m_shaderResourceGroups[blendIndex][rectIndex]->SetConstant(m_viewProjectionMatrixIndex, viewProjectionMatrix))
                 {
                     AZ_Error(AlphaToCoverage::SampleName, false, "Failed to set view projection matrix into shader resource group.");
                     return;
                 }
-                if (!m_shaderResourceGroups[blendIndex][rectIndex]->SetConstant(alphaTestRefValueIndex, alphaRefValue))
+                if (!m_shaderResourceGroups[blendIndex][rectIndex]->SetConstant(m_alphaTestRefValueIndex, alphaRefValue))
                 {
                     AZ_Error(AlphaToCoverage::SampleName, false, "Failed to set alpha test reference value into shader resource group.");
                     return;
@@ -244,6 +246,11 @@ namespace AtomSampleViewer
      void AlphaToCoverageExampleComponent::CreateScopeResources(BlendType type)
     {
         using namespace AZ;
+
+        if(!m_shader)
+        {
+            return;
+        }
         const bool useDepth = (type == BlendType::AlphaTest) || (type == BlendType::A2C_MSAA);
         const bool useResolve = (type == BlendType::A2C_MSAA);
 

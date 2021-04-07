@@ -48,9 +48,9 @@ function GenerateMaterialScreenshot(imageComparisonThresholdLevel, materialName,
     SetImguiValue('Materials/##Available', g_testMaterialsFolder .. materialName .. '.azmaterial')
 
     if (options.lighting ~= nil) then
-        SetImguiValue('Lighting Preset##SampleBase', options.lighting)
+        SetImguiValue('Lighting Preset##SampleBase/' .. options.lighting, true)
     else
-        SetImguiValue('Lighting Preset##SampleBase', "Neutral Urban (Alt)")
+        SetImguiValue('Lighting Preset##SampleBase/Neutral Urban (Alt)', true)
     end
 
     -- The sample resets the camera position after loading the model and we need to
@@ -91,13 +91,13 @@ GenerateMaterialScreenshot('Level B', '001_DefaultWhite')
 GenerateMaterialScreenshot('Level G', '002_BaseColorLerp')
 GenerateMaterialScreenshot('Level H', '002_BaseColorLinearLight')
 GenerateMaterialScreenshot('Level G', '002_BaseColorMultiply')
-GenerateMaterialScreenshot('Level B', '003_MetalMatte')
-GenerateMaterialScreenshot('Level C', '003_MetalPolished')
+GenerateMaterialScreenshot('Level E', '003_MetalMatte')
+GenerateMaterialScreenshot('Level F', '003_MetalPolished')
 GenerateMaterialScreenshot('Level E', '004_MetalMap')
 GenerateMaterialScreenshot('Level E', '005_RoughnessMap')
-GenerateMaterialScreenshot('Level C', '006_SpecularF0Map')
-GenerateMaterialScreenshot('Level B', '007_MultiscatteringCompensationOff')
-GenerateMaterialScreenshot('Level B', '007_MultiscatteringCompensationOn')
+GenerateMaterialScreenshot('Level E', '006_SpecularF0Map')
+GenerateMaterialScreenshot('Level C', '007_MultiscatteringCompensationOff')
+GenerateMaterialScreenshot('Level C', '007_MultiscatteringCompensationOn')
 GenerateMaterialScreenshot('Level H', '008_NormalMap')
 GenerateMaterialScreenshot('Level E', '008_NormalMap_Bevels')
 GenerateMaterialScreenshot('Level F', '009_Opacity_Blended', {lighting="Neutral Urban", model=g_beveledCubeModel})
@@ -134,7 +134,7 @@ GenerateMaterialScreenshot('Level L', '100_UvTiling_Parallax_B', { uniqueSuffix=
 GenerateMaterialScreenshot('Level H', '100_UvTiling_Roughness')
 GenerateMaterialScreenshot('Level F', '100_UvTiling_SpecularF0')
 
-GenerateMaterialScreenshot('Level C', '101_DetailMaps_LucyBaseNoDetailMaps',         {model=g_modelLucy, cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
+GenerateMaterialScreenshot('Level E', '101_DetailMaps_LucyBaseNoDetailMaps',         {model=g_modelLucy, cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
 GenerateMaterialScreenshot('Level F', '102_DetailMaps_All',                          {model=g_modelLucy, cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
 GenerateMaterialScreenshot('Level F', '103_DetailMaps_BaseColor',                    {model=g_modelLucy, cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
 GenerateMaterialScreenshot('Level F', '103_DetailMaps_BaseColorWithMask',            {model=g_modelLucy, cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
@@ -165,7 +165,7 @@ Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 -- We should eventually replace this with realistic skin test cases, these are just placeholders for regression testing
 GenerateMaterialScreenshot('Level D', '001_lucy_regression_test',    {model=g_modelLucy, cameraHeading=-26.0, cameraPitch=15.0, cameraDistance=2.0, cameraZ=0.7})
-GenerateMaterialScreenshot('Level D', '002_wrinkle_regression_test', {model=g_modelWithLayerMask, cameraHeading=-135.0, cameraPitch=15.0, cameraZ=-0.3, cameraDistance=3.5})
+GenerateMaterialScreenshot('Level E', '002_wrinkle_regression_test', {model=g_modelWithLayerMask, cameraHeading=-135.0, cameraPitch=15.0, cameraZ=-0.3, cameraDistance=3.5})
 
 ----------------------------------------------------------------------
 -- MinimalPBR Materials...
@@ -175,8 +175,8 @@ g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/MinimalPBR/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 GenerateMaterialScreenshot('Level B', 'MinimalPbr_Default')
-GenerateMaterialScreenshot('Level C', 'MinimalPbr_BlueMetal')
-GenerateMaterialScreenshot('Level B', 'MinimalPbr_RedDielectric')
+GenerateMaterialScreenshot('Level F', 'MinimalPbr_BlueMetal')
+GenerateMaterialScreenshot('Level D', 'MinimalPbr_RedDielectric')
 
 ----------------------------------------------------------------------
 -- AutoBrick Materials...
@@ -187,4 +187,4 @@ Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 g_testMaterialsFolder = 'testdata/materials/autobrick/'
 
 GenerateMaterialScreenshot('Level C', 'Brick', {model=g_cubeModel})
-GenerateMaterialScreenshot('Level C', 'Tile', {model=g_cubeModel})
+GenerateMaterialScreenshot('Level D', 'Tile', {model=g_cubeModel})

@@ -17,7 +17,6 @@ import pytest
 
 import ly_test_tools.environment.process_utils as process_utils
 
-pytest.importorskip("ly_test_tools")  # Bail if LyTT isn't installed.
 RENDER_HARDWARE_INTERFACE = 'dx12'
 logger = logging.getLogger(__name__)
 
@@ -28,8 +27,8 @@ def teardown():
 
 @pytest.mark.parametrize('launcher_platform', ['windows'])
 @pytest.mark.parametrize("project", ["AtomSampleViewer"])
-@pytest.mark.usefixtures("automatic_process_killer")
-class TestDX12Automation:
+@pytest.mark.usefixtures("setup_atomsampleviewer_assets", "clean_atomsampleviewer_logs")
+class TestDX12AutomationPeriodicSuite:
 
     @pytest.mark.test_case_id('C35638262')
     def test_C35638262_dx12_FullTestSuite(self, request, workspace, editor, launcher_platform):
@@ -70,24 +69,6 @@ class TestDX12Automation:
     @pytest.mark.test_case_id('C35638244')
     def test_C35638244_dx12_CheckerboardTest(self, request, workspace, editor, launcher_platform):
         test_script = 'CheckerboardTest.bv.luac'
-        cmd = os.path.join(workspace.paths.build_directory(),
-                           'AtomSampleViewerStandalone.exe '
-                           f'--rhi {RENDER_HARDWARE_INTERFACE} '
-                           f'--runtestsuite scripts/{test_script} '
-                           '--exitontestend')
-        request.addfinalizer(teardown)
-
-        try:
-            return_code = process_utils.check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
-            logger.debug(f"AtomSampleViewer {test_script} test command got response return code : {return_code}")
-            assert return_code == 0
-        except subprocess.CalledProcessError as e:
-            logger.error(f'AtomSampleViewer lua test "{test_script}" had a failure.\n')
-            raise e
-
-    @pytest.mark.test_case_id('C35638245')
-    def test_C35638245_dx12_CullingAndLod(self, request, workspace, editor, launcher_platform):
-        test_script = 'CullingAndLod.bv.luac'
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
                            f'--rhi {RENDER_HARDWARE_INTERFACE} '
