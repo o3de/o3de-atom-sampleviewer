@@ -59,10 +59,7 @@ namespace AtomSampleViewer
         AZ_Assert(createSceneOutcome, "%s", createSceneOutcome.GetError().data());
         m_frameworkScene = createSceneOutcome.GetValue();
         m_frameworkScene->SetSubsystem<AzFramework::EntityContext::SceneStorageType>(m_entityContext.get());
-        bool success = false;
-        AzFramework::SceneSystemRequestBus::BroadcastResult(success, &AzFramework::SceneSystemRequests::SetSceneForEntityContextId, m_entityContext->GetContextId(), m_frameworkScene);
-        AZ_Assert(success, "Unable to set entity context on AzFramework::Scene: %s", m_sceneName.c_str());
-
+        
         // Create a NativeWindow and WindowContext
         m_nativeWindow = AZStd::make_unique<AzFramework::NativeWindow>("Multi Scene: Second Window", AzFramework::WindowGeometry(0, 0, 1280, 720));
         m_nativeWindow->Activate();
