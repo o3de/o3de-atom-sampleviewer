@@ -81,12 +81,25 @@ namespace AtomSampleViewer
 
         AZStd::string GetOfficialBaseline(const AZStd::string& forScreenshotFile)
         {
-            AZStd::string newPath = forScreenshotFile;
-            if (!AzFramework::StringFunc::Replace(newPath, "user/scripts/screenshots", "atomsampleviewer/scripts/expectedscreenshots"))
+            AZStd::string path = forScreenshotFile;
+            const AZStd::string userPath = Utils::ResolvePath("@user@");
+
+            // make the path relative to the user folder
+            if (!AzFramework::StringFunc::Replace(path, userPath.c_str(), ""))
             {
-                newPath = "";
+                return "";
             }
-            return newPath;
+
+            // After replacing "screenshots" with "expectedscreenshots", the path should be a valid asset path, relative to asset root.
+            if (!AzFramework::StringFunc::Replace(path, "scripts/screenshots", "scripts/expectedscreenshots"))
+            {
+                return "";
+            }
+
+            // Turn it back into a full path
+            path = Utils::ResolvePath("@assets@" + path);
+
+            return path;
         }
     }
 
@@ -898,9 +911,8 @@ namespace AtomSampleViewer
         // Get source folder
         if (m_officialBaselineSourceFolder.empty())
         {
-            AZStd::string appRoot;
-            AzFramework::ApplicationRequests::Bus::BroadcastResult(appRoot, &AzFramework::ApplicationRequests::GetAppRoot);
-            AzFramework::StringFunc::Path::Join(appRoot.c_str(), "AtomSampleViewer/Scripts/ExpectedScreenshots", m_officialBaselineSourceFolder);
+            AZStd::string projectPath = AZ::Utils::GetProjectPath();
+            AzFramework::StringFunc::Path::Join(projectPath.c_str(), "Scripts/ExpectedScreenshots", m_officialBaselineSourceFolder);
 
             if (!io->Exists(m_officialBaselineSourceFolder.c_str()))
             {
@@ -1046,6 +1058,8 @@ namespace AtomSampleViewer
                 }
                 else
                 {
+                    // Be aware there is an automation test script that looks for the "Screenshot check failed. Diff score" string text to report failures.
+                    // If you change this message, be sure to update the associated tests as well located here: "C:/path/to/Lumberyard/AtomSampleViewer/Standalone/PythonTests"
                     ReportScreenshotComparisonIssue(
                         AZStd::string::format("Screenshot check failed. Diff score %f exceeds threshold of %f ('%s').",
                             screenshotTestInfo.m_officialComparisonResult.m_finalDiffScore, toleranceLevel->m_threshold, toleranceLevel->m_name.c_str()),

@@ -73,9 +73,10 @@ namespace AtomSampleViewer
         AZ::Component* m_cameraControlComponent = nullptr;
 
         AZ::Render::MeshFeatureProcessorInterface::ModelChangedEvent::Handler m_changedHandler;
-
+        
         static constexpr float ArcballRadiusMinModifier = 0.01f;
         static constexpr float ArcballRadiusMaxModifier = 4.0f;
+        static constexpr float ArcballRadiusDefaultModifier = 2.0f;
         
         AZ::RPI::Cullable::LodOverride m_lodOverride = AZ::RPI::Cullable::NoLodOverride;
 
@@ -90,6 +91,7 @@ namespace AtomSampleViewer
 
         AZ::Data::Instance<AZ::RPI::Material> m_materialOverrideInstance; //< Holds a copy of the material instance being used when m_enableMaterialOverride is true.
         AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_meshHandle;
+        AZ::Data::Asset<AZ::RPI::ModelAsset> m_modelAsset;
 
         ImGuiSidebar m_imguiSidebar;
         ImGuiMaterialDetails m_imguiMaterialDetails;

@@ -245,7 +245,7 @@ namespace AtomSampleViewer
         // load miss shader
         const char* missShaderFilePath = "Shaders/RHI/RayTracingMiss.azshader";
         m_missShader = LoadShader(missShaderFilePath, RayTracingExampleName);
-        AZ_Assert(m_rayGenerationShader, "Failed to load miss shader");
+        AZ_Assert(m_missShader, "Failed to load miss shader");
 
         auto missShaderVariant = m_missShader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId);
         RHI::PipelineStateDescriptorForRayTracing missShaderDescriptor;

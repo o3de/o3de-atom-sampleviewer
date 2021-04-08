@@ -18,7 +18,7 @@ Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 OpenSample('RPI/StreamingImage')
 ResizeViewport(900, 900)
 
-SelectImageComparisonToleranceLevel("Level C")
+SelectImageComparisonToleranceLevel("Level H")
 
 -- capture screenshot with all 2d images
 CaptureScreenshot(g_screenshotOutputFolder .. 'Streaming2dImages.ppm')

@@ -11,7 +11,7 @@
             {
                 "Name": "DepthMSAAPassTemplate",
                 "Path": "Passes/DepthMSAA.pass"
-            },            
+            },
             {
                 "Name": "DepthMSAA2xPassTemplate",
                 "Path": "Passes/DepthMSAA2x.pass"
@@ -571,6 +571,14 @@
             {
                 "Name": "UIParentTemplate",
                 "Path": "Passes/UIParent.pass"
+            },
+            {
+                "Name": "RayTracingAmbientOcclusionPassTemplate",
+                "Path": "Passes/RayTracingAmbientOcclusion.pass"
+            },
+            {
+                "Name": "SelectorPassTemplate",
+                "Path": "Passes/SelectorPass.pass"
             }
         ]
     }

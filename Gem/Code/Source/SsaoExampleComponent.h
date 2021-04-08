@@ -18,6 +18,8 @@
 #include <Atom/Feature/ImGui/ImGuiUtils.h>
 #include <AzFramework/Input/Events/InputChannelEventListener.h>
 #include <Atom/Bootstrap/DefaultWindowBus.h>
+#include <Atom/RPI.Public/Pass/Specific/SelectorPass.h>
+#include <Passes/RayTracingAmbientOcclusionPass.h>
 #include <Utils/ImGuiSidebar.h>
 #include <Utils/Utils.h>
 #include <ExampleComponentBus.h>
@@ -71,6 +73,8 @@ namespace AtomSampleViewer
         void DrawImGUI();
         void DrawSidebar();
 
+        void SwitchAOType();
+
         AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_meshHandle;
         AZ::Render::MeshFeatureProcessorInterface::ModelChangedEvent::Handler m_meshChangedHandler
         {
@@ -93,5 +97,21 @@ namespace AtomSampleViewer
         AZ::Entity* m_ssaoEntity = nullptr;
 
         AZ::Render::ImGuiActiveContextScope m_imguiScope;
+
+        enum AmbientOcclusionType
+        {
+            SSAO = 0,
+            RTAO
+        };
+
+        // Ambient Occlusion type. 0: SSAO; 1: RTAO
+        int m_aoType = AmbientOcclusionType::SSAO;
+
+        // Ray tracing ambient occlusion
+        bool m_rayTracingEnabled = false;
+        AZ::RPI::Ptr<AZ::Render::RayTracingAmbientOcclusionPass> m_RTAOPass;
+
+        // To swtich between outputs
+        AZ::RPI::Ptr<AZ::RPI::SelectorPass> m_selector;
     };
 } // namespace AtomSampleViewer

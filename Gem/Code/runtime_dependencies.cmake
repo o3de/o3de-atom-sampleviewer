@@ -24,6 +24,7 @@ set(GEM_DEPENDENCIES
     Gem::Atom_Feature_Common
     Gem::Atom_Bootstrap
     Gem::Atom_RHI_DX12.Private
+    Gem::Atom_RHI_Null.Private
     Gem::Atom_Component_DebugCamera
     Gem::AtomLyIntegration_CommonFeatures
     Gem::EMotionFX_Atom

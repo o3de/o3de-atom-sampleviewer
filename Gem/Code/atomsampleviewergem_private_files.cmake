@@ -107,6 +107,8 @@ set(FILES
     Source/DecalContainer.h
     Source/DepthOfFieldExampleComponent.h
     Source/DepthOfFieldExampleComponent.cpp
+    Source/DiffuseGIExampleComponent.cpp
+    Source/DiffuseGIExampleComponent.h
     Source/DynamicDrawExampleComponent.h
     Source/DynamicDrawExampleComponent.cpp
     Source/DynamicMaterialTestComponent.cpp
@@ -133,6 +135,9 @@ set(FILES
     Source/MultiViewSingleSceneAuxGeomExampleComponent.h
     Source/ParallaxMappingExampleComponent.cpp
     Source/ParallaxMappingExampleComponent.h
+    Source/Passes/RayTracingAmbientOcclusionPass.cpp
+    Source/Passes/RayTracingAmbientOcclusionPass.h
+    Source/ParallaxMappingExampleComponent.h
     Source/ProceduralSkinnedMesh.cpp
     Source/ProceduralSkinnedMesh.h
     Source/ProceduralSkinnedMeshUtils.cpp
@@ -153,6 +158,8 @@ set(FILES
     Source/SkinnedMeshExampleComponent.h
     Source/SsaoExampleComponent.cpp
     Source/SsaoExampleComponent.h
+    Source/SSRExampleComponent.cpp
+    Source/SSRExampleComponent.h
     Source/StreamingImageExampleComponent.cpp
     Source/StreamingImageExampleComponent.h
     Source/TonemappingExampleComponent.cpp
@@ -161,10 +168,6 @@ set(FILES
     Source/TransparencyExampleComponent.h
     Source/Utils/FileIOErrorHandler.cpp
     Source/Utils/FileIOErrorHandler.h
-    Source/DiffuseGIExampleComponent.cpp
-    Source/DiffuseGIExampleComponent.h
-    Source/SSRExampleComponent.cpp
-    Source/SSRExampleComponent.h
     Source/Utils/ImGuiAssetBrowser.cpp
     Source/Utils/ImGuiAssetBrowser.h
     Source/Utils/ImGuiHistogramQueue.cpp

@@ -360,10 +360,10 @@ namespace AtomSampleViewer
             CreatePipeline("Shaders/tonemappingexample/renderimage.azshader", "Shaders/tonemappingexample/renderimage_renderimagesrg.azsrg", m_srgAsset, m_pipelineState, m_drawListTag);
 
             // Set the input indices
-            m_imageInputIndex = m_srgAsset->GetLayout()->FindShaderInputImageIndex(Name("m_texture"));
-            m_positionInputIndex = m_srgAsset->GetLayout()->FindShaderInputConstantIndex(Name("m_position"));
-            m_sizeInputIndex = m_srgAsset->GetLayout()->FindShaderInputConstantIndex(Name("m_size"));
-            m_colorSpaceIndex = m_srgAsset->GetLayout()->FindShaderInputConstantIndex(Name("m_colorSpace"));
+            m_imageInputIndex.Reset();
+            m_positionInputIndex.Reset();
+            m_sizeInputIndex.Reset();
+            m_colorSpaceIndex.Reset();
         }
 
         m_drawImage.m_srg = RPI::ShaderResourceGroup::Create(m_srgAsset);

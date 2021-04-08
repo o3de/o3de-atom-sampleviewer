@@ -141,7 +141,7 @@ namespace AtomSampleViewer
             if (!m_lightingPresets.empty() && m_currentLightingPresetIndex == InvalidLightingPresetIndex)
             {
                 m_currentLightingPresetIndex = 0;
-                OnLightingPresetSelected(m_lightingPresets[0]);
+                OnLightingPresetSelected(m_lightingPresets[0], m_useAlternateSkybox);
             }
         }
         else
@@ -153,6 +153,7 @@ namespace AtomSampleViewer
     void CommonSampleComponentBase::ClearLightingPresets()
     {
         m_currentLightingPresetIndex = InvalidLightingPresetIndex;
+        m_useAlternateSkybox = false;
         m_lightingPresets.clear();
         m_lightingPresetsDirty = true;
     }
@@ -167,19 +168,44 @@ namespace AtomSampleViewer
             AZ_Warning("Lighting Preset", false, "Lighting presets must be loaded before calling ImGui.");
             return;
         }
-
-        AZStd::vector<const char*> items;
-        for (const auto& lightingPreset : m_lightingPresets)
+        
+        AZStd::string selectedPresetLabel = m_lightingPresets[m_currentLightingPresetIndex].m_displayName;
+        if (m_useAlternateSkybox)
         {
-            items.push_back(lightingPreset.m_displayName.c_str());
+            selectedPresetLabel += " (Alt)";
         }
-        if (ScriptableImGui::Combo("Lighting Preset##SampleBase", &m_currentLightingPresetIndex, items.begin(), aznumeric_cast<int>(items.size())))
+
+        // Note that before we were using ScriptableImGui::Combo but there were issues (at least on some systems) when the number of items
+        // exceeded the max visible item count (which defaults to 8 in ImGui). In this case you'd expect to see a scroll bar in the combo box,
+        // but the combo box just never popped up. This only happened in profile, not debug builds. It seems to be a bug in ImGui. So by using
+        // BeginCombo with ImGuiComboFlags_HeightLargest, we just make sure the combo box is always big enough for all the items.
+        if (ScriptableImGui::BeginCombo("Lighting Preset##SampleBase", selectedPresetLabel.c_str(), ImGuiComboFlags_HeightLargest))
         {
-            OnLightingPresetSelected(m_lightingPresets[m_currentLightingPresetIndex]);
+            for (uint32_t i = 0; i < m_lightingPresets.size(); ++i)
+            {
+                AZStd::string& name = m_lightingPresets[i].m_displayName;
+                AZStd::string nameForAlternateSkybox = name + " (Alt)";
+
+                // Each LightingPreset can have an alternate skybox (usually a blurred version of the primary skybox), so we expose both here as separate items in the UI.
+
+                bool useThisPresetWithNormalSkybox = (i == m_currentLightingPresetIndex) && !m_useAlternateSkybox;
+                bool useThisPresetWithAlternateSkybox = (i == m_currentLightingPresetIndex) && m_useAlternateSkybox;
+
+                useThisPresetWithNormalSkybox = ScriptableImGui::Selectable(name.c_str(), useThisPresetWithNormalSkybox);
+                useThisPresetWithAlternateSkybox = ScriptableImGui::Selectable(nameForAlternateSkybox.c_str(), useThisPresetWithAlternateSkybox);
+
+                if (useThisPresetWithNormalSkybox || useThisPresetWithAlternateSkybox)
+                {
+                    m_currentLightingPresetIndex = i;
+                    m_useAlternateSkybox = useThisPresetWithAlternateSkybox;
+                    OnLightingPresetSelected(m_lightingPresets[i], m_useAlternateSkybox);
+                }
+            }
+            ScriptableImGui::EndCombo();
         }
     }
 
-    void CommonSampleComponentBase::OnLightingPresetSelected(const AZ::Render::LightingPreset& preset)
+    void CommonSampleComponentBase::OnLightingPresetSelected(const AZ::Render::LightingPreset& preset, bool useAlternateSkybox)
     {
         AZ::Render::SkyBoxFeatureProcessorInterface* skyboxFeatureProcessor = AZ::RPI::Scene::GetFeatureProcessorForEntityContextId<AZ::Render::SkyBoxFeatureProcessorInterface>(m_entityContextId);
         AZ::Render::PostProcessFeatureProcessorInterface* postProcessFeatureProcessor = AZ::RPI::Scene::GetFeatureProcessorForEntityContextId<AZ::Render::PostProcessFeatureProcessorInterface>(m_entityContextId);
@@ -197,7 +223,10 @@ namespace AtomSampleViewer
             exposureControlSettingInterface,
             directionalLightFeatureProcessor,
             cameraConfig,
-            m_lightHandles);
+            m_lightHandles,
+            nullptr,
+            AZ::RPI::MaterialPropertyIndex{},
+            useAlternateSkybox);
     }
 
     void CommonSampleComponentBase::OnTransformChanged(const AZ::Transform&, const AZ::Transform&)

@@ -103,10 +103,10 @@ namespace AtomSampleViewer
         AZ::Data::Asset<AZ::RPI::ShaderResourceGroupAsset> m_srgAsset;
 
         // shader input indices
-        AZ::RHI::ShaderInputImageIndex m_imageInputIndex;
-        AZ::RHI::ShaderInputConstantIndex m_positionInputIndex;
-        AZ::RHI::ShaderInputConstantIndex m_sizeInputIndex;
-        AZ::RHI::ShaderInputConstantIndex m_colorSpaceIndex;
+        AZ::RHI::ShaderInputNameIndex m_imageInputIndex = "m_texture";
+        AZ::RHI::ShaderInputNameIndex m_positionInputIndex = "m_position";
+        AZ::RHI::ShaderInputNameIndex m_sizeInputIndex = "m_size";
+        AZ::RHI::ShaderInputNameIndex m_colorSpaceIndex = "m_colorSpace";
 
         // post processing feature processor
         AZ::Render::PostProcessFeatureProcessorInterface* m_postProcessFeatureProcessor = nullptr;

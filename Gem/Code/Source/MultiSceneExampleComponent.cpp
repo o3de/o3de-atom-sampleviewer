@@ -93,19 +93,14 @@ namespace AtomSampleViewer
             {
                 return;
             }
-            bool needCompile = false;
-            RHI::ShaderInputConstantIndex timeIndex = srg->FindShaderInputConstantIndex(Name{ "m_time" });
-            if (timeIndex.IsValid())
-            {
-                srg->SetConstant(timeIndex, aznumeric_cast<float>(m_simulateTime));
-                needCompile = true;
-            }
-            RHI::ShaderInputConstantIndex deltaTimeIndex = srg->FindShaderInputConstantIndex(Name{ "m_deltaTime" });
-            if (deltaTimeIndex.IsValid())
-            {
-                srg->SetConstant(deltaTimeIndex, m_deltaTime);
-                needCompile = true;
-            }
+
+            RHI::ShaderInputNameIndex timeIndex = "m_time";
+            RHI::ShaderInputNameIndex deltaTimeIndex = "m_deltaTime";
+
+            srg->SetConstant(timeIndex, aznumeric_cast<float>(m_simulateTime));
+            srg->SetConstant(deltaTimeIndex, m_deltaTime);
+
+            bool needCompile = timeIndex.IsValid() || deltaTimeIndex.IsValid();
 
             if (needCompile)
             {

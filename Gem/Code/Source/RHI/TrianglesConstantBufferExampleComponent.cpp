@@ -123,10 +123,11 @@ namespace AtomSampleViewer
 
             AZ::RHI::BufferMapResponse mapResponse;
             AZ::RHI::ResultCode resultCode = m_constantBufferPool->MapBuffer(mapRequest, mapResponse);
-            AZ_Assert(resultCode == AZ::RHI::ResultCode::Success, "Failed to map constant buffer");
-
-            memcpy(mapResponse.m_data, data + triangleIdx, sizeof(InstanceInfo));
-            m_constantBufferPool->UnmapBuffer(*mapRequest.m_buffer);
+            if (mapResponse.m_data)
+            {
+                memcpy(mapResponse.m_data, data + triangleIdx, sizeof(InstanceInfo));
+                m_constantBufferPool->UnmapBuffer(*mapRequest.m_buffer);
+            }
         }
     }
 
@@ -142,10 +143,12 @@ namespace AtomSampleViewer
 
             AZ::RHI::BufferMapResponse mapResponse;
             AZ::RHI::ResultCode resultCode = m_constantBufferPool->MapBuffer(mapRequest, mapResponse);
-            AZ_Assert(resultCode == AZ::RHI::ResultCode::Success, "Failed to map constant buffer");
 
-            memcpy(mapResponse.m_data, data + triangleIdx, sizeof(InstanceInfo));
-            m_constantBufferPool->UnmapBuffer(*mapRequest.m_buffer);
+            if(mapResponse.m_data)
+            {
+                memcpy(mapResponse.m_data, data + triangleIdx, sizeof(InstanceInfo));
+                m_constantBufferPool->UnmapBuffer(*mapRequest.m_buffer);
+            }
         }
     }
 

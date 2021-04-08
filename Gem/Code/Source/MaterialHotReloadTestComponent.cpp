@@ -124,10 +124,9 @@ namespace AtomSampleViewer
     {
         auto io = AZ::IO::LocalFileIO::GetInstance();
 
-        AZStd::string appRoot;
-        AzFramework::ApplicationRequests::Bus::BroadcastResult(appRoot, &AzFramework::ApplicationRequests::GetAppRoot);
+        auto projectPath = AZ::Utils::GetProjectPath();
         AZStd::string mainTestFolder;
-        AzFramework::StringFunc::Path::Join(appRoot.c_str(), "AtomSampleViewer/Materials/HotReloadTest/", mainTestFolder);
+        AzFramework::StringFunc::Path::Join(projectPath.c_str(), "Materials/HotReloadTest/", mainTestFolder);
         AzFramework::StringFunc::Path::Join(mainTestFolder.c_str(), "TestData/", m_testDataFolder);
         if (!io->Exists(m_testDataFolder.c_str()))
         {

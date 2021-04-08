@@ -16,14 +16,29 @@
 
 if(PAL_TRAIT_BUILD_HOST_TOOLS AND PAL_TRAIT_BUILD_TESTS_SUPPORTED)
     ly_add_pytest(
-        NAME AtomSampleViewer::PythonTests
-        PATH ${CMAKE_CURRENT_LIST_DIR}/Automated/
+        NAME AtomSampleViewer::PythonTestsMain
+        PATH ${CMAKE_CURRENT_LIST_DIR}/Automated/test_suites/main/
+        TEST_REQUIRES gpu
+        TEST_SUITE main
+        TEST_SERIAL
+        TIMEOUT 1200
+        RUNTIME_DEPENDENCIES
+            AssetProcessor
+            AssetProcessorBatch
+            AtomSampleViewerStandalone
+            AtomSampleViewer.GameLauncher
+            AtomSampleViewer.Assets
+    )
+    ly_add_pytest(
+        NAME AtomSampleViewer::PythonTestsMainPeriodic
+        PATH ${CMAKE_CURRENT_LIST_DIR}/Automated/test_suites/periodic/
         TEST_REQUIRES gpu
         TEST_SUITE periodic
         TEST_SERIAL
-        TIMEOUT 3600
+        TIMEOUT 1200
         RUNTIME_DEPENDENCIES
             AssetProcessor
+            AssetProcessorBatch
             AtomSampleViewerStandalone
             AtomSampleViewer.GameLauncher
             AtomSampleViewer.Assets

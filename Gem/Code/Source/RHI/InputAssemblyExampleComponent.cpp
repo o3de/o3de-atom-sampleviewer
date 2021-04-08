@@ -370,30 +370,22 @@ namespace AtomSampleViewer
             AZ_UNUSED(scopeData);
             {
                 const RHI::BufferView* inputAssemblyBufferView = context.GetBufferView(RHI::AttachmentId{ InputAssembly::InputAssemblyBufferAttachmentId });
-
-                m_streamBufferView[0] =
+                if (inputAssemblyBufferView)
                 {
-                    inputAssemblyBufferView->GetBuffer(),
-                    0,
-                    sizeof(BufferData),
-                    sizeof(BufferData::value_type)
-                };
+                    m_streamBufferView[0] = {inputAssemblyBufferView->GetBuffer(), 0, sizeof(BufferData), sizeof(BufferData::value_type)};
 
-                RHI::ValidateStreamBufferViews(m_inputStreamLayout, AZStd::array_view<RHI::StreamBufferView>(&m_streamBufferView[0], 1));
+                    RHI::ValidateStreamBufferViews(m_inputStreamLayout, AZStd::array_view<RHI::StreamBufferView>(&m_streamBufferView[0], 1));
+                }
             }
 
             {
                 const RHI::BufferView* inputAssemblyBufferView = context.GetBufferView(RHI::AttachmentId{ InputAssembly::ImportedInputAssemblyBufferAttachmentId });
-
-                m_streamBufferView[1] =
+                if (inputAssemblyBufferView)
                 {
-                    inputAssemblyBufferView->GetBuffer(),
-                    0,
-                    sizeof(BufferData),
-                    sizeof(BufferData::value_type)
-                };
+                    m_streamBufferView[1] = {inputAssemblyBufferView->GetBuffer(), 0, sizeof(BufferData), sizeof(BufferData::value_type)};
 
-                RHI::ValidateStreamBufferViews(m_inputStreamLayout, AZStd::array_view<RHI::StreamBufferView>(&m_streamBufferView[1], 1));
+                    RHI::ValidateStreamBufferViews(m_inputStreamLayout, AZStd::array_view<RHI::StreamBufferView>(&m_streamBufferView[1], 1));
+                }
             }
         };
 

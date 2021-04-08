@@ -56,6 +56,9 @@ namespace AtomSampleViewer
 
     void SsaoExampleComponent::Activate()
     {
+        RHI::Ptr<RHI::Device> device = RHI::RHISystemInterface::Get()->GetDevice();
+        m_rayTracingEnabled = device->GetFeatures().m_rayTracing;
+
         AZ::TickBus::Handler::BusConnect();
         AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusConnect();
         ActivateSsaoPipeline();
@@ -63,6 +66,8 @@ namespace AtomSampleViewer
         ActivateModel();
         ActivatePostProcessSettings();
         m_imguiSidebar.Activate();
+
+        SwitchAOType();
     }
 
     void SsaoExampleComponent::Deactivate()
@@ -123,6 +128,29 @@ namespace AtomSampleViewer
         ssaoPipelineDesc.m_rootPassTemplate = "SsaoPipeline";
 
         m_ssaoPipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(ssaoPipelineDesc, *m_windowContext);
+
+        if (m_rayTracingEnabled)
+        {
+            RPI::PassHierarchyFilter passFilter({ssaoPipelineDesc.m_name, "RayTracingAmbientOcclusionPass"});
+            const AZStd::vector<RPI::Pass*>& passes = RPI::PassSystemInterface::Get()->FindPasses(passFilter);
+            if (!passes.empty())
+            {
+                m_RTAOPass = azrtti_cast<Render::RayTracingAmbientOcclusionPass*>(passes.front());
+                AZ_Assert(m_RTAOPass, "Couldn't find the RayTracingAmbientOcclusionPass from the SsaoPipeline");
+            }
+        }
+        else
+        {
+            m_aoType = AmbientOcclusionType::SSAO;
+        }
+
+        RPI::PassHierarchyFilter passFilter({ssaoPipelineDesc.m_name, "SelectorPass"});
+        const AZStd::vector<RPI::Pass*>& passes = RPI::PassSystemInterface::Get()->FindPasses(passFilter);
+        if (!passes.empty())
+        {
+            m_selector = azrtti_cast<RPI::SelectorPass*>(passes.front());
+            AZ_Assert(m_selector, "Couldn't find the SelectorPass from the SsaoPipeline");
+        }
     }
 
     void SsaoExampleComponent::DestroySsaoPipeline()
@@ -220,55 +248,116 @@ namespace AtomSampleViewer
     {
         ScriptableImGui::ScopedNameContext context{ "SSAO" };
 
-        ImGui::Text("SSAO Params");
-
-        bool enabled = m_ssaoSettings->GetEnabled();
-        if (ScriptableImGui::Checkbox("Enable", &enabled))
+        // only enable selecting AO type if ray tracing is enabled
+        if (m_rayTracingEnabled)
         {
-            m_ssaoSettings->SetEnabled(enabled);
-            m_ssaoSettings->OnConfigChanged();
+            ImGui::Text("Ambient Occlusion");
+            bool aoTypeChanged = false;
+            aoTypeChanged = ScriptableImGui::RadioButton("Screen space AO", &m_aoType, AmbientOcclusionType::SSAO);
+            aoTypeChanged = aoTypeChanged | ScriptableImGui::RadioButton("Ray tracing AO", &m_aoType, AmbientOcclusionType::RTAO);
+
+            if (aoTypeChanged)
+            {
+                SwitchAOType();
+            }
+
+            ImGui::NewLine();
         }
 
-        float strength = m_ssaoSettings->GetStrength();
-        if (ScriptableImGui::SliderFloat("SSAO Strength", &strength, 0.0f, 2.0f))
+        if (m_aoType == AmbientOcclusionType::SSAO)
         {
-            m_ssaoSettings->SetStrength(strength);
-            m_ssaoSettings->OnConfigChanged();
+            ImGui::Text("SSAO Params");
+
+            bool enabled = m_ssaoSettings->GetEnabled();
+            if (ScriptableImGui::Checkbox("Enable", &enabled))
+            {
+                m_ssaoSettings->SetEnabled(enabled);
+                m_ssaoSettings->OnConfigChanged();
+            }
+
+            float strength = m_ssaoSettings->GetStrength();
+            if (ScriptableImGui::SliderFloat("SSAO Strength", &strength, 0.0f, 2.0f))
+            {
+                m_ssaoSettings->SetStrength(strength);
+                m_ssaoSettings->OnConfigChanged();
+            }
+
+            bool blurEnabled = m_ssaoSettings->GetEnableBlur();
+            if (ScriptableImGui::Checkbox("Enable Blur", &blurEnabled))
+            {
+                m_ssaoSettings->SetEnableBlur(blurEnabled);
+                m_ssaoSettings->OnConfigChanged();
+            }
+
+            float blurConstFalloff = m_ssaoSettings->GetBlurConstFalloff();
+            if (ScriptableImGui::SliderFloat("Blur Strength", &blurConstFalloff, 0.0f, 0.95f))
+            {
+                m_ssaoSettings->SetBlurConstFalloff(blurConstFalloff);
+                m_ssaoSettings->OnConfigChanged();
+            }
+
+            float blurDepthFalloffStrength = m_ssaoSettings->GetBlurDepthFalloffStrength();
+            if (ScriptableImGui::SliderFloat("Blur Sharpness", &blurDepthFalloffStrength, 0.0f, 400.0f))
+            {
+                m_ssaoSettings->SetBlurDepthFalloffStrength(blurDepthFalloffStrength);
+                m_ssaoSettings->OnConfigChanged();
+            }
+
+            float blurDepthFalloffThreshold = m_ssaoSettings->GetBlurDepthFalloffThreshold();
+            if (ScriptableImGui::SliderFloat("Blur Edge Threshold", &blurDepthFalloffThreshold, 0.0f, 1.0f))
+            {
+                m_ssaoSettings->SetBlurDepthFalloffThreshold(blurDepthFalloffThreshold);
+                m_ssaoSettings->OnConfigChanged();
+            }
+
+            bool downsampleEnabled = m_ssaoSettings->GetEnableDownsample();
+            if (ScriptableImGui::Checkbox("Enable Downsample", &downsampleEnabled))
+            {
+                m_ssaoSettings->SetEnableDownsample(downsampleEnabled);
+                m_ssaoSettings->OnConfigChanged();
+            }
+        }
+        else if (m_aoType == AmbientOcclusionType::RTAO)
+        {
+            ImGui::Text("RTAO Params");
+            float rayNear = m_RTAOPass->GetRayExtentMin();
+            if (ScriptableImGui::SliderFloat("Ray near distance", &rayNear, 0.0f, 0.5f))
+            {
+                m_RTAOPass->SetRayExtentMin(rayNear);
+            }
+            float rayFar = m_RTAOPass->GetRayExtentMax();
+            if (ScriptableImGui::SliderFloat("Ray far distance", &rayFar, 0.0f, 1.0f))
+            {
+                if (rayFar < rayNear)
+                {
+                    rayFar = rayNear + 0.1f;
+                }
+                m_RTAOPass->SetRayExtentMax(rayFar);
+            }
+            int32_t maxNumberRays = m_RTAOPass->GetRayNumberPerPixel();
+            if (ScriptableImGui::SliderInt("Number of rays", &maxNumberRays, 1, 30))
+            {
+                m_RTAOPass->SetRayNumberPerPixel(maxNumberRays);
+            }
+        }
+    }
+    
+    void SsaoExampleComponent::SwitchAOType()
+    {
+        if (m_aoType == AmbientOcclusionType::SSAO)
+        {
+            m_selector->Connect(1, 0);
+        }
+        else if (m_aoType == AmbientOcclusionType::RTAO)
+        {
+            m_selector->Connect(0, 0);
         }
 
-        bool blurEnabled = m_ssaoSettings->GetEnableBlur();
-        if (ScriptableImGui::Checkbox("Enable Blur", &blurEnabled))
+        m_ssaoSettings->SetEnabled(m_aoType == AmbientOcclusionType::SSAO);
+        m_ssaoSettings->OnConfigChanged();
+        if (m_RTAOPass)
         {
-            m_ssaoSettings->SetEnableBlur(blurEnabled);
-            m_ssaoSettings->OnConfigChanged();
-        }
-
-        float blurConstFalloff = m_ssaoSettings->GetBlurConstFalloff();
-        if (ScriptableImGui::SliderFloat("Blur Strength", &blurConstFalloff, 0.0f, 0.95f))
-        {
-            m_ssaoSettings->SetBlurConstFalloff(blurConstFalloff);
-            m_ssaoSettings->OnConfigChanged();
-        }
-
-        float blurDepthFalloffStrength = m_ssaoSettings->GetBlurDepthFalloffStrength();
-        if (ScriptableImGui::SliderFloat("Blur Sharpness", &blurDepthFalloffStrength, 0.0f, 400.0f))
-        {
-            m_ssaoSettings->SetBlurDepthFalloffStrength(blurDepthFalloffStrength);
-            m_ssaoSettings->OnConfigChanged();
-        }
-
-        float blurDepthFalloffThreshold = m_ssaoSettings->GetBlurDepthFalloffThreshold();
-        if (ScriptableImGui::SliderFloat("Blur Edge Threshold", &blurDepthFalloffThreshold, 0.0f, 1.0f))
-        {
-            m_ssaoSettings->SetBlurDepthFalloffThreshold(blurDepthFalloffThreshold);
-            m_ssaoSettings->OnConfigChanged();
-        }
-
-        bool downsampleEnabled = m_ssaoSettings->GetEnableDownsample();
-        if (ScriptableImGui::Checkbox("Enable Downsample", &downsampleEnabled))
-        {
-            m_ssaoSettings->SetEnableDownsample(downsampleEnabled);
-            m_ssaoSettings->OnConfigChanged();
+            m_RTAOPass->SetEnabled(m_aoType == AmbientOcclusionType::RTAO);
         }
     }
 
