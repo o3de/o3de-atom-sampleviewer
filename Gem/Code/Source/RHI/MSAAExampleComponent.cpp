@@ -182,7 +182,7 @@ namespace AtomSampleViewer
         const Name objectMatrixConstantId{ "m_objectMatrix" };
         FindShaderInputIndex(&m_objectMatrixConstantIndex, m_triangleShaderResourceGroup, objectMatrixConstantId, SampleName);
 
-        bool success = m_triangleShaderResourceGroup->SetConstant(m_objectMatrixConstantIndex, AZ::Matrix4x4::CreateIdentity());
+        [[maybe_unused]] bool success = m_triangleShaderResourceGroup->SetConstant(m_objectMatrixConstantIndex, AZ::Matrix4x4::CreateIdentity());
         AZ_Warning("MSAAExampleComponent", success, "Failed to set SRG Constant m_objectMatrix");
         m_triangleShaderResourceGroup->Compile();
     }
@@ -264,7 +264,7 @@ namespace AtomSampleViewer
         RHI::RenderAttachmentLayoutBuilder attachmentsBuilder;
         attachmentsBuilder.AddSubpass()
             ->RenderTargetAttachment(m_outputFormat, properties.m_resolve);
-        RHI::ResultCode result = attachmentsBuilder.End(pipelineStateDescriptor.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
+        [[maybe_unused]] RHI::ResultCode result = attachmentsBuilder.End(pipelineStateDescriptor.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
         AZ_Assert(result == RHI::ResultCode::Success, "Failed to create render attachment layout");
 
         pipelineStateDescriptor.m_renderStates.m_multisampleState.m_samples = properties.m_samplesCount;
@@ -402,7 +402,7 @@ namespace AtomSampleViewer
         RHI::RenderAttachmentLayoutBuilder attachmentsBuilder;
         attachmentsBuilder.AddSubpass()
             ->RenderTargetAttachment(m_outputFormat);
-        RHI::ResultCode result = attachmentsBuilder.End(pipelineStateDescriptor.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
+        [[maybe_unused]] RHI::ResultCode result = attachmentsBuilder.End(pipelineStateDescriptor.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
         AZ_Assert(result == RHI::ResultCode::Success, "Failed to create render attachment layout");
 
         m_customResolveMSAAPipelineState = m_customMSAAResolveShader->AcquirePipelineState(pipelineStateDescriptor);

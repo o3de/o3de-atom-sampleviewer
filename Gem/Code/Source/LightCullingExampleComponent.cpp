@@ -498,7 +498,6 @@ namespace AtomSampleViewer
         m_diskLightFeatureProcessor->SetDirection(light.m_lightHandle, light.m_direction);
         m_diskLightFeatureProcessor->SetLightEmitsBothDirections(light.m_lightHandle, m_isDiskDoubleSided);
 
-        float attenuationRadius = settings.m_enableAutomaticFalloff ? AutoCalculateAttenuationRadius(light.m_color, settings.m_intensity) : settings.m_attenuationRadius;
         m_diskLightFeatureProcessor->SetAttenuationRadius(light.m_lightHandle, m_settings[(int)LightType::Disk].m_attenuationRadius);
     }
 
@@ -798,7 +797,7 @@ namespace AtomSampleViewer
                         trianglePass->SetEnabled(m_heatmapOpacity > 0.0f);
                         Data::Instance<ShaderResourceGroup> srg = trianglePass->GetShaderResourceGroup();
                         RHI::ShaderInputConstantIndex opacityIndex = srg->FindShaderInputConstantIndex(AZ::Name("m_heatmapOpacity"));
-                        bool setOk = srg->SetConstant<float>(opacityIndex, m_heatmapOpacity);
+                        [[maybe_unused]] bool setOk = srg->SetConstant<float>(opacityIndex, m_heatmapOpacity);
                         AZ_Warning("LightCullingExampleComponent", setOk, "Unable to set heatmap opacity");
                     }
                 }

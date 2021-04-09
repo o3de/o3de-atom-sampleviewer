@@ -88,7 +88,7 @@ namespace AtomSampleViewer
 
     void SSRExampleComponent::CreateModels()
     {
-        AZ::Render::MeshFeatureProcessorInterface* meshFeatureProcessor = GetMeshFeatureProcessor();
+        GetMeshFeatureProcessor();
 
         // statue
         {

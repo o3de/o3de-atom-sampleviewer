@@ -35,8 +35,3 @@ def clean_atomsampleviewer_logs(request, workspace):
                                del_files=True,
                                del_dirs=False)
 
-
-@pytest.fixture(scope="function", autouse=True)
-def setup_atomsampleviewer_assets(project, workspace):
-    """Sets up bootstrap.cfg to target AtomSampleViewer before starting the tests (prevents AssetProcessor errors)."""
-    helpers.setup_bootstrap_project(workspace, project)

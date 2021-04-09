@@ -120,7 +120,7 @@ namespace AtomSampleViewer
             ->RenderTargetAttachment(RHI::Format::R8G8B8A8_UNORM_SRGB)
             ->RenderTargetAttachment(RHI::Format::R16G16_FLOAT)
             ->RenderTargetAttachment(RHI::Format::R32_FLOAT);
-        RHI::ResultCode result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
+        [[maybe_unused]] RHI::ResultCode [[maybe_unused]] result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
         AZ_Assert(result == RHI::ResultCode::Success, "Failed to create render attachment layout");
 
         m_pipelineStates[0] = shader->AcquirePipelineState(pipelineDesc);
@@ -154,7 +154,7 @@ namespace AtomSampleViewer
         RHI::RenderAttachmentLayoutBuilder attachmentsBuilder;
         attachmentsBuilder.AddSubpass()
             ->RenderTargetAttachment(m_outputFormat);
-        RHI::ResultCode result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
+        [[maybe_unused]] RHI::ResultCode result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
         AZ_Assert(result == RHI::ResultCode::Success, "Failed to create render attachment layout");
 
         m_pipelineStates[1] = shader->AcquirePipelineState(pipelineDesc);
