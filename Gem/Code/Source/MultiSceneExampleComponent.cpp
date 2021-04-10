@@ -54,8 +54,9 @@ namespace AtomSampleViewer
         m_entityContext->InitContext();
 
         // Create the scene
-        Outcome<AzFramework::Scene*, AZStd::string> createSceneOutcome = Failure<AZStd::string>("SceneSystemRequests bus not responding.");
-        AzFramework::SceneSystemRequestBus::BroadcastResult(createSceneOutcome, &AzFramework::SceneSystemRequests::CreateScene, m_sceneName);
+        auto sceneSystem = AzFramework::SceneSystemInterface::Get();
+        AZ_Assert(sceneSystem, "Unable to retrieve scene system.");
+        Outcome<AzFramework::Scene*, AZStd::string> createSceneOutcome = sceneSystem->CreateScene(m_sceneName);
         AZ_Assert(createSceneOutcome, "%s", createSceneOutcome.GetError().data());
         m_frameworkScene = createSceneOutcome.GetValue();
         m_frameworkScene->SetSubsystem<AzFramework::EntityContext::SceneStorageType>(m_entityContext.get());
@@ -349,8 +350,10 @@ namespace AtomSampleViewer
         m_scene->Deactivate();
         m_scene->RemoveRenderPipeline(m_pipeline->GetId());
         RPI::RPISystemInterface::Get()->UnregisterScene(m_scene);
-        bool sceneRemovedSuccessfully = false;
-        AzFramework::SceneSystemRequestBus::BroadcastResult(sceneRemovedSuccessfully, &AzFramework::SceneSystemRequests::RemoveScene, m_sceneName);
+        auto sceneSystem = AzFramework::SceneSystemInterface::Get();
+        AZ_Assert(sceneSystem, "Scene system wasn't found to remove scene '%s' from.", m_sceneName.c_str());
+        [[maybe_unused]] bool sceneRemovedSuccessfully = sceneSystem->RemoveScene(m_sceneName);
+        AZ_Assert(sceneRemovedSuccessfully, "Unable to remove scene '%s'.", m_sceneName.c_str());
         m_scene = nullptr;
 
         m_windowContext->Shutdown();
