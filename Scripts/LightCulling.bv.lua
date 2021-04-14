@@ -14,7 +14,6 @@
 
 function ResetEntityCounts()
     SetImguiValue('Point Lights/Point light count', 0)
-    SetImguiValue('Spot Lights/Spot light count', 0)
     SetImguiValue('Decals/Decal count', 0)
     SetImguiValue('Disk Lights/Disk light count', 0)
     SetImguiValue('Capsule Lights/Capsule light count', 0)
@@ -36,18 +35,6 @@ function TakeScreenshotPointLights()
     IdleFrames(1) 
 
     CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_pointlights.ppm')
-end
-
-function TakeScreenshotSpotLights()
-
-    ResetEntityCounts()
-
-    NoClipCameraController_SetFov(DegToRad(90))
-    SetImguiValue('Spot Lights/Spot light count', 150)
-    SetImguiValue('Spot Lights/Spot Intensity', 70)
-    
-    IdleFrames(1) 
-    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_spotlights.ppm')
 end
 
 function TakeScreenshotDiskLights()
@@ -129,7 +116,6 @@ ResizeViewport(1600, 900)
 EnableOnlyTestHeatmap()
 
 TakeScreenshotPointLights()
-TakeScreenshotSpotLights()
 TakeScreenshotDiskLights()
 TakeScreenshotCapsuleLights()
 TakeScreenshotQuadLights()

@@ -16,17 +16,17 @@
 //[GFX TODO][ATOM-449] - Remove this file once we switch to unified launcher
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-@interface IosLumberyardApplicationDelegate : NSObject<UIApplicationDelegate>
+@interface IosO3DEApplicationDelegate : NSObject<UIApplicationDelegate>
 {
 }
-@end    // IosLumberyardApplicationDelegate Interface
+@end    // IosO3DEApplicationDelegate Interface
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-@implementation IosLumberyardApplicationDelegate
+@implementation IosO3DEApplicationDelegate
 
 extern int ios_main();
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-- (void)launchLumberyardApplication
+- (void)launchO3DEApplication
 {
     const int exitCode = ios_main();
     exit(exitCode);
@@ -35,7 +35,7 @@ extern int ios_main();
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 - (BOOL)application:(UIApplication*)application didFinishLaunchingWithOptions:(NSDictionary*)launchOptions
 {
-    [self performSelector:@selector(launchLumberyardApplication) withObject:nil afterDelay:0.0];
+    [self performSelector:@selector(launchO3DEApplication) withObject:nil afterDelay:0.0];
     return YES;
 }
 

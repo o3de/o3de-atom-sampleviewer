@@ -14,8 +14,8 @@
 
 #include <CommonSampleComponentBase.h>
 #include <Atom/Feature/CoreLights/DirectionalLightFeatureProcessorInterface.h>
+#include <Atom/Feature/CoreLights/DiskLightFeatureProcessorInterface.h>
 #include <Atom/Feature/CoreLights/ShadowConstants.h>
-#include <Atom/Feature/CoreLights/SpotLightFeatureProcessorInterface.h>
 #include <Atom/Feature/Mesh/MeshFeatureProcessor.h>
 #include <Atom/RPI.Reflect/Material/MaterialAsset.h>
 #include <Atom/RPI.Reflect/Model/ModelAsset.h>
@@ -49,30 +49,30 @@ namespace AtomSampleViewer
 
     private:
         using DirectionalLightHandle = AZ::Render::DirectionalLightFeatureProcessorInterface::LightHandle;
-        using SpotLightHandle = AZ::Render::SpotLightFeatureProcessorInterface::LightHandle;
+        using DiskLightHandle = AZ::Render::DiskLightFeatureProcessorInterface::LightHandle;
 
-        class SpotLight
+        class DiskLight
         {
         public:
-            SpotLight() = delete;
-            explicit SpotLight(const AZ::Color& color, const AZ::Vector3& position,
+            DiskLight() = delete;
+            explicit DiskLight(const AZ::Color& color, const AZ::Vector3& position,
                 const AZ::Vector3& direction, AZ::Render::ShadowmapSize shadowmapSize)
                 : m_color(color)
                 , m_position(position)
                 , m_direction(direction)
                 , m_shadowmapSize(shadowmapSize)
             {}
-            ~SpotLight() = default;
+            ~DiskLight() = default;
 
             const AZ::Color m_color;
             const AZ::Vector3 m_position;
             const AZ::Vector3 m_direction;
             const AZ::Render::ShadowmapSize m_shadowmapSize;
-            SpotLightHandle m_handle;
+            DiskLightHandle m_handle;
         };
 
-        static constexpr int SpotLightCountMax = 100;
-        static constexpr int SpotLightCountDefault = 10;
+        static constexpr int DiskLightCountMax = 100;
+        static constexpr int DiskLightCountDefault = 10;
         static constexpr float CutoffIntensity = 0.5f;
 
         static const AZ::Color DirectionalLightColor;
@@ -89,18 +89,18 @@ namespace AtomSampleViewer
         void ClearMeshes();
         void SpawnModelsIn2DGrid(uint32_t numAlongXAxis, uint32_t numAlongYAxis);
         void SetupLights();
-        void UpdateSpotLightCount(uint16_t count);
+        void UpdateDiskLightCount(uint16_t count);
 
         void DrawSidebar();
-        void UpdateSpotLightShadowmapSize();
+        void UpdateDiskLightShadowmapSize();
 
         float m_originalFarClipDistance = 0.f;
 
         // lights
         AZ::Render::DirectionalLightFeatureProcessorInterface* m_directionalLightFeatureProcessor = nullptr;
-        AZ::Render::SpotLightFeatureProcessorInterface* m_spotLightFeatureProcessor = nullptr;
+        AZ::Render::DiskLightFeatureProcessorInterface* m_diskLightFeatureProcessor = nullptr;
         DirectionalLightHandle m_directionalLightHandle;
-        AZStd::vector<SpotLight> m_spotLights;
+        AZStd::vector<DiskLight> m_diskLights;
 
         // models
         AZStd::vector<AZ::Render::MeshFeatureProcessorInterface::MeshHandle> m_meshHandles;
@@ -111,8 +111,8 @@ namespace AtomSampleViewer
         float m_directionalLightPitch = -1.22;
         float m_directionalLightYaw = 0.7f;
         float m_directionalLightIntensity = 4.f;
-        float m_spotLightIntensity = 2000.f;
-        int m_spotLightCount = 0;
+        float m_diskLightIntensity = 2000.f;
+        int m_diskLightCount = 0;
 
         // Shadowmap
         static const AZ::Render::ShadowmapSize s_shadowmapSizes[];
@@ -123,8 +123,8 @@ namespace AtomSampleViewer
         int m_directionalLightShadowmapSizeIndex = 0;
         int m_cascadeCount = 0;
         float m_ratioLogarithmUniform = 0.f;
-        AZ::Render::ShadowmapSize m_spotLightShadowmapSize = AZ::Render::ShadowmapSize::None;
-        bool m_spotLightShadowEnabled = true;
+        AZ::Render::ShadowmapSize m_diskLightShadowmapSize = AZ::Render::ShadowmapSize::None;
+        bool m_diskLightShadowEnabled = true;
 
         // Edge-softening of directional light shadows
         static const AZ::Render::ShadowFilterMethod s_shadowFilterMethods[];

@@ -31,7 +31,7 @@ int main(int argc, char** argv)
     {
         UIApplicationMain(argc,
                       argv,
-                      @"IosLumberyardApplication",
-                      @"IosLumberyardApplicationDelegate");
+                      @"IosO3DEApplication",
+                      @"IosO3DEApplicationDelegate");
     }
 }

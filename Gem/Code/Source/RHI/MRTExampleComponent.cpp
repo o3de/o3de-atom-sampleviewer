@@ -74,7 +74,7 @@ namespace AtomSampleViewer
     }
 
     void MRTExampleComponent::Activate()
-    {   
+    {
         // Init buffers & views
         CreateInputAssemblyBuffersAndViews();
         // Init render targets
@@ -85,7 +85,7 @@ namespace AtomSampleViewer
 
         CreateRenderTargetScope();
         CreateScreenScope();
-        
+
         AZ::RHI::RHISystemNotificationBus::Handler::BusConnect();
     }
 
@@ -110,7 +110,7 @@ namespace AtomSampleViewer
         auto shader = LoadShader(MRTTargetShaderFilePath, sampleName);
         if (shader == nullptr)
             return;
-        
+
         RHI::PipelineStateDescriptorForDraw pipelineDesc;
         shader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId).ConfigurePipelineState(pipelineDesc);
         pipelineDesc.m_inputStreamLayout = m_inputStreamLayout;
@@ -120,7 +120,7 @@ namespace AtomSampleViewer
             ->RenderTargetAttachment(RHI::Format::R8G8B8A8_UNORM_SRGB)
             ->RenderTargetAttachment(RHI::Format::R16G16_FLOAT)
             ->RenderTargetAttachment(RHI::Format::R32_FLOAT);
-        [[maybe_unused]] RHI::ResultCode [[maybe_unused]] result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
+        [[maybe_unused]] RHI::ResultCode result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
         AZ_Assert(result == RHI::ResultCode::Success, "Failed to create render attachment layout");
 
         m_pipelineStates[0] = shader->AcquirePipelineState(pipelineDesc);
@@ -327,7 +327,7 @@ namespace AtomSampleViewer
         using namespace AZ;
 
         const auto prepareFunctionScreen = [this](RHI::FrameGraphInterface frameGraph, [[maybe_unused]] ScopeData& scopeData)
-        {            
+        {
             // Binds the swap chain as a color attachment. Clears it to white.
             {
                 RHI::ImageScopeAttachmentDescriptor descriptor;
@@ -361,7 +361,7 @@ namespace AtomSampleViewer
         };
 
         const auto executeFunctionScreen = [this](const RHI::FrameGraphExecuteContext& context, [[maybe_unused]] const ScopeData& scopeData)
-        {            
+        {
             RHI::CommandList* commandList = context.GetCommandList();
 
             // Set persistent viewport and scissor state.

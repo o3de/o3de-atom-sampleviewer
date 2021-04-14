@@ -10,10 +10,10 @@
 *
 */
 
-#include "MacLumberyardApplication.h"
+#include "MacO3DEApplication.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-@implementation MacLumberyardApplication
+@implementation MacO3DEApplicationDelegate
 
-@end // MacLumberyardApplication Implementation
+@end // MacO3DEApplicationDelegate Implementation
 
