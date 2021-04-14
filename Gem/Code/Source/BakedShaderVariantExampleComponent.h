@@ -1,0 +1,130 @@
+/*
+ * All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
+ * its licensors.
+ *
+ * For complete copyright and license terms please see the LICENSE at the root of this
+ * distribution (the "License"). All use of this software is governed by the License,
+ * or, if provided, by the license below or the license accompanying this file. Do not
+ * remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *
+ */
+
+#pragma once
+
+#include <Atom/RPI.Reflect/Material/MaterialAsset.h>
+#include <Atom/RPI.Reflect/Model/ModelAsset.h>
+#include <AzCore/Component/TickBus.h>
+#include <AzFramework/Asset/AssetSystemTypes.h>
+#include <CommonSampleComponentBase.h>
+#include <Utils/FileIOErrorHandler.h>
+#include <Utils/ImGuiSidebar.h>
+#include <Utils/ImGuiAssetBrowser.h>
+#include <Utils/ImGuiMaterialDetails.h>
+#include <Utils/ImGuiHistogramQueue.h>
+
+namespace AtomSampleViewer
+{
+    //! This test renders a simple material and exposes controls that can update the source data for that material and its shaders
+    //! to demonstrate and test hot-reloading. It works by copying entire files from a test data folder into a material source folder
+    //! and waiting for the Asset Processor to build the updates files.
+    class BakedShaderVariantExampleComponent final
+        : public CommonSampleComponentBase
+        , public AZ::TickBus::Handler
+        , public AZ::Data::AssetBus::Handler
+    {
+    public:
+        AZ_COMPONENT(BakedShaderVariantExampleComponent, "{4986DD5D-347E-4E11-BBD5-E364061666A1}", CommonSampleComponentBase);
+        BakedShaderVariantExampleComponent();
+
+        static void Reflect(AZ::ReflectContext* context);
+
+        // AZ::Component overrides...
+        void Activate() override;
+        void Deactivate() override;
+
+    private:
+        AZ_DISABLE_COPY_MOVE(BakedShaderVariantExampleComponent);
+
+        // AZ::TickBus::Handler overrides...
+        void OnTick(float deltaTime, AZ::ScriptTimePoint scriptTime) override;
+
+        // Finds the paths m_testDataFolder and m_tempSourceFolder
+        void InitTestDataFolders();
+
+        // Deletes a file from m_tempSourceFolder
+        void DeleteTestFile(const char* tempSourceFile);
+
+        // Copies a file from m_testDataFolder to m_tempSourceFolder
+        void CopyTestFile(const AZStd::string& testDataFile, const AZStd::string& tempSourceFile);
+
+        // Returns the AssetStatus of a file in m_tempSourceFolder
+        AzFramework::AssetSystem::AssetStatus GetTestAssetStatus(const char* tempSourceFile) const;
+
+        // Draws ImGui indicating the Asset Processor status of a file in m_tempSourceFolder
+        void DrawAssetStatus(const char* tempSourceFile, bool includeFileName = false);
+
+        AZ::Data::AssetId GetAssetId(const char* productFilePath);
+
+        void OnAssetReady(AZ::Data::Asset<AZ::Data::AssetData> asset) override;
+        
+        void MaterialChange();
+        void ShowShadersComboBox();
+
+        const char* ToString(AzFramework::AssetSystem::AssetStatus status);
+
+        enum class ShaderVariantStatus
+        {
+            None,
+            Root,
+            PartiallyBaked,
+            FullyBaked
+        };
+
+        ShaderVariantStatus GetShaderVariantStatus() const;
+
+        static constexpr float LongTimeout = 30.0f;
+
+        // Tracks initialization that starts when the component is activated
+        enum class InitStatus
+        {
+            None,
+            ClearingTestAssets,
+            CopyingDefaultAzslTestFile,
+            CopyingDefaultShaderTestFile,
+            CopyingDefaultMaterialTypeTestFile,
+            WaitingForDefaultMaterialToRegister,
+            WaitingForDefaultMaterialToLoad,
+            Ready
+        };
+        InitStatus m_initStatus = InitStatus::None;
+
+        AZStd::string m_testDataFolder; //< Stores several txt files with contents to be copied over various source asset files.
+        AZStd::string m_tempSourceFolder; //< Folder for temp source asset files. These are what the sample edits and reloads.
+
+        static constexpr uint32_t FrameTimeLogSize = 100;
+        ImGuiSidebar m_imguiSidebar;
+        ImGuiMaterialDetails m_imguiMaterialDetails;
+        ImGuiAssetBrowser m_materialBrowser;
+        ImGuiHistogramQueue m_imGuiFrameTimer;
+
+        AZ::Render::MeshFeatureProcessorInterface* m_meshFeatureProcessor = nullptr;
+
+        AZ::Data::Asset<AZ::RPI::MaterialAsset> m_materialAsset;
+        AZ::Data::Instance<AZ::RPI::Material> m_material;
+        AZ::Data::Asset<AZ::RPI::ModelAsset> m_modelAsset;
+        AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_meshHandle;
+        AZ::Render::MeshFeatureProcessorInterface::ModelChangedEvent::Handler m_meshChangedHandler;
+
+        // These are used to render a secondary mesh that indicates which shader variant is being used to render the primary mesh
+        AZ::Transform m_shaderVariantIndicatorMeshTransform;
+        AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_shaderVariantIndicatorMeshHandle;
+        AZ::Data::Instance<AZ::RPI::Material> m_shaderVariantIndicatorMaterial_root;
+        AZ::Data::Instance<AZ::RPI::Material> m_shaderVariantIndicatorMaterial_fullyBaked;
+        AZ::Data::Instance<AZ::RPI::Material> m_shaderVariantIndicatorMaterial_current;
+
+        FileIOErrorHandler m_fileIoErrorHandler;
+
+        size_t m_selectedShaderIndex = 0;
+    };
+} // namespace AtomSampleViewer
