@@ -24,7 +24,6 @@
 
 #include <Atom/Feature/CoreLights/DiskLightFeatureProcessorInterface.h>
 #include <Atom/Feature/CoreLights/PointLightFeatureProcessorInterface.h>
-#include <Atom/Feature/CoreLights/SpotLightFeatureProcessorInterface.h>
 #include <Atom/Feature/CoreLights/CapsuleLightFeatureProcessorInterface.h>
 #include <Atom/Feature/Decals/DecalFeatureProcessorInterface.h>
 #include <Atom/Feature/CoreLights/QuadLightFeatureProcessorInterface.h>
@@ -65,7 +64,6 @@ namespace AtomSampleViewer
         enum class LightType
         {
             Point,
-            Spot,
             Disk,
             Capsule,
             Quad,
@@ -83,7 +81,6 @@ namespace AtomSampleViewer
         };
 
         using PointLightHandle = AZ::Render::PointLightFeatureProcessorInterface::LightHandle;
-        using SpotLightHandle = AZ::Render::SpotLightFeatureProcessorInterface::LightHandle;
         using DiskLightHandle = AZ::Render::DiskLightFeatureProcessorInterface::LightHandle;
         using CapsuleLightHandle = AZ::Render::CapsuleLightFeatureProcessorInterface::LightHandle;
         using QuadLightHandle = AZ::Render::QuadLightFeatureProcessorInterface::LightHandle;
@@ -105,7 +102,6 @@ namespace AtomSampleViewer
 
         void DrawDebuggingHelpers();
         void DrawPointLightDebugSpheres(AZ::RPI::AuxGeomDrawPtr auxGeom);
-        void DrawSpotLightDebugCones(AZ::RPI::AuxGeomDrawPtr auxGeom);
         void DrawDiskLightDebugObjects(AZ::RPI::AuxGeomDrawPtr auxGeom);
         void DrawCapsuleLightDebugObjects(AZ::RPI::AuxGeomDrawPtr auxGeom);
         void DrawDecalDebugBoxes(AZ::RPI::AuxGeomDrawPtr auxGeom);
@@ -124,9 +120,6 @@ namespace AtomSampleViewer
 
         void CreatePointLights();
         void CreatePointLight(int index);
-
-        void CreateSpotLights();
-        void CreateSpotLight(int index);
 
         void CreateDiskLights();
         void CreateDiskLight(int index);
@@ -157,7 +150,6 @@ namespace AtomSampleViewer
         void DestroyLightsAndDecals();
 
         void DrawSidebarPointLightsSection(LightSettings* lightSettings);
-        void DrawSidebarSpotLightsSection(LightSettings* lightSettings);
         void DrawSidebarDiskLightsSection(LightSettings* lightSettings);
         void DrawSidebarCapsuleLightSection(LightSettings* lightSettings);
         void DrawSidebarDecalSection(LightSettings* lightSettings);
@@ -193,7 +185,6 @@ namespace AtomSampleViewer
         AZStd::array<LightSettings, (size_t)LightType::Count> m_settings;
 
         AZStd::vector<Light<PointLightHandle>> m_pointLights;
-        AZStd::vector<Light<SpotLightHandle>> m_spotLights;
         AZStd::vector<Light<DiskLightHandle>> m_diskLights;
         AZStd::vector<Light<CapsuleLightHandle>> m_capsuleLights;
         AZStd::vector<Light<QuadLightHandle>> m_quadLights;
@@ -217,14 +208,14 @@ namespace AtomSampleViewer
         float m_smoothedFPS = 0.0f;
         float m_bulbRadius = 3.0f;
 
-        float m_spotInnerConeDegrees = 22.0f;
-        float m_spotOuterConeDegrees = 90.0f;
-
+        bool m_diskConesEnabled = false;
+        float m_diskInnerConeDegrees = 22.0f;
+        float m_diskOuterConeDegrees = 90.0f;
+        
         float m_capsuleRadius = 0.1f;
         float m_capsuleLength = 3.0f;
 
         float m_diskRadius = 3.0f;
-        bool m_isDiskDoubleSided = false;
         bool m_isQuadLightDoubleSided = false;
         bool m_quadLightsUseFastApproximation = false;
 
@@ -240,7 +231,6 @@ namespace AtomSampleViewer
         AZ::Data::Asset<AZ::Data::AssetData> m_decalMaterial;
 
         AZ::Render::PointLightFeatureProcessorInterface* m_pointLightFeatureProcessor = nullptr;
-        AZ::Render::SpotLightFeatureProcessorInterface* m_spotLightFeatureProcessor = nullptr;
         AZ::Render::DiskLightFeatureProcessorInterface* m_diskLightFeatureProcessor = nullptr;
         AZ::Render::CapsuleLightFeatureProcessorInterface* m_capsuleLightFeatureProcessor = nullptr;
         AZ::Render::QuadLightFeatureProcessorInterface* m_quadLightFeatureProcessor = nullptr;

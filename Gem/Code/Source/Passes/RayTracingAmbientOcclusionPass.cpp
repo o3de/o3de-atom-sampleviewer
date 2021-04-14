@@ -227,13 +227,19 @@ namespace AZ
             RPI::PassAttachment* outputAttachment = GetOutputBinding(0).m_attachment.get();
             RHI::Size targetImageSize = outputAttachment->m_descriptor.m_image.m_size;
 
+            const RHI::ShaderResourceGroup* shaderResourceGroups[] =
+            {
+                m_shaderResourceGroup->GetRHIShaderResourceGroup()
+            };
+
             RHI::DispatchRaysItem dispatchRaysItem;
             dispatchRaysItem.m_width = targetImageSize.m_width;
             dispatchRaysItem.m_height = targetImageSize.m_height;
             dispatchRaysItem.m_depth = 1;
             dispatchRaysItem.m_rayTracingPipelineState = m_rayTracingPipelineState.get();
             dispatchRaysItem.m_rayTracingShaderTable = m_rayTracingShaderTable.get();
-            dispatchRaysItem.m_globalSrg = m_shaderResourceGroup->GetRHIShaderResourceGroup();
+            dispatchRaysItem.m_shaderResourceGroupCount = 1;
+            dispatchRaysItem.m_shaderResourceGroups = shaderResourceGroups;
             dispatchRaysItem.m_globalPipelineState = m_globalPipelineState.get();
 
             // submit the DispatchRays item

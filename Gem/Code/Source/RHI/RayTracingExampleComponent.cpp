@@ -53,7 +53,7 @@ namespace AtomSampleViewer
             RHI::BufferPoolDescriptor bufferPoolDesc;
             bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
             bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Host;
-            RHI::ResultCode resultCode = m_inputAssemblyBufferPool->Init(*device, bufferPoolDesc);
+            [[maybe_unused]] RHI::ResultCode resultCode = m_inputAssemblyBufferPool->Init(*device, bufferPoolDesc);
             AZ_Assert(resultCode == RHI::ResultCode::Success, "Failed to initialize input assembly buffer pool");
         }
 
@@ -63,7 +63,7 @@ namespace AtomSampleViewer
             imagePoolDesc.m_bindFlags = RHI::ImageBindFlags::ShaderReadWrite;
 
             m_imagePool = RHI::Factory::Get().CreateImagePool();
-            RHI::ResultCode result = m_imagePool->Init(*device, imagePoolDesc);
+            [[maybe_unused]] RHI::ResultCode result = m_imagePool->Init(*device, imagePoolDesc);
             AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialize output image pool");
         }
 
@@ -186,12 +186,11 @@ namespace AtomSampleViewer
 
         // create output image
         m_outputImage = RHI::Factory::Get().CreateImage();
-        uint32_t imageSize = m_imageWidth * m_imageHeight * RHI::GetFormatSize(RHI::Format::R8G8B8A8_UNORM);
 
         RHI::ImageInitRequest request;
         request.m_image = m_outputImage.get();
         request.m_descriptor = RHI::ImageDescriptor::Create2D(RHI::ImageBindFlags::ShaderReadWrite, m_imageWidth, m_imageHeight, RHI::Format::R8G8B8A8_UNORM);
-        RHI::ResultCode result = m_imagePool->InitImage(request);
+        [[maybe_unused]] RHI::ResultCode result = m_imagePool->InitImage(request);
         AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialize output image");
 
         m_outputImageViewDescriptor = RHI::ImageViewDescriptor::Create(RHI::Format::R8G8B8A8_UNORM, 0, 0);
@@ -220,7 +219,7 @@ namespace AtomSampleViewer
 
         RHI::RenderAttachmentLayoutBuilder attachmentsBuilder;
         attachmentsBuilder.AddSubpass()->RenderTargetAttachment(m_outputFormat);
-        RHI::ResultCode result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
+        [[maybe_unused]] RHI::ResultCode result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
         AZ_Assert(result == RHI::ResultCode::Success, "Failed to create draw render attachment layout");
 
         m_drawPipelineState = drawShader->AcquirePipelineState(pipelineDesc);
@@ -500,7 +499,7 @@ namespace AtomSampleViewer
         {
             // attach output image
             {
-                RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportImage(m_outputImageAttachmentId, m_outputImage);
+                [[maybe_unused]] RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportImage(m_outputImageAttachmentId, m_outputImage);
                 AZ_Error(RayTracingExampleName, result == RHI::ResultCode::Success, "Failed to import output image with error %d", result);
 
                 RHI::ImageScopeAttachmentDescriptor desc;
@@ -514,7 +513,7 @@ namespace AtomSampleViewer
             // attach TLAS buffer
             if (m_rayTracingTlas->GetTlasBuffer())
             {
-                RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportBuffer(m_tlasBufferAttachmentId, m_rayTracingTlas->GetTlasBuffer());
+                [[maybe_unused]] RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportBuffer(m_tlasBufferAttachmentId, m_rayTracingTlas->GetTlasBuffer());
                 AZ_Error(RayTracingExampleName, result == RHI::ResultCode::Success, "Failed to import TLAS buffer with error %d", result);
 
                 RHI::BufferScopeAttachmentDescriptor desc;
@@ -599,13 +598,18 @@ namespace AtomSampleViewer
 
             RHI::CommandList* commandList = context.GetCommandList();
 
+            const RHI::ShaderResourceGroup* shaderResourceGroups[] = {
+                m_globalSrg->GetRHIShaderResourceGroup()
+            };
+
             RHI::DispatchRaysItem dispatchRaysItem;
             dispatchRaysItem.m_width = m_imageWidth;
             dispatchRaysItem.m_height = m_imageHeight;
             dispatchRaysItem.m_depth = 1;
             dispatchRaysItem.m_rayTracingPipelineState = m_rayTracingPipelineState.get();
             dispatchRaysItem.m_rayTracingShaderTable = m_rayTracingShaderTable.get();
-            dispatchRaysItem.m_globalSrg = m_globalSrg->GetRHIShaderResourceGroup();
+            dispatchRaysItem.m_shaderResourceGroupCount = RHI::ArraySize(shaderResourceGroups);
+            dispatchRaysItem.m_shaderResourceGroups = shaderResourceGroups;
             dispatchRaysItem.m_globalPipelineState = m_globalPipelineState.get();
 
             // submit the DispatchRays item

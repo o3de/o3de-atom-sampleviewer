@@ -219,7 +219,7 @@ namespace AtomSampleViewer
         bufferPoolDesc.m_budgetInBytes = m_poolSizeInBytes;
 
         const RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
-        RHI::ResultCode resultCode = m_bufferPool->Init(*device, bufferPoolDesc);
+        [[maybe_unused]] RHI::ResultCode resultCode = m_bufferPool->Init(*device, bufferPoolDesc);
         AZ_Assert(resultCode == RHI::ResultCode::Success, "Failed to create Material Buffer Pool");
     };
 
@@ -232,7 +232,7 @@ namespace AtomSampleViewer
         bufferRequest.m_descriptor.m_byteCount = byteCount;
         bufferRequest.m_buffer = m_buffer.get();
 
-        RHI::ResultCode resultCode = m_bufferPool->InitBuffer(bufferRequest);
+        [[maybe_unused]] RHI::ResultCode resultCode = m_bufferPool->InitBuffer(bufferRequest);
         AZ_Assert(resultCode == RHI::ResultCode::Success, "Failed to create Material Buffer");
     };
 
@@ -415,7 +415,7 @@ namespace AtomSampleViewer
             {
                 bufferView->SetName(Name(m_floatBufferSrgName));
                 RHI::BufferViewDescriptor bufferViewDesc = RHI::BufferViewDescriptor::CreateStructured(0u, m_bufferFloatCount, sizeof(float));
-                RHI::ResultCode resultCode = bufferView->Init(*m_floatBuffer->m_buffer, bufferViewDesc);
+                [[maybe_unused]] RHI::ResultCode resultCode = bufferView->Init(*m_floatBuffer->m_buffer, bufferViewDesc);
                 AZ_Assert(resultCode == RHI::ResultCode::Success, "Failed to initialize buffer view");
             }
             m_bindlessSrg->SetBufferView(m_floatBufferSrgName, floatBufferId, bufferView.get());
@@ -444,7 +444,7 @@ namespace AtomSampleViewer
                 attachmentsBuilder.AddSubpass()
                     ->RenderTargetAttachment(m_outputFormat)
                     ->DepthStencilAttachment(AZ::RHI::Format::D32_FLOAT);
-                AZ::RHI::ResultCode result = attachmentsBuilder.End(pipelineStateDescriptor.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
+                attachmentsBuilder.End(pipelineStateDescriptor.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
                 pipelineStateDescriptor.m_renderStates.m_depthStencilState.m_depth.m_func = RHI::ComparisonFunc::GreaterEqual;
                 pipelineStateDescriptor.m_renderStates.m_depthStencilState.m_depth.m_enable = true;
 
@@ -471,7 +471,7 @@ namespace AtomSampleViewer
             for (uint32_t textuerIdx = 0u; textuerIdx < InternalBP::ImageCount; textuerIdx++)
             {
                 AZ::Data::Instance<AZ::RPI::StreamingImage> image = LoadStreamingImage(InternalBP::Images[textuerIdx], InternalBP::SampleName);
-                bool result = imageSrg->SetImage(imageIndex, image, textuerIdx);
+                [[maybe_unused]] bool result = imageSrg->SetImage(imageIndex, image, textuerIdx);
                 AZ_Assert(result, "Failed to set image into shader resource group.");
             }
 
@@ -738,7 +738,7 @@ namespace AtomSampleViewer
     {
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> srg = GetSrg(srgName);
         const AZ::RHI::ShaderInputBufferIndex inputIndex = srg->FindShaderInputBufferIndex(AZ::Name(srgId));
-        bool set = srg->SetBufferView(inputIndex, bufferView);
+        [[maybe_unused]] bool set = srg->SetBufferView(inputIndex, bufferView);
         AZ_Assert(set, "Failed to set the buffer view");
 
         return false;
@@ -804,7 +804,7 @@ namespace AtomSampleViewer
     bool BindlessPrototypeExampleComponent::FloatBuffer::MapData(const RHI::BufferMapRequest& mapRequest, const void* data)
     {
         RHI::BufferMapResponse response;
-        RHI::ResultCode result = m_bufferPool->MapBuffer(mapRequest, response);
+        [[maybe_unused]] RHI::ResultCode result = m_bufferPool->MapBuffer(mapRequest, response);
         // ResultCode::Unimplemented is used by Null Renderer and hence is a valid use case
         AZ_Assert(result == RHI::ResultCode::Success || result == RHI::ResultCode::Unimplemented, "Failed to map object buffer]");
         if (response.m_data)

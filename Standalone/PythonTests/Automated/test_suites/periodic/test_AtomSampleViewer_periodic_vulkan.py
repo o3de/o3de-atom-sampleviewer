@@ -27,7 +27,7 @@ def teardown():
 
 @pytest.mark.parametrize('launcher_platform', ['windows'])
 @pytest.mark.parametrize("project", ["AtomSampleViewer"])
-@pytest.mark.usefixtures("setup_atomsampleviewer_assets", "clean_atomsampleviewer_logs")
+@pytest.mark.usefixtures("clean_atomsampleviewer_logs")
 class TestVulkanAutomationPeriodicSuite:
 
     @pytest.mark.test_case_id('C35638262')
@@ -35,6 +35,7 @@ class TestVulkanAutomationPeriodicSuite:
         test_script = '_FullTestSuite.bv.luac'
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
+                           f'--project-path={workspace.paths.project()} '
                            f'--rhi {RENDER_HARDWARE_INTERFACE} '
                            f'--runtestsuite scripts/{test_script} '
                            '--exitontestend')
@@ -53,6 +54,7 @@ class TestVulkanAutomationPeriodicSuite:
         test_script = 'AreaLightTest.bv.luac'
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
+                           f'--project-path={workspace.paths.project()} '
                            f'--rhi {RENDER_HARDWARE_INTERFACE} '
                            f'--runtestsuite scripts/{test_script} '
                            '--exitontestend')
@@ -71,6 +73,7 @@ class TestVulkanAutomationPeriodicSuite:
         test_script = 'CheckerboardTest.bv.luac'
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
+                           f'--project-path={workspace.paths.project()} '
                            f'--rhi {RENDER_HARDWARE_INTERFACE} '
                            f'--runtestsuite scripts/{test_script} '
                            '--exitontestend')
@@ -89,6 +92,7 @@ class TestVulkanAutomationPeriodicSuite:
         test_script = 'Decals.bv.luac'
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
+                           f'--project-path={workspace.paths.project()} '
                            f'--rhi {RENDER_HARDWARE_INTERFACE} '
                            f'--runtestsuite scripts/{test_script} '
                            '--exitontestend')
@@ -107,6 +111,7 @@ class TestVulkanAutomationPeriodicSuite:
         test_script = 'DiffuseGITest.bv.luac'
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
+                           f'--project-path={workspace.paths.project()} '
                            f'--rhi {RENDER_HARDWARE_INTERFACE} '
                            f'--runtestsuite scripts/{test_script} '
                            '--exitontestend')
@@ -125,6 +130,7 @@ class TestVulkanAutomationPeriodicSuite:
         test_script = 'DynamicDraw.bv.luac'
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
+                           f'--project-path={workspace.paths.project()} '
                            f'--rhi {RENDER_HARDWARE_INTERFACE} '
                            f'--runtestsuite scripts/{test_script} '
                            '--exitontestend')
@@ -143,6 +149,7 @@ class TestVulkanAutomationPeriodicSuite:
         test_script = 'DynamicMaterialTest.bv.luac'
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
+                           f'--project-path={workspace.paths.project()} '
                            f'--rhi {RENDER_HARDWARE_INTERFACE} '
                            f'--runtestsuite scripts/{test_script} '
                            '--exitontestend')
@@ -161,6 +168,7 @@ class TestVulkanAutomationPeriodicSuite:
         test_script = 'LightCulling.bv.luac'
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
+                           f'--project-path={workspace.paths.project()} '
                            f'--rhi {RENDER_HARDWARE_INTERFACE} '
                            f'--runtestsuite scripts/{test_script} '
                            '--exitontestend')
@@ -179,6 +187,7 @@ class TestVulkanAutomationPeriodicSuite:
         test_script = 'MaterialHotReloadTest.bv.luac'
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
+                           f'--project-path={workspace.paths.project()} '
                            f'--rhi {RENDER_HARDWARE_INTERFACE} '
                            f'--runtestsuite scripts/{test_script} '
                            '--exitontestend')
@@ -197,6 +206,7 @@ class TestVulkanAutomationPeriodicSuite:
         test_script = 'MaterialScreenshotTests.bv.luac'
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
+                           f'--project-path={workspace.paths.project()} '
                            f'--rhi {RENDER_HARDWARE_INTERFACE} '
                            f'--runtestsuite scripts/{test_script} '
                            '--exitontestend')
@@ -215,6 +225,7 @@ class TestVulkanAutomationPeriodicSuite:
         test_script = 'MSAA_RPI_Test.bv.luac'
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
+                           f'--project-path={workspace.paths.project()} '
                            f'--rhi {RENDER_HARDWARE_INTERFACE} '
                            f'--runtestsuite scripts/{test_script} '
                            '--exitontestend')
@@ -233,6 +244,7 @@ class TestVulkanAutomationPeriodicSuite:
         test_script = 'MultiRenderPipeline.bv.luac'
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
+                           f'--project-path={workspace.paths.project()} '
                            f'--rhi {RENDER_HARDWARE_INTERFACE} '
                            f'--runtestsuite scripts/{test_script} '
                            '--exitontestend')
@@ -251,6 +263,7 @@ class TestVulkanAutomationPeriodicSuite:
         test_script = 'MultiScene.bv.luac'
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
+                           f'--project-path={workspace.paths.project()} '
                            f'--rhi {RENDER_HARDWARE_INTERFACE} '
                            f'--runtestsuite scripts/{test_script} '
                            '--exitontestend')
@@ -269,6 +282,7 @@ class TestVulkanAutomationPeriodicSuite:
         test_script = 'ParallaxTest.bv.luac'
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
+                           f'--project-path={workspace.paths.project()} '
                            f'--rhi {RENDER_HARDWARE_INTERFACE} '
                            f'--runtestsuite scripts/{test_script} '
                            '--exitontestend')
@@ -287,6 +301,7 @@ class TestVulkanAutomationPeriodicSuite:
         test_script = 'SceneReloadSoakTest.bv.luac'
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
+                           f'--project-path={workspace.paths.project()} '
                            f'--rhi {RENDER_HARDWARE_INTERFACE} '
                            f'--runtestsuite scripts/{test_script} '
                            '--exitontestend')
@@ -305,6 +320,7 @@ class TestVulkanAutomationPeriodicSuite:
         test_script = 'ShadowedBistroTest.bv.luac'
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
+                           f'--project-path={workspace.paths.project()} '
                            f'--rhi {RENDER_HARDWARE_INTERFACE} '
                            f'--runtestsuite scripts/{test_script} '
                            '--exitontestend')
@@ -323,6 +339,7 @@ class TestVulkanAutomationPeriodicSuite:
         test_script = 'ShadowTest.bv.luac'
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
+                           f'--project-path={workspace.paths.project()} '
                            f'--rhi {RENDER_HARDWARE_INTERFACE} '
                            f'--runtestsuite scripts/{test_script} '
                            '--exitontestend')
@@ -341,6 +358,7 @@ class TestVulkanAutomationPeriodicSuite:
         test_script = 'StreamingImageTest.bv.luac'
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
+                           f'--project-path={workspace.paths.project()} '
                            f'--rhi {RENDER_HARDWARE_INTERFACE} '
                            f'--runtestsuite scripts/{test_script} '
                            '--exitontestend')
@@ -359,6 +377,7 @@ class TestVulkanAutomationPeriodicSuite:
         test_script = 'TransparentTest.bv.luac'
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
+                           f'--project-path={workspace.paths.project()} '
                            f'--rhi {RENDER_HARDWARE_INTERFACE} '
                            f'--runtestsuite scripts/{test_script} '
                            '--exitontestend')

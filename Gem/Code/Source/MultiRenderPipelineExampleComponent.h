@@ -24,7 +24,7 @@
 #include <AzFramework/Windowing/NativeWindow.h>
 
 #include <Atom/Feature/CoreLights/DirectionalLightFeatureProcessorInterface.h>
-#include <Atom/Feature/CoreLights/SpotLightFeatureProcessorInterface.h>
+#include <Atom/Feature/CoreLights/DiskLightFeatureProcessorInterface.h>
 #include <Atom/Feature/CoreLights/ShadowConstants.h>
 #include <Atom/Feature/SkyBox/SkyBoxFeatureProcessorInterface.h>
 #include <Atom/Feature/PostProcess/PostProcessFeatureProcessorInterface.h>
@@ -78,8 +78,8 @@ namespace AtomSampleViewer
         void AddDirectionalLight();
         void RemoveDirectionalLight();
 
-        void AddSpotLight();
-        void RemoveSpotLight();
+        void AddDiskLight();
+        void RemoveDiskLight();
 
         void EnableSkybox();
         void DisableSkybox();
@@ -95,15 +95,15 @@ namespace AtomSampleViewer
         
         // For scene content
         using DirectionalLightHandle = AZ::Render::DirectionalLightFeatureProcessorInterface::LightHandle;
-        using SpotLightHandle = AZ::Render::SpotLightFeatureProcessorInterface::LightHandle;
+        using DiskLightHandle = AZ::Render::DiskLightFeatureProcessorInterface::LightHandle;
         using MeshHandle = AZ::Render::MeshFeatureProcessorInterface::MeshHandle;
 
         // Directional light
         AZ::Render::DirectionalLightFeatureProcessorInterface* m_directionalLightFeatureProcessor = nullptr;
         DirectionalLightHandle m_directionalLightHandle;
-        // Spot light
-        AZ::Render::SpotLightFeatureProcessorInterface* m_spotLightFeatureProcessor = nullptr;
-        SpotLightHandle m_spotLightHandle;
+        // Disk light
+        AZ::Render::DiskLightFeatureProcessorInterface* m_diskLightFeatureProcessor = nullptr;
+        DiskLightHandle m_diskLightHandle;
         // Meshes
         MeshHandle m_floorMeshHandle;
 
@@ -120,7 +120,7 @@ namespace AtomSampleViewer
         // flags of features enabled
         bool m_enabledDepthOfField = true;
         bool m_hasDirectionalLight = true;
-        bool m_hasSpotLight = true;
+        bool m_hasDiskLight = true;
         bool m_enabledSkybox = true;
         bool m_hasIBL = true;
         bool m_enableSecondRenderPipeline = true;

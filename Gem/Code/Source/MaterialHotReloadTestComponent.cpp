@@ -162,6 +162,7 @@ namespace AtomSampleViewer
         DeleteTestFile(Sources::ShaderVariantListFileName);
 
         m_initStatus = InitStatus::ClearingTestAssets;
+        m_clearAssetsTimeout = 5.0f;
 
         // Wait until the test material is fully initialized. Use a long timeout because it can take a while for the shaders to compile.
         ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::PauseScriptWithTimeout, LongTimeout);
@@ -368,13 +369,23 @@ namespace AtomSampleViewer
     {
         if (m_initStatus == InitStatus::ClearingTestAssets)
         {
+            m_clearAssetsTimeout -= deltaTime;
+
             Data::AssetId materialAssetId = GetAssetId(Products::MaterialFilePath);
             Data::AssetId materialTypeAssetId = GetAssetId(Products::MaterialTypeFilePath);
             Data::AssetId shaderAssetId = GetAssetId(Products::ShaderFilePath);
 
-            if (!materialAssetId.IsValid() &&
-                !materialTypeAssetId.IsValid() &&
-                !shaderAssetId.IsValid())
+            bool proceed = !materialAssetId.IsValid() && !materialTypeAssetId.IsValid() && !shaderAssetId.IsValid();
+
+            if (!proceed && m_clearAssetsTimeout < 0)
+            {
+                // There was a specific bug in the Asset Processor where deleting a source file does not always remove the corresponding product
+                // from the cache and from the asset database.
+                AZ_Error("MaterialHotReloadTestComponent", false, "Timed out while waiting for test assets to be removed.");
+                proceed = true;
+            }
+
+            if (proceed)
             {
                 // [GFX TODO] [ATOM-5899] Once this ticket is addressed, This block can call all required CopyTestFile() at once,
                 //            and the states InitStatus::CopyingDefault***TestFile won't be needed.

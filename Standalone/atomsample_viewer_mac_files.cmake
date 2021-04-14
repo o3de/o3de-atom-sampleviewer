@@ -10,7 +10,7 @@
 #
 
 set(FILES
-    mac/MacLumberyardApplication.h
-    mac/MacLumberyardApplication.mm
-    mac/MacLumberyardApplicationDelegate.mm
+    mac/MacO3DEApplication.h
+    mac/MacO3DEApplication.mm
+    mac/MacO3DEApplicationDelegate.mm
 )
