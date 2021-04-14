@@ -9,7 +9,7 @@
             "Slots": [
                 {
                     "Name": "SwapChainOutput",
-                    "SlotType": "Output",
+                    "SlotType": "InputOutput",
                     "ScopeAttachmentUsage": "RenderTarget"
                 }
             ],
