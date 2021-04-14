@@ -15,5 +15,7 @@
                 "type": "RayTracing"
             }
         ]
-    }
+    },
+    "DisabledRHIBackends": ["metal"]
 }
+ 
