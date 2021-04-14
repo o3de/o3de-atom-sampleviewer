@@ -27,6 +27,7 @@
 #include <GridMate/Drillers/ReplicaDriller.h>
 
 #include <Atom/RPI.Public/RPISystemInterface.h>
+#include <AzCore/Math/Random.h>
 #include <AzCore/Script/ScriptAsset.h>
 #include <AzCore/Settings/SettingsRegistryMergeUtils.h>
 #include <AzCore/Utils/Utils.h>
@@ -54,7 +55,7 @@ namespace AtomSampleViewer
         AZ::Debug::TraceMessageBus::Handler::BusConnect();
         AtomSampleViewerRequestsBus::Handler::BusConnect();
         SampleComponentManagerNotificationBus::Handler::BusConnect();
-        
+
         AZ::SettingsRegistryMergeUtils::MergeSettingsToRegistry_AddBuildSystemTargetSpecialization(
             *AZ::SettingsRegistry::Get(), GetBuildTargetName());
     }
@@ -73,7 +74,7 @@ namespace AtomSampleViewer
         SampleComponentManagerNotificationBus::Handler::BusConnect();
 
         SetupConsoleHandlerRoutine();
-        
+
         AZ::SettingsRegistryMergeUtils::MergeSettingsToRegistry_AddBuildSystemTargetSpecialization(
             *AZ::SettingsRegistry::Get(), GetBuildTargetName());
     }
@@ -165,13 +166,21 @@ namespace AtomSampleViewer
 
             constexpr const char* testSuiteSwitch = "runtestsuite";
             constexpr const char* testExitSwitch = "exitontestend";
+            constexpr const char* testRandomSeed = "randomtestseed";
 
             bool exitOnTestEnd = commandLine.HasSwitch(testExitSwitch);
 
             if (commandLine.HasSwitch(testSuiteSwitch))
             {
                 const AZStd::string& testSuitePath = commandLine.GetSwitchValue(testSuiteSwitch, 0);
-                SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequestBus::Events::RunMainTestSuite, testSuitePath, exitOnTestEnd);
+
+                int randomSeed = AZ::SimpleLcgRandom().GetRandom();
+                if (commandLine.HasSwitch(testRandomSeed))
+                {
+                    randomSeed = atoi(commandLine.GetSwitchValue(testRandomSeed, 0).c_str());
+                }
+
+                SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequestBus::Events::RunMainTestSuite, testSuitePath, exitOnTestEnd, randomSeed);
             }
         }
     }

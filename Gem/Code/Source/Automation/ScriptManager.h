@@ -67,7 +67,7 @@ namespace AtomSampleViewer
 
         void OpenScriptRunnerDialog();
 
-        void RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd);
+        void RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd, int randomSeed);
         
     private:
 
@@ -99,6 +99,7 @@ namespace AtomSampleViewer
         static AZStd::string Script_NormalizePath(const AZStd::string& path);
         static float Script_DegToRad(float degrees);
         static AZStd::string Script_GetRenderApiName();
+        static int Script_GetRandomTestSeed();
 
         // Samples...
         static void Script_OpenSample(const AZStd::string& sampleName);
@@ -223,6 +224,7 @@ namespace AtomSampleViewer
             bool m_isStarted = false;
             bool m_closeOnTestScriptFinish = false;
             AZStd::string m_testSuitePath;
+            int m_randomSeed;
         };
 
         TestSuiteExecutionConfig m_testSuiteRunConfig;

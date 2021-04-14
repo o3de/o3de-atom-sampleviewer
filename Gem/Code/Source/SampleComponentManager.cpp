@@ -1118,11 +1118,11 @@ namespace AtomSampleViewer
         return m_isFrameCapturePending;
     }
 
-    void SampleComponentManager::RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd)
+    void SampleComponentManager::RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd, int randomSeed)
     {
         if (m_scriptManager)
         {
-            m_scriptManager->RunMainTestSuite(suiteFilePath, exitOnTestEnd);
+            m_scriptManager->RunMainTestSuite(suiteFilePath, exitOnTestEnd, randomSeed);
         }
     }
 
