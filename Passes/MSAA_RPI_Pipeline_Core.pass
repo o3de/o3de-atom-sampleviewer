@@ -13,7 +13,7 @@
                 },
                 {
                     "Name": "SwapChainOutput",
-                    "SlotType": "Output"
+                    "SlotType": "InputOutput"
                 }
             ],
             "PassRequests": [
