@@ -174,7 +174,7 @@ namespace AtomSampleViewer
             {
                 const AZStd::string& testSuitePath = commandLine.GetSwitchValue(testSuiteSwitch, 0);
 
-                int randomSeed = AZ::SimpleLcgRandom().GetRandom();
+                int randomSeed = 0;
                 if (commandLine.HasSwitch(testRandomSeed))
                 {
                     randomSeed = atoi(commandLine.GetSwitchValue(testRandomSeed, 0).c_str());

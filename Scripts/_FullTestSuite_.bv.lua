@@ -12,6 +12,13 @@
 --
 ----------------------------------------------------------------------------------------------------
 
+
+-- This test suite is capable of randomly shuffling the order of the tests below if a random seed is provided that is not ZERO.
+-- NOTE: If the random seed is zero, then the order is not shuffled at all.
+-- The seed can be provided either in imGui or via commandline switch --randomtestseed
+
+
+
 -- Fast check for a sample which doesn't have a dedicated test script
 function FastCheckSample(sampleName)
     return function()
@@ -31,17 +38,19 @@ function random_shuffle(list)
     end
 end
 
+-- A helper wrapper to create a lambda-like behavior in Lua, this allows us to create a table of functions that call various tests
 function RunScriptWrapper(name)
     return function() RunScript(name) end
 end
 
+-- A table of lambda-like functions that invoke various tests. This table is shuffled if a random seed is provided below.
 tests= {
     RunScriptWrapper('scripts/decals.bv.luac'),
     RunScriptWrapper('scripts/dynamicdraw.bv.luac'),
     RunScriptWrapper('scripts/dynamicmaterialtest.bv.luac'),
     RunScriptWrapper('scripts/materialscreenshottests.bv.luac'),
     RunScriptWrapper('scripts/materialhotreloadtest.bv.luac'),
-    -- RunScriptWrapper('scripts/msaa_rpi_test.bv.luac'), -- seems broken at the moment?
+    RunScriptWrapper('scripts/msaa_rpi_test.bv.luac'),
     RunScriptWrapper('scripts/cullingandlod.bv.luac'),
     RunScriptWrapper('scripts/multirenderpipeline.bv.luac'),
     RunScriptWrapper('scripts/lightculling.bv.luac'),
@@ -77,7 +86,7 @@ tests= {
     FastCheckSample('RHI/Swapchain'),
     FastCheckSample('RHI/Texture'),
     FastCheckSample('RHI/Texture3d'),
-    -- FastCheckSample('RHI/TextureArray'), -- seems broken at the moment?
+    FastCheckSample('RHI/TextureArray'),
     FastCheckSample('RHI/TextureMap'),
     FastCheckSample('RHI/Triangle'),
     FastCheckSample('RHI/TrianglesConstantBuffer'),
@@ -91,7 +100,7 @@ tests= {
 
     FastCheckSample('Features/Bloom'),
     FastCheckSample('Features/DepthOfField'),
-    -- FastCheckSample('Features/Exposure'), -- seems broken at the moment?
+    FastCheckSample('Features/Exposure'),
     FastCheckSample('Features/SkinnedMesh'),
     FastCheckSample('Features/SSAO'),
     FastCheckSample('Features/SSR'),
@@ -107,9 +116,14 @@ if (GetRenderApiName() ~= "dx12") then
 end
 
 seed = GetRandomTestSeed()
-Print("========= Using " .. seed .. " as a random seed to sort the tests =========")
-math.randomseed(seed) -- pass a custom seed here
-random_shuffle(tests)
+if (seed == 0) then
+    Print("========= A random seed was not provided, running the tests in the original order =========")
+else
+    Print("========= Using " .. seed .. " as a random seed to sort the tests =========")
+    math.randomseed(seed)
+    random_shuffle(tests)
+end
+
 for k,test in pairs(tests) do
     test()
 end

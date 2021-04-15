@@ -224,7 +224,7 @@ namespace AtomSampleViewer
             bool m_isStarted = false;
             bool m_closeOnTestScriptFinish = false;
             AZStd::string m_testSuitePath;
-            int m_randomSeed;
+            int m_randomSeed = 0; // Used to shuffle test order in a random manner
         };
 
         TestSuiteExecutionConfig m_testSuiteRunConfig;
