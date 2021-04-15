@@ -16,7 +16,7 @@
 
 if(PAL_TRAIT_BUILD_HOST_TOOLS AND PAL_TRAIT_BUILD_TESTS_SUPPORTED)
     ly_add_pytest(
-        NAME AtomSampleViewer::PythonTestsMain
+        NAME AtomSampleViewer::PythonMainTests
         PATH ${CMAKE_CURRENT_LIST_DIR}/Automated/test_suites/main/
         TEST_REQUIRES gpu
         TEST_SUITE main
@@ -30,7 +30,7 @@ if(PAL_TRAIT_BUILD_HOST_TOOLS AND PAL_TRAIT_BUILD_TESTS_SUPPORTED)
             AtomSampleViewer.Assets
     )
     ly_add_pytest(
-        NAME AtomSampleViewer::PythonTestsMainPeriodic
+        NAME AtomSampleViewer::PythonPeriodicTests
         PATH ${CMAKE_CURRENT_LIST_DIR}/Automated/test_suites/periodic/
         TEST_REQUIRES gpu
         TEST_SUITE periodic
