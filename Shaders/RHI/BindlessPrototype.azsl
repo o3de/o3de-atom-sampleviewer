@@ -13,7 +13,7 @@
 // GlobalSrg::m_floatBuffer
 // PerSceneSrg::m_textureArray
 // PerSceneSrg::m_sampler
-#include "../../../Gems/Atom/RPI/Assets/ShaderLib/Atom/RPI/ShaderResourceGroups/BindlessPrototypeSrg.azsli"
+#include <Atom/RPI/ShaderResourceGroups/BindlessPrototypeSrg.azsli>
 
 struct BindlessMaterial0
 {
