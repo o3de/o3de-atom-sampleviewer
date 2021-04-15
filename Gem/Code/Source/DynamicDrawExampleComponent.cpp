@@ -22,6 +22,8 @@
 #include <Atom/RPI.Public/DynamicDraw/DynamicDrawInterface.h>
 #include <Atom/RPI.Public/RPIUtils.h>
 
+#include <DynamicDrawExampleComponent_Traits_Platform.h>
+
 namespace AtomSampleViewer
 {
     void DynamicDrawExampleComponent::Reflect(AZ::ReflectContext* context)
@@ -45,7 +47,7 @@ namespace AtomSampleViewer
 
         // List of all assets this example needs.
         AZStd::vector<AZ::AssetCollectionAsyncLoader::AssetToLoadInfo> assetList = {
-            {"Shaders/dynamicdraw/dynamicdrawexample.azshader", azrtti_typeid<AZ::RPI::ShaderAsset>()},
+            {ATOMSAMPLEVIEWER_TRAIT_DYNAMIC_DRAW_SAMPLE_SHADER_NAME, azrtti_typeid<AZ::RPI::ShaderAsset>()},
         };
 
         ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::PauseScript);
@@ -71,7 +73,7 @@ namespace AtomSampleViewer
         // Create and initialize dynamic draw context
         m_dynamicDraw = RPI::DynamicDrawInterface::Get()->CreateDynamicDrawContext(RPI::RPISystemInterface::Get()->GetDefaultScene().get());
         
-        const char* shaderFilepath = "Shaders/dynamicdraw/dynamicdrawexample.azshader";
+        const char* shaderFilepath = ATOMSAMPLEVIEWER_TRAIT_DYNAMIC_DRAW_SAMPLE_SHADER_NAME;
         Data::Asset<RPI::ShaderAsset> shaderAsset = m_assetLoadManager.GetAsset<RPI::ShaderAsset>(shaderFilepath);
         m_dynamicDraw->InitShader(shaderAsset);
         m_dynamicDraw->InitVertexFormat(

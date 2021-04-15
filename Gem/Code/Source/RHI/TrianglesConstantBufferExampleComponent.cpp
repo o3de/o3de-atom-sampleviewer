@@ -26,15 +26,17 @@
 
 #include <AzCore/Serialization/SerializeContext.h>
 
+#include <TriangleConstantBufferExampleComponent_Traits_Platform.h>
+
 namespace AtomSampleViewer
 {
     const char* TrianglesConstantBufferExampleComponent::s_trianglesConstantBufferExampleName = "TrianglesConstantBufferExample";
     // The number of triangles that are represented with a single constant buffer, that contains multiple buffer views;
     // each view containing a partial view of the constant buffer
-    const uint32_t TrianglesConstantBufferExampleComponent::s_numberOfTrianglesSingleCB = 15u;
+    const uint32_t TrianglesConstantBufferExampleComponent::s_numberOfTrianglesSingleCB = ATOMSAMPLEVIEWER_TRAIT_TRIANGLE_CONSTANT_BUFFER_SAMPLE_SINGLE_CONSTANT_BUFFER_SIZE;
     // The number of triangles that are represented with multiple constant buffers;
     // each having their own constant buffer and view containing the whole buffer
-    const uint32_t TrianglesConstantBufferExampleComponent::s_numberOfTrianglesMultipleCB = 15u;
+    const uint32_t TrianglesConstantBufferExampleComponent::s_numberOfTrianglesMultipleCB = ATOMSAMPLEVIEWER_TRAIT_TRIANGLE_CONSTANT_BUFFER_SAMPLE_MULTIPLE_CONSTANT_BUFFER_SIZE;
     // The total number of views and triangles that will be rendered for this sample
     const uint32_t TrianglesConstantBufferExampleComponent::s_numberOfTrianglesTotal = s_numberOfTrianglesSingleCB + s_numberOfTrianglesMultipleCB;
 
@@ -294,7 +296,7 @@ namespace AtomSampleViewer
 
         // Load the Shader and obtain the Pipeline state and its SRG
         {
-            const char* triangeShaderFilePath = "Shaders/RHI/TrianglesConstantBuffer.azshader";
+            const char* triangeShaderFilePath = ATOMSAMPLEVIEWER_TRAIT_TRIANGLE_CONSTANT_BUFFER_SAMPLE_SHADER_NAME;
             auto shader = LoadShader(triangeShaderFilePath, s_trianglesConstantBufferExampleName);
             if (shader == nullptr)
                 return;

@@ -11,7 +11,11 @@
 
 set(FILES
     AtomSampleViewerOptions_Android.cpp
+    BindlessExampleComponent_Traits_Platform.h
+    DynamicDrawExampleComponent_Traits_Platform.h
     MultiThreadComponent_Traits_Platform.h
+    SSRExampleComponent_Traits_Platform.h
+    TriangleConstantBufferExampleComponent_Traits_Platform.h
     SampleComponentManager_Android.cpp
     StreamingImageExampleComponent_Android.cpp
     Utils_Android.cpp
