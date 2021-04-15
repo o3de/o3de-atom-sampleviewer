@@ -8,7 +8,6 @@ or, if provided, by the license below or the license accompanying this file. Do 
 remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 """
-
 import logging
 import os
 import subprocess
@@ -16,377 +15,50 @@ import subprocess
 import pytest
 
 import ly_test_tools.environment.process_utils as process_utils
+import ly_test_tools.launchers.platforms.base
 
 RENDER_HARDWARE_INTERFACE = 'dx12'
 logger = logging.getLogger(__name__)
 
 
-def teardown():
-    process_utils.kill_processes_named(['AssetProcessor', 'AtomSampleViewerStandalone'], ignore_extensions=True)
+class AtomSampleViewerException(Exception):
+    """Custom Exception class for AtomSampleViewer tests."""
+    pass
 
 
 @pytest.mark.parametrize('launcher_platform', ['windows'])
 @pytest.mark.parametrize("project", ["AtomSampleViewer"])
-@pytest.mark.usefixtures("clean_atomsampleviewer_logs")
+@pytest.mark.usefixtures("clean_atomsampleviewer_logs", "atomsampleviewer_log_monitor")
 class TestDX12AutomationPeriodicSuite:
 
-    @pytest.mark.test_case_id('C35638262')
-    def test_C35638262_dx12_FullTestSuite(self, request, workspace, editor, launcher_platform):
-        test_script = '_FullTestSuite.bv.luac'
+    def test_dx12_PeriodicTestSuite(self, request, workspace, launcher_platform, atomsampleviewer_log_monitor):
+        # Script call setup.
+        test_script = '_FullTestSuite_.bv.lua'
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
                            f'--project-path={workspace.paths.project()} '
                            f'--rhi {RENDER_HARDWARE_INTERFACE} '
                            f'--runtestsuite scripts/{test_script} '
                            '--exitontestend')
+
+        def teardown():
+            process_utils.kill_processes_named(['AssetProcessor', 'AtomSampleViewerStandalone'], ignore_extensions=True)
         request.addfinalizer(teardown)
 
+        # Execute test.
+        process_utils.safe_check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
         try:
-            return_code = process_utils.check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
-            logger.debug(f"AtomSampleViewer {test_script} test command got response return code : {return_code}")
-            assert return_code == 0
-        except subprocess.CalledProcessError as e:
-            logger.error(f'AtomSampleViewer lua test "{test_script}" had a failure.\n')
-            raise e
-
-    @pytest.mark.test_case_id('C35638243')
-    def test_C35638243_dx12_AreaLightTest(self, request, workspace, editor, launcher_platform):
-        test_script = 'AreaLightTest.bv.luac'
-        cmd = os.path.join(workspace.paths.build_directory(),
-                           'AtomSampleViewerStandalone.exe '
-                           f'--project-path={workspace.paths.project()} '
-                           f'--rhi {RENDER_HARDWARE_INTERFACE} '
-                           f'--runtestsuite scripts/{test_script} '
-                           '--exitontestend')
-        request.addfinalizer(teardown)
-
-        try:
-            return_code = process_utils.check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
-            logger.debug(f"AtomSampleViewer {test_script} test command got response return code : {return_code}")
-            assert return_code == 0
-        except subprocess.CalledProcessError as e:
-            logger.error(f'AtomSampleViewer lua test "{test_script}" had a failure.\n')
-            raise e
-
-    @pytest.mark.test_case_id('C35638244')
-    def test_C35638244_dx12_CheckerboardTest(self, request, workspace, editor, launcher_platform):
-        test_script = 'CheckerboardTest.bv.luac'
-        cmd = os.path.join(workspace.paths.build_directory(),
-                           'AtomSampleViewerStandalone.exe '
-                           f'--project-path={workspace.paths.project()} '
-                           f'--rhi {RENDER_HARDWARE_INTERFACE} '
-                           f'--runtestsuite scripts/{test_script} '
-                           '--exitontestend')
-        request.addfinalizer(teardown)
-
-        try:
-            return_code = process_utils.check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
-            logger.debug(f"AtomSampleViewer {test_script} test command got response return code : {return_code}")
-            assert return_code == 0
-        except subprocess.CalledProcessError as e:
-            logger.error(f'AtomSampleViewer lua test "{test_script}" had a failure.\n')
-            raise e
-
-    @pytest.mark.test_case_id('C35638246')
-    def test_C35638246_dx12_Decals(self, request, workspace, editor, launcher_platform):
-        test_script = 'Decals.bv.luac'
-        cmd = os.path.join(workspace.paths.build_directory(),
-                           'AtomSampleViewerStandalone.exe '
-                           f'--project-path={workspace.paths.project()} '
-                           f'--rhi {RENDER_HARDWARE_INTERFACE} '
-                           f'--runtestsuite scripts/{test_script} '
-                           '--exitontestend')
-        request.addfinalizer(teardown)
-
-        try:
-            return_code = process_utils.check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
-            logger.debug(f"AtomSampleViewer {test_script} test command got response return code : {return_code}")
-            assert return_code == 0
-        except subprocess.CalledProcessError as e:
-            logger.error(f'AtomSampleViewer lua test "{test_script}" had a failure.\n')
-            raise e
-
-    @pytest.mark.test_case_id('C35638247')
-    def test_C35638247_dx12_DiffuseGITest(self, request, workspace, editor, launcher_platform):
-        test_script = 'DiffuseGITest.bv.luac'
-        cmd = os.path.join(workspace.paths.build_directory(),
-                           'AtomSampleViewerStandalone.exe '
-                           f'--project-path={workspace.paths.project()} '
-                           f'--rhi {RENDER_HARDWARE_INTERFACE} '
-                           f'--runtestsuite scripts/{test_script} '
-                           '--exitontestend')
-        request.addfinalizer(teardown)
-
-        try:
-            return_code = process_utils.check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
-            logger.debug(f"AtomSampleViewer {test_script} test command got response return code : {return_code}")
-            assert return_code == 0
-        except subprocess.CalledProcessError as e:
-            logger.error(f'AtomSampleViewer lua test "{test_script}" had a failure.\n')
-            raise e
-
-    @pytest.mark.test_case_id('C35638248')
-    def test_C35638248_dx12_DynamicDraw(self, request, workspace, editor, launcher_platform):
-        test_script = 'DynamicDraw.bv.luac'
-        cmd = os.path.join(workspace.paths.build_directory(),
-                           'AtomSampleViewerStandalone.exe '
-                           f'--project-path={workspace.paths.project()} '
-                           f'--rhi {RENDER_HARDWARE_INTERFACE} '
-                           f'--runtestsuite scripts/{test_script} '
-                           '--exitontestend')
-        request.addfinalizer(teardown)
-
-        try:
-            return_code = process_utils.check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
-            logger.debug(f"AtomSampleViewer {test_script} test command got response return code : {return_code}")
-            assert return_code == 0
-        except subprocess.CalledProcessError as e:
-            logger.error(f'AtomSampleViewer lua test "{test_script}" had a failure.\n')
-            raise e
-
-    @pytest.mark.test_case_id('C35638249')
-    def test_C35638249_dx12_DynamicMaterialTest(self, request, workspace, editor, launcher_platform):
-        test_script = 'DynamicMaterialTest.bv.luac'
-        cmd = os.path.join(workspace.paths.build_directory(),
-                           'AtomSampleViewerStandalone.exe '
-                           f'--project-path={workspace.paths.project()} '
-                           f'--rhi {RENDER_HARDWARE_INTERFACE} '
-                           f'--runtestsuite scripts/{test_script} '
-                           '--exitontestend')
-        request.addfinalizer(teardown)
-
-        try:
-            return_code = process_utils.check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
-            logger.debug(f"AtomSampleViewer {test_script} test command got response return code : {return_code}")
-            assert return_code == 0
-        except subprocess.CalledProcessError as e:
-            logger.error(f'AtomSampleViewer lua test "{test_script}" had a failure.\n')
-            raise e
-
-    @pytest.mark.test_case_id('C35638250')
-    def test_C35638250_dx12_LightCulling(self, request, workspace, editor, launcher_platform):
-        test_script = 'LightCulling.bv.luac'
-        cmd = os.path.join(workspace.paths.build_directory(),
-                           'AtomSampleViewerStandalone.exe '
-                           f'--project-path={workspace.paths.project()} '
-                           f'--rhi {RENDER_HARDWARE_INTERFACE} '
-                           f'--runtestsuite scripts/{test_script} '
-                           '--exitontestend')
-        request.addfinalizer(teardown)
-
-        try:
-            return_code = process_utils.check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
-            logger.debug(f"AtomSampleViewer {test_script} test command got response return code : {return_code}")
-            assert return_code == 0
-        except subprocess.CalledProcessError as e:
-            logger.error(f'AtomSampleViewer lua test "{test_script}" had a failure.\n')
-            raise e
-
-    @pytest.mark.test_case_id('C35638251')
-    def test_C35638251_dx12_MaterialHotReloadTest(self, request, workspace, editor, launcher_platform):
-        test_script = 'MaterialHotReloadTest.bv.luac'
-        cmd = os.path.join(workspace.paths.build_directory(),
-                           'AtomSampleViewerStandalone.exe '
-                           f'--project-path={workspace.paths.project()} '
-                           f'--rhi {RENDER_HARDWARE_INTERFACE} '
-                           f'--runtestsuite scripts/{test_script} '
-                           '--exitontestend')
-        request.addfinalizer(teardown)
-
-        try:
-            return_code = process_utils.check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
-            logger.debug(f"AtomSampleViewer {test_script} test command got response return code : {return_code}")
-            assert return_code == 0
-        except subprocess.CalledProcessError as e:
-            logger.error(f'AtomSampleViewer lua test "{test_script}" had a failure.\n')
-            raise e
-
-    @pytest.mark.test_case_id('C35638252')
-    def test_C35638252_dx12_MaterialScreenshotTests(self, request, workspace, editor, launcher_platform):
-        test_script = 'MaterialScreenshotTests.bv.luac'
-        cmd = os.path.join(workspace.paths.build_directory(),
-                           'AtomSampleViewerStandalone.exe '
-                           f'--project-path={workspace.paths.project()} '
-                           f'--rhi {RENDER_HARDWARE_INTERFACE} '
-                           f'--runtestsuite scripts/{test_script} '
-                           '--exitontestend')
-        request.addfinalizer(teardown)
-
-        try:
-            return_code = process_utils.check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
-            logger.debug(f"AtomSampleViewer {test_script} test command got response return code : {return_code}")
-            assert return_code == 0
-        except subprocess.CalledProcessError as e:
-            logger.error(f'AtomSampleViewer lua test "{test_script}" had a failure.\n')
-            raise e
-
-    @pytest.mark.test_case_id('C35638253')
-    def test_C35638253_dx12_MSAA_RPI_Test(self, request, workspace, editor, launcher_platform):
-        test_script = 'MSAA_RPI_Test.bv.luac'
-        cmd = os.path.join(workspace.paths.build_directory(),
-                           'AtomSampleViewerStandalone.exe '
-                           f'--project-path={workspace.paths.project()} '
-                           f'--rhi {RENDER_HARDWARE_INTERFACE} '
-                           f'--runtestsuite scripts/{test_script} '
-                           '--exitontestend')
-        request.addfinalizer(teardown)
-
-        try:
-            return_code = process_utils.check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
-            logger.debug(f"AtomSampleViewer {test_script} test command got response return code : {return_code}")
-            assert return_code == 0
-        except subprocess.CalledProcessError as e:
-            logger.error(f'AtomSampleViewer lua test "{test_script}" had a failure.\n')
-            raise e
-
-    @pytest.mark.test_case_id('C35638254')
-    def test_C35638254_dx12_MultiRenderPipeline(self, request, workspace, editor, launcher_platform):
-        test_script = 'MultiRenderPipeline.bv.luac'
-        cmd = os.path.join(workspace.paths.build_directory(),
-                           'AtomSampleViewerStandalone.exe '
-                           f'--project-path={workspace.paths.project()} '
-                           f'--rhi {RENDER_HARDWARE_INTERFACE} '
-                           f'--runtestsuite scripts/{test_script} '
-                           '--exitontestend')
-        request.addfinalizer(teardown)
-
-        try:
-            return_code = process_utils.check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
-            logger.debug(f"AtomSampleViewer {test_script} test command got response return code : {return_code}")
-            assert return_code == 0
-        except subprocess.CalledProcessError as e:
-            logger.error(f'AtomSampleViewer lua test "{test_script}" had a failure.\n')
-            raise e
-
-    @pytest.mark.test_case_id('C35638255')
-    def test_C35638255_dx12_MultiScene(self, request, workspace, editor, launcher_platform):
-        test_script = 'MultiScene.bv.luac'
-        cmd = os.path.join(workspace.paths.build_directory(),
-                           'AtomSampleViewerStandalone.exe '
-                           f'--project-path={workspace.paths.project()} '
-                           f'--rhi {RENDER_HARDWARE_INTERFACE} '
-                           f'--runtestsuite scripts/{test_script} '
-                           '--exitontestend')
-        request.addfinalizer(teardown)
-
-        try:
-            return_code = process_utils.check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
-            logger.debug(f"AtomSampleViewer {test_script} test command got response return code : {return_code}")
-            assert return_code == 0
-        except subprocess.CalledProcessError as e:
-            logger.error(f'AtomSampleViewer lua test "{test_script}" had a failure.\n')
-            raise e
-
-    @pytest.mark.test_case_id('C35638256')
-    def test_C35638256_dx12_ParallaxTest(self, request, workspace, editor, launcher_platform):
-        test_script = 'ParallaxTest.bv.luac'
-        cmd = os.path.join(workspace.paths.build_directory(),
-                           'AtomSampleViewerStandalone.exe '
-                           f'--project-path={workspace.paths.project()} '
-                           f'--rhi {RENDER_HARDWARE_INTERFACE} '
-                           f'--runtestsuite scripts/{test_script} '
-                           '--exitontestend')
-        request.addfinalizer(teardown)
-
-        try:
-            return_code = process_utils.check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
-            logger.debug(f"AtomSampleViewer {test_script} test command got response return code : {return_code}")
-            assert return_code == 0
-        except subprocess.CalledProcessError as e:
-            logger.error(f'AtomSampleViewer lua test "{test_script}" had a failure.\n')
-            raise e
-
-    @pytest.mark.test_case_id('C35638257')
-    def test_C35638257_dx12_SceneReloadSoakTest(self, request, workspace, editor, launcher_platform):
-        test_script = 'SceneReloadSoakTest.bv.luac'
-        cmd = os.path.join(workspace.paths.build_directory(),
-                           'AtomSampleViewerStandalone.exe '
-                           f'--project-path={workspace.paths.project()} '
-                           f'--rhi {RENDER_HARDWARE_INTERFACE} '
-                           f'--runtestsuite scripts/{test_script} '
-                           '--exitontestend')
-        request.addfinalizer(teardown)
-
-        try:
-            return_code = process_utils.check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
-            logger.debug(f"AtomSampleViewer {test_script} test command got response return code : {return_code}")
-            assert return_code == 0
-        except subprocess.CalledProcessError as e:
-            logger.error(f'AtomSampleViewer lua test "{test_script}" had a failure.\n')
-            raise e
-
-    @pytest.mark.test_case_id('C35638258')
-    def test_C35638258_dx12_ShadowedBistroTest(self, request, workspace, editor, launcher_platform):
-        test_script = 'ShadowedBistroTest.bv.luac'
-        cmd = os.path.join(workspace.paths.build_directory(),
-                           'AtomSampleViewerStandalone.exe '
-                           f'--project-path={workspace.paths.project()} '
-                           f'--rhi {RENDER_HARDWARE_INTERFACE} '
-                           f'--runtestsuite scripts/{test_script} '
-                           '--exitontestend')
-        request.addfinalizer(teardown)
-
-        try:
-            return_code = process_utils.check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
-            logger.debug(f"AtomSampleViewer {test_script} test command got response return code : {return_code}")
-            assert return_code == 0
-        except subprocess.CalledProcessError as e:
-            logger.error(f'AtomSampleViewer lua test "{test_script}" had a failure.\n')
-            raise e
-
-    @pytest.mark.test_case_id('C35638259')
-    def test_C35638259_dx12_ShadowTest(self, request, workspace, editor, launcher_platform):
-        test_script = 'ShadowTest.bv.luac'
-        cmd = os.path.join(workspace.paths.build_directory(),
-                           'AtomSampleViewerStandalone.exe '
-                           f'--project-path={workspace.paths.project()} '
-                           f'--rhi {RENDER_HARDWARE_INTERFACE} '
-                           f'--runtestsuite scripts/{test_script} '
-                           '--exitontestend')
-        request.addfinalizer(teardown)
-
-        try:
-            return_code = process_utils.check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
-            logger.debug(f"AtomSampleViewer {test_script} test command got response return code : {return_code}")
-            assert return_code == 0
-        except subprocess.CalledProcessError as e:
-            logger.error(f'AtomSampleViewer lua test "{test_script}" had a failure.\n')
-            raise e
-
-    @pytest.mark.test_case_id('C35638260')
-    def test_C35638260_dx12_StreamingImageTest(self, request, workspace, editor, launcher_platform):
-        test_script = 'StreamingImageTest.bv.luac'
-        cmd = os.path.join(workspace.paths.build_directory(),
-                           'AtomSampleViewerStandalone.exe '
-                           f'--project-path={workspace.paths.project()} '
-                           f'--rhi {RENDER_HARDWARE_INTERFACE} '
-                           f'--runtestsuite scripts/{test_script} '
-                           '--exitontestend')
-        request.addfinalizer(teardown)
-
-        try:
-            return_code = process_utils.check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
-            logger.debug(f"AtomSampleViewer {test_script} test command got response return code : {return_code}")
-            assert return_code == 0
-        except subprocess.CalledProcessError as e:
-            logger.error(f'AtomSampleViewer lua test "{test_script}" had a failure.\n')
-            raise e
-
-    @pytest.mark.test_case_id('C35638261')
-    def test_C35638261_dx12_TransparentTest(self, request, workspace, editor, launcher_platform):
-        test_script = 'TransparentTest.bv.luac'
-        cmd = os.path.join(workspace.paths.build_directory(),
-                           'AtomSampleViewerStandalone.exe '
-                           f'--project-path={workspace.paths.project()} '
-                           f'--rhi {RENDER_HARDWARE_INTERFACE} '
-                           f'--runtestsuite scripts/{test_script} '
-                           '--exitontestend')
-        request.addfinalizer(teardown)
-
-        try:
-            return_code = process_utils.check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
-            logger.debug(f"AtomSampleViewer {test_script} test command got response return code : {return_code}")
-            assert return_code == 0
-        except subprocess.CalledProcessError as e:
-            logger.error(f'AtomSampleViewer lua test "{test_script}" had a failure.\n')
-            raise e
+            unexpected_lines = ["Script: Screenshot check failed. Diff score"]  # "Diff score" ensures legit failure.
+            atomsampleviewer_log_monitor.monitor_log_for_lines(
+                unexpected_lines=unexpected_lines, halt_on_unexpected=True, timeout=5)
+        except ly_test_tools.log.log_monitor.LogMonitorException as e:
+            expected_screenshots_path = os.path.join(
+                workspace.paths.engine_root(), "AtomSampleViewer", "Scripts", "ExpectedScreenshots")
+            test_screenshots_path = os.path.join(
+                workspace.paths.project(), "user", "Scripts", "Screenshots")
+            raise AtomSampleViewerException(
+                f"Got error: {e}\n"
+                "Screenshot comparison check failed. Please review logs and screenshots at:\n"
+                f"Log file: {atomsampleviewer_log_monitor.file_to_monitor}\n"
+                f"Expected screenshots: {expected_screenshots_path}\n"
+                f"Test screenshots: {test_screenshots_path}\n")
