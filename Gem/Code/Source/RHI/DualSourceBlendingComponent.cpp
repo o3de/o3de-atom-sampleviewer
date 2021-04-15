@@ -153,7 +153,7 @@ namespace AtomSampleViewer
         RHI::RenderAttachmentLayoutBuilder attachmentsBuilder;
         attachmentsBuilder.AddSubpass()
             ->RenderTargetAttachment(m_outputFormat);
-        RHI::ResultCode result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
+        [[maybe_unused]] RHI::ResultCode result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
         AZ_Assert(result == RHI::ResultCode::Success, "Failed to create render attachment layout");
 
         pipelineDesc.m_renderStates.m_blendState.m_targets[0].m_enable = 1;

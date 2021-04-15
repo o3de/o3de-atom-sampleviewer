@@ -266,7 +266,7 @@ namespace AtomSampleViewer
             attachmentsBuilder.AddSubpass()
                 ->RenderTargetAttachment(m_outputFormat)
                 ->DepthStencilAttachment(RHI::Format::D32_FLOAT);
-            RHI::ResultCode result = attachmentsBuilder.End(drawPipelineStateDescriptor.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
+            [[maybe_unused]] RHI::ResultCode result = attachmentsBuilder.End(drawPipelineStateDescriptor.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
             AZ_Assert(result == RHI::ResultCode::Success, "Failed to create render attachment layout");
 
             drawPipelineStateDescriptor.m_renderStates.m_depthStencilState = AZ::RHI::DepthStencilState::CreateDepth();
@@ -704,8 +704,6 @@ namespace AtomSampleViewer
                 m_drawIndirect.m_countBuffer = &countBufferView->GetBuffer();
                 m_drawIndirect.m_countBufferByteOffset = 0;
             }
-
-            float screenAspect = GetViewportWidth() / GetViewportHeight();
 
             // Update the cull area
             float cullScale = 0.75f;

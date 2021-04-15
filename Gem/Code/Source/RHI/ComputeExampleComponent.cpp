@@ -214,7 +214,7 @@ namespace AtomSampleViewer
         RHI::RenderAttachmentLayoutBuilder attachmentsBuilder;
         attachmentsBuilder.AddSubpass()
             ->RenderTargetAttachment(m_outputFormat);
-        RHI::ResultCode result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
+        [[maybe_unused]] RHI::ResultCode result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
         AZ_Assert(result == RHI::ResultCode::Success, "Failed to create render attachment layout");
 
         m_drawPipelineState = shader->AcquirePipelineState(pipelineDesc);
@@ -283,7 +283,7 @@ namespace AtomSampleViewer
         {
             // attach compute buffer
             {
-                RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportBuffer(m_bufferAttachmentId, m_computeBuffer);
+                [[maybe_unused]] RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportBuffer(m_bufferAttachmentId, m_computeBuffer);
                 AZ_Error(s_computeExampleName, result == RHI::ResultCode::Success, "Failed to import compute buffer with error %d", result);
 
                 RHI::BufferScopeAttachmentDescriptor desc;

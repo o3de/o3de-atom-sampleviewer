@@ -113,5 +113,7 @@ namespace AtomSampleViewer
         AZ::Data::Instance<AZ::RPI::Material>  m_shaderVariantIndicatorMaterial_current;
 
         FileIOErrorHandler m_fileIoErrorHandler;
+
+        float m_clearAssetsTimeout = 0.0f;
     };
 } // namespace AtomSampleViewer

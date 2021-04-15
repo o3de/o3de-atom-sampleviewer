@@ -282,14 +282,6 @@ namespace AtomSampleViewer
         }
     }
 
-    void LightCullingExampleComponent::CreateSpotLights()
-    {
-        for (int i = 0; i < m_settings[(int)LightType::Spot].m_numActive; ++i)
-        {
-            CreateSpotLight(i);
-        }
-    }
-
     void LightCullingExampleComponent::CreateDiskLights()
     {
         for (int i = 0; i < m_settings[(int)LightType::Disk].m_numActive; ++i)
@@ -360,7 +352,6 @@ namespace AtomSampleViewer
         ImGui::Separator();
 
         DrawSidebarPointLightsSection(&m_settings[(int)LightType::Point]);
-        DrawSidebarSpotLightsSection(&m_settings[(int)LightType::Spot]);
         DrawSidebarDiskLightsSection(&m_settings[(int)LightType::Disk]);
         DrawSidebarCapsuleLightSection(&m_settings[(int)LightType::Capsule]);
         DrawSidebarQuadLightsSections(&m_settings[(int)LightType::Quad]);
@@ -384,21 +375,6 @@ namespace AtomSampleViewer
         }
     }
 
-    void LightCullingExampleComponent::DrawSidebarSpotLightsSection(LightSettings* lightSettings)
-    {
-        ScriptableImGui::ScopedNameContext context{"Spot Lights"};
-        if (ImGui::CollapsingHeader("Spot Lights", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed))
-        {
-            m_refreshLights |= ScriptableImGui::SliderInt("Spot light count", &lightSettings->m_numActive, 0, MaxNumLights);
-            m_refreshLights |= ScriptableImGui::SliderFloat("Spot Intensity", &lightSettings->m_intensity, 0.0f, 200.0f);
-            m_refreshLights |= ScriptableImGui::Checkbox("Enable automatic light falloff (Spot)", &lightSettings->m_enableAutomaticFalloff);
-            m_refreshLights |= ScriptableImGui::SliderFloat("Spot Attenuation Radius", &lightSettings->m_attenuationRadius, 0.0f, 20.0f);
-            m_refreshLights |= ScriptableImGui::SliderFloat("Inner Cone (degrees)", &m_spotInnerConeDegrees, 0.0f, 180.0f);
-            m_refreshLights |= ScriptableImGui::SliderFloat("Outer Cone (degrees)", &m_spotOuterConeDegrees, 0.0f, 180.0f);
-            ScriptableImGui::Checkbox("Draw Debug Cones", &lightSettings->m_enableDebugDraws);
-        }
-    }
-
     void LightCullingExampleComponent::DrawSidebarDiskLightsSection(LightSettings* lightSettings)
     {
         ScriptableImGui::ScopedNameContext context{"Disk Lights"};
@@ -408,8 +384,18 @@ namespace AtomSampleViewer
             m_refreshLights |= ScriptableImGui::SliderFloat("Disk Radius", &m_diskRadius, 0.0f, 20.0f);
             m_refreshLights |= ScriptableImGui::SliderFloat("Disk Attenuation Radius", &lightSettings->m_attenuationRadius, 0.0f, 20.0f);
             m_refreshLights |= ScriptableImGui::SliderFloat("Disk Intensity", &lightSettings->m_intensity, 0.0f, 200.0f);
-            m_refreshLights |= ScriptableImGui::Checkbox("Double sided disk", &m_isDiskDoubleSided);
-            ScriptableImGui::Checkbox("Draw disk lights", &lightSettings->m_enableDebugDraws);
+            m_refreshLights |= ScriptableImGui::Checkbox("Enable Disk Cone", &m_diskConesEnabled);
+
+            if (m_diskConesEnabled)
+            {
+                m_refreshLights |= ScriptableImGui::SliderFloat("Inner Cone (degrees)", &m_diskInnerConeDegrees, 0.0f, 180.0f);
+                m_refreshLights |= ScriptableImGui::SliderFloat("Outer Cone (degrees)", &m_diskOuterConeDegrees, 0.0f, 180.0f);
+                ScriptableImGui::Checkbox("Draw Debug Cones", &lightSettings->m_enableDebugDraws);
+            }
+            else
+            {
+                ScriptableImGui::Checkbox("Draw disk lights", &lightSettings->m_enableDebugDraws);
+            }
         }
     }
 
@@ -496,9 +482,13 @@ namespace AtomSampleViewer
         m_diskLightFeatureProcessor->SetPosition(light.m_lightHandle, light.m_position);
         m_diskLightFeatureProcessor->SetRgbIntensity(light.m_lightHandle, PhotometricColor<PhotometricUnit::Candela>(settings.m_intensity * light.m_color));
         m_diskLightFeatureProcessor->SetDirection(light.m_lightHandle, light.m_direction);
-        m_diskLightFeatureProcessor->SetLightEmitsBothDirections(light.m_lightHandle, m_isDiskDoubleSided);
+        
+        m_diskLightFeatureProcessor->SetConstrainToConeLight(light.m_lightHandle, m_diskConesEnabled);
+        if (m_diskConesEnabled)
+        {
+            m_diskLightFeatureProcessor->SetConeAngles(light.m_lightHandle, DegToRad(m_diskInnerConeDegrees), DegToRad(m_diskOuterConeDegrees));
+        }
 
-        float attenuationRadius = settings.m_enableAutomaticFalloff ? AutoCalculateAttenuationRadius(light.m_color, settings.m_intensity) : settings.m_attenuationRadius;
         m_diskLightFeatureProcessor->SetAttenuationRadius(light.m_lightHandle, m_settings[(int)LightType::Disk].m_attenuationRadius);
     }
 
@@ -536,21 +526,6 @@ namespace AtomSampleViewer
         m_quadLightFeatureProcessor->SetUseFastApproximation(light.m_lightHandle, m_quadLightsUseFastApproximation);
         m_quadLightFeatureProcessor->SetAttenuationRadius(light.m_lightHandle, m_settings[(int)LightType::Quad].m_attenuationRadius);
         m_quadLightFeatureProcessor->SetPosition(light.m_lightHandle, light.m_position);
-    }
-
-    void LightCullingExampleComponent::CreateSpotLight(int index)
-    {
-        auto& light = m_spotLights[index];
-        light.m_lightHandle = m_spotLightFeatureProcessor->AcquireLight();
-        const LightSettings& settings = m_settings[(int)LightType::Spot];
-
-        m_spotLightFeatureProcessor->SetPosition(light.m_lightHandle, light.m_position);
-        m_spotLightFeatureProcessor->SetDirection(light.m_lightHandle, light.m_direction);
-        m_spotLightFeatureProcessor->SetRgbIntensity(light.m_lightHandle, PhotometricColor<PhotometricUnit::Candela>(settings.m_intensity * light.m_color));
-
-        float attenuationRadius = settings.m_enableAutomaticFalloff ? AutoCalculateAttenuationRadius(light.m_color, settings.m_intensity) : settings.m_attenuationRadius;
-        m_spotLightFeatureProcessor->SetAttenuationRadius(light.m_lightHandle, attenuationRadius);
-        m_spotLightFeatureProcessor->SetConeAngles(light.m_lightHandle, m_spotInnerConeDegrees, m_spotOuterConeDegrees);
     }
 
     void LightCullingExampleComponent::CreateDecal(int index)
@@ -591,25 +566,6 @@ namespace AtomSampleViewer
 
             float radius = settings.m_enableAutomaticFalloff ? AutoCalculateAttenuationRadius(light.m_color, settings.m_intensity) : settings.m_attenuationRadius;
             auxGeom->DrawSphere(light.m_position, radius, light.m_color, AZ::RPI::AuxGeomDraw::DrawStyle::Shaded);
-        }
-    }
-
-    void LightCullingExampleComponent::DrawSpotLightDebugCones(AZ::RPI::AuxGeomDrawPtr auxGeom)
-    {
-        const LightSettings& settings = m_settings[(int)LightType::Spot];
-        int numToDraw = AZStd::min(settings.m_numActive, aznumeric_cast<int>(m_spotLights.size()));
-        for (int i = 0; i < numToDraw; ++i)
-        {
-            const auto& light = m_spotLights[i];
-            if (light.m_lightHandle.IsNull())
-            {
-                continue;
-            }
-
-            float height = settings.m_enableAutomaticFalloff ? AutoCalculateAttenuationRadius(light.m_color, settings.m_intensity) : settings.m_attenuationRadius;
-            float angleRadians = AZ::DegToRad(m_spotOuterConeDegrees * 0.5f);
-            float radius = tanf(angleRadians) * height;
-            auxGeom->DrawCone(light.m_position + light.m_direction * height, -light.m_direction, radius, height, light.m_color, AZ::RPI::AuxGeomDraw::DrawStyle::Shaded);
         }
     }
 
@@ -680,10 +636,6 @@ namespace AtomSampleViewer
             {
                 DrawPointLightDebugSpheres(auxGeom);
             }
-            if (m_settings[(int)LightType::Spot].m_enableDebugDraws)
-            {
-                DrawSpotLightDebugCones(auxGeom);
-            }
             if (m_settings[(int)LightType::Disk].m_enableDebugDraws)
             {
                 DrawDiskLightDebugObjects(auxGeom);
@@ -725,35 +677,37 @@ namespace AtomSampleViewer
 
     void LightCullingExampleComponent::InitLightArrays()
     {
-        // Set seed to the same value each time so values are consistent between multiple app runs.
-        // Intended for use with the screenshot comparison tool
-        m_random.SetSeed(0);
-
         const auto InitLight = [this](auto& light)
             {
                 light.m_color = GetRandomColor();
                 light.m_position = GetRandomPositionInsideWorldModel();
                 light.m_direction = GetRandomDirection();
             };
-
+        
+        // Set seed to a specific value for each light type so values are consistent between multiple app runs
+        // And changes to one type don't polute the random numbers for another type.
+        // Intended for use with the screenshot comparison tool
+        m_random.SetSeed(0);
         m_pointLights.resize(MaxNumLights);
         AZStd::for_each(m_pointLights.begin(), m_pointLights.end(), InitLight);
-
-        m_spotLights.resize(MaxNumLights);
-        AZStd::for_each(m_spotLights.begin(), m_spotLights.end(), InitLight);
-
+        
+        m_random.SetSeed(1);
         m_diskLights.resize(MaxNumLights);
         AZStd::for_each(m_diskLights.begin(), m_diskLights.end(), InitLight);
-
+        
+        m_random.SetSeed(2);
         m_capsuleLights.resize(MaxNumLights);
         AZStd::for_each(m_capsuleLights.begin(), m_capsuleLights.end(), InitLight);
+
+        m_random.SetSeed(3);
         m_decals.resize(MaxNumLights);
         AZStd::for_each(m_decals.begin(), m_decals.end(), [&](Decal& decal)
             {
                 decal.m_position = GetRandomPositionInsideWorldModel();
                 decal.m_quaternion = AZ::Quaternion::CreateFromAxisAngle(GetRandomDirection(), GetRandomNumber(0.0f, AZ::Constants::TwoPi));
             });
-
+        
+        m_random.SetSeed(4);
         m_quadLights.resize(MaxNumLights);
         AZStd::for_each(m_quadLights.begin(), m_quadLights.end(), InitLight);
     }
@@ -762,7 +716,6 @@ namespace AtomSampleViewer
     {
         AZ::RPI::Scene* scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get();
         m_pointLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::PointLightFeatureProcessorInterface>();
-        m_spotLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::SpotLightFeatureProcessorInterface>();
         m_diskLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DiskLightFeatureProcessorInterface>();
         m_capsuleLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::CapsuleLightFeatureProcessorInterface>();
         m_quadLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::QuadLightFeatureProcessorInterface>();
@@ -798,7 +751,7 @@ namespace AtomSampleViewer
                         trianglePass->SetEnabled(m_heatmapOpacity > 0.0f);
                         Data::Instance<ShaderResourceGroup> srg = trianglePass->GetShaderResourceGroup();
                         RHI::ShaderInputConstantIndex opacityIndex = srg->FindShaderInputConstantIndex(AZ::Name("m_heatmapOpacity"));
-                        bool setOk = srg->SetConstant<float>(opacityIndex, m_heatmapOpacity);
+                        [[maybe_unused]] bool setOk = srg->SetConstant<float>(opacityIndex, m_heatmapOpacity);
                         AZ_Warning("LightCullingExampleComponent", setOk, "Unable to set heatmap opacity");
                     }
                 }
@@ -867,7 +820,6 @@ namespace AtomSampleViewer
     void LightCullingExampleComponent::DestroyLightsAndDecals()
     {
         DestroyLights(m_pointLightFeatureProcessor, m_pointLights);
-        DestroyLights(m_spotLightFeatureProcessor, m_spotLights);
         DestroyLights(m_diskLightFeatureProcessor, m_diskLights);
         DestroyLights(m_capsuleLightFeatureProcessor, m_capsuleLights);
         DestroyLights(m_quadLightFeatureProcessor, m_quadLights);
@@ -877,7 +829,6 @@ namespace AtomSampleViewer
     void LightCullingExampleComponent::CreateLightsAndDecals()
     {
         CreatePointLights();
-        CreateSpotLights();
         CreateDiskLights();
         CreateCapsuleLights();
         CreateQuadLights();

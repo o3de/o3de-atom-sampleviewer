@@ -314,8 +314,6 @@ namespace AtomSampleViewer
 
             float radius = GetLerpValue(m_config.m_radius, index, m_config.GetVaryRadius());
             m_diskLightFeatureProcessor->SetDiskRadius(handle, radius);
-
-            m_diskLightFeatureProcessor->SetLightEmitsBothDirections(handle, m_config.m_emitsBothDirections);
         }
     }
 
@@ -685,7 +683,7 @@ namespace AtomSampleViewer
             }
         }
 
-        if (m_config.m_lightType == Disk || m_config.m_lightType == Quad || m_config.m_lightType == Polygon)
+        if (m_config.m_lightType == Quad || m_config.m_lightType == Polygon)
         {
             if (ScriptableImGui::Checkbox("Emit Both Directions", &m_config.m_emitsBothDirections))
             {

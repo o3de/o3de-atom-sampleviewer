@@ -312,7 +312,7 @@ namespace AtomSampleViewer
 
             attachmentsBuilder.AddSubpass()
                 ->DepthStencilAttachment(RHI::Format::D32_FLOAT);
-            RHI::ResultCode result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
+            [[maybe_unused]] RHI::ResultCode result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
             AZ_Assert(result == RHI::ResultCode::Success, "Failed to create render attachment layout");
 
             {
@@ -371,7 +371,7 @@ namespace AtomSampleViewer
                 ->RenderTargetAttachment(RHI::Format::R16G16B16A16_FLOAT)
                 ->DepthStencilAttachment(depthStencilFormat);
 
-            RHI::ResultCode result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
+            [[maybe_unused]] RHI::ResultCode result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
             AZ_Assert(result == RHI::ResultCode::Success, "Failed to create render attachment layout");
 
             {
@@ -427,7 +427,7 @@ namespace AtomSampleViewer
             attachmentsBuilder.Reset();
             attachmentsBuilder.AddSubpass()
                 ->RenderTargetAttachment(m_outputFormat);
-            RHI::ResultCode result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
+            [[maybe_unused]] RHI::ResultCode result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
             AZ_Assert(result == RHI::ResultCode::Success, "Failed to create render attachment layout");
 
             RHI::TargetBlendState& blendstate = pipelineDesc.m_renderStates.m_blendState.m_targets[0];
@@ -468,7 +468,7 @@ namespace AtomSampleViewer
             attachmentsBuilder.Reset();
             attachmentsBuilder.AddSubpass()
                 ->RenderTargetAttachment(RHI::Format::R32_FLOAT);
-            RHI::ResultCode result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
+            [[maybe_unused]] RHI::ResultCode result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
             AZ_Assert(result == RHI::ResultCode::Success, "Failed to create render attachment layout");
 
             RHI::InputStreamLayoutBuilder layoutBuilder;
