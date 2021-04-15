@@ -12,6 +12,9 @@
 --
 ----------------------------------------------------------------------------------------------------
 
+-- "Periodic" suite tests.
+-- These tests are considered "periodic" tests that run every so often and must pass, but will not block the pipeline when making changes.
+
 -- Fast check for a sample which doesn't have a dedicated test script
 function FastCheckSample(sampleName)
     Print("========= Begin Fast-check " .. sampleName .. " =========")

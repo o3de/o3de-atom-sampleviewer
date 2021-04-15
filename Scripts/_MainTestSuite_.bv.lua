@@ -12,7 +12,9 @@
 --
 ----------------------------------------------------------------------------------------------------
 
--- Main suite tests.
+-- "Main" suite tests.
+-- These tests are considered the "main" pipeline tests that must pass for a change to be verified in AtomSampleViewerStandalone.
+
 RunScript('scripts/decals.bv.luac')
 RunScript('scripts/dynamicdraw.bv.luac')
 RunScript('scripts/dynamicmaterialtest.bv.luac')

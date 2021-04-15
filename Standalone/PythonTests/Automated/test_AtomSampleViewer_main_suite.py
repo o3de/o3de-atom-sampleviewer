@@ -17,7 +17,6 @@ import pytest
 import ly_test_tools.environment.process_utils as process_utils
 import ly_test_tools.launchers.platforms.base
 
-RENDER_HARDWARE_INTERFACE = 'dx12'
 logger = logging.getLogger(__name__)
 
 
@@ -28,16 +27,17 @@ class AtomSampleViewerException(Exception):
 
 @pytest.mark.parametrize('launcher_platform', ['windows'])
 @pytest.mark.parametrize("project", ["AtomSampleViewer"])
+@pytest.mark.parametrize('rhi', ['dx12', 'vulkan'])
 @pytest.mark.usefixtures("clean_atomsampleviewer_logs", "atomsampleviewer_log_monitor")
 class TestDX12AutomationMainSuite:
 
-    def test_dx12_MainTestSuite(self, request, workspace, launcher_platform, atomsampleviewer_log_monitor):
+    def test_dx12_MainTestSuite(self, request, workspace, launcher_platform, rhi, atomsampleviewer_log_monitor):
         # Script call setup.
         test_script = '_MainTestSuite_.bv.lua'
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
                            f'--project-path={workspace.paths.project()} '
-                           f'--rhi {RENDER_HARDWARE_INTERFACE} '
+                           f'--rhi {rhi} '
                            f'--runtestsuite scripts/{test_script} '
                            '--exitontestend')
 
@@ -58,7 +58,8 @@ class TestDX12AutomationMainSuite:
                 workspace.paths.project(), "user", "Scripts", "Screenshots")
             raise AtomSampleViewerException(
                 f"Got error: {e}\n"
-                "Screenshot comparison check failed. Please review logs and screenshots at:\n"
+                f"Screenshot comparison check failed using Render Hardware Interface (RHI): '{rhi}'\n"
+                "Please review logs and screenshots at:\n"
                 f"Log file: {atomsampleviewer_log_monitor.file_to_monitor}\n"
                 f"Expected screenshots: {expected_screenshots_path}\n"
                 f"Test screenshots: {test_screenshots_path}\n")
