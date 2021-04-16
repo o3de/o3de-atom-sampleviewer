@@ -11,15 +11,12 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 import logging
 import os
 import subprocess
-import types
 
 import pytest
 
 import ly_test_tools.environment.process_utils as process_utils
 import ly_test_tools.launchers.platforms.base
-import ly_test_tools.log.log_monitor
 
-RENDER_HARDWARE_INTERFACE = 'dx12'
 logger = logging.getLogger(__name__)
 
 
@@ -30,38 +27,30 @@ class AtomSampleViewerException(Exception):
 
 @pytest.mark.parametrize('launcher_platform', ['windows'])
 @pytest.mark.parametrize("project", ["AtomSampleViewer"])
-@pytest.mark.usefixtures("clean_atomsampleviewer_logs")
+@pytest.mark.parametrize('rhi', ['dx12', 'vulkan'])
+@pytest.mark.usefixtures("clean_atomsampleviewer_logs", "atomsampleviewer_log_monitor")
 class TestDX12AutomationMainSuite:
 
-    @pytest.mark.test_case_id('C35638245')
-    def test_C35638245_dx12_CullingAndLod(self, request, workspace, launcher_platform):
+    def test_dx12_MainTestSuite(self, request, workspace, launcher_platform, rhi, atomsampleviewer_log_monitor):
         # Script call setup.
-        test_script = 'CullingAndLod.bv.luac'
+        test_script = '_MainTestSuite_.bv.lua'
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
                            f'--project-path={workspace.paths.project()} '
-                           f'--rhi {RENDER_HARDWARE_INTERFACE} '
+                           f'--rhi {rhi} '
                            f'--runtestsuite scripts/{test_script} '
                            '--exitontestend')
 
         def teardown():
             process_utils.kill_processes_named(['AssetProcessor', 'AtomSampleViewerStandalone'], ignore_extensions=True)
-
         request.addfinalizer(teardown)
-
-        # Log monitor setup.
-        def is_alive(launcher_name):
-            return True
-        launcher = ly_test_tools.launchers.platforms.base.Launcher(workspace, [])  # Needed for log monitor to work.
-        launcher.is_alive = types.MethodType(is_alive, launcher)
-        file_to_monitor = os.path.join(workspace.paths.project_log(), 'atomsampleviewer.log')
-        log_monitor = ly_test_tools.log.log_monitor.LogMonitor(launcher=launcher, log_file_path=file_to_monitor)
 
         # Execute test.
         process_utils.safe_check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
         try:
             unexpected_lines = ["Script: Screenshot check failed. Diff score"]  # "Diff score" ensures legit failure.
-            log_monitor.monitor_log_for_lines(unexpected_lines=unexpected_lines, halt_on_unexpected=True, timeout=5)
+            atomsampleviewer_log_monitor.monitor_log_for_lines(
+                unexpected_lines=unexpected_lines, halt_on_unexpected=True, timeout=5)
         except ly_test_tools.log.log_monitor.LogMonitorException as e:
             expected_screenshots_path = os.path.join(
                 workspace.paths.engine_root(), "AtomSampleViewer", "Scripts", "ExpectedScreenshots")
@@ -69,7 +58,8 @@ class TestDX12AutomationMainSuite:
                 workspace.paths.project(), "user", "Scripts", "Screenshots")
             raise AtomSampleViewerException(
                 f"Got error: {e}\n"
-                "Screenshot comparison check failed. Please review logs and screenshots at:\n"
-                f"Log file: {file_to_monitor}\n"
+                f"Screenshot comparison check failed using Render Hardware Interface (RHI): '{rhi}'\n"
+                "Please review logs and screenshots at:\n"
+                f"Log file: {atomsampleviewer_log_monitor.file_to_monitor}\n"
                 f"Expected screenshots: {expected_screenshots_path}\n"
                 f"Test screenshots: {test_screenshots_path}\n")
