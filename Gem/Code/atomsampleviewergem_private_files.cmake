@@ -91,6 +91,8 @@ set(FILES
     Source/AuxGeomExampleComponent.h
     Source/AuxGeomSharedDrawFunctions.cpp
     Source/AuxGeomSharedDrawFunctions.h
+    Source/BakedShaderVariantExampleComponent.h
+    Source/BakedShaderVariantExampleComponent.cpp
     Source/BistroBenchmarkComponent.cpp
     Source/BistroBenchmarkComponent.h
     Source/BloomExampleComponent.cpp
