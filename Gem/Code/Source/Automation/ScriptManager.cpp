@@ -448,11 +448,12 @@ namespace AtomSampleViewer
         m_showScriptRunnerDialog = true;
     }
 
-    void ScriptManager::RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd)
+    void ScriptManager::RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd, int randomSeed)
     {
         m_testSuiteRunConfig.m_automatedRunEnabled = true;
         m_testSuiteRunConfig.m_testSuitePath = suiteFilePath;
         m_testSuiteRunConfig.m_closeOnTestScriptFinish = exitOnTestEnd;
+        m_testSuiteRunConfig.m_randomSeed = randomSeed;
     }
 
     void ScriptManager::AbortScripts(const AZStd::string& reason)
@@ -507,6 +508,8 @@ namespace AtomSampleViewer
 
             ImGui::Text("Settings");
             ImGui::Indent();
+
+            ImGui::InputInt("Random Seed for Test Order Execution", &m_testSuiteRunConfig.m_randomSeed);
 
             m_imageComparisonOptions.DrawImGuiSettings();
             if (ImGui::Button("Reset"))
@@ -733,6 +736,7 @@ namespace AtomSampleViewer
         behaviorContext->Method("NormalizePath", &Script_NormalizePath);
         behaviorContext->Method("DegToRad", &Script_DegToRad);
         behaviorContext->Method("GetRenderApiName", &Script_GetRenderApiName);
+        behaviorContext->Method("GetRandomTestSeed", &Script_GetRandomTestSeed);
 
         // Samples...
         behaviorContext->Method("OpenSample", &Script_OpenSample);
@@ -1373,6 +1377,11 @@ namespace AtomSampleViewer
         AZ::RPI::RPISystemInterface* rpiSystem = AZ::RPI::RPISystemInterface::Get();
         return rpiSystem->GetRenderApiName().GetCStr();
         
+    }
+
+    int ScriptManager::Script_GetRandomTestSeed()
+    {
+        return s_instance->m_testSuiteRunConfig.m_randomSeed;
     }
 
     void ScriptManager::CheckArcBallControllerHandler()
