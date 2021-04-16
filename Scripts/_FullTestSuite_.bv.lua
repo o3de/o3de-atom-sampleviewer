@@ -12,6 +12,9 @@
 --
 ----------------------------------------------------------------------------------------------------
 
+-- "Full" suite of tests that need to be run locally by developers before opening a pull request.
+-- This suite of tests is NOT part of the automated review process.
+
 -- Fast check for a sample which doesn't have a dedicated test script
 function FastCheckSample(sampleName)
     Print("========= Begin Fast-check " .. sampleName .. " =========")

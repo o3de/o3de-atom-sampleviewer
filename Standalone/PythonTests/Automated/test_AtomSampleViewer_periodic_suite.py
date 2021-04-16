@@ -29,11 +29,14 @@ class AtomSampleViewerException(Exception):
 @pytest.mark.parametrize("project", ["AtomSampleViewer"])
 @pytest.mark.parametrize('rhi', ['dx12', 'vulkan'])
 @pytest.mark.usefixtures("clean_atomsampleviewer_logs", "atomsampleviewer_log_monitor")
-class TestDX12AutomationPeriodicSuite:
+class TestAutomationPeriodicSuite:
 
-    def test_dx12_PeriodicTestSuite(self, request, workspace, launcher_platform, rhi, atomsampleviewer_log_monitor):
+    def test_AutomatedPeriodicTestSuite(self, request, workspace, launcher_platform, rhi, atomsampleviewer_log_monitor):
         # Script call setup.
-        test_script = '_FullTestSuite_.bv.lua'
+        test_script = '_AutomatedPeriodicTestSuite_.bv.lua'
+        test_script_path = os.path.join(workspace.paths.engine_root(), 'AtomSampleViewer', 'Scripts', test_script)
+        if not os.path.exists(test_script_path):
+            raise AtomSampleViewerException(f'Test script does not exist in path: {test_script_path}')
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
                            f'--project-path={workspace.paths.project()} '
@@ -48,7 +51,8 @@ class TestDX12AutomationPeriodicSuite:
         # Execute test.
         process_utils.safe_check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
         try:
-            unexpected_lines = ["Script: Screenshot check failed. Diff score"]  # "Diff score" ensures legit failure.
+            unexpected_lines = ["Script: Screenshot check failed. Diff score",  # "Diff score" ensures legit failure.
+                                'Trace::Error']
             atomsampleviewer_log_monitor.monitor_log_for_lines(
                 unexpected_lines=unexpected_lines, halt_on_unexpected=True, timeout=5)
         except ly_test_tools.log.log_monitor.LogMonitorException as e:
