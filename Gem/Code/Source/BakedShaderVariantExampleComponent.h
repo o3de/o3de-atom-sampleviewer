@@ -17,7 +17,6 @@
 #include <AzCore/Component/TickBus.h>
 #include <AzFramework/Asset/AssetSystemTypes.h>
 #include <CommonSampleComponentBase.h>
-#include <Utils/FileIOErrorHandler.h>
 #include <Utils/ImGuiSidebar.h>
 #include <Utils/ImGuiAssetBrowser.h>
 #include <Utils/ImGuiMaterialDetails.h>
@@ -25,9 +24,11 @@
 
 namespace AtomSampleViewer
 {
-    //! This test renders a simple material and exposes controls that can update the source data for that material and its shaders
-    //! to demonstrate and test hot-reloading. It works by copying entire files from a test data folder into a material source folder
-    //! and waiting for the Asset Processor to build the updates files.
+    //! This test is for collecting metrics on the shader variant system by allowing users to switch from using
+    //! root shader variant to the optimized variant. To generate shader variants, use the Shader Management Console.
+    //! The shader options used by the material can be verified using the Material Details button in the sidebar.
+    //! FPS and root pass metrics are shown on the sidebar as well. To view metrics for specific passes, use the GPU
+    //! profiler.
     class BakedShaderVariantExampleComponent final
         : public CommonSampleComponentBase
         , public AZ::TickBus::Handler
@@ -50,6 +51,7 @@ namespace AtomSampleViewer
         void OnTick(float deltaTime, AZ::ScriptTimePoint scriptTime) override;
 
         void MaterialChange();
+        void SetRootVariantUsage(bool enabled);
 
         static constexpr uint32_t FrameTimeLogSize = 10;
         static constexpr uint32_t PassTimeLogSize = 10;
@@ -66,7 +68,7 @@ namespace AtomSampleViewer
         AZ::Data::Asset<AZ::RPI::ModelAsset> m_modelAsset;
         AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_meshHandle;
 
-        AZ::RHI::Ptr<AZ::RPI::ParentPass> rootPass;
+        AZ::RHI::Ptr<AZ::RPI::ParentPass> m_rootPass;
 
         size_t m_selectedShaderIndex = 0;
     };

@@ -54,7 +54,7 @@ namespace AtomSampleViewer
     }
 
     BakedShaderVariantExampleComponent::BakedShaderVariantExampleComponent()
-        : m_imguiSidebar{"@user@/MaterialHotReloadTestComponent/sidebar.xml"}
+        : m_imguiSidebar{"@user@/BakedShaderVariantExampleComponent/sidebar.xml"}
         , m_materialBrowser{"@user@/BakedShaderVariantExampleComponent/material_browser.xml"}
         , m_imGuiFrameTimer(FrameTimeLogSize, FrameTimeLogSize)
         , m_imGuiPassTimer(PassTimeLogSize, PassTimeLogSize)
@@ -94,12 +94,18 @@ namespace AtomSampleViewer
         m_meshHandle = m_meshFeatureProcessor->AcquireMesh(m_modelAsset, m_material);
         m_meshFeatureProcessor->SetTransform(m_meshHandle, meshTransform);
 
-        rootPass = AZ::RPI::PassSystemInterface::Get()->GetRootPass();
-        rootPass->SetTimestampQueryEnabled(true);
+        m_rootPass = AZ::RPI::PassSystemInterface::Get()->GetRootPass();
+        m_rootPass->SetTimestampQueryEnabled(true);
+
+        SetRootVariantUsage(true);
     }
 
     void BakedShaderVariantExampleComponent::Deactivate()
     {
+        SetRootVariantUsage(false);
+
+        m_rootPass->SetTimestampQueryEnabled(false);
+
         m_meshFeatureProcessor->ReleaseMesh(m_meshHandle);
 
         Data::AssetBus::Handler::BusDisconnect();
@@ -111,11 +117,11 @@ namespace AtomSampleViewer
         ShutdownLightingPresets();
     }
 
-    void BakedShaderVariantExampleComponent::OnTick([[maybe_unused]] float deltaTime, ScriptTimePoint /*scriptTime*/)
+    void BakedShaderVariantExampleComponent::OnTick(float deltaTime, ScriptTimePoint /*scriptTime*/)
     {
         m_imGuiFrameTimer.PushValue(deltaTime);
 
-        AZ::RPI::TimestampResult timestampResult = rootPass->GetTimestampResult();
+        AZ::RPI::TimestampResult timestampResult = m_rootPass->GetTimestampResult();
         double gpuFrameTimeMs = aznumeric_cast<double>(timestampResult.GetTimestampInNanoseconds()) / 1000000;
         m_imGuiPassTimer.PushValue(gpuFrameTimeMs);
 
@@ -133,23 +139,23 @@ namespace AtomSampleViewer
             ImGui::Separator();
             ImGui::Spacing();
 
-            AZ::IConsole* console = AZ::Interface<AZ::IConsole>::Get();
+
             ImGui::Text("Shader Variant Usage:");
             if (ScriptableImGui::Button("Force Root Variant"))
             {
-                console->PerformCommand("cl_forceRootShaderVariantUsage true");
+                SetRootVariantUsage(true);
             }
             ImGui::SameLine();
             if (ScriptableImGui::Button("Optimize Variant"))
             {
-                console->PerformCommand("cl_forceRootShaderVariantUsage false");
+                SetRootVariantUsage(false);
             }
 
             ImGui::Spacing();
             ImGui::Separator();
             ImGui::Spacing();
 
-            ImGui::Text("FPS Histogram");
+            ImGui::Text("FPS");
             ImGuiHistogramQueue::WidgetSettings settings;
             settings.m_reportInverse = true;
             settings.m_units = "fps";
@@ -159,9 +165,9 @@ namespace AtomSampleViewer
             ImGui::Separator();
             ImGui::Spacing();
 
-            ImGui::Text("GPU Pass Histogram");
+            ImGui::Text("GPU Root Pass");
             ImGuiHistogramQueue::WidgetSettings gpuMetricsSettings;
-            settings.m_units = "ms";
+            gpuMetricsSettings.m_units = "ms";
             m_imGuiPassTimer.Tick(gpuFrameTimeMs, gpuMetricsSettings);
 
             ImGui::Spacing();
@@ -183,6 +189,12 @@ namespace AtomSampleViewer
         {
             MaterialChange();
         }
+    }
+
+    void BakedShaderVariantExampleComponent::SetRootVariantUsage(bool enabled)
+    {
+        AZ::IConsole* console = AZ::Interface<AZ::IConsole>::Get();
+        console->PerformCommand(AZStd::string::format("r_forceRootShaderVariantUsage %s", enabled ? "true" : "false").c_str());
     }
 
     void BakedShaderVariantExampleComponent::MaterialChange()
