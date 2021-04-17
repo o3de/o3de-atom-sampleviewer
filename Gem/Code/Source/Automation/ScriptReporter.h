@@ -248,6 +248,7 @@ namespace AtomSampleViewer
         AZStd::vector<size_t> m_currentScriptIndexStack; //< Tracks which of the scripts in m_scriptReports is currently active
         bool m_showReportDialog = false;
         DisplayOption m_displayOption = DisplayOption::AllResults;
+        bool m_forceShowUpdateButtons = false; //< By default, the "Update" buttons are visible only for failed screenshots. This forces them to be visible.
         AZStd::string m_officialBaselineSourceFolder; //< Used for updating official baseline screenshots
     };
 
