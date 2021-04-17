@@ -57,7 +57,7 @@ namespace AtomSampleViewer
         : m_imguiSidebar{"@user@/BakedShaderVariantExampleComponent/sidebar.xml"}
         , m_materialBrowser{"@user@/BakedShaderVariantExampleComponent/material_browser.xml"}
         , m_imGuiFrameTimer(FrameTimeLogSize, FrameTimeLogSize)
-        , m_imGuiPassTimer(PassTimeLogSize, PassTimeLogSize)
+        , m_imGuiForwardPassTimer(PassTimeLogSize, PassTimeLogSize)
     {
     }
 
@@ -94,8 +94,12 @@ namespace AtomSampleViewer
         m_meshHandle = m_meshFeatureProcessor->AcquireMesh(m_modelAsset, m_material);
         m_meshFeatureProcessor->SetTransform(m_meshHandle, meshTransform);
 
-        m_rootPass = AZ::RPI::PassSystemInterface::Get()->GetRootPass();
-        m_rootPass->SetTimestampQueryEnabled(true);
+        AZStd::vector<AZStd::string> passHierarchy;
+        passHierarchy.push_back("ForwardMSAAPass");
+        AZ::RPI::PassHierarchyFilter passFilter(passHierarchy);
+        AZStd::vector<AZ::RPI::Pass*> foundPasses = AZ::RPI::PassSystemInterface::Get()->FindPasses(passFilter);
+        m_forwardPass = foundPasses[0];
+        m_forwardPass->SetTimestampQueryEnabled(true);
 
         SetRootVariantUsage(true);
     }
@@ -103,8 +107,8 @@ namespace AtomSampleViewer
     void BakedShaderVariantExampleComponent::Deactivate()
     {
         SetRootVariantUsage(false);
-
-        m_rootPass->SetTimestampQueryEnabled(false);
+        
+        m_forwardPass->SetTimestampQueryEnabled(false);
 
         m_meshFeatureProcessor->ReleaseMesh(m_meshHandle);
 
@@ -121,9 +125,10 @@ namespace AtomSampleViewer
     {
         m_imGuiFrameTimer.PushValue(deltaTime);
 
-        AZ::RPI::TimestampResult timestampResult = m_rootPass->GetTimestampResult();
-        double gpuFrameTimeMs = aznumeric_cast<double>(timestampResult.GetTimestampInNanoseconds()) / 1000000;
-        m_imGuiPassTimer.PushValue(gpuFrameTimeMs);
+        AZ::RPI::TimestampResult forwardTimestampResult = m_forwardPass->GetLatestTimestampResult();
+        double gpuForwardFrameTimeMs = aznumeric_cast<double>(forwardTimestampResult.GetDurationInNanoseconds()) / 1000000;
+        m_imGuiForwardPassTimer.PushValue(gpuForwardFrameTimeMs);
+
 
         bool materialNeedsUpdate = false;
         if (m_imguiSidebar.Begin())
@@ -165,10 +170,10 @@ namespace AtomSampleViewer
             ImGui::Separator();
             ImGui::Spacing();
 
-            ImGui::Text("GPU Root Pass");
+            ImGui::Text("GPU Forward Pass");
             ImGuiHistogramQueue::WidgetSettings gpuMetricsSettings;
             gpuMetricsSettings.m_units = "ms";
-            m_imGuiPassTimer.Tick(gpuFrameTimeMs, gpuMetricsSettings);
+            m_imGuiForwardPassTimer.Tick(gpuForwardFrameTimeMs, gpuMetricsSettings);
 
             ImGui::Spacing();
             ImGui::Separator();

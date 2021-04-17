@@ -53,13 +53,13 @@ namespace AtomSampleViewer
         void MaterialChange();
         void SetRootVariantUsage(bool enabled);
 
-        static constexpr uint32_t FrameTimeLogSize = 10;
-        static constexpr uint32_t PassTimeLogSize = 10;
+        static constexpr uint32_t FrameTimeLogSize = 50;
+        static constexpr uint32_t PassTimeLogSize = 50;
         ImGuiSidebar m_imguiSidebar;
         ImGuiMaterialDetails m_imguiMaterialDetails;
         ImGuiAssetBrowser m_materialBrowser;
         ImGuiHistogramQueue m_imGuiFrameTimer;
-        ImGuiHistogramQueue m_imGuiPassTimer;
+        ImGuiHistogramQueue m_imGuiForwardPassTimer;
 
         AZ::Render::MeshFeatureProcessorInterface* m_meshFeatureProcessor = nullptr;
 
@@ -68,7 +68,7 @@ namespace AtomSampleViewer
         AZ::Data::Asset<AZ::RPI::ModelAsset> m_modelAsset;
         AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_meshHandle;
 
-        AZ::RHI::Ptr<AZ::RPI::ParentPass> m_rootPass;
+        AZ::RHI::Ptr<AZ::RPI::Pass> m_forwardPass;
 
         size_t m_selectedShaderIndex = 0;
     };
