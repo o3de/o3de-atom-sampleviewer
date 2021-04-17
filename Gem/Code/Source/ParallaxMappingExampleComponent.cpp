@@ -121,8 +121,8 @@ namespace AtomSampleViewer
         AZ::RPI::Scene* scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get();
         m_directionalLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DirectionalLightFeatureProcessorInterface>();
         CreateDirectionalLight();
-        m_spotLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::SpotLightFeatureProcessorInterface>();
-        CreateSpotLight();
+        m_diskLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DiskLightFeatureProcessorInterface>();
+        CreateDiskLight();
 
         m_imguiSidebar.Activate();
         AZ::TickBus::Handler::BusConnect();
@@ -139,7 +139,7 @@ namespace AtomSampleViewer
             &AZ::Debug::CameraControllerRequestBus::Events::Disable);
 
         m_directionalLightFeatureProcessor->ReleaseLight(m_directionalLightHandle);
-        m_spotLightFeatureProcessor->ReleaseLight(m_spotLightHandle);
+        m_diskLightFeatureProcessor->ReleaseLight(m_diskLightHandle);
 
         m_imguiSidebar.Deactivate();
         AZ::TickBus::Handler::BusDisconnect();
@@ -180,16 +180,17 @@ namespace AtomSampleViewer
         m_directionalLightHandle = handle;
     }
 
-    void ParallaxMappingExampleComponent::CreateSpotLight()
+    void ParallaxMappingExampleComponent::CreateDiskLight()
     {
-        AZ::Render::SpotLightFeatureProcessorInterface* const featureProcessor = m_spotLightFeatureProcessor;
-        const AZ::Render::SpotLightFeatureProcessorInterface::LightHandle handle = featureProcessor->AcquireLight();
+        AZ::Render::DiskLightFeatureProcessorInterface* const featureProcessor = m_diskLightFeatureProcessor;
+        const AZ::Render::DiskLightFeatureProcessorInterface::LightHandle handle = featureProcessor->AcquireLight();
 
-        featureProcessor->SetAttenuationRadius( handle, sqrtf(500.f / CutoffIntensity));
-        featureProcessor->SetConeAngles( handle, 45.f * ConeAngleInnerRatio, 45.f);
-        featureProcessor->SetShadowmapSize( handle, AZ::Render::ShadowmapSize::Size2048);
+        featureProcessor->SetAttenuationRadius(handle, sqrtf(500.f / CutoffIntensity));
+        featureProcessor->SetConeAngles(handle, AZ::DegToRad(45.0f) * ConeAngleInnerRatio, AZ::DegToRad(45.0f));
+        featureProcessor->SetShadowsEnabled(handle, true);
+        featureProcessor->SetShadowmapMaxResolution(handle, AZ::Render::ShadowmapSize::Size2048);
 
-        m_spotLightHandle = handle;
+        m_diskLightHandle = handle;
         
     }
 
@@ -211,20 +212,20 @@ namespace AtomSampleViewer
         if (m_lightType)
         {
             AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Lux> directionalLightColor(AZ::Color::CreateZero());
-            AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Candela> spotLightColor(AZ::Color::CreateOne() * 500.f);
+            AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Candela> diskLightColor(AZ::Color::CreateOne() * 500.f);
             m_directionalLightFeatureProcessor->SetRgbIntensity(m_directionalLightHandle, directionalLightColor);
-            m_spotLightFeatureProcessor->SetRgbIntensity(m_spotLightHandle, spotLightColor);
+            m_diskLightFeatureProcessor->SetRgbIntensity(m_diskLightHandle, diskLightColor);
         }
         else
         {
             AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Lux> directionalLightColor(AZ::Color::CreateOne() * 5.f);
-            AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Candela> spotLightColor(AZ::Color::CreateZero());
+            AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Candela> diskLightColor(AZ::Color::CreateZero());
             m_directionalLightFeatureProcessor->SetRgbIntensity(m_directionalLightHandle, directionalLightColor);
-            m_spotLightFeatureProcessor->SetRgbIntensity(m_spotLightHandle, spotLightColor);
+            m_diskLightFeatureProcessor->SetRgbIntensity(m_diskLightHandle, diskLightColor);
         }
 
-        m_spotLightFeatureProcessor->SetPosition(m_spotLightHandle, location);
-        m_spotLightFeatureProcessor->SetDirection(m_spotLightHandle, transform.GetBasis(1));
+        m_diskLightFeatureProcessor->SetPosition(m_diskLightHandle, location);
+        m_diskLightFeatureProcessor->SetDirection(m_diskLightHandle, transform.GetBasis(1));
         m_directionalLightFeatureProcessor->SetDirection(m_directionalLightHandle, transform.GetBasis(1));
 
         // Camera Configuration

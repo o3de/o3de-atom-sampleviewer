@@ -26,7 +26,7 @@ def teardown():
 
 @pytest.mark.parametrize('launcher_platform', ['windows'])
 @pytest.mark.parametrize("project", ["AtomSampleViewer"])
-@pytest.mark.usefixtures("setup_atomsampleviewer_assets", "clean_atomsampleviewer_logs")
+@pytest.mark.usefixtures("clean_atomsampleviewer_logs")
 class TestVulkanAutomationMainSuite:
 
     @pytest.mark.test_case_id('C35638265')
@@ -34,6 +34,7 @@ class TestVulkanAutomationMainSuite:
         test_script = 'CullingAndLod.bv.luac'
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
+                           f'--project-path={workspace.paths.project()} '
                            f'--rhi {RENDER_HARDWARE_INTERFACE} '
                            f'--runtestsuite scripts/{test_script} '
                            '--exitontestend')

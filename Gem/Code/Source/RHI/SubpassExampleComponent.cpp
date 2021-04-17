@@ -244,7 +244,7 @@ namespace AtomSampleViewer
             ->DepthStencilAttachment(m_depthStencilAttachmentId);
 
         RHI::RenderAttachmentLayout renderAttachmentLayout;
-        RHI::ResultCode result = attachmentsBuilder.End(renderAttachmentLayout);
+        [[maybe_unused]] RHI::ResultCode result = attachmentsBuilder.End(renderAttachmentLayout);
         AZ_Assert(result == RHI::ResultCode::Success, "Failed to create render attachment layout");
         {
             // GBuffer Scope Pipelines

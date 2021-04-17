@@ -71,6 +71,8 @@ namespace AtomSampleViewer
 
         // Create the RPI::Scene, add some feature processors
         RPI::SceneDescriptor sceneDesc;
+        sceneDesc.m_featureProcessorNames.push_back("AZ::Render::SimplePointLightFeatureProcessor");
+        sceneDesc.m_featureProcessorNames.push_back("AZ::Render::SimpleSpotLightFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::CapsuleLightFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::DecalTextureArrayFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::DirectionalLightFeatureProcessor");
@@ -82,8 +84,9 @@ namespace AtomSampleViewer
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::QuadLightFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("ReflectionProbeFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::SkyBoxFeatureProcessor");
-        sceneDesc.m_featureProcessorNames.push_back("AZ::Render::SpotLightFeatureProcessor");
+        sceneDesc.m_featureProcessorNames.push_back("AZ::Render::DiskLightFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::TransformServiceFeatureProcessor");
+        sceneDesc.m_featureProcessorNames.push_back("AZ::Render::ProjectedShadowFeatureProcessor");
         m_scene = RPI::Scene::CreateScene(sceneDesc);
 
         // Setup scene srg modification callback (to push per-frame values to the shaders)
@@ -143,7 +146,7 @@ namespace AtomSampleViewer
         m_meshFeatureProcessor = m_scene->GetFeatureProcessor<Render::MeshFeatureProcessorInterface>();
         m_skyBoxFeatureProcessor = m_scene->GetFeatureProcessor<Render::SkyBoxFeatureProcessorInterface>();
         m_pointLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::PointLightFeatureProcessorInterface>();
-        m_spotLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::SpotLightFeatureProcessorInterface>();
+        m_diskLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DiskLightFeatureProcessorInterface>();
         m_directionalLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
         m_reflectionProbeFeatureProcessor = m_scene->GetFeatureProcessor<Render::ReflectionProbeFeatureProcessorInterface>();
         m_postProcessFeatureProcessor = m_scene->GetFeatureProcessor<Render::PostProcessFeatureProcessorInterface>();
@@ -214,26 +217,27 @@ namespace AtomSampleViewer
             m_pointLightFeatureProcessor->SetBulbRadius(m_pointLightHandle, 4.0f);
         }
 
-        // Create SpotLight
+        // Create DiskLight
         {
-            m_spotLightHandle = m_spotLightFeatureProcessor->AcquireLight();
+            m_diskLightHandle = m_diskLightFeatureProcessor->AcquireLight();
 
-            const Vector3 spotLightPosition(3.0f, 0.0f, 4.0f);
-            m_spotLightFeatureProcessor->SetPosition(m_spotLightHandle, spotLightPosition);
+            const Vector3 diskLightPosition(3.0f, 0.0f, 4.0f);
+            m_diskLightFeatureProcessor->SetPosition(m_diskLightHandle, diskLightPosition);
 
             Render::PhotometricValue rgbIntensity;
-            m_spotLightFeatureProcessor->SetRgbIntensity(m_spotLightHandle, Render::PhotometricColor<Render::PhotometricUnit::Candela>(Color::CreateOne() * 2000.0f));
+            m_diskLightFeatureProcessor->SetRgbIntensity(m_diskLightHandle, Render::PhotometricColor<Render::PhotometricUnit::Candela>(Color::CreateOne() * 2000.0f));
 
             const auto lightDir = Transform::CreateLookAt(
-                spotLightPosition,
+                diskLightPosition,
                 Vector3::CreateZero());
-            m_spotLightFeatureProcessor->SetDirection(m_spotLightHandle, lightDir.GetBasis(1));
+            m_diskLightFeatureProcessor->SetDirection(m_diskLightHandle, lightDir.GetBasis(1));
 
             const float radius = sqrtf(2000.0f / 0.5f);
-            m_spotLightFeatureProcessor->SetAttenuationRadius(m_spotLightHandle, radius);
-            m_spotLightFeatureProcessor->SetShadowmapSize(m_spotLightHandle, Render::ShadowmapSize::Size512);
-            m_spotLightFeatureProcessor->SetConeAngles(m_spotLightHandle, 45.f, 55.f);
-            m_spotLightFeatureProcessor->SetShadowBoundaryWidthAngle(m_spotLightHandle, 0.25f);
+            m_diskLightFeatureProcessor->SetAttenuationRadius(m_diskLightHandle, radius);
+            m_diskLightFeatureProcessor->SetShadowsEnabled(m_diskLightHandle, true);
+            m_diskLightFeatureProcessor->SetShadowmapMaxResolution(m_diskLightHandle, Render::ShadowmapSize::Size512);
+            m_diskLightFeatureProcessor->SetConeAngles(m_diskLightHandle, DegToRad(45.0f), DegToRad(55.0f));
+            m_diskLightFeatureProcessor->SetSofteningBoundaryWidthAngle(m_diskLightHandle, DegToRad(0.25f));
         }
 
         // Create DirectionalLight
@@ -324,7 +328,7 @@ namespace AtomSampleViewer
 
         // Release all the light types
         m_pointLightFeatureProcessor->ReleaseLight(m_pointLightHandle);
-        m_spotLightFeatureProcessor->ReleaseLight(m_spotLightHandle);
+        m_diskLightFeatureProcessor->ReleaseLight(m_diskLightHandle);
         m_directionalLightFeatureProcessor->ReleaseLight(m_directionalLightHandle);
 
         // Release the probe

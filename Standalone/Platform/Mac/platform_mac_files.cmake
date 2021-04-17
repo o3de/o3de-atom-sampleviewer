@@ -10,9 +10,9 @@
 #
 
 set(FILES
-    MacLumberyardApplication.h
-    MacLumberyardApplication.mm
-    MacLumberyardApplicationDelegate.mm
+    MacO3DEApplication.h
+    MacO3DEApplication.mm
+    MacO3DEApplicationDelegate.mm
     AtomSampleViewerApplication_mac.cpp
     main_mac.mm
 )

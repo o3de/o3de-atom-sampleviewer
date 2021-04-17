@@ -133,7 +133,7 @@ namespace AtomSampleViewer
         }
         {
             auto scaleMatrix = AZ::Matrix4x4::CreateScale(AZ::Vector3(0.2, 0.2, 0.2));
-            bool success = m_shaderResourceGroups[2]->SetConstant(m_objectMatrixConstantIndex, scaleMatrix * AZ::Matrix4x4::CreateTranslation(AZ::Vector3(0, 0, 0.49)));
+            [[maybe_unused]] bool success = m_shaderResourceGroups[2]->SetConstant(m_objectMatrixConstantIndex, scaleMatrix * AZ::Matrix4x4::CreateTranslation(AZ::Vector3(0, 0, 0.49)));
             AZ_Warning(QueryExample::SampleName, success, "Failed to set SRG Constant data");
         }
 
@@ -216,7 +216,7 @@ namespace AtomSampleViewer
         attachmentsBuilder.AddSubpass()
             ->RenderTargetAttachment(format)
             ->DepthStencilAttachment(AZ::RHI::Format::D32_FLOAT);
-        AZ::RHI::ResultCode result = attachmentsBuilder.End(pipelineStateDescriptor.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
+        [[maybe_unused]] AZ::RHI::ResultCode result = attachmentsBuilder.End(pipelineStateDescriptor.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
         AZ_Assert(result == AZ::RHI::ResultCode::Success, "Failed to create render attachment layout");
 
         pipelineStateDescriptor.m_renderStates.m_blendState.m_targets[0] = blendState;
@@ -286,7 +286,7 @@ namespace AtomSampleViewer
                 return;
             }
             
-            RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportBuffer(RHI::AttachmentId{QueryExample::PredicationBufferId}, m_predicationBuffer);
+            [[maybe_unused]] RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportBuffer(RHI::AttachmentId{QueryExample::PredicationBufferId}, m_predicationBuffer);
             AZ_Error(QueryExample::SampleName, result == RHI::ResultCode::Success, "Failed to import predication buffer with error %d", result);
 
             frameGraph.UseQueryPool(

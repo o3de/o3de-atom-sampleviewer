@@ -147,7 +147,7 @@ namespace AtomSampleViewer
         bool ShowTool(const AZStd::string& toolName, bool enable) override;
         void RequestFrameCapture(const AZStd::string& filePath, bool hideImGui) override;
         bool IsFrameCapturePending() override;
-        void RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd) override;
+        void RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd, int randomSeed) override;
 
         // FrameCaptureNotificationBus overrides...
         void OnCaptureFinished(AZ::Render::FrameCaptureResult result, const AZStd::string& info) override;

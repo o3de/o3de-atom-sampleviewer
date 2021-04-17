@@ -11,7 +11,7 @@
 */
 
 #include <Atom/Features/SrgSemantics.azsli>
-#include <Shaders/RHI/RayTracingCommon.azsli>
+#include "RayTracingCommon.azsli"
 
 // hit shader that uses the ray's intersection point on the triangle to modulate an output color
 [shader("closesthit")] 

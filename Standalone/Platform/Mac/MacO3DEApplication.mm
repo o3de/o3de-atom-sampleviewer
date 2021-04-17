@@ -10,14 +10,10 @@
 *
 */
 
-#include <Atom/Features/SrgSemantics.azsli>
-#include "RayTracingCommon.azsli"
+#include "MacO3DEApplication.h"
 
-// hit shader that lerps between two colors
-[shader("closesthit")] 
-void ClosestHitSolidShader(inout RayPayload payload, BuiltInTriangleIntersectionAttributes attr) 
-{
-    payload.color = smoothstep(RayTracingGlobalSrg::m_hitSolidData[InstanceID()].m_color1,
-                               RayTracingGlobalSrg::m_hitSolidData[InstanceID()].m_color2,
-                               RayTracingGlobalSrg::m_hitSolidData[InstanceID()].m_lerp);
-}
+////////////////////////////////////////////////////////////////////////////////////////////////////
+@implementation MacO3DEApplication
+
+@end // MacO3DEApplication Implementation
+

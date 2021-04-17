@@ -98,7 +98,7 @@ namespace AtomSampleViewer
                 for (uint32_t textuerIdx = 0u; textuerIdx < InternalTA::TextureCount; textuerIdx++)
                 {
                     AZ::Data::Instance<AZ::RPI::StreamingImage> image = LoadStreamingImage(filePath[textuerIdx], InternalTA::SampleName);
-                    bool result = m_textureArraySrg->SetImage(m_textureArray, image, textuerIdx);
+                    [[maybe_unused]] bool result = m_textureArraySrg->SetImage(m_textureArray, image, textuerIdx);
                     AZ_Error(InternalTA::SampleName, result, "Failed to set image into shader resource group.");
                 }
                 m_textureArraySrg->Compile();
@@ -121,7 +121,7 @@ namespace AtomSampleViewer
             RHI::RenderAttachmentLayoutBuilder attachmentsBuilder;
             attachmentsBuilder.AddSubpass()
                 ->RenderTargetAttachment(m_outputFormat);
-            AZ::RHI::ResultCode result = attachmentsBuilder.End(pipelineStateDescriptor.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
+            [[maybe_unused]] AZ::RHI::ResultCode result = attachmentsBuilder.End(pipelineStateDescriptor.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
             AZ_Assert(result == AZ::RHI::ResultCode::Success, "Failed to create render attachment layout");
 
             m_pipelineState = m_shader->AcquirePipelineState(pipelineStateDescriptor);
@@ -190,7 +190,7 @@ namespace AtomSampleViewer
 
             const auto compileFunction = [this]([[maybe_unused]] const AZ::RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
             {
-                bool success = m_textureIndexSrg->SetConstant(m_textureIndex, InternalTA::g_textureIndex);
+                [[maybe_unused]] bool success = m_textureIndexSrg->SetConstant(m_textureIndex, InternalTA::g_textureIndex);
                 AZ_Warning("TriangleExampleComponent", success, "Failed to set SRG Constant m_objectMatrix");
                 m_textureIndexSrg->Compile();
             };

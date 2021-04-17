@@ -40,7 +40,8 @@ namespace AtomSampleViewer
         //! Runs the main test suite, in an automated mode and closes AtomSampleViewer when the suite finished running
         //! @param suiteFilePath path to the compiled luac test script
         //! @param exitOnTestEnd if true, exits AtomSampleViewerStandalone when the script finishes, used in jenkins
-        virtual void RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd) = 0;
+        //! @param randomSeed the seed for the random generator, frequently used inside lua tests to shuffle the order of the test execution
+        virtual void RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd, int randomSeed) = 0;
     };
     using SampleComponentManagerRequestBus = AZ::EBus<SampleComponentManagerRequests>;
 

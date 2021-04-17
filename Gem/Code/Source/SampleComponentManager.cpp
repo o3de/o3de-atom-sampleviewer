@@ -284,7 +284,6 @@ namespace AtomSampleViewer
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Parallax", azrtti_typeid<ParallaxMappingExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Shadow", azrtti_typeid<ShadowExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/ShadowedBistro", azrtti_typeid<ShadowedBistroExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/SkinnedMesh", azrtti_typeid<SkinnedMeshExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/SSAO", azrtti_typeid<SsaoExampleComponent>()));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/SSR", azrtti_typeid<SSRExampleComponent>()));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Tonemapping", azrtti_typeid<TonemappingExampleComponent>() ));
@@ -1089,7 +1088,7 @@ namespace AtomSampleViewer
         {
             AZ::Render::ImGuiSystemRequestBus::Broadcast(&AZ::Render::ImGuiSystemRequestBus::Events::HideAllImGuiPasses);
 
-            // We also hide lumberyard's debug text
+            // We also hide Open 3D Engine's debug text
             AzFramework::ConsoleRequestBus::Broadcast(&AzFramework::ConsoleRequests::ExecuteConsoleCommand, "r_DisplayInfo 0");
             // The ExecuteConsoleCommand request is handled in a deferred manner, so we have to delay the screenshot a bit.
             m_countdownForFrameCapture = 1;
@@ -1108,7 +1107,7 @@ namespace AtomSampleViewer
         {
             AZ::Render::ImGuiSystemRequestBus::Broadcast(&AZ::Render::ImGuiSystemRequestBus::Events::ShowAllImGuiPasses);
 
-            // We also show lumberyard's debug text
+            // We also show Open 3D Engine's debug text
             AzFramework::ConsoleRequestBus::Broadcast(&AzFramework::ConsoleRequests::ExecuteConsoleCommand, "r_DisplayInfo 1");
         }
 
@@ -1121,11 +1120,11 @@ namespace AtomSampleViewer
         return m_isFrameCapturePending;
     }
 
-    void SampleComponentManager::RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd)
+    void SampleComponentManager::RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd, int randomSeed)
     {
         if (m_scriptManager)
         {
-            m_scriptManager->RunMainTestSuite(suiteFilePath, exitOnTestEnd);
+            m_scriptManager->RunMainTestSuite(suiteFilePath, exitOnTestEnd, randomSeed);
         }
     }
 

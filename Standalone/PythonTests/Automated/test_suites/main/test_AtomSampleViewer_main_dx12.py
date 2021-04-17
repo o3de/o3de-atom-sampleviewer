@@ -30,7 +30,7 @@ class AtomSampleViewerException(Exception):
 
 @pytest.mark.parametrize('launcher_platform', ['windows'])
 @pytest.mark.parametrize("project", ["AtomSampleViewer"])
-@pytest.mark.usefixtures("setup_atomsampleviewer_assets", "clean_atomsampleviewer_logs")
+@pytest.mark.usefixtures("clean_atomsampleviewer_logs")
 class TestDX12AutomationMainSuite:
 
     @pytest.mark.test_case_id('C35638245')
@@ -39,6 +39,7 @@ class TestDX12AutomationMainSuite:
         test_script = 'CullingAndLod.bv.luac'
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
+                           f'--project-path={workspace.paths.project()} '
                            f'--rhi {RENDER_HARDWARE_INTERFACE} '
                            f'--runtestsuite scripts/{test_script} '
                            '--exitontestend')
@@ -63,9 +64,9 @@ class TestDX12AutomationMainSuite:
             log_monitor.monitor_log_for_lines(unexpected_lines=unexpected_lines, halt_on_unexpected=True, timeout=5)
         except ly_test_tools.log.log_monitor.LogMonitorException as e:
             expected_screenshots_path = os.path.join(
-                workspace.paths.dev(), "AtomSampleViewer", "Scripts", "ExpectedScreenshots")
+                workspace.paths.engine_root(), "AtomSampleViewer", "Scripts", "ExpectedScreenshots")
             test_screenshots_path = os.path.join(
-                workspace.paths.project_cache(), "pc", "user", "Scripts", "Screenshots")
+                workspace.paths.project(), "user", "Scripts", "Screenshots")
             raise AtomSampleViewerException(
                 f"Got error: {e}\n"
                 "Screenshot comparison check failed. Please review logs and screenshots at:\n"

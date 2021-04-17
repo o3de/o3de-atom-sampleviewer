@@ -18,8 +18,7 @@ ly_add_target(
         atomsampleviewergem_lib_files.cmake
     INCLUDE_DIRECTORIES
         PUBLIC
-            Include
-                Lib
+            Lib
     BUILD_DEPENDENCIES
         PUBLIC
             AZ::AzGameFramework
@@ -36,10 +35,9 @@ ly_add_target(
         ${pal_dir}/atomsampleviewer_${PAL_PLATFORM_NAME_LOWERCASE}_files.cmake
     INCLUDE_DIRECTORIES
         PUBLIC
-            Include
-                Lib
-                Source
-                ${pal_dir}
+            Lib
+            Source
+            ${pal_dir}
     BUILD_DEPENDENCIES
         PUBLIC
             AZ::AzGameFramework
@@ -55,9 +53,6 @@ ly_add_target(
     FILES_CMAKE
         atomsampleviewergem_private_shared_files.cmake
         ../../atomsampleviewer_asset_files.cmake
-    INCLUDE_DIRECTORIES
-        PUBLIC
-            Include
     PLATFORM_INCLUDE_FILES
         ${pal_dir}/additional_${PAL_PLATFORM_NAME_LOWERCASE}_runtime_library.cmake
     BUILD_DEPENDENCIES
@@ -77,9 +72,8 @@ if(PAL_TRAIT_BUILD_HOST_TOOLS)
             atomsampleviewergem_tools_files.cmake
         INCLUDE_DIRECTORIES
             PUBLIC
-                Include
-                    .
-                    Tools
+                .
+                Tools
         BUILD_DEPENDENCIES
             PRIVATE
                 AZ::AzGameFramework
@@ -102,8 +96,6 @@ if(PAL_TRAIT_BUILD_HOST_TOOLS)
                 .
                 Source
                 Source/Platform/${PAL_PLATFORM_NAME}
-            PUBLIC
-                Include
         BUILD_DEPENDENCIES
             PUBLIC
                 AZ::AzCore

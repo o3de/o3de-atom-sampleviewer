@@ -27,15 +27,6 @@ function SetupDiskLights()
     SetImguiValue('AreaLightSample/Emit Both Directions', false)
 end
 
-function SetupDiskLightsDoubleSided()
-    SetImguiValue('AreaLightSample/LightType/Disk', true)
-    SetImguiValue('AreaLightSample/Position Offset', Vector3(0.0, -0.5, -1.25))
-    SetImguiValue('AreaLightSample/Radius', 0.75)
-    SetImguiValue('AreaLightSample/X rotation', -1.45)
-    SetImguiValue('AreaLightSample/Y rotation', -0.5)
-    SetImguiValue('AreaLightSample/Emit Both Directions', true)
-end
-
 function SetupCapsuleLights()
     SetImguiValue('AreaLightSample/LightType/Capsule', true)
     SetImguiValue('AreaLightSample/Position Offset', Vector3(0.0, 0.0, 0.0))
@@ -139,7 +130,6 @@ lightSetups =
 {
     point = SetupPointLights,
     disk = SetupDiskLights,
-    disk_double_sided = SetupDiskLightsDoubleSided,
     capsule = SetupCapsuleLights,
     quad = SetupQuadLights,
     quad_double_sided = SetupQuadLightsDoubleSided,

@@ -73,20 +73,20 @@ namespace AtomSampleViewer
     {
         using namespace AZ;
         m_directionalLightShadowmapSizeIndex = s_shadowmapSizeIndexDefault;
-        m_spotLightShadowmapSize = Render::ShadowmapSize::None; // random
+        m_diskLightShadowmapSize = Render::ShadowmapSize::None; // random
         m_cascadeCount = s_cascadesCountDefault;
         m_ratioLogarithmUniform = s_ratioLogarithmUniformDefault;
-        m_spotLightCount = 0;
+        m_diskLightCount = 0;
 
-        // heuristic spot light default position configuration
-        m_spotLightsBasePosition[0] = 0.04f;
-        m_spotLightsBasePosition[1] = 0.04f;;
-        m_spotLightsBasePosition[2] = -0.03f;
-        m_spotLightsPositionScatteringRatio = 0.27f;
+        // heuristic disk light default position configuration
+        m_diskLightsBasePosition[0] = 0.04f;
+        m_diskLightsBasePosition[1] = 0.04f;;
+        m_diskLightsBasePosition[2] = -0.03f;
+        m_diskLightsPositionScatteringRatio = 0.27f;
 
         RPI::Scene* scene = RPI::RPISystemInterface::Get()->GetDefaultScene().get();
         m_directionalLightFeatureProcessor = scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
-        m_spotLightFeatureProcessor = scene->GetFeatureProcessor<Render::SpotLightFeatureProcessorInterface>();
+        m_diskLightFeatureProcessor = scene->GetFeatureProcessor<Render::DiskLightFeatureProcessorInterface>();
 
         SetupScene();
 
@@ -129,7 +129,7 @@ namespace AtomSampleViewer
         GetMeshFeatureProcessor()->ReleaseMesh(m_meshHandle);
 
         m_directionalLightFeatureProcessor->ReleaseLight(m_directionalLightHandle);
-        UpdateSpotLightCount(0);
+        UpdateDiskLightCount(0);
     }
 
     void ShadowedBistroExampleComponent::OnTick(float deltaTime, AZ::ScriptTimePoint timePoint)
@@ -176,7 +176,7 @@ namespace AtomSampleViewer
     {
         m_bistroExteriorAssetLoaded = true;
         m_worldAabb = model->GetAabb();
-        UpdateSpotLightCount(SpotLightCountDefault);
+        UpdateDiskLightCount(DiskLightCountDefault);
 
         // Now that the models are initialized, we can allow the script to continue.
         ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::ResumeScript);
@@ -269,27 +269,27 @@ namespace AtomSampleViewer
             SetupDebugFlags();
         }
 
-        // spot lights are initialized after loading models.
-        BuildSpotLightParameters();
+        // disk lights are initialized after loading models.
+        BuildDiskLightParameters();
     }
 
-    void ShadowedBistroExampleComponent::BuildSpotLightParameters()
+    void ShadowedBistroExampleComponent::BuildDiskLightParameters()
     {
         m_random.SetSeed(0);
-        m_spotLights.clear();
-        m_spotLights.reserve(SpotLightCountMax);
-        for (int index = 0; index < SpotLightCountMax; ++index)
+        m_diskLights.clear();
+        m_diskLights.reserve(DiskLightCountMax);
+        for (int index = 0; index < DiskLightCountMax; ++index)
         {
-            m_spotLights.emplace_back(
+            m_diskLights.emplace_back(
                 GetRandomColor(),
                 GetRandomPosition(),
                 GetRandomShadowmapSize());
         }
     }
 
-    void ShadowedBistroExampleComponent::UpdateSpotLightCount(uint16_t count)
+    void ShadowedBistroExampleComponent::UpdateDiskLightCount(uint16_t count)
     {
-        // We suppose m_spotLights has been initialized except m_entity.
+        // We suppose m_diskLights has been initialized except m_entity.
         using namespace AZ;
 
         // Don't assert here if count == 0, since the count is set to 0 during Deactivate
@@ -299,40 +299,43 @@ namespace AtomSampleViewer
             return;
         }
 
-        for (int index = count; index < m_spotLightCount; ++index)
+        for (int index = count; index < m_diskLightCount; ++index)
         {
-            SpotLightHandle& handle = m_spotLights[index].m_handle;
-            m_spotLightFeatureProcessor->ReleaseLight(handle);
+            DiskLightHandle& handle = m_diskLights[index].m_handle;
+            m_diskLightFeatureProcessor->ReleaseLight(handle);
         }
 
-        const int previousSpotLightCount = m_spotLightCount;
+        const int previousDiskLightCount = m_diskLightCount;
 
-        for (int index = previousSpotLightCount; index < count; ++index)
+        for (int index = previousDiskLightCount; index < count; ++index)
         {
-            Render::SpotLightFeatureProcessorInterface* const featureProcessor = m_spotLightFeatureProcessor;
-            const SpotLightHandle handle = featureProcessor->AcquireLight();
+            Render::DiskLightFeatureProcessorInterface* const featureProcessor = m_diskLightFeatureProcessor;
+            const DiskLightHandle handle = featureProcessor->AcquireLight();
 
-            AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Candela> lightColor(m_spotLights[index].m_color * m_spotLightIntensity);
+            AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Candela> lightColor(m_diskLights[index].m_color * m_diskLightIntensity);
             featureProcessor->SetRgbIntensity(handle, lightColor);
             featureProcessor->SetAttenuationRadius(
                 handle,
-                sqrtf(m_spotLightIntensity / CutoffIntensity));
-            featureProcessor->SetShadowmapSize(
-                handle,
-                m_spotLightShadowEnabled ?
-                m_spotLights[index].m_shadowmapSize :
-                Render::ShadowmapSize::None);
-            featureProcessor->SetConeAngles(handle, 45.f, 55.f);
-            featureProcessor->SetShadowFilterMethod(handle, aznumeric_cast<Render::ShadowFilterMethod>(m_shadowFilterMethodIndexSpot));
-            featureProcessor->SetPredictionSampleCount(handle, aznumeric_cast<uint16_t>(m_predictionSampleCountSpot));
-            featureProcessor->SetFilteringSampleCount(handle, aznumeric_cast<uint16_t>(m_filteringSampleCountSpot));
+                sqrtf(m_diskLightIntensity / CutoffIntensity));
+            featureProcessor->SetConeAngles(handle, DegToRad(45.0f), DegToRad(55.0f));
+            featureProcessor->SetShadowsEnabled(handle, m_diskLightShadowEnabled);
+            if (m_diskLightShadowEnabled)
+            {
+                featureProcessor->SetShadowmapMaxResolution(
+                    handle,
+                    m_diskLightShadowEnabled ?
+                    m_diskLights[index].m_shadowmapSize :
+                    Render::ShadowmapSize::None);
+                featureProcessor->SetShadowFilterMethod(handle, aznumeric_cast<Render::ShadowFilterMethod>(m_shadowFilterMethodIndexDisk));
+                featureProcessor->SetPredictionSampleCount(handle, aznumeric_cast<uint16_t>(m_predictionSampleCountDisk));
+                featureProcessor->SetFilteringSampleCount(handle, aznumeric_cast<uint16_t>(m_filteringSampleCountDisk));
+            }
+            m_diskLights[index].m_handle = handle;
 
-            m_spotLights[index].m_handle = handle;
-
-            UpdateSpotLightPosition(index);
+            UpdateDiskLightPosition(index);
         }
 
-        m_spotLightCount = count;
+        m_diskLightCount = count;
     }
 
     const AZ::Color& ShadowedBistroExampleComponent::GetRandomColor()
@@ -505,7 +508,23 @@ namespace AtomSampleViewer
             {
                 ImGui::Spacing();
                 ImGui::Text("Filtering (PCF specific)");
-                if (ScriptableImGui::SliderInt("Prediction # ##Directional", &m_predictionSampleCountDirectional, 4, 16))
+
+                int pcfMethodAsInteger = aznumeric_cast<int>(m_pcfMethodDirectional);
+                if (ScriptableImGui::RadioButton(
+                        "Boundary Search filtering", &pcfMethodAsInteger, static_cast<int>(PcfMethod::BoundarySearch)))
+                {
+                    m_pcfMethodDirectional = PcfMethod::BoundarySearch;
+                    m_directionalLightFeatureProcessor->SetPcfMethod(m_directionalLightHandle, m_pcfMethodDirectional);
+                }
+                if (ScriptableImGui::RadioButton("Bicubic filtering", &pcfMethodAsInteger, static_cast<int>(PcfMethod::Bicubic)))
+                {
+                    m_pcfMethodDirectional = PcfMethod::Bicubic;
+                    m_directionalLightFeatureProcessor->SetPcfMethod(m_directionalLightHandle, m_pcfMethodDirectional);
+                }
+
+                if (m_pcfMethodDirectional ==
+                    AZ::Render::PcfMethod::BoundarySearch && ScriptableImGui::SliderInt(
+                        "Prediction # ##Directional", &m_predictionSampleCountDirectional, 4, 16))
                 {
                     m_directionalLightFeatureProcessor->SetPredictionSampleCount(
                         m_directionalLightHandle,
@@ -526,96 +545,96 @@ namespace AtomSampleViewer
         ImGui::Text("Spot Lights");
         ImGui::Indent();
         {
-            int spotLightCount = m_spotLightCount;
-            if (ScriptableImGui::SliderInt("Number", &spotLightCount, 0, SpotLightCountMax))
+            int diskLightCount = m_diskLightCount;
+            if (ScriptableImGui::SliderInt("Number", &diskLightCount, 0, DiskLightCountMax))
             {
-                UpdateSpotLightCount(spotLightCount);
+                UpdateDiskLightCount(diskLightCount);
             }
 
-            if (ScriptableImGui::SliderFloat("Intensity##spot", &m_spotLightIntensity, 0.f, 100000.f, "%.1f", 4.f))
+            if (ScriptableImGui::SliderFloat("Intensity##spot", &m_diskLightIntensity, 0.f, 100000.f, "%.1f", 4.f))
             {
-                for (const SpotLight& light : m_spotLights)
+                for (const DiskLight& light : m_diskLights)
                 {
                     if (light.m_handle.IsValid())
                     {
-                        AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Candela> lightColor(light.m_color * m_spotLightIntensity);
-                        m_spotLightFeatureProcessor->SetRgbIntensity(light.m_handle, lightColor);
-                        m_spotLightFeatureProcessor->SetAttenuationRadius(
+                        AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Candela> lightColor(light.m_color * m_diskLightIntensity);
+                        m_diskLightFeatureProcessor->SetRgbIntensity(light.m_handle, lightColor);
+                        m_diskLightFeatureProcessor->SetAttenuationRadius(
                             light.m_handle,
-                            sqrtf(m_spotLightIntensity / CutoffIntensity));
+                            sqrtf(m_diskLightIntensity / CutoffIntensity));
                     }
                 }
             }
 
             // avoiding SliderFloat3 since its sliders are too narrow.
-            if (ScriptableImGui::SliderFloat("Center X", &m_spotLightsBasePosition[0], -0.5f, 0.5f) ||
-                ScriptableImGui::SliderFloat("Center Y", &m_spotLightsBasePosition[1], -0.5f, 0.5f) ||
-                ScriptableImGui::SliderFloat("Center Z", &m_spotLightsBasePosition[2], -0.5f, 0.5f) ||
-                ScriptableImGui::SliderFloat("Pos. Scatt. Ratio", &m_spotLightsPositionScatteringRatio, 0.f, 1.f))
+            if (ScriptableImGui::SliderFloat("Center X", &m_diskLightsBasePosition[0], -0.5f, 0.5f) ||
+                ScriptableImGui::SliderFloat("Center Y", &m_diskLightsBasePosition[1], -0.5f, 0.5f) ||
+                ScriptableImGui::SliderFloat("Center Z", &m_diskLightsBasePosition[2], -0.5f, 0.5f) ||
+                ScriptableImGui::SliderFloat("Pos. Scatt. Ratio", &m_diskLightsPositionScatteringRatio, 0.f, 1.f))
             {
-                UpdateSpotLightPositions();
+                UpdateDiskLightPositions();
             }
 
-            bool spotLightShadowmapChanged = ScriptableImGui::Checkbox("Enable Shadow", &m_spotLightShadowEnabled);
+            bool diskLightShadowmapChanged = ScriptableImGui::Checkbox("Enable Shadow", &m_diskLightShadowEnabled);
 
             ImGui::Text("Shadowmap Size");
-            int newSize = static_cast<int>(m_spotLightShadowmapSize);
+            int newSize = static_cast<int>(m_diskLightShadowmapSize);
             // To avoid GPU memory consumption, we avoid bigger shadowmap sizes here.
-            spotLightShadowmapChanged = spotLightShadowmapChanged ||
+            diskLightShadowmapChanged = diskLightShadowmapChanged ||
                 ScriptableImGui::RadioButton("256", &newSize, static_cast<int>(Render::ShadowmapSize::Size256)) ||
                 ScriptableImGui::RadioButton("512", &newSize, static_cast<int>(Render::ShadowmapSize::Size512)) ||
                 ScriptableImGui::RadioButton("1024", &newSize, static_cast<int>(Render::ShadowmapSize::Size1024)) ||
                 ScriptableImGui::RadioButton("Random", &newSize, static_cast<int>(Render::ShadowmapSize::None));
 
-            if (spotLightShadowmapChanged)
+            if (diskLightShadowmapChanged)
             {
-                m_spotLightShadowmapSize = static_cast<Render::ShadowmapSize>(newSize);
-                UpdateSpotLightShadowmapSize();
+                m_diskLightShadowmapSize = static_cast<Render::ShadowmapSize>(newSize);
+                UpdateDiskLightShadowmapSize();
             }
 
             ImGui::Spacing();
             ImGui::Text("Filtering");
             if (ScriptableImGui::Combo(
                 "Filter Method##Spot",
-                &m_shadowFilterMethodIndexSpot,
+                &m_shadowFilterMethodIndexDisk,
                 s_shadowFilterMethodLabels,
                 AZ_ARRAY_SIZE(s_shadowFilterMethodLabels)))
             {
-                for (int index = 0; index < m_spotLightCount; ++index)
+                for (int index = 0; index < m_diskLightCount; ++index)
                 {
-                    m_spotLightFeatureProcessor->SetShadowFilterMethod(m_spotLights[index].m_handle, aznumeric_cast<ShadowFilterMethod>(m_shadowFilterMethodIndexSpot));
+                    m_diskLightFeatureProcessor->SetShadowFilterMethod(m_diskLights[index].m_handle, aznumeric_cast<ShadowFilterMethod>(m_shadowFilterMethodIndexDisk));
                 }
             }
 
-            if (m_shadowFilterMethodIndexSpot != aznumeric_cast<int>(ShadowFilterMethod::None))
+            if (m_shadowFilterMethodIndexDisk != aznumeric_cast<int>(ShadowFilterMethod::None))
             {
                 ImGui::Text("Boundary Width in degrees");
-                if (ScriptableImGui::SliderFloat("Width##Spot", &m_boundaryWidthSpot, 0.f, 1.f, "%.3f"))
+                if (ScriptableImGui::SliderFloat("Width##Spot", &m_boundaryWidthDisk, 0.f, 1.f, "%.3f"))
                 {
-                    for (int index = 0; index < m_spotLightCount; ++index)
+                    for (int index = 0; index < m_diskLightCount; ++index)
                     {
-                        m_spotLightFeatureProcessor->SetShadowBoundaryWidthAngle(m_spotLights[index].m_handle, m_boundaryWidthSpot);
+                        m_diskLightFeatureProcessor->SetSofteningBoundaryWidthAngle(m_diskLights[index].m_handle, DegToRad(m_boundaryWidthDisk));
                     }
                 }
             }
 
-            if (m_shadowFilterMethodIndexSpot == aznumeric_cast<int>(ShadowFilterMethod::Pcf) ||
-                m_shadowFilterMethodIndexSpot == aznumeric_cast<int>(ShadowFilterMethod::EsmPcf))
+            if (m_shadowFilterMethodIndexDisk == aznumeric_cast<int>(ShadowFilterMethod::Pcf) ||
+                m_shadowFilterMethodIndexDisk == aznumeric_cast<int>(ShadowFilterMethod::EsmPcf))
             {
                 ImGui::Spacing();
                 ImGui::Text("Filtering (PCF specific)");
-                if (ScriptableImGui::SliderInt("Predictiona # ##Spot", &m_predictionSampleCountSpot, 4, 16))
+                if (ScriptableImGui::SliderInt("Predictiona # ##Spot", &m_predictionSampleCountDisk, 4, 16))
                 {
-                    for (int index = 0; index < m_spotLightCount; ++index)
+                    for (int index = 0; index < m_diskLightCount; ++index)
                     {
-                        m_spotLightFeatureProcessor->SetPredictionSampleCount(m_spotLights[index].m_handle, m_predictionSampleCountSpot);
+                        m_diskLightFeatureProcessor->SetPredictionSampleCount(m_diskLights[index].m_handle, m_predictionSampleCountDisk);
                     }
                 }
-                if (ScriptableImGui::SliderInt("Filtering # ##Spot", &m_filteringSampleCountSpot, 4, 64))
+                if (ScriptableImGui::SliderInt("Filtering # ##Spot", &m_filteringSampleCountDisk, 4, 64))
                 {
-                    for (int index = 0; index < m_spotLightCount; ++index)
+                    for (int index = 0; index < m_diskLightCount; ++index)
                     {
-                        m_spotLightFeatureProcessor->SetFilteringSampleCount(m_spotLights[index].m_handle, m_filteringSampleCountSpot);
+                        m_diskLightFeatureProcessor->SetFilteringSampleCount(m_diskLights[index].m_handle, m_filteringSampleCountDisk);
                     }
                 }
             }
@@ -625,45 +644,32 @@ namespace AtomSampleViewer
         m_imguiSidebar.End();
     }
 
-    void ShadowedBistroExampleComponent::UpdateSpotLightShadowmapSize()
+    void ShadowedBistroExampleComponent::UpdateDiskLightShadowmapSize()
     {
         using namespace AZ::Render;
-        SpotLightFeatureProcessorInterface* const featureProcessor = m_spotLightFeatureProcessor;
+        DiskLightFeatureProcessorInterface* const featureProcessor = m_diskLightFeatureProcessor;
 
-        if (!m_spotLightShadowEnabled)
+        for (const DiskLight& light : m_diskLights)
         {
-            // disabled shadows
-            for (const SpotLight& light : m_spotLights)
+            if (!light.m_handle.IsValid())
             {
-                if (light.m_handle.IsValid())
-                {
-                    featureProcessor->SetShadowmapSize(
-                        light.m_handle,
-                        ShadowmapSize::None);
-                }
+                continue;
             }
-        }
-        else if (m_spotLightShadowmapSize != ShadowmapSize::None)
-        {
-            // uniform size
-            for (const SpotLight& light : m_spotLights)
+
+            featureProcessor->SetShadowsEnabled(light.m_handle, m_diskLightShadowEnabled);
+            if (m_diskLightShadowEnabled)
             {
-                if (light.m_handle.IsValid())
+                if (m_diskLightShadowmapSize != ShadowmapSize::None)
                 {
-                    featureProcessor->SetShadowmapSize(
+                    // Uniform size
+                    featureProcessor->SetShadowmapMaxResolution(
                         light.m_handle,
-                        m_spotLightShadowmapSize);
+                        m_diskLightShadowmapSize);
                 }
-            }
-        }
-        else
-        {
-            // random sizes
-            for (const SpotLight& light : m_spotLights)
-            {
-                if (light.m_handle.IsValid())
+                else
                 {
-                    featureProcessor->SetShadowmapSize(
+                    // Random sizes
+                    featureProcessor->SetShadowmapMaxResolution(
                         light.m_handle,
                         light.m_shadowmapSize);
                 }
@@ -671,18 +677,18 @@ namespace AtomSampleViewer
         }
     }
 
-    void ShadowedBistroExampleComponent::UpdateSpotLightPositions()
+    void ShadowedBistroExampleComponent::UpdateDiskLightPositions()
     {
-        for (int index = 0; index < m_spotLightCount; ++index)
+        for (int index = 0; index < m_diskLightCount; ++index)
         {
-            UpdateSpotLightPosition(index);
+            UpdateDiskLightPosition(index);
         }
     }
 
-    void ShadowedBistroExampleComponent::UpdateSpotLightPosition(int index)
+    void ShadowedBistroExampleComponent::UpdateDiskLightPosition(int index)
     {
         using namespace AZ;
-        Render::SpotLightFeatureProcessorInterface* const featureProcessor = m_spotLightFeatureProcessor;
+        Render::DiskLightFeatureProcessorInterface* const featureProcessor = m_diskLightFeatureProcessor;
 
 
         if (!m_worldAabb.IsValid() || !m_worldAabb.IsFinite())
@@ -692,19 +698,19 @@ namespace AtomSampleViewer
         }
 
         const Vector3 basePosition(
-            m_spotLightsBasePosition[0],
-            m_spotLightsBasePosition[1],
-            m_spotLightsBasePosition[2]);
-        const Vector3 relativePosition = basePosition + m_spotLights[index].m_relativePosition * m_spotLightsPositionScatteringRatio;
+            m_diskLightsBasePosition[0],
+            m_diskLightsBasePosition[1],
+            m_diskLightsBasePosition[2]);
+        const Vector3 relativePosition = basePosition + m_diskLights[index].m_relativePosition * m_diskLightsPositionScatteringRatio;
         const Vector3 position = m_worldAabb.GetCenter() +
             m_worldAabb.GetExtents() * relativePosition;
         const auto transform =
             Transform::CreateTranslation(position) * Transform::CreateRotationX(-Constants::HalfPi);
         featureProcessor->SetPosition(
-            m_spotLights[index].m_handle,
+            m_diskLights[index].m_handle,
             position);
         featureProcessor->SetDirection(
-            m_spotLights[index].m_handle,
+            m_diskLights[index].m_handle,
             transform.GetBasis(1));
     }
 
