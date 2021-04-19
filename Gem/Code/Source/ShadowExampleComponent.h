@@ -117,7 +117,7 @@ namespace AtomSampleViewer
         float m_diskLightHeights[DiskLightCount] = {5.f, 6.f, 7.f};
         float m_directionalLightIntensity = 5.f;
         float m_diskLightIntensities[DiskLightCount] = {500.f, 900.f, 500.f};
-        float m_outerConeAngles[DiskLightCount] = {35.f, 40.f, 45.f};
+        float m_outerConeAngles[DiskLightCount] = {17.5f, 20.f, 22.5f};
         float m_cameraFovY = AZ::Constants::QuarterPi;
 
         // Shadowmap
