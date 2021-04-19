@@ -317,7 +317,7 @@ namespace AtomSampleViewer
             featureProcessor->SetAttenuationRadius(
                 handle,
                 sqrtf(m_diskLightIntensity / CutoffIntensity));
-            featureProcessor->SetConeAngles(handle, DegToRad(45.0f), DegToRad(55.0f));
+            featureProcessor->SetConeAngles(handle, DegToRad(22.5f), DegToRad(27.5));
             featureProcessor->SetShadowsEnabled(handle, m_diskLightShadowEnabled);
             if (m_diskLightShadowEnabled)
             {

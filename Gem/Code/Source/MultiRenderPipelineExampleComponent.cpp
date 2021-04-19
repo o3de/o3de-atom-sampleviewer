@@ -256,7 +256,7 @@ namespace AtomSampleViewer
         AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Candela> lightColor(Colors::Green * 500.0f);
         featureProcessor->SetRgbIntensity(handle, lightColor);
         featureProcessor->SetAttenuationRadius(handle, 30.0f);
-        featureProcessor->SetConeAngles(handle, DegToRad(35.0f * 0.9f), DegToRad(35.0f));
+        featureProcessor->SetConeAngles(handle, DegToRad(17.5f * 0.9f), DegToRad(17.5f));
         featureProcessor->SetShadowsEnabled(handle, true);
         featureProcessor->SetShadowmapMaxResolution(handle, Render::ShadowmapSize::Size1024);
         Vector3 position(0, 5, 7);
