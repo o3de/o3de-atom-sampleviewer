@@ -11,7 +11,7 @@
 */
 
 #include <Atom/Features/SrgSemantics.azsli>
-#include <Shaders/RHI/RayTracingCommon.azsli>
+#include "RayTracingCommon.azsli"
 
 // hit shader that lerps between two colors
 [shader("closesthit")] 

@@ -11,7 +11,7 @@
 */
 
 #include <Atom/Features/SrgSemantics.azsli>
-#include <Shaders/RHI/RayTracingCommon.azsli>
+#include "RayTracingCommon.azsli"
 
 // top level ray generation shader, each thread casts a ray straight into the scene
 [shader("raygeneration")]
