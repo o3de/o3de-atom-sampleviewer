@@ -29,6 +29,7 @@
 #include <AzCore/Component/TransformBus.h>
 #include <AzCore/Math/Transform.h>
 #include <AzCore/Math/Obb.h>
+#include <AzCore/Math/Matrix3x4.h>
 #include <AzFramework/Components/CameraBus.h>
 #include <Atom/RPI.Public/RPISystemInterface.h>
 #include <Atom/RPI.Public/Scene.h>
@@ -622,7 +623,7 @@ namespace AtomSampleViewer
 
                 // Rotate 90 degrees so that the debug draw is aligned properly with the quad light
                 transform *= AZ::Transform::CreateFromQuaternion(AZ::ConvertEulerRadiansToQuaternion(AZ::Vector3(AZ::Constants::HalfPi, 0.0f, 0.0f)));
-                auxGeom->DrawQuad(m_quadLightSize[0], m_quadLightSize[1], transform, light.m_color);
+                auxGeom->DrawQuad(m_quadLightSize[0], m_quadLightSize[1], AZ::Matrix3x4::CreateFromTransform(transform), light.m_color);
             }
         }
     }
