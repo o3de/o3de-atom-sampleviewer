@@ -236,7 +236,7 @@ namespace AtomSampleViewer
             m_diskLightFeatureProcessor->SetAttenuationRadius(m_diskLightHandle, radius);
             m_diskLightFeatureProcessor->SetShadowsEnabled(m_diskLightHandle, true);
             m_diskLightFeatureProcessor->SetShadowmapMaxResolution(m_diskLightHandle, Render::ShadowmapSize::Size512);
-            m_diskLightFeatureProcessor->SetConeAngles(m_diskLightHandle, DegToRad(45.0f), DegToRad(55.0f));
+            m_diskLightFeatureProcessor->SetConeAngles(m_diskLightHandle, DegToRad(22.5f), DegToRad(27.5f));
             m_diskLightFeatureProcessor->SetSofteningBoundaryWidthAngle(m_diskLightHandle, DegToRad(0.25f));
         }
 
