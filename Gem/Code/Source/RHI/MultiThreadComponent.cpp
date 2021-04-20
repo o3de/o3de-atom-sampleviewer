@@ -233,7 +233,7 @@ namespace AtomSampleViewer
         attachmentsBuilder.AddSubpass()
             ->RenderTargetAttachment(m_outputFormat)
             ->DepthStencilAttachment(device->GetNearestSupportedFormat(AZ::RHI::Format::D24_UNORM_S8_UINT, AZ::RHI::FormatCapabilities::DepthStencil));
-        AZ::RHI::ResultCode result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
+        [[maybe_unused]] AZ::RHI::ResultCode result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
         AZ_Assert(result == AZ::RHI::ResultCode::Success, "Failed to create render attachment layout");
 
         m_pipelineState = shader->AcquirePipelineState(pipelineDesc);

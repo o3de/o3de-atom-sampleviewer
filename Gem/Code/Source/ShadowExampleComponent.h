@@ -16,7 +16,7 @@
 
 #include <Atom/Feature/CoreLights/DirectionalLightFeatureProcessorInterface.h>
 #include <Atom/Feature/CoreLights/ShadowConstants.h>
-#include <Atom/Feature/CoreLights/SpotLightFeatureProcessorInterface.h>
+#include <Atom/Feature/CoreLights/DiskLightFeatureProcessorInterface.h>
 
 #include <AzCore/Component/TickBus.h>
 
@@ -31,7 +31,7 @@ namespace AtomSampleViewer
     * At the 3rd step, we made the number of cascades configurable.
     * At the 4th step, we implement softening shadow edge by PCF (Percentage Closer Filtering).
     * At the 5th step, we implement softening shadow edge by ESM (Exponential Shadow Maps).
-    * At the 6th step, we implement spot light shadows.
+    * At the 6th step, we implement disk light shadows.
     */
     class ShadowExampleComponent final
         : public CommonSampleComponentBase
@@ -50,7 +50,7 @@ namespace AtomSampleViewer
 
     private:
         using DirectionalLightHandle = AZ::Render::DirectionalLightFeatureProcessorInterface::LightHandle;
-        using SpotLightHandle = AZ::Render::SpotLightFeatureProcessorInterface::LightHandle;
+        using DiskLightHandle = AZ::Render::DiskLightFeatureProcessorInterface::LightHandle;
         
         // AZ::TickBus::Handler overrides...
         void OnTick(float deltaTime, AZ::ScriptTimePoint time);
@@ -67,19 +67,19 @@ namespace AtomSampleViewer
 
         void CreateMeshes();
         void CreateDirectionalLight();
-        void CreateSpotLights();
+        void CreateDiskLights();
         void SetInitialShadowParams();
         void SetupDebugFlags();
 
         void DrawSidebar();
 
-        static constexpr uint32_t SpotLightCount = 3;
+        static constexpr uint32_t DiskLightCount = 3;
         static constexpr float ConeAngleInnerRatio = 0.9f;
         static constexpr float CutoffIntensity = 0.1f;
         static constexpr float FarClipDistance = 20.f;
 
         static const AZ::Color DirectionalLightColor;
-        static AZ::Color s_spotLightColors[SpotLightCount];
+        static AZ::Color s_diskLightColors[DiskLightCount];
         
         // Mesh Handles
         using MeshHandle = AZ::Render::MeshFeatureProcessorInterface::MeshHandle;
@@ -88,9 +88,9 @@ namespace AtomSampleViewer
 
         // lights
         AZ::Render::DirectionalLightFeatureProcessorInterface* m_directionalLightFeatureProcessor = nullptr;
-        AZ::Render::SpotLightFeatureProcessorInterface* m_spotLightFeatureProcessor = nullptr;
+        AZ::Render::DiskLightFeatureProcessorInterface* m_diskLightFeatureProcessor = nullptr;
         DirectionalLightHandle m_directionalLightHandle;
-        SpotLightHandle m_spotLightHandles[SpotLightCount];
+        DiskLightHandle m_diskLightHandles[DiskLightCount];
 
         // asset
         AZ::Data::Asset<AZ::RPI::ModelAsset> m_bunnyModelAsset;
@@ -108,23 +108,23 @@ namespace AtomSampleViewer
         // GUI
         float m_elapsedTime = 0.f;
 
-        int m_controlTargetSpotLightIndex = 0;
+        int m_controlTargetDiskLightIndex = 0;
         float m_directionalLightRotationAngle = 0.f; // in radian
-        float m_spotLightRotationAngle = 0.f; // in radian
+        float m_diskLightRotationAngle = 0.f; // in radian
         bool m_isDirectionalLightAutoRotate = true;
-        bool m_isSpotLightAutoRotate = true;
+        bool m_isDiskLightAutoRotate = true;
         float m_directionalLightHeight = 10.f;
-        float m_spotLightHeights[SpotLightCount] = {5.f, 6.f, 7.f};
+        float m_diskLightHeights[DiskLightCount] = {5.f, 6.f, 7.f};
         float m_directionalLightIntensity = 5.f;
-        float m_spotLightIntensities[SpotLightCount] = {500.f, 900.f, 500.f};
-        float m_outerConeAngles[SpotLightCount] = {35.f, 40.f, 45.f};
+        float m_diskLightIntensities[DiskLightCount] = {500.f, 900.f, 500.f};
+        float m_outerConeAngles[DiskLightCount] = {17.5f, 20.f, 22.5f};
         float m_cameraFovY = AZ::Constants::QuarterPi;
 
         // Shadowmap
         static const AZ::Render::ShadowmapSize s_shadowmapImageSizes[];
         static const char* s_shadowmapImageSizeLabels[];
         int m_directionalLightImageSizeIndex = 2; // image size is 1024.
-        int m_spotLightImageSizeIndices[SpotLightCount] = {2, 2, 2}; // image size is 1024.
+        int m_diskLightImageSizeIndices[DiskLightCount] = {2, 2, 2}; // image size is 1024.
         int m_cascadeCount = 2;
         bool m_shadowmapFrustumSplitIsAutomatic = true;
         float m_ratioLogarithmUniform = 0.5f;
@@ -138,20 +138,20 @@ namespace AtomSampleViewer
         bool m_isCascadeCorrectionEnabled = false;
         bool m_isDebugColoringEnabled = false;
         bool m_isDebugBoundingBoxEnabled = false;
-        bool m_spotLightShadowEnabled[SpotLightCount] = {true, true, true};
+        bool m_diskLightShadowEnabled[DiskLightCount] = {true, true, true};
 
         // Edge-softening of shadows
         static const AZ::Render::ShadowFilterMethod s_shadowFilterMethods[];
         static const char* s_shadowFilterMethodLabels[];
         int m_shadowFilterMethodIndexDirectional = 0; // filter method is None.
-        int m_shadowFilterMethodIndicesSpot[SpotLightCount] = { 0, 0, 0 }; // filter method is None.
+        int m_shadowFilterMethodIndicesDisk[DiskLightCount] = { 0, 0, 0 }; // filter method is None.
         float m_boundaryWidthDirectional = 0.03f; // 3cm
-        float m_boundaryWidthsSpot[SpotLightCount] = { 0.25f, 0.25f, 0.25f }; // 0.25 degrees
+        float m_boundaryWidthsDisk[DiskLightCount] = { 0.25f, 0.25f, 0.25f }; // 0.25 degrees
         int m_predictionSampleCountDirectional = 8;
-        int m_predictionSampleCountsSpot[SpotLightCount] = { 8, 8, 8 };
+        int m_predictionSampleCountsDisk[DiskLightCount] = { 8, 8, 8 };
         int m_filteringSampleCountDirectional = 32;
-        int m_filteringSampleCountsSpot[SpotLightCount] = { 32, 32, 32 };
-        AZ::Render::PcfMethod m_pcfMethod[SpotLightCount] = {
+        int m_filteringSampleCountsDisk[DiskLightCount] = { 32, 32, 32 };
+        AZ::Render::PcfMethod m_pcfMethod[DiskLightCount] = {
             AZ::Render::PcfMethod::BoundarySearch, AZ::Render::PcfMethod::BoundarySearch, AZ::Render::PcfMethod::BoundarySearch};
 
         ImGuiSidebar m_imguiSidebar;

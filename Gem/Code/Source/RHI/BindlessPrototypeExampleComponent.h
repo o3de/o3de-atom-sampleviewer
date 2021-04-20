@@ -179,7 +179,7 @@ namespace AtomSampleViewer
         void AllocateMaterial(FloatBufferHandle& handle)
         {
             T material;
-            bool result = m_floatBuffer->AllocateOrUpdateBuffer(handle, static_cast<void*>(&material), sizeof(T));
+            [[maybe_unused]] bool result = m_floatBuffer->AllocateOrUpdateBuffer(handle, static_cast<void*>(&material), sizeof(T));
             AZ_Assert(result, "Failed to allocate FloatBuffer");
         }
 

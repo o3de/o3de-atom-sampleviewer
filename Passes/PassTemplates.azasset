@@ -293,8 +293,8 @@
                 "Path": "Passes/LightCullingRemap.pass"
             },
             {
-                "Name": "SpotLightShadowmapsTemplate",
-                "Path": "Passes/SpotLightShadowmaps.pass"
+                "Name": "ProjectedShadowmapsTemplate",
+                "Path": "Passes/ProjectedShadowmaps.pass"
             },
             {
                 "Name": "EnvironmentCubeMapPipeline",

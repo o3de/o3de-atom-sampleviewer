@@ -77,7 +77,7 @@ namespace AtomSampleViewer
         m_scene = RPI::RPISystemInterface::Get()->GetDefaultScene();
 
         // Save references of different feature processors
-        m_spotLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::SpotLightFeatureProcessorInterface>();
+        m_diskLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DiskLightFeatureProcessorInterface>();
         m_directionalLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
         m_skyboxFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::SkyBoxFeatureProcessorInterface>();
         m_postProcessFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::PostProcessFeatureProcessorInterface>();
@@ -156,9 +156,9 @@ namespace AtomSampleViewer
         {
             AddDirectionalLight();
         }
-        if (m_hasSpotLight)
+        if (m_hasDiskLight)
         {
-            AddSpotLight();
+            AddDiskLight();
         }
         if (m_enabledSkybox)
         {
@@ -247,31 +247,32 @@ namespace AtomSampleViewer
         }
     }
 
-    void MultiRenderPipelineExampleComponent::AddSpotLight()
+    void MultiRenderPipelineExampleComponent::AddDiskLight()
     {
-        Render::SpotLightFeatureProcessorInterface* const featureProcessor = m_spotLightFeatureProcessor;
+        Render::DiskLightFeatureProcessorInterface* const featureProcessor = m_diskLightFeatureProcessor;
 
-        const SpotLightHandle handle = featureProcessor->AcquireLight();
+        const DiskLightHandle handle = featureProcessor->AcquireLight();
 
         AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Candela> lightColor(Colors::Green * 500.0f);
         featureProcessor->SetRgbIntensity(handle, lightColor);
         featureProcessor->SetAttenuationRadius(handle, 30.0f);
-        featureProcessor->SetConeAngles(handle, 35*0.9f, 35);
-        featureProcessor->SetShadowmapSize(handle, Render::ShadowmapSize::Size1024);
+        featureProcessor->SetConeAngles(handle, DegToRad(17.5f * 0.9f), DegToRad(17.5f));
+        featureProcessor->SetShadowsEnabled(handle, true);
+        featureProcessor->SetShadowmapMaxResolution(handle, Render::ShadowmapSize::Size1024);
         Vector3 position(0, 5, 7);
         Vector3 direction = -position;
         direction.Normalize();
         featureProcessor->SetPosition(handle, position);
         featureProcessor->SetDirection(handle, direction);
 
-        m_spotLightHandle = handle;
+        m_diskLightHandle = handle;
     }
 
-    void MultiRenderPipelineExampleComponent::RemoveSpotLight()
+    void MultiRenderPipelineExampleComponent::RemoveDiskLight()
     {
-        if (m_spotLightHandle.IsValid())
+        if (m_diskLightHandle.IsValid())
         {
-            m_spotLightFeatureProcessor->ReleaseLight(m_spotLightHandle);
+            m_diskLightFeatureProcessor->ReleaseLight(m_diskLightHandle);
         }
     }
 
@@ -386,7 +387,7 @@ namespace AtomSampleViewer
     {
         RemoveIBL();
         DisableSkybox();
-        RemoveSpotLight();
+        RemoveDiskLight();
         RemoveDirectionalLight();
         DisableDepthOfField();
 
@@ -407,7 +408,7 @@ namespace AtomSampleViewer
         CleanUpScene();
 
         m_directionalLightFeatureProcessor = nullptr;
-        m_spotLightFeatureProcessor = nullptr;
+        m_diskLightFeatureProcessor = nullptr;
         m_skyboxFeatureProcessor = nullptr;
         m_scene = nullptr;
     }
@@ -538,15 +539,15 @@ namespace AtomSampleViewer
                 ImGui::Unindent();
             }
 
-            if (ScriptableImGui::Checkbox("Add/Remove Spot Light", &m_hasSpotLight))
+            if (ScriptableImGui::Checkbox("Add/Remove Spot Light", &m_hasDiskLight))
             {
-                if (m_hasSpotLight)
+                if (m_hasDiskLight)
                 {
-                    AddSpotLight();
+                    AddDiskLight();
                 }
                 else
                 {
-                    RemoveSpotLight();
+                    RemoveDiskLight();
                 }
             }
 

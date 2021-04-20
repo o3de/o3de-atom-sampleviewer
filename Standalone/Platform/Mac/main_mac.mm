@@ -17,7 +17,7 @@
 #include <GridMate/GridMate.h>
 #include <GridMate/Session/LANSession.h>
 
-#include "MacLumberyardApplication.h"
+#include "MacO3DEApplication.h"
 #include <mach-o/dyld.h>
 #include <libgen.h>
 
@@ -44,8 +44,8 @@ int main(int argc, char** argv)
     // Create a custom AppKit application, and a custom AppKit application delegate.
     @autoreleasepool
     {
-        [MacLumberyardApplication sharedApplication];
-        [NSApp setDelegate: [[MacLumberyardApplicationDelegate alloc] init]];
+        [MacO3DEApplication sharedApplication];
+        [NSApp setDelegate: [[MacO3DEApplicationDelegate alloc] init]];
         
         // Register some default application behaviours
         [[NSUserDefaults standardUserDefaults] registerDefaults:
@@ -58,6 +58,6 @@ int main(int argc, char** argv)
         [NSApp finishLaunching];
     }
     
-    // Launch the Lumberyard application.
+    // Launch the Open 3D Engine application.
     return AtomSampleViewer::RunGameCommon(argc, argv);
 }

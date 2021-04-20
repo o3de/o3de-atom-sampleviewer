@@ -936,9 +936,7 @@ namespace AtomSampleViewer
         float right = left + width;
         float bottom = -1.0f;
         float top = bottom + width;
-        float spacing = 1.0f;
         float yStart = -1.0f;
-        float y = yStart;
 
         //Draw opaque cube using DrawTriangles
         right = left + width;

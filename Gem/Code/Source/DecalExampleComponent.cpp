@@ -33,8 +33,8 @@ namespace AtomSampleViewer
 {
     namespace
     {
-        static constexpr char* TargetMeshName = "objects/plane.azmodel";
-        static constexpr char* TargetMaterialName = "materials/defaultpbr.azmaterial";
+        static constexpr const char* TargetMeshName = "objects/plane.azmodel";
+        static constexpr const char* TargetMaterialName = "materials/defaultpbr.azmaterial";
     }
 
     void DecalExampleComponent::Reflect(AZ::ReflectContext* context)

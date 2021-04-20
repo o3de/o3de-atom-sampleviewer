@@ -11,13 +11,12 @@
 
 ################################################################################
 # Automated Tests
-# Tests are not in their final/desired suites yet - see ATOM-14520
 ################################################################################
 
 if(PAL_TRAIT_BUILD_HOST_TOOLS AND PAL_TRAIT_BUILD_TESTS_SUPPORTED)
     ly_add_pytest(
-        NAME AtomSampleViewer::PythonTestsMain
-        PATH ${CMAKE_CURRENT_LIST_DIR}/Automated/test_suites/main/
+        NAME AtomSampleViewer::PythonMainTests
+        PATH ${CMAKE_CURRENT_LIST_DIR}/Automated/test_AtomSampleViewer_main_suite.py
         TEST_REQUIRES gpu
         TEST_SUITE main
         TEST_SERIAL
@@ -30,8 +29,8 @@ if(PAL_TRAIT_BUILD_HOST_TOOLS AND PAL_TRAIT_BUILD_TESTS_SUPPORTED)
             AtomSampleViewer.Assets
     )
     ly_add_pytest(
-        NAME AtomSampleViewer::PythonTestsMainPeriodic
-        PATH ${CMAKE_CURRENT_LIST_DIR}/Automated/test_suites/periodic/
+        NAME AtomSampleViewer::PythonPeriodicTests
+        PATH ${CMAKE_CURRENT_LIST_DIR}/Automated/test_AtomSampleViewer_periodic_suite.py
         TEST_REQUIRES gpu
         TEST_SUITE periodic
         TEST_SERIAL

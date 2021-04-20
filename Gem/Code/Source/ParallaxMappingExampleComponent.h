@@ -13,7 +13,7 @@
 #pragma once
 #include <CommonSampleComponentBase.h>
 #include <Atom/Feature/CoreLights/DirectionalLightFeatureProcessorInterface.h>
-#include <Atom/Feature/CoreLights/SpotLightFeatureProcessorInterface.h>
+#include <Atom/Feature/CoreLights/DiskLightFeatureProcessorInterface.h>
 #include <AzCore/Component/TickBus.h>
 
 #include <Utils/ImGuiSidebar.h>
@@ -50,7 +50,7 @@ namespace AtomSampleViewer
             AZ::Data::Instance<AZ::RPI::Material> material,
             AZ::Transform transform);
         void CreateDirectionalLight();
-        void CreateSpotLight();
+        void CreateDiskLight();
         void DrawSidebar();
 
         void SaveCameraConfiguration();
@@ -64,13 +64,13 @@ namespace AtomSampleViewer
 
         // Light
         AZ::Render::DirectionalLightFeatureProcessorInterface* m_directionalLightFeatureProcessor = nullptr;
-        AZ::Render::SpotLightFeatureProcessorInterface* m_spotLightFeatureProcessor = nullptr;
+        AZ::Render::DiskLightFeatureProcessorInterface* m_diskLightFeatureProcessor = nullptr;
         AZ::Render::DirectionalLightFeatureProcessorInterface::LightHandle m_directionalLightHandle;
-        AZ::Render::SpotLightFeatureProcessorInterface::LightHandle m_spotLightHandle;
+        AZ::Render::DiskLightFeatureProcessorInterface::LightHandle m_diskLightHandle;
 
         float m_lightRotationAngle = 0.f; // in radian
         bool m_lightAutoRotate = true;
-        int m_lightType = 0; // 0: diectionalLight, 1: spotLight
+        int m_lightType = 0; // 0: diectionalLight, 1: diskLight
 
         //Assets
         AZ::Data::Asset<AZ::RPI::ModelAsset> m_planeAsset;

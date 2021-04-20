@@ -173,7 +173,6 @@ namespace AtomSampleViewer
 
         for (int i = 0; i < m_meshHandles.size(); ++i)
         {
-            auto& meshHandle = m_meshHandles[i];
             auto& material = m_materials[i];
 
             static const float CylesPerSecond = 0.5f;

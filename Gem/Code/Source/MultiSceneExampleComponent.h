@@ -24,7 +24,7 @@
 #include <AzFramework/Windowing/NativeWindow.h>
 
 #include <Atom/Feature/CoreLights/PointLightFeatureProcessorInterface.h>
-#include <Atom/Feature/CoreLights/SpotLightFeatureProcessorInterface.h>
+#include <Atom/Feature/CoreLights/DiskLightFeatureProcessorInterface.h>
 #include <Atom/Feature/CoreLights/DirectionalLightFeatureProcessorInterface.h>
 #include <Atom/Feature/ReflectionProbe/ReflectionProbeFeatureProcessorInterface.h>
 #include <Atom/Feature/ReflectionProbe/ReflectionProbeFeatureProcessor.h>
@@ -41,7 +41,7 @@ namespace AtomSampleViewer
     {
         using ModelChangedHandler = AZ::Render::MeshFeatureProcessorInterface::ModelChangedEvent::Handler;
         using PointLightHandle = AZ::Render::PointLightFeatureProcessorInterface::LightHandle;
-        using SpotLightHandle = AZ::Render::SpotLightFeatureProcessorInterface::LightHandle;
+        using DiskLightHandle = AZ::Render::DiskLightFeatureProcessorInterface::LightHandle;
         using DirectionalLightHandle = AZ::Render::DirectionalLightFeatureProcessorInterface::LightHandle;
         using ReflectinoProbeHandle = AZ::Render::ReflectionProbeHandle;
 
@@ -81,7 +81,7 @@ namespace AtomSampleViewer
         AZ::Render::MeshFeatureProcessorInterface* m_meshFeatureProcessor = nullptr;
         AZ::Render::SkyBoxFeatureProcessorInterface* m_skyBoxFeatureProcessor = nullptr;
         AZ::Render::PointLightFeatureProcessorInterface* m_pointLightFeatureProcessor = nullptr;
-        AZ::Render::SpotLightFeatureProcessorInterface* m_spotLightFeatureProcessor = nullptr;
+        AZ::Render::DiskLightFeatureProcessorInterface* m_diskLightFeatureProcessor = nullptr;
         AZ::Render::DirectionalLightFeatureProcessorInterface* m_directionalLightFeatureProcessor = nullptr;
         AZ::Render::PostProcessFeatureProcessorInterface* m_postProcessFeatureProcessor = nullptr;
         AZ::Render::ReflectionProbeFeatureProcessorInterface* m_reflectionProbeFeatureProcessor = nullptr;
@@ -95,7 +95,7 @@ namespace AtomSampleViewer
 
         // Various FeatureProcessor handles
         PointLightHandle m_pointLightHandle;
-        SpotLightHandle m_spotLightHandle;
+        DiskLightHandle m_diskLightHandle;
         DirectionalLightHandle m_directionalLightHandle;
         ReflectinoProbeHandle m_reflectionProbeHandle;
 

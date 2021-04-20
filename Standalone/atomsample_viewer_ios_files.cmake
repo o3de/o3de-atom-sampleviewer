@@ -11,6 +11,6 @@
 
 set(FILES
     Resources/IOSLauncher/Info.plist
-    ios/IosLumberyardApplication.mm
-    ios/IosLumberyardApplicationDelegate.mm
+    ios/IosO3DEApplication.mm
+    ios/IosO3DEApplicationDelegate.mm
 )

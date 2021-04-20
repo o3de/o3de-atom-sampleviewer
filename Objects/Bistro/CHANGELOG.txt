@@ -1,4 +1,4 @@
-Amazon Lumberyard Bistro
+Amazon Open 3D Engine Bistro
 
 v1: Initial release
 

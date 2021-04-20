@@ -15,13 +15,13 @@
 //[GFX TODO][ATOM-449] - Remove this file once we switch to unified launcher
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-@interface MacLumberyardApplication : NSApplication
+@interface MacO3DEApplication : NSApplication
 {
 }
-@end    // MacLumberyardApplication Interface
+@end    // MacO3DEApplication Interface
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
-@interface MacLumberyardApplicationDelegate : NSObject<NSApplicationDelegate>
+@interface MacO3DEApplicationDelegate : NSObject<NSApplicationDelegate>
 {
 }
-@end    // MacLumberyardApplicationDelegate Interface
+@end    // MacO3DEApplicationDelegate Interface

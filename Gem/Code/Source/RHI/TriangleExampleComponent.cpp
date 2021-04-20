@@ -48,7 +48,7 @@ namespace AtomSampleViewer
                 cosf(time) * 0.25f,
                 0.0f);
 
-            bool success = m_shaderResourceGroup->SetConstant(m_objectMatrixConstantIndex, AZ::Matrix4x4::CreateTranslation(translation));
+            [[maybe_unused]] bool success = m_shaderResourceGroup->SetConstant(m_objectMatrixConstantIndex, AZ::Matrix4x4::CreateTranslation(translation));
             AZ_Warning("TriangleExampleComponent", success, "Failed to set SRG Constant m_objectMatrix");
             m_shaderResourceGroup->Compile();
         }
@@ -145,7 +145,7 @@ namespace AtomSampleViewer
             RHI::RenderAttachmentLayoutBuilder attachmentsBuilder;
             attachmentsBuilder.AddSubpass()
                 ->RenderTargetAttachment(m_outputFormat);
-            AZ::RHI::ResultCode result = attachmentsBuilder.End(pipelineStateDescriptor.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
+            [[maybe_unused]] AZ::RHI::ResultCode result = attachmentsBuilder.End(pipelineStateDescriptor.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
             AZ_Assert(result == AZ::RHI::ResultCode::Success, "Failed to create render attachment layout");
 
             m_pipelineState = shader->AcquirePipelineState(pipelineStateDescriptor);

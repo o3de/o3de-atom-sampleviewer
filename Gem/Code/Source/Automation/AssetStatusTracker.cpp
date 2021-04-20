@@ -61,7 +61,6 @@ namespace AtomSampleViewer
 
         for (auto& assetData : m_allAssetStatusData)
         {
-            const AZStd::string& assetPath = assetData.first;
             const AssetStatusEvents& status = assetData.second;
 
             if (status.m_expecteCount > (status.m_succeeded + status.m_failed))

@@ -1,4 +1,4 @@
-Amazon Lumberyard Bistro
+Amazon Open 3D Engine Bistro
 
 Vertex counts:
 - Interior: 814,435
@@ -24,8 +24,8 @@ Also included:
 How to cite use of this asset:
 
   @misc{ORCAAmazonBistro,
-   title = {Amazon Lumberyard Bistro, Open Research Content Archive (ORCA)},
-   author = {Amazon Lumberyard},
+   title = {Amazon Open 3D Engine Bistro, Open Research Content Archive (ORCA)},
+   author = {Amazon Open 3D Engine},
    year = {2017},
    month = {July},
    note = {\small \texttt{http://developer.nvidia.com/orca/amazon-lumberyard-bistro}},
