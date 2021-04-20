@@ -12,11 +12,12 @@
 --
 ----------------------------------------------------------------------------------------------------
 
+-- "Full" suite of tests that need to be run locally by developers before opening a pull request.
+-- This suite of tests is NOT part of the automated review process.
 
 -- This test suite is capable of randomly shuffling the order of the tests below if a random seed is provided that is not ZERO.
 -- NOTE: If the random seed is zero, then the order is not shuffled at all.
 -- The seed can be provided either in imGui or via commandline switch --randomtestseed
-
 
 
 -- Fast check for a sample which doesn't have a dedicated test script
