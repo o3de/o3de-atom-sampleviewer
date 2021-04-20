@@ -32,7 +32,7 @@ namespace AtomSampleViewer
     static const char* ParallaxQualityName = "parallax.quality";
     static const char* ParallaxUvIndexName = "parallax.textureMapUv";
 
-    static const char* AmbientOcclusionUvIndexName = "ambientOcclusion.textureMapUv";
+    static const char* AmbientOcclusionUvIndexName = "occlusion.diffuseTextureMapUv";
     static const char* BaseColorUvIndexName = "baseColor.textureMapUv";
     static const char* NormalUvIndexName = "normal.textureMapUv";
     static const char* RoughnessUvIndexName = "roughness.textureMapUv";
