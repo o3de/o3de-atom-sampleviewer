@@ -9,7 +9,7 @@
     },
 
     "RasterState" : {
-        "DepthClipEnable" : false,
+        "DepthClipEnable" : true,
         "CullMode" : "None"
     },
 

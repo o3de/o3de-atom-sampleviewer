@@ -10,4 +10,6 @@
 *
 */
 
+// TODO: figure out the which limitations of android devices causing the error of loading the high poly model
+// https://jira.agscollab.com/browse/ATOM-14947
 #define ATOMSAMPLEVIEWER_TRAIT_SSR_SAMPLE_LUCY_MODEL_NAME                       "objects/lucy/lucy_low.azmodel"

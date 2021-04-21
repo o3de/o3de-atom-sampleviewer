@@ -296,7 +296,7 @@ namespace AtomSampleViewer
 
         // Load the Shader and obtain the Pipeline state and its SRG
         {
-            const char* triangeShaderFilePath = ATOMSAMPLEVIEWER_TRAIT_TRIANGLE_CONSTANT_BUFFER_SAMPLE_SHADER_NAME;
+            const char* triangeShaderFilePath = "Shaders/RHI/TrianglesConstantBuffer.azshader";
             auto shader = LoadShader(triangeShaderFilePath, s_trianglesConstantBufferExampleName);
             if (shader == nullptr)
                 return;

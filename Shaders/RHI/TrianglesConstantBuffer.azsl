@@ -13,7 +13,17 @@
  #include <Atom/Features/SrgSemantics.azsli>
 
 // Number of triangles that will be rendered on screen
+// Uniform limitation need to be taken into consideration for mobile devices
+// https://jira.agscollab.com/browse/ATOM-14949
+#if AZ_TRAIT_CONSTANT_BUFFER_LIMITATIONS
+
+#define MAX_NUMBER_OF_INSTANCES 12
+
+#else
+
 #define MAX_NUMBER_OF_INSTANCES 30
+
+#endif
 
 struct InstanceInfo
 {

@@ -33,8 +33,6 @@
 
 #include <Utils/Utils.h>
 
-#include <BindlessExampleComponent_Traits_Platform.h>
-
 namespace AtomSampleViewer
 {
     using namespace AZ;
@@ -353,7 +351,7 @@ namespace AtomSampleViewer
 
         // Load the shader
         {
-            const char* BindlessPrototypeShader = ATOMSAMPLEVIEWER_TRAIT_BINDLESS_SAMPLE_SHADER_NAME;
+            const char* BindlessPrototypeShader = "shaders/rhi/bindlessprototype.azshader";
 
             m_shader = AtomSampleViewer::BasicRHIComponent::LoadShader(BindlessPrototypeShader, InternalBP::SampleName);
             AZ_Assert(m_shader, "Shader isn't loaded correctly");
