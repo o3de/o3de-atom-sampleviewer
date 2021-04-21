@@ -104,7 +104,7 @@ namespace AtomSampleViewer
         // parallax setting
         bool m_parallaxEnable = true;
         bool m_pdoEnable = true;
-        float m_parallaxFactor = 0.03f;
+        float m_parallaxFactor = 0.05f;
         // see StandardPbr.materialtype for the full enum list.
         int m_parallaxAlgorithm = 2; // POM
         int m_parallaxQuality = 2;   // High
