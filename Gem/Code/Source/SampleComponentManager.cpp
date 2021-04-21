@@ -69,6 +69,7 @@
 #include <AreaLightExampleComponent.h>
 #include <AssetLoadTestComponent.h>
 #include <AuxGeomExampleComponent.h>
+#include <BakedShaderVariantExampleComponent.h>
 #include <BistroBenchmarkComponent.h>
 #include <BloomExampleComponent.h>
 #include <CheckerboardExampleComponent.h>
@@ -257,6 +258,7 @@ namespace AtomSampleViewer
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/TrianglesConstantBuffer", azrtti_typeid<TrianglesConstantBufferExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/AssetLoadTest", azrtti_typeid<AssetLoadTestComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/AuxGeom", azrtti_typeid<AuxGeomExampleComponent>() ));
+        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/BakedShaderVariant", azrtti_typeid<BakedShaderVariantExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/BistroBenchmark", azrtti_typeid<BistroBenchmarkComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/CullingAndLod", azrtti_typeid<CullingAndLodExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/Decals", azrtti_typeid<DecalExampleComponent>() ));
@@ -1118,11 +1120,11 @@ namespace AtomSampleViewer
         return m_isFrameCapturePending;
     }
 
-    void SampleComponentManager::RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd)
+    void SampleComponentManager::RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd, int randomSeed)
     {
         if (m_scriptManager)
         {
-            m_scriptManager->RunMainTestSuite(suiteFilePath, exitOnTestEnd);
+            m_scriptManager->RunMainTestSuite(suiteFilePath, exitOnTestEnd, randomSeed);
         }
     }
 

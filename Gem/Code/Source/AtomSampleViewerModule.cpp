@@ -17,6 +17,7 @@
 #include <AssetLoadTestComponent.h>
 #include <AuxGeomExampleComponent.h>
 #include <AtomSampleViewerSystemComponent.h>
+#include <BakedShaderVariantExampleComponent.h>
 #include <BistroBenchmarkComponent.h>
 #include <BloomExampleComponent.h>
 #include <CheckerboardExampleComponent.h>
@@ -126,6 +127,7 @@ namespace AtomSampleViewer
             m_descriptors.insert(m_descriptors.end(), {
                 AreaLightExampleComponent::CreateDescriptor(),
                 AssetLoadTestComponent::CreateDescriptor(),
+                BakedShaderVariantExampleComponent::CreateDescriptor(),
                 BistroBenchmarkComponent::CreateDescriptor(),
                 BloomExampleComponent::CreateDescriptor(),
                 CheckerboardExampleComponent::CreateDescriptor(),

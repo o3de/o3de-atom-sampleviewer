@@ -20,6 +20,7 @@ ResizeViewport(1600, 900)
 SelectImageComparisonToleranceLevel("Level I")
 SetImguiValue('Lighting/Auto Rotation', false)
 SetImguiValue('Lighting/Direction', DegToRad(110))
+SetImguiValue('Parallax Setting/Factor', 0.05)
 
 SetImguiValue('Parallax Setting/Enable Pdo', false)
 IdleFrames(2)
