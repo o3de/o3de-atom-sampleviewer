@@ -56,9 +56,9 @@ namespace AtomSampleViewer
         // Create the scene
         auto sceneSystem = AzFramework::SceneSystemInterface::Get();
         AZ_Assert(sceneSystem, "Unable to retrieve scene system.");
-        Outcome<AzFramework::Scene*, AZStd::string> createSceneOutcome = sceneSystem->CreateScene(m_sceneName);
+        Outcome<AZStd::shared_ptr<AzFramework::Scene>, AZStd::string> createSceneOutcome = sceneSystem->CreateScene(m_sceneName);
         AZ_Assert(createSceneOutcome, "%s", createSceneOutcome.GetError().data());
-        m_frameworkScene = createSceneOutcome.GetValue();
+        m_frameworkScene = createSceneOutcome.TakeValue();
         m_frameworkScene->SetSubsystem<AzFramework::EntityContext::SceneStorageType>(m_entityContext.get());
         
         // Create a NativeWindow and WindowContext

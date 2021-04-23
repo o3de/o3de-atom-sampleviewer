@@ -1442,7 +1442,7 @@ namespace AtomSampleViewer
         // Bind m_rpiScene to the GameEntityContext's AzFramework::Scene so the RPI Scene can be found by the entity context
         auto sceneSystem = AzFramework::SceneSystemInterface::Get();
         AZ_Assert(sceneSystem, "SampleComponentManager requires an implementation of the scene system.");
-        AzFramework::Scene* mainScene = sceneSystem->GetScene(AzFramework::Scene::MainSceneName);
+        AZStd::shared_ptr<AzFramework::Scene> mainScene = sceneSystem->GetScene(AzFramework::Scene::MainSceneName);
         AZ_Assert(mainScene, "Main scene missing during system component initialization"); // This should never happen unless scene creation has changed.
         // Add RPI::Scene as a sub system for the default AzFramework Scene
         [[maybe_unused]] bool result = mainScene->SetSubsystem(m_rpiScene);
@@ -1487,7 +1487,7 @@ namespace AtomSampleViewer
 
             auto sceneSystem = AzFramework::SceneSystemInterface::Get();
             AZ_Assert(sceneSystem, "Scene system was destroyed before SampleComponentManager was able to unregister the RPI scene.");
-            AzFramework::Scene* scene = sceneSystem->GetScene(AzFramework::Scene::MainSceneName);
+            AZStd::shared_ptr<AzFramework::Scene> scene = sceneSystem->GetScene(AzFramework::Scene::MainSceneName);
             AZ_Assert(scene, "The main scene wasn't found in the scene system.");
             [[maybe_unused]] bool result = scene->UnsetSubsystem(m_rpiScene);
             AZ_Assert(result, "SampleComponentManager failed to unregister its RPI scene from the general scene.");
