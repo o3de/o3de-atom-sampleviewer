@@ -32,7 +32,7 @@ namespace AtomSampleViewer
     static const char* ParallaxQualityName = "parallax.quality";
     static const char* ParallaxUvIndexName = "parallax.textureMapUv";
 
-    static const char* AmbientOcclusionUvIndexName = "ambientOcclusion.textureMapUv";
+    static const char* AmbientOcclusionUvIndexName = "occlusion.diffuseTextureMapUv";
     static const char* BaseColorUvIndexName = "baseColor.textureMapUv";
     static const char* NormalUvIndexName = "normal.textureMapUv";
     static const char* RoughnessUvIndexName = "roughness.textureMapUv";
@@ -186,7 +186,7 @@ namespace AtomSampleViewer
         const AZ::Render::DiskLightFeatureProcessorInterface::LightHandle handle = featureProcessor->AcquireLight();
 
         featureProcessor->SetAttenuationRadius(handle, sqrtf(500.f / CutoffIntensity));
-        featureProcessor->SetConeAngles(handle, AZ::DegToRad(45.0f) * ConeAngleInnerRatio, AZ::DegToRad(45.0f));
+        featureProcessor->SetConeAngles(handle, AZ::DegToRad(22.5f) * ConeAngleInnerRatio, AZ::DegToRad(22.5f));
         featureProcessor->SetShadowsEnabled(handle, true);
         featureProcessor->SetShadowmapMaxResolution(handle, AZ::Render::ShadowmapSize::Size2048);
 
