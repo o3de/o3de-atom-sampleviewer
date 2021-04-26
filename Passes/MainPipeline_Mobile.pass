@@ -289,6 +289,13 @@
                             }
                         },
                         {
+                            "LocalSlot": "AlbedoInput",
+                            "AttachmentRef": {
+                                "Pass": "ForwardPass",
+                                "Attachment": "AlbedoOutput"
+                            }
+                        },
+                        {
                             "LocalSlot": "ClearCoatNormalInput",
                             "AttachmentRef": {
                                 "Pass": "ForwardPass",

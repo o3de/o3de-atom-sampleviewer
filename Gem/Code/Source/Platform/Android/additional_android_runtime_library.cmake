@@ -12,11 +12,3 @@
 set(LY_RUNTIME_DEPENDENCIES
     3rdParty::VkValidation
 )
-
-set(VKVALIDATION_VERSION
-    r21d
-)
-
-set(VKVALIDATION_3RDPARTY_PLATFORM_DIRECTORY
-    android-ndk
-)
