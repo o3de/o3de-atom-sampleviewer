@@ -115,7 +115,7 @@
 #include <AzFramework/Input/Devices/Keyboard/InputDeviceKeyboard.h>
 #include <AzFramework/Entity/GameEntityContextBus.h>
 #include <AzFramework/Scene/Scene.h>
-#include <AzFramework/Scene/SceneSystemBus.h>
+#include <AzFramework/Scene/SceneSystemInterface.h>
 
 #include <Passes/RayTracingAmbientOcclusionPass.h>
 

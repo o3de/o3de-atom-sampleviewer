@@ -28,7 +28,7 @@
 #include <AzCore/Component/Entity.h>
 
 #include <AzFramework/Components/TransformComponent.h>
-#include <AzFramework/Scene/SceneSystemBus.h>
+#include <AzFramework/Scene/SceneSystemInterface.h>
 #include <AzFramework/Entity/GameEntityContextComponent.h>
 
 #include <SampleComponentConfig.h>
