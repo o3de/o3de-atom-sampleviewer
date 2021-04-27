@@ -24,7 +24,6 @@ function SetupDiskLights()
     SetImguiValue('AreaLightSample/Radius', 1.0)
     SetImguiValue('AreaLightSample/X rotation', -1.5)
     SetImguiValue('AreaLightSample/Y rotation', -0.125)
-    SetImguiValue('AreaLightSample/Emit Both Directions', false)
 end
 
 function SetupCapsuleLights()
