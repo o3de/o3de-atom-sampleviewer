@@ -416,7 +416,7 @@ namespace AtomSampleViewer
 
         m_imguiFrameCaptureSaver.SetDefaultFolder(screenshotFolder);
         m_imguiFrameCaptureSaver.SetDefaultFileName("screenshot");
-        m_imguiFrameCaptureSaver.SetAvailableExtensions({"ppm", "dds"});
+        m_imguiFrameCaptureSaver.SetAvailableExtensions({"png", "ppm", "dds"});
         m_imguiFrameCaptureSaver.Activate();
 
         SampleComponentManagerRequestBus::Handler::BusConnect();
@@ -1145,7 +1145,7 @@ namespace AtomSampleViewer
                 ImGui::Checkbox("Hide ImGui", &hideImGuiFromFrameCapture);
 
                 ImGuiSaveFilePath::WidgetSettings settings;
-                settings.m_labels.m_filePath = "File Path (.ppm or .dds):";
+                settings.m_labels.m_filePath = "File Path (.png, .ppm, or .dds):";
                 m_imguiFrameCaptureSaver.Tick(settings);
 
                 if (ImGui::Button("Capture"))
