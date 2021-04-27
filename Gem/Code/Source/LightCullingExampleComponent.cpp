@@ -623,7 +623,7 @@ namespace AtomSampleViewer
 
                 // Rotate 90 degrees so that the debug draw is aligned properly with the quad light
                 transform *= AZ::Transform::CreateFromQuaternion(AZ::ConvertEulerRadiansToQuaternion(AZ::Vector3(AZ::Constants::HalfPi, 0.0f, 0.0f)));
-                auxGeom->DrawQuad(m_quadLightSize[0], m_quadLightSize[1], AZ::Matrix3x4::CreateFromTransform(transform), light.m_color);
+                auxGeom->DrawQuad(m_quadLightSize[0], m_quadLightSize[1], transform, light.m_color);
             }
         }
     }
