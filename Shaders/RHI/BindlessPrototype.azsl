@@ -136,7 +136,7 @@ PixelOutput MainPS(VertexOutput psInput)
         SetFloat4(bindlessMaterial1.m_diffuseColor, HandleSrg::m_materialHandle, offset);
         SetUint(bindlessMaterial1.m_diffuseTextureIndex, HandleSrg::m_materialHandle, offset);
 
-        Texture2D texture = ImageSrg::m_textureArray[bindlessMaterial1.m_diffuseTextureIndex];
+        Texture2D texture = ImageSrg::m_textureArray[bindlessMaterial1.m_diffuseTextureIndex % 8]; // % 8 for wrap-around texture index as specified in ImageSrg.m_textureArray
         OUT.m_color = texture.Sample(ImageSrg::m_sampler, psInput.m_uv);
     }
     else if(materialIndex.x == 2) // Shaded material
@@ -148,7 +148,7 @@ PixelOutput MainPS(VertexOutput psInput)
         SetUint(bindlessMaterial2.m_normalTextureIndex, HandleSrg::m_materialHandle, offset);
         SetUint(bindlessMaterial2.m_specularTextureIndex, HandleSrg::m_materialHandle, offset);
 
-        Texture2D texture = ImageSrg::m_textureArray[bindlessMaterial2.m_diffuseTextureIndex];
+        Texture2D texture = ImageSrg::m_textureArray[bindlessMaterial2.m_diffuseTextureIndex % 8]; // % 8 for wrap-around texture index as specified in ImageSrg.m_textureArray
         color = texture.Sample(ImageSrg::m_sampler, psInput.m_uv);
 
         float3 lightDir;
