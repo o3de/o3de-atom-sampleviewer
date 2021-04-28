@@ -10,6 +10,7 @@
 *
 */
 
-// TODO: figure out the which limitations of android devices causing the error of loading the high poly model
-// https://jira.agscollab.com/browse/ATOM-14947
+// Mali devices have a memory limitation of vertex buffer (180MB), so low resolution mesh model is needed.
+// https://community.arm.com/developer/tools-software/graphics/b/blog/posts/memory-limits-with-vulkan-on-mali-gpus
+// [ATOM-14947]
 #define ATOMSAMPLEVIEWER_TRAIT_SSR_SAMPLE_LUCY_MODEL_NAME                       "objects/lucy/lucy_low.azmodel"
