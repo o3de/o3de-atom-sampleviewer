@@ -29,6 +29,8 @@
 #include <SampleComponentConfig.h>
 
 #include <RHI/BasicRHIComponent.h>
+#include <Atom/RPI.Public/ColorManagement/TransformColor.h>
+
 
 namespace AtomSampleViewer
 {
@@ -39,12 +41,13 @@ namespace AtomSampleViewer
     };
 
     const AZ::Color ShadowExampleComponent::DirectionalLightColor = AZ::Color::CreateOne();
-    AZ::Color ShadowExampleComponent::s_diskLightColors[] = {
+    AZ::Color ShadowExampleComponent::s_positionalLightColors[] = {
         // they will be initialized in the constructor.
         AZ::Color::CreateZero(),
         AZ::Color::CreateZero(),
         AZ::Color::CreateZero()
     };
+
     const AZ::Render::ShadowmapSize ShadowExampleComponent::s_shadowmapImageSizes[] = 
     {
         AZ::Render::ShadowmapSize::Size256,
@@ -77,9 +80,9 @@ namespace AtomSampleViewer
     ShadowExampleComponent::ShadowExampleComponent()
         : m_imguiSidebar("@user@/ShadowExampleComponent/sidebar.xml")
     {
-        s_diskLightColors[0] = AZ::Colors::Red;
-        s_diskLightColors[1] = AZ::Colors::Green;
-        s_diskLightColors[2] = AZ::Colors::Blue;
+        s_positionalLightColors[0] = AZ::Colors::Red;
+        s_positionalLightColors[1] = AZ::Colors::Green;
+        s_positionalLightColors[2] = AZ::Colors::Blue;
     }
 
     void ShadowExampleComponent::Reflect(AZ::ReflectContext* context)
@@ -123,9 +126,9 @@ namespace AtomSampleViewer
         m_floorMeshIsReady = false;
 
         m_directionalLightImageSizeIndex = 2; // image size is 1024.
-        for (uint32_t index = 0; index < DiskLightCount; ++index)
+        for (uint32_t index = 0; index < PositionalLightCount; ++index)
         {
-            m_diskLightImageSizeIndices[index] = 2; // image size is 1024.
+            m_positionalLightImageSizeIndices[index] = 2; // image size is 1024.
         }
         m_cascadeCount = 2;
         m_ratioLogarithmUniform = 0.5f;
@@ -135,6 +138,7 @@ namespace AtomSampleViewer
         RPI::Scene* scene = RPI::RPISystemInterface::Get()->GetDefaultScene().get();
         m_directionalLightFeatureProcessor = scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
         m_diskLightFeatureProcessor = scene->GetFeatureProcessor<Render::DiskLightFeatureProcessorInterface>();
+        m_pointLightFeatureProcessor = scene->GetFeatureProcessor<Render::PointLightFeatureProcessorInterface>();
 
         CreateMeshes();
         CreateDirectionalLight();
@@ -154,12 +158,10 @@ namespace AtomSampleViewer
 
         GetMeshFeatureProcessor()->ReleaseMesh(m_floorMeshHandle);
         GetMeshFeatureProcessor()->ReleaseMesh(m_bunnyMeshHandle);
+        DestroyDiskLights();
+        DestroyPointLights();
 
         m_directionalLightFeatureProcessor->ReleaseLight(m_directionalLightHandle);
-        for (DiskLightHandle& handle : m_diskLightHandles)
-        {
-            m_diskLightFeatureProcessor->ReleaseLight(handle);
-        }
 
         m_imguiSidebar.Deactivate();
     }
@@ -168,8 +170,7 @@ namespace AtomSampleViewer
     {
         using namespace AZ;
         constexpr float directionalLightPeriodTime = 5.f; // 5 seconds for a rotation of directional light position.
-        constexpr float diskLightPeriodTime = 7.f; // 7 seconds for a rotation of disk light positions.
-        constexpr float directionalLightDist = 10.f;
+        constexpr float diskLightPeriodTime = 7.f; // 7 seconds for a rotation of light positions.
         constexpr float diskLightDist = 5.f;
 
         if (m_elapsedTime == 0.f)
@@ -185,67 +186,98 @@ namespace AtomSampleViewer
         {
             m_directionalLightRotationAngle = fmodf(m_directionalLightRotationAngle + deltaTime * Constants::TwoPi / directionalLightPeriodTime, Constants::TwoPi);
         }
-        if (m_isDiskLightAutoRotate)
+        if (m_isPositionalLightAutoRotate)
         {
-            m_diskLightRotationAngle = fmodf(m_diskLightRotationAngle - deltaTime * Constants::TwoPi / diskLightPeriodTime + Constants::TwoPi, Constants::TwoPi);
+            m_positionalLightRotationAngle = fmodf(m_positionalLightRotationAngle - deltaTime * Constants::TwoPi / diskLightPeriodTime + Constants::TwoPi, Constants::TwoPi);
         }
 
-        // Directional Light Transform
+
+        UpdateDirectionalLight();
+
+        for (uint32_t index = 0; index < PositionalLightCount; ++index)
         {
-            const auto lightLocation = Vector3(
-                directionalLightDist * sinf(m_directionalLightRotationAngle),
-                directionalLightDist * cosf(m_directionalLightRotationAngle),
-                m_directionalLightHeight);
-            const auto lightTransform = Transform::CreateLookAt(
-                lightLocation,
-                Vector3::CreateZero());
-            m_directionalLightFeatureProcessor->SetDirection(m_directionalLightHandle, lightTransform.GetBasis(1));
-        }
+            const auto transform = GetTransformForLight(index);
 
-        // Disk Lights Transform
-        for (uint32_t index = 0; index < DiskLightCount; ++index)
-        { 
-            const float angle = m_diskLightRotationAngle + index * Constants::TwoPi / 3;
-            const auto location = Vector3(
-                diskLightDist * sinf(angle),
-                diskLightDist * cosf(angle),
-                m_diskLightHeights[index]);
-            const auto transform = Transform::CreateLookAt(
-                location,
-                Vector3::CreateZero());
-            m_diskLightFeatureProcessor->SetPosition(m_diskLightHandles[index], location);
-            m_diskLightFeatureProcessor->SetDirection(m_diskLightHandles[index], transform.GetBasis(1));
-        }
+            if (m_diskLightHandles[index].IsValid())
+            {
+                m_diskLightFeatureProcessor->SetPosition(m_diskLightHandles[index], transform.GetTranslation());
+                m_diskLightFeatureProcessor->SetDirection(m_diskLightHandles[index], transform.GetBasis(1));
+            }
 
+            if (m_pointLightHandles[index].IsValid())
+            {
+                m_pointLightFeatureProcessor->SetPosition(m_pointLightHandles[index], transform.GetTranslation());
+            }
+        }
         Camera::CameraRequestBus::Event(
             GetCameraEntityId(),
             &Camera::CameraRequestBus::Events::SetFovRadians,
             m_cameraFovY);
 
+
+        DrawSidebar();
+    }
+
+    AZ::Transform ShadowExampleComponent::GetTransformForLight(const uint32_t index) const
+    {
+        constexpr float diskLightDist = 5.f;
+        using namespace AZ;
+        const float angle = m_positionalLightRotationAngle + index * Constants::TwoPi / 3;
+        const auto location = Vector3(diskLightDist * sinf(angle), diskLightDist * cosf(angle), m_positionalLightHeights[index]);
+        const auto transform = Transform::CreateLookAt(location, Vector3::CreateZero());
+        return transform;
+    }
+
+    float ShadowExampleComponent::GetAttenuationForLight(const uint32_t index) const
+    {
+        return sqrtf(m_lightIntensities[index] / CutoffIntensity);
+    }
+
+    AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Candela> ShadowExampleComponent::GetRgbIntensityForLight(
+        const uint32_t index) const
+    {
+        AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Candela> lightRgbIntensity(
+            s_positionalLightColors[index] * m_lightIntensities[index]);
+       
+        return lightRgbIntensity;
+    }
+
+    AZStd::pair<float, float> ShadowExampleComponent::GetConeAnglesForLight(const uint32_t index) const
+    {
+        const float innerConeAngle = AZ::DegToRad(m_outerConeAngles[index]) * ConeAngleInnerRatio;
+        const float outerConeAngle = AZ::DegToRad(m_outerConeAngles[index]);
+
+        return AZStd::make_pair(innerConeAngle, outerConeAngle);
+    }
+
+
+    void ShadowExampleComponent::UpdateDirectionalLight()
+    {
+        using namespace AZ;
+        constexpr float directionalLightDist = 10.f;
+
+        // Directional Light Transform
+        {
+            const auto lightLocation = Vector3(
+                directionalLightDist * sinf(m_directionalLightRotationAngle), directionalLightDist * cosf(m_directionalLightRotationAngle),
+                m_directionalLightHeight);
+            const auto lightTransform = Transform::CreateLookAt(lightLocation, Vector3::CreateZero());
+            m_directionalLightFeatureProcessor->SetDirection(m_directionalLightHandle, lightTransform.GetBasis(1));
+        }
+
         // Camera Configuration
         {
             Camera::Configuration config;
-            Camera::CameraRequestBus::EventResult(
-                config,
-                GetCameraEntityId(),
-                &Camera::CameraRequestBus::Events::GetCameraConfiguration);
-            m_directionalLightFeatureProcessor->SetCameraConfiguration(
-                m_directionalLightHandle,
-                config);
+            Camera::CameraRequestBus::EventResult(config, GetCameraEntityId(), &Camera::CameraRequestBus::Events::GetCameraConfiguration);
+            m_directionalLightFeatureProcessor->SetCameraConfiguration(m_directionalLightHandle, config);
         }
 
         // Camera Transform
         {
             Transform transform = Transform::CreateIdentity();
-            TransformBus::EventResult(
-                transform,
-                GetCameraEntityId(),
-                &TransformBus::Events::GetWorldTM);
-            m_directionalLightFeatureProcessor->SetCameraTransform(
-                m_directionalLightHandle, transform);
+            TransformBus::EventResult(transform, GetCameraEntityId(), &TransformBus::Events::GetWorldTM);
+            m_directionalLightFeatureProcessor->SetCameraTransform(m_directionalLightHandle, transform);
         }
-
-        DrawSidebar();
     }
 
     void ShadowExampleComponent::SaveCameraConfiguration()
@@ -401,34 +433,33 @@ namespace AtomSampleViewer
 
     void ShadowExampleComponent::CreateDiskLights()
     {
+        DestroyDiskLights();
+
         using namespace AZ;
         Render::DiskLightFeatureProcessorInterface* const featureProcessor = m_diskLightFeatureProcessor;
 
-        for (uint32_t index = 0; index < DiskLightCount; ++index)
+        for (uint32_t index = 0; index < PositionalLightCount; ++index)
         {
             const DiskLightHandle handle = featureProcessor->AcquireLight();
-
-            AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Candela> lightColor(s_diskLightColors[index] * m_diskLightIntensities[index]);
-            featureProcessor->SetRgbIntensity(handle, lightColor);
-            featureProcessor->SetAttenuationRadius(
-                handle,
-                sqrtf(m_diskLightIntensities[index] / CutoffIntensity));
-            featureProcessor->SetConeAngles(
-                handle,
-                DegToRad(m_outerConeAngles[index]) * ConeAngleInnerRatio,
-                DegToRad(m_outerConeAngles[index]));
-            featureProcessor->SetShadowsEnabled(handle, m_diskLightShadowEnabled[index]);
-            if (m_diskLightShadowEnabled[index])
-            {
-                featureProcessor->SetShadowmapMaxResolution(handle, s_shadowmapImageSizes[m_diskLightImageSizeIndices[index]]);
-                featureProcessor->SetShadowFilterMethod(handle, s_shadowFilterMethods[m_shadowFilterMethodIndicesDisk[index]]);
-                featureProcessor->SetSofteningBoundaryWidthAngle(handle, AZ::DegToRad(m_boundaryWidthsDisk[index]));
-                featureProcessor->SetPredictionSampleCount(handle, m_predictionSampleCountsDisk[index]);
-                featureProcessor->SetFilteringSampleCount(handle, m_filteringSampleCountsDisk[index]);
-                featureProcessor->SetPcfMethod(handle, m_pcfMethod[index]);
-            }
+            AZ_Assert(m_diskLightHandles[index].IsNull(), "Unreleased light");
             m_diskLightHandles[index] = handle;
         }
+        ApplyDiskLightSettings();
+    }
+    void ShadowExampleComponent::CreatePointLights()
+    {
+        DestroyPointLights();
+
+        using namespace AZ;
+        Render::PointLightFeatureProcessorInterface* const featureProcessor = m_pointLightFeatureProcessor;
+
+        for (uint32_t index = 0; index < PositionalLightCount; ++index)
+        {
+            const PointLightHandle handle = featureProcessor->AcquireLight();        
+            AZ_Assert(m_pointLightHandles[index].IsNull(), "Unreleased light");
+            m_pointLightHandles[index] = handle;
+        }
+        ApplyPointLightSettings();
     }
 
     void ShadowExampleComponent::DrawSidebar()
@@ -439,304 +470,19 @@ namespace AtomSampleViewer
         {
             ImGui::Spacing();
 
-            ImGui::Text("Directional Light");
-            ImGui::Indent();
-            {
-                ImGui::SliderFloat("Height##Directional", &m_directionalLightHeight, 1.f, 30.f, "%.1f", 2.f);
-
-                ScriptableImGui::Checkbox("Auto Rotation##Directional", &m_isDirectionalLightAutoRotate);
-                ScriptableImGui::SliderAngle("Direction##Directional", &m_directionalLightRotationAngle, 0, 360);
-
-                if (ScriptableImGui::SliderFloat("Intensity##Directional", &m_directionalLightIntensity, 0.f, 20.f, "%.1f", 2.f))
-                {
-                    AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Lux> lightColor(DirectionalLightColor * m_directionalLightIntensity);
-                    m_directionalLightFeatureProcessor->SetRgbIntensity(m_directionalLightHandle, lightColor);
-                }
-
-                ImGui::Separator();
-
-                ImGui::Text("Shadowmap Size");
-                if (ScriptableImGui::Combo(
-                    "Size##Directional",
-                    &m_directionalLightImageSizeIndex,
-                    s_shadowmapImageSizeLabels,
-                    AZ_ARRAY_SIZE(s_shadowmapImageSizeLabels)))
-                {
-                    m_directionalLightFeatureProcessor->SetShadowmapSize(
-                        m_directionalLightHandle,
-                        s_shadowmapImageSizes[m_directionalLightImageSizeIndex]);
-                }
-
-                ImGui::Text("Number of cascades");
-                bool cascadesChanged = false;
-                cascadesChanged = cascadesChanged ||
-                    ScriptableImGui::RadioButton("1", &m_cascadeCount, 1);
-                ImGui::SameLine();
-                cascadesChanged = cascadesChanged ||
-                    ScriptableImGui::RadioButton("2", &m_cascadeCount, 2);
-                ImGui::SameLine();
-                cascadesChanged = cascadesChanged ||
-                    ScriptableImGui::RadioButton("3", &m_cascadeCount, 3);
-                ImGui::SameLine();
-                cascadesChanged = cascadesChanged ||
-                    ScriptableImGui::RadioButton("4", &m_cascadeCount, 4);
-                if (cascadesChanged)
-                {
-                    m_directionalLightFeatureProcessor->SetCascadeCount(
-                        m_directionalLightHandle,
-                        m_cascadeCount);
-                }
-
-                ImGui::Spacing();
-                bool cascadeDepthIsChanged = 
-                    ScriptableImGui::Checkbox("Automatic Cascade Split", &m_shadowmapFrustumSplitIsAutomatic);
-                if (m_shadowmapFrustumSplitIsAutomatic)
-                {
-                    ImGui::Text("Cascade partition scheme");
-                    ImGui::Text("  (uniform <--> logarithm)");
-                    cascadeDepthIsChanged = cascadeDepthIsChanged ||
-                        ScriptableImGui::SliderFloat("Ratio", &m_ratioLogarithmUniform, 0.f, 1.f, "%0.3f");
-                    if (cascadeDepthIsChanged)
-                    {
-                        m_directionalLightFeatureProcessor->SetShadowmapFrustumSplitSchemeRatio(
-                            m_directionalLightHandle,
-                            m_ratioLogarithmUniform);
-                    }
-                }
-                else
-                {
-                    for (int cascadeIndex = 0; cascadeIndex < m_cascadeCount; ++cascadeIndex)
-                    {
-                        const AZStd::string label = AZStd::string::format("FarDepth %d", cascadeIndex);
-                        cascadeDepthIsChanged = cascadeDepthIsChanged ||
-                            ScriptableImGui::SliderFloat(label.c_str(), &m_cascadeFarDepth[cascadeIndex], 0.01f, 20.f);
-                    }
-                    if (cascadeDepthIsChanged)
-                    {
-                        for (int cascadeIndex = 0; cascadeIndex < m_cascadeCount; ++cascadeIndex)
-                        {
-                            m_directionalLightFeatureProcessor->SetCascadeFarDepth(
-                                m_directionalLightHandle,
-                                aznumeric_cast<uint16_t>(cascadeIndex),
-                                m_cascadeFarDepth[cascadeIndex]);
-                        }
-                    }
-                }
-
-                ImGui::Spacing();
-
-                ImGui::Text("Filtering");
-                if (ScriptableImGui::Combo(
-                    "Filter Method##Directional",
-                    &m_shadowFilterMethodIndexDirectional,
-                    s_shadowFilterMethodLabels,
-                    AZ_ARRAY_SIZE(s_shadowFilterMethodLabels)))
-                {
-                    m_directionalLightFeatureProcessor->SetShadowFilterMethod(
-                        m_directionalLightHandle,
-                        s_shadowFilterMethods[m_shadowFilterMethodIndexDirectional]);
-                }
-                if (m_shadowFilterMethodIndexDirectional != aznumeric_cast<int>(ShadowFilterMethod::None))
-                {
-                    ImGui::Text("Boundary Width in meter");
-                    if (ScriptableImGui::SliderFloat("Width##Directional", &m_boundaryWidthDirectional, 0.f, 0.1f, "%.3f"))
-                    {
-                        m_directionalLightFeatureProcessor->SetShadowBoundaryWidth(
-                            m_directionalLightHandle,
-                            m_boundaryWidthDirectional);
-                    }
-                }
-
-                if (m_shadowFilterMethodIndexDirectional == aznumeric_cast<int>(ShadowFilterMethod::Pcf) ||
-                    m_shadowFilterMethodIndexDirectional == aznumeric_cast<int>(ShadowFilterMethod::EsmPcf))
-                {
-                    ImGui::Spacing();
-                    ImGui::Text("Filtering (PCF specific)");
-                    if (ScriptableImGui::SliderInt("Prediction # ##Directional", &m_predictionSampleCountDirectional, 4, 16))
-                    {
-                        m_directionalLightFeatureProcessor->SetPredictionSampleCount(
-                            m_directionalLightHandle,
-                            m_predictionSampleCountDirectional);
-                    }
-                    if (ScriptableImGui::SliderInt("Filtering # ##Directional", &m_filteringSampleCountDirectional, 4, 64))
-                    {
-                        m_directionalLightFeatureProcessor->SetFilteringSampleCount(
-                            m_directionalLightHandle,
-                            m_filteringSampleCountDirectional);
-                    }
-                }
-
-                ImGui::Spacing();
-
-                bool debugFlagsChanged = false;
-                debugFlagsChanged = ScriptableImGui::Checkbox("Debug Coloring", &m_isDebugColoringEnabled) || debugFlagsChanged;
-                debugFlagsChanged = ScriptableImGui::Checkbox("Debug Bounding Box", &m_isDebugBoundingBoxEnabled) || debugFlagsChanged;
-
-                if (debugFlagsChanged)
-                {
-                    SetupDebugFlags();
-                }
-                
-                if (ScriptableImGui::Checkbox("Cascade Position Correction", &m_isCascadeCorrectionEnabled))
-                {
-                    m_directionalLightFeatureProcessor->SetViewFrustumCorrectionEnabled(
-                        m_directionalLightHandle,
-                        m_isCascadeCorrectionEnabled);
-                }
-            }
-            ImGui::Unindent();
-
+            DrawSidebarDirectionalLight();
 
             ImGui::Separator();
 
-            ImGui::Text("Disk Lights");
-            ImGui::Indent();
+            if (DrawSidebarPositionalLights())
             {
-                ScriptableImGui::Checkbox("Auto Rotation##Disk", &m_isDiskLightAutoRotate);
-                ScriptableImGui::SliderAngle("Base Direction##Disk", &m_diskLightRotationAngle, 0, 360);
-
-                ImGui::Spacing();
-
-                ImGui::Text("Control Target");
-                ScriptableImGui::RadioButton("Red", &m_controlTargetDiskLightIndex, 0);
-                ImGui::SameLine();
-                ScriptableImGui::RadioButton("Green", &m_controlTargetDiskLightIndex, 1);
-                ImGui::SameLine();
-                ScriptableImGui::RadioButton("Blue", &m_controlTargetDiskLightIndex, 2);
-
-                const int index = m_controlTargetDiskLightIndex;
-                const DiskLightHandle lightId = m_diskLightHandles[index];
-
-                ScriptableImGui::SliderFloat("Height##Disk",
-                    &m_diskLightHeights[index], 1.f, 30.f, "%.1f", 2.f);
-
-                if (ScriptableImGui::SliderFloat("Cone Angle", &m_outerConeAngles[index], 0.f, 120.f))
-                {
-                    m_diskLightFeatureProcessor->SetConeAngles(
-                        lightId,
-                        AZ::DegToRad(m_outerConeAngles[index]) * ConeAngleInnerRatio,
-                        AZ::DegToRad(m_outerConeAngles[index]));
-                }
-
-                if (ScriptableImGui::SliderFloat("Intensity##Disk", &m_diskLightIntensities[index], 0.f, 20000.f, "%.1f", 2.f))
-                {
-                    AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Candela> lightColor(s_diskLightColors[index] * m_diskLightIntensities[index]);
-                    m_diskLightFeatureProcessor->SetRgbIntensity(lightId, lightColor);
-                    m_diskLightFeatureProcessor->SetAttenuationRadius(
-                        lightId,
-                        sqrtf(m_diskLightIntensities[index] / CutoffIntensity));
-                }
-
-                bool shadowmapSizeChanged =
-                    ScriptableImGui::Checkbox("Enable Shadow", &m_diskLightShadowEnabled[index]);
-
-                ImGui::Text("Shadowmap Size");
-                shadowmapSizeChanged = shadowmapSizeChanged ||
-                    ScriptableImGui::Combo(
-                        "Size##Disk",
-                        &m_diskLightImageSizeIndices[index],
-                        s_shadowmapImageSizeLabels,
-                        AZ_ARRAY_SIZE(s_shadowmapImageSizeLabels));
-                if (shadowmapSizeChanged)
-                {
-                    m_diskLightFeatureProcessor->SetShadowsEnabled(lightId, m_diskLightShadowEnabled[index]);
-                    if (m_diskLightShadowEnabled[index])
-                    {
-                        m_diskLightFeatureProcessor->SetShadowmapMaxResolution(lightId, s_shadowmapImageSizes[m_diskLightImageSizeIndices[index]]);
-                    }
-
-                    // Reset shadow parameters when shadow is disabled.
-                    if (!m_diskLightShadowEnabled[index])
-                    {
-                        m_shadowFilterMethodIndicesDisk[index] = 0;
-                        m_boundaryWidthsDisk[index] = 0.f;
-                        m_predictionSampleCountsDisk[index] = 0;
-                        m_filteringSampleCountsDisk[index] = 0;
-                    }
-                }
-
-                ImGui::Spacing();
-
-                ImGui::Text("Filtering");
-                if (ScriptableImGui::Combo(
-                    "Filter Method##Disk",
-                    &m_shadowFilterMethodIndicesDisk[index],
-                    s_shadowFilterMethodLabels,
-                    AZ_ARRAY_SIZE(s_shadowFilterMethodLabels)))
-                {
-                    m_diskLightFeatureProcessor->SetShadowFilterMethod(
-                        lightId,
-                        s_shadowFilterMethods[m_shadowFilterMethodIndicesDisk[index]]);
-                }
-
-                if (m_shadowFilterMethodIndicesDisk[index] != aznumeric_cast<int>(ShadowFilterMethod::None))
-                {
-                    ImGui::Text("Boundary Width in degrees");
-                    if (ScriptableImGui::SliderFloat("Width##Disk", &m_boundaryWidthsDisk[index], 0.f, 1.0f, "%.3f"))
-                    {
-                        m_diskLightFeatureProcessor->SetSofteningBoundaryWidthAngle(lightId, AZ::DegToRad(m_boundaryWidthsDisk[index]));
-                    }
-                }
-
-                if (m_shadowFilterMethodIndicesDisk[index] == aznumeric_cast<int>(ShadowFilterMethod::Pcf) ||
-                    m_shadowFilterMethodIndicesDisk[index] == aznumeric_cast<int>(ShadowFilterMethod::EsmPcf))
-                {
-                    ImGui::Spacing();
-                    ImGui::Text("Filtering (PCF specific)");
-                    
-                    if (m_pcfMethod[index] == PcfMethod::BoundarySearch && ScriptableImGui::SliderInt("Prediction # ##Disk", &m_predictionSampleCountsDisk[index], 4, 16))
-                    {
-                        m_diskLightFeatureProcessor->SetPredictionSampleCount(lightId, m_predictionSampleCountsDisk[index]);
-                    }
-                    if (ScriptableImGui::SliderInt("Filtering # ##Disk", &m_filteringSampleCountsDisk[index], 4, 64))
-                    {
-                        m_diskLightFeatureProcessor->SetFilteringSampleCount(lightId, m_filteringSampleCountsDisk[index]);
-                    }
-
-                    int pcfMethodAsInteger = aznumeric_cast<int>(m_pcfMethod[index]);
-                    if (ScriptableImGui::RadioButton(
-                            "Boundary Search filtering", &pcfMethodAsInteger, static_cast<int>(PcfMethod::BoundarySearch)))
-                    {
-                        m_pcfMethod[index] = PcfMethod::BoundarySearch;
-                        m_diskLightFeatureProcessor->SetPcfMethod(lightId, m_pcfMethod[index]);
-                    }
-                    if (ScriptableImGui::RadioButton(
-                            "Bicubic filtering", &pcfMethodAsInteger, static_cast<int>(PcfMethod::Bicubic)))
-                    {
-                        m_pcfMethod[index] = PcfMethod::Bicubic;
-                        m_diskLightFeatureProcessor->SetPcfMethod(lightId, m_pcfMethod[index]);
-                    }
-
-                }
+                ApplyDiskLightSettings();
+                ApplyPointLightSettings();
             }
-            ImGui::Unindent();
 
             ImGui::Separator();
 
-            ImGui::Text("Camera");
-            ImGui::Indent();
-            {
-                using namespace AZ;
-
-                ScriptableImGui::SliderAngle("FoVY", &m_cameraFovY, 1.f, 120.f);
-                ImGui::Spacing();
-
-                Transform cameraTransform;
-                TransformBus::EventResult(
-                    cameraTransform,
-                    GetCameraEntityId(),
-                    &TransformBus::Events::GetWorldTM);
-                const Vector3 eularDegrees = cameraTransform.GetEulerDegrees();
-                float cameraPitch = eularDegrees.GetElement(0);
-                const float cameraYaw = eularDegrees.GetElement(1);
-                if (cameraPitch > 180.f)
-                {
-                    cameraPitch -= 360.f;
-                }
-                ImGui::Text("Pitch: %f", cameraPitch);
-                ImGui::Text("Yaw:   %f", cameraYaw);
-            }
-            ImGui::Unindent();
+            DrawSidebarCamera();
 
             ImGui::Separator();
 
@@ -748,8 +494,278 @@ namespace AtomSampleViewer
 
             m_imguiSidebar.End();
         }
-
         m_imguiMaterialDetails.Tick();
+    }
+
+    void ShadowExampleComponent::DrawSidebarDirectionalLight()
+    {
+        ImGui::Indent();
+        if (ImGui::CollapsingHeader("Directional Light", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed))
+        {
+            ImGui::SliderFloat("Height##Directional", &m_directionalLightHeight, 1.f, 30.f, "%.1f", 2.f);
+
+            ScriptableImGui::Checkbox("Auto Rotation##Directional", &m_isDirectionalLightAutoRotate);
+            ScriptableImGui::SliderAngle("Direction##Directional", &m_directionalLightRotationAngle, 0, 360);
+
+            if (ScriptableImGui::SliderFloat("Intensity##Directional", &m_directionalLightIntensity, 0.f, 20.f, "%.1f", 2.f))
+            {
+                AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Lux> lightColor(
+                    DirectionalLightColor * m_directionalLightIntensity);
+                m_directionalLightFeatureProcessor->SetRgbIntensity(m_directionalLightHandle, lightColor);
+            }
+
+            ImGui::Text("Shadowmap Size");
+            if (ScriptableImGui::Combo(
+                    "Size##Directional", &m_directionalLightImageSizeIndex, s_shadowmapImageSizeLabels,
+                    AZ_ARRAY_SIZE(s_shadowmapImageSizeLabels)))
+            {
+                m_directionalLightFeatureProcessor->SetShadowmapSize(
+                    m_directionalLightHandle, s_shadowmapImageSizes[m_directionalLightImageSizeIndex]);
+            }
+
+            ImGui::Text("Number of cascades");
+            bool cascadesChanged = false;
+            cascadesChanged = cascadesChanged || ScriptableImGui::RadioButton("1", &m_cascadeCount, 1);
+            ImGui::SameLine();
+            cascadesChanged = cascadesChanged || ScriptableImGui::RadioButton("2", &m_cascadeCount, 2);
+            ImGui::SameLine();
+            cascadesChanged = cascadesChanged || ScriptableImGui::RadioButton("3", &m_cascadeCount, 3);
+            ImGui::SameLine();
+            cascadesChanged = cascadesChanged || ScriptableImGui::RadioButton("4", &m_cascadeCount, 4);
+            if (cascadesChanged)
+            {
+                m_directionalLightFeatureProcessor->SetCascadeCount(m_directionalLightHandle, m_cascadeCount);
+            }
+
+            ImGui::Spacing();
+            bool cascadeDepthIsChanged = ScriptableImGui::Checkbox("Automatic Cascade Split", &m_shadowmapFrustumSplitIsAutomatic);
+            if (m_shadowmapFrustumSplitIsAutomatic)
+            {
+                ImGui::Text("Cascade partition scheme");
+                ImGui::Text("  (uniform <--> logarithm)");
+                cascadeDepthIsChanged =
+                    cascadeDepthIsChanged || ScriptableImGui::SliderFloat("Ratio", &m_ratioLogarithmUniform, 0.f, 1.f, "%0.3f");
+                if (cascadeDepthIsChanged)
+                {
+                    m_directionalLightFeatureProcessor->SetShadowmapFrustumSplitSchemeRatio(
+                        m_directionalLightHandle, m_ratioLogarithmUniform);
+                }
+            }
+            else
+            {
+                for (int cascadeIndex = 0; cascadeIndex < m_cascadeCount; ++cascadeIndex)
+                {
+                    const AZStd::string label = AZStd::string::format("FarDepth %d", cascadeIndex);
+                    cascadeDepthIsChanged =
+                        cascadeDepthIsChanged || ScriptableImGui::SliderFloat(label.c_str(), &m_cascadeFarDepth[cascadeIndex], 0.01f, 20.f);
+                }
+                if (cascadeDepthIsChanged)
+                {
+                    for (int cascadeIndex = 0; cascadeIndex < m_cascadeCount; ++cascadeIndex)
+                    {
+                        m_directionalLightFeatureProcessor->SetCascadeFarDepth(
+                            m_directionalLightHandle, aznumeric_cast<uint16_t>(cascadeIndex), m_cascadeFarDepth[cascadeIndex]);
+                    }
+                }
+            }
+
+            ImGui::Spacing();
+
+            ImGui::Text("Filtering");
+            if (ScriptableImGui::Combo(
+                    "Filter Method##Directional", &m_shadowFilterMethodIndexDirectional, s_shadowFilterMethodLabels,
+                    AZ_ARRAY_SIZE(s_shadowFilterMethodLabels)))
+            {
+                m_directionalLightFeatureProcessor->SetShadowFilterMethod(
+                    m_directionalLightHandle, s_shadowFilterMethods[m_shadowFilterMethodIndexDirectional]);
+            }
+            if (m_shadowFilterMethodIndexDirectional != aznumeric_cast<int>(AZ::Render::ShadowFilterMethod::None))
+            {
+                ImGui::Text("Boundary Width in meter");
+                if (ScriptableImGui::SliderFloat("Width##Directional", &m_boundaryWidthDirectional, 0.f, 0.1f, "%.3f"))
+                {
+                    m_directionalLightFeatureProcessor->SetShadowBoundaryWidth(m_directionalLightHandle, m_boundaryWidthDirectional);
+                }
+            }
+
+            if (m_shadowFilterMethodIndexDirectional == aznumeric_cast<int>(AZ::Render::ShadowFilterMethod::Pcf) ||
+                m_shadowFilterMethodIndexDirectional == aznumeric_cast<int>(AZ::Render::ShadowFilterMethod::EsmPcf))
+            {
+                ImGui::Spacing();
+                ImGui::Text("Filtering (PCF specific)");
+                if (ScriptableImGui::SliderInt("Prediction # ##Directional", &m_predictionSampleCountDirectional, 4, 16))
+                {
+                    m_directionalLightFeatureProcessor->SetPredictionSampleCount(
+                        m_directionalLightHandle, m_predictionSampleCountDirectional);
+                }
+                if (ScriptableImGui::SliderInt("Filtering # ##Directional", &m_filteringSampleCountDirectional, 4, 64))
+                {
+                    m_directionalLightFeatureProcessor->SetFilteringSampleCount(
+                        m_directionalLightHandle, m_filteringSampleCountDirectional);
+                }
+            }
+
+            ImGui::Spacing();
+
+            bool debugFlagsChanged = false;
+            debugFlagsChanged = ScriptableImGui::Checkbox("Debug Coloring", &m_isDebugColoringEnabled) || debugFlagsChanged;
+            debugFlagsChanged = ScriptableImGui::Checkbox("Debug Bounding Box", &m_isDebugBoundingBoxEnabled) || debugFlagsChanged;
+
+            if (debugFlagsChanged)
+            {
+                SetupDebugFlags();
+            }
+
+            if (ScriptableImGui::Checkbox("Cascade Position Correction", &m_isCascadeCorrectionEnabled))
+            {
+                m_directionalLightFeatureProcessor->SetViewFrustumCorrectionEnabled(m_directionalLightHandle, m_isCascadeCorrectionEnabled);
+            }
+        }
+        ImGui::Unindent();
+    }
+
+    bool ShadowExampleComponent::DrawSidebarPositionalLights()
+    {
+        using namespace AZ::Render;
+        bool settingsChanged = false;
+        ImGui::Indent();
+        if (ImGui::CollapsingHeader("Positional Lights", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed))
+        {
+            ImGui::Text("Light Type");
+            if (ScriptableImGui::RadioButton("Disk", &m_positionalLightTypeActive, 0))
+            {
+                DestroyPointLights();
+                CreateDiskLights();
+                settingsChanged = true;
+            }
+            if (ScriptableImGui::RadioButton("Point", &m_positionalLightTypeActive, 1))
+            {
+                DestroyDiskLights();
+                CreatePointLights();
+                settingsChanged = true;
+            }
+
+            ScriptableImGui::Checkbox("Auto Rotation##Positional", &m_isPositionalLightAutoRotate);
+            ScriptableImGui::SliderAngle("Base Direction##Positional", &m_positionalLightRotationAngle, 0, 360);
+
+            ImGui::Spacing();
+
+            ImGui::Text("Control Target");
+            ScriptableImGui::RadioButton("Red", &m_controlTargetPositionalLightIndex, 0);
+            ImGui::SameLine();
+            ScriptableImGui::RadioButton("Green", &m_controlTargetPositionalLightIndex, 1);
+            ImGui::SameLine();
+            ScriptableImGui::RadioButton("Blue", &m_controlTargetPositionalLightIndex, 2);
+
+            const int index = m_controlTargetPositionalLightIndex;
+
+            ScriptableImGui::SliderFloat("Height##Positional", &m_positionalLightHeights[index], 1.f, 30.f, "%.1f", 2.f);
+
+            if (ScriptableImGui::SliderFloat("Cone Angle", &m_outerConeAngles[index], 0.f, 120.f))
+            {
+                settingsChanged = true;
+            }
+
+            if (ScriptableImGui::SliderFloat("Intensity##Positional", &m_lightIntensities[index], 0.f, 20000.f, "%.1f", 2.f))
+            {
+                settingsChanged = true;
+            }
+
+            bool shadowmapSizeChanged = ScriptableImGui::Checkbox("Enable Shadow", &m_positionalLightShadowEnabled[index]);
+
+            ImGui::Text("Shadowmap Size");
+            shadowmapSizeChanged = shadowmapSizeChanged ||
+                ScriptableImGui::Combo("Size##Positional", &m_positionalLightImageSizeIndices[index], s_shadowmapImageSizeLabels,
+                                       AZ_ARRAY_SIZE(s_shadowmapImageSizeLabels));
+            if (shadowmapSizeChanged)
+            {
+                // Reset shadow parameters when shadow is disabled.
+                if (!m_positionalLightShadowEnabled[index])
+                {
+                    m_shadowFilterMethodIndicesPositional[index] = 0;
+                    m_boundaryWidthsPositional[index] = 0.f;
+                    m_predictionSampleCountsPositional[index] = 0;
+                    m_filteringSampleCountsPositional[index] = 0;
+                }
+                settingsChanged = true;
+            }
+
+            ImGui::Spacing();
+
+            ImGui::Text("Filtering");
+            if (ScriptableImGui::Combo(
+                    "Filter Method##Positional", &m_shadowFilterMethodIndicesPositional[index], s_shadowFilterMethodLabels,
+                    AZ_ARRAY_SIZE(s_shadowFilterMethodLabels)))
+            {
+                settingsChanged = true;
+            }
+
+            if (m_shadowFilterMethodIndicesPositional[index] != aznumeric_cast<int>(ShadowFilterMethod::None))
+            {
+                ImGui::Text("Boundary Width in degrees");
+                if (ScriptableImGui::SliderFloat("Width##Positional", &m_boundaryWidthsPositional[index], 0.f, 1.0f, "%.3f"))
+                {
+                    settingsChanged = true;
+                }
+            }
+
+            if (m_shadowFilterMethodIndicesPositional[index] == aznumeric_cast<int>(ShadowFilterMethod::Pcf) ||
+                m_shadowFilterMethodIndicesPositional[index] == aznumeric_cast<int>(ShadowFilterMethod::EsmPcf))
+            {
+                ImGui::Spacing();
+                ImGui::Text("Filtering (PCF specific)");
+
+                if (m_pcfMethod[index] == PcfMethod::BoundarySearch &&
+                    ScriptableImGui::SliderInt("Prediction # ##Positional", &m_predictionSampleCountsPositional[index], 4, 16))
+                {
+                    settingsChanged = true;
+                }
+                if (ScriptableImGui::SliderInt("Filtering # ##Positional", &m_filteringSampleCountsPositional[index], 4, 64))
+                {
+                    settingsChanged = true;
+                }
+
+                int pcfMethodAsInteger = aznumeric_cast<int>(m_pcfMethod[index]);
+                if (ScriptableImGui::RadioButton(
+                        "Boundary Search filtering", &pcfMethodAsInteger, static_cast<int>(PcfMethod::BoundarySearch)))
+                {
+                    m_pcfMethod[index] = PcfMethod::BoundarySearch;
+                    settingsChanged = true;
+                }
+                if (ScriptableImGui::RadioButton("Bicubic filtering", &pcfMethodAsInteger, static_cast<int>(PcfMethod::Bicubic)))
+                {
+                    m_pcfMethod[index] = PcfMethod::Bicubic;
+                    settingsChanged = true;
+                }
+            }
+        }
+        ImGui::Unindent();
+        return settingsChanged;
+    }
+
+    void ShadowExampleComponent::DrawSidebarCamera()
+    {
+        ImGui::Indent();
+        if (ImGui::CollapsingHeader("Camera", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed))
+        {
+            using namespace AZ;
+
+            ScriptableImGui::SliderAngle("FoVY", &m_cameraFovY, 1.f, 120.f);
+            ImGui::Spacing();
+
+            Transform cameraTransform;
+            TransformBus::EventResult(cameraTransform, GetCameraEntityId(), &TransformBus::Events::GetWorldTM);
+            const Vector3 eularDegrees = cameraTransform.GetEulerDegrees();
+            float cameraPitch = eularDegrees.GetElement(0);
+            const float cameraYaw = eularDegrees.GetElement(1);
+            if (cameraPitch > 180.f)
+            {
+                cameraPitch -= 360.f;
+            }
+            ImGui::Text("Pitch: %f", cameraPitch);
+            ImGui::Text("Yaw:   %f", cameraYaw);
+        }
+        ImGui::Unindent();
     }
 
     void ShadowExampleComponent::SetupDebugFlags()
@@ -765,6 +781,87 @@ namespace AtomSampleViewer
         }
         m_directionalLightFeatureProcessor->SetDebugFlags(m_directionalLightHandle,
             static_cast<AZ::Render::DirectionalLightFeatureProcessorInterface::DebugDrawFlags>(flags));
+    }
+
+    void ShadowExampleComponent::DestroyDiskLights()
+    {
+        for (DiskLightHandle& handle : m_diskLightHandles)
+        {
+            m_diskLightFeatureProcessor->ReleaseLight(handle);
+        }
+    }
+
+    void ShadowExampleComponent::DestroyPointLights()
+    {
+        for (PointLightHandle& handle : m_pointLightHandles)
+        {
+            m_pointLightFeatureProcessor->ReleaseLight(handle);
+        }
+    }
+
+    void ShadowExampleComponent::ApplyDiskLightSettings()
+    {
+        for (uint32_t index = 0; index < PositionalLightCount; ++index)
+        {
+            auto lightHandle = m_diskLightHandles[index];
+            if (lightHandle.IsValid())
+            {
+                auto [innerConeAngle, outerConeAngle] = GetConeAnglesForLight(index);
+                m_diskLightFeatureProcessor->SetConeAngles(lightHandle, innerConeAngle, outerConeAngle);
+                m_diskLightFeatureProcessor->SetPosition(lightHandle, GetTransformForLight(index).GetTranslation());
+                m_diskLightFeatureProcessor->SetDirection(lightHandle, GetTransformForLight(index).GetBasis(1));
+                m_diskLightFeatureProcessor->SetAttenuationRadius(lightHandle, GetAttenuationForLight(index));
+                m_diskLightFeatureProcessor->SetRgbIntensity(lightHandle, GetRgbIntensityForLight(index));
+
+                const bool shadowEnabled = m_positionalLightShadowEnabled[index];
+                m_diskLightFeatureProcessor->SetShadowsEnabled(lightHandle, shadowEnabled);
+                if (shadowEnabled)
+                {
+                    m_diskLightFeatureProcessor->SetShadowmapMaxResolution(
+                        lightHandle, s_shadowmapImageSizes[m_positionalLightImageSizeIndices[index]]);
+
+                    m_diskLightFeatureProcessor->SetShadowFilterMethod(
+                        lightHandle, s_shadowFilterMethods[m_shadowFilterMethodIndicesPositional[index]]);
+
+                    m_diskLightFeatureProcessor->SetSofteningBoundaryWidthAngle(lightHandle, AZ::DegToRad(m_boundaryWidthsPositional[index]));
+                    m_diskLightFeatureProcessor->SetFilteringSampleCount(lightHandle, m_filteringSampleCountsPositional[index]);
+                    m_diskLightFeatureProcessor->SetPredictionSampleCount(lightHandle, m_predictionSampleCountsPositional[index]);
+                    m_diskLightFeatureProcessor->SetPcfMethod(lightHandle, m_pcfMethod[index]);
+                }
+            }
+        }
+    }
+
+    void ShadowExampleComponent::ApplyPointLightSettings()
+    {
+        for (uint32_t index = 0; index < PositionalLightCount; ++index)
+        {
+            auto lightHandle = m_pointLightHandles[index];
+            if (lightHandle.IsValid())
+            {
+
+                m_pointLightFeatureProcessor->SetPosition(lightHandle, GetTransformForLight(index).GetTranslation());
+                m_pointLightFeatureProcessor->SetBulbRadius(lightHandle, 0.0f);
+                m_pointLightFeatureProcessor->SetAttenuationRadius(lightHandle, GetAttenuationForLight(index));
+                m_pointLightFeatureProcessor->SetRgbIntensity(lightHandle, GetRgbIntensityForLight(index));
+
+                const bool shadowEnabled = m_positionalLightShadowEnabled[index];
+                m_pointLightFeatureProcessor->SetShadowsEnabled(lightHandle, shadowEnabled);
+                if (shadowEnabled)
+                {
+                    m_pointLightFeatureProcessor->SetShadowmapMaxResolution(
+                        lightHandle, s_shadowmapImageSizes[m_positionalLightImageSizeIndices[index]]);
+
+                    m_pointLightFeatureProcessor->SetShadowFilterMethod(
+                        lightHandle, s_shadowFilterMethods[m_shadowFilterMethodIndicesPositional[index]]);
+
+                    m_pointLightFeatureProcessor->SetPcfMethod(lightHandle, m_pcfMethod[index]);
+                    m_pointLightFeatureProcessor->SetFilteringSampleCount(lightHandle, m_filteringSampleCountsPositional[index]);
+                    m_pointLightFeatureProcessor->SetPredictionSampleCount(lightHandle, m_predictionSampleCountsPositional[index]);
+                    m_pointLightFeatureProcessor->SetSofteningBoundaryWidthAngle(lightHandle, AZ::DegToRad(m_boundaryWidthsPositional[index]));
+                }
+            }
+        }
     }
 
 } // namespace AtomSampleViewer
