@@ -156,7 +156,7 @@ do
         materialSetupFunction()
         
         IdleFrames(1) 
-        CaptureScreenshot(g_screenshotOutputFolder .. '/' .. lightName .. '_' .. materialName ..'.ppm')
+        CaptureScreenshot(g_screenshotOutputFolder .. '/' .. lightName .. '_' .. materialName ..'.png')
     end
 end
 

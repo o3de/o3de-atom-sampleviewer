@@ -25,7 +25,7 @@ SetImguiValue('Auto Rotation##Disk', false)
 SetImguiValue('Direction##Directional', 0.0)
 SetImguiValue('Base Direction##Disk', 0.0)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/initial.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/initial.png')
 
 -- Directional Light Initial
 -- Diabling Disk lights
@@ -46,7 +46,7 @@ ArcBallCameraController_SetPan(Vector3(1.1, 2.3, -1.2))
 SetImguiValue('Size##Directional', '2048')
 SetImguiValue('4', true) -- cascade count
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/directional_initial.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/directional_initial.png')
 
 -- Directional Light Manual Cascade Split
 SetImguiValue('Debug Coloring', true)
@@ -58,19 +58,19 @@ SetImguiValue('FarDepth 1', 5.0)
 IdleFrames(1)
 SetImguiValue('FarDepth 2', 6.0)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/directional_manual_cascade.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/directional_manual_cascade.png')
 
 -- Directional Light Automatic Cascade Split
 SetImguiValue('Automatic Cascade Split', true)
 IdleFrames(1)
 SetImguiValue('Ratio', 0.25)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/directional_auto_cascade.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/directional_auto_cascade.png')
 
 -- Directional Light Cascade Position Correction
 SetImguiValue('Cascade Position Correction', true)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/directional_cascade_correction.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/directional_cascade_correction.png')
 
 -- Directional Light PCF low
 SetImguiValue('Debug Coloring', false)
@@ -80,23 +80,23 @@ SetImguiValue('Width##Directional', 0.07)
 SetImguiValue('Prediction # ##Directional', 4)
 SetImguiValue('Filtering # ##Directional', 4)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/directional_pcf_low.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/directional_pcf_low.png')
 
 -- Directional Light PCF high
 SetImguiValue('Prediction # ##Directional', 16)
 SetImguiValue('Filtering # ##Directional', 64)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/directional_pcf_high.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/directional_pcf_high.png')
 
 -- Directional Light ESM
 SetImguiValue('Filter Method##Directional', 'ESM')
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/directional_esm.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/directional_esm.png')
 
 -- Directional Light ESM+PCF
 SetImguiValue('Filter Method##Directional', 'ESM+PCF')
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/directional_esm_pcf.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/directional_esm_pcf.png')
 
 -- Disk Light Initial
 -- Disabling directional light
@@ -111,13 +111,13 @@ IdleFrames(1)
 SetImguiValue('Blue', true)
 SetImguiValue('Intensity##Disk', 500.0)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/spot_initial.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/spot_initial.png')
 
 -- Disk Light Disabling Shadow for Red
 SetImguiValue('Red', true)
 SetImguiValue('Enable Shadow', false)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/spot_no_red_shadow.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/spot_no_red_shadow.png')
 
 -- Disk Light Various Shadowmap Sizes
 SetImguiValue('Red', true)
@@ -131,7 +131,7 @@ IdleFrames(1)
 SetImguiValue('Blue', true)
 SetImguiValue('Size##Disk', '512')
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/spot_shadowmap_size.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/spot_shadowmap_size.png')
 
 -- Disk Light Various Filter Method
 SetImguiValue('Red', true)
@@ -153,13 +153,13 @@ SetImguiValue('Width##Disk', 0.5)
 SetImguiValue('Prediction # ##Disk', 16)
 SetImguiValue('Filtering # ##Disk', 64)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/spot_filter_method.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/spot_filter_method.png')
 
 -- Camera FoV
 SetImguiValue('Intensity##Directional', 5.0)
 SetImguiValue('Direction##Directional', 3.3)
 SetImguiValue('FoVY', 0.25)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/camera_fov.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/camera_fov.png')
 
 OpenSample(nil)
