@@ -66,7 +66,7 @@ namespace AtomSampleViewer
         AZStd::shared_ptr<AZ::RPI::WindowContext> m_windowContext;
         AZStd::unique_ptr<AzFramework::EntityContext> m_entityContext;
         AZStd::string m_sceneName;
-        AzFramework::Scene* m_frameworkScene = nullptr;
+        AZStd::shared_ptr<AzFramework::Scene> m_frameworkScene;
         AZ::RPI::ScenePtr m_scene;
         AZ::RPI::RenderPipelinePtr m_pipeline;
 
