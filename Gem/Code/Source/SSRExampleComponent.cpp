@@ -22,6 +22,8 @@
 #include <Automation/ScriptRunnerBus.h>
 #include <Utils/Utils.h>
 
+#include <SSRExampleComponent_Traits_Platform.h>
+
 namespace AtomSampleViewer
 {
     void SSRExampleComponent::Reflect(AZ::ReflectContext* context)
@@ -93,7 +95,7 @@ namespace AtomSampleViewer
         // statue
         {
             AZ::Data::Asset<AZ::RPI::MaterialAsset> materialAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::MaterialAsset>("objects/lucy/lucy_stone.azmaterial", AZ::RPI::AssetUtils::TraceLevel::Assert);
-            AZ::Data::Asset<AZ::RPI::ModelAsset> modelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/lucy/lucy_high.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
+            AZ::Data::Asset<AZ::RPI::ModelAsset> modelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>(ATOMSAMPLEVIEWER_TRAIT_SSR_SAMPLE_LUCY_MODEL_NAME, AZ::RPI::AssetUtils::TraceLevel::Assert);
             AZ::Transform transform = AZ::Transform::CreateIdentity();
             transform *= AZ::Transform::CreateRotationZ(AZ::Constants::Pi);
             transform.SetTranslation(0.0f, 0.0f, -0.05f);
