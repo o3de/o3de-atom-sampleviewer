@@ -913,12 +913,7 @@ namespace AtomSampleViewer
         // Get source folder
         if (m_officialBaselineSourceFolder.empty())
         {
-
-            auto projectPath = AZ::Utils::GetProjectPath();
-            AzFramework::StringFunc::Path::Join(projectPath.c_str(), "Scripts/ExpectedScreenshots", m_officialBaselineSourceFolder);
-
             m_officialBaselineSourceFolder = (AZ::IO::FixedMaxPath(AZ::Utils::GetProjectPath()) / "Scripts" / "ExpectedScreenshots").String();
-
 
             if (!io->Exists(m_officialBaselineSourceFolder.c_str()))
             {
