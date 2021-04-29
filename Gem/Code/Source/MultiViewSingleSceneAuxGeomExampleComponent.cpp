@@ -32,7 +32,7 @@
 #include <AzCore/Component/Entity.h>
 
 #include <AzFramework/Components/TransformComponent.h>
-#include <AzFramework/Scene/SceneSystemBus.h>
+#include <AzFramework/Scene/SceneSystemInterface.h>
 
 #include <SampleComponentConfig.h>
 #include <SampleComponentManager.h>

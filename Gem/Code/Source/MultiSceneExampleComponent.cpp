@@ -28,7 +28,7 @@
 #include <AzCore/Component/Entity.h>
 
 #include <AzFramework/Components/TransformComponent.h>
-#include <AzFramework/Scene/SceneSystemBus.h>
+#include <AzFramework/Scene/SceneSystemInterface.h>
 #include <AzFramework/Entity/GameEntityContextComponent.h>
 
 #include <SampleComponentConfig.h>
@@ -54,14 +54,13 @@ namespace AtomSampleViewer
         m_entityContext->InitContext();
 
         // Create the scene
-        Outcome<AzFramework::Scene*, AZStd::string> createSceneOutcome = Failure<AZStd::string>("SceneSystemRequests bus not responding.");
-        AzFramework::SceneSystemRequestBus::BroadcastResult(createSceneOutcome, &AzFramework::SceneSystemRequests::CreateScene, m_sceneName);
+        auto sceneSystem = AzFramework::SceneSystemInterface::Get();
+        AZ_Assert(sceneSystem, "Unable to retrieve scene system.");
+        Outcome<AZStd::shared_ptr<AzFramework::Scene>, AZStd::string> createSceneOutcome = sceneSystem->CreateScene(m_sceneName);
         AZ_Assert(createSceneOutcome, "%s", createSceneOutcome.GetError().data());
-        m_frameworkScene = createSceneOutcome.GetValue();
-        bool success = false;
-        AzFramework::SceneSystemRequestBus::BroadcastResult(success, &AzFramework::SceneSystemRequests::SetSceneForEntityContextId, m_entityContext->GetContextId(), m_frameworkScene);
-        AZ_Assert(success, "Unable to set entity context on AzFramework::Scene: %s", m_sceneName.c_str());
-
+        m_frameworkScene = createSceneOutcome.TakeValue();
+        m_frameworkScene->SetSubsystem<AzFramework::EntityContext::SceneStorageType>(m_entityContext.get());
+        
         // Create a NativeWindow and WindowContext
         m_nativeWindow = AZStd::make_unique<AzFramework::NativeWindow>("Multi Scene: Second Window", AzFramework::WindowGeometry(0, 0, 1280, 720));
         m_nativeWindow->Activate();
@@ -113,7 +112,7 @@ namespace AtomSampleViewer
         m_scene->SetShaderResourceGroupCallback(srgCallback);
 
         // Link our RPI::Scene to the AzFramework::Scene
-        m_frameworkScene->SetSubsystem(m_scene.get());
+        m_frameworkScene->SetSubsystem(m_scene);
 
         // Create a custom pipeline descriptor
         RPI::RenderPipelineDescriptor pipelineDesc;
@@ -351,8 +350,10 @@ namespace AtomSampleViewer
         m_scene->Deactivate();
         m_scene->RemoveRenderPipeline(m_pipeline->GetId());
         RPI::RPISystemInterface::Get()->UnregisterScene(m_scene);
-        bool sceneRemovedSuccessfully = false;
-        AzFramework::SceneSystemRequestBus::BroadcastResult(sceneRemovedSuccessfully, &AzFramework::SceneSystemRequests::RemoveScene, m_sceneName);
+        auto sceneSystem = AzFramework::SceneSystemInterface::Get();
+        AZ_Assert(sceneSystem, "Scene system wasn't found to remove scene '%s' from.", m_sceneName.c_str());
+        [[maybe_unused]] bool sceneRemovedSuccessfully = sceneSystem->RemoveScene(m_sceneName);
+        AZ_Assert(sceneRemovedSuccessfully, "Unable to remove scene '%s'.", m_sceneName.c_str());
         m_scene = nullptr;
 
         m_windowContext->Shutdown();
