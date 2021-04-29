@@ -11,8 +11,8 @@
 
 set(FILES
     ../../Resources/IOSLauncher/Info.plist
-    IosLumberyardApplication.mm
-    IosLumberyardApplicationDelegate.mm
+    IosO3DEApplication.mm
+    IosO3DEApplicationDelegate.mm
     AtomSampleViewerApplication_ios.cpp
     main_ios.mm
 )

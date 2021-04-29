@@ -10,10 +10,7 @@
 *
 */
 
-#include "MacLumberyardApplication.h"
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-@implementation MacLumberyardApplication
-
-@end // MacLumberyardApplication Implementation
-
+// https://jira.agscollab.com/browse/ATOM-14949
+// The number need to be within the uniform limitations of android devices with lower specs where 15 total would be the lower bound on the devices.
+#define ATOMSAMPLEVIEWER_TRAIT_TRIANGLE_CONSTANT_BUFFER_SAMPLE_SINGLE_CONSTANT_BUFFER_SIZE       6u  
+#define ATOMSAMPLEVIEWER_TRAIT_TRIANGLE_CONSTANT_BUFFER_SAMPLE_MULTIPLE_CONSTANT_BUFFER_SIZE     6u

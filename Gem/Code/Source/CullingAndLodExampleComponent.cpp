@@ -102,7 +102,7 @@ namespace AtomSampleViewer
         ClearMeshes();
 
         m_directionalLightFeatureProcessor->ReleaseLight(m_directionalLightHandle);
-        UpdateSpotLightCount(0);
+        UpdateDiskLightCount(0);
     }
 
     void CullingAndLodExampleComponent::OnTick(float deltaTime, AZ::ScriptTimePoint timePoint)
@@ -209,14 +209,14 @@ namespace AtomSampleViewer
         using namespace AZ;
 
         m_directionalLightShadowmapSizeIndex = s_shadowmapSizeIndexDefault;
-        m_spotLightShadowmapSize = Render::ShadowmapSize::None; // random
+        m_diskLightShadowmapSize = Render::ShadowmapSize::None; // random
         m_cascadeCount = s_cascadesCountDefault;
         m_ratioLogarithmUniform = s_ratioLogarithmUniformDefault;
-        m_spotLightCount = 0;
+        m_diskLightCount = 0;
 
         RPI::Scene* scene = RPI::Scene::GetSceneForEntityContextId(GetEntityContextId());
         m_directionalLightFeatureProcessor = scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
-        m_spotLightFeatureProcessor = scene->GetFeatureProcessor<Render::SpotLightFeatureProcessorInterface>();
+        m_diskLightFeatureProcessor = scene->GetFeatureProcessor<Render::DiskLightFeatureProcessorInterface>();
 
         // directional light
         {
@@ -245,57 +245,61 @@ namespace AtomSampleViewer
             m_directionalLightHandle = handle;
         }
 
-        // spot lights
+        // disk lights
         {
-            m_spotLights.clear();
-            m_spotLights.reserve(SpotLightCountMax);
-            const float spotlightSpacing = 10.0f;
-            const int spotLightsPerRow = 10;
+            m_diskLights.clear();
+            m_diskLights.reserve(DiskLightCountMax);
+            const float disklightSpacing = 10.0f;
+            const int diskLightsPerRow = 10;
             const Color colors[5] = {Colors::Red, Colors::Green, Colors::Blue, Colors::Orange, Colors::Pink};
-            for (int index = 0; index < SpotLightCountMax; ++index)
+            for (int index = 0; index < DiskLightCountMax; ++index)
             {
-                float xPos = (index % spotLightsPerRow) * spotlightSpacing;
-                float yPos = (index / spotLightsPerRow) * spotlightSpacing;
-                m_spotLights.emplace_back(
+                float xPos = (index % diskLightsPerRow) * disklightSpacing;
+                float yPos = (index / diskLightsPerRow) * disklightSpacing;
+                m_diskLights.emplace_back(
                     colors[index % 5],
                     Vector3(xPos, yPos, 10.0f),
                     Vector3(1.0f, 1.0f, -1.0f).GetNormalized(),
                     Render::ShadowmapSize::Size256);
             }
-            UpdateSpotLightCount(20);
+            UpdateDiskLightCount(20);
         }
     }
 
-    void CullingAndLodExampleComponent::UpdateSpotLightCount(uint16_t count)
+    void CullingAndLodExampleComponent::UpdateDiskLightCount(uint16_t count)
     {
         using namespace AZ;
 
-        for (int index = count; index < m_spotLightCount; ++index)
+        for (int index = count; index < m_diskLightCount; ++index)
         {
-            SpotLightHandle& handle = m_spotLights[index].m_handle;
-            m_spotLightFeatureProcessor->ReleaseLight(handle);
+            DiskLightHandle& handle = m_diskLights[index].m_handle;
+            m_diskLightFeatureProcessor->ReleaseLight(handle);
         }
 
-        const int previousSpotLightCount = m_spotLightCount;
+        const int previousDiskLightCount = m_diskLightCount;
 
-        for (int index = previousSpotLightCount; index < count; ++index)
+        for (int index = previousDiskLightCount; index < count; ++index)
         {
-            Render::SpotLightFeatureProcessorInterface* const spotLightFP = m_spotLightFeatureProcessor;
-            const SpotLightHandle handle = spotLightFP->AcquireLight();
-            const SpotLight &spotLight = m_spotLights[index];
+            Render::DiskLightFeatureProcessorInterface* const diskLightFP = m_diskLightFeatureProcessor;
+            const DiskLightHandle handle = diskLightFP->AcquireLight();
+            const DiskLight &diskLight = m_diskLights[index];
 
-            spotLightFP->SetPosition(handle, spotLight.m_position);
-            spotLightFP->SetDirection(handle, spotLight.m_direction);
-            spotLightFP->SetRgbIntensity(handle, Render::PhotometricColor<Render::PhotometricUnit::Candela>(spotLight.m_color * m_spotLightIntensity));
-            const float radius = sqrtf(m_spotLightIntensity / CutoffIntensity);
-            spotLightFP->SetAttenuationRadius(handle, radius);
-            spotLightFP->SetShadowmapSize(handle, m_spotLightShadowEnabled ? m_spotLights[index].m_shadowmapSize : Render::ShadowmapSize::None);
-            spotLightFP->SetConeAngles(handle, 45.f, 55.f);
+            diskLightFP->SetPosition(handle, diskLight.m_position);
+            diskLightFP->SetDirection(handle, diskLight.m_direction);
+            diskLightFP->SetRgbIntensity(handle, Render::PhotometricColor<Render::PhotometricUnit::Candela>(diskLight.m_color * m_diskLightIntensity));
+            const float radius = sqrtf(m_diskLightIntensity / CutoffIntensity);
+            diskLightFP->SetAttenuationRadius(handle, radius);
+            diskLightFP->SetShadowsEnabled(handle, m_diskLightShadowEnabled);
+            if (m_diskLightShadowEnabled)
+            {
+                diskLightFP->SetShadowmapMaxResolution(handle, m_diskLights[index].m_shadowmapSize);
+            }
+            diskLightFP->SetConeAngles(handle, DegToRad(45.f), DegToRad(55.f));
 
-            m_spotLights[index].m_handle = handle;
+            m_diskLights[index].m_handle = handle;
         }
 
-        m_spotLightCount = count;
+        m_diskLightCount = count;
     }
 
     void CullingAndLodExampleComponent::DrawSidebar()
@@ -419,42 +423,42 @@ namespace AtomSampleViewer
 
         ImGui::Separator();
 
-        ImGui::Text("Spot Lights");
+        ImGui::Text("Disk Lights");
         ImGui::Indent();
         {
-            int spotLightCount = m_spotLightCount;
-            if (ImGui::SliderInt("Number", &spotLightCount, 0, SpotLightCountMax))
+            int diskLightCount = m_diskLightCount;
+            if (ImGui::SliderInt("Number", &diskLightCount, 0, DiskLightCountMax))
             {
-                UpdateSpotLightCount(spotLightCount);
+                UpdateDiskLightCount(diskLightCount);
             }
 
-            if (ImGui::SliderFloat("Intensity##spot", &m_spotLightIntensity, 0.f, 100000.f, "%.1f", 4.f))
+            if (ImGui::SliderFloat("Intensity##disk", &m_diskLightIntensity, 0.f, 100000.f, "%.1f", 4.f))
             {
-                for (const SpotLight& light : m_spotLights)
+                for (const DiskLight& light : m_diskLights)
                 {
                     if (light.m_handle.IsValid())
                     {
-                        m_spotLightFeatureProcessor->SetRgbIntensity(light.m_handle, Render::PhotometricColor<Render::PhotometricUnit::Candela>(light.m_color * m_spotLightIntensity));
-                        const float radius = sqrtf(m_spotLightIntensity / CutoffIntensity);
-                        m_spotLightFeatureProcessor->SetAttenuationRadius(light.m_handle, radius);
+                        m_diskLightFeatureProcessor->SetRgbIntensity(light.m_handle, Render::PhotometricColor<Render::PhotometricUnit::Candela>(light.m_color * m_diskLightIntensity));
+                        const float radius = sqrtf(m_diskLightIntensity / CutoffIntensity);
+                        m_diskLightFeatureProcessor->SetAttenuationRadius(light.m_handle, radius);
                     }
                 }
             }
 
-            bool spotLightShadowmapChanged = ImGui::Checkbox("Enable Shadow", &m_spotLightShadowEnabled);
+            bool diskLightShadowmapChanged = ImGui::Checkbox("Enable Shadow", &m_diskLightShadowEnabled);
             
             ImGui::Text("Shadowmap Size");
-            int newSize = static_cast<int>(m_spotLightShadowmapSize);
+            int newSize = static_cast<int>(m_diskLightShadowmapSize);
             // To avoid GPU memory consumption, we avoid bigger shadowmap sizes here.
-            spotLightShadowmapChanged = spotLightShadowmapChanged ||
+            diskLightShadowmapChanged = diskLightShadowmapChanged ||
                 ImGui::RadioButton("256", &newSize, static_cast<int>(Render::ShadowmapSize::Size256)) ||
                 ImGui::RadioButton("512", &newSize, static_cast<int>(Render::ShadowmapSize::Size512)) ||
                 ImGui::RadioButton("Random", &newSize, static_cast<int>(Render::ShadowmapSize::None));
 
-            if (spotLightShadowmapChanged)
+            if (diskLightShadowmapChanged)
             {
-                m_spotLightShadowmapSize = static_cast<Render::ShadowmapSize>(newSize);
-                UpdateSpotLightShadowmapSize();
+                m_diskLightShadowmapSize = static_cast<Render::ShadowmapSize>(newSize);
+                UpdateDiskLightShadowmapSize();
             }
         }
         ImGui::Unindent();
@@ -474,47 +478,43 @@ namespace AtomSampleViewer
         m_imguiSidebar.End();
     }
 
-    void CullingAndLodExampleComponent::UpdateSpotLightShadowmapSize()
+    void CullingAndLodExampleComponent::UpdateDiskLightShadowmapSize()
     {
         using namespace AZ::Render;
-        SpotLightFeatureProcessorInterface* const featureProcessor = m_spotLightFeatureProcessor;
+        DiskLightFeatureProcessorInterface* const featureProcessor = m_diskLightFeatureProcessor;
 
-        if (!m_spotLightShadowEnabled)
+        if (!m_diskLightShadowEnabled)
         {
             // disabled shadows
-            for (const SpotLight& light : m_spotLights)
+            for (const DiskLight& light : m_diskLights)
             {
                 if (light.m_handle.IsValid())
                 {
-                    featureProcessor->SetShadowmapSize(
-                        light.m_handle,
-                        ShadowmapSize::None);
+                    featureProcessor->SetShadowsEnabled(light.m_handle, false);
                 }
             }
         }
-        else if (m_spotLightShadowmapSize != ShadowmapSize::None)
+        else if (m_diskLightShadowmapSize != ShadowmapSize::None)
         {
             // uniform size
-            for (const SpotLight& light : m_spotLights)
+            for (const DiskLight& light : m_diskLights)
             {
                 if (light.m_handle.IsValid())
                 {
-                    featureProcessor->SetShadowmapSize(
-                        light.m_handle,
-                        m_spotLightShadowmapSize);
+                    featureProcessor->SetShadowsEnabled(light.m_handle, true);
+                    featureProcessor->SetShadowmapMaxResolution(light.m_handle, m_diskLightShadowmapSize);
                 }
             }
         }
         else
         {
             // random sizes
-            for (const SpotLight& light : m_spotLights)
+            for (const DiskLight& light : m_diskLights)
             {
                 if (light.m_handle.IsValid())
                 {
-                    featureProcessor->SetShadowmapSize(
-                        light.m_handle,
-                        light.m_shadowmapSize);
+                    featureProcessor->SetShadowsEnabled(light.m_handle, true);
+                    featureProcessor->SetShadowmapMaxResolution(light.m_handle, light.m_shadowmapSize);
                 }
             }
         }

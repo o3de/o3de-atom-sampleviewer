@@ -446,6 +446,8 @@ namespace AtomSampleViewer
             ImGui::Combo("Display", &displayOption, DiplayOptions, AZ_ARRAY_SIZE(DiplayOptions));
             m_displayOption = (DisplayOption)displayOption;
 
+            ImGui::Checkbox("Force Show 'Update' Buttons", &m_forceShowUpdateButtons);
+
             bool showWarnings = (m_displayOption == DisplayOption::AllResults) || (m_displayOption == DisplayOption::WarningsAndErrors);
             bool showAll = (m_displayOption == DisplayOption::AllResults);
 
@@ -610,7 +612,7 @@ namespace AtomSampleViewer
                                 ShowDiffButton("View Diff", screenshotResult.m_officialBaselineScreenshotFilePath, screenshotResult.m_screenshotFilePath);
                                 ImGui::PopID();
 
-                                if (!screenshotPassed && ImGui::Button("Update"))
+                                if ((!screenshotPassed || m_forceShowUpdateButtons) && ImGui::Button("Update##Official"))
                                 {
                                     if (screenshotResult.m_localComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::FileNotFound)
                                     {
@@ -649,7 +651,7 @@ namespace AtomSampleViewer
                                 ShowDiffButton("View Diff", screenshotResult.m_localBaselineScreenshotFilePath, screenshotResult.m_screenshotFilePath);
                                 ImGui::PopID();
 
-                                if (localBaselineWarning && ImGui::Button("Update"))
+                                if ((localBaselineWarning || m_forceShowUpdateButtons) && ImGui::Button("Update##Local"))
                                 {
                                     if (screenshotResult.m_localComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::FileNotFound)
                                     {
@@ -911,8 +913,12 @@ namespace AtomSampleViewer
         // Get source folder
         if (m_officialBaselineSourceFolder.empty())
         {
+
             auto projectPath = AZ::Utils::GetProjectPath();
             AzFramework::StringFunc::Path::Join(projectPath.c_str(), "Scripts/ExpectedScreenshots", m_officialBaselineSourceFolder);
+
+            m_officialBaselineSourceFolder = (AZ::IO::FixedMaxPath(AZ::Utils::GetProjectPath()) / "Scripts" / "ExpectedScreenshots").String();
+
 
             if (!io->Exists(m_officialBaselineSourceFolder.c_str()))
             {

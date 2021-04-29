@@ -332,7 +332,7 @@ namespace AtomSampleViewer
         RHI::RenderAttachmentLayoutBuilder attachmentsBuilder;
         attachmentsBuilder.AddSubpass()
             ->DepthStencilAttachment(AZ::RHI::Format::D32_FLOAT);
-        RHI::ResultCode result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
+        [[maybe_unused]] RHI::ResultCode result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
         AZ_Assert(result == RHI::ResultCode::Success, "Failed to create render attachment layout");
 
         m_pipelineStates[0] = shader->AcquirePipelineState(pipelineDesc);
@@ -369,7 +369,7 @@ namespace AtomSampleViewer
         attachmentsBuilder.AddSubpass()
             ->RenderTargetAttachment(m_outputFormat)
             ->DepthStencilAttachment(depthStencilFormat);
-        AZ::RHI::ResultCode result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
+        [[maybe_unused]] AZ::RHI::ResultCode result = attachmentsBuilder.End(pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
         AZ_Assert(result == AZ::RHI::ResultCode::Success, "Failed to create render attachment layout");
 
         m_pipelineStates[1] = shader->AcquirePipelineState(pipelineDesc);

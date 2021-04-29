@@ -314,8 +314,6 @@ namespace AtomSampleViewer
 
             float radius = GetLerpValue(m_config.m_radius, index, m_config.GetVaryRadius());
             m_diskLightFeatureProcessor->SetDiskRadius(handle, radius);
-
-            m_diskLightFeatureProcessor->SetLightEmitsBothDirections(handle, m_config.m_emitsBothDirections);
         }
     }
 
@@ -685,7 +683,7 @@ namespace AtomSampleViewer
             }
         }
 
-        if (m_config.m_lightType == Disk || m_config.m_lightType == Quad || m_config.m_lightType == Polygon)
+        if (m_config.m_lightType == Quad || m_config.m_lightType == Polygon)
         {
             if (ScriptableImGui::Checkbox("Emit Both Directions", &m_config.m_emitsBothDirections))
             {
@@ -825,7 +823,7 @@ namespace AtomSampleViewer
                 transform.SetRotation(AZ::ConvertEulerRadiansToQuaternion(AZ::Vector3(m_config.m_rotations[0], -m_config.m_rotations[1], m_config.m_rotations[2])));
                 transform.SetTranslation(lightPos);
                 transform *= AZ::Transform::CreateFromQuaternion(AZ::ConvertEulerRadiansToQuaternion(AZ::Vector3(AZ::Constants::Pi * 0.5f, 0.0f, 0.0f)));
-                m_auxGeom->DrawQuad(m_config.m_quadSize[0], m_config.m_quadSize[1], transform, nitsColor, drawStyle);
+                m_auxGeom->DrawQuad(m_config.m_quadSize[0], m_config.m_quadSize[1], AZ::Matrix3x4::CreateFromTransform(transform), nitsColor, drawStyle);
                 break;
             }
             case Polygon:

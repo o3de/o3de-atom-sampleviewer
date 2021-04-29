@@ -9,7 +9,7 @@
             "Slots": [
                 {
                     "Name": "SwapChainOutput",
-                    "SlotType": "Output"
+                    "SlotType": "InputOutput"
                 }
             ],
             "PassRequests": [
@@ -102,12 +102,12 @@
                     ]
                 },
                 {
-                    "Name": "SpotLightShadowmapsPass",
-                    "TemplateName": "SpotLightShadowmapsTemplate",
+                    "Name": "ProjectedShadowmapsPass",
+                    "TemplateName": "ProjectedShadowmapsTemplate",
                     "PassData": {
                         "$type": "RasterPassData",
                         "DrawListTag": "shadow",
-                        "PipelineViewTag": "SpotLightView"
+                        "PipelineViewTag": "ProjectedShadowView"
                     },
                     "Connections": [
                         {
@@ -208,10 +208,10 @@
                             }
                         },
                         {
-                            "LocalSlot": "ClearCoatNormalInput",
+                            "LocalSlot": "AlbedoInput",
                             "AttachmentRef": {
                                 "Pass": "ForwardPass",
-                                "Attachment": "ClearCoatNormalOutput"
+                                "Attachment": "AlbedoOutput"
                             }
                         },
                         {

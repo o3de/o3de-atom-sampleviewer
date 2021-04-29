@@ -37,6 +37,10 @@
                 "Path": "Passes/ForwardMSAA.pass"
             },
             {
+                "Name": "ForwardSubsurfaceMSAAPassTemplate",
+                "Path": "Passes/ForwardSubsurfaceMSAA.pass"
+            },
+            {
                 "Name": "CascadedShadowmapsTemplate",
                 "Path": "Passes/CascadedShadowmaps.pass"
             },
@@ -293,8 +297,8 @@
                 "Path": "Passes/LightCullingRemap.pass"
             },
             {
-                "Name": "SpotLightShadowmapsTemplate",
-                "Path": "Passes/SpotLightShadowmaps.pass"
+                "Name": "ProjectedShadowmapsTemplate",
+                "Path": "Passes/ProjectedShadowmaps.pass"
             },
             {
                 "Name": "EnvironmentCubeMapPipeline",
@@ -507,6 +511,10 @@
             {
                 "Name": "DiffuseProbeGridRelocationPassTemplate",
                 "Path": "Passes/DiffuseProbeGridRelocation.pass"
+            },
+            {
+                "Name": "DiffuseProbeGridClassificationPassTemplate",
+                "Path": "Passes/DiffuseProbeGridClassification.pass"
             },
             {
                 "Name": "DiffuseGlobalIlluminationPassTemplate",

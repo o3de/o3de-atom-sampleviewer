@@ -127,7 +127,6 @@ namespace AtomSampleViewer
         }
 
         m_loadImageStart = AZStd::GetTimeUTCMilliSecond();
-        AZ::u64 m_initialImageTime = 0;
 
         // Queue load all the textures under Textures\Streaming folder
         for (uint32_t index = 0; index < TestDDSCount; index++)

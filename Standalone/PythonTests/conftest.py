@@ -13,11 +13,13 @@ pytest test configuration file for launching AtomSampleViewerStandalone tests.
 
 import logging
 import os
+import types
 
 import pytest
 
 import ly_test_tools.builtin.helpers as helpers
 import ly_test_tools.environment.file_system as file_system
+import ly_test_tools.log.log_monitor
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +39,15 @@ def clean_atomsampleviewer_logs(request, workspace):
 
 
 @pytest.fixture(scope="function", autouse=True)
-def setup_atomsampleviewer_assets(project, workspace):
-    """Sets up bootstrap.cfg to target AtomSampleViewer before starting the tests (prevents AssetProcessor errors)."""
-    helpers.setup_bootstrap_project(workspace, project)
+def atomsampleviewer_log_monitor(request, workspace):
+    """Creates a LyTestTools log monitor object for monitoring AtomSampleViewer logs."""
+    def is_alive(launcher_name):
+        return True
+
+    launcher = ly_test_tools.launchers.platforms.base.Launcher(workspace, [])  # Needed for log monitor to work.
+    launcher.is_alive = types.MethodType(is_alive, launcher)
+    file_to_monitor = os.path.join(workspace.paths.project_log(), 'atomsampleviewer.log')
+    log_monitor = ly_test_tools.log.log_monitor.LogMonitor(launcher=launcher, log_file_path=file_to_monitor)
+    log_monitor.file_to_monitor = file_to_monitor
+
+    return log_monitor

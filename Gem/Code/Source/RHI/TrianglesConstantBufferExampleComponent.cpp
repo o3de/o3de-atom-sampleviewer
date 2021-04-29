@@ -26,15 +26,17 @@
 
 #include <AzCore/Serialization/SerializeContext.h>
 
+#include <TriangleConstantBufferExampleComponent_Traits_Platform.h>
+
 namespace AtomSampleViewer
 {
     const char* TrianglesConstantBufferExampleComponent::s_trianglesConstantBufferExampleName = "TrianglesConstantBufferExample";
     // The number of triangles that are represented with a single constant buffer, that contains multiple buffer views;
     // each view containing a partial view of the constant buffer
-    const uint32_t TrianglesConstantBufferExampleComponent::s_numberOfTrianglesSingleCB = 15u;
+    const uint32_t TrianglesConstantBufferExampleComponent::s_numberOfTrianglesSingleCB = ATOMSAMPLEVIEWER_TRAIT_TRIANGLE_CONSTANT_BUFFER_SAMPLE_SINGLE_CONSTANT_BUFFER_SIZE;
     // The number of triangles that are represented with multiple constant buffers;
     // each having their own constant buffer and view containing the whole buffer
-    const uint32_t TrianglesConstantBufferExampleComponent::s_numberOfTrianglesMultipleCB = 15u;
+    const uint32_t TrianglesConstantBufferExampleComponent::s_numberOfTrianglesMultipleCB = ATOMSAMPLEVIEWER_TRAIT_TRIANGLE_CONSTANT_BUFFER_SAMPLE_MULTIPLE_CONSTANT_BUFFER_SIZE;
     // The total number of views and triangles that will be rendered for this sample
     const uint32_t TrianglesConstantBufferExampleComponent::s_numberOfTrianglesTotal = s_numberOfTrianglesSingleCB + s_numberOfTrianglesMultipleCB;
 
@@ -122,7 +124,7 @@ namespace AtomSampleViewer
             mapRequest.m_byteOffset = triangleIdx * elementSize;
 
             AZ::RHI::BufferMapResponse mapResponse;
-            AZ::RHI::ResultCode resultCode = m_constantBufferPool->MapBuffer(mapRequest, mapResponse);
+            m_constantBufferPool->MapBuffer(mapRequest, mapResponse);
             if (mapResponse.m_data)
             {
                 memcpy(mapResponse.m_data, data + triangleIdx, sizeof(InstanceInfo));
@@ -142,7 +144,7 @@ namespace AtomSampleViewer
             mapRequest.m_byteOffset = 0u;
 
             AZ::RHI::BufferMapResponse mapResponse;
-            AZ::RHI::ResultCode resultCode = m_constantBufferPool->MapBuffer(mapRequest, mapResponse);
+            m_constantBufferPool->MapBuffer(mapRequest, mapResponse);
 
             if(mapResponse.m_data)
             {
@@ -231,7 +233,7 @@ namespace AtomSampleViewer
             constantBufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::Constant;
             constantBufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
             constantBufferPoolDesc.m_hostMemoryAccess = RHI::HostMemoryAccess::Write;
-            RHI::ResultCode result = m_constantBufferPool->Init(*device, constantBufferPoolDesc);
+            [[maybe_unused]] RHI::ResultCode result = m_constantBufferPool->Init(*device, constantBufferPoolDesc);
             AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialized constant buffer pool");
         }
 
@@ -248,7 +250,7 @@ namespace AtomSampleViewer
             RHI::BufferInitRequest request;
             request.m_buffer = m_constantBuffer.get();
             request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::Constant, constantBufferSize };
-            RHI::ResultCode result = m_constantBufferPool->InitBuffer(request);
+            [[maybe_unused]] RHI::ResultCode result = m_constantBufferPool->InitBuffer(request);
             AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialize constant buffer");
 
             for (uint32_t triangleIdx = 0u; triangleIdx < s_numberOfTrianglesSingleCB; ++triangleIdx)
@@ -305,7 +307,7 @@ namespace AtomSampleViewer
             RHI::RenderAttachmentLayoutBuilder attachmentsBuilder;
             attachmentsBuilder.AddSubpass()
                 ->RenderTargetAttachment(m_outputFormat);
-            RHI::ResultCode result = attachmentsBuilder.End(pipelineStateDescriptor.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
+            [[maybe_unused]] RHI::ResultCode result = attachmentsBuilder.End(pipelineStateDescriptor.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
             AZ_Assert(result == RHI::ResultCode::Success, "Failed to create render attachment layout");
 
             m_pipelineState = shader->AcquirePipelineState(pipelineStateDescriptor);
@@ -324,7 +326,7 @@ namespace AtomSampleViewer
             uint32_t viewIdx = 0u;
             for (const AZ::RHI::Ptr<AZ::RHI::BufferView>& bufferView : m_constantBufferViewArray)
             {
-                bool set = m_shaderResourceGroup->SetBufferView(trianglesBufferIndex, bufferView.get(), viewIdx);
+                [[maybe_unused]] bool set = m_shaderResourceGroup->SetBufferView(trianglesBufferIndex, bufferView.get(), viewIdx);
                 AZ_Assert(set, "Failed to set the buffer view");
                 viewIdx++;
             }

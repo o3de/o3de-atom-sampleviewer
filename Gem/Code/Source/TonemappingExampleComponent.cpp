@@ -65,8 +65,6 @@ namespace AtomSampleViewer
 
         m_dynamicDraw = RPI::DynamicDrawInterface::Get();
 
-        RPI::Scene* scene = RPI::RPISystemInterface::Get()->GetDefaultScene().get();
-
         m_imguiSidebar.Activate();
 
         AZ::TickBus::Handler::BusConnect();
