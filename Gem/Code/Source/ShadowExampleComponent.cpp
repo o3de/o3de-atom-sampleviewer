@@ -170,8 +170,7 @@ namespace AtomSampleViewer
     {
         using namespace AZ;
         constexpr float directionalLightPeriodTime = 5.f; // 5 seconds for a rotation of directional light position.
-        constexpr float diskLightPeriodTime = 7.f; // 7 seconds for a rotation of light positions.
-        constexpr float diskLightDist = 5.f;
+        constexpr float lightPeriodTime = 7.f; // 7 seconds for a rotation of light positions.
 
         if (m_elapsedTime == 0.f)
         {
@@ -188,7 +187,7 @@ namespace AtomSampleViewer
         }
         if (m_isPositionalLightAutoRotate)
         {
-            m_positionalLightRotationAngle = fmodf(m_positionalLightRotationAngle - deltaTime * Constants::TwoPi / diskLightPeriodTime + Constants::TwoPi, Constants::TwoPi);
+            m_positionalLightRotationAngle = fmodf(m_positionalLightRotationAngle - deltaTime * Constants::TwoPi / lightPeriodTime + Constants::TwoPi, Constants::TwoPi);
         }
 
 
@@ -220,10 +219,10 @@ namespace AtomSampleViewer
 
     AZ::Transform ShadowExampleComponent::GetTransformForLight(const uint32_t index) const
     {
-        constexpr float diskLightDist = 5.f;
+        constexpr float lightDist = 5.f;
         using namespace AZ;
         const float angle = m_positionalLightRotationAngle + index * Constants::TwoPi / 3;
-        const auto location = Vector3(diskLightDist * sinf(angle), diskLightDist * cosf(angle), m_positionalLightHeights[index]);
+        const auto location = Vector3(lightDist * sinf(angle), lightDist * cosf(angle), m_positionalLightHeights[index]);
         const auto transform = Transform::CreateLookAt(location, Vector3::CreateZero());
         return transform;
     }
