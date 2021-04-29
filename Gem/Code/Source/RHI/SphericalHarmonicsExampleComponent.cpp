@@ -555,7 +555,7 @@ namespace AtomSampleViewer
                 }
             }
 
-            if (ScriptableImGui::ListBox("Solver", &m_shaderInputSHSolver, SHExampleComponent::imGui_solverListItem,
+            if (ImGui::ListBox("Solver", &m_shaderInputSHSolver, SHExampleComponent::imGui_solverListItem,
                 IM_ARRAYSIZE(SHExampleComponent::imGui_solverListItem), 4))
             {
                 m_updateDemoSRG = true;
@@ -568,7 +568,7 @@ namespace AtomSampleViewer
         }
         else
         {
-            if (ScriptableImGui::ListBox("Coefficient set", &m_shaderInputPresetIndex, SHExampleComponent::imGui_presetItem,
+            if (ImGui::ListBox("Coefficient set", &m_shaderInputPresetIndex, SHExampleComponent::imGui_presetItem,
                 IM_ARRAYSIZE(SHExampleComponent::imGui_presetItem), 4))
             {
                 m_updateRenderSRG = true;
