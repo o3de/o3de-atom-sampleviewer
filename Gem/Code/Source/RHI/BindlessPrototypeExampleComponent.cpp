@@ -166,17 +166,17 @@ namespace AtomSampleViewer
             ImGui::Spacing();
 
             ImGui::Text("Lattice Depth");
-            latticeChanged |= ImGui::SliderInt("##LatticeDepth", &m_objectCountDepth, 1, m_maxObjectPerAxis);
+            latticeChanged |= ScriptableImGui::SliderInt("##LatticeDepth", &m_objectCountDepth, 1, m_maxObjectPerAxis);
 
             ImGui::Spacing();
 
             static bool enableDynamicUpdates = true;
             bool previousEnableDynamicUpdates = enableDynamicUpdates;
-            ImGui::Checkbox("Enable Dynamic Updates", &enableDynamicUpdates);
+            ScriptableImGui::Checkbox("Enable Dynamic Updates", &enableDynamicUpdates);
 
             ImGui::Separator();
 
-            bool randomizeMaterials = ImGui::Button("RandomizeMaterials");
+            bool randomizeMaterials = ScriptableImGui::Button("RandomizeMaterials");
 
             ImGui::Separator();
 

@@ -16,5 +16,9 @@
             }
         ]
     },
+<<<<<<< Updated upstream
+=======
+    
+>>>>>>> Stashed changes
     "DisabledRHIBackends": ["metal"]
 }

@@ -284,7 +284,7 @@ namespace AtomSampleViewer
             for (int32_t i = 0; i < static_cast<int32_t>(m_imageLayout.m_size.m_depth); i++)
             {
                 const AZStd::string label = AZStd::string::format("Image Slice %d", i);
-                ImGui::RadioButton(label.c_str(), &m_sliceIndex, i);
+                ScriptableImGui::RadioButton(label.c_str(), &m_sliceIndex, i);
             }
 
             m_imguiSidebar.End();

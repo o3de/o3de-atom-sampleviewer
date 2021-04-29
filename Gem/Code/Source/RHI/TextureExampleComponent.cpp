@@ -302,14 +302,14 @@ namespace AtomSampleViewer
         ImGui::Text("UV Settings");
         float vec2[2];
         m_uvOffset.StoreToFloat2(vec2);
-        if (ImGui::SliderFloat2("UV Offset", vec2, -2.0f, 2.0, "%.1f"))
+        if (ScriptableImGui::SliderFloat2("UV Offset", vec2, -2.0f, 2.0, "%.1f"))
         {
             m_uvOffset.Set(vec2[0], vec2[1]);
             m_updateSRG = true;
         }  
 
         m_uvScale.StoreToFloat2(vec2);
-        if (ImGui::SliderFloat2("UV Scale", vec2, 0, 2, "%.1f"))
+        if (ScriptableImGui::SliderFloat2("UV Scale", vec2, 0, 2, "%.1f"))
         {
             m_uvScale.Set(vec2[0], vec2[1]);
             m_updateSRG = true;
@@ -318,7 +318,7 @@ namespace AtomSampleViewer
         ImGui::Separator();
         ImGui::NewLine();
         ImGui::Text("Dynamic Sampler");
-        if (ImGui::Checkbox("Use static sampler", &m_useStaticSampler))
+        if (ScriptableImGui::Checkbox("Use static sampler", &m_useStaticSampler))
         {
             m_updateSRG = true;
         }
@@ -327,7 +327,7 @@ namespace AtomSampleViewer
         {            
             const AZStd::vector<const char*> addressMode = { "Wrap", "Mirror", "Clamp", "Border", "MirrorOnce" };
             int current_item = static_cast<int>(m_samplerState.m_addressU);
-            if (ImGui::Combo("Address Mode", &current_item, addressMode.data(), static_cast<int>(addressMode.size())))
+            if (ScriptableImGui::Combo("Address Mode", &current_item, addressMode.data(), static_cast<int>(addressMode.size())))
             {
                 m_samplerState.m_addressU = m_samplerState.m_addressV = m_samplerState.m_addressW = static_cast<AZ::RHI::AddressMode>(current_item);
                 m_updateSRG = true;
@@ -337,7 +337,7 @@ namespace AtomSampleViewer
             {
                 const AZStd::vector<const char*> borderColor = { "OpaqueBlack", "TransparentBlack", "OpaqueWhite" };
                 current_item = static_cast<int>(m_samplerState.m_borderColor);
-                if (ImGui::Combo("BorderColor", &current_item, borderColor.data(), static_cast<int>(borderColor.size())))
+                if (ScriptableImGui::Combo("BorderColor", &current_item, borderColor.data(), static_cast<int>(borderColor.size())))
                 {
                     m_samplerState.m_borderColor = static_cast<AZ::RHI::BorderColor>(current_item);
                     m_updateSRG = true;

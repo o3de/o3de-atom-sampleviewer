@@ -1005,8 +1005,8 @@ namespace AtomSampleViewer
     void IndirectRenderingExampleComponent::DrawSampleSettings()
     {
         ImGui::Spacing();
-        ImGui::SliderFloat("Cull Offset", &m_cullOffset, 0.f, 1.f);
-        if (ImGui::SliderInt("Num Objects", reinterpret_cast<int*>(&m_numObjects), 1, s_maxNumberOfObjects))
+        ScriptableImGui::SliderFloat("Cull Offset", &m_cullOffset, 0.f, 1.f);
+        if (ScriptableImGui::SliderInt("Num Objects", reinterpret_cast<int*>(&m_numObjects), 1, s_maxNumberOfObjects))
         {
             m_updateIndirectDispatchArguments = true;
         }

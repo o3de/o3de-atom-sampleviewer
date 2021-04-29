@@ -647,23 +647,23 @@ namespace AtomSampleViewer
         }
         int current_item = static_cast<int>(m_currentType);
         ImGui::Text("Type");
-        ImGui::Combo("", &current_item, items.data(), static_cast<int>(items.size()));
+        ScriptableImGui::Combo("", &current_item, items.data(), static_cast<int>(items.size()));
         SetQueryType(static_cast<QueryType>(current_item));
         if (m_currentType == QueryType::Occlusion && features.m_occlusionQueryPrecise)
         {
             // Precision occlusion is only available for the Occlusion query type
-            ImGui::Checkbox("Enable Precision occlusion", &m_precisionOcclusionEnabled);
+            ScriptableImGui::Checkbox("Enable Precision occlusion", &m_precisionOcclusionEnabled);
         }
 
         auto& supportedQueries = features.m_queryTypesMask[static_cast<uint32_t>(AZ::RHI::HardwareQueueClass::Graphics)];
         if (AZ::RHI::CheckBitsAll(supportedQueries, AZ::RHI::QueryTypeFlags::Timestamp))
         {
-            ImGui::Checkbox("Enable Timestamp queries", &m_timestampEnabled);
+            ScriptableImGui::Checkbox("Enable Timestamp queries", &m_timestampEnabled);
         }
 
         if (AZ::RHI::CheckBitsAll(supportedQueries, AZ::RHI::QueryTypeFlags::PipelineStatistics))
         {
-            ImGui::Checkbox("Enable Statistics queries", &m_pipelineStatisticsEnabled);
+            ScriptableImGui::Checkbox("Enable Statistics queries", &m_pipelineStatisticsEnabled);
         }
 
         if (m_precisionOcclusionEnabled)

@@ -520,7 +520,7 @@ namespace AtomSampleViewer
 
         std::stringstream ss;
         ss << "Switch to " << (m_mode ? "Render" : "Demo") << " mode";
-        if (ImGui::Button(ss.str().c_str()))
+        if (ScriptableImGui::Button(ss.str().c_str()))
         {
             m_mode = !m_mode;
         }
@@ -555,20 +555,20 @@ namespace AtomSampleViewer
                 }
             }
 
-            if (ImGui::ListBox("Solver", &m_shaderInputSHSolver, SHExampleComponent::imGui_solverListItem,
+            if (ScriptableImGui::ListBox("Solver", &m_shaderInputSHSolver, SHExampleComponent::imGui_solverListItem,
                 IM_ARRAYSIZE(SHExampleComponent::imGui_solverListItem), 4))
             {
                 m_updateDemoSRG = true;
             }
 
-            if (ImGui::Checkbox("Distortion", &m_shaderInputEnableDistortion))
+            if (ScriptableImGui::Checkbox("Distortion", &m_shaderInputEnableDistortion))
             {
                 m_updateDemoSRG = true;
             }
         }
         else
         {
-            if (ImGui::ListBox("Coefficient set", &m_shaderInputPresetIndex, SHExampleComponent::imGui_presetItem,
+            if (ScriptableImGui::ListBox("Coefficient set", &m_shaderInputPresetIndex, SHExampleComponent::imGui_presetItem,
                 IM_ARRAYSIZE(SHExampleComponent::imGui_presetItem), 4))
             {
                 m_updateRenderSRG = true;
@@ -578,19 +578,19 @@ namespace AtomSampleViewer
             static const float deg2rad = (AZ::Constants::Pi / 180.0);
             if (m_shaderInputPresetIndex == SHExampleComponent::FakeLightRotation)
             {
-                if (ImGui::SliderInt("Set X rotation", &angle[0], 0, 360))
+                if (ScriptableImGui::SliderInt("Set X rotation", &angle[0], 0, 360))
                 {
                     m_shaderInputRotationAngle.SetX(angle[0] * deg2rad);
                     m_updateRenderSRG = true;
                 }
 
-                if (ImGui::SliderInt("Set Y rotation", &angle[1], 0, 360))
+                if (ScriptableImGui::SliderInt("Set Y rotation", &angle[1], 0, 360))
                 {
                     m_shaderInputRotationAngle.SetZ(angle[1] * deg2rad);
                     m_updateRenderSRG = true;
                 }
 
-                if (ImGui::SliderInt("Set Z rotation", &angle[2], 0, 360))
+                if (ScriptableImGui::SliderInt("Set Z rotation", &angle[2], 0, 360))
                 {
                     // since SH computation assume z-up frame
                     m_shaderInputRotationAngle.SetY(angle[2] * deg2rad);
@@ -600,14 +600,14 @@ namespace AtomSampleViewer
 
             ss = std::stringstream();
             ss << (m_shaderInputEnableGammaCorrection ? "Disable" : "Enable") << " Gamma Correction";
-            if (ImGui::Button(ss.str().c_str()))
+            if (ScriptableImGui::Button(ss.str().c_str()))
             {
                 m_shaderInputEnableGammaCorrection = !m_shaderInputEnableGammaCorrection;
                 m_updateRenderSRG = true;
             }
 
             static float sliderFloatValue = 1.0f;
-            if (ImGui::SliderFloat("set exposure", &sliderFloatValue, 0.1f, 2.0f, "ratio = %.1f"))
+            if (ScriptableImGui::SliderFloat("set exposure", &sliderFloatValue, 0.1f, 2.0f, "ratio = %.1f"))
             {
                 m_shaderInputExposure = sliderFloatValue;
                 m_updateRenderSRG = true;
@@ -643,7 +643,7 @@ namespace AtomSampleViewer
                     }
                 }
 
-                if (ImGui::Button("Recompute"))
+                if (ScriptableImGui::Button("Recompute"))
                 {
                     fakeLightDone = false;
                     m_recomputeFakeLight = true;
