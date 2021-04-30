@@ -43,15 +43,3 @@ SimpleScreenshotTest('RHI/Stencil', 'A')
 SimpleScreenshotTest('RHI/Texture', 'A')
 SimpleScreenshotTest('RHI/Texture3d', 'A') -- flickers but seems to work
 SimpleScreenshotTest('RHI/TextureMap', 'D')
-
---SimpleScreenshotTest('RHI/AlphaToCoverage', 'I') -- not matching
---SimpleScreenshotTest('RHI/BindlessPrototype', 'H') -- not matching
---SimpleScreenshotTest('RHI/IndirectRendering', 'A') -- may not render screenshot looks blank should be random triangles
---SimpleScreenshotTest('RHI/MultipleViews', 'I') -- not matching
---SimpleScreenshotTest('RHI/MultiViewportSwapchainComponent', 'I') -- not matching
---SimpleScreenshotTest('RHI/Queries', 'H')
---SimpleScreenshotTest('RHI/SphericalHarmonics', 'A') -- CRASH or unexpected exit but worked when launched again
---SimpleScreenshotTest('RHI/Swapchain', 'F')
---SimpleScreenshotTest('RHI/TextureArray', 'C') -- changing each run
---SimpleScreenshotTest('RHI/Triangle', 'I') -- not matching
---SimpleScreenshotTest('RHI/TrianglesConstantBuffer', 'I')
