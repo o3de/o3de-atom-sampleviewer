@@ -215,13 +215,6 @@
                             }
                         },
                         {
-                            "LocalSlot": "ClearCoatNormalInput",
-                            "AttachmentRef": {
-                                "Pass": "ForwardPass",
-                                "Attachment": "ClearCoatNormalOutput"
-                            }
-                        },
-                        {
                             "LocalSlot": "DepthStencilInputOutput",
                             "AttachmentRef": {
                                 "Pass": "ForwardPass",

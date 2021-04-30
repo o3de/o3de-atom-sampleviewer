@@ -37,6 +37,10 @@
                 "Path": "Passes/ForwardMSAA.pass"
             },
             {
+                "Name": "ForwardSubsurfaceMSAAPassTemplate",
+                "Path": "Passes/ForwardSubsurfaceMSAA.pass"
+            },
+            {
                 "Name": "CascadedShadowmapsTemplate",
                 "Path": "Passes/CascadedShadowmaps.pass"
             },
