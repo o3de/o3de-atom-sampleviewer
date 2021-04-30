@@ -28,6 +28,8 @@ namespace AtomSampleViewer
     static const char* ParallaxEnableName = "parallax.enable";
     static const char* PdoEnableName = "parallax.pdo";
     static const char* ParallaxFactorName = "parallax.factor";
+    static const char* ParallaxHeightOffsetName = "parallax.offset";
+    static const char* ParallaxShowClippingName = "parallax.showClipping";
     static const char* ParallaxAlgorithmName = "parallax.algorithm";
     static const char* ParallaxQualityName = "parallax.quality";
     static const char* ParallaxUvIndexName = "parallax.textureMapUv";
@@ -89,6 +91,8 @@ namespace AtomSampleViewer
         // Material index
         m_parallaxEnableIndex = m_parallaxMaterial->FindPropertyIndex(AZ::Name(ParallaxEnableName));
         m_parallaxFactorIndex = m_parallaxMaterial->FindPropertyIndex(AZ::Name(ParallaxFactorName));
+        m_parallaxOffsetIndex = m_parallaxMaterial->FindPropertyIndex(AZ::Name(ParallaxHeightOffsetName));
+        m_parallaxShowClippingIndex = m_parallaxMaterial->FindPropertyIndex(AZ::Name(ParallaxShowClippingName));
         m_parallaxAlgorithmIndex = m_parallaxMaterial->FindPropertyIndex(AZ::Name(ParallaxAlgorithmName));
         m_parallaxQualityIndex = m_parallaxMaterial->FindPropertyIndex(AZ::Name(ParallaxQualityName));
         m_parallaxUvIndex = m_parallaxMaterial->FindPropertyIndex(AZ::Name(ParallaxUvIndexName));
@@ -323,48 +327,53 @@ namespace AtomSampleViewer
                 ImGui::Text("Parallax Setting");
                 ImGui::Indent();
                 {
-                    bool parallaxEnableChanged = false;
-                    bool pdoEnableChanged = false;
-                    bool factorChanged = false;
-                    bool algorithmChanged = false;
-                    bool qualityChanged = false;
-                    bool uvChanged = false;
-
-                    parallaxEnableChanged = ScriptableImGui::Checkbox("Enable Parallax", &m_parallaxEnable);
-                    if (parallaxEnableChanged)
+                    if (ScriptableImGui::Checkbox("Enable Parallax", &m_parallaxEnable))
                     {
+                        parallaxSettingChanged = true;
                         m_parallaxMaterial->SetPropertyValue(m_parallaxEnableIndex, m_parallaxEnable);
                     }
 
                     if (m_parallaxEnable)
                     {
-                        pdoEnableChanged = ScriptableImGui::Checkbox("Enable Pdo", &m_pdoEnable);
-                        if (pdoEnableChanged)
+                        if (ScriptableImGui::Checkbox("Enable Pdo", &m_pdoEnable))
                         {
+                            parallaxSettingChanged = true;
                             m_parallaxMaterial->SetPropertyValue(m_pdoEnableIndex, m_pdoEnable);
                         }
 
-                        factorChanged = ScriptableImGui::SliderFloat("Factor", &m_parallaxFactor, 0.0f, 0.1f);
-                        if (factorChanged)
+                        if (ScriptableImGui::SliderFloat("Heightmap Scale", &m_parallaxFactor, 0.0f, 0.1f))
                         {
+                            parallaxSettingChanged = true;
                             m_parallaxMaterial->SetPropertyValue(m_parallaxFactorIndex, m_parallaxFactor);
                         }
-
-                        algorithmChanged = ScriptableImGui::Combo("Algorithm", &m_parallaxAlgorithm, ParallaxAlgorithmList, AZ_ARRAY_SIZE(ParallaxAlgorithmList));
-                        if (algorithmChanged)
+                        
+                        if (ScriptableImGui::SliderFloat("Offset", &m_parallaxOffset, -0.1f, 0.1f))
                         {
+                            parallaxSettingChanged = true;
+                            m_parallaxMaterial->SetPropertyValue(m_parallaxOffsetIndex, m_parallaxOffset);
+                        }
+                        
+                        if (ScriptableImGui::Checkbox("Show Clipping", &m_parallaxShowClipping))
+                        {
+                            parallaxSettingChanged = true;
+                            m_parallaxMaterial->SetPropertyValue(m_parallaxShowClippingIndex, m_parallaxShowClipping);
+                        }
+
+                        if (ScriptableImGui::Combo("Algorithm", &m_parallaxAlgorithm, ParallaxAlgorithmList, AZ_ARRAY_SIZE(ParallaxAlgorithmList)))
+                        {
+                            parallaxSettingChanged = true;
                             m_parallaxMaterial->SetPropertyValue(m_parallaxAlgorithmIndex, static_cast<uint32_t>(m_parallaxAlgorithm));
                         }
 
-                        qualityChanged = ScriptableImGui::Combo("Quality", &m_parallaxQuality, ParallaxQualityList, AZ_ARRAY_SIZE(ParallaxQualityList));
-                        if (qualityChanged)
+                        if (ScriptableImGui::Combo("Quality", &m_parallaxQuality, ParallaxQualityList, AZ_ARRAY_SIZE(ParallaxQualityList)))
                         {
+                            parallaxSettingChanged = true;
                             m_parallaxMaterial->SetPropertyValue(m_parallaxQualityIndex, static_cast<uint32_t>(m_parallaxQuality));
                         }
 
-                        uvChanged = ScriptableImGui::Combo("UV", &m_parallaxUv, ParallaxUvSetList, AZ_ARRAY_SIZE(ParallaxUvSetList));
-                        if (uvChanged)
+                        if (ScriptableImGui::Combo("UV", &m_parallaxUv, ParallaxUvSetList, AZ_ARRAY_SIZE(ParallaxUvSetList)))
                         {
+                            parallaxSettingChanged = true;
                             m_parallaxMaterial->SetPropertyValue(m_parallaxUvIndex, static_cast<uint32_t>(m_parallaxUv));
                             m_parallaxMaterial->SetPropertyValue(m_ambientOcclusionUvIndex, static_cast<uint32_t>(m_parallaxUv));
                             m_parallaxMaterial->SetPropertyValue(m_baseColorUvIndex, static_cast<uint32_t>(m_parallaxUv));
@@ -372,8 +381,6 @@ namespace AtomSampleViewer
                             m_parallaxMaterial->SetPropertyValue(m_roughnessUvIndex, static_cast<uint32_t>(m_parallaxUv));
                         }
                     }
-
-                    parallaxSettingChanged = parallaxEnableChanged || pdoEnableChanged || factorChanged || algorithmChanged || qualityChanged || uvChanged;
                 }
                 ImGui::Unindent();
             }
