@@ -31,8 +31,6 @@ function SimpleScreenshotTest(sample, threshold)
     OpenSample(nil)
 end
 
-SimpleScreenshotTest('RHI/AsyncCompute', 'B')
-SimpleScreenshotTest('RHI/Compute', 'B')
 SimpleScreenshotTest('RHI/CopyQueue', 'A')
 SimpleScreenshotTest('RHI/DualSourceBlending', 'A')
 SimpleScreenshotTest('RHI/InputAssembly', 'E')
