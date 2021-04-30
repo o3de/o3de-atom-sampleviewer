@@ -126,7 +126,7 @@ namespace AtomSampleViewer
 
         if (m_imguiSidebar.Begin())
         {
-            ImGui::Checkbox("Enable/Disable Async Compute", &m_asyncComputeEnabled);
+            ScriptableImGui::Checkbox("Enable/Disable Async Compute", &m_asyncComputeEnabled);
             m_imguiSidebar.End();
         }
     }
