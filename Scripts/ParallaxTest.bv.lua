@@ -25,17 +25,17 @@ SetImguiValue('Parallax Setting/Factor', 0.05)
 SetImguiValue('Parallax Setting/Enable Pdo', false)
 IdleFrames(2)
 -- Disable Pdo
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_1.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_1.png')
 
 -- Purpose of 2 shots
 -- First: regression test verifying using the 2nd UV is stable
 -- Second: diff test that compares UV0 (direct tangent) to UV1 (generated tangent), UV values are the same
 -- Because we don't have the ability to pick the image we want to compare so far,
--- the expected image of the second test is copied from screenshot_1.ppm
+-- the expected image of the second test is copied from screenshot_1.png
 SetImguiValue('Parallax Setting/UV', "UV1")
 IdleFrames(2)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_2ndUv_1.ppm')
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_2ndUv_2.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_2ndUv_1.png')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_2ndUv_2.png')
 SetImguiValue('Parallax Setting/UV', "UV0")
 
 SetImguiValue('Parallax Setting/Enable Pdo', true)
@@ -43,7 +43,7 @@ SetImguiValue('Parallax Setting/Enable Pdo', true)
 SetImguiValue('Plane Setting/Rotation', DegToRad(45))
 IdleFrames(1)
 -- Directional Light 0 degree, algorithm POM
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_2.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_2.png')
 
 ArcBallCameraController_SetHeading(DegToRad(120))
 SetImguiValue('Parallax Setting/Algorithm', "Relief")
@@ -57,7 +57,7 @@ SetImguiValue('Plane Setting/Rotation UV', 275)
 SetImguiValue('Plane Setting/Scale UV', 0.6)
 IdleFrames(1)
 -- Directional Light 120 degree with uv parameter changed, algorithm Relief
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_3.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_3.png')
 
 ArcBallCameraController_SetHeading(DegToRad(240))
 SetImguiValue('Parallax Setting/Algorithm', "ContactRefinement")
@@ -71,7 +71,7 @@ SetImguiValue('Plane Setting/Rotation UV', 138)
 SetImguiValue('Plane Setting/Scale UV', 1.6)
 IdleFrames(1)
 -- Directional Light 240 degree with uv parameter changed, algorithm Contact Refinement
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_4.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_4.png')
 
 
 ArcBallCameraController_SetHeading(DegToRad(0))
@@ -81,7 +81,7 @@ SetImguiValue('Parallax Setting/Algorithm', "POM")
 SetImguiValue('Plane Setting/Rotation', DegToRad(135))
 IdleFrames(1)
 -- Spot Light 0 degree, algorithm POM
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_5.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_5.png')
 
 ArcBallCameraController_SetHeading(DegToRad(120))
 SetImguiValue('Parallax Setting/Algorithm', "Relief")
@@ -95,7 +95,7 @@ SetImguiValue('Plane Setting/Rotation UV', 125)
 SetImguiValue('Plane Setting/Scale UV', 0.3)
 IdleFrames(1)
 -- Spot Light 120 degree with uv parameter changed, algorithm Relief
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_6.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_6.png')
 
 ArcBallCameraController_SetHeading(DegToRad(240))
 SetImguiValue('Parallax Setting/Algorithm', "ContactRefinement")
@@ -109,6 +109,6 @@ SetImguiValue('Plane Setting/Rotation UV', 74)
 SetImguiValue('Plane Setting/Scale UV', 1.3)
 IdleFrames(1)
 -- Spot Light 240 degree with uv parameter changed, algorithm Contact Refinement
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_7.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_7.png')
 
 OpenSample(nil)

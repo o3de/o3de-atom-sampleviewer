@@ -13,7 +13,7 @@
 ----------------------------------------------------------------------------------------------------
 
 function TakeScreenshots()
-    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_decals.ppm')
+    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_decals.png')
 end
 
 g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/Decals/')

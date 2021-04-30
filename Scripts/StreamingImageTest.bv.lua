@@ -21,18 +21,18 @@ ResizeViewport(900, 900)
 SelectImageComparisonToleranceLevel("Level H")
 
 -- capture screenshot with all 2d images
-CaptureScreenshot(g_screenshotOutputFolder .. 'Streaming2dImages.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. 'Streaming2dImages.png')
 
 -- capture screenshot for hot loading
 SetImguiValue('Switch texture', true)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. 'HotReloading.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. 'HotReloading.png')
 
 
 -- capture screenshot for 3d images
 SetImguiValue('View 3D Images', true)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. 'Streaming3dImage.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. 'Streaming3dImage.png')
 
 
 OpenSample(nil)

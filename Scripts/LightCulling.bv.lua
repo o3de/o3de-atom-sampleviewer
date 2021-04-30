@@ -34,7 +34,7 @@ function TakeScreenshotPointLights()
 
     IdleFrames(1) 
 
-    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_pointlights.ppm')
+    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_pointlights.png')
 end
 
 function TakeScreenshotDiskLights()
@@ -45,7 +45,7 @@ function TakeScreenshotDiskLights()
     SetImguiValue('Disk Lights/Disk light count', 200)
     
     IdleFrames(1) 
-    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_disklights.ppm')
+    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_disklights.png')
 end
 
 function TakeScreenshotCapsuleLights()
@@ -56,7 +56,7 @@ function TakeScreenshotCapsuleLights()
     SetImguiValue('Capsule Lights/Capsule light count', 200)
     
     IdleFrames(1) 
-    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_capsulelights.ppm')
+    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_capsulelights.png')
 end
 
 function TakeScreenshotQuadLights()
@@ -70,7 +70,7 @@ function TakeScreenshotQuadLights()
     SetImguiValue('Quad Lights/Quad light height', 5)
     
     IdleFrames(1) 
-    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_quadlights.ppm')
+    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_quadlights.png')
 end
 
 
@@ -82,7 +82,7 @@ function TakeScreenshotDecals()
     SetImguiValue('Decals/Decal count', 200)
     
     IdleFrames(1) 
-    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_decals.ppm')
+    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_decals.png')
 end
 
 function TakeScreenShotLookingStraightDown()
@@ -97,7 +97,7 @@ function TakeScreenShotLookingStraightDown()
     SetImguiValue('Point Lights/Point Intensity', 200)
 
     IdleFrames(1) 
-    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_lookingdown.ppm')
+    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_lookingdown.png')
 end
 
 function EnableOnlyTestHeatmap()
