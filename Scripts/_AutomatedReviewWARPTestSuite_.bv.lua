@@ -26,7 +26,7 @@ function SimpleScreenshotTest(sample, threshold)
     ResizeViewport(1600, 900)
     SelectImageComparisonToleranceLevel("Level " .. threshold:upper())
     --ArcBallCameraController_SetDistance(2.0)
-    IdleFrames(10)
+    IdleFrames(15)
     CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_warp_' .. sampleSplit[#sampleSplit] .. '.png')
     OpenSample(nil)
 end
