@@ -15,7 +15,7 @@
 
 namespace AtomSampleViewer
 {
-    bool ScriptReporter::LoadPngData(ImageComparisonResult& imageComparisonResult, const AZStd::string& path, AZStd::vector<uint8_t>& buffer, AZ::RHI::Size& size, AZ::RHI::Format& format, TraceLevel traceLevel)
+    bool ScriptReporter::LoadPngData([[maybe_unused]] ImageComparisonResult& imageComparisonResult, [[maybe_unused]] const AZStd::string& path, [[maybe_unused]] AZStd::vector<uint8_t>& buffer, [[maybe_unused]] AZ::RHI::Size& size, [[maybe_unused]] AZ::RHI::Format& format, [[maybe_unused]] TraceLevel traceLevel)
     {
         return false;
     }
