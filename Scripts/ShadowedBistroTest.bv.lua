@@ -100,57 +100,57 @@ SelectImageComparisonToleranceLevel("Level H")
 
 -- Initial
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/initial.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/initial.png')
 
 -- Directional Light None-filtering Plaza
 MoveCameraToPlaza()
 SetDirectionalNoneFiltering()
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/directional_nofilter_plaza.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/directional_nofilter_plaza.png')
 
 -- Directional Light Filtering Plaza
 MoveCameraToPlaza()
 SetDirectionalFiltering()
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/directional_filter_plaza.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/directional_filter_plaza.png')
 
 -- Directional Light None-filtering Table
 MoveCameraToTable()
 SetDirectionalNoneFiltering()
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/directional_nofilter_table.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/directional_nofilter_table.png')
 
 -- Directional Light Filtering Table
 MoveCameraToTable()
 SetDirectionalFiltering()
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/directional_filter_table.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/directional_filter_table.png')
 
 -- Spot Light Non-filtering Table
 MoveCameraToTable()
 SetSpotNoneFiltering()
 SetImguiValue('Intensity##directional', 0.0)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/spot_nofilter_table.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/spot_nofilter_table.png')
 
 -- Spot Light Filtering Table
 MoveCameraToTable()
 SetSpotFiltering()
 SetImguiValue('Intensity##directional', 0.0)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/spot_filter_table.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/spot_filter_table.png')
 
 -- Directional Light Buildings
 MoveCameraToOverhead()
 SetDirectionalFiltering()
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/directional_buildings.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/directional_buildings.png')
 
 -- Spot Light Buildings
 MoveCameraToOverhead()
 SetSpotFiltering()
 SetImguiValue('Number', 25) -- spot light number
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/spot_buildings.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/spot_buildings.png')
 
 OpenSample(nil)

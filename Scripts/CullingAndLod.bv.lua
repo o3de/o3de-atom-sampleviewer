@@ -22,7 +22,7 @@ SelectImageComparisonToleranceLevel("Level G")
 
 SetImguiValue("Begin Verification", true)
 IdleFrames(5)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_1.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_1.png')
 IdleFrames(1)
 SetImguiValue("End Verification", true)
 IdleFrames(1) -- make sure all outstanding imgui comamnds are processed before closing sample.

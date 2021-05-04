@@ -40,13 +40,13 @@ function TakeScreenshotSeries(filenamePrefix)
     -- Note we pause while taking the screenshot so that IO delays won't impact the timing of the sample
 
     SetImguiValue("Pause", true)
-    CaptureScreenshot(g_screenshotOutputFolder .. filenamePrefix .. '_A.ppm')
+    CaptureScreenshot(g_screenshotOutputFolder .. filenamePrefix .. '_A.png')
     SetImguiValue("Pause", false)
 
     IdleSeconds(1.0)
 
     SetImguiValue("Pause", true)
-    CaptureScreenshot(g_screenshotOutputFolder .. filenamePrefix .. '_B.ppm')
+    CaptureScreenshot(g_screenshotOutputFolder .. filenamePrefix .. '_B.png')
     SetImguiValue("Pause", false)
 end
 

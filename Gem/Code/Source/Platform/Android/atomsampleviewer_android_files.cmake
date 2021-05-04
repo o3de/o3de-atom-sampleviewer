@@ -17,4 +17,5 @@ set(FILES
     SampleComponentManager_Android.cpp
     StreamingImageExampleComponent_Android.cpp
     Utils_Android.cpp
+    ScriptReporter_Android.cpp
 )
