@@ -115,7 +115,7 @@
 #include <AzFramework/Input/Devices/Keyboard/InputDeviceKeyboard.h>
 #include <AzFramework/Entity/GameEntityContextBus.h>
 #include <AzFramework/Scene/Scene.h>
-#include <AzFramework/Scene/SceneSystemBus.h>
+#include <AzFramework/Scene/SceneSystemInterface.h>
 
 #include <Passes/RayTracingAmbientOcclusionPass.h>
 
@@ -416,7 +416,7 @@ namespace AtomSampleViewer
 
         m_imguiFrameCaptureSaver.SetDefaultFolder(screenshotFolder);
         m_imguiFrameCaptureSaver.SetDefaultFileName("screenshot");
-        m_imguiFrameCaptureSaver.SetAvailableExtensions({"ppm", "dds"});
+        m_imguiFrameCaptureSaver.SetAvailableExtensions({"png", "ppm", "dds"});
         m_imguiFrameCaptureSaver.Activate();
 
         SampleComponentManagerRequestBus::Handler::BusConnect();
@@ -1145,7 +1145,7 @@ namespace AtomSampleViewer
                 ImGui::Checkbox("Hide ImGui", &hideImGuiFromFrameCapture);
 
                 ImGuiSaveFilePath::WidgetSettings settings;
-                settings.m_labels.m_filePath = "File Path (.ppm or .dds):";
+                settings.m_labels.m_filePath = "File Path (.png, .ppm, or .dds):";
                 m_imguiFrameCaptureSaver.Tick(settings);
 
                 if (ImGui::Button("Capture"))
@@ -1440,12 +1440,13 @@ namespace AtomSampleViewer
         m_rpiScene->SetShaderResourceGroupCallback(callback);
 
         // Bind m_rpiScene to the GameEntityContext's AzFramework::Scene so the RPI Scene can be found by the entity context
-        AZStd::vector<AzFramework::Scene*> scenes;
-        AzFramework::SceneSystemRequestBus::BroadcastResult(scenes, &AzFramework::SceneSystemRequests::GetAllScenes);
-        AZ_Assert(scenes.size() > 0, "Error: Scenes missing during system component initialization"); // This should never happen unless scene creation has changed.
+        auto sceneSystem = AzFramework::SceneSystemInterface::Get();
+        AZ_Assert(sceneSystem, "SampleComponentManager requires an implementation of the scene system.");
+        AZStd::shared_ptr<AzFramework::Scene> mainScene = sceneSystem->GetScene(AzFramework::Scene::MainSceneName);
+        AZ_Assert(mainScene, "Main scene missing during system component initialization"); // This should never happen unless scene creation has changed.
         // Add RPI::Scene as a sub system for the default AzFramework Scene
-        const uint32_t DefaultAzSceneIndex = 0;
-        scenes[DefaultAzSceneIndex]->SetSubsystem(m_rpiScene.get());
+        [[maybe_unused]] bool result = mainScene->SetSubsystem(m_rpiScene);
+        AZ_Assert(result, "SampleComponentManager failed to register the RPI scene with the general scene.");
 
         m_rpiScene->Activate();
 
@@ -1484,10 +1485,13 @@ namespace AtomSampleViewer
         {
             RPI::RPISystemInterface::Get()->UnregisterScene(m_rpiScene);
 
-            AZStd::vector<AzFramework::Scene*> scenes;
-            AzFramework::SceneSystemRequestBus::BroadcastResult(scenes, &AzFramework::SceneSystemRequests::GetAllScenes);
-            scenes[0]->UnsetSubsystem<RPI::Scene>();
-
+            auto sceneSystem = AzFramework::SceneSystemInterface::Get();
+            AZ_Assert(sceneSystem, "Scene system was destroyed before SampleComponentManager was able to unregister the RPI scene.");
+            AZStd::shared_ptr<AzFramework::Scene> scene = sceneSystem->GetScene(AzFramework::Scene::MainSceneName);
+            AZ_Assert(scene, "The main scene wasn't found in the scene system.");
+            [[maybe_unused]] bool result = scene->UnsetSubsystem(m_rpiScene);
+            AZ_Assert(result, "SampleComponentManager failed to unregister its RPI scene from the general scene.");
+            
             m_rpiScene = nullptr;
         }
     }

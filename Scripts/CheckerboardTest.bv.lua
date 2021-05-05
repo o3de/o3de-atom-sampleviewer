@@ -22,6 +22,6 @@ SelectImageComparisonToleranceLevel("Level F")
 
 IdleFrames(10) 
 
-CaptureScreenshot(g_screenshotOutputFolder .. 'frame1.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. 'frame1.png')
 
 OpenSample(nil)

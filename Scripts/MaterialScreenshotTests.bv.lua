@@ -73,9 +73,9 @@ function GenerateMaterialScreenshot(imageComparisonThresholdLevel, materialName,
 
     options.screenshotFilename = string.lower(options.screenshotFilename)
     if type(options.uniqueSuffix) == "string" then
-        filename = g_screenshotOutputFolder .. options.screenshotFilename .. '.' .. options.uniqueSuffix .. '.ppm'
+        filename = g_screenshotOutputFolder .. options.screenshotFilename .. '.' .. options.uniqueSuffix .. '.png'
     else
-        filename = g_screenshotOutputFolder .. options.screenshotFilename .. '.ppm'
+        filename = g_screenshotOutputFolder .. options.screenshotFilename .. '.png'
     end
     
     SelectImageComparisonToleranceLevel(imageComparisonThresholdLevel)

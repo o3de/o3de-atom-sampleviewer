@@ -24,7 +24,7 @@ else
 
     IdleSeconds(5)
 
-    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_cornellbox.ppm')
+    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_cornellbox.png')
 end
 
 OpenSample(nil)

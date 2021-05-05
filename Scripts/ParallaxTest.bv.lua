@@ -25,25 +25,25 @@ SetImguiValue('Lighting/Direction', DegToRad(110))
 SetImguiValue('Parallax Setting/Heightmap Scale', 0.05)
 SetImguiValue('Parallax Setting/Enable Pdo', false)
 IdleFrames(2)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_1.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_1.png')
 
 -- Test alternate UV streams...
 -- Purpose of 2 shots
 -- First: regression test verifying using the 2nd UV is stable
 -- Second: diff test that compares UV0 (direct tangent) to UV1 (generated tangent), UV values are the same
 -- Because we don't have the ability to pick the image we want to compare so far,
--- the expected image of the second test is copied from screenshot_1.ppm
+-- the expected image of the second test is copied from screenshot_1.png
 SetImguiValue('Parallax Setting/UV', "UV1")
 IdleFrames(2)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_2ndUv_1.ppm')
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_2ndUv_2.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_2ndUv_1.png')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_2ndUv_2.png')
 SetImguiValue('Parallax Setting/UV', "UV0")
 
 -- Test with PDO on, also Plane rotated...
 SetImguiValue('Parallax Setting/Enable Pdo', true)
 SetImguiValue('Plane Setting/Rotation', DegToRad(45))
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_2.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_2.png')
 
 -- Algorithm "Relief", also Directional Light at 120 degrees and uv parameters changed
 ArcBallCameraController_SetHeading(DegToRad(120))
@@ -57,7 +57,7 @@ SetImguiValue('Plane Setting/Offset V', 0.6)
 SetImguiValue('Plane Setting/Rotation UV', 275)
 SetImguiValue('Plane Setting/Scale UV', 0.6)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_3.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_3.png')
 
 -- Algorithm Contact Refinement, also Directional Light at 240 degrees with uv parameters changed again 
 ArcBallCameraController_SetHeading(DegToRad(240))
@@ -71,7 +71,7 @@ SetImguiValue('Plane Setting/Offset V', -0.6)
 SetImguiValue('Plane Setting/Rotation UV', 138)
 SetImguiValue('Plane Setting/Scale UV', 1.6)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_4.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_4.png')
 
 -- Algorithm "POM", switch to Spot Light 0 degree, also Plate rotated again 
 ArcBallCameraController_SetHeading(DegToRad(0))
@@ -79,7 +79,7 @@ SetImguiValue('Lighting/Spot Light', true)
 SetImguiValue('Parallax Setting/Algorithm', "POM")
 SetImguiValue('Plane Setting/Rotation', DegToRad(135))
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_5.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_5.png')
 
 -- Algorithm "Relief", also Spot Light rotated with uv parameters changed again
 ArcBallCameraController_SetHeading(DegToRad(120))
@@ -93,7 +93,7 @@ SetImguiValue('Plane Setting/Offset V', 0.2)
 SetImguiValue('Plane Setting/Rotation UV', 125)
 SetImguiValue('Plane Setting/Scale UV', 0.3)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_6.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_6.png')
 
 -- Algorithm "Contact Refinement" Spot Light rotated again, with uv parameter changed again
 ArcBallCameraController_SetHeading(DegToRad(240))
@@ -107,7 +107,7 @@ SetImguiValue('Plane Setting/Offset V', -0.3)
 SetImguiValue('Plane Setting/Rotation UV', 74)
 SetImguiValue('Plane Setting/Scale UV', 1.3)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_7.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_7.png')
 
 -- Test offset
 ArcBallCameraController_SetHeading(DegToRad(-135))
@@ -117,21 +117,21 @@ SetImguiValue('Lighting/Direction', DegToRad(350))
 SetImguiValue('Parallax Setting/Heightmap Scale', 0.1)
 SetImguiValue('Parallax Setting/Offset', -0.1)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_8_offset.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_8_offset.png')
 
 -- Test offset clipping
 ArcBallCameraController_SetPitch(DegToRad(-15)) -- Use a harsh angle as that could reveal artifacts we've seen in the past and fixed.
 SetImguiValue('Parallax Setting/Offset', 0.05)
 SetImguiValue('Parallax Setting/Show Clipping', true)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_9_offsetClipping.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_9_offsetClipping.png')
 
 -- Testing a specific case where offset clamping was not calculated correctly, and clamped a bit below the surface instead of right on the surface.
 SetImguiValue('Parallax Setting/Offset', 0.06)
 SetImguiValue('Parallax Setting/Heightmap Scale', 0.1)
 SetImguiValue('Parallax Setting/Algorithm', "Steep")
 SetImguiValue('Parallax Setting/Show Clipping', true)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_10_offsetClippingSteep.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_10_offsetClippingSteep.png')
 
 -- Test some different combinations that might result in divide-by-0 related crashes (which did happen at one point)
 SetImguiValue('Parallax Setting/Offset', 0.0)

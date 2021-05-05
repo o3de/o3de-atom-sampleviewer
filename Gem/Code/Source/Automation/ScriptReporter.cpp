@@ -12,7 +12,6 @@
 
 #include <Automation/ScriptReporter.h>
 #include <Utils/Utils.h>
-#include <Atom/Utils/PpmFile.h>
 #include <imgui/imgui.h>
 #include <Atom/RHI/Factory.h>
 #include <AzFramework/API/ApplicationAPI.h>
@@ -97,7 +96,7 @@ namespace AtomSampleViewer
             }
 
             // Turn it back into a full path
-            path = Utils::ResolvePath("@assets@" + path);
+            path = Utils::ResolvePath("@devassets@" + path);
 
             return path;
         }
@@ -756,28 +755,6 @@ namespace AtomSampleViewer
         ReportScriptIssue(fullMessage, traceLevel);
     }
 
-    bool ScriptReporter::LoadPpmData(ImageComparisonResult& imageComparisonResult, const AZStd::string& path, AZStd::vector<uint8_t>& buffer, AZ::RHI::Size& size, AZ::RHI::Format& format, TraceLevel traceLevel)
-    {
-        const size_t maxFileSize = 1024 * 1024 * 25;
-
-        auto readScreenshotFileResult = AZ::Utils::ReadFile<AZStd::vector<uint8_t>>(path, maxFileSize);
-        if (!readScreenshotFileResult.IsSuccess())
-        {
-            ReportScriptIssue(AZStd::string::format("Screenshot check failed. %s", readScreenshotFileResult.GetError().c_str()), traceLevel);
-            imageComparisonResult.m_resultCode = ImageComparisonResult::ResultCode::FileNotFound;
-            return false;
-        }
-
-        if (!AZ::Utils::PpmFile::CreateImageBufferFromPpm(readScreenshotFileResult.GetValue(), buffer, size, format))
-        {
-            ReportScriptIssue(AZStd::string::format("Screenshot check failed. Failed to read file '%s'", path.c_str()), traceLevel);
-            imageComparisonResult.m_resultCode = ImageComparisonResult::ResultCode::FileNotLoaded;
-            return false;
-        }
-
-        return true;
-    }
-
     bool ScriptReporter::DiffImages(ImageComparisonResult& imageComparisonResult, const AZStd::string& expectedImageFilePath, const AZStd::string& actualImageFilePath, TraceLevel traceLevel)
     {
         using namespace AZ::Utils;
@@ -785,7 +762,7 @@ namespace AtomSampleViewer
         AZStd::vector<uint8_t> actualImageBuffer;
         AZ::RHI::Size actualImageSize;
         AZ::RHI::Format actualImageFormat;
-        if (!LoadPpmData(imageComparisonResult, actualImageFilePath, actualImageBuffer, actualImageSize, actualImageFormat, traceLevel))
+        if (!LoadPngData(imageComparisonResult, actualImageFilePath, actualImageBuffer, actualImageSize, actualImageFormat, traceLevel))
         {
             return false;
         }
@@ -793,7 +770,7 @@ namespace AtomSampleViewer
         AZStd::vector<uint8_t> expectedImageBuffer;
         AZ::RHI::Size expectedImageSize;
         AZ::RHI::Format expectedImageFormat;
-        if (!LoadPpmData(imageComparisonResult, expectedImageFilePath, expectedImageBuffer, expectedImageSize, expectedImageFormat, traceLevel))
+        if (!LoadPngData(imageComparisonResult, expectedImageFilePath, expectedImageBuffer, expectedImageSize, expectedImageFormat, traceLevel))
         {
             return false;
         }
@@ -939,7 +916,7 @@ namespace AtomSampleViewer
         AZStd::string sourceFolderPath = AZStd::string::format("%s\\%s", m_officialBaselineSourceFolder.c_str(), reversePathComponents[1].c_str());
 
         // Source file path
-        // ".../AtomSampleViewer/Scripts/ExpectedScreenshots/MyTestFolder/" + "MyTest.ppm"
+        // ".../AtomSampleViewer/Scripts/ExpectedScreenshots/MyTestFolder/" + "MyTest.png"
         AZStd::string sourceFilePath = AZStd::string::format("%s\\%s", sourceFolderPath.c_str(), reversePathComponents[0].c_str());
 
         m_fileIoErrorHandler.BusConnect();

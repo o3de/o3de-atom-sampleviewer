@@ -39,12 +39,12 @@ SetImguiValue('Preview Attachment', true)
 
 SetShowImGui(false)
 -- capture image attachment previews and capture them for different formats
-TestAttachment('ForwardMSAAPass/[Input] [BRDFTextureInput] [Image] BRDFTexture [R16G16_FLOAT] [256x256]', 'brdf.ppm')
-TestAttachment('ForwardMSAAPass/[Output] [AlbedoOutput] [Image] AlbedoImage [R8G8B8A8_UNORM] [800x600] [MSAA_4x]', 'albedo.ppm')
-TestAttachment('MSAAResolveDepthPass/[Input] [Input] [Image] DepthStencil [D32_FLOAT_S8X24_UINT] [800x600] [MSAA_4x]', 'depthStencilMs.ppm')
-TestAttachment('MSAAResolveDepthPass/[Output] [Output] [Image] ResolvedDepthOutput [D32_FLOAT_S8X24_UINT] [800x600]', 'depthStencilResolve.ppm')
-TestAttachment('DepthDownsample/[Input] [FullResDepth] [Image] LinearDepth [R32_FLOAT] [800x600]', 'linearDepth.ppm')
-TestAttachment('MSAAResolveSpecularPass/[Output] [Output] [Image] ResolvedOutput [R16G16B16A16_FLOAT] [800x600]', 'specularResolved.ppm')
+TestAttachment('ForwardMSAAPass/[Input] [BRDFTextureInput] [Image] BRDFTexture [R16G16_FLOAT] [256x256]', 'brdf.png')
+TestAttachment('ForwardMSAAPass/[Output] [AlbedoOutput] [Image] AlbedoImage [R8G8B8A8_UNORM] [800x600] [MSAA_4x]', 'albedo.png')
+TestAttachment('MSAAResolveDepthPass/[Input] [Input] [Image] DepthStencil [D32_FLOAT_S8X24_UINT] [800x600] [MSAA_4x]', 'depthStencilMs.png')
+TestAttachment('MSAAResolveDepthPass/[Output] [Output] [Image] ResolvedDepthOutput [D32_FLOAT_S8X24_UINT] [800x600]', 'depthStencilResolve.png')
+TestAttachment('DepthDownsample/[Input] [FullResDepth] [Image] LinearDepth [R32_FLOAT] [800x600]', 'linearDepth.png')
+TestAttachment('MSAAResolveSpecularPass/[Output] [Output] [Image] ResolvedOutput [R16G16B16A16_FLOAT] [800x600]', 'specularResolved.png')
 
 SetShowImGui(true)
 

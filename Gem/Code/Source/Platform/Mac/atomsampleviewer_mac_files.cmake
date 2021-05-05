@@ -13,9 +13,12 @@ set(FILES
     ../../../../Resources/MacLauncher/Info.plist
     AtomSampleViewerOptions_Mac.cpp
     MultiThreadComponent_Traits_Platform.h
+    SSRExampleComponent_Traits_Platform.h
+    TriangleConstantBufferExampleComponent_Traits_Platform.h
     SampleComponentManager_Mac.cpp
     StreamingImageExampleComponent_Mac.cpp
     Utils_Mac.cpp
+    ScriptReporter_Mac.cpp
 )
 
 set(LY_COMPILE_OPTIONS

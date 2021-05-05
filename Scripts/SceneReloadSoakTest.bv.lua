@@ -22,7 +22,7 @@ ResizeViewport(500, 500)
 NoClipCameraController_SetFov(DegToRad(90))
 IdleSeconds(1.0)
 SelectImageComparisonToleranceLevel("Level G")
-CaptureScreenshot(g_screenshotOutputFolder .. 'screenshot.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. 'screenshot.png')
 
 -- Unlock the frame time now that we have our screen capture, so the actual "soaking" can happen at a natural rate
 UnlockFrameTime()
