@@ -37,8 +37,8 @@ SelectImageComparisonToleranceLevel("Level F")
 
 -- Start window
 WaitForDepthOfFieldFocus() 
-TakeScreenShotFromPrimaryWindow('Start_MultiScene1.ppm')
-TakeScreenShotFromSecondaryWindow('Start_MultiScene2.ppm')
+TakeScreenShotFromPrimaryWindow('Start_MultiScene1.png')
+TakeScreenShotFromSecondaryWindow('Start_MultiScene2.png')
 
 -- Go back to the base scene
 OpenSample(nil)

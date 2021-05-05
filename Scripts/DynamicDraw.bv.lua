@@ -21,6 +21,6 @@ ResizeViewport(800, 500)
 -- Vulkan's line width is different than dx12's 
 SelectImageComparisonToleranceLevel("Level F") 
 
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_1.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_1.png')
 
 OpenSample(nil)

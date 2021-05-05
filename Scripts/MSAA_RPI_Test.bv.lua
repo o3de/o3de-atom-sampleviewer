@@ -18,7 +18,7 @@ function TakeScreenShot4xCylinder()
     SetImguiValue('Model/ShaderBall', true)
     ArcBallCameraController_SetDistance(4.0)
     IdleFrames(10) -- Need a few frames to let all Ibl mip levels load in 
-    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_msaa4x_cylinder.ppm')
+    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_msaa4x_cylinder.png')
 end
 
 g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/MSAA_RPI/')
