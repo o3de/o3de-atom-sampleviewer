@@ -18,7 +18,7 @@ g_cubeModel = 'materialeditor/viewportmodels/cube.azmodel'
 g_beveledCubeModel = 'materialeditor/viewportmodels/beveledcube.azmodel'
 g_modelWithoutLayerMask = 'objects/bunny.azmodel'
 g_modelWithLayerMask = 'objects/com_envi_me_wall-2x2_testcorner.azmodel'
-g_modelLucy = 'materialeditor/viewportmodels/lucy.azmodel'
+g_modelHermanubis = 'materialeditor/viewportmodels/hermanubis.azmodel'
 
 function GenerateMaterialScreenshot(imageComparisonThresholdLevel, materialName, options)
     if options == nil then options = {} end
@@ -134,13 +134,13 @@ GenerateMaterialScreenshot('Level L', '100_UvTiling_Parallax_B', { uniqueSuffix=
 GenerateMaterialScreenshot('Level H', '100_UvTiling_Roughness')
 GenerateMaterialScreenshot('Level F', '100_UvTiling_SpecularF0')
 
-GenerateMaterialScreenshot('Level E', '101_DetailMaps_LucyBaseNoDetailMaps',         {model=g_modelLucy, cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
-GenerateMaterialScreenshot('Level F', '102_DetailMaps_All',                          {model=g_modelLucy, cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
-GenerateMaterialScreenshot('Level F', '103_DetailMaps_BaseColor',                    {model=g_modelLucy, cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
-GenerateMaterialScreenshot('Level F', '103_DetailMaps_BaseColorWithMask',            {model=g_modelLucy, cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
-GenerateMaterialScreenshot('Level F', '104_DetailMaps_Normal',                       {model=g_modelLucy, cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
-GenerateMaterialScreenshot('Level F', '104_DetailMaps_NormalWithMask',               {model=g_modelLucy, cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
-GenerateMaterialScreenshot('Level F', '105_DetailMaps_BlendMaskUsingDetailUVs',      {model=g_modelLucy, cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
+GenerateMaterialScreenshot('Level E', '101_DetailMaps_LucyBaseNoDetailMaps',    {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
+GenerateMaterialScreenshot('Level F', '102_DetailMaps_All',                     {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
+GenerateMaterialScreenshot('Level F', '103_DetailMaps_BaseColor',               {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
+GenerateMaterialScreenshot('Level F', '103_DetailMaps_BaseColorWithMask',       {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
+GenerateMaterialScreenshot('Level F', '104_DetailMaps_Normal',                  {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
+GenerateMaterialScreenshot('Level F', '104_DetailMaps_NormalWithMask',          {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
+GenerateMaterialScreenshot('Level F', '105_DetailMaps_BlendMaskUsingDetailUVs', {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
 
 ----------------------------------------------------------------------
 -- StandardMultilayerPBR Materials...
@@ -164,7 +164,7 @@ g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/Skin/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 -- We should eventually replace this with realistic skin test cases, these are just placeholders for regression testing
-GenerateMaterialScreenshot('Level D', '001_lucy_regression_test',    {model=g_modelLucy, cameraHeading=-26.0, cameraPitch=15.0, cameraDistance=2.0, cameraZ=0.7})
+GenerateMaterialScreenshot('Level D', '001_lucy_regression_test',    {model=g_modelHermanubis, cameraHeading=-26.0, cameraPitch=15.0, cameraDistance=2.0, cameraZ=0.7})
 GenerateMaterialScreenshot('Level E', '002_wrinkle_regression_test', {model=g_modelWithLayerMask, cameraHeading=-135.0, cameraPitch=15.0, cameraZ=-0.3, cameraDistance=3.5})
 
 ----------------------------------------------------------------------
