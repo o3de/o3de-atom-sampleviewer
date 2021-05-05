@@ -262,7 +262,7 @@ def CheckoutRepo(boolean disableSubmodules = false) {
         retryAttempt = retryAttempt + 1
         projectsAndUrl.each { projectAndUrl ->
             dir(projectAndUrl.key) {
-                def gitFolderExists = fileExists(".git")
+                def gitFolderExists = fileExists("./.git")
                 palSh('git lfs uninstall', 'Git LFS Uninstall') // Prevent git from pulling lfs objects during checkout
                 checkout scm: [
                     $class: 'GitSCM',
