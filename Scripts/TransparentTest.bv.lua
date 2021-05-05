@@ -23,10 +23,10 @@ ArcBallCameraController_SetDistance(2.0)
 ArcBallCameraController_SetHeading(DegToRad(45))
 ArcBallCameraController_SetPitch(DegToRad(-35))
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_front.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_front.png')
 
 ArcBallCameraController_SetHeading(DegToRad(135))
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_back.ppm')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_back.png')
 
 OpenSample(nil)

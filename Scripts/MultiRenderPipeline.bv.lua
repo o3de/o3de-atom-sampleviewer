@@ -39,26 +39,26 @@ SelectImageComparisonToleranceLevel("Level E")
 
 -- start window
 WaitForDepthOfFieldFocus() 
-TakeScreenShotForWindow1('Start_window1.ppm')
-TakeScreenShotForWindow2('Start_window2.ppm')
+TakeScreenShotForWindow1('Start_window1.png')
+TakeScreenShotForWindow2('Start_window2.png')
 
 -- use second camera for second window. 
 -- Wait for DOF stablized every time camera changes
 SetImguiValue('Use second camera', true)
 WaitForDepthOfFieldFocus() 
-TakeScreenShotForWindow1('TwoCameras_window1.ppm')
-TakeScreenShotForWindow2('TwoCameras_window2.ppm')
+TakeScreenShotForWindow1('TwoCameras_window1.png')
+TakeScreenShotForWindow2('TwoCameras_window2.png')
 
 -- Disable DOF only
 SetImguiValue('Enable Depth of Field', false)
 WaitForDepthOfFieldFocus() 
-TakeScreenShotForWindow1('NoDOF_window1.ppm')
-TakeScreenShotForWindow2('NoDOF_window2.ppm')
+TakeScreenShotForWindow1('NoDOF_window1.png')
+TakeScreenShotForWindow2('NoDOF_window2.png')
 -- Disable DOF only
 SetImguiValue('Enable Depth of Field', true)
 WaitForDepthOfFieldFocus() 
-TakeScreenShotForWindow1('WithDOF_window1.ppm')
-TakeScreenShotForWindow2('WithDOF_window2.ppm')
+TakeScreenShotForWindow1('WithDOF_window1.png')
+TakeScreenShotForWindow2('WithDOF_window2.png')
 
 -- disable all the features
 SetImguiValue('Enable Depth of Field', false)
@@ -66,8 +66,8 @@ SetImguiValue('Add/Remove Directional Light', false)
 SetImguiValue('Add/Remove Spot Light', false)
 SetImguiValue('Enable Skybox', false)
 SetImguiValue('Add/Remove IBL', false)
-TakeScreenShotForWindow1('NoFeatures_window1.ppm')
-TakeScreenShotForWindow2('NoFeatures_window2.ppm')
+TakeScreenShotForWindow1('NoFeatures_window1.png')
+TakeScreenShotForWindow2('NoFeatures_window2.png')
 
 -- Relax for NVIDIA Titan X (DX12)
 SelectImageComparisonToleranceLevel("Level F")
@@ -76,32 +76,32 @@ SelectImageComparisonToleranceLevel("Level F")
 SetImguiValue('Add/Remove IBL', true)
 -- IBL takes 2 frames to apply 
 IdleFrames(2) 
-TakeScreenShotForWindow1('IBL_window1.ppm')
-TakeScreenShotForWindow2('IBL_window2.ppm')
+TakeScreenShotForWindow1('IBL_window1.png')
+TakeScreenShotForWindow2('IBL_window2.png')
 
 -- Set the level back to E because NVIDIA Titan X passes with E
 SelectImageComparisonToleranceLevel("Level E")
 
 -- Add skybox
 SetImguiValue('Enable Skybox', true)
-TakeScreenShotForWindow1('IBL_Skybox_window1.ppm')
-TakeScreenShotForWindow2('IBL_Skybox_window2.ppm')
+TakeScreenShotForWindow1('IBL_Skybox_window1.png')
+TakeScreenShotForWindow2('IBL_Skybox_window2.png')
 
 -- Add spot light
 SetImguiValue('Add/Remove Spot Light', true)
-TakeScreenShotForWindow1('IBL_Skybox_Spot_window1.ppm')
-TakeScreenShotForWindow2('IBL_Skybox_Spot_window2.ppm')
+TakeScreenShotForWindow1('IBL_Skybox_Spot_window1.png')
+TakeScreenShotForWindow2('IBL_Skybox_Spot_window2.png')
 
 -- Add directional light
 SetImguiValue('Add/Remove Directional Light', true)
-TakeScreenShotForWindow1('IBL_Skybox_Spot_Dir_window1.ppm')
-TakeScreenShotForWindow2('IBL_Skybox_Spot_Dir_window2.ppm')
+TakeScreenShotForWindow1('IBL_Skybox_Spot_Dir_window1.png')
+TakeScreenShotForWindow2('IBL_Skybox_Spot_Dir_window2.png')
 
 -- Enable DOF
 SetImguiValue('Enable Depth of Field', true)
 WaitForDepthOfFieldFocus()
-TakeScreenShotForWindow1('IBL_Skybox_Spot_Dir_DOF_window1.ppm')
-TakeScreenShotForWindow2('IBL_Skybox_Spot_Dir_DOF_window2.ppm')
+TakeScreenShotForWindow1('IBL_Skybox_Spot_Dir_DOF_window1.png')
+TakeScreenShotForWindow2('IBL_Skybox_Spot_Dir_DOF_window2.png')
 
 
 OpenSample(nil)

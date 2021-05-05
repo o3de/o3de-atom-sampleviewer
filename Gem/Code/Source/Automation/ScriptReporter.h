@@ -202,14 +202,14 @@ namespace AtomSampleViewer
         static void ReportScriptIssue(const AZStd::string& message, TraceLevel traceLevel);
         static void ReportScreenshotComparisonIssue(const AZStd::string& message, const AZStd::string& expectedImageFilePath, const AZStd::string& actualImageFilePath, TraceLevel traceLevel);
 
-        // Loads image data from a .ppm file.
+        // Loads image data from a .png file.
         // @param imageComparisonResult will be set to an error code if the function fails
-        // @param path the path the .ppm file
-        // @param buffer will be filled with the raw image data from the .ppm file
-        // @param size will be set to the image size of the .ppm file
-        // @param format will be set to the pixel format of the .ppm file
+        // @param path the path the .png file
+        // @param buffer will be filled with the raw image data from the .png file
+        // @param size will be set to the image size of the .png file
+        // @param format will be set to the pixel format of the .png file
         // @return true if the file was loaded successfully
-        static bool LoadPpmData(ImageComparisonResult& imageComparisonResult, const AZStd::string& path, AZStd::vector<uint8_t>& buffer, AZ::RHI::Size& size, AZ::RHI::Format& format, TraceLevel traceLevel);
+        static bool LoadPngData(ImageComparisonResult& imageComparisonResult, const AZStd::string& path, AZStd::vector<uint8_t>& buffer, AZ::RHI::Size& size, AZ::RHI::Format& format, TraceLevel traceLevel);
 
         // Compares two image files and updates the ImageComparisonResult accordingly.
         // Returns false if an error prevented the comparison.
