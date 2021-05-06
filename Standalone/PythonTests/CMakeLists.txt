@@ -34,7 +34,7 @@ if(PAL_TRAIT_BUILD_HOST_TOOLS AND PAL_TRAIT_BUILD_TESTS_SUPPORTED)
         TEST_REQUIRES gpu
         TEST_SUITE periodic
         TEST_SERIAL
-        TIMEOUT 300
+        TIMEOUT 1200
         RUNTIME_DEPENDENCIES
             AssetProcessor
             AssetProcessorBatch
