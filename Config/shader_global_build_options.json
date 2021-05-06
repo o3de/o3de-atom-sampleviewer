@@ -5,11 +5,11 @@
     "ClassData": {
         "PreprocessorOptions" : {
             "predefinedMacros": ["AZSL=17"],
-            "projectIncludePaths": [
-                "AtomSampleViewer",
+                // The root of the current project is always the first include path.
                 // These include paths are already part of the automatic include folders list.
                 // By specifying them here, we are boosting the priority of these folders above all the other automatic include folders.
                 // (This is not necessary for the project, but just shown as a usage example.)
+            "projectIncludePaths": [
                 "Gems/Atom/RPI/Assets/ShaderLib",
                 "Gems/Atom/Feature/Common/Assets/ShaderLib"
             ]
