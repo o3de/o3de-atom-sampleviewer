@@ -31,15 +31,15 @@ class AtomSampleViewerException(Exception):
 @pytest.mark.usefixtures("clean_atomsampleviewer_logs", "atomsampleviewer_log_monitor")
 class TestAutomationWarpSuite:
 
-    def test_AutomatedReviewWARPTestSuite(self, request, workspace, launcher_platform, rhi, atomsampleviewer_log_monitor):
+    def test_AutomatedReviewWARPTestSuite(self, request, workspace, launcher_platform, rhi, project, atomsampleviewer_log_monitor):
         # Script call setup.
         test_script = '_AutomatedReviewWARPTestSuite_.bv.lua'
-        test_script_path = os.path.join(workspace.paths.engine_root(), 'AtomSampleViewer', 'Scripts', test_script)
+        test_script_path = os.path.join(workspace.paths.engine_root(), project, 'Scripts', test_script)
         if not os.path.exists(test_script_path):
             raise AtomSampleViewerException(f'Test script does not exist in path: {test_script_path}')
         cmd = os.path.join(workspace.paths.build_directory(),
                            'AtomSampleViewerStandalone.exe '
-						   '-forceAdapter="Microsoft Basic Render Driver" '
+                           '-forceAdapter="Microsoft Basic Render Driver" '
                            f'--project-path={workspace.paths.project()} '
                            f'--rhi {rhi} '
                            f'--runtestsuite scripts/{test_script} '
