@@ -72,9 +72,9 @@ namespace AtomSampleViewer
         static bool Combo(const char* label, int* current_item, const char* const items[], int items_count, int height_in_items = -1);
 
         static bool SliderInt(const char* label, int* v, int v_min, int v_max, const char* format = "%d");
-        static bool SliderFloat(const char* label, float* v, float v_min, float v_max, const char* format = "%.3f", float power = 1.0f);
-        static bool SliderFloat2(const char* label, float v[2], float v_min, float v_max, const char* format = "%.3f", float power = 1.0f);
-        static bool SliderFloat3(const char* label, float v[3], float v_min, float v_max, const char* format = "%.3f", float power = 1.0f);
+        static bool SliderFloat(const char* label, float* v, float v_min, float v_max, const char* format = "%.3f", ImGuiSliderFlags flags = 0);
+        static bool SliderFloat2(const char* label, float v[2], float v_min, float v_max, const char* format = "%.3f", ImGuiSliderFlags flags = 0);
+        static bool SliderFloat3(const char* label, float v[3], float v_min, float v_max, const char* format = "%.3f", ImGuiSliderFlags flags = 0);
         static bool SliderAngle(const char* label, float* v, float v_min = -360.0f, float v_max = 360.0f, const char* format = "%.0f deg");
 
         static bool ColorEdit3(const char* label, float v[3], ImGuiColorEditFlags flags);

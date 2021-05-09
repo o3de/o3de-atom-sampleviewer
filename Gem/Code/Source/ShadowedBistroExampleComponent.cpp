@@ -410,7 +410,7 @@ namespace AtomSampleViewer
             ScriptableImGui::SliderAngle("Pitch", &m_directionalLightPitch, -90.0f, 0.f);
             ScriptableImGui::SliderAngle("Yaw", &m_directionalLightYaw, 0.f, 360.f);
 
-            if (ScriptableImGui::SliderFloat("Intensity##directional", &m_directionalLightIntensity, 0.f, 20.f, "%.1f", 2.f))
+            if (ScriptableImGui::SliderFloat("Intensity##directional", &m_directionalLightIntensity, 0.f, 20.f, "%.1f", ImGuiSliderFlags_Logarithmic))
             {
                 AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Lux> lightColor(DirectionalLightColor * m_directionalLightIntensity);
                 m_directionalLightFeatureProcessor->SetRgbIntensity(m_directionalLightHandle, lightColor);
@@ -551,7 +551,7 @@ namespace AtomSampleViewer
                 UpdateDiskLightCount(diskLightCount);
             }
 
-            if (ScriptableImGui::SliderFloat("Intensity##spot", &m_diskLightIntensity, 0.f, 100000.f, "%.1f", 4.f))
+            if (ScriptableImGui::SliderFloat("Intensity##spot", &m_diskLightIntensity, 0.f, 100000.f, "%.1f", ImGuiSliderFlags_Logarithmic))
             {
                 for (const DiskLight& light : m_diskLights)
                 {
