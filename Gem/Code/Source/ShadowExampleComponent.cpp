@@ -442,12 +442,12 @@ namespace AtomSampleViewer
             ImGui::Text("Directional Light");
             ImGui::Indent();
             {
-                ImGui::SliderFloat("Height##Directional", &m_directionalLightHeight, 1.f, 30.f, "%.1f", 2.f);
+                ScriptableImGui::SliderFloat("Height##Directional", &m_directionalLightHeight, 1.f, 30.f, "%.1f", ImGuiSliderFlags_Logarithmic);
 
                 ScriptableImGui::Checkbox("Auto Rotation##Directional", &m_isDirectionalLightAutoRotate);
                 ScriptableImGui::SliderAngle("Direction##Directional", &m_directionalLightRotationAngle, 0, 360);
 
-                if (ScriptableImGui::SliderFloat("Intensity##Directional", &m_directionalLightIntensity, 0.f, 20.f, "%.1f", 2.f))
+                if (ScriptableImGui::SliderFloat("Intensity##Directional", &m_directionalLightIntensity, 0.f, 20.f, "%.1f", ImGuiSliderFlags_Logarithmic))
                 {
                     AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Lux> lightColor(DirectionalLightColor * m_directionalLightIntensity);
                     m_directionalLightFeatureProcessor->SetRgbIntensity(m_directionalLightHandle, lightColor);
@@ -607,8 +607,7 @@ namespace AtomSampleViewer
                 const int index = m_controlTargetDiskLightIndex;
                 const DiskLightHandle lightId = m_diskLightHandles[index];
 
-                ScriptableImGui::SliderFloat("Height##Disk",
-                    &m_diskLightHeights[index], 1.f, 30.f, "%.1f", 2.f);
+                ScriptableImGui::SliderFloat("Height##Disk", &m_diskLightHeights[index], 1.f, 30.f, "%.1f", ImGuiSliderFlags_Logarithmic);
 
                 if (ScriptableImGui::SliderFloat("Cone Angle", &m_outerConeAngles[index], 0.f, 120.f))
                 {
@@ -618,7 +617,7 @@ namespace AtomSampleViewer
                         AZ::DegToRad(m_outerConeAngles[index]));
                 }
 
-                if (ScriptableImGui::SliderFloat("Intensity##Disk", &m_diskLightIntensities[index], 0.f, 20000.f, "%.1f", 2.f))
+                if (ScriptableImGui::SliderFloat("Intensity##Disk", &m_diskLightIntensities[index], 0.f, 20000.f, "%.1f", ImGuiSliderFlags_Logarithmic))
                 {
                     AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Candela> lightColor(s_diskLightColors[index] * m_diskLightIntensities[index]);
                     m_diskLightFeatureProcessor->SetRgbIntensity(lightId, lightColor);

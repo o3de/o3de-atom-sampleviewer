@@ -595,7 +595,7 @@ namespace AtomSampleViewer
             ScriptableImGui::EndCombo();
         }
 
-        if (ScriptableImGui::SliderFloat("Lumens", &m_config.m_intensity, 0.0f, 1000.0f, "%.3f", 2.0f))
+        if (ScriptableImGui::SliderFloat("Lumens", &m_config.m_intensity, 0.0f, 1000.0f, "%.3f", ImGuiSliderFlags_Logarithmic))
         {
             lightsNeedUpdate = true;
         }

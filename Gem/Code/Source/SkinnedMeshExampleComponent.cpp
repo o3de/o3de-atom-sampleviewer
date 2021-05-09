@@ -115,7 +115,7 @@ namespace AtomSampleViewer
 
         // Imgui limits slider range to half the natural range of the type
         float segmentCountFloat = static_cast<float>(config.m_segmentCount);
-        configWasModified |= ScriptableImGui::SliderFloat("Segments Per-Mesh", &segmentCountFloat, 2.0f, 2048.0f, "%.0f", 2.0f);
+        configWasModified |= ScriptableImGui::SliderFloat("Segments Per-Mesh", &segmentCountFloat, 2.0f, 2048.0f, "%.0f", ImGuiSliderFlags_Logarithmic);
         configWasModified |= ScriptableImGui::SliderInt("Vertices Per-Segment", &config.m_verticesPerSegment, 4, 2048);
         configWasModified |= ScriptableImGui::SliderInt("Bones Per-Mesh", &config.m_boneCount, 2, 256);
         configWasModified |= ScriptableImGui::SliderInt("Influences Per-Vertex", &config.m_influencesPerVertex, 1, 4);
