@@ -40,6 +40,9 @@ function GenerateMaterialScreenshot(imageComparisonThresholdLevel, materialName,
     if not (type(options.screenshotFilename) == "string") then
         options.screenshotFilename = materialName
     end
+    if not (type(options.showGroundPlane) == "boolean") then
+        options.showGroundPlane = false
+    end
 
     Print("MODEL: " .. options.model)
 
@@ -52,6 +55,8 @@ function GenerateMaterialScreenshot(imageComparisonThresholdLevel, materialName,
     else
         SetImguiValue('Lighting Preset##SampleBase/Neutral Urban (Alt)', true)
     end
+    
+    SetImguiValue('Show Ground Plane', options.showGroundPlane)
 
     -- The sample resets the camera position after loading the model and we need to
     -- make sure that happens before moving the camera below
@@ -109,6 +114,7 @@ GenerateMaterialScreenshot('Level G', '010_SpecularOcclusion', {lighting="Palerm
 GenerateMaterialScreenshot('Level G', '010_BothOcclusion', {lighting="Palermo Sidewalk (Alt)"})
 GenerateMaterialScreenshot('Level G', '011_Emissive')
 GenerateMaterialScreenshot('Level I', '012_Parallax_POM', {model=g_cubeModel, cameraHeading=-35.0, cameraPitch=35.0})
+GenerateMaterialScreenshot('Level I', '012_Parallax_POM_Cutout', {model=g_cubeModel, cameraHeading=-130.0, cameraPitch=35.0, cameraDistance=3.5, lighting="Goegap (Alt)", showGroundPlane=true})
 GenerateMaterialScreenshot('Level I', '013_SpecularAA_Off', {lighting="Dark Test Lighting"})
 GenerateMaterialScreenshot('Level J', '013_SpecularAA_On', {lighting="Dark Test Lighting"})
 GenerateMaterialScreenshot('Level G', '014_ClearCoat', {lighting="Neutral Urban"})
@@ -167,7 +173,7 @@ Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 -- We should eventually replace this with realistic skin test cases, these are just placeholders for regression testing
 GenerateMaterialScreenshot('Level D', '001_lucy_regression_test',    {model=g_modelLucy, cameraHeading=-26.0, cameraPitch=15.0, cameraDistance=2.0, cameraZ=0.7})
-GenerateMaterialScreenshot('Level E', '002_wrinkle_regression_test', {model=g_modelWithLayerMask, cameraHeading=-135.0, cameraPitch=15.0, cameraZ=-0.3, cameraDistance=3.5})
+GenerateMaterialScreenshot('Level G', '002_wrinkle_regression_test', {model=g_modelWithLayerMask, cameraHeading=-135.0, cameraPitch=15.0, cameraZ=-0.3, cameraDistance=3.5})
 
 ----------------------------------------------------------------------
 -- MinimalPBR Materials...
