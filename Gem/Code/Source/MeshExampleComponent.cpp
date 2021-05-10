@@ -75,6 +75,8 @@ namespace AtomSampleViewer
                 // This handler will be connected to the feature processor so that when the model is updated, the camera
                 // controller will reset. This ensures the camera is a reasonable distance from the model when it resizes.
                 ResetCameraController();
+
+                UpdateGroundPlane();
             }
         };
     }
@@ -132,6 +134,10 @@ namespace AtomSampleViewer
 
         InitLightingPresets(true);
 
+        AZ::Data::Asset<AZ::RPI::MaterialAsset> groundPlaneMaterialAsset = AZ::RPI::AssetUtils::LoadAssetByProductPath<AZ::RPI::MaterialAsset>(DefaultPbrMaterialPath, AZ::RPI::AssetUtils::TraceLevel::Error);
+        m_groundPlaneMaterial = AZ::RPI::Material::FindOrCreate(groundPlaneMaterialAsset);
+        m_groundPlaneModelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/plane.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
+
         AZ::TickBus::Handler::BusConnect();
         AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusConnect();
         CreateLowEndPipeline();
@@ -151,10 +157,12 @@ namespace AtomSampleViewer
         m_modelBrowser.Deactivate();
 
         RemoveController();
-
+        
         GetMeshFeatureProcessor()->ReleaseMesh(m_meshHandle);
+        GetMeshFeatureProcessor()->ReleaseMesh(m_groundPlandMeshHandle);
 
         m_modelAsset = {};
+        m_groundPlaneModelAsset = {};
 
         m_materialOverrideInstance = nullptr;
 
@@ -222,6 +230,19 @@ namespace AtomSampleViewer
 
             modelNeedsUpdate |= ScriptableImGui::Checkbox("Enable Material Override", &m_enableMaterialOverride);
            
+            if (ScriptableImGui::Checkbox("Show Ground Plane", &m_showGroundPlane))
+            {
+                if (m_showGroundPlane)
+                {
+                    CreateGroundPlane();
+                    UpdateGroundPlane();
+                }
+                else
+                {
+                    RemoveGroundPlane();
+                }
+            }
+
             if (ScriptableImGui::Checkbox("Show Model Materials", &m_showModelMaterials))
             {
                 modelNeedsUpdate = true;
@@ -360,6 +381,36 @@ namespace AtomSampleViewer
         {
             GetMeshFeatureProcessor()->SetMaterialAssignmentMap(m_meshHandle, m_materialOverrideInstance);
         }
+    }
+    
+    void MeshExampleComponent::CreateGroundPlane()
+    {
+        m_groundPlandMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(m_groundPlaneModelAsset, m_groundPlaneMaterial);
+    }
+
+    void MeshExampleComponent::UpdateGroundPlane()
+    {
+        if (m_groundPlandMeshHandle.IsValid())
+        {
+            AZ::Transform groundPlaneTransform = AZ::Transform::CreateIdentity();
+
+            AZ::Vector3 modelCenter;
+            float modelRadius;
+            m_modelAsset->GetAabb().GetAsSphere(modelCenter, modelRadius);
+
+            static const float GroundPlaneRelativeScale = 4.0f;
+            static const float GroundPlaneOffset = 0.01f;
+
+            groundPlaneTransform.SetScale(AZ::Vector3(GroundPlaneRelativeScale * modelRadius));
+            groundPlaneTransform.SetTranslation(AZ::Vector3(0.0f, 0.0f, m_modelAsset->GetAabb().GetMin().GetZ() - GroundPlaneOffset));
+
+            GetMeshFeatureProcessor()->SetTransform(m_groundPlandMeshHandle, groundPlaneTransform);
+        }
+    }
+
+    void MeshExampleComponent::RemoveGroundPlane()
+    {
+        GetMeshFeatureProcessor()->ReleaseMesh(m_groundPlandMeshHandle);
     }
 
     void MeshExampleComponent::OnEntityDestruction(const AZ::EntityId& entityId)

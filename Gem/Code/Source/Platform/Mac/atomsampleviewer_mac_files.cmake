@@ -18,6 +18,7 @@ set(FILES
     SampleComponentManager_Mac.cpp
     StreamingImageExampleComponent_Mac.cpp
     Utils_Mac.cpp
+    ScriptReporter_Mac.cpp
 )
 
 set(LY_COMPILE_OPTIONS

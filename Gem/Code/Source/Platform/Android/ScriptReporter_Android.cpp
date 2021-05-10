@@ -10,15 +10,13 @@
 *
 */
 
-#pragma once
+#include <Automation/ScriptReporter.h>
+#include <AzCore/Utils/Utils.h>
 
-#include <Atom/Features/SrgSemantics.azsli>
-
-partial ShaderResourceGroup RayTracingSceneSrg : SRG_RayTracingScene
+namespace AtomSampleViewer
 {
-/* Intentionally Empty. Helps define the SrgSemantic for RayTracingSceneSrg once.*/
-};
-
-#define AZ_COLLECTING_PARTIAL_SRGS
-#include <Atom/Feature/Common/Assets/ShaderResourceGroups/RayTracingSceneSrgAll.azsli>
-#undef AZ_COLLECTING_PARTIAL_SRGS
+    bool ScriptReporter::LoadPngData([[maybe_unused]] ImageComparisonResult& imageComparisonResult, [[maybe_unused]] const AZStd::string& path, [[maybe_unused]] AZStd::vector<uint8_t>& buffer, [[maybe_unused]] AZ::RHI::Size& size, [[maybe_unused]] AZ::RHI::Format& format, [[maybe_unused]] TraceLevel traceLevel)
+    {
+        return false;
+    }
+} 
