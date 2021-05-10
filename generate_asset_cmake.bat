@@ -41,18 +41,22 @@ echo set(FILES>> %OUTPUT_FILE%
         set relativeFilePath=!relativeFilePath:\=/!
         
         
-        :: Filter out files in Materials/HotReloadTest. truncatedPath is the first 23 characters of the relative file path 
-        set truncatedPath=!relativeFilePath:~0,23!
-        if not !truncatedPath! == Materials/HotReloadTest (
+        :: Filter out files in Materials/HotReloadTest. materialHotReloadPath is the first 23 characters of the relative file path 
+        set materialHotReloadPath=!relativeFilePath:~0,23!
+        if not !materialHotReloadPath! == Materials/HotReloadTest (
 
-            :: Filter only relevant file types
-            if !relativeFilePath:~-4!  == .lua          echo %TAB%!relativeFilePath!
-            if !relativeFilePath:~-5!  == .pass         echo %TAB%!relativeFilePath!
-            if !relativeFilePath:~-5!  == .azsl         echo %TAB%!relativeFilePath!
-            if !relativeFilePath:~-6!  == .azsli        echo %TAB%!relativeFilePath!
-            if !relativeFilePath:~-7!  == .shader       echo %TAB%!relativeFilePath!
-            if !relativeFilePath:~-13! == .materialtype echo %TAB%!relativeFilePath!
+            set cachePath=!relativeFilePath:~0,6!
+            if not !cachePath! == Cache/ (
+
+                :: Filter only relevant file types
+                if !relativeFilePath:~-4!  == .lua          echo %TAB%!relativeFilePath!
+                if !relativeFilePath:~-5!  == .pass         echo %TAB%!relativeFilePath!
+                if !relativeFilePath:~-5!  == .azsl         echo %TAB%!relativeFilePath!
+                if !relativeFilePath:~-6!  == .azsli        echo %TAB%!relativeFilePath!
+                if !relativeFilePath:~-7!  == .shader       echo %TAB%!relativeFilePath!
+                if !relativeFilePath:~-13! == .materialtype echo %TAB%!relativeFilePath!
             
+            )
         )
     )
 ) >> %OUTPUT_FILE%

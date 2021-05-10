@@ -23,12 +23,15 @@
 #include <Utils/ImGuiMaterialDetails.h>
 #include <Utils/ImGuiAssetBrowser.h>
 
+#include <Atom/Bootstrap/DefaultWindowBus.h>
+#include <Atom/Feature/ImGui/ImGuiUtils.h>
 #include <Atom/Feature/SkyBox/SkyBoxFeatureProcessorInterface.h>
 
 namespace AtomSampleViewer
 {
     class MeshExampleComponent final
         : public CommonSampleComponentBase
+        , public AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler
         , public AZ::TickBus::Handler
     {
     public:
@@ -59,6 +62,20 @@ namespace AtomSampleViewer
         void SetArcBallControllerParams();
         void ResetCameraController();
 
+        void DefaultWindowCreated() override;
+
+        void CreateLowEndPipeline();
+        void DestroyLowEndPipeline();
+
+        void ActivateLowEndPipeline();
+        void DeactivateLowEndPipeline();
+
+        AZ::RPI::RenderPipelinePtr m_lowEndPipeline;
+        AZ::RPI::RenderPipelinePtr m_originalPipeline;
+
+        AZStd::shared_ptr<AZ::RPI::WindowContext> m_windowContext;
+        AZ::Render::ImGuiActiveContextScope m_imguiScope;
+
         enum class CameraControllerType : int32_t 
         {
             ArcBall = 0,
@@ -88,6 +105,9 @@ namespace AtomSampleViewer
         bool m_showModelMaterials = false;
 
         bool m_cameraControllerDisabled = false;
+
+        bool m_useLowEndPipeline = false;
+        bool m_switchPipeline = false;
 
         AZ::Data::Instance<AZ::RPI::Material> m_materialOverrideInstance; //< Holds a copy of the material instance being used when m_enableMaterialOverride is true.
         AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_meshHandle;
