@@ -88,6 +88,7 @@ namespace AtomSampleViewer
 
     void MeshExampleComponent::CreateLowEndPipeline()
     {
+        // Create low end pipeline
         AZ::RPI::RenderPipelineDescriptor pipelineDesc;
         pipelineDesc.m_mainViewTagName = "MainCamera";
         pipelineDesc.m_name = "LowEndPipeline";
@@ -95,10 +96,19 @@ namespace AtomSampleViewer
         pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 4;
 
         m_lowEndPipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
+
+        // Add it to the scene
+        AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
+        m_originalPipeline = defaultScene->GetDefaultRenderPipeline();
+        defaultScene->AddRenderPipeline(m_lowEndPipeline);
+        m_lowEndPipeline->SetDefaultView(m_originalPipeline->GetDefaultView());
+        m_lowEndPipeline->RemoveFromRenderTick();
     }
 
     void MeshExampleComponent::DestroyLowEndPipeline()
     {
+        AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
+        defaultScene->RemoveRenderPipeline(m_lowEndPipeline->GetId());
         m_lowEndPipeline = nullptr;
     }
 
@@ -141,12 +151,14 @@ namespace AtomSampleViewer
         AZ::TickBus::Handler::BusConnect();
         AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusConnect();
         CreateLowEndPipeline();
-        ActivateLowEndPipeline();
     }
 
     void MeshExampleComponent::Deactivate()
     {
-        DeactivateLowEndPipeline();
+        if (m_useLowEndPipeline)
+        {
+            DeactivateLowEndPipeline();
+        }
         DestroyLowEndPipeline();
         AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusDisconnect();
         AZ::TickBus::Handler::BusDisconnect();
@@ -171,25 +183,16 @@ namespace AtomSampleViewer
 
     void MeshExampleComponent::ActivateLowEndPipeline()
     {
-        AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        m_originalPipeline = defaultScene->GetDefaultRenderPipeline();
-        defaultScene->AddRenderPipeline(m_lowEndPipeline);
-        m_lowEndPipeline->SetDefaultView(m_originalPipeline->GetDefaultView());
-        m_lowEndPipeline->RemoveFromRenderTick();
-
-        //defaultScene->RemoveRenderPipeline(m_originalPipeline->GetId());
-
-        // Create an ImGuiActiveContextScope to ensure the ImGui context on the new pipeline's ImGui pass is activated.
-        //m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass(AZ::RPI::PassHierarchyFilter({ m_lowEndPipeline->GetId().GetCStr(), "ImGuiPass" }));
+        m_lowEndPipeline->AddToRenderTick();
+        m_originalPipeline->RemoveFromRenderTick();
+        m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass(AZ::RPI::PassHierarchyFilter({ m_lowEndPipeline->GetId().GetCStr(), "ImGuiPass" }));
     }
 
     void MeshExampleComponent::DeactivateLowEndPipeline()
     {
+        m_originalPipeline->AddToRenderTick();
+        m_lowEndPipeline->RemoveFromRenderTick();
         m_imguiScope = {}; // restores previous ImGui context.
-
-        AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        defaultScene->AddRenderPipeline(m_originalPipeline);
-        defaultScene->RemoveRenderPipeline(m_lowEndPipeline->GetId());
     }
 
     void MeshExampleComponent::OnTick([[maybe_unused]] float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint time)
@@ -200,24 +203,14 @@ namespace AtomSampleViewer
         {
             if (m_useLowEndPipeline)
             {
-                //ActivateLowEndPipeline();
-                m_originalPipeline->RemoveFromRenderTick();
-                m_lowEndPipeline->AddToRenderTick();
-                m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass(AZ::RPI::PassHierarchyFilter({ m_lowEndPipeline->GetId().GetCStr(), "ImGuiPass" }));
+                ActivateLowEndPipeline();
             }
             else
             {
-                //DeactivateLowEndPipeline();
-                m_lowEndPipeline->RemoveFromRenderTick();
-                m_originalPipeline->AddToRenderTick();
-                m_imguiScope = {}; // restores previous ImGui context.
+                DeactivateLowEndPipeline();
             }
 
-            //m_imguiSidebar.Deactivate();
-            //m_imguiSidebar.Activate();
-
             m_switchPipeline = false;
-            return;
         }
 
         if (m_imguiSidebar.Begin())
