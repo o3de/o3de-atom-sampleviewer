@@ -501,12 +501,13 @@ namespace AtomSampleViewer
         ImGui::Indent();
         if (ImGui::CollapsingHeader("Directional Light", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed))
         {
-            ImGui::SliderFloat("Height##Directional", &m_directionalLightHeight, 1.f, 30.f, "%.1f", 2.f);
+            ImGui::SliderFloat("Height##Directional", &m_directionalLightHeight, 1.f, 30.f, "%.1f", ImGuiSliderFlags_Logarithmic);
 
             ScriptableImGui::Checkbox("Auto Rotation##Directional", &m_isDirectionalLightAutoRotate);
             ScriptableImGui::SliderAngle("Direction##Directional", &m_directionalLightRotationAngle, 0, 360);
 
-            if (ScriptableImGui::SliderFloat("Intensity##Directional", &m_directionalLightIntensity, 0.f, 20.f, "%.1f", 2.f))
+            if (ScriptableImGui::SliderFloat(
+                    "Intensity##Directional", &m_directionalLightIntensity, 0.f, 20.f, "%.1f", ImGuiSliderFlags_Logarithmic))
             {
                 AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Lux> lightColor(
                     DirectionalLightColor * m_directionalLightIntensity);
@@ -649,6 +650,7 @@ namespace AtomSampleViewer
 
             ImGui::Spacing();
 
+
             ImGui::Text("Control Target");
             ScriptableImGui::RadioButton("Red", &m_controlTargetPositionalLightIndex, 0);
             ImGui::SameLine();
@@ -658,14 +660,16 @@ namespace AtomSampleViewer
 
             const int index = m_controlTargetPositionalLightIndex;
 
-            ScriptableImGui::SliderFloat("Height##Positional", &m_positionalLightHeights[index], 1.f, 30.f, "%.1f", 2.f);
+            ScriptableImGui::SliderFloat(
+                "Height##Positional", &m_positionalLightHeights[index], 1.f, 30.f, "%.1f", ImGuiSliderFlags_Logarithmic);
 
             if (ScriptableImGui::SliderFloat("Cone Angle", &m_outerConeAngles[index], 0.f, 120.f))
             {
                 settingsChanged = true;
             }
 
-            if (ScriptableImGui::SliderFloat("Intensity##Positional", &m_lightIntensities[index], 0.f, 20000.f, "%.1f", 2.f))
+            if (ScriptableImGui::SliderFloat(
+                    "Intensity##Positional", &m_lightIntensities[index], 0.f, 20000.f, "%.1f", ImGuiSliderFlags_Logarithmic))
             {
                 settingsChanged = true;
             }
