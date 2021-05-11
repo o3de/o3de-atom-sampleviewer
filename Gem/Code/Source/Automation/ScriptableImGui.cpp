@@ -338,11 +338,11 @@ namespace AtomSampleViewer
         return ActionHelper<float>(label, imguiAction, reportScriptableAction, handleScriptedAction);
     }
 
-    bool ScriptableImGui::SliderFloat(const char* label, float* v, float v_min, float v_max, const char* format, float power)
+    bool ScriptableImGui::SliderFloat(const char* label, float* v, float v_min, float v_max, const char* format, ImGuiSliderFlags flags)
     {
         auto imguiAction = [&]()
         {
-            return ImGui::SliderFloat(label, v, v_min, v_max, format, power);
+            return ImGui::SliderFloat(label, v, v_min, v_max, format, flags);
         };
 
         auto reportScriptableAction = [&](const AZStd::string& pathToImGuiItem)
@@ -359,11 +359,11 @@ namespace AtomSampleViewer
         return ActionHelper<float>(label, imguiAction, reportScriptableAction, handleScriptedAction);
     }
 
-    bool ScriptableImGui::SliderFloat2(const char* label, float v[2], float v_min, float v_max, const char* format, float power)
+    bool ScriptableImGui::SliderFloat2(const char* label, float v[2], float v_min, float v_max, const char* format, ImGuiSliderFlags flags)
     {
         auto imguiAction = [&]()
         {
-            return ImGui::SliderFloat2(label, v, v_min, v_max, format, power);
+            return ImGui::SliderFloat2(label, v, v_min, v_max, format, flags);
         };
 
         auto reportScriptableAction = [&](const AZStd::string& pathToImGuiItem)
@@ -400,11 +400,11 @@ namespace AtomSampleViewer
         return ActionHelper<AZ::Vector3>(label, imguiAction, reportScriptableAction, handleScriptedAction);
     }
 
-    bool ScriptableImGui::SliderFloat3(const char* label, float v[3], float v_min, float v_max, const char* format, float power)
+    bool ScriptableImGui::SliderFloat3(const char* label, float v[3], float v_min, float v_max, const char* format, ImGuiSliderFlags flags)
     {
         auto imguiAction = [&]()
         {
-            return ImGui::SliderFloat3(label, v, v_min, v_max, format, power);
+            return ImGui::SliderFloat3(label, v, v_min, v_max, format, flags);
         };
 
         return ThreeComponentHelper(label, v, imguiAction);

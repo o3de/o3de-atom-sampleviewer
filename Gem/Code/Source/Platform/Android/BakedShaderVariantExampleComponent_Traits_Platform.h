@@ -10,15 +10,5 @@
 *
 */
 
-#pragma once
-
-#include <Atom/Features/SrgSemantics.azsli>
-
-partial ShaderResourceGroup RayTracingSceneSrg : SRG_RayTracingScene
-{
-/* Intentionally Empty. Helps define the SrgSemantic for RayTracingSceneSrg once.*/
-};
-
-#define AZ_COLLECTING_PARTIAL_SRGS
-#include <Atom/Feature/Common/Assets/ShaderResourceGroups/RayTracingSceneSrgAll.azsli>
-#undef AZ_COLLECTING_PARTIAL_SRGS
+// [ATOM-15361] Mobile pipeline uses no-msaa forward pass, need to differentiate this while getting the pass in the sample
+#define ATOMSAMPLEVIEWER_TRAIT_BAKED_SHADERVARIANT_SAMPLE_PASS_NAME     "ForwardPass"

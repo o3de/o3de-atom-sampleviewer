@@ -219,10 +219,10 @@ namespace AtomSampleViewer
 
     AZ::Transform ShadowExampleComponent::GetTransformForLight(const uint32_t index) const
     {
-        constexpr float lightDist = 5.f;
+        constexpr float diskLightDist = 5.f;
         using namespace AZ;
         const float angle = m_positionalLightRotationAngle + index * Constants::TwoPi / 3;
-        const auto location = Vector3(lightDist * sinf(angle), lightDist * cosf(angle), m_positionalLightHeights[index]);
+        const auto location = Vector3(diskLightDist * sinf(angle), diskLightDist * cosf(angle), m_positionalLightHeights[index]);
         const auto transform = Transform::CreateLookAt(location, Vector3::CreateZero());
         return transform;
     }
@@ -501,7 +501,7 @@ namespace AtomSampleViewer
         ImGui::Indent();
         if (ImGui::CollapsingHeader("Directional Light", ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Framed))
         {
-            ImGui::SliderFloat("Height##Directional", &m_directionalLightHeight, 1.f, 30.f, "%.1f", ImGuiSliderFlags_Logarithmic);
+            ScriptableImGui::SliderFloat("Height##Directional", &m_directionalLightHeight, 1.f, 30.f, "%.1f", ImGuiSliderFlags_Logarithmic);
 
             ScriptableImGui::Checkbox("Auto Rotation##Directional", &m_isDirectionalLightAutoRotate);
             ScriptableImGui::SliderAngle("Direction##Directional", &m_directionalLightRotationAngle, 0, 360);
@@ -649,7 +649,6 @@ namespace AtomSampleViewer
             ScriptableImGui::SliderAngle("Base Direction##Positional", &m_positionalLightRotationAngle, 0, 360);
 
             ImGui::Spacing();
-
 
             ImGui::Text("Control Target");
             ScriptableImGui::RadioButton("Red", &m_controlTargetPositionalLightIndex, 0);

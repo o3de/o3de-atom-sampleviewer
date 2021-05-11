@@ -32,6 +32,8 @@
 
 #include <RHI/BasicRHIComponent.h>
 
+#include <BakedShaderVariantExampleComponent_Traits_Platform.h>
+
 namespace AtomSampleViewer
 {
     using namespace AZ;
@@ -95,7 +97,7 @@ namespace AtomSampleViewer
         m_meshFeatureProcessor->SetTransform(m_meshHandle, meshTransform);
 
         AZStd::vector<AZStd::string> passHierarchy;
-        passHierarchy.push_back("ForwardMSAAPass");
+        passHierarchy.push_back(ATOMSAMPLEVIEWER_TRAIT_BAKED_SHADERVARIANT_SAMPLE_PASS_NAME);
         AZ::RPI::PassHierarchyFilter passFilter(passHierarchy);
         AZStd::vector<AZ::RPI::Pass*> foundPasses = AZ::RPI::PassSystemInterface::Get()->FindPasses(passFilter);
         m_forwardPass = foundPasses[0];
