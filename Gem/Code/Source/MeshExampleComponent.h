@@ -52,6 +52,10 @@ namespace AtomSampleViewer
 
         void ModelChange();
 
+        void CreateGroundPlane();
+        void UpdateGroundPlane();
+        void RemoveGroundPlane();
+
         void UseArcBallCameraController();
         void UseNoClipCameraController();
         void RemoveController();
@@ -87,11 +91,17 @@ namespace AtomSampleViewer
         // be shown in the material list.
         bool m_showModelMaterials = false;
 
+        bool m_showGroundPlane = false;
+
         bool m_cameraControllerDisabled = false;
 
         AZ::Data::Instance<AZ::RPI::Material> m_materialOverrideInstance; //< Holds a copy of the material instance being used when m_enableMaterialOverride is true.
         AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_meshHandle;
         AZ::Data::Asset<AZ::RPI::ModelAsset> m_modelAsset;
+
+        AZ::Data::Asset<AZ::RPI::ModelAsset> m_groundPlaneModelAsset;
+        AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_groundPlandMeshHandle;
+        AZ::Data::Instance<AZ::RPI::Material> m_groundPlaneMaterial;
 
         ImGuiSidebar m_imguiSidebar;
         ImGuiMaterialDetails m_imguiMaterialDetails;
