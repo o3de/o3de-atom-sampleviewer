@@ -158,6 +158,8 @@ g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/StandardMulti
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 GenerateMaterialScreenshot('Level I', '001_ManyFeatures', {model=g_cubeModel, cameraHeading=-125.0, cameraPitch=-16.0, cameraZ=0.12})
+GenerateMaterialScreenshot('Level I', '001_ManyFeatures_Layer2Off', {model=g_cubeModel, cameraHeading=-125.0, cameraPitch=-16.0, cameraZ=0.12})
+GenerateMaterialScreenshot('Level I', '001_ManyFeatures_Layer3Off', {model=g_cubeModel, cameraHeading=-125.0, cameraPitch=-16.0, cameraZ=0.12})
 GenerateMaterialScreenshot('Level I', '002_ParallaxPdo', {model=g_cubeModel, cameraHeading=15.0, cameraPitch=28.0, lighting="Goegap (Alt)"})
 GenerateMaterialScreenshot('Level G', '003_Debug_BlendSource', {model=g_cubeModel})
 GenerateMaterialScreenshot('Level F', '003_Debug_DepthMaps', {model=g_cubeModel})
