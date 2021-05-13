@@ -338,7 +338,7 @@ namespace AtomSampleViewer
             const auto lightTrans = Transform::CreateRotationZ(m_directionalLightYaw) * Transform::CreateRotationX(m_directionalLightPitch);
             m_directionalLightFeatureProcessor->SetDirection(m_directionalLightHandle, lightTrans.GetBasis(1));
 
-            if (ImGui::SliderFloat("Intensity##directional", &m_directionalLightIntensity, 0.f, 20.f, "%.1f", 2.f))
+            if (ImGui::SliderFloat("Intensity##directional", &m_directionalLightIntensity, 0.f, 20.f, "%.1f", ImGuiSliderFlags_Logarithmic))
             {
                 m_directionalLightFeatureProcessor->SetRgbIntensity(
                     m_directionalLightHandle,
@@ -432,7 +432,7 @@ namespace AtomSampleViewer
                 UpdateDiskLightCount(diskLightCount);
             }
 
-            if (ImGui::SliderFloat("Intensity##disk", &m_diskLightIntensity, 0.f, 100000.f, "%.1f", 4.f))
+            if (ImGui::SliderFloat("Intensity##disk", &m_diskLightIntensity, 0.f, 100000.f, "%.1f", ImGuiSliderFlags_Logarithmic))
             {
                 for (const DiskLight& light : m_diskLights)
                 {

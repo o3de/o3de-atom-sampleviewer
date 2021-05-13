@@ -233,7 +233,7 @@ namespace AtomSampleViewer
 
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/AlphaToCoverage", azrtti_typeid<AlphaToCoverageExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/AsyncCompute", azrtti_typeid<AsyncComputeExampleComponent>() ) );
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/BindlessPrototype", azrtti_typeid<BindlessPrototypeExampleComponent>() ));
+        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/BindlessPrototype", azrtti_typeid<BindlessPrototypeExampleComponent>(), []() {return Utils::GetRHIDevice()->GetFeatures().m_unboundedArrays; } ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/Compute", azrtti_typeid<ComputeExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/CopyQueue", azrtti_typeid<CopyQueueComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/DualSourceBlending", azrtti_typeid<DualSourceBlendingComponent>(), []() {return Utils::GetRHIDevice()->GetFeatures().m_dualSourceBlending; } ));
