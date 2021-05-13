@@ -28,7 +28,7 @@ LightUnitProperty_Nit = 1
 function Process(context)
 
     local useTexture = context:GetMaterialPropertyValue_bool("emissive.useTexture")
-    local textureMap = context:GetMaterialPropertyValue_image("emissive.textureMap")
+    local textureMap = context:GetMaterialPropertyValue_Image("emissive.textureMap")
     
     context:SetShaderOptionValue_bool("o_emissive_useTexture", useTexture and textureMap ~= nil)
 
@@ -60,7 +60,7 @@ end
 
 function ProcessEditor(context)
     
-    local textureMap = context:GetMaterialPropertyValue_image("emissive.textureMap")
+    local textureMap = context:GetMaterialPropertyValue_Image("emissive.textureMap")
 
     if(nil == textureMap) then
         context:SetMaterialPropertyVisibility("emissive.useTexture", MaterialPropertyVisibility_Disabled)
