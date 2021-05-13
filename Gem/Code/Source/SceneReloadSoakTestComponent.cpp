@@ -23,6 +23,8 @@
 
 #include <RHI/BasicRHIComponent.h>
 
+#include <SceneReloadSoakTestComponent_Traits_Platform.h>
+
 namespace AtomSampleViewer
 {
     using namespace AZ;
@@ -52,7 +54,7 @@ namespace AtomSampleViewer
         m_currentCount = 0;
         m_totalResetCount = 0;
 
-        SetLatticeDimensions(5, 5, 5);
+        SetLatticeDimensions(ATOMSAMPLEVIEWER_TRAIT_SCENE_RELOAD_SOAK_TEST_COMPONENT_LATTICE_SIZE, ATOMSAMPLEVIEWER_TRAIT_SCENE_RELOAD_SOAK_TEST_COMPONENT_LATTICE_SIZE, ATOMSAMPLEVIEWER_TRAIT_SCENE_RELOAD_SOAK_TEST_COMPONENT_LATTICE_SIZE);
         Base::Activate();
 
         TickBus::Handler::BusConnect();

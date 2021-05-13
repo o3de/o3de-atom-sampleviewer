@@ -133,7 +133,9 @@ PixelOutput MainPS(VertexOutput input)
             debugInfo);
     }
     
-    output.m_diffuse = float4(diffuse.rgb, saturate(baseColor.a));
-    output.m_specular = float4(specular.rgb, saturate(baseColor.a));
+    float clampedAlpha = saturate(baseColor.a);
+    output.m_diffuse = float4(diffuse.rgb, clampedAlpha);
+    output.m_specular = float4(specular.rgb, clampedAlpha);
+
     return output;
 }
