@@ -26,7 +26,7 @@
 #include <Atom/RHI/DrawPacketBuilder.h>
 
 #include <Atom/RPI.Public/RPISystemInterface.h>
-#include <Atom/RPI.Public/Shader/Shader.h>
+#include <Atom/RPI.Public/Shader/Shader2.h>
 #include <Atom/RPI.Reflect/Asset/AssetUtils.h>
 
 
@@ -318,6 +318,7 @@ namespace AtomSampleViewer
     {
         const auto CreatePipeline = [](const char* shaderFilepath,
             const char* srgFilepath,
+            Data::Asset<AZ::RPI::ShaderAsset2>& shaderAsset,
             Data::Asset<AZ::RPI::ShaderResourceGroupAsset>& srgAsset,
             RHI::ConstPtr<RHI::PipelineState>& pipelineState,
             RHI::DrawListTag& drawListTag)
@@ -326,16 +327,9 @@ namespace AtomSampleViewer
             // Also, the index buffer is not needed with DrawLinear.
             RHI::PipelineStateDescriptorForDraw pipelineStateDescriptor;
 
-            Data::Asset<RPI::ShaderAsset> shaderAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::ShaderAsset>(shaderFilepath, RPI::AssetUtils::TraceLevel::Error);
-            Data::Instance<RPI::Shader> shader = RPI::Shader::FindOrCreate(shaderAsset);
-
-            if (!shader)
-            {
-                AZ_Error("Render", false, "Failed to find or create shader instance from shader asset with path %s", shaderFilepath);
-                return;
-            }
-
-            const RPI::ShaderVariant& shaderVariant = shader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId);
+            shaderAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::ShaderAsset2>(shaderFilepath, RPI::AssetUtils::TraceLevel::Error);
+            Data::Instance<RPI::Shader2> shader = RPI::Shader2::FindOrCreate(shaderAsset, Name());
+            const RPI::ShaderVariant2& shaderVariant = shader->GetRootVariant();
             shaderVariant.ConfigurePipelineState(pipelineStateDescriptor);
             drawListTag = shader->GetDrawListTag();
 
@@ -356,8 +350,11 @@ namespace AtomSampleViewer
         };
 
         // Create the example's main pipeline object
+        Data::Asset<AZ::RPI::ShaderAsset2> shaderAsset;
         {
-            CreatePipeline("Shaders/tonemappingexample/renderimage.azshader", "Shaders/tonemappingexample/renderimage_renderimagesrg.azsrg", m_srgAsset, m_pipelineState, m_drawListTag);
+            CreatePipeline(
+                "Shaders/tonemappingexample/renderimage2.azshader2", "Shaders/tonemappingexample/renderimage_renderimagesrg.azsrg",
+                shaderAsset, m_srgAsset, m_pipelineState, m_drawListTag);
 
             // Set the input indices
             m_imageInputIndex.Reset();
@@ -367,6 +364,7 @@ namespace AtomSampleViewer
         }
 
         m_drawImage.m_srg = RPI::ShaderResourceGroup::Create(m_srgAsset);
+        m_drawImage.m_srg->ReplaceSrgLayoutUsingShaderAsset(shaderAsset, Name(), Name("RenderImageSrg"));
         m_drawImage.m_wasStreamed = false;
 
         // Set the image to occupy the full screen.

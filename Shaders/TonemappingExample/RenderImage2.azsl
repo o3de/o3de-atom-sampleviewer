@@ -1,0 +1,75 @@
+/*
+* All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
+* its licensors.
+*
+* For complete copyright and license terms please see the LICENSE at the root of this
+* distribution (the "License"). All use of this software is governed by the License,
+* or, if provided, by the license below or the license accompanying this file. Do not
+* remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
+* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+*
+*/
+
+#include <viewsrg.srgi>
+#include <Atom/Features/ColorManagement/TransformColor.azsli>
+
+ShaderResourceGroup RenderImageSrg : SRG_PerDraw
+{
+    Texture2D m_texture;
+    float2 m_position;
+    float2 m_size;
+
+    int m_colorSpace;
+
+    Sampler m_sampler
+    {
+        MaxAnisotropy = 16;
+        AddressU = Wrap;
+        AddressV = Wrap;
+        AddressW = Wrap;
+    };
+}
+
+struct VSInput
+{
+    uint m_vertexIndex :SV_VertexID;
+    uint m_instanceIndex :SV_InstanceID;
+};
+
+struct VSOutput
+{
+    float4 m_position : SV_Position;
+    float2 m_uv : UV0;
+};
+
+struct PSOutput
+{
+    float4 m_color : SV_Target0;
+    float4 m_specular : SV_Target1;
+    float4 m_scatterDistance : SV_Target2;
+};
+
+VSOutput MainVS(VSInput vsInput)
+{
+    VSOutput OUT;
+    float2 uvs[4] = { {0.0, 0.0}, {1.0, 0.0}, {0.0, -1.0}, {1.0, -1.0} };
+    float2 vtx[4] = { {0.0, 0.0}, {2.0, 0.0}, {0.0, 2.0}, {2.0, 2.0} };
+    int index = vsInput.m_vertexIndex%4;
+    float2 startPosition = RenderImageSrg::m_position;
+    OUT.m_position = float4(startPosition + vtx[index], 0, 1.0);
+    OUT.m_uv.xy = uvs[index];
+    return OUT;
+}
+
+PSOutput MainPS(VSOutput psInput)
+{
+    PSOutput OUT;
+    float3 color = float3(1.0, 1.0, 1.0);
+
+    color = RenderImageSrg::m_texture.SampleLevel(RenderImageSrg::m_sampler, psInput.m_uv.xy, 0).rgb;
+    color = TransformColor(color, (ColorSpaceId)RenderImageSrg::m_colorSpace, ColorSpaceId::ACEScg);
+    OUT.m_color = float4(color, 1.0);
+    OUT.m_specular = float4(0,0,0,1);
+    OUT.m_scatterDistance = float4(0,0,0,0);
+    return OUT;
+}
