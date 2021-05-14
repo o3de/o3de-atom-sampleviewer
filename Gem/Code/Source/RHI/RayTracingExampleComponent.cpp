@@ -295,55 +295,11 @@ namespace AtomSampleViewer
         m_rayTracingPipelineState->Init(*device.get(), &descriptor);
     }
 
-    void RayTracingExampleComponent::CreateRayTracingShaderTableScope()
+    void RayTracingExampleComponent::CreateRayTracingShaderTable()
     {
-        struct ScopeData
-        {
-        };
-
-        const auto prepareFunction = [this]([[maybe_unused]] RHI::FrameGraphInterface& scopeBuilder, [[maybe_unused]] ScopeData& scopeData)
-        {
-        };
-
-        const auto compileFunction = [this]([[maybe_unused]] const RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
-        {
-        };
-
-        const auto executeFunction = [this]([[maybe_unused]] const RHI::FrameGraphExecuteContext& context, [[maybe_unused]] const ScopeData& scopeData)
-        {
-            RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
-
-            // build the ray tracing shader table descriptor
-            RHI::RayTracingShaderTableDescriptor descriptor;
-            descriptor.Build(AZ::Name("RayTracingExampleShaderTable"), m_rayTracingPipelineState)
-                ->RayGenerationRecord(AZ::Name("RayGenerationShader"))
-                ->MissRecord(AZ::Name("MissShader"))
-                ->HitGroupRecord(AZ::Name("HitGroupGradient")) // triangle1
-                ->HitGroupRecord(AZ::Name("HitGroupGradient")) // triangle2
-                ->HitGroupRecord(AZ::Name("HitGroupSolid")) // triangle3
-                ->HitGroupRecord(AZ::Name("HitGroupSolid")) // rectangle
-            ;
-
-            // initialize the ray tracing shader table object
-            m_rayTracingShaderTable->Init(*device.get(), &descriptor, *m_rayTracingBufferPools);
-        };
-
-        // create the shader table once, outside of the scope
+        RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
         m_rayTracingShaderTable = RHI::Factory::Get().CreateRayTracingShaderTable();
-
-        m_scopeProducers.emplace_back(
-            aznew RHI::ScopeProducerFunction<
-            ScopeData,
-            decltype(prepareFunction),
-            decltype(compileFunction),
-            decltype(executeFunction)>(
-                RHI::ScopeId{ "RayTracingBuildShaderTable" },
-                ScopeData{},
-                prepareFunction,
-                compileFunction,
-                executeFunction));
-
-        m_shaderTableScopeId = m_scopeProducers.back()->GetScopeId();
+        m_rayTracingShaderTable->Init(*device.get(), *m_rayTracingBufferPools);
     }
 
     void RayTracingExampleComponent::CreateRayTracingAccelerationTableScope()
@@ -463,6 +419,16 @@ namespace AtomSampleViewer
             m_rayTracingTlas->CreateBuffers(*device, &tlasDescriptor, *m_rayTracingBufferPools);
 
             m_tlasBufferViewDescriptor = RHI::BufferViewDescriptor::CreateRaw(0, (uint32_t)m_rayTracingTlas->GetTlasBuffer()->GetDescriptor().m_byteCount);
+
+            [[maybe_unused]] RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportBuffer(m_tlasBufferAttachmentId, m_rayTracingTlas->GetTlasBuffer());
+            AZ_Error(RayTracingExampleName, result == RHI::ResultCode::Success, "Failed to import TLAS buffer with error %d", result);
+
+            RHI::BufferScopeAttachmentDescriptor desc;
+            desc.m_attachmentId = m_tlasBufferAttachmentId;
+            desc.m_bufferViewDescriptor = m_tlasBufferViewDescriptor;
+            desc.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
+
+            frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::ReadWrite);
         };
 
         RHI::EmptyCompileFunction<ScopeData> compileFunction;
@@ -513,18 +479,14 @@ namespace AtomSampleViewer
             // attach TLAS buffer
             if (m_rayTracingTlas->GetTlasBuffer())
             {
-                [[maybe_unused]] RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportBuffer(m_tlasBufferAttachmentId, m_rayTracingTlas->GetTlasBuffer());
-                AZ_Error(RayTracingExampleName, result == RHI::ResultCode::Success, "Failed to import TLAS buffer with error %d", result);
-
                 RHI::BufferScopeAttachmentDescriptor desc;
                 desc.m_attachmentId = m_tlasBufferAttachmentId;
                 desc.m_bufferViewDescriptor = m_tlasBufferViewDescriptor;
                 desc.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
 
-                frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::Read);
+                frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::ReadWrite);
             }
 
-            frameGraph.ExecuteAfter(m_shaderTableScopeId);
             frameGraph.SetEstimatedItemCount(1);
         };
 
@@ -586,6 +548,19 @@ namespace AtomSampleViewer
 
                 m_globalSrg->SetConstantArray(hitSolidDataConstantIndex, hitSolidData);
                 m_globalSrg->Compile();
+
+                // update the ray tracing shader table
+                m_rayTracingShaderTableDescriptor = AZStd::make_shared<RHI::RayTracingShaderTableDescriptor>();
+                m_rayTracingShaderTableDescriptor->Build(AZ::Name("RayTracingExampleShaderTable"), m_rayTracingPipelineState)
+                    ->RayGenerationRecord(AZ::Name("RayGenerationShader"))
+                    ->MissRecord(AZ::Name("MissShader"))
+                    ->HitGroupRecord(AZ::Name("HitGroupGradient")) // triangle1
+                    ->HitGroupRecord(AZ::Name("HitGroupGradient")) // triangle2
+                    ->HitGroupRecord(AZ::Name("HitGroupSolid")) // triangle3
+                    ->HitGroupRecord(AZ::Name("HitGroupSolid")) // rectangle
+                    ;
+
+                m_rayTracingShaderTable->Build(m_rayTracingShaderTableDescriptor);
             }
         };
 
@@ -714,7 +689,7 @@ namespace AtomSampleViewer
         CreateRasterShader();
         CreateRayTracingAccelerationStructureObjects();
         CreateRayTracingPipelineState();
-        CreateRayTracingShaderTableScope();
+        CreateRayTracingShaderTable();
         CreateRayTracingAccelerationTableScope();
         CreateRayTracingDispatchScope();
         CreateRasterScope();
