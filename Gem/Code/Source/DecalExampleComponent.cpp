@@ -87,7 +87,7 @@ namespace AtomSampleViewer
 
     void DecalExampleComponent::ScaleObjectToFitDecals()
     {
-        const AZ::Transform doubleSize = AZ::Transform::CreateScale(AZ::Vector3(2.0f, 1.0f, 1.0f));
+        const AZ::Transform doubleSize = AZ::Transform::CreateScale(AZ::Vector3(4.0f, 1.0f, 1.0f));
         GetMeshFeatureProcessor()->SetTransform(m_meshHandle, doubleSize);
     }
 
@@ -139,6 +139,18 @@ namespace AtomSampleViewer
             m_decalContainer->SetNumDecalsActive(numDecalsActive);
         }
 
+        if (ScriptableImGui::Checkbox("Clone decals", &m_cloneDecalsEnabled))
+        {
+            if (m_cloneDecalsEnabled)
+            {
+                m_decalContainerClone->CloneFrom(*m_decalContainer.get());
+            }
+            else
+            {
+                m_decalContainerClone->SetNumDecalsActive(0);
+            }
+        }
+
         m_imguiSidebar.End();
     }
 
@@ -146,7 +158,8 @@ namespace AtomSampleViewer
     {
         const AZ::RPI::Scene* scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get();
         const auto decalFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DecalFeatureProcessorInterface>();
-        m_decalContainer = AZStd::make_unique<DecalContainer>(decalFeatureProcessor);
+        m_decalContainer = AZStd::make_unique<DecalContainer>(decalFeatureProcessor, AZ::Vector3(1,0,0));
+        m_decalContainerClone = AZStd::make_unique<DecalContainer>(decalFeatureProcessor, AZ::Vector3(-1,0,0));
     }
 
 }
