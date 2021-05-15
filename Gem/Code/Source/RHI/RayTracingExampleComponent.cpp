@@ -42,6 +42,30 @@ namespace AtomSampleViewer
         m_supportRHISamplePipeline = true;
     }
 
+    void RayTracingExampleComponent::Activate()
+    {
+        CreateResourcePools();
+        CreateGeometry();
+        CreateFullScreenBuffer();
+        CreateOutputTexture();
+        CreateRasterShader();
+        CreateRayTracingAccelerationStructureObjects();
+        CreateRayTracingPipelineState();
+        CreateRayTracingShaderTable();
+        CreateRayTracingAccelerationTableScope();
+        CreateRayTracingDispatchScope();
+        CreateRasterScope();
+
+        RHI::RHISystemNotificationBus::Handler::BusConnect();
+    }
+
+    void RayTracingExampleComponent::Deactivate()
+    {
+        RHI::RHISystemNotificationBus::Handler::BusDisconnect();
+        m_windowContext = nullptr;
+        m_scopeProducers.clear();
+    }
+
     void RayTracingExampleComponent::CreateResourcePools()
     {
         RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
@@ -550,8 +574,8 @@ namespace AtomSampleViewer
                 m_globalSrg->Compile();
 
                 // update the ray tracing shader table
-                m_rayTracingShaderTableDescriptor = AZStd::make_shared<RHI::RayTracingShaderTableDescriptor>();
-                m_rayTracingShaderTableDescriptor->Build(AZ::Name("RayTracingExampleShaderTable"), m_rayTracingPipelineState)
+                AZStd::shared_ptr<RHI::RayTracingShaderTableDescriptor> descriptor = AZStd::make_shared<RHI::RayTracingShaderTableDescriptor>();
+                descriptor->Build(AZ::Name("RayTracingExampleShaderTable"), m_rayTracingPipelineState)
                     ->RayGenerationRecord(AZ::Name("RayGenerationShader"))
                     ->MissRecord(AZ::Name("MissShader"))
                     ->HitGroupRecord(AZ::Name("HitGroupGradient")) // triangle1
@@ -560,7 +584,7 @@ namespace AtomSampleViewer
                     ->HitGroupRecord(AZ::Name("HitGroupSolid")) // rectangle
                     ;
 
-                m_rayTracingShaderTable->Build(m_rayTracingShaderTableDescriptor);
+                m_rayTracingShaderTable->Build(descriptor);
             }
         };
 
@@ -678,29 +702,5 @@ namespace AtomSampleViewer
                 prepareFunction,
                 compileFunction,
                 executeFunction));
-    }
-
-    void RayTracingExampleComponent::Activate()
-    {
-        CreateResourcePools();
-        CreateGeometry();
-        CreateFullScreenBuffer();
-        CreateOutputTexture();
-        CreateRasterShader();
-        CreateRayTracingAccelerationStructureObjects();
-        CreateRayTracingPipelineState();
-        CreateRayTracingShaderTable();
-        CreateRayTracingAccelerationTableScope();
-        CreateRayTracingDispatchScope();
-        CreateRasterScope();
-
-        RHI::RHISystemNotificationBus::Handler::BusConnect();
-    }
-
-    void RayTracingExampleComponent::Deactivate()
-    {
-        RHI::RHISystemNotificationBus::Handler::BusDisconnect();
-        m_windowContext = nullptr;
-        m_scopeProducers.clear();
     }
 } // namespace AtomSampleViewer

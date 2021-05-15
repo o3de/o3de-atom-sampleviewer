@@ -106,7 +106,6 @@ namespace AtomSampleViewer
 
         // ray tracing shader table
         RHI::Ptr<RHI::RayTracingShaderTable> m_rayTracingShaderTable;
-        AZStd::shared_ptr<RHI::RayTracingShaderTableDescriptor> m_rayTracingShaderTableDescriptor;
 
         // ray tracing global shader resource group and pipeline state
         Data::Instance<RPI::ShaderResourceGroup> m_globalSrg;

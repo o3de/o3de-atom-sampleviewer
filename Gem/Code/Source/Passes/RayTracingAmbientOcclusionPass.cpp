@@ -135,14 +135,14 @@ namespace AZ
                 m_rayTracingShaderTable = RHI::Factory::Get().CreateRayTracingShaderTable();
                 m_rayTracingShaderTable->Init(*device.get(), rayTracingBufferPools);
 
-                m_rayTracingShaderTableDescriptor = AZStd::make_shared<RHI::RayTracingShaderTableDescriptor>();
-                m_rayTracingShaderTableDescriptor->Build(AZ::Name("RayTracingAOShaderTable"), m_rayTracingPipelineState)
+                AZStd::shared_ptr<RHI::RayTracingShaderTableDescriptor> descriptor = AZStd::make_shared<RHI::RayTracingShaderTableDescriptor>();
+                descriptor->Build(AZ::Name("RayTracingAOShaderTable"), m_rayTracingPipelineState)
                     ->RayGenerationRecord(AZ::Name("AoRayGen"))
                     ->MissRecord(AZ::Name("AoMiss"))
                     ->HitGroupRecord(AZ::Name("ClosestHitGroup"))
                     ;
 
-                m_rayTracingShaderTable->Build(m_rayTracingShaderTableDescriptor);
+                m_rayTracingShaderTable->Build(descriptor);
             }
 
             RenderPass::FrameBeginInternal(params);
