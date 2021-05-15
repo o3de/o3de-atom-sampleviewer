@@ -58,7 +58,10 @@ namespace AtomSampleViewer
         AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_meshHandle;
         Utils::DefaultIBL m_defaultIbl;
         AZStd::unique_ptr<DecalContainer> m_decalContainer;
+        // Used to test the DecalFeatureProcessor::Clone() function
+        AZStd::unique_ptr<DecalContainer> m_decalContainerClone;
         ImGuiSidebar m_imguiSidebar;
+        bool m_cloneDecalsEnabled = false;
 
         // CommonSampleComponentBase overrides...
         void OnAllAssetsReadyActivate() override;
