@@ -20,7 +20,6 @@ PROJECT_REPOSITORY_NAME = 'o3de-atom-sampleviewer'
 PROJECT_ORGANIZATION_NAME = 'aws-lumberyard'
 ENGINE_REPOSITORY_NAME = 'o3de'
 ENGINE_ORGANIZATION_NAME = 'aws-lumberyard-dev'
-PROJECT_BUILD_NAME = 'AtomSampleViewer'
 
 def pipelineProperties = []
 
@@ -30,7 +29,8 @@ def pipelineParameters = [
     booleanParam(defaultValue: false, description: 'Deletes the contents of the output directory before building. This will cause a \"clean\" build. NOTE: does not imply CLEAN_ASSETS', name: 'CLEAN_OUTPUT_DIRECTORY'),
     booleanParam(defaultValue: false, description: 'Deletes the contents of the output directories of the AssetProcessor before building.', name: 'CLEAN_ASSETS'),
     booleanParam(defaultValue: false, description: 'Deletes the contents of the workspace and forces a complete pull.', name: 'CLEAN_WORKSPACE'),
-    booleanParam(defaultValue: false, description: 'Recreates the volume used for the workspace. The volume will be created out of a snapshot taken from main.', name: 'RECREATE_VOLUME')
+    booleanParam(defaultValue: false, description: 'Recreates the volume used for the workspace. The volume will be created out of a snapshot taken from main.', name: 'RECREATE_VOLUME'),
+    stringParam(defaultValue: 'main', description: 'Sets a different branch from o3de engine repo to use. Default is mainline', trim: true, name: 'ENGINE_BRANCH')
 ]
 
 def palSh(cmd, lbl = '', winSlashReplacement = true) {
@@ -103,7 +103,7 @@ def GetRunningPipelineName(JENKINS_JOB_NAME) {
     if (job_parts.size() > 1) {
         return [job_parts.take(job_parts.size() - 1).join('_'), job_parts[job_parts.size()-1]]
     }
-    return [job_parts[0], 'project']
+    return [job_parts[0], 'default']
 }
 
 @NonCPS
@@ -170,7 +170,7 @@ def GetBuildEnvVars(Map platformEnv, Map buildTypeEnv, String pipelineName) {
         // This may override the above one if there is an entry defined by the job
         envVarMap[var.key] = var.value
     }
-
+    
     // Environment that only applies to to Jenkins tweaks.
     // For 3rdParty downloads, we store them in the EBS volume so we can reuse them across node
     // instances. This allow us to scale up and down without having to re-download 3rdParty
@@ -215,6 +215,7 @@ def getEngineRemoteConfig(remoteConfigs) {
         url: remoteConfigs.url[0]
             .replace("${PROJECT_REPOSITORY_NAME}", "${ENGINE_REPOSITORY_NAME}")
             .replace("/${PROJECT_ORGANIZATION_NAME}/", "/${ENGINE_ORGANIZATION_NAME}/"),
+        refspec: "+refs/heads/main:refs/remotes/origin/main",
         credentialsId: remoteConfigs.credentialsId[0]
         ]
     return engineRemoteConfigs
@@ -275,11 +276,15 @@ def CheckoutRepo(boolean disableSubmodules = false) {
         retryAttempt = retryAttempt + 1
         projectsAndUrl.each { projectAndUrl ->
             dir(projectAndUrl.key) {
-                def gitFolderExists = fileExists("./.git")
+                def gitLfsConfigExists = fileExists(".lfsconfig")
+                def branchName = scm.branches
                 palSh('git lfs uninstall', 'Git LFS Uninstall') // Prevent git from pulling lfs objects during checkout
+                if(projectAndUrl.key == "${ENGINE_REPOSITORY_NAME}") {
+                    branchName = [[name: params.ENGINE_BRANCH]]
+                }
                 checkout scm: [
                     $class: 'GitSCM',
-                    branches: scm.branches,
+                    branches: branchName,
                     extensions: [
                         [$class: 'PruneStaleBranch'],
                         [$class: 'SubmoduleOption', disableSubmodules: disableSubmodules, recursiveSubmodules: true],
@@ -287,16 +292,17 @@ def CheckoutRepo(boolean disableSubmodules = false) {
                     ],
                     userRemoteConfigs: [projectAndUrl.value]
                 ]
-                if(!gitFolderExists) {
+                if(gitLfsConfigExists) {
+                    def localLfsUrl = GetLfsConfig("git config -f .lfsconfig --get lfs.url", "Getting LFS URL").replace("https://","").trim()
+                    withCredentials([usernamePassword(credentialsId: "${env.GITHUB_USER}", passwordVariable: 'accesstoken', usernameVariable: 'username')]) {
+                        SetLfsCredentials("git config -f .lfsconfig lfs.url https://${username}:${accesstoken}@${localLfsUrl}", 'Set credentials')
+                    }
+                } else {
                     withCredentials([usernamePassword(credentialsId: "${env.GITHUB_USER}", passwordVariable: 'accesstoken', usernameVariable: 'username')]) {
                         SetLfsCredentials("git config -f .lfsconfig lfs.url https://${username}:${accesstoken}@${env.LFS_URL}", 'Set credentials')
                     }
-                } else {
-					def localLfsUrl = GetLfsConfig("git config -f .lfsconfig --get lfs.url", "Getting LFS URL").replace("https://","").trim()
-					withCredentials([usernamePassword(credentialsId: "${env.GITHUB_USER}", passwordVariable: 'accesstoken', usernameVariable: 'username')]) {
-                        SetLfsCredentials("git config -f .lfsconfig lfs.url https://${username}:${accesstoken}@${localLfsUrl}", 'Set credentials')
-                    }
-				}
+                }
+
                 palSh('git lfs install', 'Git LFS Install')
                 palSh('git lfs pull', 'Git LFS Pull')
             }
@@ -502,9 +508,9 @@ try {
                     }
                     pipelineProperties.add(disableConcurrentBuilds())
 
-                    echo "Running \"${pipelineName}\" for \"${branchName}\"..."
+                    echo "Running \"${pipelineName}\" for \"${branchName}\" on engine branch \"${params.ENGINE_BRANCH}\"..."
 
-                    CheckoutBootstrapScripts(branchName)
+                    CheckoutBootstrapScripts(params.ENGINE_BRANCH)
 
                     // Load configs
                     pipelineConfig = LoadPipelineConfig(pipelineName, branchName)
@@ -546,6 +552,7 @@ try {
             if (IsJobEnabled(branchName, build_job, pipelineName, platform.key)) {   // User can filter jobs, jobs are tagged by pipeline
                 def envVars = GetBuildEnvVars(platform.value.PIPELINE_ENV ?: EMPTY_JSON, build_job.value.PIPELINE_ENV ?: EMPTY_JSON, pipelineName)
                 envVars['JOB_NAME'] = "${branchName}_${platform.key}_${build_job.key}" // backwards compatibility, some scripts rely on this
+                envVars['CMAKE_LY_PROJECTS'] = "../${PROJECT_REPOSITORY_NAME}"
                 def nodeLabel = envVars['NODE_LABEL']
                 someBuildHappened = true
 
@@ -563,13 +570,14 @@ try {
                                 if(build_job.value.steps) { //this is a pipe with many steps so create all the build stages
                                     build_job.value.steps.each { build_step ->
                                         build_job_name = build_step
-                                        
+                                
                                         def buildTypeJson = platform.value.build_types["${build_job_name}"]
                                         def buildTypePipelineEnv = buildTypeJson ? buildTypeJson.PIPELINE_ENV : EMPTY_JSON
                                         def jobEnvVars = envVars
                                         buildTypePipelineEnv.each { var ->
                                             jobEnvVars[var.key] = var.value
                                         }
+                                      
                                         withEnv(GetEnvStringList(jobEnvVars)) {
                                             CreateBuildStage(pipelineConfig,  platform.key, build_step, envVars).call()
                                         }
