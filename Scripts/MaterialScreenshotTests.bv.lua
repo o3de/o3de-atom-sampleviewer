@@ -169,8 +169,10 @@ GenerateMaterialScreenshot('Level I', '004_UseVertexColors', {model=g_modelWitho
 GenerateMaterialScreenshot('Level I', '005_UseDisplacement',                            {lighting="Blouberg Sunrise 1 (Alt)", model=g_modelWithLayerMask, cameraHeading=-35.0, cameraPitch=33.0, cameraDistance=9.0, cameraZ=0.9})
 GenerateMaterialScreenshot('Level I', '005_UseDisplacement_Layer2Off',                  {lighting="Blouberg Sunrise 1 (Alt)", model=g_modelWithLayerMask, cameraHeading=-35.0, cameraPitch=33.0, cameraDistance=9.0, cameraZ=0.9})
 GenerateMaterialScreenshot('Level I', '005_UseDisplacement_Layer3Off',                  {lighting="Blouberg Sunrise 1 (Alt)", model=g_modelWithLayerMask, cameraHeading=-35.0, cameraPitch=33.0, cameraDistance=9.0, cameraZ=0.9})
-GenerateMaterialScreenshot('Level I', '005_UseDisplacement_With_BlendMaskTexture',      {lighting="Blouberg Sunrise 1 (Alt)", model=g_modelWithLayerMask, cameraHeading=180.0, cameraPitch=45.0, cameraDistance=20.0, cameraZ=-0.5})
 GenerateMaterialScreenshot('Level I', '005_UseDisplacement_With_BlendMaskVertexColors', {lighting="Blouberg Sunrise 1 (Alt)", model=g_modelWithLayerMask, cameraHeading=0.0, cameraPitch=80.0, cameraDistance=27.0})
+GenerateMaterialScreenshot('Level I', '005_UseDisplacement_With_BlendMaskTexture',               {lighting="Blouberg Sunrise 1 (Alt)", model=g_modelWithLayerMask, cameraHeading=180.0, cameraPitch=45.0, cameraDistance=20.0, cameraZ=-0.5})
+GenerateMaterialScreenshot('Level I', '005_UseDisplacement_With_BlendMaskTexture_NoHeightmaps',  {lighting="Blouberg Sunrise 1 (Alt)", model=g_modelWithLayerMask, cameraHeading=180.0, cameraPitch=45.0, cameraDistance=20.0, cameraZ=-0.5})
+GenerateMaterialScreenshot('Level I', '005_UseDisplacement_With_BlendMaskTexture_AllSameHeight', {lighting="Blouberg Sunrise 1 (Alt)", model=g_modelWithLayerMask, cameraHeading=180.0, cameraPitch=45.0, cameraDistance=20.0, cameraZ=-0.5})
 
 ----------------------------------------------------------------------
 -- Skin Materials...
