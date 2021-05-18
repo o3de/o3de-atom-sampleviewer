@@ -199,6 +199,7 @@ namespace AtomSampleViewer
     {
         bool modelNeedsUpdate = false;
 
+        // Switch pipeline before any imGui actions (switching pipelines switches imGui scope)
         if (m_switchPipeline)
         {
             if (m_useLowEndPipeline)
