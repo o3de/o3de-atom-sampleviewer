@@ -1,0 +1,117 @@
+{
+    "Type": "JsonSerialization",
+    "Version": 1,
+    "ClassName": "AssetAliasesSourceData",
+    "ClassData": {
+        "AssetPaths": [
+            {
+                "Name": "MainPipeline_Mobile",
+                "Path": "Passes/MainPipeline_Mobile.pass"
+            },
+            {
+                "Name": "ImGuiOnlyPipeline",
+                "Path": "Passes/ImGuiOnlyPipeline.pass"
+            },
+            {
+                "Name": "ImGuiNoInputPassTemplate",
+                "Path": "Passes/ImGuiNoInput.pass"
+            },
+            {
+                "Name": "ColorBlindPassTemplate",
+                "Path": "Passes/ColorblindnessSimulation.pass"
+            },
+            {
+                "Name": "ComplexPipeline",
+                "Path": "Passes/ComplexPipeline.pass"
+            },
+            {
+                "Name": "CheckerboardResolveColorTemplate",
+                "Path": "Passes/CheckerboardResolveColor.pass"
+            },
+            {
+                "Name": "CheckerboardResolveDepthTemplate",
+                "Path": "Passes/CheckerboardResolveDepth.pass"
+            },
+            {
+                "Name": "ForwardCheckerboardPassTemplate",
+                "Path": "Passes/ForwardCheckerboard.pass"
+            },
+            {
+                "Name": "DepthCheckerboardPassTemplate",
+                "Path": "Passes/DepthCheckerboard.pass"
+            },
+            {
+                "Name": "CheckerboardPipeline",
+                "Path": "Passes/CheckerboardPipeline.pass"
+            },
+            {
+                "Name": "MonochromeTemplate",
+                "Path": "Passes/Monochrome.pass"
+            },
+            {
+                "Name": "MSAA_RPI_Pipeline_Core",
+                "Path": "Passes/MSAA_RPI_Pipeline_Core.pass"
+            },
+            {
+                "Name": "MSAA_2x_RPI_Pipeline",
+                "Path": "Passes/MSAA_2x_RPI_Pipeline.pass"
+            },
+            {
+                "Name": "MSAA_4x_RPI_Pipeline",
+                "Path": "Passes/MSAA_4x_RPI_Pipeline.pass"
+            },
+            {
+                "Name": "MSAA_8x_RPI_Pipeline",
+                "Path": "Passes/MSAA_8x_RPI_Pipeline.pass"
+            },
+            {
+                "Name": "No_MSAA_RPI_Pipeline",
+                "Path": "Passes/No_MSAA_RPI_Pipeline.pass"
+            },
+            {
+                "Name": "ColorInvertCS",
+                "Path": "Passes/ColorInvertCS.pass"
+            },
+            {
+                "Name": "LuxCoreTexturePassTemplate",
+                "Path": "Passes/LuxCoreTexture.pass"
+            },
+            {
+                "Name": "RenderTextureTemplate",
+                "Path": "Passes/RenderTexture.pass"
+            },
+            {
+                "Name": "ReflectionsParentPass_nomsaaTemplate",
+                "Path": "Passes/Reflections_nomsaa.pass"
+            },
+            {
+                "Name": "ReflectionGlobalFullscreenPass_nomsaaTemplate",
+                "Path": "Passes/ReflectionGlobalFullscreen_nomsaa.pass"
+            },
+            {
+                "Name": "RHISamplePassTemplate",
+                "Path": "Passes/RHISamplePass.pass"
+            },
+            {
+                "Name": "RHISamplePipelineTemplate",
+                "Path": "Passes/RHISamplePipeline.pass"
+            },
+            {
+                "Name": "SsaoPipeline",
+                "Path": "Passes/SsaoPipeline.pass"
+            },
+            {
+                "Name": "DiffuseGlobalFullscreenPass_nomsaaTemplate",
+                "Path": "Passes/DiffuseGlobalFullscreen_nomsaa.pass"
+            },
+            {
+                "Name": "RayTracingAmbientOcclusionPassTemplate",
+                "Path": "Passes/RayTracingAmbientOcclusion.pass"
+            },
+            {
+                "Name": "SelectorPassTemplate",
+                "Path": "Passes/SelectorPass.pass"
+            }
+        ]
+    }
+}
