@@ -61,7 +61,7 @@ namespace AtomSampleViewer
         void CreateRasterShader();
         void CreateRayTracingAccelerationStructureObjects();
         void CreateRayTracingPipelineState();
-        void CreateRayTracingShaderTableScope();
+        void CreateRayTracingShaderTable();
         void CreateRayTracingAccelerationTableScope();
         void CreateRayTracingDispatchScope();
         void CreateRasterScope();
@@ -106,7 +106,6 @@ namespace AtomSampleViewer
 
         // ray tracing shader table
         RHI::Ptr<RHI::RayTracingShaderTable> m_rayTracingShaderTable;
-        RHI::ScopeId m_shaderTableScopeId;
 
         // ray tracing global shader resource group and pipeline state
         Data::Instance<RPI::ShaderResourceGroup> m_globalSrg;
