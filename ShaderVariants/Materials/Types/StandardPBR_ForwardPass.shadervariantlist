@@ -34,9 +34,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -73,9 +71,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -112,9 +108,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "true",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -151,9 +145,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "true",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -190,9 +182,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "true",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -229,9 +219,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -268,9 +256,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -307,9 +293,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -332,7 +316,7 @@
                 "o_enableIBL": "true",
                 "o_enablePunctualLights": "true",
                 "o_enableShadows": "true",
-                "o_enableSubsurfaceScattering": "true",
+                "o_enableSubsurfaceScattering": "false",
                 "o_materialUseForwardPassIBLSpecular": "false",
                 "o_metallic_useTexture": "false",
                 "o_normal_useTexture": "false",
@@ -346,9 +330,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "true",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -385,9 +367,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "true",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -424,9 +404,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "true",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -463,9 +441,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -502,9 +478,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -541,9 +515,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -580,9 +552,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -619,9 +589,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -658,9 +626,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -697,9 +663,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -736,9 +700,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -775,9 +737,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -814,9 +774,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -853,9 +811,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -892,9 +848,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -931,9 +885,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "true",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -956,7 +908,7 @@
                 "o_enableIBL": "true",
                 "o_enablePunctualLights": "true",
                 "o_enableShadows": "true",
-                "o_enableSubsurfaceScattering": "true",
+                "o_enableSubsurfaceScattering": "false",
                 "o_materialUseForwardPassIBLSpecular": "false",
                 "o_metallic_useTexture": "false",
                 "o_normal_useTexture": "false",
@@ -970,9 +922,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
-                "o_transmission_mode": "TransmissionMode::ThickObject",
-                "o_transmission_useTexture": "true",
+                "o_transmission_mode": "TransmissionMode::None",
                 "o_useDepthMap": "false"
             }
         },
@@ -1009,9 +959,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "true"
             }
         },
@@ -1048,9 +996,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -1087,9 +1033,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -1126,9 +1070,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -1165,9 +1107,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -1204,9 +1144,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "true"
             }
         },
@@ -1243,9 +1181,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -1282,9 +1218,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -1321,9 +1255,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "true"
             }
         },
@@ -1360,9 +1292,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "true",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -1399,9 +1329,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "true",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -1438,9 +1366,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -1477,9 +1403,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "true",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -1516,9 +1440,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "true",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
@@ -1555,9 +1477,7 @@
                 "o_specularF0_enableMultiScatterCompensation": "true",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
-                "o_subsurfaceScattering_useTexture": "false",
                 "o_transmission_mode": "TransmissionMode::None",
-                "o_transmission_useTexture": "false",
                 "o_useDepthMap": "false"
             }
         },
