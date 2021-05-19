@@ -393,8 +393,8 @@ namespace AtomSampleViewer
 
         // Set up the SRGs
         {
-            const char* floatBufferSrgPath = "shaderlib/atom/rpi/shaderresourcegroups/bindlessprototypesrg_floatbuffersrg.azsrg";
-            const char* imageSrgPath = "shaderlib/atom/rpi/shaderresourcegroups/bindlessprototypesrg_imagesrg.azsrg";
+            const char* floatBufferSrgPath = "shaders/rhi/bindlessprototypesrg_floatbuffersrg.azsrg";
+            const char* imageSrgPath = "shaders/rhi/bindlessprototypesrg_imagesrg.azsrg";
 
             // Set the FloatBufferSrg
             m_bindlessSrg = std::make_unique<BindlessSrg>(BindlessSrg({

@@ -178,7 +178,6 @@ namespace AtomSampleViewer
 
         AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
         defaultScene->AddRenderPipeline(m_originalPipeline);
-        AZ::RPI::RenderPipelineDescriptor pipelineDesc;
         defaultScene->RemoveRenderPipeline(m_ssaoPipeline->GetId());
         DestroySsaoPipeline();
     }

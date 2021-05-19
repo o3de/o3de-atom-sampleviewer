@@ -34,8 +34,8 @@ namespace AtomSampleViewer
         };
     }
 
-    DecalContainer::DecalContainer(AZ::Render::DecalFeatureProcessorInterface* fp)
-        : m_decalFeatureProcessor(fp)
+    DecalContainer::DecalContainer(AZ::Render::DecalFeatureProcessorInterface* fp, const AZ::Vector3 position)
+        : m_decalFeatureProcessor(fp), m_position(position)
     {
         SetupDecals();
     }
@@ -45,14 +45,14 @@ namespace AtomSampleViewer
         const float HalfLength = 0.25f;
         const float HalfProjectionDepth = 10.0f;
         const AZ::Vector3 halfSize(HalfLength, HalfLength, HalfProjectionDepth);
-        SetupNewDecal(AZ::Vector3(-0.75f, -0.25f, 1), halfSize, DecalMaterialNames[0]);
-        SetupNewDecal(AZ::Vector3(-0.25f, -0.25f, 1), halfSize, DecalMaterialNames[1]);
-        SetupNewDecal(AZ::Vector3(0.25f, -0.25f, 1), halfSize, DecalMaterialNames[2]);
-        SetupNewDecal(AZ::Vector3(0.75f, -0.25f, 1), halfSize, DecalMaterialNames[3]);
-        SetupNewDecal(AZ::Vector3(-0.75f, 0.25f, 1), halfSize, DecalMaterialNames[4]);
-        SetupNewDecal(AZ::Vector3(-0.25f, 0.25f, 1), halfSize, DecalMaterialNames[5]);
-        SetupNewDecal(AZ::Vector3(0.25f, 0.25f, 1), halfSize, DecalMaterialNames[6]);
-        SetupNewDecal(AZ::Vector3(0.75f, 0.25f, 1), halfSize, DecalMaterialNames[7]);
+        SetupNewDecal(AZ::Vector3(-0.75f, -0.25f, 1) + m_position, halfSize, DecalMaterialNames[0]);
+        SetupNewDecal(AZ::Vector3(-0.25f, -0.25f, 1) + m_position, halfSize, DecalMaterialNames[1]);
+        SetupNewDecal(AZ::Vector3(0.25f, -0.25f, 1) + m_position, halfSize, DecalMaterialNames[2]);
+        SetupNewDecal(AZ::Vector3(0.75f, -0.25f, 1) + m_position, halfSize, DecalMaterialNames[3]);
+        SetupNewDecal(AZ::Vector3(-0.75f, 0.25f, 1) + m_position, halfSize, DecalMaterialNames[4]);
+        SetupNewDecal(AZ::Vector3(-0.25f, 0.25f, 1) + m_position, halfSize, DecalMaterialNames[5]);
+        SetupNewDecal(AZ::Vector3(0.25f, 0.25f, 1) + m_position, halfSize, DecalMaterialNames[6]);
+        SetupNewDecal(AZ::Vector3(0.75f, 0.25f, 1) + m_position, halfSize, DecalMaterialNames[7]);
     }
 
     DecalContainer::~DecalContainer()
@@ -113,4 +113,20 @@ namespace AtomSampleViewer
         m_decalFeatureProcessor->ReleaseDecal(decal.m_decalHandle);
         decal.m_decalHandle = AZ::Render::DecalFeatureProcessorInterface::DecalHandle::Null;
     }
+
+    void DecalContainer::CloneFrom(const DecalContainer& containerToClone)
+    {
+        SetNumDecalsActive(0);
+        for (size_t i = 0; i < containerToClone.GetNumDecalsActive() ; ++i)
+        {
+            Decal& ourDecal = m_decals[i];
+            const Decal& otherDecal = containerToClone.m_decals[i];
+
+            ourDecal.m_decalHandle = m_decalFeatureProcessor->CloneDecal(otherDecal.m_decalHandle);
+
+            // Cloning sets the decal position to overlap the existing decal, lets move it so that it is visible
+            m_decalFeatureProcessor->SetDecalPosition(ourDecal.m_decalHandle, ourDecal.m_position);
+        }
+    }
+
 }
