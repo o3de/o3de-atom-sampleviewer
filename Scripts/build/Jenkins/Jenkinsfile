@@ -276,7 +276,6 @@ def CheckoutRepo(boolean disableSubmodules = false) {
         retryAttempt = retryAttempt + 1
         projectsAndUrl.each { projectAndUrl ->
             dir(projectAndUrl.key) {
-                def gitLfsConfigExists = fileExists(".lfsconfig")
                 def branchName = scm.branches
                 palSh('git lfs uninstall', 'Git LFS Uninstall') // Prevent git from pulling lfs objects during checkout
                 if(projectAndUrl.key == "${ENGINE_REPOSITORY_NAME}") {
@@ -292,14 +291,10 @@ def CheckoutRepo(boolean disableSubmodules = false) {
                     ],
                     userRemoteConfigs: [projectAndUrl.value]
                 ]
-                if(gitLfsConfigExists) {
-                    def localLfsUrl = GetLfsConfig("git config -f .lfsconfig --get lfs.url", "Getting LFS URL").replace("https://","").trim()
-                    withCredentials([usernamePassword(credentialsId: "${env.GITHUB_USER}", passwordVariable: 'accesstoken', usernameVariable: 'username')]) {
-                        SetLfsCredentials("git config -f .lfsconfig lfs.url https://${username}:${accesstoken}@${localLfsUrl}", 'Set credentials')
-                    }
-                } else {
-                    withCredentials([usernamePassword(credentialsId: "${env.GITHUB_USER}", passwordVariable: 'accesstoken', usernameVariable: 'username')]) {
-                        SetLfsCredentials("git config -f .lfsconfig lfs.url https://${username}:${accesstoken}@${env.LFS_URL}", 'Set credentials')
+                if(fileExists(".lfsconfig")) {
+                def localLfsUrl = GetLfsConfig("git config -f .lfsconfig --get lfs.url", "Getting LFS URL").replace("https://","").trim()
+                withCredentials([usernamePassword(credentialsId: "${env.GITHUB_USER}", passwordVariable: 'accesstoken', usernameVariable: 'username')]) {
+                    SetLfsCredentials("git config -f .lfsconfig lfs.url https://${username}:${accesstoken}@${localLfsUrl}", 'Set credentials')
                     }
                 }
 
