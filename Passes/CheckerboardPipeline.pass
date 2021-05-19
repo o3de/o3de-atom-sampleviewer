@@ -363,7 +363,7 @@
                 },
                 {
                     "Name": "SkyBoxPass",
-                    "TemplateName": "SkyBoxTemplate",
+                    "TemplateName": "SkyBoxTwoOutputsTemplate",
                     "Enabled": true,
                     "Connections": [
                         {
