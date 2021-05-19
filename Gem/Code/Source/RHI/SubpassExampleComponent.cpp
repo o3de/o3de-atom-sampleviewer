@@ -262,9 +262,12 @@ namespace AtomSampleViewer
             {
                 Data::Instance<AZ::RPI::ModelLod> modelLod = m_models[modelData.m_modelType]->GetLods()[0];
 
+                AZ::RPI::UvStreamTangentIndex dummyUvStreamTangentIndex;
+
                 modelLod->GetStreamsForMesh(
                     pipelineDesc.m_inputStreamLayout,
                     modelData.m_streamBufferList,
+                    dummyUvStreamTangentIndex,
                     variant.GetInputContract(),
                     0);
 

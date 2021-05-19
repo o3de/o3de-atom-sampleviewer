@@ -336,7 +336,7 @@ namespace AtomSampleViewer
                     return;
                 }
             }
-                        
+
             {
                 // Model Pipeline
                 Data::Instance<AZ::RPI::ModelLod> modelLod = m_model->GetLods()[0];
@@ -344,9 +344,10 @@ namespace AtomSampleViewer
                 modelLod->GetStreamsForMesh(
                     pipelineDesc.m_inputStreamLayout,
                     m_modelStreamBufferViews[ShadowScope],
+                    m_uvStreamTangentIndex,
                     variant.GetInputContract(),
                     0);
-                                    
+
                 m_modelPipelineStates[ShadowScope] = shader->AcquirePipelineState(pipelineDesc);
                 if (!m_modelPipelineStates[ShadowScope])
                 {
@@ -400,10 +401,12 @@ namespace AtomSampleViewer
             {
                 // Model Pipeline
                 Data::Instance<AZ::RPI::ModelLod> modelLod = m_model->GetLods()[0];
+                AZ::RPI::UvStreamTangentIndex uvStreamTangentIndex;
 
                 modelLod->GetStreamsForMesh(
                     pipelineDesc.m_inputStreamLayout,
                     m_modelStreamBufferViews[ForwardScope],
+                    uvStreamTangentIndex,
                     variant.GetInputContract(),
                     0);
 
@@ -447,7 +450,7 @@ namespace AtomSampleViewer
             {
                 AZ_Error(AsyncCompute::sampleName, false, "Invalid stream buffer views for LuminanceMap");
                 return;
-            }                
+            }
 
             m_copyTexturePipelineState = shader->AcquirePipelineState(pipelineDesc);
             if (!m_copyTexturePipelineState)
@@ -964,6 +967,8 @@ namespace AtomSampleViewer
             for (const auto& shaderResourceGroup : m_shaderResourceGroups[ForwardScope])
             {
                 shaderResourceGroup->SetImageView(m_shaderInputImageIndex, imageView);
+                RHI::ShaderInputNameIndex shaderUvStreamTangentIndex = "m_uvStreamTangentIndex";
+                shaderResourceGroup->SetConstant(shaderUvStreamTangentIndex, m_uvStreamTangentIndex);
                 shaderResourceGroup->Compile();
             }
         };

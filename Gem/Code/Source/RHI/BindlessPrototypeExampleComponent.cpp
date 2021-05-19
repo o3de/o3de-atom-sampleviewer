@@ -277,7 +277,8 @@ namespace AtomSampleViewer
             // Set the buffer stream
             RHI::InputStreamLayout layout;
             const ShaderVariant& shaderVariant = m_shader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId);
-            m_model->GetLods()[lodModel]->GetStreamsForMesh(layout, subMeshInstance.bufferStreamViewArray, shaderVariant.GetInputContract(), subMeshIdx);
+            AZ::RPI::UvStreamTangentIndex uvStreamTangentIndex;
+            m_model->GetLods()[lodModel]->GetStreamsForMesh(layout, subMeshInstance.bufferStreamViewArray, uvStreamTangentIndex, shaderVariant.GetInputContract(), subMeshIdx);
         }
     }
 
@@ -393,8 +394,8 @@ namespace AtomSampleViewer
 
         // Set up the SRGs
         {
-            const char* floatBufferSrgPath = "shaders/rhi/bindlessprototypesrg_floatbuffersrg.azsrg";
-            const char* imageSrgPath = "shaders/rhi/bindlessprototypesrg_imagesrg.azsrg";
+            const char* floatBufferSrgPath = "shaderlib/atom/rpi/shaderresourcegroups/bindlessprototypesrg_floatbuffersrg.azsrg";
+            const char* imageSrgPath = "shaderlib/atom/rpi/shaderresourcegroups/bindlessprototypesrg_imagesrg.azsrg";
 
             // Set the FloatBufferSrg
             m_bindlessSrg = std::make_unique<BindlessSrg>(BindlessSrg({
@@ -430,7 +431,8 @@ namespace AtomSampleViewer
             RHI::InputStreamLayout layout;
             ModelLod::StreamBufferViewList streamBufferView;
             const ShaderVariant& shaderVariant = m_shader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId);
-            m_model->GetLods()[m_modelLod]->GetStreamsForMesh(layout, streamBufferView, shaderVariant.GetInputContract(), meshIndex);
+            AZ::RPI::UvStreamTangentIndex dummyUvStreamTangentIndex;
+            m_model->GetLods()[m_modelLod]->GetStreamsForMesh(layout, streamBufferView, dummyUvStreamTangentIndex, shaderVariant.GetInputContract(), meshIndex);
             // Set the pipeline state
             {
                 RHI::PipelineStateDescriptorForDraw pipelineStateDescriptor;
@@ -466,18 +468,14 @@ namespace AtomSampleViewer
         // Set the images
         {
             Data::Instance<AZ::RPI::ShaderResourceGroup> imageSrg = m_bindlessSrg->GetSrg(m_imageSrgName);
-            AZ::RHI::ShaderInputImageUnboundedArrayIndex imageIndex = imageSrg->FindShaderInputImageUnboundedArrayIndex(AZ::Name(textureArrayId));
+            AZ::RHI::ShaderInputImageIndex imageIndex = imageSrg->FindShaderInputImageIndex(AZ::Name(textureArrayId));
 
-            AZStd::vector<const RHI::ImageView*> imageViews;
-            for (uint32_t textureIdx = 0u; textureIdx < InternalBP::ImageCount; textureIdx++)
+            for (uint32_t textuerIdx = 0u; textuerIdx < InternalBP::ImageCount; textuerIdx++)
             {
-                AZ::Data::Instance<AZ::RPI::StreamingImage> image = LoadStreamingImage(InternalBP::Images[textureIdx], InternalBP::SampleName);
-                m_images.push_back(image);
-                imageViews.push_back(image->GetImageView());
+                AZ::Data::Instance<AZ::RPI::StreamingImage> image = LoadStreamingImage(InternalBP::Images[textuerIdx], InternalBP::SampleName);
+                [[maybe_unused]] bool result = imageSrg->SetImage(imageIndex, image, textuerIdx);
+                AZ_Assert(result, "Failed to set image into shader resource group.");
             }
-
-            [[maybe_unused]] bool result = imageSrg->SetImageViewUnboundedArray(imageIndex, imageViews);
-            AZ_Assert(result, "Failed to set image view unbounded array into shader resource group.");
 
             // Compile the image SRG
             imageSrg->Compile();

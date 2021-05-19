@@ -95,7 +95,7 @@ namespace AtomSampleViewer
                 }
 
                 auto model = AZ::RPI::Model::FindOrCreate(modelAsset);
-                AZ_Error("Render", model, "Failed to load model %s", modelsPath[i]);               
+                AZ_Error("Render", model, "Failed to load model %s", modelsPath[i]);
 
                 m_models.push_back(AZStd::move(model));
             }
@@ -179,12 +179,14 @@ namespace AtomSampleViewer
                 if (model)
                 {
                     Data::Instance<AZ::RPI::ModelLod> modelLod = model->GetLods()[0];
+                    AZ::RPI::UvStreamTangentIndex dummyUvStreamTangentIndex;
+
                     m_modelStreamBufferViews[i].resize(modelLod->GetMeshes().size());
 
                     for (uint32_t j = 0; j < m_modelStreamBufferViews[i].size(); ++j)
                     {
                         modelLod->GetStreamsForMesh(
-                            pipelineStateDescriptor.m_inputStreamLayout, m_modelStreamBufferViews[i][j], shaderVariant.GetInputContract(),
+                            pipelineStateDescriptor.m_inputStreamLayout, m_modelStreamBufferViews[i][j], dummyUvStreamTangentIndex, shaderVariant.GetInputContract(),
                             j);
                     }
                 }

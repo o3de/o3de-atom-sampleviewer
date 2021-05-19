@@ -152,6 +152,8 @@ namespace AtomSampleViewer
         // Camera projection matrix
         AZ::Matrix4x4 m_projectionMatrix;
 
+        AZ::RPI::UvStreamTangentIndex m_uvStreamTangentIndex;
+
         AZStd::array<AZStd::vector<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>>, NumScopes> m_shaderResourceGroups;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_viewShaderResourceGroup;
         AZ::RHI::ShaderInputImageIndex m_shaderInputImageIndex;
