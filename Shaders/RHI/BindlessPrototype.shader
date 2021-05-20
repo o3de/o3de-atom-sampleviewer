@@ -20,5 +20,6 @@
           "type": "Fragment"
         }
       ]
-    }
+    },
+    "DisabledRHIBackends": ["metal"]
 }
