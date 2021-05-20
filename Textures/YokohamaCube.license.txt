@@ -1,0 +1,7 @@
+This yokohamCube.dss is modified from the following source
+
+https://www.humus.name/index.php?page=Textures
+https://www.humus.name/index.php?page=Cubemap&item=Yokohama3
+
+These textures are licensed under a Creative Commons Attribution 3.0 Unported License.
+https://creativecommons.org/licenses/by/3.0/
