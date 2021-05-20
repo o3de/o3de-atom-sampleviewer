@@ -81,6 +81,37 @@ namespace AtomSampleViewer
         };
     }
 
+    void MeshExampleComponent::DefaultWindowCreated()
+    {
+        AZ::Render::Bootstrap::DefaultWindowBus::BroadcastResult(m_windowContext, &AZ::Render::Bootstrap::DefaultWindowBus::Events::GetDefaultWindowContext);
+    }
+
+    void MeshExampleComponent::CreateLowEndPipeline()
+    {
+        // Create low end pipeline
+        AZ::RPI::RenderPipelineDescriptor pipelineDesc;
+        pipelineDesc.m_mainViewTagName = "MainCamera";
+        pipelineDesc.m_name = "LowEndPipeline";
+        pipelineDesc.m_rootPassTemplate = "LowEndPipelineTemplate";
+        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 4;
+
+        m_lowEndPipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
+
+        // Add it to the scene
+        AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
+        m_originalPipeline = defaultScene->GetDefaultRenderPipeline();
+        defaultScene->AddRenderPipeline(m_lowEndPipeline);
+        m_lowEndPipeline->SetDefaultView(m_originalPipeline->GetDefaultView());
+        m_lowEndPipeline->RemoveFromRenderTick();
+    }
+
+    void MeshExampleComponent::DestroyLowEndPipeline()
+    {
+        AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
+        defaultScene->RemoveRenderPipeline(m_lowEndPipeline->GetId());
+        m_lowEndPipeline = nullptr;
+    }
+
     void MeshExampleComponent::Activate()
     {
         UseArcBallCameraController();
@@ -118,10 +149,18 @@ namespace AtomSampleViewer
         m_groundPlaneModelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/plane.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
 
         AZ::TickBus::Handler::BusConnect();
+        AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusConnect();
+        CreateLowEndPipeline();
     }
 
     void MeshExampleComponent::Deactivate()
     {
+        if (m_useLowEndPipeline)
+        {
+            DeactivateLowEndPipeline();
+        }
+        DestroyLowEndPipeline();
+        AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusDisconnect();
         AZ::TickBus::Handler::BusDisconnect();
 
         m_imguiSidebar.Deactivate();
@@ -142,15 +181,46 @@ namespace AtomSampleViewer
         ShutdownLightingPresets();
     }
 
+    void MeshExampleComponent::ActivateLowEndPipeline()
+    {
+        m_lowEndPipeline->AddToRenderTick();
+        m_originalPipeline->RemoveFromRenderTick();
+        m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass(AZ::RPI::PassHierarchyFilter({ m_lowEndPipeline->GetId().GetCStr(), "ImGuiPass" }));
+    }
+
+    void MeshExampleComponent::DeactivateLowEndPipeline()
+    {
+        m_originalPipeline->AddToRenderTick();
+        m_lowEndPipeline->RemoveFromRenderTick();
+        m_imguiScope = {}; // restores previous ImGui context.
+    }
+
     void MeshExampleComponent::OnTick([[maybe_unused]] float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint time)
     {
         bool modelNeedsUpdate = false;
+
+        // Switch pipeline before any imGui actions (switching pipelines switches imGui scope)
+        if (m_switchPipeline)
+        {
+            if (m_useLowEndPipeline)
+            {
+                ActivateLowEndPipeline();
+            }
+            else
+            {
+                DeactivateLowEndPipeline();
+            }
+
+            m_switchPipeline = false;
+        }
 
         if (m_imguiSidebar.Begin())
         {
             ImGuiLightingPreset();
 
             ImGuiAssetBrowser::WidgetSettings assetBrowserSettings;
+
+            m_switchPipeline = ScriptableImGui::Checkbox("Use Low End Pipeline", &m_useLowEndPipeline) || m_switchPipeline;
 
             modelNeedsUpdate |= ScriptableImGui::Checkbox("Enable Material Override", &m_enableMaterialOverride);
            

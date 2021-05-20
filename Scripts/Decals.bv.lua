@@ -22,8 +22,10 @@ Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 OpenSample('RPI/Decals')
 ResizeViewport(1600, 900)
 SelectImageComparisonToleranceLevel("Level G")
-ArcBallCameraController_SetDistance(2.0)
+ArcBallCameraController_SetDistance(4.0)
+-- Wait until decals are loaded in
 IdleFrames(5)
+SetImguiValue('Clone decals', true)
 TakeScreenshots()
 
 OpenSample(nil)

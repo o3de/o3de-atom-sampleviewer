@@ -16,19 +16,7 @@ set(GEM_DEPENDENCIES
     Gem::LmbrCentral
     Gem::LyShine
     Gem::Camera
-    Gem::Atom_RHI.Private
-    Gem::Atom_RHI_Metal.Private
     Gem::EMotionFX
-    Gem::Atom_RHI_Vulkan.Private
-    Gem::Atom_RPI.Private
-    Gem::Atom_Feature_Common
-    Gem::Atom_Bootstrap
-    Gem::Atom_RHI_DX12.Private
-    Gem::Atom_RHI_Null.Private
-    Gem::Atom_Component_DebugCamera
-    Gem::AtomLyIntegration_CommonFeatures
-    Gem::EMotionFX_Atom
-    Gem::ImguiAtom
     Gem::Atom_AtomBridge
     Gem::AtomSampleViewer
 )
