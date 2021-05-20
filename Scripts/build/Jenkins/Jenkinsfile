@@ -194,7 +194,7 @@ def GetLfsConfig(cmd, lbl = '') {
            script: cmd,
            returnStdout: true
     } else {
-        powershell label: lbl,
+        powershell label: lbl, // Powershell is used due to bat output returning the prompt as well
            script: cmd,
            returnStdout: true
     }
@@ -292,7 +292,7 @@ def CheckoutRepo(boolean disableSubmodules = false) {
                     userRemoteConfigs: [projectAndUrl.value]
                 ]
                 if(fileExists(".lfsconfig")) {
-                def localLfsUrl = GetLfsConfig("git config -f .lfsconfig --get lfs.url", "Getting LFS URL").replace("https://","").trim()
+                def localLfsUrl = GetLfsConfig("git config -f .lfsconfig --get lfs.url", "Getting LFS URL").replace("https://","").trim() // Read the lfs file instead of relying on env var
                 withCredentials([usernamePassword(credentialsId: "${env.GITHUB_USER}", passwordVariable: 'accesstoken', usernameVariable: 'username')]) {
                     SetLfsCredentials("git config -f .lfsconfig lfs.url https://${username}:${accesstoken}@${localLfsUrl}", 'Set credentials')
                     }
