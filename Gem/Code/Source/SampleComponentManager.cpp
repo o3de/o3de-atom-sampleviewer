@@ -233,7 +233,7 @@ namespace AtomSampleViewer
 
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/AlphaToCoverage", azrtti_typeid<AlphaToCoverageExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/AsyncCompute", azrtti_typeid<AsyncComputeExampleComponent>() ) );
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/BindlessPrototype", azrtti_typeid<BindlessPrototypeExampleComponent>() ));
+        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/BindlessPrototype", azrtti_typeid<BindlessPrototypeExampleComponent>(), []() {return Utils::GetRHIDevice()->GetFeatures().m_unboundedArrays; } ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/Compute", azrtti_typeid<ComputeExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/CopyQueue", azrtti_typeid<CopyQueueComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/DualSourceBlending", azrtti_typeid<DualSourceBlendingComponent>(), []() {return Utils::GetRHIDevice()->GetFeatures().m_dualSourceBlending; } ));
@@ -332,6 +332,17 @@ namespace AtomSampleViewer
         // Add customized pass classes
         auto* passSystem = RPI::PassSystemInterface::Get();
         passSystem->AddPassCreator(Name("RHISamplePass"), &AtomSampleViewer::RHISamplePass::Create);
+
+        // Load ASV's own pass templates mapping
+        // It can be loaded here and it doesn't need be added via OnReadyLoadTemplatesEvent::Handler
+        // since the first render pipeline is created after this point.
+        const char* asvPassTemplatesFile = "Passes/ASV/PassTemplates.azasset";
+        bool loaded = passSystem->LoadPassTemplateMappings(asvPassTemplatesFile);
+        if (!loaded)
+        {
+            AZ_Fatal("SampleComponentManager", "Failed to load AtomSampleViewer's pass templates at %s", asvPassTemplatesFile);
+            return;
+        }
 
         // Use scene and render pipeline for RHI samples as default scene and render pipeline
         CreateSceneForRHISample();

@@ -13,7 +13,7 @@
 // GlobalSrg::m_floatBuffer
 // PerSceneSrg::m_textureArray
 // PerSceneSrg::m_sampler
-#include <Atom/RPI/ShaderResourceGroups/BindlessPrototypeSrg.azsli>
+#include "BindlessPrototypeSrg.azsli"
 
 struct BindlessMaterial0
 {
@@ -87,15 +87,15 @@ VertexOutput MainVS(VertexInput vsInput)
     uint offset = 0;
     PerObject perObject;
     {
-        SetFloat4x4(perObject.m_localToWorldMatrix, HandleSrg::m_perObjectHandle, offset);
-        SetFloat4(perObject.rotation, HandleSrg::m_perObjectHandle, offset);
+        ReadFromFloatBuffer(perObject.m_localToWorldMatrix, HandleSrg::m_perObjectHandle, offset);
+        ReadFromFloatBuffer(perObject.rotation, HandleSrg::m_perObjectHandle, offset);
     }
 
     // Read the world matrix from the FloatBuffer
     float4x4 worldToClipMatrix;
     offset = 0;
     {
-        SetFloat4x4(worldToClipMatrix, HandleSrg::m_perViewHandle, offset);
+        ReadFromFloatBuffer(worldToClipMatrix, HandleSrg::m_perViewHandle, offset);
     }
 
     const float4 worldPosition = mul(perObject.m_localToWorldMatrix,  float4(vsInput.m_position, 1.0));
@@ -119,22 +119,22 @@ PixelOutput MainPS(VertexOutput psInput)
     // Read the material index to identify the material type
     uint4 materialIndex;
     {
-        SetUint4(materialIndex, HandleSrg::m_materialHandle, offset);
+        ReadFromFloatBuffer(materialIndex, HandleSrg::m_materialHandle, offset);
     }
     
     // Read the material data from the FloatBuffer depending ont he material index
     if(materialIndex.x == 0) // Albedo material
     {
         BindlessMaterial0 bindlessMaterial0; 
-        SetFloat4(bindlessMaterial0.m_diffuseColor, HandleSrg::m_materialHandle, offset);
+        ReadFromFloatBuffer(bindlessMaterial0.m_diffuseColor, HandleSrg::m_materialHandle, offset);
         
         OUT.m_color = float4(bindlessMaterial0.m_diffuseColor.xyz, 1.0);
     }
     else if(materialIndex.x == 1) // Texture sample material
     {
         BindlessMaterial1 bindlessMaterial1; 
-        SetFloat4(bindlessMaterial1.m_diffuseColor, HandleSrg::m_materialHandle, offset);
-        SetUint(bindlessMaterial1.m_diffuseTextureIndex, HandleSrg::m_materialHandle, offset);
+        ReadFromFloatBuffer(bindlessMaterial1.m_diffuseColor, HandleSrg::m_materialHandle, offset);
+        ReadFromFloatBuffer(bindlessMaterial1.m_diffuseTextureIndex, HandleSrg::m_materialHandle, offset);
 
         Texture2D texture = ImageSrg::m_textureArray[bindlessMaterial1.m_diffuseTextureIndex % 8]; // % 8 for wrap-around texture index as specified in ImageSrg.m_textureArray
         OUT.m_color = texture.Sample(ImageSrg::m_sampler, psInput.m_uv);
@@ -143,17 +143,17 @@ PixelOutput MainPS(VertexOutput psInput)
     {
         float4 color;
         BindlessMaterial2 bindlessMaterial2; 
-        SetFloat4(bindlessMaterial2.m_diffuseColor, HandleSrg::m_materialHandle, offset);
-        SetUint(bindlessMaterial2.m_diffuseTextureIndex, HandleSrg::m_materialHandle, offset);
-        SetUint(bindlessMaterial2.m_normalTextureIndex, HandleSrg::m_materialHandle, offset);
-        SetUint(bindlessMaterial2.m_specularTextureIndex, HandleSrg::m_materialHandle, offset);
+        ReadFromFloatBuffer(bindlessMaterial2.m_diffuseColor, HandleSrg::m_materialHandle, offset);
+        ReadFromFloatBuffer(bindlessMaterial2.m_diffuseTextureIndex, HandleSrg::m_materialHandle, offset);
+        ReadFromFloatBuffer(bindlessMaterial2.m_normalTextureIndex, HandleSrg::m_materialHandle, offset);
+        ReadFromFloatBuffer(bindlessMaterial2.m_specularTextureIndex, HandleSrg::m_materialHandle, offset);
 
         Texture2D texture = ImageSrg::m_textureArray[bindlessMaterial2.m_diffuseTextureIndex % 8]; // % 8 for wrap-around texture index as specified in ImageSrg.m_textureArray
         color = texture.Sample(ImageSrg::m_sampler, psInput.m_uv);
 
         float3 lightDir;
         uint lightOffset = 0;
-        SetFloat3(lightDir, HandleSrg::m_lightHandle, lightOffset); 
+        ReadFromFloatBuffer(lightDir, HandleSrg::m_lightHandle, lightOffset); 
         lightDir = normalize(-lightDir);
 
         color *= dot(lightDir, psInput.m_normal) * 8.0;

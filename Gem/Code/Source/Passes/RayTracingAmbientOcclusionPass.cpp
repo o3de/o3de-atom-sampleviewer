@@ -128,19 +128,21 @@ namespace AZ
 
             if (!m_rayTracingShaderTable)
             {
+                RHI::Ptr<RHI::Device> device = RHI::RHISystemInterface::Get()->GetDevice();
+                RHI::RayTracingBufferPools& rayTracingBufferPools = m_rayTracingFeatureProcessor->GetBufferPools();
+
                 // Build shader table once. Since we are not using local srg so we don't need to rebuild it even when scene changed 
                 m_rayTracingShaderTable = RHI::Factory::Get().CreateRayTracingShaderTable();
-                RHI::RayTracingShaderTableDescriptor descriptor;
-                descriptor.Build(AZ::Name("RayTracingAOShaderTable"), m_rayTracingPipelineState)
+                m_rayTracingShaderTable->Init(*device.get(), rayTracingBufferPools);
+
+                AZStd::shared_ptr<RHI::RayTracingShaderTableDescriptor> descriptor = AZStd::make_shared<RHI::RayTracingShaderTableDescriptor>();
+                descriptor->Build(AZ::Name("RayTracingAOShaderTable"), m_rayTracingPipelineState)
                     ->RayGenerationRecord(AZ::Name("AoRayGen"))
                     ->MissRecord(AZ::Name("AoMiss"))
                     ->HitGroupRecord(AZ::Name("ClosestHitGroup"))
                     ;
 
-                RHI::Ptr<RHI::Device> device = RHI::RHISystemInterface::Get()->GetDevice();
-                RHI::RayTracingBufferPools& rayTracingBufferPools = m_rayTracingFeatureProcessor->GetBufferPools();
-
-                m_rayTracingShaderTable->Init(*device.get(), &descriptor, rayTracingBufferPools);
+                m_rayTracingShaderTable->Build(descriptor);
             }
 
             RenderPass::FrameBeginInternal(params);
