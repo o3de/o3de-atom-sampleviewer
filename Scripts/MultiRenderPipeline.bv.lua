@@ -35,6 +35,11 @@ end
 OpenSample('RPI/MultiRenderPipeline')
 ResizeViewport(800, 600)
 
+NoClipCameraController_SetFov(DegToRad(21.358959))
+NoClipCameraController_SetPosition(Vector3(-7.576071, 13.286152, 2.185254))
+NoClipCameraController_SetHeading(DegToRad(-149.923874))
+NoClipCameraController_SetPitch(DegToRad(-4.615502))
+
 SelectImageComparisonToleranceLevel("Level E")
 
 -- start window

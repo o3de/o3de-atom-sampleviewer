@@ -375,7 +375,8 @@ namespace AtomSampleViewer
             const AZ::Aabb& aabb = model->GetAabb();
             const float minZ = aabb.GetMin().GetZ();
             const AZ::Vector3 translation{ 0.f, 0.f, -minZ };
-            const auto transform = AZ::Transform::CreateTranslation(translation);
+            auto transform = AZ::Transform::CreateTranslation(translation);
+            transform.SetScale(AZ::Vector3(1.5f, 1.5f, 1.5f));
             GetMeshFeatureProcessor()->SetTransform(m_bunnyMeshHandle, transform);
             m_bunnyMeshIsReady = true;
             if (m_floorMeshIsReady)
