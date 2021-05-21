@@ -197,10 +197,10 @@ namespace AtomSampleViewer
         }
 
         auto planeMeshHandle = meshFP->AcquireMesh(planeModelAsset, material);
-        Transform planeScale = Transform::CreateScale(Vector3(numAlongXAxis * spacing, numAlongYAxis * spacing, 1.0f));
+        Vector3 planeNonUniformScale(numAlongXAxis * spacing, numAlongYAxis * spacing, 1.0f);
         Transform planeTranslation = Transform::CreateTranslation(Vector3(0.5f * numAlongXAxis * spacing, 0.5f * numAlongYAxis * spacing, 0.0f));
-        Transform planeModelToWorld = planeTranslation * planeScale;
-        meshFP->SetTransform(planeMeshHandle, planeModelToWorld);
+        Transform planeModelToWorld = planeTranslation;
+        meshFP->SetTransform(planeMeshHandle, planeModelToWorld, planeNonUniformScale);
         m_meshHandles.push_back(AZStd::move(planeMeshHandle));
     }
 
