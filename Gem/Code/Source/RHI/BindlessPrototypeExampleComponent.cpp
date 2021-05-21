@@ -277,8 +277,7 @@ namespace AtomSampleViewer
             // Set the buffer stream
             RHI::InputStreamLayout layout;
             const ShaderVariant& shaderVariant = m_shader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId);
-            AZ::RPI::UvStreamTangentIndex uvStreamTangentIndex;
-            m_model->GetLods()[lodModel]->GetStreamsForMesh(layout, subMeshInstance.bufferStreamViewArray, uvStreamTangentIndex, shaderVariant.GetInputContract(), subMeshIdx);
+            m_model->GetLods()[lodModel]->GetStreamsForMesh(layout, subMeshInstance.bufferStreamViewArray, nullptr, shaderVariant.GetInputContract(), subMeshIdx);
         }
     }
 
@@ -431,8 +430,7 @@ namespace AtomSampleViewer
             RHI::InputStreamLayout layout;
             ModelLod::StreamBufferViewList streamBufferView;
             const ShaderVariant& shaderVariant = m_shader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId);
-            AZ::RPI::UvStreamTangentIndex dummyUvStreamTangentIndex;
-            m_model->GetLods()[m_modelLod]->GetStreamsForMesh(layout, streamBufferView, dummyUvStreamTangentIndex, shaderVariant.GetInputContract(), meshIndex);
+            m_model->GetLods()[m_modelLod]->GetStreamsForMesh(layout, streamBufferView, nullptr, shaderVariant.GetInputContract(), meshIndex);
             // Set the pipeline state
             {
                 RHI::PipelineStateDescriptorForDraw pipelineStateDescriptor;

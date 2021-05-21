@@ -340,11 +340,10 @@ namespace AtomSampleViewer
             {
                 // Model Pipeline
                 Data::Instance<AZ::RPI::ModelLod> modelLod = m_model->GetLods()[0];
-
                 modelLod->GetStreamsForMesh(
                     pipelineDesc.m_inputStreamLayout,
                     m_modelStreamBufferViews[ShadowScope],
-                    m_uvStreamTangentIndex,
+                    nullptr,
                     variant.GetInputContract(),
                     0);
 
@@ -401,12 +400,10 @@ namespace AtomSampleViewer
             {
                 // Model Pipeline
                 Data::Instance<AZ::RPI::ModelLod> modelLod = m_model->GetLods()[0];
-                AZ::RPI::UvStreamTangentIndex uvStreamTangentIndex;
-
                 modelLod->GetStreamsForMesh(
                     pipelineDesc.m_inputStreamLayout,
                     m_modelStreamBufferViews[ForwardScope],
-                    uvStreamTangentIndex,
+                    nullptr,
                     variant.GetInputContract(),
                     0);
 
@@ -967,8 +964,6 @@ namespace AtomSampleViewer
             for (const auto& shaderResourceGroup : m_shaderResourceGroups[ForwardScope])
             {
                 shaderResourceGroup->SetImageView(m_shaderInputImageIndex, imageView);
-                RHI::ShaderInputNameIndex shaderUvStreamTangentIndex = "m_uvStreamTangentIndex";
-                shaderResourceGroup->SetConstant(shaderUvStreamTangentIndex, m_uvStreamTangentIndex);
                 shaderResourceGroup->Compile();
             }
         };
