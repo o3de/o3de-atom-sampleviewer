@@ -41,7 +41,7 @@ SetImguiValue('Intensity##Positional', 0.0)
 ArcBallCameraController_SetHeading(DegToRad(90.0))
 ArcBallCameraController_SetPitch(DegToRad(-45.0))
 ArcBallCameraController_SetDistance(6.0)
-ArcBallCameraController_SetPan(Vector3(1.1, 2.3, -1.2))
+ArcBallCameraController_SetPan(Vector3(0.9, 2.4, -1.0))
 -- Set quality highest
 SetImguiValue('Size##Directional', '2048')
 SetImguiValue('4', true) -- cascade count
