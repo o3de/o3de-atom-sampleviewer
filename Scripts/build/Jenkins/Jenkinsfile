@@ -31,7 +31,7 @@ def pipelineParameters = [
     booleanParam(defaultValue: false, description: 'Deletes the contents of the workspace and forces a complete pull.', name: 'CLEAN_WORKSPACE'),
     booleanParam(defaultValue: false, description: 'Recreates the volume used for the workspace. The volume will be created out of a snapshot taken from main.', name: 'RECREATE_VOLUME'),
     stringParam(defaultValue: 'main', description: 'Sets a different branch from o3de engine repo to use. Default is mainline', trim: true, name: 'ENGINE_BRANCH')
-    stringParam(defaultValue: 'HEAD', description: 'Sets a refspec for the mainline branch. Default is HEAD', trim: true, name: 'ENGINE_REFSPEC')
+    stringParam(defaultValue: 'origin/main', description: 'Sets a refspec for the mainline branch. Default is head of main', trim: true, name: 'ENGINE_REFSPEC')
 ]
 
 def palSh(cmd, lbl = '', winSlashReplacement = true) {
@@ -206,7 +206,7 @@ def getEngineRemoteConfig(remoteConfigs) {
         url: remoteConfigs.url[0]
             .replace("${PROJECT_REPOSITORY_NAME}", "${ENGINE_REPOSITORY_NAME}")
             .replace("/${PROJECT_ORGANIZATION_NAME}/", "/${ENGINE_ORGANIZATION_NAME}/"),
-        refspec: "+refs/heads/main:refs/remotes/origin/main",
+        refspec: "+refs/heads/*:refs/remotes/${params.ENGINE_REFSPEC}",
         credentialsId: remoteConfigs.credentialsId[0]
         ]
     return engineRemoteConfigs
