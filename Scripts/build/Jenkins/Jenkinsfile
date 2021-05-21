@@ -31,6 +31,7 @@ def pipelineParameters = [
     booleanParam(defaultValue: false, description: 'Deletes the contents of the workspace and forces a complete pull.', name: 'CLEAN_WORKSPACE'),
     booleanParam(defaultValue: false, description: 'Recreates the volume used for the workspace. The volume will be created out of a snapshot taken from main.', name: 'RECREATE_VOLUME'),
     stringParam(defaultValue: 'main', description: 'Sets a different branch from o3de engine repo to use. Default is mainline', trim: true, name: 'ENGINE_BRANCH')
+    stringParam(defaultValue: 'HEAD', description: 'Sets a refspec for the mainline branch. Default is HEAD', trim: true, name: 'ENGINE_REFSPEC')
 ]
 
 def palSh(cmd, lbl = '', winSlashReplacement = true) {
@@ -200,16 +201,6 @@ def GetLfsConfig(cmd, lbl = '') {
     }
 }
 
-def SetLfsCredentials(cmd, lbl = '') {
-    if (env.IS_UNIX) {
-        sh label: lbl,
-           script: cmd
-    } else {
-        bat label: lbl,
-            script: cmd
-    }
-}
-
 def getEngineRemoteConfig(remoteConfigs) {
     def engineRemoteConfigs = [name: "${ENGINE_REPOSITORY_NAME}",
         url: remoteConfigs.url[0]
@@ -292,9 +283,9 @@ def CheckoutRepo(boolean disableSubmodules = false) {
                     userRemoteConfigs: [projectAndUrl.value]
                 ]
                 if(fileExists(".lfsconfig")) {
-                def localLfsUrl = GetLfsConfig("git config -f .lfsconfig --get lfs.url", "Getting LFS URL").replace("https://","").trim() // Read the lfs file instead of relying on env var
-                withCredentials([usernamePassword(credentialsId: "${env.GITHUB_USER}", passwordVariable: 'accesstoken', usernameVariable: 'username')]) {
-                    SetLfsCredentials("git config -f .lfsconfig lfs.url https://${username}:${accesstoken}@${localLfsUrl}", 'Set credentials')
+                    def localLfsUrl = GetLfsConfig("git config -f .lfsconfig --get lfs.url", "Getting LFS URL").replace("https://","").trim() // Read the lfs file instead of relying on env var
+                    withCredentials([usernamePassword(credentialsId: "${env.GITHUB_USER}", passwordVariable: 'accesstoken', usernameVariable: 'username')]) {
+                        palSh("git config -f .lfsconfig lfs.url https://${username}:${accesstoken}@${localLfsUrl}", 'Set credentials', false)
                     }
                 }
 
