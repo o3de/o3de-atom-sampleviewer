@@ -12,9 +12,20 @@
 --
 ----------------------------------------------------------------------------------------------------
 
-function TestDirectionalLight()
-    -- Directional Light Initial
-    -- Diabling Positional lights
+function EnablePositionalLights()
+    SetImguiValue('Red', true)
+    SetImguiValue('Intensity##Positional', 500.0)
+    IdleFrames(1)
+    SetImguiValue('Green', true)
+    SetImguiValue('Height##Positional', 4.0)
+    SetImguiValue('Intensity##Positional', 400.0)
+    IdleFrames(1)
+    SetImguiValue('Blue', true)
+    SetImguiValue('Intensity##Positional', 500.0)
+    IdleFrames(1)
+end
+
+function DisablePositionalLights()
     SetImguiValue('Red', true)
     SetImguiValue('Intensity##Positional', 0.0)
     IdleFrames(1)
@@ -23,6 +34,11 @@ function TestDirectionalLight()
     IdleFrames(1)
     SetImguiValue('Blue', true)
     SetImguiValue('Intensity##Positional', 0.0)
+endif
+
+function TestDirectionalLight()
+
+    DisablePositionalLights()
     -- Set Camera
     ArcBallCameraController_SetHeading(DegToRad(90.0))
     ArcBallCameraController_SetPitch(DegToRad(-45.0))
@@ -85,26 +101,12 @@ function TestDirectionalLight()
     CaptureScreenshot(g_screenshotOutputFolder .. '/directional_esm_pcf.png')    
 end
 
-function EnablePositionalLights()
-    SetImguiValue('Red', true)
-    SetImguiValue('Intensity##Positional', 500.0)
-    IdleFrames(1)
-    SetImguiValue('Green', true)
-    SetImguiValue('Height##Positional', 4.0)
-    SetImguiValue('Intensity##Positional', 400.0)
-    IdleFrames(1)
-    SetImguiValue('Blue', true)
-    SetImguiValue('Intensity##Positional', 500.0)
-    IdleFrames(1)
-end
-
 function TestDiskLights()
-    -- Positional Light Initial
-    -- Disabling directional light
-    -- Sample can use either point or disk lights. Test disk lights first.
+
     SetImguiValue('Disk', true)
     IdleFrames(1)
 
+    -- Disabling directional light
     SetImguiValue('Intensity##Directional', 0.0)
     EnablePositionalLights()
     CaptureScreenshot(g_screenshotOutputFolder .. '/spot_initial.png')
@@ -129,7 +131,7 @@ function TestDiskLights()
     IdleFrames(1)
     CaptureScreenshot(g_screenshotOutputFolder .. '/spot_shadowmap_size.png')
 
-    -- Positional Light Various Filter Method
+    -- Positional Light Various Filter Methods
     SetImguiValue('Red', true)
     SetImguiValue('Filter Method##Positional', 'PCF')
     IdleFrames(1)
