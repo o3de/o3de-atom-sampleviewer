@@ -17,9 +17,9 @@ INCREMENTAL_BUILD_SCRIPT_PATH = 'scripts/build/bootstrap/incremental_build_util.
 EMPTY_JSON = readJSON text: '{}'
 
 PROJECT_REPOSITORY_NAME = 'o3de-atom-sampleviewer'
-PROJECT_ORGANIZATION_NAME = 'aws-lumberyard-dev'
+PROJECT_ORGANIZATION_NAME = 'aws-lumberyard'
 ENGINE_REPOSITORY_NAME = 'o3de'
-ENGINE_ORGANIZATION_NAME = 'aws-lumberyard-dev'
+ENGINE_ORGANIZATION_NAME = 'aws-lumberyard'
 
 def pipelineProperties = []
 
