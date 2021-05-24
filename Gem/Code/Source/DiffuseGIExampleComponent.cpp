@@ -244,9 +244,9 @@ namespace AtomSampleViewer
             AZ::Transform transform = AZ::Transform::CreateIdentity();
             transform.SetTranslation(-5.0f, 0.0f, 0.0f);
             transform *= AZ::Transform::CreateRotationY(AZ::Constants::HalfPi);
-            transform.MultiplyByScale(AZ::Vector3(10.05f, 10.05f, 1.0f));
+            AZ::Vector3 nonUniformScale(10.05f, 10.05f, 1.0f);
             m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::LeftWall)] = GetMeshFeatureProcessor()->AcquireMesh(m_planeModelAsset, materialMap);
-            GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::LeftWall)], transform);
+            GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::LeftWall)], transform, nonUniformScale);
         }
         
         // right wall
@@ -259,9 +259,9 @@ namespace AtomSampleViewer
             AZ::Transform transform = AZ::Transform::CreateIdentity();
             transform.SetTranslation(5.0f, 0.0f, 0.0f);
             transform *= AZ::Transform::CreateRotationY(-AZ::Constants::HalfPi);
-            transform.MultiplyByScale(AZ::Vector3(10.05f, 10.05f, 1.0f));
+            AZ::Vector3 nonUniformScale(10.05f, 10.05f, 1.0f);
             m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::RightWall)] = GetMeshFeatureProcessor()->AcquireMesh(m_planeModelAsset, materialMap);
-            GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::RightWall)], transform);
+            GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::RightWall)], transform, nonUniformScale);
         }
         
         // back wall
@@ -274,9 +274,9 @@ namespace AtomSampleViewer
             AZ::Transform transform = AZ::Transform::CreateIdentity();
             transform.SetTranslation(0.0f, 5.0f, 0.0f);
             transform *= AZ::Transform::CreateRotationX(AZ::Constants::HalfPi);
-            transform.MultiplyByScale(AZ::Vector3(10.05f, 10.05f, 1.0f));
+            AZ::Vector3 nonUniformScale(10.05f, 10.05f, 1.0f);
             m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::BackWall)] = GetMeshFeatureProcessor()->AcquireMesh(m_planeModelAsset, materialMap);
-            GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::BackWall)], transform);
+            GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::BackWall)], transform, nonUniformScale);
         }
         
         // ceiling
@@ -289,9 +289,9 @@ namespace AtomSampleViewer
             AZ::Transform transform = AZ::Transform::CreateIdentity();
             transform.SetTranslation(0.0f, 0.0f, 5.0f);
             transform *= AZ::Transform::CreateRotationX(AZ::Constants::Pi);
-            transform.MultiplyByScale(AZ::Vector3(10.05f, 10.05f, 1.0f));
+            AZ::Vector3 nonUniformScale(10.05f, 10.05f, 1.0f);
             m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Ceiling)] = GetMeshFeatureProcessor()->AcquireMesh(m_planeModelAsset, materialMap);
-            GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Ceiling)], transform);
+            GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Ceiling)], transform, nonUniformScale);
         }
         
         // floor
@@ -303,9 +303,9 @@ namespace AtomSampleViewer
         
             AZ::Transform transform = AZ::Transform::CreateIdentity();
             transform.SetTranslation(0.0f, 0.0f, -5.0f);
-            transform.MultiplyByScale(AZ::Vector3(10.05f, 10.05f, 1.0f));
+            AZ::Vector3 nonUniformScale(10.05f, 10.05f, 1.0f);
             m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Floor)] = GetMeshFeatureProcessor()->AcquireMesh(m_planeModelAsset, materialMap);
-            GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Floor)], transform);
+            GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Floor)], transform, nonUniformScale);
         }
         
         // large box
@@ -317,9 +317,9 @@ namespace AtomSampleViewer
             AZ::Transform transform = AZ::Transform::CreateIdentity();
             transform.SetTranslation(-2.0f, 0.0f, -2.0f);
             transform *= AZ::Transform::CreateRotationZ(AZ::Constants::HalfPi * 0.2f);
-            transform.MultiplyByScale(AZ::Vector3(3.0f, 3.0f, 6.0f));
+            AZ::Vector3 nonUniformScale(3.0f, 3.0f, 6.0f);
             m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::LargeBox)] = GetMeshFeatureProcessor()->AcquireMesh(m_cubeModelAsset, materialMap);
-            GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::LargeBox)], transform);
+            GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::LargeBox)], transform, nonUniformScale);
         }
         
         // small box
@@ -331,9 +331,9 @@ namespace AtomSampleViewer
             AZ::Transform transform = AZ::Transform::CreateIdentity();
             transform.SetTranslation(2.0f, -1.5f, -3.5f);
             transform *= AZ::Transform::CreateRotationZ(-AZ::Constants::HalfPi * 0.2f);
-            transform.MultiplyByScale(AZ::Vector3(3.0f, 3.0f, 3.0f));
+            AZ::Vector3 nonUniformScale(3.0f, 3.0f, 3.0f);
             m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::SmallBox)] = GetMeshFeatureProcessor()->AcquireMesh(m_cubeModelAsset, materialMap);
-            GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::SmallBox)], transform);
+            GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::SmallBox)], transform, nonUniformScale);
         }
 
         // stop now if we were only loading the geometry

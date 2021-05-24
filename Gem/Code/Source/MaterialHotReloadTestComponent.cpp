@@ -183,7 +183,7 @@ namespace AtomSampleViewer
         // The shader variant indicator banner will appear right below the main test mesh
         m_shaderVariantIndicatorMeshTransform = Transform::CreateIdentity();
         m_shaderVariantIndicatorMeshTransform.SetTranslation(Vector3{0.0f, 0.0f, -0.6f});
-        m_shaderVariantIndicatorMeshTransform.SetScale(Vector3{1.0f, 0.125f, 1.0f});
+        m_shaderVariantIndicatorMeshNonUniformScale = Vector3(1.0f, 0.125f, 1.0f);
         m_shaderVariantIndicatorMeshTransform.SetRotation(Quaternion::CreateFromAxisAngle(Vector3::CreateAxisX(), -AZ::Constants::HalfPi));
 
         // Load materials that will be used to indicate which shader variant is active...
@@ -469,7 +469,8 @@ namespace AtomSampleViewer
             {
                 m_meshFeatureProcessor->ReleaseMesh(m_shaderVariantIndicatorMeshHandle);
                 m_shaderVariantIndicatorMeshHandle = m_meshFeatureProcessor->AcquireMesh(m_modelAsset, m_shaderVariantIndicatorMaterial_current);
-                m_meshFeatureProcessor->SetTransform(m_shaderVariantIndicatorMeshHandle, m_shaderVariantIndicatorMeshTransform);
+                m_meshFeatureProcessor->SetTransform(m_shaderVariantIndicatorMeshHandle, m_shaderVariantIndicatorMeshTransform,
+                    m_shaderVariantIndicatorMeshNonUniformScale);
             }
         }
 

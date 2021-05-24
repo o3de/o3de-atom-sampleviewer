@@ -107,6 +107,7 @@ namespace AtomSampleViewer
 
         // These are used to render a secondary mesh that indicates which shader variant is being used to render the primary mesh
         AZ::Transform m_shaderVariantIndicatorMeshTransform;
+        AZ::Vector3 m_shaderVariantIndicatorMeshNonUniformScale = AZ::Vector3::CreateOne();
         AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_shaderVariantIndicatorMeshHandle;
         AZ::Data::Instance<AZ::RPI::Material> m_shaderVariantIndicatorMaterial_root;
         AZ::Data::Instance<AZ::RPI::Material> m_shaderVariantIndicatorMaterial_fullyBaked;

@@ -87,8 +87,8 @@ namespace AtomSampleViewer
 
     void DecalExampleComponent::ScaleObjectToFitDecals()
     {
-        const AZ::Transform transform = AZ::Transform::CreateScale(AZ::Vector3(4.0f, 1.0f, 1.0f));
-        GetMeshFeatureProcessor()->SetTransform(m_meshHandle, transform);
+        const AZ::Vector3 nonUniformScale(4.0f, 1.0f, 1.0f);
+        GetMeshFeatureProcessor()->SetTransform(m_meshHandle, AZ::Transform::CreateIdentity(), nonUniformScale);
     }
 
     void DecalExampleComponent::Deactivate()

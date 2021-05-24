@@ -128,10 +128,10 @@ namespace AtomSampleViewer
             m_bunnyMeshHandles[bunnyIndex] = meshFeatureProcessor->AcquireMesh(bunnyAsset, material);
         }
 
-        const Vector3 scale{ 12.f, 12.f, 0.1f };
+        const Vector3 floorNonUniformScale{ 12.f, 12.f, 0.1f };
         const Vector3 translation{ 0.f, 0.f, -0.05f };
-        Transform floorTransform = Transform::CreateTranslation(translation) * AZ::Transform::CreateScale(scale);
-        meshFeatureProcessor->SetTransform(m_floorMeshHandle, floorTransform);
+        Transform floorTransform = Transform::CreateTranslation(translation);
+        meshFeatureProcessor->SetTransform(m_floorMeshHandle, floorTransform, floorNonUniformScale);
 
         meshFeatureProcessor->SetTransform(m_bunnyMeshHandles[0], Transform::CreateTranslation(Vector3(0.f, 0.f, 0.21f)));
         meshFeatureProcessor->SetTransform(m_bunnyMeshHandles[1], Transform::CreateTranslation(Vector3(-3.f, 3.f, 0.21f)));
