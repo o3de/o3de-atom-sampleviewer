@@ -189,11 +189,11 @@ namespace AtomSampleViewer
 
         // Create the floor
         {
-            const Vector3 scale{ 24.f, 24.f, 1.0f };
+            const Vector3 nonUniformScale{ 24.f, 24.f, 1.0f };
             const Vector3 translation{ 0.f, 0.f, 0.0f };
-            const auto transform = Transform::CreateTranslation(translation) * Transform::CreateScale(scale);
+            const auto transform = Transform::CreateTranslation(translation);
             m_floorMeshHandle = LoadMesh("testdata/objects/cube/cube.azmodel");
-            m_meshFeatureProcessor->SetTransform(m_floorMeshHandle, transform);
+            m_meshFeatureProcessor->SetTransform(m_floorMeshHandle, transform, nonUniformScale);
         }
 
         // Create the Skybox
