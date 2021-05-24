@@ -259,7 +259,7 @@ namespace AtomSampleViewer
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/AssetLoadTest", azrtti_typeid<AssetLoadTestComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/AuxGeom", azrtti_typeid<AuxGeomExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/BakedShaderVariant", azrtti_typeid<BakedShaderVariantExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/BistroBenchmark", azrtti_typeid<BistroBenchmarkComponent>() ));
+        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/SponzaBenchmark", azrtti_typeid<BistroBenchmarkComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/CullingAndLod", azrtti_typeid<CullingAndLodExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/Decals", azrtti_typeid<DecalExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/DynamicDraw", azrtti_typeid<DynamicDrawExampleComponent>() ));
@@ -283,7 +283,7 @@ namespace AtomSampleViewer
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/LightCulling", azrtti_typeid<LightCullingExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Parallax", azrtti_typeid<ParallaxMappingExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Shadow", azrtti_typeid<ShadowExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/ShadowedBistro", azrtti_typeid<ShadowedBistroExampleComponent>() ));
+        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/ShadowedSponza", azrtti_typeid<ShadowedSponzaExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/SSAO", azrtti_typeid<SsaoExampleComponent>()));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/SSR", azrtti_typeid<SSRExampleComponent>()));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Tonemapping", azrtti_typeid<TonemappingExampleComponent>() ));
