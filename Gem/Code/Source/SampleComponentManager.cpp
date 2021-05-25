@@ -31,6 +31,8 @@
 #include <Atom/RPI.Public/RenderPipeline.h>
 #include <Atom/RPI.Public/RPISystemInterface.h>
 #include <Atom/RPI.Public/Scene.h>
+#include <Atom/RPI.Reflect/Asset/AssetUtils.h>
+#include <Atom/RPI.Reflect/Image/AttachmentImageAsset.h>
 #include <Atom/RPI.Reflect/Shader/IShaderVariantFinder.h>
 
 #include <Atom/RHI/Factory.h>
@@ -454,6 +456,7 @@ namespace AtomSampleViewer
         m_imguiFrameGraphVisualizer.Reset();
 
         m_windowContext = nullptr;
+        m_brdfTexture.reset();
 
         ReleaseRHIScene();
         ReleaseRPIScene();
@@ -1482,9 +1485,21 @@ namespace AtomSampleViewer
         brdfPipelineDesc.m_name = "BRDFTexturePipeline";
         brdfPipelineDesc.m_rootPassTemplate = "BRDFTexturePipeline";
         brdfPipelineDesc.m_executeOnce = true;
-
+        
         RPI::RenderPipelinePtr brdfTexturePipeline = AZ::RPI::RenderPipeline::CreateRenderPipeline(brdfPipelineDesc);
         m_rpiScene->AddRenderPipeline(brdfTexturePipeline);
+        
+        // Save a reference to the generated BRDF texture so it doesn't get deleted if all the passes refering to it get deleted and it's ref count goes to zero
+        if (!m_brdfTexture)
+        {
+            const AZStd::shared_ptr<RPI::PassTemplate> brdfTextureTemplate = RPI::PassSystemInterface::Get()->GetPassTemplate(Name("BRDFTextureTemplate"));
+            Data::Asset<RPI::AttachmentImageAsset> brdfImageAsset = RPI::AssetUtils::LoadAssetById<RPI::AttachmentImageAsset>(
+                brdfTextureTemplate->m_imageAttachments[0].m_assetRef.m_assetId, RPI::AssetUtils::TraceLevel::Error);
+            if (brdfImageAsset.IsReady())
+            {
+                m_brdfTexture = RPI::AttachmentImage::FindOrCreate(brdfImageAsset);
+            }
+        }
 
         // Setup imGui since a new render pipeline with imgui pass was created
         SetupImGuiContext();
