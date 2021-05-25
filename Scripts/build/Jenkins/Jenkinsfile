@@ -493,10 +493,15 @@ try {
                         env.BRANCH_NAME = branchName // so scripts that read this environment have it (e.g. incremental_build_util.py)
                     }
                     pipelineProperties.add(disableConcurrentBuilds())
+                    
+                    def engineBranch = branchName // This allows the first run to work with parameters having null value, but use the engine branch parameter afterwards
+                    if(params.ENGINE_BRANCH) {
+                        engineBranch = params.ENGINE_BRANCH
+                    }
 
-                    echo "Running \"${pipelineName}\" for \"${branchName}\" on engine branch \"${params.ENGINE_BRANCH}\"..."
+                    echo "Running \"${pipelineName}\" for \"${branchName}\" on engine branch \"${engineBranch}\"..."
 
-                    CheckoutBootstrapScripts(params.ENGINE_BRANCH)
+                    CheckoutBootstrapScripts(engineBranch)
 
                     // Load configs
                     pipelineConfig = LoadPipelineConfig(pipelineName, branchName)
