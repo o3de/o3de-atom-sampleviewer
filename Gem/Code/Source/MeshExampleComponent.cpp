@@ -391,7 +391,7 @@ namespace AtomSampleViewer
             static const float GroundPlaneRelativeScale = 4.0f;
             static const float GroundPlaneOffset = 0.01f;
 
-            groundPlaneTransform.SetScale(AZ::Vector3(GroundPlaneRelativeScale * modelRadius));
+            groundPlaneTransform.SetUniformScale(GroundPlaneRelativeScale * modelRadius);
             groundPlaneTransform.SetTranslation(AZ::Vector3(0.0f, 0.0f, m_modelAsset->GetAabb().GetMin().GetZ() - GroundPlaneOffset));
 
             GetMeshFeatureProcessor()->SetTransform(m_groundPlandMeshHandle, groundPlaneTransform);
