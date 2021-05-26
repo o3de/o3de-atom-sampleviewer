@@ -162,8 +162,8 @@ namespace AtomSampleViewer
         m_groundMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(planeModel, AZ::RPI::Material::FindOrCreate(m_groundMaterialAsset));
 
         AZ::Transform transform = AZ::Transform::CreateIdentity();
-        transform.MultiplyByScale(AZ::Vector3(15.0f, 15.0f, 1.0f));
-        GetMeshFeatureProcessor()->SetTransform(m_groundMeshHandle, transform);
+        const AZ::Vector3 nonUniformScale(15.0f, 15.0f, 1.0f);
+        GetMeshFeatureProcessor()->SetTransform(m_groundMeshHandle, transform, nonUniformScale);
     }
 
     void SSRExampleComponent::OnTick([[maybe_unused]] float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint timePoint)

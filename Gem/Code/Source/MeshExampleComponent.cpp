@@ -81,6 +81,47 @@ namespace AtomSampleViewer
         };
     }
 
+    void MeshExampleComponent::DefaultWindowCreated()
+    {
+        AZ::Render::Bootstrap::DefaultWindowBus::BroadcastResult(m_windowContext, &AZ::Render::Bootstrap::DefaultWindowBus::Events::GetDefaultWindowContext);
+    }
+
+    void MeshExampleComponent::CreateLowEndPipeline()
+    {
+        AZ::RPI::RenderPipelineDescriptor pipelineDesc;
+        pipelineDesc.m_mainViewTagName = "MainCamera";
+        pipelineDesc.m_name = "LowEndPipeline";
+        pipelineDesc.m_rootPassTemplate = "LowEndPipelineTemplate";
+        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 4;
+
+        m_lowEndPipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
+    }
+
+    void MeshExampleComponent::DestroyLowEndPipeline()
+    {
+        m_lowEndPipeline = nullptr;
+    }
+
+    void MeshExampleComponent::ActivateLowEndPipeline()
+    {
+        AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
+        m_originalPipeline = defaultScene->GetDefaultRenderPipeline();
+        defaultScene->AddRenderPipeline(m_lowEndPipeline);
+        m_lowEndPipeline->SetDefaultView(m_originalPipeline->GetDefaultView());
+        defaultScene->RemoveRenderPipeline(m_originalPipeline->GetId());
+
+        m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass(AZ::RPI::PassHierarchyFilter({ m_lowEndPipeline->GetId().GetCStr(), "ImGuiPass" }));
+    }
+
+    void MeshExampleComponent::DeactivateLowEndPipeline()
+    {
+        m_imguiScope = {}; // restores previous ImGui context.
+
+        AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
+        defaultScene->AddRenderPipeline(m_originalPipeline);
+        defaultScene->RemoveRenderPipeline(m_lowEndPipeline->GetId());
+    }
+
     void MeshExampleComponent::Activate()
     {
         UseArcBallCameraController();
@@ -118,10 +159,18 @@ namespace AtomSampleViewer
         m_groundPlaneModelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/plane.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
 
         AZ::TickBus::Handler::BusConnect();
+        AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusConnect();
+        CreateLowEndPipeline();
     }
 
     void MeshExampleComponent::Deactivate()
     {
+        if (m_useLowEndPipeline)
+        {
+            DeactivateLowEndPipeline();
+        }
+        DestroyLowEndPipeline();
+        AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusDisconnect();
         AZ::TickBus::Handler::BusDisconnect();
 
         m_imguiSidebar.Deactivate();
@@ -146,11 +195,28 @@ namespace AtomSampleViewer
     {
         bool modelNeedsUpdate = false;
 
+        // Switch pipeline before any imGui actions (switching pipelines switches imGui scope)
+        if (m_switchPipeline)
+        {
+            if (m_useLowEndPipeline)
+            {
+                ActivateLowEndPipeline();
+            }
+            else
+            {
+                DeactivateLowEndPipeline();
+            }
+
+            m_switchPipeline = false;
+        }
+
         if (m_imguiSidebar.Begin())
         {
             ImGuiLightingPreset();
 
             ImGuiAssetBrowser::WidgetSettings assetBrowserSettings;
+
+            m_switchPipeline = ScriptableImGui::Checkbox("Use Low End Pipeline", &m_useLowEndPipeline) || m_switchPipeline;
 
             modelNeedsUpdate |= ScriptableImGui::Checkbox("Enable Material Override", &m_enableMaterialOverride);
            
@@ -325,7 +391,7 @@ namespace AtomSampleViewer
             static const float GroundPlaneRelativeScale = 4.0f;
             static const float GroundPlaneOffset = 0.01f;
 
-            groundPlaneTransform.SetScale(AZ::Vector3(GroundPlaneRelativeScale * modelRadius));
+            groundPlaneTransform.SetUniformScale(GroundPlaneRelativeScale * modelRadius);
             groundPlaneTransform.SetTranslation(AZ::Vector3(0.0f, 0.0f, m_modelAsset->GetAabb().GetMin().GetZ() - GroundPlaneOffset));
 
             GetMeshFeatureProcessor()->SetTransform(m_groundPlandMeshHandle, groundPlaneTransform);

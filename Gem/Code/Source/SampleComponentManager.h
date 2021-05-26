@@ -19,6 +19,7 @@
 #include <Atom/Feature/ImGui/SystemBus.h>
 #include <Atom/Feature/Utils/FrameCaptureBus.h>
 #include <Atom/RPI.Public/WindowContext.h>
+#include <Atom/RPI.Public/Image/AttachmentImage.h>
 #include <Atom/RPI.Public/Pass/Specific/SwapChainPass.h>
 #include <Atom/RPI.Public/GpuQuery/GpuQuerySystemInterface.h>
 
@@ -179,6 +180,8 @@ namespace AtomSampleViewer
         AZ::Component* m_activeSample = nullptr;
 
         AZ::Entity* m_cameraEntity = nullptr;
+
+        AZ::Data::Instance<AZ::RPI::AttachmentImage> m_brdfTexture;
 
         int32_t m_selectedSampleIndex = -1;
 

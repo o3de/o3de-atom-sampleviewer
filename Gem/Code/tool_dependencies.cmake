@@ -18,31 +18,9 @@ set(GEM_DEPENDENCIES
     Gem::SceneProcessing.Editor
     Gem::EditorPythonBindings.Editor
     Gem::Camera.Editor
-    Gem::Atom_RHI.Private
     Gem::EMotionFX.Editor
-    Gem::Atom_RHI_Vulkan.Private
-    Gem::Atom_RHI_Vulkan.Builders
-    Gem::Atom_RHI_Metal.Private
-    Gem::Atom_RHI_Metal.Builders
-    Gem::Atom_RPI.Builders
-    Gem::Atom_RPI.Editor
-    Gem::Atom_Feature_Common.Builders
-    Gem::Atom_Feature_Common.Editor
     Gem::ImGui.Editor
-    Gem::Atom_Bootstrap
-    Gem::Atom_Asset_Shader.Builders
-    Gem::Atom_RHI_DX12.Private
-    Gem::Atom_RHI_DX12.Builders
-    Gem::Atom_RHI_Null.Private
-    Gem::Atom_RHI_Null.Builders
-    Gem::Atom_Component_DebugCamera
-    Gem::AtomImGuiTools
-    Gem::AtomLyIntegration_CommonFeatures.Editor
-    Gem::EMotionFX_Atom.Editor
-    Gem::ImageProcessingAtom.Editor
     Gem::Atom_AtomBridge.Editor
     Gem::AtomSampleViewer
     Gem::AtomSampleViewer.Tools
-    Gem::ImguiAtom
-    Gem::AtomToolsFramework.Editor
 )

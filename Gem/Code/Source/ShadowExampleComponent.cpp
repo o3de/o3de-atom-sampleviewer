@@ -357,11 +357,10 @@ namespace AtomSampleViewer
         {
             const AZ::Aabb& aabb = model->GetAabb();
             const float maxZ = aabb.GetMax().GetZ();
-            const AZ::Vector3 scale{ 12.f, 12.f, 0.1f };
-            const AZ::Vector3 translation{ 0.f, 0.f, -maxZ * scale.GetZ() };
-            const auto transform = AZ::Transform::CreateTranslation(translation) *
-                AZ::Transform::CreateScale(scale);
-            GetMeshFeatureProcessor()->SetTransform(m_floorMeshHandle, transform);
+            const AZ::Vector3 nonUniformScale{ 12.f, 12.f, 0.1f };
+            const AZ::Vector3 translation{ 0.f, 0.f, -maxZ * nonUniformScale.GetZ() };
+            const auto transform = AZ::Transform::CreateTranslation(translation);
+            GetMeshFeatureProcessor()->SetTransform(m_floorMeshHandle, transform, nonUniformScale);
             m_floorMeshIsReady = true;
             if (m_bunnyMeshIsReady)
             {
@@ -375,7 +374,8 @@ namespace AtomSampleViewer
             const AZ::Aabb& aabb = model->GetAabb();
             const float minZ = aabb.GetMin().GetZ();
             const AZ::Vector3 translation{ 0.f, 0.f, -minZ };
-            const auto transform = AZ::Transform::CreateTranslation(translation);
+            auto transform = AZ::Transform::CreateTranslation(translation);
+            transform.SetUniformScale(1.5f);
             GetMeshFeatureProcessor()->SetTransform(m_bunnyMeshHandle, transform);
             m_bunnyMeshIsReady = true;
             if (m_floorMeshIsReady)
