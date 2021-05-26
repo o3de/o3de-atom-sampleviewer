@@ -84,7 +84,7 @@ namespace AtomSampleViewer
         m_parallaxMaterial = AZ::RPI::Material::Create(m_parallaxMaterialAsset);
         m_defaultMaterial = AZ::RPI::Material::Create(m_defaultMaterialAsset);
 
-        m_planeTransform = AZ::Transform::CreateScale(AZ::Vector3(5, 5, 5));
+        m_planeTransform = AZ::Transform::CreateUniformScale(5);
         m_planeHandle = LoadMesh(m_planeAsset, m_parallaxMaterial, m_planeTransform);
         m_boxHandle = LoadMesh(m_boxAsset, m_defaultMaterial, AZ::Transform::CreateIdentity());
 
