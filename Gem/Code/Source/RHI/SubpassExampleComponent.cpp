@@ -265,6 +265,7 @@ namespace AtomSampleViewer
                 modelLod->GetStreamsForMesh(
                     pipelineDesc.m_inputStreamLayout,
                     modelData.m_streamBufferList,
+                    nullptr,
                     variant.GetInputContract(),
                     0);
 

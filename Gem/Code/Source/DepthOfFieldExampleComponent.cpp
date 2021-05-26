@@ -198,7 +198,7 @@ namespace AtomSampleViewer
         defaultMaterial.m_materialInstance = RPI::Material::FindOrCreate(defaultMaterial.m_materialAsset);
 
         Vector3 translation = Vector3::CreateZero();
-        Transform scaleTransform = Transform::CreateScale(AZ::Vector3(ModelScaleRatio));
+        Transform scaleTransform = Transform::CreateUniformScale(ModelScaleRatio);
 
         for (MeshHandle& meshHandle : m_meshHandles)
         {
