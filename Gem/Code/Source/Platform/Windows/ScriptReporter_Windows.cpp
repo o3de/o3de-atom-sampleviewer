@@ -12,12 +12,22 @@
 
 #include <Automation/ScriptReporter.h>
 #include <AzCore/Utils/Utils.h>
+
+#if defined(OPEN_IMAGE_IO_ENABLED)
 #include <OpenImageIO/imageio.h>
+#endif
 
 namespace AtomSampleViewer
 {
-    bool ScriptReporter::LoadPngData(ImageComparisonResult& imageComparisonResult, const AZStd::string& path, AZStd::vector<uint8_t>& buffer, AZ::RHI::Size& size, AZ::RHI::Format& format, TraceLevel traceLevel)
+    bool ScriptReporter::LoadPngData(
+        [[maybe_unused]] ImageComparisonResult& imageComparisonResult,
+        [[maybe_unused]] const AZStd::string& path,
+        [[maybe_unused]] AZStd::vector<uint8_t>& buffer,
+        [[maybe_unused]] AZ::RHI::Size& size,
+        [[maybe_unused]] AZ::RHI::Format& format,
+        [[maybe_unused]] TraceLevel traceLevel)
     {
+#if defined(OPEN_IMAGE_IO_ENABLED)
         using namespace OIIO;
 
         const size_t maxFileSize = 1024 * 1024 * 25;
@@ -49,5 +59,9 @@ namespace AtomSampleViewer
         }
 
         return true;
+#else
+        ReportScriptIssue(AZStd::string::format("Screenshots are not available because OpenImageIO is disabled."), traceLevel);
+        return false;
+#endif
     }
 }
