@@ -401,19 +401,19 @@ namespace AtomSampleViewer
             // transforms
             AZ::Transform triangleTransform1 = AZ::Transform::CreateIdentity();
             triangleTransform1.SetTranslation(sinf(m_time) * -100.0f, cosf(m_time) * -100.0f, 1.0f);
-            triangleTransform1.MultiplyByScale(Vector3(100.0f, 100.0f, 100.0f));
+            triangleTransform1.MultiplyByUniformScale(100.0f);
 
             AZ::Transform triangleTransform2 = AZ::Transform::CreateIdentity();
             triangleTransform2.SetTranslation(sinf(m_time) * -100.0f, cosf(m_time) * 100.0f, 2.0f);
-            triangleTransform2.MultiplyByScale(Vector3(100.0f, 100.0f, 100.0f));
+            triangleTransform2.MultiplyByUniformScale(100.0f);
 
             AZ::Transform triangleTransform3 = AZ::Transform::CreateIdentity();
             triangleTransform3.SetTranslation(sinf(m_time) * 100.0f, cosf(m_time) * 100.0f, 3.0f);
-            triangleTransform3.MultiplyByScale(Vector3(100.0f, 100.0f, 100.0f));
+            triangleTransform3.MultiplyByUniformScale(100.0f);
 
             AZ::Transform rectangleTransform = AZ::Transform::CreateIdentity();
             rectangleTransform.SetTranslation(sinf(m_time) * 100.0f, cosf(m_time) * -100.0f, 4.0f);
-            rectangleTransform.MultiplyByScale(Vector3(100.0f, 100.0f, 100.0f));
+            rectangleTransform.MultiplyByUniformScale(100.0f);
 
             // create the TLAS
             RHI::RayTracingTlasDescriptor tlasDescriptor;
