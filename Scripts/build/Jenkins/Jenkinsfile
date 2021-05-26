@@ -20,6 +20,7 @@ PROJECT_REPOSITORY_NAME = 'o3de-atom-sampleviewer'
 PROJECT_ORGANIZATION_NAME = 'aws-lumberyard'
 ENGINE_REPOSITORY_NAME = 'o3de'
 ENGINE_ORGANIZATION_NAME = 'aws-lumberyard'
+ENGINE_DEFAULT = 'main'
 
 def pipelineProperties = []
 
@@ -30,7 +31,7 @@ def pipelineParameters = [
     booleanParam(defaultValue: false, description: 'Deletes the contents of the output directories of the AssetProcessor before building.', name: 'CLEAN_ASSETS'),
     booleanParam(defaultValue: false, description: 'Deletes the contents of the workspace and forces a complete pull.', name: 'CLEAN_WORKSPACE'),
     booleanParam(defaultValue: false, description: 'Recreates the volume used for the workspace. The volume will be created out of a snapshot taken from main.', name: 'RECREATE_VOLUME'),
-    stringParam(defaultValue: 'main', description: 'Sets a different branch from o3de engine repo to use or use commit id. Default is mainline', trim: true, name: 'ENGINE_BRANCH'),
+    stringParam(defaultValue: "${ENGINE_DEFAULT}", description: 'Sets a different branch from o3de engine repo to use or use commit id. Default is mainline', trim: true, name: 'ENGINE_BRANCH'),
     stringParam(defaultValue: 'origin/main', description: 'Sets a refspec for the mainline branch. Default is head of main', trim: true, name: 'ENGINE_REFSPEC')
 ]
 
@@ -493,10 +494,15 @@ try {
                         env.BRANCH_NAME = branchName // so scripts that read this environment have it (e.g. incremental_build_util.py)
                     }
                     pipelineProperties.add(disableConcurrentBuilds())
+                    
+                    def engineBranch = "${ENGINE_DEFAULT}" // This allows the first run to work with parameters having null value, but use the engine branch parameter afterwards
+                    if(params.ENGINE_BRANCH) {
+                        engineBranch = params.ENGINE_BRANCH
+                    }
 
-                    echo "Running \"${pipelineName}\" for \"${branchName}\" on engine branch \"${params.ENGINE_BRANCH}\"..."
+                    echo "Running \"${pipelineName}\" for \"${branchName}\" on engine branch \"${engineBranch}\"..."
 
-                    CheckoutBootstrapScripts(params.ENGINE_BRANCH)
+                    CheckoutBootstrapScripts(engineBranch)
 
                     // Load configs
                     pipelineConfig = LoadPipelineConfig(pipelineName, branchName)
