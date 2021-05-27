@@ -109,6 +109,7 @@ GenerateMaterialScreenshot('Level F', '009_Opacity_Blended', {lighting="Neutral 
 GenerateMaterialScreenshot('Level H', '009_Opacity_Cutout_PackedAlpha_DoubleSided', {lighting="Neutral Urban", model=g_beveledCubeModel})
 GenerateMaterialScreenshot('Level H', '009_Opacity_Cutout_SplitAlpha_DoubleSided', {lighting="Neutral Urban", model=g_beveledCubeModel})
 GenerateMaterialScreenshot('Level G', '009_Opacity_Cutout_SplitAlpha_SingleSided', {lighting="Neutral Urban", model=g_beveledCubeModel})
+GenerateMaterialScreenshot('Level F', '009_Opacity_TintedTransparent', {lighting="Neutral Urban", model=g_beveledCubeModel})
 GenerateMaterialScreenshot('Level G', '010_AmbientOcclusion', {lighting="Palermo Sidewalk (Alt)"})
 GenerateMaterialScreenshot('Level G', '010_SpecularOcclusion', {lighting="Palermo Sidewalk (Alt)"})
 GenerateMaterialScreenshot('Level G', '010_BothOcclusion', {lighting="Palermo Sidewalk (Alt)"})
