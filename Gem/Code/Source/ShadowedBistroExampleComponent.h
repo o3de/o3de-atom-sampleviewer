@@ -25,19 +25,19 @@
 namespace AtomSampleViewer
 {
     /*
-     * This component creates a scene of Bistro with shadowing.
+     * This component creates a scene of Sponza with shadowing.
      */
-    class ShadowedBistroExampleComponent final
+    class ShadowedSponzaExampleComponent final
         : public CommonSampleComponentBase
         , public AZ::TickBus::Handler
     {
     public:
-        AZ_COMPONENT(ShadowedBistroExampleComponent, "AAA320C7-1CF7-4CBA-9279-D29BB04B9CA9", CommonSampleComponentBase);
+        AZ_COMPONENT(ShadowedSponzaExampleComponent, "AAA320C7-1CF7-4CBA-9279-D29BB04B9CA9", CommonSampleComponentBase);
 
         static void Reflect(AZ::ReflectContext* context);
 
-        ShadowedBistroExampleComponent() = default;
-        ~ShadowedBistroExampleComponent() override = default;
+        ShadowedSponzaExampleComponent() = default;
+        ~ShadowedSponzaExampleComponent() override = default;
 
         void Activate() override;
         void Deactivate() override;
@@ -112,7 +112,7 @@ namespace AtomSampleViewer
         {
             [&](AZ::Data::Instance<AZ::RPI::Model> model) { OnModelReady(model); }
         };
-        bool m_bistroExteriorAssetLoaded = false;
+        bool m_sponzaExteriorAssetLoaded = false;
 
         // GUI
         ImGuiSidebar m_imguiSidebar;
