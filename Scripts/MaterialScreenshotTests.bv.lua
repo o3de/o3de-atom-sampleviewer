@@ -68,7 +68,7 @@ function GenerateMaterialScreenshot(imageComparisonThresholdLevel, materialName,
     ArcBallCameraController_SetPan(Vector3(0.0, 0.0, options.cameraZ))
     
     -- Give some extra frames for the textures to finish streaming in. 
-    -- [GFX TODO][ATOM-4819] Hopefully at some point we can make this deterministic
+    -- [GFX TODO] Hopefully at some point we can make this deterministic
     IdleFrames(10) 
 
     options.screenshotFilename = string.lower(options.screenshotFilename)
