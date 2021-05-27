@@ -67,8 +67,7 @@ function GenerateMaterialScreenshot(imageComparisonThresholdLevel, materialName,
     ArcBallCameraController_SetDistance(options.cameraDistance)
     ArcBallCameraController_SetPan(Vector3(0.0, 0.0, options.cameraZ))
     
-    -- Give some extra frames for the textures to finish streaming in. 
-    -- [GFX TODO][ATOM-4819] Hopefully at some point we can make this deterministic
+    -- Give some extra frames for the textures to finish streaming in.
     IdleFrames(10) 
 
     options.screenshotFilename = string.lower(options.screenshotFilename)
@@ -161,10 +160,18 @@ GenerateMaterialScreenshot('Level I', '001_ManyFeatures', {model=g_cubeModel, ca
 GenerateMaterialScreenshot('Level I', '001_ManyFeatures_Layer2Off', {model=g_cubeModel, cameraHeading=-125.0, cameraPitch=-16.0, cameraZ=0.12})
 GenerateMaterialScreenshot('Level I', '001_ManyFeatures_Layer3Off', {model=g_cubeModel, cameraHeading=-125.0, cameraPitch=-16.0, cameraZ=0.12})
 GenerateMaterialScreenshot('Level I', '002_ParallaxPdo', {model=g_cubeModel, cameraHeading=15.0, cameraPitch=28.0, lighting="Goegap (Alt)"})
-GenerateMaterialScreenshot('Level G', '003_Debug_BlendSource', {model=g_cubeModel})
-GenerateMaterialScreenshot('Level F', '003_Debug_DepthMaps', {model=g_cubeModel})
+GenerateMaterialScreenshot('Level G', '003_Debug_BlendMask', {model=g_cubeModel})
+GenerateMaterialScreenshot('Level G', '003_Debug_Displacement', {model=g_cubeModel})
+GenerateMaterialScreenshot('Level G', '003_Debug_BlendWeights', {model=g_cubeModel})
 GenerateMaterialScreenshot('Level I', '004_UseVertexColors', {model=g_modelWithLayerMask, cameraHeading=0.0, cameraPitch=45.0, cameraDistance=30.0})
 GenerateMaterialScreenshot('Level I', '004_UseVertexColors', {model=g_modelWithoutLayerMask, cameraHeading=145.0, cameraPitch=7.0, cameraZ=-0.1, cameraDistance=3.0, screenshotFilename="004_UseVertexColors_modelHasNoVertexColors"})
+GenerateMaterialScreenshot('Level I', '005_UseDisplacement',                            {lighting="Blouberg Sunrise 1 (Alt)", model=g_modelWithLayerMask, cameraHeading=-35.0, cameraPitch=33.0, cameraDistance=9.0, cameraZ=0.9})
+GenerateMaterialScreenshot('Level I', '005_UseDisplacement_Layer2Off',                  {lighting="Blouberg Sunrise 1 (Alt)", model=g_modelWithLayerMask, cameraHeading=-35.0, cameraPitch=33.0, cameraDistance=9.0, cameraZ=0.9})
+GenerateMaterialScreenshot('Level I', '005_UseDisplacement_Layer3Off',                  {lighting="Blouberg Sunrise 1 (Alt)", model=g_modelWithLayerMask, cameraHeading=-35.0, cameraPitch=33.0, cameraDistance=9.0, cameraZ=0.9})
+GenerateMaterialScreenshot('Level I', '005_UseDisplacement_With_BlendMaskVertexColors', {lighting="Blouberg Sunrise 1 (Alt)", model=g_modelWithLayerMask, cameraHeading=0.0, cameraPitch=80.0, cameraDistance=27.0})
+GenerateMaterialScreenshot('Level I', '005_UseDisplacement_With_BlendMaskTexture',               {lighting="Blouberg Sunrise 1 (Alt)", model=g_modelWithLayerMask, cameraHeading=180.0, cameraPitch=45.0, cameraDistance=20.0, cameraZ=-0.5})
+GenerateMaterialScreenshot('Level I', '005_UseDisplacement_With_BlendMaskTexture_NoHeightmaps',  {lighting="Blouberg Sunrise 1 (Alt)", model=g_modelWithLayerMask, cameraHeading=180.0, cameraPitch=45.0, cameraDistance=20.0, cameraZ=-0.5})
+GenerateMaterialScreenshot('Level I', '005_UseDisplacement_With_BlendMaskTexture_AllSameHeight', {lighting="Blouberg Sunrise 1 (Alt)", model=g_modelWithLayerMask, cameraHeading=180.0, cameraPitch=45.0, cameraDistance=20.0, cameraZ=-0.5})
 
 ----------------------------------------------------------------------
 -- Skin Materials...

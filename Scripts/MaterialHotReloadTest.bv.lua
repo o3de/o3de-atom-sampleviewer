@@ -112,7 +112,7 @@ AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.materialtype")
 AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.shader")
 AssetTracking_IdleUntilExpectedAssetsFinish(60)
 IdleSeconds(1) -- Idle for a bit to give time for the assets to reload
---[GFX TODO][ATOM-15079] This test is consistently failing due to an Asset Processor bug. Re-enable this test once SPEC-5888 is fixed.
+--[GFX TODO] This test is consistently failing due to an Asset Processor bug. Re-enable this test once that is fixed.
 --CaptureScreenshot(g_screenshotOutputFolder .. '/12_Variants_None_AfterUpdatingShader.png')
 
 -- Here we prepare to test a specific edge case. First, the material should be using a full baked shader variant, so we set up that precondition and verify with a screenshot.
