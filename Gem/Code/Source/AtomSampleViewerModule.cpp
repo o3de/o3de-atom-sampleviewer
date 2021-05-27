@@ -145,7 +145,7 @@ namespace AtomSampleViewer
                 SceneReloadSoakTestComponent::CreateDescriptor(),
                 ShadingExampleComponent::CreateDescriptor(),
                 ShadowExampleComponent::CreateDescriptor(),
-                ShadowedBistroExampleComponent::CreateDescriptor(),
+                ShadowedSponzaExampleComponent::CreateDescriptor(),
                 SkinnedMeshExampleComponent::CreateDescriptor(),
                 SsaoExampleComponent::CreateDescriptor(),
                 LightCullingExampleComponent::CreateDescriptor(),

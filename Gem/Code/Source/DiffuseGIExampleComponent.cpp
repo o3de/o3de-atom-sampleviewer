@@ -132,8 +132,8 @@ namespace AtomSampleViewer
         case SampleScene::CornellBox:
             CreateCornellBoxScene(geometryOnly);
             break;
-        case SampleScene::Bistro:
-            CreateBistroScene();
+        case SampleScene::Sponza:
+            CreateSponzaScene();
             break;
         };
     }
@@ -192,14 +192,10 @@ namespace AtomSampleViewer
         AZ::Data::AssetId whiteMaterialAssetId = AZ::RPI::AssetUtils::GetAssetIdForProductPath(WhiteMaterialPath, AZ::RPI::AssetUtils::TraceLevel::Error);
         m_whiteMaterialAsset.Create(whiteMaterialAssetId);
 
-        // Bistro models
-        static constexpr const char InteriorModelPath[] = "objects/bistro/Bistro_Research_Interior.azmodel";
+        // Sponza models
+        static constexpr const char InteriorModelPath[] = "objects/sponza.azmodel";
         AZ::Data::AssetId interiorAssetId = AZ::RPI::AssetUtils::GetAssetIdForProductPath(InteriorModelPath, AZ::RPI::AssetUtils::TraceLevel::Error);
-        m_bistroInteriorModelAsset.Create(interiorAssetId);
-
-        static constexpr const char ExteriorModelPath[] = "objects/bistro/Bistro_Research_Exterior.azmodel";
-        AZ::Data::AssetId exteriorAssetId = AZ::RPI::AssetUtils::GetAssetIdForProductPath(ExteriorModelPath, AZ::RPI::AssetUtils::TraceLevel::Error);
-        m_bistroExteriorModelAsset.Create(exteriorAssetId);
+        m_sponzaModelAsset.Create(interiorAssetId);
 
         // diffuse IBL cubemap
         const constexpr char* DiffuseAssetPath = "lightingpresets/lowcontrast/palermo_sidewalk_4k_iblskyboxcm_ibldiffuse.exr.streamingimage";
@@ -377,21 +373,19 @@ namespace AtomSampleViewer
 
         // camera
         m_cameraTranslation = AZ::Vector3(0.0f, -17.5f, 0.0f);
+        m_cameraHeading = 0.0f;
 
         // disable diffuse Ibl
         DisableGlobalIbl();
     }
 
-    void DiffuseGIExampleComponent::CreateBistroScene()
+    void DiffuseGIExampleComponent::CreateSponzaScene()
     {
-        m_meshHandles.resize(aznumeric_cast<uint32_t>(BistroMeshes::Count));
+        m_meshHandles.resize(aznumeric_cast<uint32_t>(SponzaMeshes::Count));
 
         AZ::Transform transform = AZ::Transform::CreateIdentity();
-        m_meshHandles[aznumeric_cast<uint32_t>(BistroMeshes::Inside)] = GetMeshFeatureProcessor()->AcquireMesh(m_bistroInteriorModelAsset);
-        GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(BistroMeshes::Inside)], transform);
-        
-        m_meshHandles[aznumeric_cast<uint32_t>(BistroMeshes::Outside)] = GetMeshFeatureProcessor()->AcquireMesh(m_bistroExteriorModelAsset);
-        GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(BistroMeshes::Outside)], transform);
+        m_meshHandles[aznumeric_cast<uint32_t>(SponzaMeshes::Inside)] = GetMeshFeatureProcessor()->AcquireMesh(m_sponzaModelAsset);
+        GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(SponzaMeshes::Inside)], transform);
         
         m_directionalLightPitch = AZ::DegToRad(-45.0f);
         m_directionalLightYaw = AZ::DegToRad(180.0f);
@@ -452,7 +446,8 @@ namespace AtomSampleViewer
         }
 
         // camera
-        m_cameraTranslation = AZ::Vector3(2.0f, -17.0f, 10.0f);
+        m_cameraTranslation = AZ::Vector3(5.0f, 0.0f, 5.0f);
+        m_cameraHeading = 90.0f;
 
         // diffuse Ibl
         EnableDiffuseIbl();
@@ -465,6 +460,7 @@ namespace AtomSampleViewer
             AZ::Debug::CameraControllerRequestBus::Event(GetCameraEntityId(), &AZ::Debug::CameraControllerRequestBus::Events::Reset);
             AZ::TransformBus::Event(GetCameraEntityId(), &AZ::TransformBus::Events::SetWorldTranslation, m_cameraTranslation);
             AZ::Debug::CameraControllerRequestBus::Event(GetCameraEntityId(), &AZ::Debug::CameraControllerRequestBus::Events::Enable, azrtti_typeid<AZ::Debug::NoClipControllerComponent>());
+            AZ::Debug::NoClipControllerRequestBus::Event(GetCameraEntityId(), &AZ::Debug::NoClipControllerRequestBus::Events::SetHeading, AZ::DegToRad(m_cameraHeading));
             m_resetCamera = false;
         }
 
@@ -489,7 +485,7 @@ namespace AtomSampleViewer
             {
                 ImGui::Text("Scene");
                 sceneChanged |= ImGui::RadioButton("Cornell Box", (int*)&m_sampleScene, aznumeric_cast<uint32_t>(CornellBox));
-                sceneChanged |= ImGui::RadioButton("Bistro", (int*)&m_sampleScene, aznumeric_cast<uint32_t>(Bistro));
+                sceneChanged |= ImGui::RadioButton("Sponza", (int*)&m_sampleScene, aznumeric_cast<uint32_t>(Sponza));
                 ImGui::NewLine();
             }
 
@@ -537,8 +533,8 @@ namespace AtomSampleViewer
                 ImGui::NewLine();
             }
 
-            // diffuse IBL (Bistro only)
-            if (m_sampleScene == SampleScene::Bistro)
+            // diffuse IBL (Sponza only)
+            if (m_sampleScene == SampleScene::Sponza)
             {
                 bool diffuseIblChanged = false;
                 diffuseIblChanged |= ImGui::Checkbox("Diffuse IBL (Sky Light)", &m_useDiffuseIbl);
