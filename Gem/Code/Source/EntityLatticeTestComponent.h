@@ -14,6 +14,7 @@
 
 #include <CommonSampleComponentBase.h>
 #include <Utils/Utils.h>
+#include <EntityLatticeTestComponent_Traits_Platform.h>
 
 struct ImGuiContext;
 
@@ -63,9 +64,9 @@ namespace AtomSampleViewer
         void BuildLattice();
 
         // These are signed to avoid casting with imgui controls.
-        int32_t m_latticeWidth = 5;
-        int32_t m_latticeHeight = 5;
-        int32_t m_latticeDepth = 5;
+        int32_t m_latticeWidth = ENTITY_LATTICE_TEST_COMPONENT_WIDTH;
+        int32_t m_latticeHeight = ENTITY_LATTICE_TEST_COMPONENT_HEIGHT;
+        int32_t m_latticeDepth = ENTITY_LATTICE_TEST_COMPONENT_DEPTH;
         
         Utils::DefaultIBL m_defaultIbl;
     };

@@ -12,7 +12,7 @@
 --
 ----------------------------------------------------------------------------------------------------
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/ShadowedBistro/')
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/ShadowedSponza/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 function MoveCameraToPlaza()
@@ -94,7 +94,7 @@ function SetSpotNoneFiltering()
     SetImguiValue('Filter Method##Spot', 'None')
 end
 
-OpenSample('Features/ShadowedBistro')
+OpenSample('Features/ShadowedSponza')
 ResizeViewport(800, 600)
 SelectImageComparisonToleranceLevel("Level H")
 

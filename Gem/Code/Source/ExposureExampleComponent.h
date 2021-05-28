@@ -81,7 +81,7 @@ namespace AtomSampleViewer
         {
             [&](AZ::Data::Instance<AZ::RPI::Model> model) { OnModelReady(model); }
         };
-        bool m_bistroExteriorAssetLoaded = false;
+        bool m_sponzaAssetLoaded = false;
 
         // feature processors
         AZ::Render::PointLightFeatureProcessorInterface* m_pointLightFeatureProcessor = nullptr;

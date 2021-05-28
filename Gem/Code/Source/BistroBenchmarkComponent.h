@@ -133,27 +133,8 @@ namespace AtomSampleViewer
         using CameraPath = AZStd::vector<CameraPathPoint>;
 
         const CameraPath m_exteriorPath = {
-            {0,     AZ::Vector3(13.924f, 42.245f, 2.761f), AZ::Vector3(13.661f, 41.280f, 2.748f), AZ::Vector3(0.006f, 0.0636f, 0.998f)},
-            {500,   AZ::Vector3(11.651f, 35.829f, 2.761f), AZ::Vector3(11.389f, 34.864f, 2.748f), AZ::Vector3(0.006f, 0.0636f, 0.998f)},
-            {1000,  AZ::Vector3(6.611f, 25.962f, 2.737f),  AZ::Vector3(6.037f, 25.143f, 2.733f),  AZ::Vector3(0.045f, 0.056f, 0.997f)},
-            {1500,  AZ::Vector3(2.655f, 21.641f, 2.737f),  AZ::Vector3(2.081f, 20.822f, 2.733f),  AZ::Vector3(0.045f, 0.056f, 0.997f)},
-            {2000,  AZ::Vector3(-1.235f, 14.989f, 1.450f), AZ::Vector3(-0.897f, 14.054f, 1.346f), AZ::Vector3(0.017f, -0.024f, 0.999f)},
-            {2500,  AZ::Vector3(-4.379f, 10.890f, 1.589f), AZ::Vector3(-3.842f, 10.058f, 1.454f), AZ::Vector3(0.025f, -0.055f, 0.998f)},
-            {3000,  AZ::Vector3(-7.152f, 4.652f, 1.369f),  AZ::Vector3(-6.159f, 4.749f, 1.317f),  AZ::Vector3(-0.024, -0.010f, 0.999f)},
-            {3500,  AZ::Vector3(-3.468f, -1.993f, 3.570f),   AZ::Vector3(-2.898f, -1.187f, 3.406f),   AZ::Vector3(0.052f, 0.071f, 0.996f)},
-            {4000,  AZ::Vector3(1.469f, -4.083f, 3.076f),    AZ::Vector3(1.924f, -3.197f, 2.982f),    AZ::Vector3(0.009f, 0.016f, 0.999f)},
-            {4500,  AZ::Vector3(7.631f, -5.290f, 3.476f),    AZ::Vector3(8.571f, -5.631f, 3.501f),    AZ::Vector3(-0.096f, 0.032f, 0.995f)},
-            {5000,  AZ::Vector3(28.078f, -13.430f, 3.165f),  AZ::Vector3(29.019f, -13.766f, 3.145f),  AZ::Vector3(-0.055f, 0.015f, 0.998f)},
-            {5500,  AZ::Vector3(37.032f, -21.699f, 3.082f),  AZ::Vector3(38.013f, -21.507f, 3.068f),  AZ::Vector3(-0.067f, 0.015f, 0.998f)},
-            {6000,  AZ::Vector3(40.579f, -27.793f, 2.948f),  AZ::Vector3(41.019f, -26.895f, 2.954f),  AZ::Vector3(-0.054f, -0.065f, 0.996f)},
-            {6500,  AZ::Vector3(52.912f, -27.212f, 3.632f),  AZ::Vector3(52.160f, -26.554f, 3.593f),  AZ::Vector3(0.026f, -0.027f, 0.999f)},
-            {7000,  AZ::Vector3(51.839f, -13.224f, 4.111f),  AZ::Vector3(51.241f, -14.023f, 4.044f),  AZ::Vector3(0.013f, 0.002f, 0.999f)},
-            {7500,  AZ::Vector3(36.274f, -14.114f, 3.613f),  AZ::Vector3(35.314f, -13.836f, 3.566f),  AZ::Vector3(0.026f, -0.016f, 0.999f)},
-            {8000,  AZ::Vector3(19.405f, -9.554f, 3.259f),   AZ::Vector3(18.459f, -9.229f, 3.248f),   AZ::Vector3(0.059f, -0.025f, 0.997f)},
-            {8500,  AZ::Vector3(7.768f, -4.673f, 2.460f),    AZ::Vector3(7.320f, -3.786f, 2.345f),    AZ::Vector3(-0.047f, 0.019f, 0.998f)},
-            {9000,  AZ::Vector3(5.322f, 0.631f, 1.789f),   AZ::Vector3(4.787f, 1.470f, 1.684f),   AZ::Vector3(-0.043f, 0.006f, 0.999f)},
-            {9500,  AZ::Vector3(-0.990f, 2.766f, 1.955f),  AZ::Vector3(-1.060f, 3.759f, 1.867f),  AZ::Vector3(-0.029f, 0.009f, 0.999f)},
-            {10000, AZ::Vector3(-6.400f, 6.291f, 1.320f),  AZ::Vector3(-5.431f, 6.222f, 1.086f),  AZ::Vector3(0.160f, 0.007f, 0.987f)},
+            {0,     AZ::Vector3(8.0f, 0.0, 3.0f), AZ::Vector3(-100.0f, 0.0f, 10.0f), AZ::Vector3(0.0f, 0.0f, 1.0f)},
+            {10000,     AZ::Vector3(-8.0f, 0.0, 3.0f), AZ::Vector3(-100.0f, 0.0f, 10.0f), AZ::Vector3(0.0f, 0.0f, 1.0f)},
         };
 
         bool m_firstResultsDisplay = true;
@@ -167,16 +148,16 @@ namespace AtomSampleViewer
         CameraPathPoint m_lastCameraPoint;
         
 
-        AZ::Data::Asset<AZ::RPI::ModelAsset> m_bistroExteriorAsset;
-        AZ::Data::Asset<AZ::RPI::ModelAsset> m_bistroInteriorAsset;
+        AZ::Data::Asset<AZ::RPI::ModelAsset> m_sponzaExteriorAsset;
+        AZ::Data::Asset<AZ::RPI::ModelAsset> m_sponzaInteriorAsset;
 
         using MeshHandle = AZ::Render::MeshFeatureProcessorInterface::MeshHandle;
-        MeshHandle m_bistroExteriorMeshHandle;
-        MeshHandle m_bistroInteriorMeshHandle;
+        MeshHandle m_sponzaExteriorMeshHandle;
+        MeshHandle m_sponzaInteriorMeshHandle;
         Utils::DefaultIBL m_defaultIbl;
 
-        bool m_bistroExteriorLoaded = false;
-        bool m_bistroInteriorLoaded = false;
+        bool m_sponzaExteriorLoaded = false;
+        bool m_sponzaInteriorLoaded = false;
 
         AZ::Component* m_cameraControlComponent = nullptr;
 
