@@ -25,7 +25,7 @@
 
 namespace AtomSampleViewer
 {
-    static const char* ParallaxEnableName = "parallax.enable";
+    static const char* ParallaxEnableName = "parallax.useTexture";
     static const char* PdoEnableName = "parallax.pdo";
     static const char* ParallaxFactorName = "parallax.factor";
     static const char* ParallaxHeightOffsetName = "parallax.offset";
