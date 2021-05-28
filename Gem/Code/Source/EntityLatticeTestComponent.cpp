@@ -23,13 +23,14 @@
 #include <Automation/ScriptableImGui.h>
 
 #include <RHI/BasicRHIComponent.h>
+#include <EntityLatticeTestComponent_Traits_Platform.h>
 
 namespace AtomSampleViewer
 {
     using namespace AZ;
     using namespace RPI;
 
-    constexpr int32_t s_latticeSizeMax = 20;
+    constexpr int32_t s_latticeSizeMax = ENTITY_LATTEST_TEST_COMPONENT_MAX;
 
     void EntityLatticeTestComponent::Reflect(ReflectContext* context)
     {

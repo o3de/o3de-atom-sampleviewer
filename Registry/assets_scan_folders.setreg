@@ -7,7 +7,8 @@
             {
                 "SourcePaths":
                 [
-                    "Gems/Atom/Tools/MaterialEditor"
+                    "Gems/Atom/Tools/MaterialEditor",
+                    "Gems/AtomContent/Sponza"
                 ]
             },
             "UiBasics":

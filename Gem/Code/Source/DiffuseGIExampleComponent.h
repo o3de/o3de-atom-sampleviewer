@@ -57,7 +57,7 @@ namespace AtomSampleViewer
         float ComputePointLightAttenuationRadius(AZ::Color color, float intensity);
         void LoadSampleSceneAssets();
         void CreateCornellBoxScene(bool geometryOnly);
-        void CreateBistroScene();
+        void CreateSponzaScene();
         void UpdateImGui();
         void SetSampleScene(bool geometryOnly = false);
         void UnloadSampleScene(bool geometryOnly);
@@ -68,6 +68,7 @@ namespace AtomSampleViewer
         bool m_resetCamera = true;
         float m_originalFarClipDistance = 0.0f;
         AZ::Vector3 m_cameraTranslation = AZ::Vector3(0.0f);
+        float m_cameraHeading = 0.0f;
 
         Utils::DefaultIBL m_defaultIbl;
 
@@ -89,7 +90,7 @@ namespace AtomSampleViewer
         {
             None,
             CornellBox,
-            Bistro
+            Sponza
         };
 
         SampleScene m_sampleScene = SampleScene::None;
@@ -147,17 +148,15 @@ namespace AtomSampleViewer
         CornellBoxColors m_floorColor = CornellBoxColors::White;
         CornellBoxColors m_ceilingColor = CornellBoxColors::White;
 
-        // Bistro scene
-        enum class BistroMeshes
+        // Sponza scene
+        enum class SponzaMeshes
         {
             Inside,
-            Outside,
             Count
         };
 
         // models
-        AZ::Data::Asset<AZ::RPI::ModelAsset> m_bistroInteriorModelAsset;
-        AZ::Data::Asset<AZ::RPI::ModelAsset> m_bistroExteriorModelAsset;
+        AZ::Data::Asset<AZ::RPI::ModelAsset> m_sponzaModelAsset;
 
         // scene
         AZStd::vector<AZ::Render::MeshFeatureProcessorInterface::MeshHandle> m_meshHandles;
@@ -165,7 +164,7 @@ namespace AtomSampleViewer
         AZ::Render::DirectionalLightFeatureProcessorInterface::LightHandle m_directionalLightHandle;
         AZ::Render::DiffuseProbeGridHandle m_diffuseProbeGrid;
 
-        // diffuse IBL (Bistro only)
+        // diffuse IBL (Sponza only)
         bool m_useDiffuseIbl = true;
         AZ::Data::Asset<AZ::RPI::StreamingImageAsset> m_diffuseImageAsset;
         float m_diffuseIblExposure = 1.0f;

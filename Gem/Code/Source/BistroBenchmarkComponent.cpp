@@ -107,18 +107,14 @@ namespace AtomSampleViewer
     void BistroBenchmarkComponent::Activate()
     {
         auto traceLevel = AZ::RPI::AssetUtils::TraceLevel::Assert;
-        m_bistroExteriorAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>
-            ("Objects/Bistro/Bistro_Research_Exterior.azmodel", traceLevel);
-        m_bistroInteriorAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>
-            ("Objects/Bistro/Bistro_Research_Interior.azmodel", traceLevel);
+        m_sponzaInteriorAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>
+            ("Objects/Sponza.azmodel", traceLevel);
 
-        m_bistroExteriorMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(m_bistroExteriorAsset);
-        m_bistroInteriorMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(m_bistroInteriorAsset);
+        m_sponzaInteriorMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(m_sponzaInteriorAsset);
 
         // rotate the entities 180 degrees about Z (the vertical axis)
         // This makes it consistent with how it was positioned in the world when the world was Y-up.
-        GetMeshFeatureProcessor()->SetTransform(m_bistroExteriorMeshHandle, AZ::Transform::CreateRotationZ(AZ::Constants::Pi));
-        GetMeshFeatureProcessor()->SetTransform(m_bistroInteriorMeshHandle, AZ::Transform::CreateRotationZ(AZ::Constants::Pi));
+        GetMeshFeatureProcessor()->SetTransform(m_sponzaInteriorMeshHandle, AZ::Transform::CreateRotationZ(AZ::Constants::Pi));
 
         BenchmarkLoadStart();
 
@@ -199,8 +195,7 @@ namespace AtomSampleViewer
 
         m_skyboxFeatureProcessor->Enable(false);
 
-        GetMeshFeatureProcessor()->ReleaseMesh(m_bistroExteriorMeshHandle);
-        GetMeshFeatureProcessor()->ReleaseMesh(m_bistroInteriorMeshHandle);
+        GetMeshFeatureProcessor()->ReleaseMesh(m_sponzaInteriorMeshHandle);
 
         m_directionalLightFeatureProcessor->ReleaseLight(m_directionalLightHandle);
         m_directionalLightFeatureProcessor = nullptr;
@@ -235,7 +230,7 @@ namespace AtomSampleViewer
 
         m_currentTimePointInSeconds = timePoint.GetSeconds();
 
-        if (m_bistroExteriorLoaded == false || m_bistroInteriorLoaded == false)
+        if (m_sponzaInteriorLoaded == false)
         {
             DisplayLoadingDialog();
         }
@@ -272,7 +267,7 @@ namespace AtomSampleViewer
                 if (screenshotRequested)
                 {
                     AZStd::string filePath;
-                    AZStd::string fileName = AZStd::string::format("screenshot_bistro_%llu.dds", m_frameCount);
+                    AZStd::string fileName = AZStd::string::format("screenshot_sponza_%llu.dds", m_frameCount);
                     AzFramework::StringFunc::Path::Join(m_screenshotFolder.c_str(), fileName.c_str(), filePath, true, false);
                     AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, filePath);
                 }
@@ -314,13 +309,9 @@ namespace AtomSampleViewer
 
     void BistroBenchmarkComponent::OnAssetReady(AZ::Data::Asset<AZ::Data::AssetData> asset)
     {
-        if (asset.GetId() == m_bistroExteriorAsset.GetId())
+        if (asset.GetId() == m_sponzaInteriorAsset.GetId())
         {
-            m_bistroExteriorLoaded = true;
-        }
-        else if (asset.GetId() == m_bistroInteriorAsset.GetId())
-        {
-            m_bistroInteriorLoaded = true;
+            m_sponzaInteriorLoaded = true;
         }
 
         // Benchmark the count and total size of files loaded
@@ -336,7 +327,7 @@ namespace AtomSampleViewer
         m_currentLoadBenchmarkData.m_totalMBLoaded += static_cast<double>(info.m_sizeBytes) * invBytesToMB;
         m_currentLoadBenchmarkData.m_filesLoaded.emplace_back(AZStd::move(fileLoadedData));
 
-        if (m_bistroExteriorLoaded && m_bistroInteriorLoaded)
+        if (m_sponzaInteriorLoaded)
         {
             BenchmarkLoadEnd();
         }
@@ -348,8 +339,7 @@ namespace AtomSampleViewer
     {
         AZStd::vector<AZ::Data::AssetId> unloadedAssetsInCatalog;
 
-        unloadedAssetsInCatalog.push_back(m_bistroExteriorAsset.GetId());
-        unloadedAssetsInCatalog.push_back(m_bistroInteriorAsset.GetId());
+        unloadedAssetsInCatalog.push_back(m_sponzaInteriorAsset.GetId());
 
         // Get a vector of all assets that haven't been loaded
         auto startCB = []() {};
@@ -398,13 +388,13 @@ namespace AtomSampleViewer
 
         FinalizeLoadBenchmarkData();
 
-        const AZStd::string unresolvedPath = AZStd::string::format("@user@/benchmarks/bistroLoad_%ld.xml", time(0));
-        char bistroLoadBenchmarkDataFilePath[AZ_MAX_PATH_LEN] = { 0 };
-        AZ::IO::FileIOBase::GetInstance()->ResolvePath(unresolvedPath.c_str(), bistroLoadBenchmarkDataFilePath, AZ_MAX_PATH_LEN);
+        const AZStd::string unresolvedPath = AZStd::string::format("@user@/benchmarks/sponzaLoad_%ld.xml", time(0));
+        char sponzaLoadBenchmarkDataFilePath[AZ_MAX_PATH_LEN] = { 0 };
+        AZ::IO::FileIOBase::GetInstance()->ResolvePath(unresolvedPath.c_str(), sponzaLoadBenchmarkDataFilePath, AZ_MAX_PATH_LEN);
 
-        if (!AZ::Utils::SaveObjectToFile(bistroLoadBenchmarkDataFilePath, AZ::DataStream::ST_XML, &m_currentLoadBenchmarkData))
+        if (!AZ::Utils::SaveObjectToFile(sponzaLoadBenchmarkDataFilePath, AZ::DataStream::ST_XML, &m_currentLoadBenchmarkData))
         {
-            AZ_Error("BistroBenchmarkComponent", false, "Failed to save bistro benchmark load data to file %s", bistroLoadBenchmarkDataFilePath);
+            AZ_Error("BistroBenchmarkComponent", false, "Failed to save sponza benchmark load data to file %s", sponzaLoadBenchmarkDataFilePath);
         }
     }
 
@@ -496,14 +486,14 @@ namespace AtomSampleViewer
 
         FinalizeRunBenchmarkData();
 
-        const AZStd::string unresolvedPath = AZStd::string::format("@user@/benchmarks/bistroRun_%ld.xml", time(0));
+        const AZStd::string unresolvedPath = AZStd::string::format("@user@/benchmarks/sponzaRun_%ld.xml", time(0));
 
-        char bistroRunBenchmarkDataFilePath[AZ_MAX_PATH_LEN] = { 0 };
-        AZ::IO::FileIOBase::GetInstance()->ResolvePath(unresolvedPath.c_str(), bistroRunBenchmarkDataFilePath, AZ_MAX_PATH_LEN);
+        char sponzaRunBenchmarkDataFilePath[AZ_MAX_PATH_LEN] = { 0 };
+        AZ::IO::FileIOBase::GetInstance()->ResolvePath(unresolvedPath.c_str(), sponzaRunBenchmarkDataFilePath, AZ_MAX_PATH_LEN);
 
-        if (!AZ::Utils::SaveObjectToFile(bistroRunBenchmarkDataFilePath, AZ::DataStream::ST_XML, &m_currentRunBenchmarkData))
+        if (!AZ::Utils::SaveObjectToFile(sponzaRunBenchmarkDataFilePath, AZ::DataStream::ST_XML, &m_currentRunBenchmarkData))
         {
-            AZ_Error("BistroBenchmarkComponent", false, "Failed to save bistro benchmark run data to file %s", bistroRunBenchmarkDataFilePath);
+            AZ_Error("BistroBenchmarkComponent", false, "Failed to save sponza benchmark run data to file %s", sponzaRunBenchmarkDataFilePath);
         }
 
     }
@@ -545,16 +535,7 @@ namespace AtomSampleViewer
             memset(loadingIndicator, '.', loadingIndicatorSize);
             loadingIndicator[loadingIndicatorSize] = '\0';
 
-            if (m_bistroInteriorLoaded)
-            {
-                ImGui::Text("Bistro Exterior: Loaded!");
-            }
-            else
-            {
-                ImGui::Text("Bistro Exterior: Loading%s", loadingIndicator);
-            }
-
-            if (m_bistroInteriorLoaded)
+            if (m_sponzaInteriorLoaded)
             {
                 ImGui::Text("Bistro Interior: Loaded!");
             }
