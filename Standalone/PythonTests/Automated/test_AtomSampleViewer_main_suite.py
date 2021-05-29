@@ -51,8 +51,7 @@ class TestAutomationMainSuite:
         # Execute test.
         process_utils.safe_check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
         try:
-            unexpected_lines = ["Script: Screenshot check failed. Diff score",  # "Diff score" ensures legit failure.
-                                'Trace::Error']
+            unexpected_lines = ["Script: Screenshot check failed. Diff score"]  # "Diff score" ensures legit failure.
             atomsampleviewer_log_monitor.monitor_log_for_lines(
                 unexpected_lines=unexpected_lines, halt_on_unexpected=True, timeout=200)
         except ly_test_tools.log.log_monitor.LogMonitorException as e:
