@@ -13,7 +13,7 @@
 ----------------------------------------------------------------------------------------------------
 
 -- "Main" suite tests for the automated review process.
--- These tests run on the nightly builds currently due to insufficient GPU node count (see SPEC-6031).
+-- These tests run on the nightly builds currently due to GPU node availability.
 -- In the future when we have more GPU nodes, these tests will run as part of the gating process for automated review.
 -- Failures in that gating process will block submission of your code in the automated review process and require a bug to be filed.
 
@@ -35,5 +35,5 @@ RunScript('scripts/diffusegitest.bv.luac')
 RunScript('scripts/arealighttest.bv.luac')
 RunScript('scripts/multiscene.bv.luac')
 RunScript('scripts/shadowtest.bv.luac')
-RunScript('scripts/shadowedbistrotest.bv.luac')
+RunScript('scripts/shadowedsponzatest.bv.luac')
 RunScript('scripts/PassTree.bv.luac')

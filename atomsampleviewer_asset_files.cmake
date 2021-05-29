@@ -51,7 +51,7 @@ set(FILES
     Scripts/ParallaxTest.bv.lua
     Scripts/PassTree.bv.lua
     Scripts/SceneReloadSoakTest.bv.lua
-    Scripts/ShadowedBistroTest.bv.lua
+    Scripts/ShadowedSponzaTest.bv.lua
     Scripts/ShadowTest.bv.lua
     Scripts/StreamingImageTest.bv.lua
     Scripts/TransparentTest.bv.lua

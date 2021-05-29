@@ -34,7 +34,7 @@ function DisablePositionalLights()
     IdleFrames(1)
     SetImguiValue('Blue', true)
     SetImguiValue('Intensity##Positional', 0.0)
-endif
+end
 
 function TestDirectionalLight()
 

@@ -20,8 +20,12 @@ PROJECT_REPOSITORY_NAME = 'o3de-atom-sampleviewer'
 PROJECT_ORGANIZATION_NAME = 'aws-lumberyard'
 ENGINE_REPOSITORY_NAME = 'o3de'
 ENGINE_ORGANIZATION_NAME = 'aws-lumberyard'
+<<<<<<< HEAD
 ENGINE_BRANCH_DEFAULT = 'main'
 ENGINE_REFSPEC_DEFAULT = 'origin/main'
+=======
+ENGINE_DEFAULT = 'main'
+>>>>>>> fb76a4cee0b786748adcc25400cb00d6ff74b13a
 
 def pipelineProperties = []
 
@@ -32,8 +36,13 @@ def pipelineParameters = [
     booleanParam(defaultValue: false, description: 'Deletes the contents of the output directories of the AssetProcessor before building.', name: 'CLEAN_ASSETS'),
     booleanParam(defaultValue: false, description: 'Deletes the contents of the workspace and forces a complete pull.', name: 'CLEAN_WORKSPACE'),
     booleanParam(defaultValue: false, description: 'Recreates the volume used for the workspace. The volume will be created out of a snapshot taken from main.', name: 'RECREATE_VOLUME'),
+<<<<<<< HEAD
     stringParam(defaultValue: "${ENGINE_BRANCH_DEFAULT}", description: 'Sets a different branch from o3de engine repo to use or use commit id. Default is mainline', trim: true, name: 'ENGINE_BRANCH'),
     stringParam(defaultValue: "${ENGINE_REFSPEC_DEFAULT}", description: 'Sets a refspec for the mainline branch. Default is head of main', trim: true, name: 'ENGINE_REFSPEC')
+=======
+    stringParam(defaultValue: "${ENGINE_DEFAULT}", description: 'Sets a different branch from o3de engine repo to use or use commit id. Default is mainline', trim: true, name: 'ENGINE_BRANCH'),
+    stringParam(defaultValue: 'origin/main', description: 'Sets a refspec for the mainline branch. Default is head of main', trim: true, name: 'ENGINE_REFSPEC')
+>>>>>>> fb76a4cee0b786748adcc25400cb00d6ff74b13a
 ]
 
 def palSh(cmd, lbl = '', winSlashReplacement = true) {
@@ -500,7 +509,11 @@ try {
                     }
                     pipelineProperties.add(disableConcurrentBuilds())
                     
+<<<<<<< HEAD
                     def engineBranch = "${ENGINE_BRANCH_DEFAULT}" // This allows the first run to work with parameters having null value, but use the engine branch parameter afterwards
+=======
+                    def engineBranch = "${ENGINE_DEFAULT}" // This allows the first run to work with parameters having null value, but use the engine branch parameter afterwards
+>>>>>>> fb76a4cee0b786748adcc25400cb00d6ff74b13a
                     if(params.ENGINE_BRANCH) {
                         engineBranch = params.ENGINE_BRANCH
                     }

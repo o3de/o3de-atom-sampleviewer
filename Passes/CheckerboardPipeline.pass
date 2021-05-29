@@ -635,6 +635,13 @@
                                 "Pass": "LightCullingRemapPass",
                                 "Attachment": "LightListRemapped"
                             }
+                        },
+                        {
+                            "LocalSlot": "InputLinearDepth",
+                            "AttachmentRef": {
+                                "Pass": "DepthToLinearDepthPass",
+                                "Attachment": "Output"
+                            }
                         }
                     ],
                     "PassData": {

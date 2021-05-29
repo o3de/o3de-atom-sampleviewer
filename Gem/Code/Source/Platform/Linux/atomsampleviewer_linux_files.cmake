@@ -11,6 +11,7 @@
 
 set(FILES
     AtomSampleViewerOptions_Linux.cpp
+    EntityLatticeTestComponent_Traits_Platform.h
     MultiThreadComponent_Traits_Platform.h
     SceneReloadSoakTestComponent_Traits_Platform.h
     SSRExampleComponent_Traits_Platform.h

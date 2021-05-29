@@ -34,19 +34,6 @@ function Process(context)
 
     local lightUnit = context:GetMaterialPropertyValue_enum("emissive.unit")
     local intensity = context:GetMaterialPropertyValue_float("emissive.intensity")
-    
-    -- [GFX TODO][ATOM-6014]: this doesn't work yet because I need a way for the PhotometricUnit code (which is in the Common Feature gem)
-    -- to reflect itself into the LuaMaterialFunctor's BehaviorContext (which is in the RPI gem). In the meantime, we replicate the math from ConvertIntensityBetweenUnits
-    --local sourcePhotometricUnit
-    --if(LightUnitProperty_EV100 == lightUnit) then
-    --    sourcePhotometricUnit = PhotometricUnit_Ev100_Luminance
-    --elseif(LightUnitProperty_Nit == lightUnit) then
-    --    sourcePhotometricUnit = PhotometricUnit_Nit
-    --else
-    --    Error("Unrecognized light unit.")
-    --end
-    
-    --intensity = PhotometricValue_ConvertIntensityBetweenUnits(sourceType, PhotometricUnit_Nit, intensity)
 
     if(LightUnitProperty_EV100 == lightUnit) then
         local Ev100LightMeterConstantLuminance = 12.5

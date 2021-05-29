@@ -117,8 +117,8 @@ namespace AtomSampleViewer
     {
         using namespace AZ;
 
-        const char* bistroPath = "Objects/Bistro/Bistro_Research_Exterior.azmodel";
-        Data::Asset<RPI::ModelAsset> modelAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>(bistroPath, RPI::AssetUtils::TraceLevel::Assert);
+        const char* sponzaPath = "objects/sponza.azmodel";
+        Data::Asset<RPI::ModelAsset> modelAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>(sponzaPath, RPI::AssetUtils::TraceLevel::Assert);
         Data::Asset<RPI::MaterialAsset> materialAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::MaterialAsset>(DefaultPbrMaterialPath, RPI::AssetUtils::TraceLevel::Assert);
         m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(modelAsset, AZ::RPI::Material::FindOrCreate(materialAsset));
 
@@ -153,7 +153,7 @@ namespace AtomSampleViewer
 
     void ExposureExampleComponent::OnModelReady(AZ::Data::Instance<AZ::RPI::Model> model)
     {
-        m_bistroExteriorAssetLoaded = true;
+        m_sponzaAssetLoaded = true;
 
         SetInitialCameraTransform();
     }
@@ -164,9 +164,9 @@ namespace AtomSampleViewer
 
         if (!m_cameraTransformInitialized)
         {
-            const AZ::Vector3 InitPosition = AZ::Vector3(5.f, -10.f, 1.3f);
-            constexpr float InitPitch = 0.0f;
-            constexpr float InitHeading = -1.85f;
+            const AZ::Vector3 InitPosition = AZ::Vector3(5.0f, 0.0f, 5.0f);
+            constexpr float InitPitch = DegToRad(-20.0f);
+            constexpr float InitHeading = DegToRad(90.0f);
             AZ::Transform cameraTrans = AZ::Transform::CreateIdentity();
             cameraTrans.SetTranslation(InitPosition);
             TransformBus::Event(
