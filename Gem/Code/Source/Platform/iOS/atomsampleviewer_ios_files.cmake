@@ -12,7 +12,9 @@
 set(FILES
     ../../../../Resources/IOSLauncher/Info.plist
     AtomSampleViewerOptions_iOS.cpp
+    EntityLatticeTestComponent_Traits_Platform.h
     MultiThreadComponent_Traits_Platform.h
+    SceneReloadSoakTestComponent_Traits_Platform.h
     SSRExampleComponent_Traits_Platform.h
     TriangleConstantBufferExampleComponent_Traits_Platform.h
     SampleComponentManager_iOS.cpp

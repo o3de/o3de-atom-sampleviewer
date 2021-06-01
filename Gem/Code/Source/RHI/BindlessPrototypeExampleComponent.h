@@ -219,6 +219,9 @@ namespace AtomSampleViewer
         // Handle array holding the FloatBuffer handles for all objects
         AZStd::vector<FloatBufferHandle> m_objectHandleArray;
 
+        // Image array holding all of the StreamImages
+        AZStd::vector<AZ::Data::Instance<AZ::RPI::StreamingImage>> m_images;
+
         // Light direction handle
         FloatBufferHandle m_lightDirectionHandle;
 

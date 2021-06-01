@@ -22,7 +22,6 @@ set(FILES
     Passes/ImGuiNoInput.pass
     Passes/ImGuiOnlyPipeline.pass
     Passes/LuxCoreTexture.pass
-    Passes/MainPipeline.pass
     Passes/MainPipeline_Mobile.pass
     Passes/Monochrome.pass
     Passes/MSAA_2x_RPI_Pipeline.pass
@@ -30,9 +29,11 @@ set(FILES
     Passes/MSAA_8x_RPI_Pipeline.pass
     Passes/MSAA_RPI_Pipeline_Core.pass
     Passes/No_MSAA_RPI_Pipeline.pass
+    Passes/RayTracingAmbientOcclusion.pass
     Passes/RenderTexture.pass
     Passes/RHISamplePass.pass
     Passes/RHISamplePipeline.pass
+    Passes/SelectorPass.pass
     Passes/SsaoPipeline.pass
     Scripts/AreaLightTest.bv.lua
     Scripts/CheckerboardTest.bv.lua
@@ -50,10 +51,12 @@ set(FILES
     Scripts/ParallaxTest.bv.lua
     Scripts/PassTree.bv.lua
     Scripts/SceneReloadSoakTest.bv.lua
-    Scripts/ShadowedBistroTest.bv.lua
+    Scripts/ShadowedSponzaTest.bv.lua
     Scripts/ShadowTest.bv.lua
     Scripts/StreamingImageTest.bv.lua
     Scripts/TransparentTest.bv.lua
+    Scripts/_AutomatedPeriodicTestSuite_.bv.lua
+    Scripts/_AutomatedReviewTestSuite_.bv.lua
     Scripts/_FullTestSuite_.bv.lua
     Shaders/DebugVertexNormals.azsl
     Shaders/DebugVertexNormals.materialtype
@@ -78,6 +81,13 @@ set(FILES
     Shaders/PostProcessing/Monochrome.shader
     Shaders/PostProcessing/MSAAResolveDepth.azsl
     Shaders/PostProcessing/MSAAResolveDepth.shader
+    Shaders/RayTracing/RTAOClosestHit.azsl
+    Shaders/RayTracing/RTAOClosestHit.shader
+    Shaders/RayTracing/RTAODefines.azsli
+    Shaders/RayTracing/RTAOGeneration.azsl
+    Shaders/RayTracing/RTAOGeneration.shader
+    Shaders/RayTracing/RTAOMiss.azsl
+    Shaders/RayTracing/RTAOMiss.shader
     Shaders/RHI/AsyncComputeLuminanceMap.azsl
     Shaders/RHI/AsyncComputeLuminanceMap.shader
     Shaders/RHI/AsyncComputeLuminanceReduce.azsl
@@ -120,10 +130,17 @@ set(FILES
     Shaders/RHI/MultipleViewsShadow.shader
     Shaders/RHI/Multithread.azsl
     Shaders/RHI/Multithread.shader
+    Shaders/RHI/RayTracingClosestHitGradient.azsl
+    Shaders/RHI/RayTracingClosestHitGradient.shader
+    Shaders/RHI/RayTracingClosestHitSolid.azsl
+    Shaders/RHI/RayTracingClosestHitSolid.shader
+    Shaders/RHI/RayTracingCommon.azsli
     Shaders/RHI/RayTracingDispatch.azsl
     Shaders/RHI/RayTracingDispatch.shader
     Shaders/RHI/RayTracingDraw.azsl
     Shaders/RHI/RayTracingDraw.shader
+    Shaders/RHI/RayTracingMiss.azsl
+    Shaders/RHI/RayTracingMiss.shader
     Shaders/RHI/SHDemo.azsl
     Shaders/RHI/SHDemo.shader
     Shaders/RHI/SHRender.azsl

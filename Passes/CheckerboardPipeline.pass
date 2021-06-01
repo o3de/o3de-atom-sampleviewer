@@ -363,7 +363,7 @@
                 },
                 {
                     "Name": "SkyBoxPass",
-                    "TemplateName": "SkyBoxTemplate",
+                    "TemplateName": "SkyBoxTwoOutputsTemplate",
                     "Enabled": true,
                     "Connections": [
                         {
@@ -634,6 +634,13 @@
                             "AttachmentRef": {
                                 "Pass": "LightCullingRemapPass",
                                 "Attachment": "LightListRemapped"
+                            }
+                        },
+                        {
+                            "LocalSlot": "InputLinearDepth",
+                            "AttachmentRef": {
+                                "Pass": "DepthToLinearDepthPass",
+                                "Attachment": "Output"
                             }
                         }
                     ],

@@ -31,6 +31,8 @@
 #include <Atom/RPI.Public/RenderPipeline.h>
 #include <Atom/RPI.Public/RPISystemInterface.h>
 #include <Atom/RPI.Public/Scene.h>
+#include <Atom/RPI.Reflect/Asset/AssetUtils.h>
+#include <Atom/RPI.Reflect/Image/AttachmentImageAsset.h>
 #include <Atom/RPI.Reflect/Shader/IShaderVariantFinder.h>
 
 #include <Atom/RHI/Factory.h>
@@ -233,7 +235,7 @@ namespace AtomSampleViewer
 
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/AlphaToCoverage", azrtti_typeid<AlphaToCoverageExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/AsyncCompute", azrtti_typeid<AsyncComputeExampleComponent>() ) );
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/BindlessPrototype", azrtti_typeid<BindlessPrototypeExampleComponent>() ));
+        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/BindlessPrototype", azrtti_typeid<BindlessPrototypeExampleComponent>(), []() {return Utils::GetRHIDevice()->GetFeatures().m_unboundedArrays; } ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/Compute", azrtti_typeid<ComputeExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/CopyQueue", azrtti_typeid<CopyQueueComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/DualSourceBlending", azrtti_typeid<DualSourceBlendingComponent>(), []() {return Utils::GetRHIDevice()->GetFeatures().m_dualSourceBlending; } ));
@@ -259,7 +261,7 @@ namespace AtomSampleViewer
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/AssetLoadTest", azrtti_typeid<AssetLoadTestComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/AuxGeom", azrtti_typeid<AuxGeomExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/BakedShaderVariant", azrtti_typeid<BakedShaderVariantExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/BistroBenchmark", azrtti_typeid<BistroBenchmarkComponent>() ));
+        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/SponzaBenchmark", azrtti_typeid<BistroBenchmarkComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/CullingAndLod", azrtti_typeid<CullingAndLodExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/Decals", azrtti_typeid<DecalExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/DynamicDraw", azrtti_typeid<DynamicDrawExampleComponent>() ));
@@ -283,7 +285,7 @@ namespace AtomSampleViewer
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/LightCulling", azrtti_typeid<LightCullingExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Parallax", azrtti_typeid<ParallaxMappingExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Shadow", azrtti_typeid<ShadowExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/ShadowedBistro", azrtti_typeid<ShadowedBistroExampleComponent>() ));
+        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/ShadowedSponza", azrtti_typeid<ShadowedSponzaExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/SSAO", azrtti_typeid<SsaoExampleComponent>()));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/SSR", azrtti_typeid<SSRExampleComponent>()));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Tonemapping", azrtti_typeid<TonemappingExampleComponent>() ));
@@ -332,6 +334,17 @@ namespace AtomSampleViewer
         // Add customized pass classes
         auto* passSystem = RPI::PassSystemInterface::Get();
         passSystem->AddPassCreator(Name("RHISamplePass"), &AtomSampleViewer::RHISamplePass::Create);
+
+        // Load ASV's own pass templates mapping
+        // It can be loaded here and it doesn't need be added via OnReadyLoadTemplatesEvent::Handler
+        // since the first render pipeline is created after this point.
+        const char* asvPassTemplatesFile = "Passes/ASV/PassTemplates.azasset";
+        bool loaded = passSystem->LoadPassTemplateMappings(asvPassTemplatesFile);
+        if (!loaded)
+        {
+            AZ_Fatal("SampleComponentManager", "Failed to load AtomSampleViewer's pass templates at %s", asvPassTemplatesFile);
+            return;
+        }
 
         // Use scene and render pipeline for RHI samples as default scene and render pipeline
         CreateSceneForRHISample();
@@ -443,6 +456,7 @@ namespace AtomSampleViewer
         m_imguiFrameGraphVisualizer.Reset();
 
         m_windowContext = nullptr;
+        m_brdfTexture.reset();
 
         ReleaseRHIScene();
         ReleaseRPIScene();
@@ -1471,9 +1485,21 @@ namespace AtomSampleViewer
         brdfPipelineDesc.m_name = "BRDFTexturePipeline";
         brdfPipelineDesc.m_rootPassTemplate = "BRDFTexturePipeline";
         brdfPipelineDesc.m_executeOnce = true;
-
+        
         RPI::RenderPipelinePtr brdfTexturePipeline = AZ::RPI::RenderPipeline::CreateRenderPipeline(brdfPipelineDesc);
         m_rpiScene->AddRenderPipeline(brdfTexturePipeline);
+        
+        // Save a reference to the generated BRDF texture so it doesn't get deleted if all the passes refering to it get deleted and it's ref count goes to zero
+        if (!m_brdfTexture)
+        {
+            const AZStd::shared_ptr<RPI::PassTemplate> brdfTextureTemplate = RPI::PassSystemInterface::Get()->GetPassTemplate(Name("BRDFTextureTemplate"));
+            Data::Asset<RPI::AttachmentImageAsset> brdfImageAsset = RPI::AssetUtils::LoadAssetById<RPI::AttachmentImageAsset>(
+                brdfTextureTemplate->m_imageAttachments[0].m_assetRef.m_assetId, RPI::AssetUtils::TraceLevel::Error);
+            if (brdfImageAsset.IsReady())
+            {
+                m_brdfTexture = RPI::AttachmentImage::FindOrCreate(brdfImageAsset);
+            }
+        }
 
         // Setup imGui since a new render pipeline with imgui pass was created
         SetupImGuiContext();

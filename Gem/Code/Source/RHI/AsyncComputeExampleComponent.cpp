@@ -336,17 +336,17 @@ namespace AtomSampleViewer
                     return;
                 }
             }
-                        
+
             {
                 // Model Pipeline
                 Data::Instance<AZ::RPI::ModelLod> modelLod = m_model->GetLods()[0];
-
                 modelLod->GetStreamsForMesh(
                     pipelineDesc.m_inputStreamLayout,
                     m_modelStreamBufferViews[ShadowScope],
+                    nullptr,
                     variant.GetInputContract(),
                     0);
-                                    
+
                 m_modelPipelineStates[ShadowScope] = shader->AcquirePipelineState(pipelineDesc);
                 if (!m_modelPipelineStates[ShadowScope])
                 {
@@ -400,10 +400,10 @@ namespace AtomSampleViewer
             {
                 // Model Pipeline
                 Data::Instance<AZ::RPI::ModelLod> modelLod = m_model->GetLods()[0];
-
                 modelLod->GetStreamsForMesh(
                     pipelineDesc.m_inputStreamLayout,
                     m_modelStreamBufferViews[ForwardScope],
+                    nullptr,
                     variant.GetInputContract(),
                     0);
 
@@ -447,7 +447,7 @@ namespace AtomSampleViewer
             {
                 AZ_Error(AsyncCompute::sampleName, false, "Invalid stream buffer views for LuminanceMap");
                 return;
-            }                
+            }
 
             m_copyTexturePipelineState = shader->AcquirePipelineState(pipelineDesc);
             if (!m_copyTexturePipelineState)

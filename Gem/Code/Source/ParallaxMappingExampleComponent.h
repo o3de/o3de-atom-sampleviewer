@@ -82,6 +82,8 @@ namespace AtomSampleViewer
 
         AZ::RPI::MaterialPropertyIndex m_parallaxEnableIndex;
         AZ::RPI::MaterialPropertyIndex m_parallaxFactorIndex;
+        AZ::RPI::MaterialPropertyIndex m_parallaxOffsetIndex;
+        AZ::RPI::MaterialPropertyIndex m_parallaxShowClippingIndex;
         AZ::RPI::MaterialPropertyIndex m_parallaxAlgorithmIndex;
         AZ::RPI::MaterialPropertyIndex m_parallaxQualityIndex;
         AZ::RPI::MaterialPropertyIndex m_parallaxUvIndex;
@@ -105,6 +107,8 @@ namespace AtomSampleViewer
         bool m_parallaxEnable = true;
         bool m_pdoEnable = true;
         float m_parallaxFactor = 0.05f;
+        float m_parallaxOffset = 0.0f;
+        bool m_parallaxShowClipping = false;
         // see StandardPbr.materialtype for the full enum list.
         int m_parallaxAlgorithm = 2; // POM
         int m_parallaxQuality = 2;   // High

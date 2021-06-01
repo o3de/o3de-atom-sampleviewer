@@ -1,6 +1,10 @@
 _savebackup/
 .mayaSwatches/
 *.swatches
-[Bb]uild/
+.vscode/
+__pycache__
+AssetProcessorTemp/**
+[Bb]uild/**
 [Cc]ache/
 [Uu]ser/
+.DS_Store

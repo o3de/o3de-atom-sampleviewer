@@ -23,12 +23,15 @@
 #include <Utils/ImGuiMaterialDetails.h>
 #include <Utils/ImGuiAssetBrowser.h>
 
+#include <Atom/Bootstrap/DefaultWindowBus.h>
+#include <Atom/Feature/ImGui/ImGuiUtils.h>
 #include <Atom/Feature/SkyBox/SkyBoxFeatureProcessorInterface.h>
 
 namespace AtomSampleViewer
 {
     class MeshExampleComponent final
         : public CommonSampleComponentBase
+        , public AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler
         , public AZ::TickBus::Handler
     {
     public:
@@ -52,12 +55,30 @@ namespace AtomSampleViewer
 
         void ModelChange();
 
+        void CreateGroundPlane();
+        void UpdateGroundPlane();
+        void RemoveGroundPlane();
+
         void UseArcBallCameraController();
         void UseNoClipCameraController();
         void RemoveController();
 
         void SetArcBallControllerParams();
         void ResetCameraController();
+
+        void DefaultWindowCreated() override;
+
+        void CreateLowEndPipeline();
+        void DestroyLowEndPipeline();
+
+        void ActivateLowEndPipeline();
+        void DeactivateLowEndPipeline();
+
+        AZ::RPI::RenderPipelinePtr m_lowEndPipeline;
+        AZ::RPI::RenderPipelinePtr m_originalPipeline;
+
+        AZStd::shared_ptr<AZ::RPI::WindowContext> m_windowContext;
+        AZ::Render::ImGuiActiveContextScope m_imguiScope;
 
         enum class CameraControllerType : int32_t 
         {
@@ -87,11 +108,20 @@ namespace AtomSampleViewer
         // be shown in the material list.
         bool m_showModelMaterials = false;
 
+        bool m_showGroundPlane = false;
+
         bool m_cameraControllerDisabled = false;
+
+        bool m_useLowEndPipeline = false;
+        bool m_switchPipeline = false;
 
         AZ::Data::Instance<AZ::RPI::Material> m_materialOverrideInstance; //< Holds a copy of the material instance being used when m_enableMaterialOverride is true.
         AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_meshHandle;
         AZ::Data::Asset<AZ::RPI::ModelAsset> m_modelAsset;
+
+        AZ::Data::Asset<AZ::RPI::ModelAsset> m_groundPlaneModelAsset;
+        AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_groundPlandMeshHandle;
+        AZ::Data::Instance<AZ::RPI::Material> m_groundPlaneMaterial;
 
         ImGuiSidebar m_imguiSidebar;
         ImGuiMaterialDetails m_imguiMaterialDetails;

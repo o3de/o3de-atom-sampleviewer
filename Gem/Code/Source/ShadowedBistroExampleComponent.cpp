@@ -29,29 +29,29 @@
 
 namespace AtomSampleViewer
 {
-    const AZ::Color ShadowedBistroExampleComponent::DirectionalLightColor = AZ::Color::CreateOne();
-    const AZ::Render::ShadowmapSize ShadowedBistroExampleComponent::s_shadowmapSizes[] =
+    const AZ::Color ShadowedSponzaExampleComponent::DirectionalLightColor = AZ::Color::CreateOne();
+    const AZ::Render::ShadowmapSize ShadowedSponzaExampleComponent::s_shadowmapSizes[] =
     {
         AZ::Render::ShadowmapSize::Size256,
         AZ::Render::ShadowmapSize::Size512,
         AZ::Render::ShadowmapSize::Size1024,
         AZ::Render::ShadowmapSize::Size2048
     };
-    const char* ShadowedBistroExampleComponent::s_directionalLightShadowmapSizeLabels[] =
+    const char* ShadowedSponzaExampleComponent::s_directionalLightShadowmapSizeLabels[] =
     {
         "256",
         "512",
         "1024",
         "2048"
     };
-    const AZ::Render::ShadowFilterMethod ShadowedBistroExampleComponent::s_shadowFilterMethods[] =
+    const AZ::Render::ShadowFilterMethod ShadowedSponzaExampleComponent::s_shadowFilterMethods[] =
     {
         AZ::Render::ShadowFilterMethod::None,
         AZ::Render::ShadowFilterMethod::Pcf,
         AZ::Render::ShadowFilterMethod::Esm,
         AZ::Render::ShadowFilterMethod::EsmPcf
     };
-    const char* ShadowedBistroExampleComponent::s_shadowFilterMethodLabels[] =
+    const char* ShadowedSponzaExampleComponent::s_shadowFilterMethodLabels[] =
     {
         "None",
         "PCF",
@@ -59,17 +59,17 @@ namespace AtomSampleViewer
         "ESM+PCF"
     };
 
-    void ShadowedBistroExampleComponent::Reflect(AZ::ReflectContext* context)
+    void ShadowedSponzaExampleComponent::Reflect(AZ::ReflectContext* context)
     {
         if (AZ::SerializeContext* serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
         {
-            serializeContext->Class<ShadowedBistroExampleComponent, AZ::Component>()
+            serializeContext->Class<ShadowedSponzaExampleComponent, AZ::Component>()
                 ->Version(0)
                 ;
         }
     }
 
-    void ShadowedBistroExampleComponent::Activate()
+    void ShadowedSponzaExampleComponent::Activate()
     {
         using namespace AZ;
         m_directionalLightShadowmapSizeIndex = s_shadowmapSizeIndexDefault;
@@ -112,7 +112,7 @@ namespace AtomSampleViewer
         ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::PauseScriptWithTimeout, 120.0f);
     }
 
-    void ShadowedBistroExampleComponent::Deactivate()
+    void ShadowedSponzaExampleComponent::Deactivate()
     {
         using namespace AZ;
 
@@ -132,7 +132,7 @@ namespace AtomSampleViewer
         UpdateDiskLightCount(0);
     }
 
-    void ShadowedBistroExampleComponent::OnTick(float deltaTime, AZ::ScriptTimePoint timePoint)
+    void ShadowedSponzaExampleComponent::OnTick(float deltaTime, AZ::ScriptTimePoint timePoint)
     {
         AZ_UNUSED(deltaTime);
         AZ_UNUSED(timePoint);
@@ -172,9 +172,9 @@ namespace AtomSampleViewer
         }
     }
 
-    void ShadowedBistroExampleComponent::OnModelReady(AZ::Data::Instance<AZ::RPI::Model> model)
+    void ShadowedSponzaExampleComponent::OnModelReady(AZ::Data::Instance<AZ::RPI::Model> model)
     {
-        m_bistroExteriorAssetLoaded = true;
+        m_sponzaExteriorAssetLoaded = true;
         m_worldAabb = model->GetAabb();
         UpdateDiskLightCount(DiskLightCountDefault);
 
@@ -182,7 +182,7 @@ namespace AtomSampleViewer
         ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::ResumeScript);
     }
 
-    void ShadowedBistroExampleComponent::SaveCameraConfiguration()
+    void ShadowedSponzaExampleComponent::SaveCameraConfiguration()
     {
         Camera::CameraRequestBus::EventResult(
             m_originalFarClipDistance,
@@ -190,7 +190,7 @@ namespace AtomSampleViewer
             &Camera::CameraRequestBus::Events::GetFarClipDistance);
     }
 
-    void ShadowedBistroExampleComponent::RestoreCameraConfiguration()
+    void ShadowedSponzaExampleComponent::RestoreCameraConfiguration()
     {
         Camera::CameraRequestBus::Event(
             GetCameraEntityId(),
@@ -198,33 +198,24 @@ namespace AtomSampleViewer
             m_originalFarClipDistance);
     }
 
-    void ShadowedBistroExampleComponent::SetInitialCameraTransform()
+    void ShadowedSponzaExampleComponent::SetInitialCameraTransform()
     {
         using namespace AZ;
 
         if (!m_cameraTransformInitialized)
         {
-            // heuristic relatively scenic camera location
-            const float cameraTransValues[12] =
-            {
-                sqrtf(0.5f), -sqrtf(0.4f), -sqrtf(0.1f), -2.1f,
-                sqrtf(0.5f),  sqrtf(0.4f),  sqrtf(0.1f), -2.9f,
-                sqrtf(0.0f), -sqrtf(0.1f),  sqrtf(0.8f),  1.9f
-            };
-            const auto cameraTrans = Transform::CreateFromMatrix3x4(Matrix3x4::CreateFromRowMajorFloat12(cameraTransValues));
-            TransformBus::Event(
-                GetCameraEntityId(),
-                &TransformBus::Events::SetWorldTM,
-                cameraTrans);
+            Debug::NoClipControllerRequestBus::Event(GetCameraEntityId(), &Debug::NoClipControllerRequestBus::Events::SetPosition, Vector3(5.0f, 1.0f, 5.0f));
+            Debug::NoClipControllerRequestBus::Event(GetCameraEntityId(), &Debug::NoClipControllerRequestBus::Events::SetHeading, DegToRad(90.0f));
+            Debug::NoClipControllerRequestBus::Event(GetCameraEntityId(), &Debug::NoClipControllerRequestBus::Events::SetPitch, DegToRad(-20.0f));
             m_cameraTransformInitialized = true;
         }
     }
 
-    void ShadowedBistroExampleComponent::SetupScene()
+    void ShadowedSponzaExampleComponent::SetupScene()
     {
         using namespace AZ;
 
-        const char* bistroPath = "Objects/Bistro/Bistro_Research_Exterior.azmodel";
+        const char* bistroPath = "objects/sponza.azmodel";
         Data::Asset<RPI::ModelAsset> modelAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>(bistroPath, RPI::AssetUtils::TraceLevel::Assert);
         Data::Asset<RPI::MaterialAsset> materialAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::MaterialAsset>(DefaultPbrMaterialPath, RPI::AssetUtils::TraceLevel::Assert);
         m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(modelAsset, RPI::Material::FindOrCreate(materialAsset));
@@ -273,7 +264,7 @@ namespace AtomSampleViewer
         BuildDiskLightParameters();
     }
 
-    void ShadowedBistroExampleComponent::BuildDiskLightParameters()
+    void ShadowedSponzaExampleComponent::BuildDiskLightParameters()
     {
         m_random.SetSeed(0);
         m_diskLights.clear();
@@ -287,7 +278,7 @@ namespace AtomSampleViewer
         }
     }
 
-    void ShadowedBistroExampleComponent::UpdateDiskLightCount(uint16_t count)
+    void ShadowedSponzaExampleComponent::UpdateDiskLightCount(uint16_t count)
     {
         // We suppose m_diskLights has been initialized except m_entity.
         using namespace AZ;
@@ -338,7 +329,7 @@ namespace AtomSampleViewer
         m_diskLightCount = count;
     }
 
-    const AZ::Color& ShadowedBistroExampleComponent::GetRandomColor()
+    const AZ::Color& ShadowedSponzaExampleComponent::GetRandomColor()
     {
         static const AZStd::vector<AZ::Color> colors =
         {
@@ -354,7 +345,7 @@ namespace AtomSampleViewer
         return colors[m_random.GetRandom() % colors.size()];
     }
 
-    AZ::Vector3 ShadowedBistroExampleComponent::GetRandomPosition()
+    AZ::Vector3 ShadowedSponzaExampleComponent::GetRandomPosition()
     {
         // returns a position in the range [-0.5, +0.5]^3.
         return AZ::Vector3(
@@ -363,7 +354,7 @@ namespace AtomSampleViewer
             m_random.GetRandomFloat() - 0.5f);
     }
 
-    AZ::Render::ShadowmapSize ShadowedBistroExampleComponent::GetRandomShadowmapSize() 
+    AZ::Render::ShadowmapSize ShadowedSponzaExampleComponent::GetRandomShadowmapSize() 
     {
         static const AZStd::vector<AZ::Render::ShadowmapSize> sizes =
         {
@@ -376,7 +367,7 @@ namespace AtomSampleViewer
         return sizes[m_random.GetRandom() % sizes.size()];
     }
 
-    void ShadowedBistroExampleComponent::DrawSidebar()
+    void ShadowedSponzaExampleComponent::DrawSidebar()
     {
         using namespace AZ;
         using namespace AZ::Render;
@@ -386,7 +377,7 @@ namespace AtomSampleViewer
             return;
         }
 
-        if (!m_bistroExteriorAssetLoaded)
+        if (!m_sponzaExteriorAssetLoaded)
         {
             const ImGuiWindowFlags windowFlags =
                 ImGuiWindowFlags_NoCollapse |
@@ -395,7 +386,7 @@ namespace AtomSampleViewer
 
             if (ImGui::Begin("Asset", nullptr, windowFlags))
             {
-                ImGui::Text("Bistro Exterior Model: %s", m_bistroExteriorAssetLoaded ? "Loaded" : "Loading...");
+                ImGui::Text("Sponza Model: %s", m_sponzaExteriorAssetLoaded ? "Loaded" : "Loading...");
                 ImGui::End();
             }
             m_imguiSidebar.End();
@@ -410,7 +401,7 @@ namespace AtomSampleViewer
             ScriptableImGui::SliderAngle("Pitch", &m_directionalLightPitch, -90.0f, 0.f);
             ScriptableImGui::SliderAngle("Yaw", &m_directionalLightYaw, 0.f, 360.f);
 
-            if (ScriptableImGui::SliderFloat("Intensity##directional", &m_directionalLightIntensity, 0.f, 20.f, "%.1f", 2.f))
+            if (ScriptableImGui::SliderFloat("Intensity##directional", &m_directionalLightIntensity, 0.f, 20.f, "%.1f", ImGuiSliderFlags_Logarithmic))
             {
                 AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Lux> lightColor(DirectionalLightColor * m_directionalLightIntensity);
                 m_directionalLightFeatureProcessor->SetRgbIntensity(m_directionalLightHandle, lightColor);
@@ -551,7 +542,7 @@ namespace AtomSampleViewer
                 UpdateDiskLightCount(diskLightCount);
             }
 
-            if (ScriptableImGui::SliderFloat("Intensity##spot", &m_diskLightIntensity, 0.f, 100000.f, "%.1f", 4.f))
+            if (ScriptableImGui::SliderFloat("Intensity##spot", &m_diskLightIntensity, 0.f, 100000.f, "%.1f", ImGuiSliderFlags_Logarithmic))
             {
                 for (const DiskLight& light : m_diskLights)
                 {
@@ -644,7 +635,7 @@ namespace AtomSampleViewer
         m_imguiSidebar.End();
     }
 
-    void ShadowedBistroExampleComponent::UpdateDiskLightShadowmapSize()
+    void ShadowedSponzaExampleComponent::UpdateDiskLightShadowmapSize()
     {
         using namespace AZ::Render;
         DiskLightFeatureProcessorInterface* const featureProcessor = m_diskLightFeatureProcessor;
@@ -677,7 +668,7 @@ namespace AtomSampleViewer
         }
     }
 
-    void ShadowedBistroExampleComponent::UpdateDiskLightPositions()
+    void ShadowedSponzaExampleComponent::UpdateDiskLightPositions()
     {
         for (int index = 0; index < m_diskLightCount; ++index)
         {
@@ -685,7 +676,7 @@ namespace AtomSampleViewer
         }
     }
 
-    void ShadowedBistroExampleComponent::UpdateDiskLightPosition(int index)
+    void ShadowedSponzaExampleComponent::UpdateDiskLightPosition(int index)
     {
         using namespace AZ;
         Render::DiskLightFeatureProcessorInterface* const featureProcessor = m_diskLightFeatureProcessor;
@@ -714,7 +705,7 @@ namespace AtomSampleViewer
             transform.GetBasis(1));
     }
 
-    void ShadowedBistroExampleComponent::SetupDebugFlags()
+    void ShadowedSponzaExampleComponent::SetupDebugFlags()
     {
         int flags = AZ::Render::DirectionalLightFeatureProcessorInterface::DebugDrawFlags::DebugDrawNone;
         if (m_isDebugColoringEnabled)

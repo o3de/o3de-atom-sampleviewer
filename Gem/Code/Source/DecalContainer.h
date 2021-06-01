@@ -24,7 +24,7 @@ namespace AtomSampleViewer
     {
     public:
 
-        DecalContainer(AZ::Render::DecalFeatureProcessorInterface* fp);
+        DecalContainer(AZ::Render::DecalFeatureProcessorInterface* fp, const AZ::Vector3 position);
         DecalContainer(const DecalContainer&) = delete;
         DecalContainer& operator=(const DecalContainer&) = delete;
         ~DecalContainer();
@@ -32,6 +32,7 @@ namespace AtomSampleViewer
         void SetNumDecalsActive(int numDecals);
         int GetMaxDecals() const { return aznumeric_cast<int>(m_decals.size()); }
         int GetNumDecalsActive() const { return m_numDecalsActive; }
+        void CloneFrom(const DecalContainer& containerToClone);
 
     private:
 
@@ -52,5 +53,6 @@ namespace AtomSampleViewer
         AZStd::vector<Decal> m_decals;
         AZ::Render::DecalFeatureProcessorInterface* m_decalFeatureProcessor = nullptr;
         int m_numDecalsActive = 0;
+        AZ::Vector3 m_position;
     };
 } // namespace AtomSampleViewer

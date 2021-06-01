@@ -28,25 +28,12 @@ LightUnitProperty_Nit = 1
 function Process(context)
 
     local useTexture = context:GetMaterialPropertyValue_bool("emissive.useTexture")
-    local textureMap = context:GetMaterialPropertyValue_image("emissive.textureMap")
+    local textureMap = context:GetMaterialPropertyValue_Image("emissive.textureMap")
     
     context:SetShaderOptionValue_bool("o_emissive_useTexture", useTexture and textureMap ~= nil)
 
     local lightUnit = context:GetMaterialPropertyValue_enum("emissive.unit")
     local intensity = context:GetMaterialPropertyValue_float("emissive.intensity")
-    
-    -- [GFX TODO][ATOM-6014]: this doesn't work yet because I need a way for the PhotometricUnit code (which is in the Common Feature gem)
-    -- to reflect itself into the LuaMaterialFunctor's BehaviorContext (which is in the RPI gem). In the meantime, we replicate the math from ConvertIntensityBetweenUnits
-    --local sourcePhotometricUnit
-    --if(LightUnitProperty_EV100 == lightUnit) then
-    --    sourcePhotometricUnit = PhotometricUnit_Ev100_Luminance
-    --elseif(LightUnitProperty_Nit == lightUnit) then
-    --    sourcePhotometricUnit = PhotometricUnit_Nit
-    --else
-    --    Error("Unrecognized light unit.")
-    --end
-    
-    --intensity = PhotometricValue_ConvertIntensityBetweenUnits(sourceType, PhotometricUnit_Nit, intensity)
 
     if(LightUnitProperty_EV100 == lightUnit) then
         local Ev100LightMeterConstantLuminance = 12.5
@@ -60,7 +47,7 @@ end
 
 function ProcessEditor(context)
     
-    local textureMap = context:GetMaterialPropertyValue_image("emissive.textureMap")
+    local textureMap = context:GetMaterialPropertyValue_Image("emissive.textureMap")
 
     if(nil == textureMap) then
         context:SetMaterialPropertyVisibility("emissive.useTexture", MaterialPropertyVisibility_Disabled)

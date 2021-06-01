@@ -47,7 +47,7 @@ namespace AtomSampleViewer
     using namespace AZ::Render;
     using namespace AZ::RPI;
 
-    static const char* WorldModelName = "Objects/Bistro/Bistro_Research_Exterior.azmodel";
+    static const char* WorldModelName = "Objects/Sponza.azmodel";
 
     static const char* TransparentModelName = "Objects/ShaderBall_simple.azmodel";
     static const char* TransparentMaterialName = "materials/DefaultPBRTransparent.azmaterial";
@@ -162,6 +162,11 @@ namespace AtomSampleViewer
             GetCameraEntityId(),
             &Camera::CameraRequestBus::Events::SetFarClipDistance,
             FarClipDistance);
+
+        Camera::CameraRequestBus::Event(GetCameraEntityId(), &Camera::CameraRequestBus::Events::SetFarClipDistance, 200.0f);
+        AZ::Debug::NoClipControllerRequestBus::Event(GetCameraEntityId(), &AZ::Debug::NoClipControllerRequestBus::Events::SetPosition, Vector3(5.0f, 0.0f, 5.0f));
+        AZ::Debug::NoClipControllerRequestBus::Event(GetCameraEntityId(), &AZ::Debug::NoClipControllerRequestBus::Events::SetHeading, AZ::DegToRad(90.0f));
+        AZ::Debug::NoClipControllerRequestBus::Event(GetCameraEntityId(), &AZ::Debug::NoClipControllerRequestBus::Events::SetPitch, AZ::DegToRad(-11.936623));
     }
 
     void LightCullingExampleComponent::Deactivate()

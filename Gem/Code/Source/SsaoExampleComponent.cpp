@@ -90,7 +90,7 @@ namespace AtomSampleViewer
 
     void SsaoExampleComponent::ActivateModel()
     {
-        const char* modelPath = "Objects/Bistro/Bistro_Research_Exterior.azmodel";
+        const char* modelPath = "objects/sponza.azmodel";
 
         // Get Model and Material asset
         Data::Asset<RPI::ModelAsset> modelAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>(modelPath, RPI::AssetUtils::TraceLevel::Assert);
@@ -178,7 +178,6 @@ namespace AtomSampleViewer
 
         AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
         defaultScene->AddRenderPipeline(m_originalPipeline);
-        AZ::RPI::RenderPipelineDescriptor pipelineDesc;
         defaultScene->RemoveRenderPipeline(m_ssaoPipeline->GetId());
         DestroySsaoPipeline();
     }
@@ -400,8 +399,8 @@ namespace AtomSampleViewer
     void SsaoExampleComponent::MoveCameraToStartPosition()
     {
         Camera::CameraRequestBus::Event(GetCameraEntityId(), &Camera::CameraRequestBus::Events::SetFarClipDistance, 200.0f);
-        Debug::NoClipControllerRequestBus::Event(GetCameraEntityId(), &Debug::NoClipControllerRequestBus::Events::SetPosition, Vector3(11.475539, -0.477937, 4.178957));
-        Debug::NoClipControllerRequestBus::Event(GetCameraEntityId(), &Debug::NoClipControllerRequestBus::Events::SetHeading, DegToRad(96.925217));
+        Debug::NoClipControllerRequestBus::Event(GetCameraEntityId(), &Debug::NoClipControllerRequestBus::Events::SetPosition, Vector3(5.0f, 0.0f, 5.0f));
+        Debug::NoClipControllerRequestBus::Event(GetCameraEntityId(), &Debug::NoClipControllerRequestBus::Events::SetHeading, DegToRad(90.0f));
         Debug::NoClipControllerRequestBus::Event(GetCameraEntityId(), &Debug::NoClipControllerRequestBus::Events::SetPitch, DegToRad(-11.936623));
     }
 
