@@ -204,10 +204,7 @@ def GetLfsConfig(cmd, lbl = '') {
 }
 
 def getEngineRemoteConfig(remoteConfigs) {
-    def refSpec = "${ENGINE_REFSPEC_DEFAULT}"
-    if (params.ENGINE_REFSPEC) {
-        refSpec = "${params.ENGINE_REFSPEC}"
-    }
+    def refSpec = "${params.ENGINE_REFSPEC}" ?: "${ENGINE_REFSPEC_DEFAULT}"
     def engineRemoteConfigs = [name: "${ENGINE_REPOSITORY_NAME}",
         url: remoteConfigs.url[0]
             .replace("${PROJECT_REPOSITORY_NAME}", "${ENGINE_REPOSITORY_NAME}")
@@ -500,10 +497,7 @@ try {
                     }
                     pipelineProperties.add(disableConcurrentBuilds())
                     
-                    def engineBranch = "${ENGINE_BRANCH_DEFAULT}" // This allows the first run to work with parameters having null value, but use the engine branch parameter afterwards
-                    if(params.ENGINE_BRANCH) {
-                        engineBranch = params.ENGINE_BRANCH
-                    }
+                    def engineBranch = params.ENGINE_BRANCH ?: "${ENGINE_BRANCH_DEFAULT}" // This allows the first run to work with parameters having null value, but use the engine branch parameter afterwards
 
                     echo "Running \"${pipelineName}\" for \"${branchName}\" on engine branch \"${engineBranch}\"..."
 
