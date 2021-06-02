@@ -41,12 +41,10 @@ if (NOT LY_MONOLITHIC_GAME)
 
         add_subdirectory(PythonTests)
 
-        ly_add_target_dependencies(
-            TARGETS 
-                AtomSampleViewerStandalone
-            DEPENDENCIES_FILES 
-                ../Gem/Code/runtime_dependencies.cmake
-        )
+        ly_enable_gems(GEM_FILE ../Gem/Code/enabled_gems.cmake
+            TARGETS AtomSampleViewerStandalone
+            VARIANTS Clients)
+
 
         # Adds the AtomSampleViewerStandalone target as a C preprocessor define so that it can be used as a Settings Registry
         # specialization in order to look up the generated .setreg which contains the dependencies
