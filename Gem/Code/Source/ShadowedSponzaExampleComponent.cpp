@@ -10,7 +10,7 @@
 *
 */
 
-#include <ShadowedBistroExampleComponent.h>
+#include <ShadowedSponzaExampleComponent.h>
 #include <SampleComponentConfig.h>
 #include <Automation/ScriptableImGui.h>
 #include <Automation/ScriptRunnerBus.h>
@@ -215,8 +215,9 @@ namespace AtomSampleViewer
     {
         using namespace AZ;
 
-        const char* bistroPath = "objects/sponza.azmodel";
-        Data::Asset<RPI::ModelAsset> modelAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>(bistroPath, RPI::AssetUtils::TraceLevel::Assert);
+        const char* modelPath = "objects/sponza.azmodel";
+        Data::Asset<RPI::ModelAsset> modelAsset =
+            RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>(modelPath, RPI::AssetUtils::TraceLevel::Assert);
         Data::Asset<RPI::MaterialAsset> materialAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::MaterialAsset>(DefaultPbrMaterialPath, RPI::AssetUtils::TraceLevel::Assert);
         m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(modelAsset, RPI::Material::FindOrCreate(materialAsset));
 
