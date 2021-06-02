@@ -65,6 +65,10 @@ ly_add_target(
             Gem::ImGui.imguilib
 )
 
+# if enabled, AtomSampleViewer is used by the Client and ServerLauncher
+ly_create_alias(NAME AtomSampleViewer.Clients  NAMESPACE Gem TARGETS Gem::AtomSampleViewer)
+ly_create_alias(NAME AtomSampleViewer.Servers  NAMESPACE Gem TARGETS Gem::AtomSampleViewer)
+
 if(PAL_TRAIT_BUILD_HOST_TOOLS)
 
     ly_add_target(
@@ -104,6 +108,9 @@ if(PAL_TRAIT_BUILD_HOST_TOOLS)
                 Gem::AtomSampleViewer.Tools.Static
     )
 
+    # The AtomSampleViewer.Tools target is the real GEM_MODULE target made above, but the AssetBuilder/AssetProcessor
+    # also needs that target, so alias the "Builders" variant to it
+    ly_create_alias(NAME AtomSampleViewer.Builders NAMESPACE Gem TARGETS Gem::AtomSampleViewer.Tools)
 endif()
 
 ################################################################################
@@ -130,10 +137,6 @@ if(PAL_TRAIT_BUILD_SUPPORTS_TESTS)
     )
 endif()
 
-# if enabled, AtomSampleViewer is used by the Client and ServerLauncher
-# The AtomSampleViewer.Tools target is the real GEM_MODULE target made above
-ly_create_alias(NAME AtomSampleViewer.Clients  NAMESPACE Gem TARGETS Gem::AtomSampleViewer)
-ly_create_alias(NAME AtomSampleViewer.Servers  NAMESPACE Gem TARGETS Gem::AtomSampleViewer)
 
 ################################################################################
 # Gem dependencies
