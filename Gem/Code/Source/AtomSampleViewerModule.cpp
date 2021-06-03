@@ -39,7 +39,7 @@
 #include <SceneReloadSoakTestComponent.h>
 #include <ShadingExampleComponent.h>
 #include <ShadowExampleComponent.h>
-#include <ShadowedBistroExampleComponent.h>
+#include <ShadowedSponzaExampleComponent.h>
 #include <SkinnedMeshExampleComponent.h>
 #include <SsaoExampleComponent.h>
 #include <StreamingImageExampleComponent.h>
