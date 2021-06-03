@@ -106,6 +106,8 @@ if(PAL_TRAIT_BUILD_HOST_TOOLS)
             PUBLIC
                 AZ::AzCore
                 Gem::AtomSampleViewer.Tools.Static
+        RUNTIME_DEPENDENCIES
+            Gem::AtomSampleViewer
     )
 
     # The AtomSampleViewer.Tools target is the real GEM_MODULE target made above, but the AssetBuilder/AssetProcessor
