@@ -587,7 +587,7 @@
                         "DrawListSortType": "KeyThenReverseDepth",
                         "PipelineViewTag": "MainCamera",
                         "PassSrgAsset": {
-                            "FilePath": "shaderlib/atom/features/pbr/transparentpasssrg.azsli:PassSrg"
+                            "FilePath": "shaderlib/atom/features/pbr/forwardpasssrg.azsli:PassSrg"
                         }
                     }
                 },
