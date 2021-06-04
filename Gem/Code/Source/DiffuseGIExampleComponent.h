@@ -24,7 +24,7 @@
 #include <Atom/Feature/Mesh/MeshFeatureProcessorInterface.h>
 #include <Atom/Feature/CoreLights/PointLightFeatureProcessorInterface.h>
 #include <Atom/Feature/CoreLights/DirectionalLightFeatureProcessorInterface.h>
-#include <Atom/Feature/DiffuseProbeGrid/DiffuseProbeGridFeatureProcessorInterface.h>
+#include <Atom/Feature/DiffuseGlobalIllumination/DiffuseProbeGridFeatureProcessorInterface.h>
 
 namespace AtomSampleViewer
 {
