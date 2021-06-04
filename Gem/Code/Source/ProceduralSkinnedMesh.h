@@ -19,8 +19,8 @@ namespace AtomSampleViewer
     {
         int m_segmentCount = 8;
         int m_verticesPerSegment = 8;
-        int m_boneCount = 1;
-        int m_influencesPerVertex = 1;
+        int m_boneCount = 4;
+        int m_influencesPerVertex = 4;
     };
 
     //! Class for creating SkinnedMeshInputBuffers with arbitrary bone/vertex counts
@@ -31,6 +31,8 @@ namespace AtomSampleViewer
         void Resize(SkinnedMeshConfig& skinnedMeshConfig);
         void UpdateAnimation(float time, bool useOutOfSyncBoneAnimation = false);
 
+        uint32_t GetInfluencesPerVertex() const;
+
         static const uint32_t MaxInfluencesPerVertex = 4;
 
         // Mesh data that's used for rendering
@@ -40,8 +42,8 @@ namespace AtomSampleViewer
         AZStd::vector< AZStd::array<float, 3>> m_normals;
         AZStd::vector< AZStd::array<float, 4>> m_tangents;
         AZStd::vector< AZStd::array<float, 3>> m_bitangents;
-        AZStd::vector< AZStd::array<uint32_t, 4>> m_blendIndices;
-        AZStd::vector< AZStd::array<float, 4>> m_blendWeights;
+        AZStd::vector<uint32_t> m_blendIndices;
+        AZStd::vector<float> m_blendWeights;
         AZStd::vector<AZStd::array<float, 2>> m_uvs;
         AZStd::vector<AZ::Matrix3x4> m_boneMatrices;
 
@@ -53,8 +55,8 @@ namespace AtomSampleViewer
         // Extra values that are used while generating per-vertex data
         AZStd::vector<float> m_boneHeights;
         AZStd::vector<float> m_segmentHeights;
-        AZStd::vector<AZStd::array<uint32_t, MaxInfluencesPerVertex>> m_segmentBlendIndices;
-        AZStd::vector<AZStd::array<float, MaxInfluencesPerVertex>> m_segmentBlendWeights;
+        AZStd::vector<uint32_t> m_segmentBlendIndices;
+        AZStd::vector<float> m_segmentBlendWeights;
         AZStd::vector<float> m_segmentHeightOffsets;
 
         uint32_t m_boneCount = 0;
