@@ -472,41 +472,6 @@
                     ]
                 },
                 {
-                    "Name": "CameraMotionVectorPass",
-                    "TemplateName": "CameraMotionVectorPassTemplate",
-                    "Connections": [
-                        {
-                            "LocalSlot": "Input",
-                            "AttachmentRef": {
-                                "Pass": "MSAAResolveDepthPass",
-                                "Attachment": "Output"
-                            }
-                        }
-                    ],
-                    "PassData": {
-                        "$type": "RasterPassData",
-                        "PipelineViewTag": "MainCamera"
-                    }
-                },
-                {
-                    "Name": "MeshMotionVectorPass",
-                    "TemplateName": "MeshMotionVectorPassTemplate",
-                    "PassData": {
-                        "$type": "RasterPassData",
-                        "DrawListTag": "motion",
-                        "PipelineViewTag": "MainCamera"
-                    },
-                    "Connections": [
-                        {
-                            "LocalSlot": "SkinnedMeshes",
-                            "AttachmentRef": {
-                                "Pass": "SkinningPass",
-                                "Attachment": "SkinnedMeshOutputStream"
-                            }
-                        }
-                    ]
-                },
-                {
                     "Name": "DepthToLinearDepthPass",
                     "TemplateName": "DepthToLinearTemplate",
                     "Connections": [
