@@ -462,19 +462,7 @@ namespace AtomSampleViewer
 
     AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> BasicRHIComponent::CreateShaderResourceGroup(AZ::Data::Instance<AZ::RPI::Shader> shader, const char* shaderResourceGroupId, [[maybe_unused]] const char* sampleName)
     {
-        auto perInstanceSrgAsset = shader->FindShaderResourceGroupAsset(AZ::Name{ shaderResourceGroupId });
-        if (!perInstanceSrgAsset.GetId().IsValid())
-        {
-            AZ_Error(sampleName, false, "Could not find shader resource group asset '%s'", shaderResourceGroupId);
-            return nullptr;
-        }
-        else if (!perInstanceSrgAsset.IsReady())
-        {
-            AZ_Error(sampleName, false, "Shader resource group asset is not loaded");
-            return nullptr;
-        }
-
-        auto srg = AZ::RPI::ShaderResourceGroup::Create(perInstanceSrgAsset);
+        auto srg = AZ::RPI::ShaderResourceGroup::Create(shader->GetAsset(), AZ::RPI::DefaultSupervariantIndex, AZ::Name { shaderResourceGroupId });
         if (!srg)
         {
             AZ_Error(sampleName, false, "Failed to create shader resource group");

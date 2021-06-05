@@ -143,15 +143,14 @@ namespace AtomSampleViewer
             m_rootConstantData = RHI::ConstantsData(rootConstantsLayout);
 
             // Load shader resource group asset
-            auto srgAsset = shader->FindShaderResourceGroupAsset(Name{ "MaterialGroupSrg" });
-            m_srg = AZ::RPI::ShaderResourceGroup::Create(srgAsset);
+            m_srg = AZ::RPI::ShaderResourceGroup::Create(shaderAsset, AZ::RPI::DefaultSupervariantIndex, Name { "MaterialGroupSrg" });
             if (!m_srg)
             {
                 AZ_Error("Render", false, "Failed to create shader resource group");
                 return;
             }
 
-            auto materialsInputIndex = srgAsset->GetLayout()->FindShaderInputConstantIndex(Name("m_materials"));
+            auto materialsInputIndex = m_srg->FindShaderInputConstantIndex(Name("m_materials"));
 
             struct MaterialInfo
             {
@@ -185,7 +184,7 @@ namespace AtomSampleViewer
                     for (uint32_t j = 0; j < m_modelStreamBufferViews[i].size(); ++j)
                     {
                         modelLod->GetStreamsForMesh(
-                            pipelineStateDescriptor.m_inputStreamLayout, m_modelStreamBufferViews[i][j], nullptr, shaderVariant.GetInputContract(),
+                            pipelineStateDescriptor.m_inputStreamLayout, m_modelStreamBufferViews[i][j], nullptr, shader->GetInputContract(),
                             j);
                     }
                 }
