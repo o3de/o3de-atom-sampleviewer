@@ -92,7 +92,7 @@
 #include <SceneReloadSoakTestComponent.h>
 #include <ShadingExampleComponent.h>
 #include <ShadowExampleComponent.h>
-#include <ShadowedBistroExampleComponent.h>
+#include <ShadowedSponzaExampleComponent.h>
 #include <SkinnedMeshExampleComponent.h>
 #include <SsaoExampleComponent.h>
 #include <StreamingImageExampleComponent.h>
@@ -278,7 +278,7 @@ namespace AtomSampleViewer
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/StreamingImage", azrtti_typeid<StreamingImageExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/AreaLight", azrtti_typeid<AreaLightExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Bloom", azrtti_typeid<BloomExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Checkerboard", azrtti_typeid<CheckerboardExampleComponent>() ));
+        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Checkerboard", azrtti_typeid<CheckerboardExampleComponent>(), []() {return (Utils::GetRHIDevice()->GetPhysicalDevice().GetDescriptor().m_vendorId != RHI::VendorId::ARM && Utils::GetRHIDevice()->GetPhysicalDevice().GetDescriptor().m_vendorId != RHI::VendorId::Qualcomm); } ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/DepthOfField", azrtti_typeid<DepthOfFieldExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/DiffuseGI", azrtti_typeid<DiffuseGIExampleComponent>(), []() {return Utils::GetRHIDevice()->GetFeatures().m_rayTracing; }));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Exposure", azrtti_typeid<ExposureExampleComponent>() ));

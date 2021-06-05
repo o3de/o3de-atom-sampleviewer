@@ -558,8 +558,8 @@ namespace AtomSampleViewer
             mipAsset.BlockUntilLoadComplete();
             imageMipAssets.emplace_back(mipAsset);
 
-            const RHI::ImageSubresourceLayout layout = mipAsset->GetSubImageLayout(0);
-            imageSubresourceLayouts.emplace_back(layout);
+            const RHI::ImageSubresourceLayout subImageLayout = mipAsset->GetSubImageLayout(0);
+            imageSubresourceLayouts.emplace_back(subImageLayout);
         }
 
         // Validate the compatibility of the image sub resources

@@ -8,14 +8,13 @@
                 "RC fbx": {
                     "ignore": true
                 },
-                "RC ppm": {
-                    "glob": "*.ppm",
-                    "params": "copy"
-                },
                 "ScanFolder AtomTestData": {
                     "watch": "@ENGINEROOT@/Gems/Atom/TestData",
                     "recursive": 1,
                     "order": 1000
+                },
+                "Exclude screenshots": {
+                    "pattern": ".*\\\\/Scripts\\\\/ExpectedScreenshots\\\\/.*"
                 }
             }
         }
