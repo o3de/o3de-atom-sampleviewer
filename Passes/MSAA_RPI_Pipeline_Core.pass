@@ -252,13 +252,31 @@
                     ]
                 },
                 {
-                    "Name": "MeshMotionVectorPass",
-                    "TemplateName": "MeshMotionVectorPassTemplate",
-                    "PassData": {
-                        "$type": "RasterPassData",
-                        "DrawListTag": "motion",
-                        "PipelineViewTag": "MainCamera"
-                    }
+                    "Name": "MotionVectorPass",
+                    "TemplateName": "MotionVectorParentTemplate",
+                    "Connections": [
+                        {
+                            "LocalSlot": "SkinnedMeshes",
+                            "AttachmentRef": {
+                                "Pass": "SkinningPass",
+                                "Attachment": "SkinnedMeshOutputStream"
+                            }
+                        },
+                        {
+                            "LocalSlot": "Depth",
+                            "AttachmentRef": {
+                                "Pass": "DepthPass",
+                                "Attachment": "Output"
+                            }
+                        },
+                        {
+                            "LocalSlot": "SwapChainOutput",
+                            "AttachmentRef": {
+                                "Pass": "Parent",
+                                "Attachment": "SwapChainOutput"
+                            }
+                        }
+                    ]
                 },
                 {
                     "Name": "DiffuseSpecularMergePass",
