@@ -65,6 +65,10 @@ ly_add_target(
             Gem::ImGui.imguilib
 )
 
+# if enabled, AtomSampleViewer is used by the Client and ServerLauncher
+ly_create_alias(NAME AtomSampleViewer.Clients  NAMESPACE Gem TARGETS Gem::AtomSampleViewer)
+ly_create_alias(NAME AtomSampleViewer.Servers  NAMESPACE Gem TARGETS Gem::AtomSampleViewer)
+
 if(PAL_TRAIT_BUILD_HOST_TOOLS)
 
     ly_add_target(
@@ -102,42 +106,13 @@ if(PAL_TRAIT_BUILD_HOST_TOOLS)
             PUBLIC
                 AZ::AzCore
                 Gem::AtomSampleViewer.Tools.Static
+        RUNTIME_DEPENDENCIES
+            Gem::AtomSampleViewer
     )
 
-endif()
-
-################################################################################
-# Gem dependencies
-################################################################################
-ly_add_project_dependencies(
-    PROJECT_NAME
-        AtomSampleViewer
-    TARGETS 
-        AtomSampleViewer.GameLauncher
-    DEPENDENCIES_FILES runtime_dependencies.cmake
-)
-
-if(PAL_TRAIT_BUILD_HOST_TOOLS)
-    ly_add_project_dependencies(
-        PROJECT_NAME
-            AtomSampleViewer
-        TARGETS
-            AssetBuilder
-            AssetProcessor
-            AssetProcessorBatch
-            Editor
-        DEPENDENCIES_FILES tool_dependencies.cmake
-    )
-endif()
-
-if(PAL_TRAIT_BUILD_SUPPORTS_SERVER)
-    ly_add_project_dependencies(
-        PROJECT_NAME
-            AtomSampleViewer
-        TARGETS
-            AtomSampleViewerServer
-        DEPENDENCIES_FILES runtime_dependencies.cmake
-    )
+    # The AtomSampleViewer.Tools target is the real GEM_MODULE target made above, but the AssetBuilder/AssetProcessor
+    # also needs that target, so alias the "Builders" variant to it
+    ly_create_alias(NAME AtomSampleViewer.Builders NAMESPACE Gem TARGETS Gem::AtomSampleViewer.Tools)
 endif()
 
 ################################################################################
@@ -162,4 +137,37 @@ if(PAL_TRAIT_BUILD_SUPPORTS_TESTS)
         NAME Gem::AtomSampleViewer.Tests
         TARGET Gem::AtomSampleViewer.Tests
     )
+endif()
+
+
+################################################################################
+# Gem dependencies
+################################################################################
+# The GameLauncher uses "Clients" gem variants:
+ly_enable_gems(PROJECT_NAME AtomSampleViewer GEM_FILE enabled_gems.cmake
+    TARGETS AtomSampleViewer.GameLauncher
+    VARIANTS Clients)
+
+# If we build a server, then apply the gems to the server
+if(PAL_TRAIT_BUILD_SERVER_SUPPORTED)
+    # if we're making a server, then add the "Server" gem variants to it:
+    ly_enable_gems(PROJECT_NAME AtomSampleViewer GEM_FILE enabled_gems.cmake
+        TARGETS AtomSampleViewer.ServerLauncher
+        VARIANTS Servers)
+
+    set_property(GLOBAL APPEND PROPERTY LY_LAUNCHER_SERVER_PROJECTS AtomSampleViewer)
+endif()
+
+if (PAL_TRAIT_BUILD_HOST_TOOLS)
+    # The Editor uses "Tools" gem variants:
+    ly_enable_gems(
+        PROJECT_NAME AtomSampleViewer GEM_FILE enabled_gems.cmake
+        TARGETS Editor
+        VARIANTS Tools)
+
+    # The pipeline tools use "Builders" gem variants:
+    ly_enable_gems(
+        PROJECT_NAME AtomSampleViewer GEM_FILE enabled_gems.cmake
+        TARGETS AssetBuilder AssetProcessor AssetProcessorBatch
+        VARIANTS Builders)
 endif()
