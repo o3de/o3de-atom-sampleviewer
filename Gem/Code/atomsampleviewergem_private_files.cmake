@@ -152,8 +152,8 @@ set(FILES
     Source/ShadingExampleComponent.h
     Source/ShadowExampleComponent.cpp
     Source/ShadowExampleComponent.h
-    Source/ShadowedBistroExampleComponent.cpp
-    Source/ShadowedBistroExampleComponent.h
+    Source/ShadowedSponzaExampleComponent.cpp
+    Source/ShadowedSponzaExampleComponent.h
     Source/SkinnedMeshContainer.cpp
     Source/SkinnedMeshContainer.h
     Source/SkinnedMeshExampleComponent.cpp

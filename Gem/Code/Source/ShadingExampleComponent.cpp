@@ -68,7 +68,7 @@ namespace AtomSampleViewer
 
         // Load default IBL texture asset for LuxCore
         // We should be able to extract this information from SkyBox in the future
-        LoadIBLImage("textures/sampleenvironment/papermill_e_3k.exr.streamingimage");
+        LoadIBLImage("textures/sampleenvironment/example_iblskyboxcm.dds.streamingimage");
 
         AZ::Render::LuxCoreRequestsBus::Broadcast(&AZ::Render::LuxCoreRequestsBus::Events::SetCameraEntityID, GetCameraEntityId());
         AzFramework::InputChannelEventListener::Connect();

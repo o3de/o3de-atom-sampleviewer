@@ -15,56 +15,13 @@
 g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/ShadowedSponza/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
-function MoveCameraToPlaza()
-    NoClipCameraController_SetPosition(Vector3(-8.5, -3.3, 2.5))
-    NoClipCameraController_SetHeading(DegToRad(-77.3))
-    NoClipCameraController_SetPitch(DegToRad(-16.4))
-    SetImguiValue('Pitch', -0.8)
-    SetImguiValue('Yaw', 4.2)
-end
 
-function MoveCameraToTable()
-    NoClipCameraController_SetPitch(DegToRad(-26.5))
-    NoClipCameraController_SetHeading(DegToRad(6.6))
-    NoClipCameraController_SetPosition(Vector3(-2.9, 3.6, 1.6))
-
-    -- Light table by directional light
-    SetImguiValue('Pitch', -1.6)
-    SetImguiValue('Yaw', 0.0)
-
-    -- Light table by spot lights
-    SetImguiValue('1024', true)
-    IdleFrames(1)
-    SetImguiValue('Center X', -0.003)
-    IdleFrames(1)
-    SetImguiValue('Center Y', 0.014)
-    IdleFrames(1)
-    SetImguiValue('Center Z', -0.036)
-    SetImguiValue('Number', 17)
-end
-
-function MoveCameraToOverhead()
-    NoClipCameraController_SetPosition(Vector3(9.2, -11.3, 20.4))
-    NoClipCameraController_SetHeading(DegToRad(51.2))
-    NoClipCameraController_SetPitch(DegToRad(-41.5))
-
-    -- Light buildings by directional light
-    SetImguiValue('Yaw', 0.91)
-    SetImguiValue('Pitch', -1.1)
-
-    -- Light biuldings by spot lights
-    SetImguiValue('Center X', 0.097)
-    IdleFrames(1)
-    SetImguiValue('Center Y', -0.025)
-    IdleFrames(1)
-    SetImguiValue('Center Z', 0.025)
-    IdleFrames(1)
-    SetImguiValue('Pos. Scatt. Ratio', 0.232)
+function SetNumSpotlightsActive(num)
+    SetImguiValue('Number', num) 
 end
 
 function SetDirectionalFiltering()
     SetImguiValue('Intensity##directional', 5.0)
-    SetImguiValue('Number', 0) -- spot light number
     SetImguiValue('Filter Method##Directional', 'ESM+PCF')
     IdleFrames(1)
     SetImguiValue('Width##Directional', 0.053)
@@ -72,15 +29,21 @@ function SetDirectionalFiltering()
     SetImguiValue('Filtering # ##Directional', 64)
 end
 
+function SetDirectionalLightOrientation(pitchDegrees, yawDegrees)
+    
+    local pitchRadians = math.rad(pitchDegrees)
+    local yawRadians = math.rad(yawDegrees)
+
+    SetImguiValue('Pitch', pitchRadians) 
+    SetImguiValue('Yaw', yawRadians) 
+end
+
 function SetDirectionalNoneFiltering()
     SetImguiValue('Intensity##directional', 5.0)
-    SetImguiValue('Number', 0) -- spot light number
     SetImguiValue('Filter Method##Directional', 'None')
 end
 
 function SetSpotFiltering()
-    SetImguiValue('Intensity##directional', 1.0)
-    SetImguiValue('Number', 17) -- spot light number
     SetImguiValue('Filter Method##Spot', 'ESM+PCF')
     IdleFrames(1)
     SetImguiValue('Width##Spot', 0.144)
@@ -90,7 +53,6 @@ end
 
 function SetSpotNoneFiltering()
     SetImguiValue('Intensity##directional', 1.0)
-    SetImguiValue('Number', 17) -- spot light number
     SetImguiValue('Filter Method##Spot', 'None')
 end
 
@@ -102,55 +64,30 @@ SelectImageComparisonToleranceLevel("Level H")
 IdleFrames(1)
 CaptureScreenshot(g_screenshotOutputFolder .. '/initial.png')
 
--- Directional Light None-filtering Plaza
-MoveCameraToPlaza()
+SetNumSpotlightsActive(0)
+SetDirectionalLightOrientation(-45, 95)
+
+-- Directional Light None-filtering 
 SetDirectionalNoneFiltering()
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/directional_nofilter_plaza.png')
+CaptureScreenshot(g_screenshotOutputFolder .. '/directional_nofilter.png')
 
--- Directional Light Filtering Plaza
-MoveCameraToPlaza()
+-- Directional Light Filtering 
 SetDirectionalFiltering()
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/directional_filter_plaza.png')
+CaptureScreenshot(g_screenshotOutputFolder .. '/directional_filter.png')
 
--- Directional Light None-filtering Table
-MoveCameraToTable()
-SetDirectionalNoneFiltering()
-IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/directional_nofilter_table.png')
+SetNumSpotlightsActive(17)
 
--- Directional Light Filtering Table
-MoveCameraToTable()
-SetDirectionalFiltering()
-IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/directional_filter_table.png')
-
--- Spot Light Non-filtering Table
-MoveCameraToTable()
+-- Spot Light Non-filtering 
 SetSpotNoneFiltering()
 SetImguiValue('Intensity##directional', 0.0)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/spot_nofilter_table.png')
+CaptureScreenshot(g_screenshotOutputFolder .. '/spot_nofilter.png')
 
--- Spot Light Filtering Table
-MoveCameraToTable()
+-- Spot Light Filtering 
 SetSpotFiltering()
-SetImguiValue('Intensity##directional', 0.0)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/spot_filter_table.png')
-
--- Directional Light Buildings
-MoveCameraToOverhead()
-SetDirectionalFiltering()
-IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/directional_buildings.png')
-
--- Spot Light Buildings
-MoveCameraToOverhead()
-SetSpotFiltering()
-SetImguiValue('Number', 25) -- spot light number
-IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/spot_buildings.png')
+CaptureScreenshot(g_screenshotOutputFolder .. '/spot_filter.png')
 
 OpenSample(nil)

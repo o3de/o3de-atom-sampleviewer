@@ -1037,7 +1037,6 @@ namespace AtomSampleViewer
             AZ::Vector3(0.5f - vertOffset, 0.5f + vertOffset, z), 
             AZ::Vector3(0.5f + vertOffset, 0.5f + vertOffset, z), 
             AZ::Vector3(0.5f + vertOffset, 0.5f - vertOffset, z) };
-        AZ::Color Red = AZ::Color(1.0f, 0.0f, 0.0f, 1.0f);
         int32_t viewProjOverrideIndex = auxGeom->GetOrAdd2DViewProjOverride();
         AZ::RPI::AuxGeomDraw::AuxGeomDynamicDrawArguments drawArgs;
         drawArgs.m_verts = verts;
