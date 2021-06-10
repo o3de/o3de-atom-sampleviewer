@@ -28,6 +28,7 @@
 #include <AzCore/Asset/AssetManagerBus.h>
 #include <AzCore/IO/FileIO.h>
 #include <AzCore/IO/SystemFile.h>
+#include <AzCore/Utils/Utils.h>
 
 #include <AzFramework/API/ApplicationAPI.h>
 
@@ -532,18 +533,13 @@ namespace AtomSampleViewer
         AZStd::string sourceImageFiles[] = {
             {"streaming1.png"}, {"streaming2.png" }
         };
+        
+        auto projectPath = AZ::Utils::GetProjectPath();
+        AZStd::string srcPath, destPath;
+        AzFramework::StringFunc::Path::Join(projectPath.c_str(), (TestImageFolder + sourceImageFiles[m_curSourceImage]).c_str(), srcPath);
+        AzFramework::StringFunc::Path::Join(projectPath.c_str(), (TestImageFolder + ReloadTestImageName).c_str(), destPath);
 
-        const char* engineRoot = nullptr;
-        AzFramework::ApplicationRequests::Bus::BroadcastResult(engineRoot, &AzFramework::ApplicationRequests::GetEngineRoot);
-
-        AZStd::string srcPath = "AtomSampleViewer/" + TestImageFolder + sourceImageFiles[m_curSourceImage];
-        AZStd::string destPath = "AtomSampleViewer/" + TestImageFolder + ReloadTestImageName;
-
-        AZStd::string srcFullPath, destFullPath;
-        AzFramework::StringFunc::Path::Join(engineRoot, srcPath.c_str(), srcFullPath);
-        AzFramework::StringFunc::Path::Join(engineRoot, destPath.c_str(), destFullPath);
-
-        CopyFile(destFullPath, srcFullPath);
+        CopyFile(destPath, srcPath);
     }
 
     void StreamingImageExampleComponent::DeleteHotReloadImage()
