@@ -117,13 +117,13 @@ namespace AZ
 
         void RayTracingAmbientOcclusionPass::FrameBeginInternal(FramePrepareParams params)
         {
-            if (!m_flags.m_initialized)
+            if (m_createRayTracingPipelineState)
             {
                 RPI::Scene* scene = m_pipeline->GetScene();
                 m_rayTracingFeatureProcessor = scene->GetFeatureProcessor<RayTracingFeatureProcessor>();
 
                 CreateRayTracingPipelineState();
-                m_flags.m_initialized = true;
+                m_createRayTracingPipelineState = false;
             }
 
             if (!m_rayTracingShaderTable)
