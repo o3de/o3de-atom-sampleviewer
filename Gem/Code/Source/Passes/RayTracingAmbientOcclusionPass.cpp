@@ -89,11 +89,7 @@ namespace AZ
             AZ_Assert(m_globalPipelineState, "Failed to acquire ray tracing global pipeline state");
 
             //Get pass srg
-            auto srgAsset = m_rayGenerationShader->FindShaderResourceGroupAsset(Name{"RayTracingGlobalSrg"});
-            AZ_Error("RayTracingAmbientOcclusionPass", srgAsset.GetId().IsValid(), "Failed to find PassSrg asset for shader [%s]", rayGenerationShaderFilePath);
-            AZ_Error("RayTracingAmbientOcclusionPass", srgAsset.IsReady(), "RayTracingGlobalSrg asset is not loaded for shader [%s]", rayGenerationShaderFilePath);
-
-            m_shaderResourceGroup = RPI::ShaderResourceGroup::Create(srgAsset);
+            m_shaderResourceGroup = RPI::ShaderResourceGroup::Create(m_rayGenerationShader->GetAsset(), AZ::RPI::DefaultSupervariantIndex, Name { "RayTracingGlobalSrg" });
             AZ_Assert(m_shaderResourceGroup, "[RayTracingAmbientOcclusionPass '%s']: Failed to create SRG from shader asset '%s'",
                 GetPathName().GetCStr(), rayGenerationShaderFilePath);
                         

@@ -83,7 +83,6 @@ namespace AtomSampleViewer
         {
             None,
             ClearingTestAssets,
-            CopyingDefaultAzslTestFile,
             CopyingDefaultShaderTestFile,
             CopyingDefaultMaterialTypeTestFile,
             WaitingForDefaultMaterialToRegister,
