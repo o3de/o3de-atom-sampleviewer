@@ -344,7 +344,7 @@ namespace AtomSampleViewer
                     pipelineDesc.m_inputStreamLayout,
                     m_modelStreamBufferViews[ShadowScope],
                     nullptr,
-                    variant.GetInputContract(),
+                    shader->GetInputContract(),
                     0);
 
                 m_modelPipelineStates[ShadowScope] = shader->AcquirePipelineState(pipelineDesc);
@@ -404,7 +404,7 @@ namespace AtomSampleViewer
                     pipelineDesc.m_inputStreamLayout,
                     m_modelStreamBufferViews[ForwardScope],
                     nullptr,
-                    variant.GetInputContract(),
+                    shader->GetInputContract(),
                     0);
 
                 m_modelPipelineStates[ForwardScope] = shader->AcquirePipelineState(pipelineDesc);

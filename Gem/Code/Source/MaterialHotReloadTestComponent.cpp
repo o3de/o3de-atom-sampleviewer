@@ -392,20 +392,12 @@ namespace AtomSampleViewer
                 // Any stale assets have been cleared, now we can create the new ones.
                 // Copy a default set files into the temp folder.
                 CopyTestFile(TestData::AzslFileNames::HorizontalPattern, Sources::AzslFileName);
-                m_initStatus = InitStatus::CopyingDefaultAzslTestFile;
-            }
-        }
-
-        if (m_initStatus == InitStatus::CopyingDefaultAzslTestFile)
-        {
-            AzFramework::AssetSystem::AssetStatus status = GetTestAssetStatus(Sources::AzslFileName);
-            if (status == AzFramework::AssetSystem::AssetStatus::AssetStatus_Compiled)
-            {
                 CopyTestFile(TestData::ShaderFileNames::BlendingOff, Sources::ShaderFileName);
                 m_initStatus = InitStatus::CopyingDefaultShaderTestFile;
             }
         }
-        else if (m_initStatus == InitStatus::CopyingDefaultShaderTestFile)
+
+        if (m_initStatus == InitStatus::CopyingDefaultShaderTestFile)
         {
             AzFramework::AssetSystem::AssetStatus status = GetTestAssetStatus(Sources::ShaderFileName);
             if (status == AzFramework::AssetSystem::AssetStatus::AssetStatus_Compiled)

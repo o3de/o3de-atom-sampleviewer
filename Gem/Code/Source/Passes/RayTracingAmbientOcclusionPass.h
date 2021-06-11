@@ -71,8 +71,7 @@ namespace AZ
             // ray tracing shader table
             RHI::Ptr<RHI::RayTracingShaderTable> m_rayTracingShaderTable;
 
-            // ray tracing global shader resource group asset and pipeline state
-            Data::Asset<RPI::ShaderResourceGroupAsset> m_globalSrgAsset;
+            // ray tracing global pipeline state
             RHI::ConstPtr<RHI::PipelineState> m_globalPipelineState;
 
             Render::RayTracingFeatureProcessor* m_rayTracingFeatureProcessor = nullptr;
