@@ -54,9 +54,9 @@ namespace AtomSampleViewer
         }
     }
 
-    void RHISamplePass::BuildAttachmentsInternal()
+    void RHISamplePass::BuildInternal()
     {
-        Base::BuildAttachmentsInternal();
+        Base::BuildInternal();
 
         // The RHISamplePass template should have one owned image attachment which is the render target
         m_outputAttachment = m_ownedAttachments[0];

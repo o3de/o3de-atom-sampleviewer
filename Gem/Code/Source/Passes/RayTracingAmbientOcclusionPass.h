@@ -82,6 +82,8 @@ namespace AZ
             float m_rayMaxT = 0.4f;          // The ray's far distance
             float m_rayMinT = 0.01f;        // The ray's near distance
             uint32_t m_rayNumber = 8;      // Ray casted per pixel
+
+            bool m_createRayTracingPipelineState = true;
         };
     }   // namespace RPI
 }   // namespace AZ
