@@ -175,7 +175,7 @@ namespace AtomSampleViewer
     void ShadowedSponzaExampleComponent::OnModelReady(AZ::Data::Instance<AZ::RPI::Model> model)
     {
         m_sponzaExteriorAssetLoaded = true;
-        m_worldAabb = model->GetAabb();
+        m_worldAabb = model->GetModelAsset()->GetAabb();
         UpdateDiskLightCount(DiskLightCountDefault);
 
         // Now that the models are initialized, we can allow the script to continue.

@@ -167,7 +167,7 @@ namespace AtomSampleViewer
                 m_shaderBallMeshHandles.push_back(LoadMesh("objects/shaderball_simple.azmodel"));
                 auto updateShaderBallTransform = [this, i](Data::Instance<RPI::Model> model)
                 {
-                    const Aabb& aabb = model->GetAabb();
+                    const Aabb& aabb = model->GetModelAsset()->GetAabb();
                     const Vector3 translation{ 0.0f, -aabb.GetMin().GetZ() * aznumeric_cast<float>(i), -aabb.GetMin().GetY() };
                     const auto transform = Transform::CreateTranslation(translation);
                     m_meshFeatureProcessor->SetTransform(m_shaderBallMeshHandles[i], transform);
