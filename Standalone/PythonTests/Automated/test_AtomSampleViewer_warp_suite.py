@@ -57,7 +57,7 @@ class TestAutomationWarpSuite:
                 unexpected_lines=unexpected_lines, halt_on_unexpected=True, timeout=200)
         except ly_test_tools.log.log_monitor.LogMonitorException as e:
             expected_screenshots_path = os.path.join(
-                workspace.paths.engine_root(), "AtomSampleViewer", "Scripts", "ExpectedScreenshots")
+                workspace.paths.project(), "Scripts", "ExpectedScreenshots")
             test_screenshots_path = os.path.join(
                 workspace.paths.project(), "user", "Scripts", "Screenshots")
             raise AtomSampleViewerException(
