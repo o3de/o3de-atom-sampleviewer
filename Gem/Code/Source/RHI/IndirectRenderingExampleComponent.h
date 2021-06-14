@@ -138,9 +138,7 @@ namespace AtomSampleViewer
 
         ///////////////////////////////////////////////////////////////////////
         // ShaderReloadNotificationBus overrides
-        void OnShaderVariantReinitialized(
-            const AZ::RPI::Shader& shader, const AZ::RPI::ShaderVariantId& shaderVariantId,
-            AZ::RPI::ShaderVariantStableId shaderVariantStableId) override;
+        void OnShaderVariantReinitialized(const AZ::RPI::ShaderVariant& shaderVariant) override;
         ///////////////////////////////////////////////////////////////////////
 
         void InitRequestsForShaderVariants();
