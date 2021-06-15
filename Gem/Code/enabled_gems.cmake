@@ -9,18 +9,16 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #
 
-# Extracted from Editor.xml
-set(GEM_DEPENDENCIES
-    Gem::Maestro.Editor
-    Gem::TextureAtlas.Editor
-    Gem::LmbrCentral.Editor
-    Gem::LyShine.Editor
-    Gem::SceneProcessing.Editor
-    Gem::EditorPythonBindings.Editor
-    Gem::Camera.Editor
-    Gem::EMotionFX.Editor
-    Gem::ImGui.Editor
-    Gem::Atom_AtomBridge.Editor
-    Gem::AtomSampleViewer
-    Gem::AtomSampleViewer.Tools
+set(ENABLED_GEMS
+    Maestro
+    TextureAtlas
+    LmbrCentral
+    LyShine
+    Camera
+    EMotionFX
+    Atom_AtomBridge
+    AtomSampleViewer
+    SceneProcessing
+    EditorPythonBindings
+    ImGui
 )

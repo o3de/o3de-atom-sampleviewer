@@ -74,7 +74,7 @@ namespace AtomSampleViewer
         explicit RHISamplePass(const AZ::RPI::PassDescriptor& descriptor);
 
         // --- Pass Behaviour Overrides ---
-        void BuildAttachmentsInternal() override; // build attachment
+        void BuildInternal() override; // build attachment
         void FrameBeginInternal(FramePrepareParams params) override; // import scopes
 
         BasicRHIComponent* m_rhiSample = nullptr;
