@@ -266,7 +266,7 @@ namespace AtomSampleViewer
                     pipelineDesc.m_inputStreamLayout,
                     modelData.m_streamBufferList,
                     nullptr,
-                    variant.GetInputContract(),
+                    shader->GetInputContract(),
                     0);
 
                 pipelineDesc.m_renderStates.m_rasterState.m_cullMode = modelData.m_modelType == ModelType_Plane ? RHI::CullMode::None : RHI::CullMode::Back;

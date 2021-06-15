@@ -20,8 +20,8 @@ PROJECT_REPOSITORY_NAME = 'o3de-atom-sampleviewer'
 PROJECT_ORGANIZATION_NAME = 'aws-lumberyard'
 ENGINE_REPOSITORY_NAME = 'o3de'
 ENGINE_ORGANIZATION_NAME = 'aws-lumberyard'
-ENGINE_BRANCH_DEFAULT = 'main'
-ENGINE_REFSPEC_DEFAULT = 'origin/main'
+ENGINE_BRANCH_DEFAULT = 'development'
+ENGINE_REFSPEC_DEFAULT = 'origin/development'
 
 def pipelineProperties = []
 

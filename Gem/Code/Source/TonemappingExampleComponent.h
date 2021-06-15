@@ -92,7 +92,8 @@ namespace AtomSampleViewer
         // render related data
         AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_pipelineState;
         AZ::RHI::DrawListTag m_drawListTag;
-        AZ::Data::Asset<AZ::RPI::ShaderResourceGroupAsset> m_srgAsset;
+        AZ::Data::Asset<AZ::RPI::ShaderAsset> m_shaderAsset;
+        AZ::RHI::Ptr<AZ::RHI::ShaderResourceGroupLayout> m_srgLayout;
 
         // shader input indices
         AZ::RHI::ShaderInputImageIndex m_imageInputIndex;

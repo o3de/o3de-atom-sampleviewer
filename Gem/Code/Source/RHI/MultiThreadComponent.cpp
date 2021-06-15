@@ -243,15 +243,10 @@ namespace AtomSampleViewer
             return;
         }
 
-        auto perInstanceSrgAsset = shader->FindShaderResourceGroupAsset(AZ::Name{ "MultiThreadInstanceSrg" });
-        if (!perInstanceSrgAsset.GetId().IsValid())
+        auto perInstanceSrgLayout = shader->FindShaderResourceGroupLayout(AZ::Name{ "MultiThreadInstanceSrg" });
+        if (!perInstanceSrgLayout)
         {
-            AZ_Error("MultiThreadComponent", false, "Failed to get shader resource group asset");
-            return;
-        }
-        else if (!perInstanceSrgAsset.IsReady())
-        {
-            AZ_Error("MultiThreadComponent", false, "Shader resource group asset is not loaded");
+            AZ_Error("MultiThreadComponent", false, "Failed to get shader resource group layout");
             return;
         }
 

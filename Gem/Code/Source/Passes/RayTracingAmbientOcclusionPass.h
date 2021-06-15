@@ -71,8 +71,7 @@ namespace AZ
             // ray tracing shader table
             RHI::Ptr<RHI::RayTracingShaderTable> m_rayTracingShaderTable;
 
-            // ray tracing global shader resource group asset and pipeline state
-            Data::Asset<RPI::ShaderResourceGroupAsset> m_globalSrgAsset;
+            // ray tracing global pipeline state
             RHI::ConstPtr<RHI::PipelineState> m_globalPipelineState;
 
             Render::RayTracingFeatureProcessor* m_rayTracingFeatureProcessor = nullptr;
@@ -83,6 +82,8 @@ namespace AZ
             float m_rayMaxT = 0.4f;          // The ray's far distance
             float m_rayMinT = 0.01f;        // The ray's near distance
             uint32_t m_rayNumber = 8;      // Ray casted per pixel
+
+            bool m_createRayTracingPipelineState = true;
         };
     }   // namespace RPI
 }   // namespace AZ
