@@ -113,7 +113,7 @@ namespace AtomSampleViewer
             ScriptableImGui::Checkbox("Draw axis lines", &m_drawAxisLines);
             ScriptableImGui::Checkbox("Draw lines", &m_drawLines);
             ScriptableImGui::Checkbox("Draw triangles", &m_drawTriangles);
-            ScriptableImGui::Checkbox("Draw shapex", &m_drawShapes);
+            ScriptableImGui::Checkbox("Draw shapes", &m_drawShapes);
             ScriptableImGui::Checkbox("Draw boxes", &m_drawBoxes);
             ScriptableImGui::Checkbox("Draw many primitives", &m_drawManyPrimitives);
             ScriptableImGui::Checkbox("Draw depth test primitives", &m_drawDepthTestPrimitives);
