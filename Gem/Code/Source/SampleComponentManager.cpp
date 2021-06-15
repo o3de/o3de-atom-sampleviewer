@@ -783,6 +783,14 @@ namespace AtomSampleViewer
     {
         if (ImGui::BeginMainMenuBar())
         {
+            // If imgui doesn't have enough room to render a menu, it will fall back to the safe area which
+            // is typically 3 pixels. This causes the menu to overlap the menu bar, and makes it easy to
+            // accidentally select the first item on that menu bar. By altering the safe area temporarily
+            // while drawing the menu, this problem can be avoided.
+            
+            ImVec2 cachedSafeArea = ImGui::GetStyle().DisplaySafeAreaPadding;
+            ImGui::GetStyle().DisplaySafeAreaPadding = ImVec2(cachedSafeArea.x, cachedSafeArea.y + 16.0f);
+
             if (ImGui::BeginMenu("File"))
             {
                 if (ImGui::MenuItem("Exit", "Ctrl-Q"))
@@ -949,6 +957,9 @@ namespace AtomSampleViewer
                 }
                 ImGui::EndMenu();
             }
+
+            // Restore original safe area.
+            ImGui::GetStyle().DisplaySafeAreaPadding = cachedSafeArea;
 
             ImGui::EndMainMenuBar();
         }
