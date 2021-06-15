@@ -16,7 +16,7 @@ function TakeScreenShotBoxes()
 
     NoClipCameraController_SetFov(DegToRad(70))
     NoClipCameraController_SetHeading(DegToRad(-40))
-    NoClipCameraController_SetPitch(DegToRad(4))
+    NoClipCameraController_SetPitch(DegToRad(20))
 
     IdleFrames(1) 
     CaptureScreenshot(g_screenshotOutputFolder .. '/auxgeom_boxes.png')
@@ -25,8 +25,8 @@ end
 function TakeScreenShotShapes()
 
     NoClipCameraController_SetFov(DegToRad(70))
-    NoClipCameraController_SetHeading(DegToRad(-145))
-    NoClipCameraController_SetPitch(DegToRad(13.528164))
+    NoClipCameraController_SetHeading(DegToRad(-130))
+    NoClipCameraController_SetPitch(DegToRad(30))
 
     IdleFrames(1) 
     CaptureScreenshot(g_screenshotOutputFolder .. '/auxgeom_shapes.png')
