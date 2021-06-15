@@ -38,7 +38,7 @@ Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 OpenSample('RPI/AuxGeom')
 ResizeViewport(800, 600)
 
-SelectImageComparisonToleranceLevel("Level G")
+SelectImageComparisonToleranceLevel("Level B")
 TakeScreenShotBoxes()
 TakeScreenShotShapes()
 
