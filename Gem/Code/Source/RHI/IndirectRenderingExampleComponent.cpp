@@ -42,7 +42,7 @@ namespace AtomSampleViewer
 
     float GetRandomFloat(float min, float max)
     {
-        float scale = static_cast<float>(rand()) / RAND_MAX;
+        float scale = aznumeric_cast<float>(rand()) / aznumeric_cast<float>(RAND_MAX);
         float range = max - min;
         return scale * range + min;
     }
