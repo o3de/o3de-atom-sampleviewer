@@ -71,6 +71,7 @@ tests= {
 
     FastCheckSample('RHI/AlphaToCoverage'),
     FastCheckSample('RHI/AsyncCompute'),
+    FastCheckSample('RHI/AuxGeom'),
     FastCheckSample('RHI/BindlessPrototype'),
     FastCheckSample('RHI/Compute'),
     FastCheckSample('RHI/CopyQueue'),
