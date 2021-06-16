@@ -1002,7 +1002,7 @@ namespace AtomSampleViewer
     {
         AZ::RHI::Device* rhiDevice = Utils::GetRHIDevice().get();
         m_imguiFrameGraphVisualizer.Init(rhiDevice);
-        m_imguiFrameGraphVisualizer.Draw(m_showFrameGraphVisualizer);
+        m_imguiFrameGraphVisualizer.Draw(&m_showFrameGraphVisualizer);
     }
 
     void SampleComponentManager::ShowCpuProfilerWindow()
