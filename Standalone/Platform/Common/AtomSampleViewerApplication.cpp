@@ -105,16 +105,6 @@ namespace AtomSampleViewer
         ReadTimeoutShutdown();
 
         WriteStartupLog();
-
-        // Register .luac assets
-        if (AZ::Data::AssetCatalogRequests* assetCatalog = AZ::Data::AssetCatalogRequestBus::FindFirstHandler())
-        {
-            assetCatalog->EnableCatalogForAsset(AZ::AzTypeInfo<AZ::ScriptAsset>::Uuid());
-        }
-        else
-        {
-            AZ_Assert(false, "AssetCatalogRequestBus handler not found.");
-        }
     }
 
     void AtomSampleViewerApplication::OnSampleManagerActivated()

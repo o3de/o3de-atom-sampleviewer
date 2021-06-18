@@ -434,6 +434,13 @@
                                 "Pass": "ImGuiPass",
                                 "Attachment": "InputOutput"
                             }
+                        },
+                        {
+                            "LocalSlot": "DepthInputOutput",
+                            "AttachmentRef": {
+                                "Pass": "DepthPass",
+                                "Attachment": "Output"
+                            }
                         }
                     ],
                     "PassData": {
