@@ -103,7 +103,7 @@ namespace AtomSampleViewer
             m_residentMipInputIndex = m_srgLayout->FindShaderInputConstantIndex(Name("m_residentMip"));
 
             // Create an SRG instance for the hot reloaded image
-            m_imageHotReload.m_srg = RPI::ShaderResourceGroup::Create(m_shaderAsset, AZ::RPI::DefaultSupervariantIndex, m_srgLayout->GetName());
+            m_imageHotReload.m_srg = RPI::ShaderResourceGroup::Create(m_shaderAsset, m_srgLayout->GetName());
         }
 
         // Create the 3D pipeline object
@@ -601,7 +601,7 @@ namespace AtomSampleViewer
             m_numImageAssetQueued++;
             ImageToDraw img;
             img.m_asset = AZ::Data::AssetManager::Instance().GetAsset<AZ::RPI::StreamingImageAsset>(imageAssetId, AZ::Data::AssetLoadBehavior::PreLoad);
-            img.m_srg = RPI::ShaderResourceGroup::Create(m_shaderAsset, AZ::RPI::DefaultSupervariantIndex, m_srgLayout->GetName());
+            img.m_srg = RPI::ShaderResourceGroup::Create(m_shaderAsset, m_srgLayout->GetName());
             img.m_assetId = imageAssetId;
             m_images.push_back(img);
 
@@ -642,7 +642,7 @@ namespace AtomSampleViewer
 
             // Create the srg
             Image3dToDraw image3d;
-            image3d.m_srg = RPI::ShaderResourceGroup::Create(m_image3dShaderAsset, AZ::RPI::DefaultSupervariantIndex, m_image3dSrgLayout->GetName());
+            image3d.m_srg = RPI::ShaderResourceGroup::Create(m_image3dShaderAsset, m_image3dSrgLayout->GetName());
             image3d.m_srg->SetImage(image3DInputIndex, image.get(), 0);
             image3d.m_sliceCount = layout.m_size.m_depth;
 
@@ -687,7 +687,7 @@ namespace AtomSampleViewer
 
             // Create the srg
             Image3dToDraw image3d;
-            image3d.m_srg = RPI::ShaderResourceGroup::Create(m_image3dShaderAsset, AZ::RPI::DefaultSupervariantIndex, m_image3dSrgLayout->GetName());
+            image3d.m_srg = RPI::ShaderResourceGroup::Create(m_image3dShaderAsset, m_image3dSrgLayout->GetName());
             image3d.m_srg->SetImage(image3DInputIndex, image.get(), 0);
             image3d.m_sliceCount = depth;
 

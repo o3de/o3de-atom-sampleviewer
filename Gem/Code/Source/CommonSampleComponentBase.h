@@ -62,6 +62,9 @@ namespace AtomSampleViewer
         //! Clear all lighting presets.
         void ClearLightingPresets();
 
+        //! Reset internal scene related data
+        void ResetScene();
+
         //! Apply lighting presets to the scene.
         //! Derived samples can override this function to have custom behaviors.
         virtual void OnLightingPresetSelected(const AZ::Render::LightingPreset& preset, bool useAltSkybox);

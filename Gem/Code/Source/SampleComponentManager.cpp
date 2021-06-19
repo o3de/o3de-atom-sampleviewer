@@ -1142,6 +1142,17 @@ namespace AtomSampleViewer
         }
     }
 
+    void SampleComponentManager::ResetRPIScene()
+    {
+        ReleaseRPIScene();
+        SwitchSceneForRPISample();
+    }
+
+    void SampleComponentManager::ClearRPIScene()
+    {
+        ReleaseRPIScene();
+    }
+
     void SampleComponentManager::ShowFrameCaptureDialog()
     {
         static bool requestCaptureOnNextFrame = false;

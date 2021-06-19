@@ -17,10 +17,12 @@
 
 #include <Atom/RPI.Public/View.h>
 #include <Atom/RPI.Public/Image/StreamingImage.h>
+#include <Atom/RPI.Public/Shader/ShaderSystemInterface.h>
 
 #include <Atom/RPI.Reflect/Asset/AssetUtils.h>
 #include <Atom/RPI.Reflect/Model/ModelAsset.h>
 #include <Atom/RPI.Reflect/Material/MaterialAsset.h>
+#include <Atom/RPI.Reflect/Shader/ShaderCommonTypes.h>
 
 #include <Utils/Utils.h>
 
@@ -34,23 +36,6 @@
 
 namespace AtomSampleViewer
 {
-    static const char* GetPipelineName(int numSamples)
-    {
-        switch (numSamples)
-        {
-        case 1:
-            return "No_MSAA_RPI_Pipeline";
-        case 2:
-            return "MSAA_2x_RPI_Pipeline";
-        case 4:
-            return "MSAA_4x_RPI_Pipeline";
-        case 8:
-            return "MSAA_8x_RPI_Pipeline";
-        }
-        AZ_Warning("MSAA_RPI_ExampleComponent", false, "Unsupported number of samples, defaulting to 1");
-        return "No_MSAA_RPI_Pipeline";
-    }
-
     void MSAA_RPI_ExampleComponent::Reflect(AZ::ReflectContext* context)
     {
         if (AZ::SerializeContext* serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
@@ -61,39 +46,20 @@ namespace AtomSampleViewer
         }
     }
 
-    void MSAA_RPI_ExampleComponent::Activate()
-    {
-        m_imguiSidebar.Activate();
-        AZ::TickBus::Handler::BusConnect();
-        ExampleComponentRequestBus::Handler::BusConnect(GetEntityId());
-        AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusConnect();
-        ActivateMSAAPipeline();
-        EnableArcBallCameraController();
-        ActivateModel();
-        ActivateIbl();
-    }
-
     void MSAA_RPI_ExampleComponent::Deactivate()
     {
-        DeactivateIbl();
-        DeactivateModel();
-        DisableArcBallCameraController();
-        DeactivateMSAAPipeline();
+        GetMeshFeatureProcessor()->ReleaseMesh(m_meshHandle);
+        AZ::Debug::CameraControllerRequestBus::Event(GetCameraEntityId(), &AZ::Debug::CameraControllerRequestBus::Events::Disable);
+        m_defaultIbl.Reset();
+
+        // clear the non-MSAA pipeline and the RPI scene
+        AZ::RPI::ShaderSystemInterface::Get()->SetSupervariantName(AZ::Name(""));
+        SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequests::ClearRPIScene);
+
         AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusDisconnect();
         ExampleComponentRequestBus::Handler::BusDisconnect();
         AZ::TickBus::Handler::BusDisconnect();
         m_imguiSidebar.Deactivate();
-    }
-
-    void MSAA_RPI_ExampleComponent::EnableArcBallCameraController()
-    {
-        AZ::Debug::CameraControllerRequestBus::Event(GetCameraEntityId(), &AZ::Debug::CameraControllerRequestBus::Events::Enable,
-            azrtti_typeid<AZ::Debug::ArcBallControllerComponent>());
-    }
-
-    void MSAA_RPI_ExampleComponent::DisableArcBallCameraController()
-    {
-        AZ::Debug::CameraControllerRequestBus::Event(GetCameraEntityId(), &AZ::Debug::CameraControllerRequestBus::Events::Disable);
     }
 
     void MSAA_RPI_ExampleComponent::OnModelReady(AZ::Data::Instance<AZ::RPI::Model> model)
@@ -103,39 +69,105 @@ namespace AtomSampleViewer
         ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::ResumeScript);
     }
 
-    void MSAA_RPI_ExampleComponent::ActivateMSAAPipeline()
+    void MSAA_RPI_ExampleComponent::Activate()
     {
-        CreateMSAAPipeline(m_numSamples);
+        m_imguiSidebar.Activate();
+        AZ::TickBus::Handler::BusConnect();
+        ExampleComponentRequestBus::Handler::BusConnect(GetEntityId());
+        AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusConnect();
 
+        // save the current render pipeline
         AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
         m_originalPipeline = defaultScene->GetDefaultRenderPipeline();
-        defaultScene->AddRenderPipeline(m_msaaPipeline);
-        m_msaaPipeline->SetDefaultView(m_originalPipeline->GetDefaultView());
         defaultScene->RemoveRenderPipeline(m_originalPipeline->GetId());
 
-        // Create an ImGuiActiveContextScope to ensure the ImGui context on the new pipeline's ImGui pass is activated.
-        m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass(AZ::RPI::PassHierarchyFilter({ m_msaaPipeline->GetId().GetCStr(), "ImGuiPass" }));
+        // switch to the sample render pipeline
+        ChangeRenderPipeline();
+  
+        // set ArcBall camera controller
+        AZ::Debug::CameraControllerRequestBus::Event(GetCameraEntityId(), &AZ::Debug::CameraControllerRequestBus::Events::Enable,
+            azrtti_typeid<AZ::Debug::ArcBallControllerComponent>());
+    
+        ActivateModel();
+        ActivateIbl();
     }
 
-    void MSAA_RPI_ExampleComponent::DeactivateMSAAPipeline()
+    void MSAA_RPI_ExampleComponent::ChangeRenderPipeline()
     {
+        AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
+
         m_imguiScope = {}; // restores previous ImGui context.
 
-        AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        defaultScene->AddRenderPipeline(m_originalPipeline);
-        AZ::RPI::RenderPipelineDescriptor pipelineDesc;
-        defaultScene->RemoveRenderPipeline(m_msaaPipeline->GetId());
-        DestroyMSAAPipeline();
-    }
+        // remove currently running sample pipeline, if any
+        if (m_samplePipeline)
+        {
+            defaultScene->RemoveRenderPipeline(m_samplePipeline->GetId());
+            m_samplePipeline = nullptr;
+        }
+        
+        bool isNonMsaaPipeline = (m_numSamples == 1);
+        
+        // if we are changing between the MSAA and non-MSAA pipelines we need to force a reset on the RPI scene.  This is
+        // necessary to re-initialize all of the feature processor shaders and Srgs
+        if (isNonMsaaPipeline != m_isNonMsaaPipeline)
+        {      
+            // set the NoMsaa flag based on the pipeline type and reset the RPI scene
+            const char* supervariantName = isNonMsaaPipeline ? AZ::RPI::NoMsaaSupervariantName : "";
+            AZ::RPI::ShaderSystemInterface::Get()->SetSupervariantName(AZ::Name(supervariantName));
+            SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequests::ResetRPIScene);
 
-    void MSAA_RPI_ExampleComponent::CreateMSAAPipeline(int numSamples)
-    {
+            // reset internal sample scene related data
+            ResetScene();
+
+            // re-acquire the default scene
+            defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
+
+            // remove the default render pipeline
+            AZ::RPI::RenderPipelinePtr defaultPipeline = defaultScene->GetDefaultRenderPipeline();
+            defaultScene->RemoveRenderPipeline(defaultPipeline->GetId());
+
+            // scene IBL is cleared after the reset, re-activate it
+            ActivateIbl();
+
+            m_isNonMsaaPipeline = isNonMsaaPipeline;          
+        }
+        
+        // create the new sample pipeline
         AZ::RPI::RenderPipelineDescriptor pipelineDesc;
         pipelineDesc.m_mainViewTagName = "MainCamera";
         pipelineDesc.m_name = "MSAA";
-        pipelineDesc.m_rootPassTemplate = GetPipelineName(numSamples);
+        pipelineDesc.m_rootPassTemplate = "MainPipeline";
+        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = m_numSamples;
+        m_samplePipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
 
-        m_msaaPipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
+        // add the sample pipeline to the scene
+        defaultScene->AddRenderPipeline(m_samplePipeline);
+        m_samplePipeline->SetDefaultView(m_originalPipeline->GetDefaultView());
+        defaultScene->SetDefaultRenderPipeline(m_samplePipeline->GetId());
+
+        // create an ImGuiActiveContextScope to ensure the ImGui context on the new pipeline's ImGui pass is activated.
+        m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass(AZ::RPI::PassHierarchyFilter({ m_samplePipeline->GetId().GetCStr(), "ImGuiPass" }));
+
+        // enable/disable resolve passes as appropriate
+        bool enableResolvePass = !isNonMsaaPipeline;
+
+        AZStd::vector<AZ::Name> resolvePassNames =
+        {
+            AZ::Name("MSAAResolveDepthPass"),
+            AZ::Name("MSAAResolveDiffusePass"),
+            AZ::Name("MSAAResolveSpecularPass"),
+            AZ::Name("MSAAResolveScatterDistancePass")
+        };
+
+        for (const auto& resolvePassName : resolvePassNames)
+        {
+            AZ::RPI::PassHierarchyFilter passFilter(resolvePassName);
+            const AZStd::vector<AZ::RPI::Pass*>& passes = AZ::RPI::PassSystemInterface::Get()->FindPasses(passFilter);
+            for (auto& pass : passes)
+            {
+                pass->SetEnabled(enableResolvePass);
+            }
+        }
     }
 
     void MSAA_RPI_ExampleComponent::ResetCamera()
@@ -153,11 +185,6 @@ namespace AtomSampleViewer
     void MSAA_RPI_ExampleComponent::DefaultWindowCreated()
     {
         AZ::Render::Bootstrap::DefaultWindowBus::BroadcastResult(m_windowContext, &AZ::Render::Bootstrap::DefaultWindowBus::Events::GetDefaultWindowContext);
-    }
-
-    void MSAA_RPI_ExampleComponent::DestroyMSAAPipeline()
-    {
-        m_msaaPipeline = nullptr;
     }
 
     AZ::Data::Asset<AZ::RPI::MaterialAsset> MSAA_RPI_ExampleComponent::GetMaterialAsset()
@@ -183,7 +210,6 @@ namespace AtomSampleViewer
         return AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/cylinder.azmodel", traceLevel);
     }
 
-
     void MSAA_RPI_ExampleComponent::ActivateModel()
     {
         m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(GetModelAsset(), AZ::RPI::Material::FindOrCreate(GetMaterialAsset()));
@@ -201,22 +227,12 @@ namespace AtomSampleViewer
         }
     }
 
-    void MSAA_RPI_ExampleComponent::DeactivateModel()
-    {
-        GetMeshFeatureProcessor()->ReleaseMesh(m_meshHandle);
-    }
-
     void MSAA_RPI_ExampleComponent::ActivateIbl()
     {
         m_defaultIbl.Init(AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get());
 
         // reduce the exposure so the model isn't overly bright
         m_defaultIbl.SetExposure(-0.5f);
-    }
-
-    void MSAA_RPI_ExampleComponent::DeactivateIbl()
-    {
-        m_defaultIbl.Reset();
     }
 
     void MSAA_RPI_ExampleComponent::OnTick([[maybe_unused]] float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint timePoint)
@@ -239,9 +255,8 @@ namespace AtomSampleViewer
         if (refresh)
         {
             // Note that the model's have some multisample information embedded into their pipeline state, so delete and recreate the model
-            DeactivateModel();
-            DeactivateMSAAPipeline();
-            ActivateMSAAPipeline();
+            GetMeshFeatureProcessor()->ReleaseMesh(m_meshHandle);
+            ChangeRenderPipeline();
             ActivateModel();
         }
     }
