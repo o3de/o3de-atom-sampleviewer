@@ -218,7 +218,7 @@ namespace AtomSampleViewer
     {
         m_meshChangedHandler.Disconnect();
         m_worldModelAssetLoaded = true;
-        m_worldModelAABB = model->GetAabb();
+        m_worldModelAABB = model->GetModelAsset()->GetAabb();
 
         InitLightArrays();
         CreateLightsAndDecals();
