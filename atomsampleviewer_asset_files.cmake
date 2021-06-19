@@ -24,11 +24,6 @@ set(FILES
     Passes/LuxCoreTexture.pass
     Passes/MainPipeline_Mobile.pass
     Passes/Monochrome.pass
-    Passes/MSAA_2x_RPI_Pipeline.pass
-    Passes/MSAA_4x_RPI_Pipeline.pass
-    Passes/MSAA_8x_RPI_Pipeline.pass
-    Passes/MSAA_RPI_Pipeline_Core.pass
-    Passes/No_MSAA_RPI_Pipeline.pass
     Passes/RayTracingAmbientOcclusion.pass
     Passes/RenderTexture.pass
     Passes/RHISamplePass.pass
