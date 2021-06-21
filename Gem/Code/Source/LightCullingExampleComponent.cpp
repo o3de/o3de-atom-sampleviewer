@@ -57,8 +57,7 @@ namespace AtomSampleViewer
     static const float TimingSmoothingFactor = 0.9f;
     static const size_t MaxNumLights = 1024;
     static const float AuxGeomDebugAlpha = 0.5f;
-    static const AZ::Vector3 CameraStartPositionVespa = AZ::Vector3(3.37f, -1.44f, 1.82f);
-    static const AZ::Vector3 CameraStartPositionLongViewDownStreet = AZ::Vector3(-12.f, -35.5f, 0.7438f);
+    static const AZ::Vector3 CameraStartPosition = AZ::Vector3(-12.f, -35.5f, 0.7438f);
 
     AZ::Color LightCullingExampleComponent::GetRandomColor()
     {
@@ -740,7 +739,7 @@ namespace AtomSampleViewer
     void LightCullingExampleComponent::MoveCameraToStartPosition()
     {
         const AZ::Vector3 target = AZ::Vector3::CreateAxisZ();
-        const AZ::Transform transform = AZ::Transform::CreateLookAt(CameraStartPositionLongViewDownStreet, target, AZ::Transform::Axis::YPositive);
+        const AZ::Transform transform = AZ::Transform::CreateLookAt(CameraStartPosition, target, AZ::Transform::Axis::YPositive);
         AZ::TransformBus::Event(GetCameraEntityId(), &AZ::TransformBus::Events::SetWorldTM, transform);
     }
 
