@@ -111,7 +111,7 @@ namespace AtomSampleViewer
         Data::Asset<ModelAsset> modelAsset;
         modelAsset.Create(m_modelAssetId);
 
-        auto meshHandle = GetMeshFeatureProcessor()->AcquireMesh(modelAsset, materials);
+        auto meshHandle = GetMeshFeatureProcessor()->AcquireMesh(Render::MeshHandleDescriptor{ modelAsset }, materials);
         GetMeshFeatureProcessor()->SetTransform(meshHandle, transform);
         m_meshHandles.push_back(AZStd::move(meshHandle));
     }

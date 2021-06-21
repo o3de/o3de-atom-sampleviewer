@@ -202,7 +202,7 @@ namespace AtomSampleViewer
 
         for (MeshHandle& meshHandle : m_meshHandles)
         {
-            meshHandle = GetMeshFeatureProcessor()->AcquireMesh(m_bunnyModelAsset, materials);
+            meshHandle = GetMeshFeatureProcessor()->AcquireMesh(Render::MeshHandleDescriptor{ m_bunnyModelAsset }, materials);
 
             auto transform = AZ::Transform::CreateTranslation(translation);
             transform *= scaleTransform;

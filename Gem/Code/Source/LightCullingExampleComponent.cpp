@@ -776,7 +776,7 @@ namespace AtomSampleViewer
 
         auto meshFeatureProcessor = GetMeshFeatureProcessor();
 
-        m_meshHandle = meshFeatureProcessor->AcquireMesh(modelAsset);
+        m_meshHandle = meshFeatureProcessor->AcquireMesh(MeshHandleDescriptor{ modelAsset });
         meshFeatureProcessor->SetTransform(m_meshHandle, Transform::CreateIdentity());
         Data::Instance<RPI::Model> model = meshFeatureProcessor->GetModel(m_meshHandle);
         // Loading in the world will probably take a while and I want to grab the AABB afterwards, so hook it up to a a ModelChangeEventHandler
@@ -802,7 +802,7 @@ namespace AtomSampleViewer
         Render::MaterialAssignmentMap materialAssignmentMap = CreateMaterialAssignmentMap(TransparentMaterialName);
         for (const AZ::Vector3& position : TransparentModelPositions)
         {
-            AZ::Render::MeshFeatureProcessorInterface::MeshHandle meshHandle = GetMeshFeatureProcessor()->AcquireMesh(transparentModelAsset, materialAssignmentMap);
+            AZ::Render::MeshFeatureProcessorInterface::MeshHandle meshHandle = GetMeshFeatureProcessor()->AcquireMesh(MeshHandleDescriptor{ transparentModelAsset }, materialAssignmentMap);
             GetMeshFeatureProcessor()->SetTransform(meshHandle, Transform::CreateTranslation(position));
             m_transparentMeshHandles.push_back(std::move(meshHandle));
         }

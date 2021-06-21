@@ -319,7 +319,7 @@ namespace AtomSampleViewer
             m_material = Material::Create(m_materialAsset);
 
             Transform meshTransform = Transform::CreateFromQuaternion(Quaternion::CreateFromAxisAngle(Vector3::CreateAxisX(), -AZ::Constants::HalfPi));
-            m_meshHandle = m_meshFeatureProcessor->AcquireMesh(m_modelAsset, m_material);
+            m_meshHandle = m_meshFeatureProcessor->AcquireMesh(MeshHandleDescriptor{ m_modelAsset }, m_material);
             m_meshFeatureProcessor->SetTransform(m_meshHandle, meshTransform);
 
             Data::Instance<RPI::Model> model = GetMeshFeatureProcessor()->GetModel(m_meshHandle);
@@ -468,7 +468,7 @@ namespace AtomSampleViewer
             if (updateIndicatorMesh)
             {
                 m_meshFeatureProcessor->ReleaseMesh(m_shaderVariantIndicatorMeshHandle);
-                m_shaderVariantIndicatorMeshHandle = m_meshFeatureProcessor->AcquireMesh(m_modelAsset, m_shaderVariantIndicatorMaterial_current);
+                m_shaderVariantIndicatorMeshHandle = m_meshFeatureProcessor->AcquireMesh(Render::MeshHandleDescriptor{ m_modelAsset }, m_shaderVariantIndicatorMaterial_current);
                 m_meshFeatureProcessor->SetTransform(m_shaderVariantIndicatorMeshHandle, m_shaderVariantIndicatorMeshTransform,
                     m_shaderVariantIndicatorMeshNonUniformScale);
             }

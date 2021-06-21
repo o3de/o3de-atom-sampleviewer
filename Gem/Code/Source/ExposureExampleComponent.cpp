@@ -120,7 +120,7 @@ namespace AtomSampleViewer
         const char* sponzaPath = "objects/sponza.azmodel";
         Data::Asset<RPI::ModelAsset> modelAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>(sponzaPath, RPI::AssetUtils::TraceLevel::Assert);
         Data::Asset<RPI::MaterialAsset> materialAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::MaterialAsset>(DefaultPbrMaterialPath, RPI::AssetUtils::TraceLevel::Assert);
-        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(modelAsset, AZ::RPI::Material::FindOrCreate(materialAsset));
+        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(Render::MeshHandleDescriptor{ modelAsset }, AZ::RPI::Material::FindOrCreate(materialAsset));
 
         // rotate the entity 180 degrees about Z (the vertical axis)
         // This makes it consistent with how it was positioned in the world when the world was Y-up.

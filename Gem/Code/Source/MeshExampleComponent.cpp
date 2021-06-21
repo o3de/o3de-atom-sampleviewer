@@ -362,7 +362,7 @@ namespace AtomSampleViewer
 
             m_modelAsset.Create(m_modelBrowser.GetSelectedAssetId());
             GetMeshFeatureProcessor()->ReleaseMesh(m_meshHandle);
-            m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(m_modelAsset, m_materialOverrideInstance);
+            m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(MeshHandleDescriptor{ m_modelAsset }, m_materialOverrideInstance);
             GetMeshFeatureProcessor()->SetTransform(m_meshHandle, AZ::Transform::CreateIdentity());
             GetMeshFeatureProcessor()->ConnectModelChangeEventHandler(m_meshHandle, m_changedHandler);
             GetMeshFeatureProcessor()->SetLodOverride(m_meshHandle, m_lodOverride);
@@ -375,7 +375,7 @@ namespace AtomSampleViewer
     
     void MeshExampleComponent::CreateGroundPlane()
     {
-        m_groundPlandMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(m_groundPlaneModelAsset, m_groundPlaneMaterial);
+        m_groundPlandMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(MeshHandleDescriptor{ m_groundPlaneModelAsset }, m_groundPlaneMaterial);
     }
 
     void MeshExampleComponent::UpdateGroundPlane()

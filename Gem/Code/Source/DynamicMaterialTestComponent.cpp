@@ -97,7 +97,11 @@ namespace AtomSampleViewer
         defaultMaterial.m_materialAsset = materialAsset;
         defaultMaterial.m_materialInstance = material;
 
-        auto meshHandle = GetMeshFeatureProcessor()->AcquireMesh(m_modelAsset, materialMap, false, false);
+        Render::MeshHandleDescriptor meshDescriptor;
+        meshDescriptor.m_modelAsset = m_modelAsset;
+        meshDescriptor.m_skinnedMeshWithMotion = false;
+        meshDescriptor.m_rayTracingEnabled = false;
+        auto meshHandle = GetMeshFeatureProcessor()->AcquireMesh(meshDescriptor, materialMap);
         GetMeshFeatureProcessor()->SetTransform(meshHandle, transform);
 
         Data::Instance<RPI::Model> model = GetMeshFeatureProcessor()->GetModel(meshHandle);

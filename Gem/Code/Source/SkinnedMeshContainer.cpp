@@ -175,12 +175,15 @@ namespace AtomSampleViewer
             AZ::Render::MaterialAssignmentMap materialMap;
             materialMap[AZ::Render::DefaultMaterialAssignmentId].m_materialAsset = materialAsset;
             materialMap[AZ::Render::DefaultMaterialAssignmentId].m_materialInstance = materialOverrideInstance;
-            bool isSkinnedMeshWithMotion = true;
+
             if (renderData.m_skinnedMeshInstance->m_model)
             {
+                AZ::Render::MeshHandleDescriptor meshDescriptor;
+                meshDescriptor.m_modelAsset = renderData.m_skinnedMeshInstance->m_model->GetModelAsset();
+                meshDescriptor.m_skinnedMeshWithMotion = true;
                 renderData.m_meshHandle =
                     AZStd::make_shared<AZ::Render::MeshFeatureProcessorInterface::MeshHandle>(m_meshFeatureProcessor->AcquireMesh(
-                        renderData.m_skinnedMeshInstance->m_model->GetModelAsset(), materialMap, isSkinnedMeshWithMotion));
+                        meshDescriptor, materialMap));
                 m_meshFeatureProcessor->SetTransform(*renderData.m_meshHandle, renderData.m_rootTransform);
             }
             // If render proxies already exist, they will be auto-freed

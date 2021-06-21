@@ -93,7 +93,7 @@ namespace AtomSampleViewer
 
         Transform meshTransform =
             Transform::CreateFromQuaternion(Quaternion::CreateFromAxisAngle(Vector3::CreateAxisX(), -AZ::Constants::HalfPi));
-        m_meshHandle = m_meshFeatureProcessor->AcquireMesh(m_modelAsset, m_material);
+        m_meshHandle = m_meshFeatureProcessor->AcquireMesh(Render::MeshHandleDescriptor{ m_modelAsset }, m_material);
         m_meshFeatureProcessor->SetTransform(m_meshHandle, meshTransform);
 
         AZStd::vector<AZStd::string> passHierarchy;

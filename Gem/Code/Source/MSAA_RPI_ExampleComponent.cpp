@@ -186,7 +186,7 @@ namespace AtomSampleViewer
 
     void MSAA_RPI_ExampleComponent::ActivateModel()
     {
-        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(GetModelAsset(), AZ::RPI::Material::FindOrCreate(GetMaterialAsset()));
+        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ GetModelAsset() }, AZ::RPI::Material::FindOrCreate(GetMaterialAsset()));
         GetMeshFeatureProcessor()->SetTransform(m_meshHandle, AZ::Transform::CreateIdentity());
 
         AZ::Data::Instance<AZ::RPI::Model> model = GetMeshFeatureProcessor()->GetModel(m_meshHandle);

@@ -155,7 +155,7 @@ namespace AtomSampleViewer
         {
             AZ_Assert(m_meshFeatureProcessor, "Cannot find mesh feature processor on scene");
             auto meshAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>(modelPath, RPI::AssetUtils::TraceLevel::Assert);
-            Render::MeshFeatureProcessorInterface::MeshHandle meshHandle = m_meshFeatureProcessor->AcquireMesh(meshAsset);
+            Render::MeshFeatureProcessorInterface::MeshHandle meshHandle = m_meshFeatureProcessor->AcquireMesh(Render::MeshHandleDescriptor{ meshAsset });
 
             return meshHandle;
         };
@@ -435,7 +435,7 @@ namespace AtomSampleViewer
         // Setup Main Mesh Entity
         {
             auto bunnyAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>("objects/bunny.azmodel", RPI::AssetUtils::TraceLevel::Assert);
-            m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(bunnyAsset);
+            m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(Render::MeshHandleDescriptor{ bunnyAsset });
             GetMeshFeatureProcessor()->SetTransform(m_meshHandle, Transform::CreateRotationZ(Constants::Pi));
         }
 

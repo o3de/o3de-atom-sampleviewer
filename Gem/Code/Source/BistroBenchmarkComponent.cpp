@@ -110,7 +110,7 @@ namespace AtomSampleViewer
         m_sponzaInteriorAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>
             ("Objects/Sponza.azmodel", traceLevel);
 
-        m_sponzaInteriorMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(m_sponzaInteriorAsset);
+        m_sponzaInteriorMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_sponzaInteriorAsset });
 
         // rotate the entities 180 degrees about Z (the vertical axis)
         // This makes it consistent with how it was positioned in the world when the world was Y-up.

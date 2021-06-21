@@ -188,7 +188,7 @@ namespace AtomSampleViewer
                 AZ::Data::Asset<AZ::RPI::ModelAsset> modelAsset;
                 modelAsset.Create(instanceData.m_modelAssetId);
 
-                instanceData.m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(modelAsset, materials);
+                instanceData.m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ modelAsset }, materials);
                 GetMeshFeatureProcessor()->SetTransform(instanceData.m_meshHandle, instanceData.m_transform);
             }
         }
