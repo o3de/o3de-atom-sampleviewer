@@ -83,7 +83,7 @@ namespace AtomSampleViewer
         struct Configuration
         {
             LightType m_lightType = Point;
-            AZStd::string m_modelAssetPath = "models/sphere.azmodel";
+            AZStd::string m_modelAssetPath = "objects/test/area_light_test_sphere.azmodel";
             uint32_t m_count = 1;
 
             float m_intensity = 30.0f;

@@ -42,7 +42,7 @@ namespace AtomSampleViewer
 
     float GetRandomFloat(float min, float max)
     {
-        float scale = static_cast<float>(rand()) / RAND_MAX;
+        float scale = aznumeric_cast<float>(rand()) / aznumeric_cast<float>(RAND_MAX);
         float range = max - min;
         return scale * range + min;
     }
@@ -1106,23 +1106,19 @@ namespace AtomSampleViewer
 
     ///////////////////////////////////////////////////////////////////////
     // ShaderReloadNotificationBus overrides
-    void IndirectRenderingExampleComponent::OnShaderVariantReinitialized(
-        const AZ::RPI::Shader& shader, const AZ::RPI::ShaderVariantId& shaderVariantId,
-        AZ::RPI::ShaderVariantStableId shaderVariantStableId)
-    {
-        AZ_UNUSED(shader);
-        AZ_UNUSED(shaderVariantId);
 
+    void IndirectRenderingExampleComponent::OnShaderVariantReinitialized(const AZ::RPI::ShaderVariant& shaderVariant)
+    {
         //AZ_TracePrintf(LogName, "Got variant %s\n", shaderVariantAsset.GetHint().c_str());
         const AZ::Data::AssetId* shaderAssetId = AZ::RPI::ShaderReloadNotificationBus::GetCurrentBusId();
         if (*shaderAssetId == m_indirectDrawShader->GetAsset().GetId())
         {
-            m_indirectDrawShaderVariantStableId = shaderVariantStableId;
+            m_indirectDrawShaderVariantStableId = shaderVariant.GetStableId();
             m_imguiProgressList.RemoveItem(IndirectDrawVariantLabel);
         }
         else if (*shaderAssetId == m_indirectDispatchShader->GetAsset().GetId())
         {
-            m_indirectDispatchShaderVariantStableId = shaderVariantStableId;
+            m_indirectDispatchShaderVariantStableId = shaderVariant.GetStableId();
             m_imguiProgressList.RemoveItem(IndirectDispatchVariantLabel);
         }
 
