@@ -46,29 +46,6 @@ namespace AtomSampleViewer
         }
     }
 
-    void MSAA_RPI_ExampleComponent::Deactivate()
-    {
-        GetMeshFeatureProcessor()->ReleaseMesh(m_meshHandle);
-        AZ::Debug::CameraControllerRequestBus::Event(GetCameraEntityId(), &AZ::Debug::CameraControllerRequestBus::Events::Disable);
-        m_defaultIbl.Reset();
-
-        // clear the non-MSAA pipeline and the RPI scene
-        AZ::RPI::ShaderSystemInterface::Get()->SetSupervariantName(AZ::Name(""));
-        SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequests::ClearRPIScene);
-
-        AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusDisconnect();
-        ExampleComponentRequestBus::Handler::BusDisconnect();
-        AZ::TickBus::Handler::BusDisconnect();
-        m_imguiSidebar.Deactivate();
-    }
-
-    void MSAA_RPI_ExampleComponent::OnModelReady(AZ::Data::Instance<AZ::RPI::Model> model)
-    {
-        AZ::Data::Asset<AZ::RPI::ModelAsset> modelAsset = model->GetModelAsset();
-        m_meshChangedHandler.Disconnect();
-        ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::ResumeScript);
-    }
-
     void MSAA_RPI_ExampleComponent::Activate()
     {
         m_imguiSidebar.Activate();
@@ -90,6 +67,22 @@ namespace AtomSampleViewer
     
         ActivateModel();
         ActivateIbl();
+    }
+
+    void MSAA_RPI_ExampleComponent::Deactivate()
+    {
+        GetMeshFeatureProcessor()->ReleaseMesh(m_meshHandle);
+        AZ::Debug::CameraControllerRequestBus::Event(GetCameraEntityId(), &AZ::Debug::CameraControllerRequestBus::Events::Disable);
+        m_defaultIbl.Reset();
+
+        // clear the non-MSAA pipeline and the RPI scene
+        AZ::RPI::ShaderSystemInterface::Get()->SetSupervariantName(AZ::Name(""));
+        SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequests::ClearRPIScene);
+
+        AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusDisconnect();
+        ExampleComponentRequestBus::Handler::BusDisconnect();
+        AZ::TickBus::Handler::BusDisconnect();
+        m_imguiSidebar.Deactivate();
     }
 
     void MSAA_RPI_ExampleComponent::ChangeRenderPipeline()
@@ -147,27 +140,6 @@ namespace AtomSampleViewer
 
         // create an ImGuiActiveContextScope to ensure the ImGui context on the new pipeline's ImGui pass is activated.
         m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass(AZ::RPI::PassHierarchyFilter({ m_samplePipeline->GetId().GetCStr(), "ImGuiPass" }));
-
-        // enable/disable resolve passes as appropriate
-        bool enableResolvePass = !isNonMsaaPipeline;
-
-        AZStd::vector<AZ::Name> resolvePassNames =
-        {
-            AZ::Name("MSAAResolveDepthPass"),
-            AZ::Name("MSAAResolveDiffusePass"),
-            AZ::Name("MSAAResolveSpecularPass"),
-            AZ::Name("MSAAResolveScatterDistancePass")
-        };
-
-        for (const auto& resolvePassName : resolvePassNames)
-        {
-            AZ::RPI::PassHierarchyFilter passFilter(resolvePassName);
-            const AZStd::vector<AZ::RPI::Pass*>& passes = AZ::RPI::PassSystemInterface::Get()->FindPasses(passFilter);
-            for (auto& pass : passes)
-            {
-                pass->SetEnabled(enableResolvePass);
-            }
-        }
     }
 
     void MSAA_RPI_ExampleComponent::ResetCamera()
@@ -225,6 +197,13 @@ namespace AtomSampleViewer
             ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::PauseScript);
             GetMeshFeatureProcessor()->ConnectModelChangeEventHandler(m_meshHandle, m_meshChangedHandler);
         }
+    }
+
+    void MSAA_RPI_ExampleComponent::OnModelReady(AZ::Data::Instance<AZ::RPI::Model> model)
+    {
+        AZ::Data::Asset<AZ::RPI::ModelAsset> modelAsset = model->GetModelAsset();
+        m_meshChangedHandler.Disconnect();
+        ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::ResumeScript);
     }
 
     void MSAA_RPI_ExampleComponent::ActivateIbl()
