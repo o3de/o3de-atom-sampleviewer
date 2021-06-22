@@ -58,7 +58,7 @@ namespace AtomSampleViewer
 
         AZ::RPI::ScenePtr scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
         m_meshFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::MeshFeatureProcessorInterface>();
-        m_meshHandle = m_meshFeatureProcessor->AcquireMesh(meshAsset, materials);
+        m_meshHandle = m_meshFeatureProcessor->AcquireMesh(AZ::Render::MeshHandleDescriptor{ meshAsset }, materials);
         m_meshFeatureProcessor->SetTransform(m_meshHandle, AZ::Transform::CreateIdentity());
         
         AZ::Debug::CameraControllerRequestBus::Event(m_cameraEntityId, &AZ::Debug::CameraControllerRequestBus::Events::Enable,

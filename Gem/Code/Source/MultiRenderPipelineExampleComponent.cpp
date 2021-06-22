@@ -122,10 +122,10 @@ namespace AtomSampleViewer
             RPI::AssetUtils::TraceLevel::Assert);
         auto floorAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::ModelAsset>(CubeModelFilePath,
             RPI::AssetUtils::TraceLevel::Assert);
-        m_floorMeshHandle = meshFeatureProcessor->AcquireMesh(floorAsset, material);
+        m_floorMeshHandle = meshFeatureProcessor->AcquireMesh(Render::MeshHandleDescriptor{ floorAsset }, material);
         for (uint32_t bunnyIndex = 0; bunnyIndex < BunnyCount; bunnyIndex++)
         {
-            m_bunnyMeshHandles[bunnyIndex] = meshFeatureProcessor->AcquireMesh(bunnyAsset, material);
+            m_bunnyMeshHandles[bunnyIndex] = meshFeatureProcessor->AcquireMesh(Render::MeshHandleDescriptor{ bunnyAsset }, material);
         }
 
         const Vector3 floorNonUniformScale{ 12.f, 12.f, 0.1f };

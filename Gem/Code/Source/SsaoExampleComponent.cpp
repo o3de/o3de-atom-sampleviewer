@@ -98,7 +98,7 @@ namespace AtomSampleViewer
 
         // Create Mesh and Model
         MeshFeatureProcessorInterface* meshFeatureProcessor = GetMeshFeatureProcessor();
-        m_meshHandle = meshFeatureProcessor->AcquireMesh(modelAsset, RPI::Material::FindOrCreate(materialAsset));
+        m_meshHandle = meshFeatureProcessor->AcquireMesh(MeshHandleDescriptor{ modelAsset }, RPI::Material::FindOrCreate(materialAsset));
         meshFeatureProcessor->SetTransform(m_meshHandle, Transform::CreateIdentity());
         Data::Instance<RPI::Model> model = meshFeatureProcessor->GetModel(m_meshHandle);
 

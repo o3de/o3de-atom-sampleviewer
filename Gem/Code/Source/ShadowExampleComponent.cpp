@@ -350,8 +350,8 @@ namespace AtomSampleViewer
         using namespace AZ;
 
         m_materialInstance = RPI::Material::FindOrCreate(m_materialAsset);
-        m_floorMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(m_floorModelAsset, m_materialInstance);
-        m_bunnyMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(m_bunnyModelAsset, m_materialInstance);
+        m_floorMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(Render::MeshHandleDescriptor{ m_floorModelAsset }, m_materialInstance);
+        m_bunnyMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(Render::MeshHandleDescriptor{ m_bunnyModelAsset }, m_materialInstance);
 
         auto updateFloorTransform = [&](Data::Instance<RPI::Model> model)
         {

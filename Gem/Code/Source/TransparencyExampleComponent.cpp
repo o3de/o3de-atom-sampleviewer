@@ -136,7 +136,7 @@ namespace AtomSampleViewer
         defaultMaterial.m_materialAsset = m_materialAsset;
         defaultMaterial.m_materialInstance = AZ::RPI::Material::Create(m_materialAsset);
 
-        AZ::Render::MeshFeatureProcessorInterface::MeshHandle meshHandle = GetMeshFeatureProcessor()->AcquireMesh(m_modelAsset, materialMap);
+        AZ::Render::MeshFeatureProcessorInterface::MeshHandle meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_modelAsset }, materialMap);
         GetMeshFeatureProcessor()->SetTransform(meshHandle, transform);
 
         AZ::Data::Instance<AZ::RPI::Model> model = GetMeshFeatureProcessor()->GetModel(meshHandle);

@@ -52,6 +52,7 @@ namespace AtomSampleViewer
 
         static const uint32_t MaxVariants = 10;
 
+        using MeshHandleDescriptor = AZ::Render::MeshHandleDescriptor;
         using MeshHandle = AZ::Render::MeshFeatureProcessorInterface::MeshHandle;
         using PointLightHandle = AZ::Render::PointLightFeatureProcessorInterface::LightHandle;
         using DiskLightHandle = AZ::Render::DiskLightFeatureProcessorInterface::LightHandle;

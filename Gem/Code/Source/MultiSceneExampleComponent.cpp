@@ -165,11 +165,12 @@ namespace AtomSampleViewer
         const auto LoadMesh = [this](const char* modelPath) -> Render::MeshFeatureProcessorInterface::MeshHandle
         {
             AZ_Assert(m_meshFeatureProcessor, "Cannot find mesh feature processor on scene");
+
             auto meshAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>(modelPath, RPI::AssetUtils::TraceLevel::Assert);            
             auto materialAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::MaterialAsset>(DefaultPbrMaterialPath,
                 RPI::AssetUtils::TraceLevel::Assert);
             auto material = AZ::RPI::Material::FindOrCreate(materialAsset);
-            Render::MeshFeatureProcessorInterface::MeshHandle meshHandle = m_meshFeatureProcessor->AcquireMesh(meshAsset, material);
+            Render::MeshFeatureProcessorInterface::MeshHandle meshHandle = m_meshFeatureProcessor->AcquireMesh(Render::MeshHandleDescriptor{ meshAsset }, material);
 
             return meshHandle;
         };
@@ -471,7 +472,8 @@ namespace AtomSampleViewer
             auto material = AZ::RPI::Material::FindOrCreate(materialAsset);
             auto bunnyAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::ModelAsset>(BunnyModelFilePath,
                 RPI::AssetUtils::TraceLevel::Assert);
-            m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(bunnyAsset, material);
+            m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(Render::MeshHandleDescriptor{ bunnyAsset }, material);
+
             GetMeshFeatureProcessor()->SetTransform(m_meshHandle, Transform::CreateRotationZ(Constants::Pi));
         }
 

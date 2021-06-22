@@ -58,7 +58,7 @@ namespace AtomSampleViewer
         AZ::RPI::AssetUtils::TraceLevel traceLevel = AZ::RPI::AssetUtils::TraceLevel::Assert;
         auto meshAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/shaderball_simple.azmodel", traceLevel);
         auto materialAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::MaterialAsset>(DefaultPbrMaterialPath, traceLevel);
-        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(meshAsset, AZ::RPI::Material::FindOrCreate(materialAsset));
+        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ meshAsset }, AZ::RPI::Material::FindOrCreate(materialAsset));
         GetMeshFeatureProcessor()->SetTransform(m_meshHandle, AZ::Transform::CreateIdentity());
 
         UseArcBallCameraController();
