@@ -149,6 +149,8 @@ namespace AtomSampleViewer
         void RequestFrameCapture(const AZStd::string& filePath, bool hideImGui) override;
         bool IsFrameCapturePending() override;
         void RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd, int randomSeed) override;
+        void ResetRPIScene() override;
+        void ClearRPIScene() override;
 
         // FrameCaptureNotificationBus overrides...
         void OnCaptureFinished(AZ::Render::FrameCaptureResult result, const AZStd::string& info) override;

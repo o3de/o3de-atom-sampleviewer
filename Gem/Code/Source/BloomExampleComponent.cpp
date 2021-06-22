@@ -367,7 +367,7 @@ namespace AtomSampleViewer
             m_colorSpaceIndex.Reset();
         }
 
-        m_drawImage.m_srg = RPI::ShaderResourceGroup::Create(m_shaderAsset, AZ::RPI::DefaultSupervariantIndex, m_srgLayout->GetName());
+        m_drawImage.m_srg = RPI::ShaderResourceGroup::Create(m_shaderAsset, m_srgLayout->GetName());
         m_drawImage.m_wasStreamed = false;
 
         // Set the image to occupy the full screen.

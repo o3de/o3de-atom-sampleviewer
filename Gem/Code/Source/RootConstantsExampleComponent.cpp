@@ -143,7 +143,7 @@ namespace AtomSampleViewer
             m_rootConstantData = RHI::ConstantsData(rootConstantsLayout);
 
             // Load shader resource group asset
-            m_srg = AZ::RPI::ShaderResourceGroup::Create(shaderAsset, AZ::RPI::DefaultSupervariantIndex, Name { "MaterialGroupSrg" });
+            m_srg = AZ::RPI::ShaderResourceGroup::Create(shaderAsset, Name { "MaterialGroupSrg" });
             if (!m_srg)
             {
                 AZ_Error("Render", false, "Failed to create shader resource group");

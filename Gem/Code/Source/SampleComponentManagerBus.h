@@ -42,6 +42,12 @@ namespace AtomSampleViewer
         //! @param exitOnTestEnd if true, exits AtomSampleViewerStandalone when the script finishes, used in jenkins
         //! @param randomSeed the seed for the random generator, frequently used inside lua tests to shuffle the order of the test execution
         virtual void RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd, int randomSeed) = 0;
+
+        //! Reset the RPI scene while keeping the current sample running
+        virtual void ResetRPIScene() = 0;
+
+        //! Clear the RPI scene
+        virtual void ClearRPIScene() = 0;
     };
     using SampleComponentManagerRequestBus = AZ::EBus<SampleComponentManagerRequests>;
 

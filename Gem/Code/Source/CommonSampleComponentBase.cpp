@@ -284,4 +284,9 @@ namespace AtomSampleViewer
             });
     }
 
+    void CommonSampleComponentBase::ResetScene()
+    {
+        m_meshFeatureProcessor = nullptr;
+    }
+
 } // namespace AtomSampleViewer
