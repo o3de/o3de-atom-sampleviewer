@@ -51,8 +51,13 @@ namespace AtomSampleViewer
     private:
         struct ExampleVertex
         {
-            float x, y, z;
-            float r, g, b, a;
+            ExampleVertex(float position[3], float color[4])
+            {
+                memcpy(m_position, position, sizeof(float)*3);
+                memcpy(m_color, color, sizeof(float)*4);
+            }
+            float m_position[3];
+            float m_color[4];
         };
 
         AZ::RHI::Ptr<AZ::RPI::DynamicDrawContext> m_dynamicDraw;

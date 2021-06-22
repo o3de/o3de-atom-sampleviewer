@@ -138,22 +138,32 @@ namespace AtomSampleViewer
         const uint32_t TetrahedronIndexCount = 12;
         const uint32_t TetrahedronWireframeIndexCount = 6;
 
+        float positions[4][3] =
+        {
+            { 0.2, 0.2f, 0.2f },
+            { 0.2, -0.2f, -0.2f },
+            { -0.2, 0.2f, -0.2f },
+            { -0.2, -0.2f, 0.2f }
+        };
+
+        float colors[4][4] = { { 1, 0, 0, 0.5f }, { 0, 1, 0, 0.5f }, { 0, 0, 1, 0.5f }, {1, 1, 0, 0.5f}};
+
         ExampleVertex tetrahedronVerts[TetrahedronVertexCount] = {
-            {0.2, 0.2f, 0.2f,       1, 0, 0, 0.5f}, // 0
-            {-0.2, -0.2f, 0.2f,     1, 0, 0, 0.5f}, // 3
-            {0.2, -0.2f, -0.2f,     1, 0, 0, 0.5f}, // 1
+            ExampleVertex{positions[0], colors[0]}, // 0
+            ExampleVertex{positions[3], colors[0]}, // 3
+            ExampleVertex{positions[1], colors[0]}, // 1
 
-            {0.2, 0.2f, 0.2f,       0, 1, 0, 0.5f}, // 0
-            {0.2, -0.2f, -0.2f,     0, 1, 0, 0.5f}, // 1
-            {-0.2, 0.2f, -0.2f,     0, 1, 0, 0.5f}, // 2
+            ExampleVertex{positions[0], colors[1]}, // 0
+            ExampleVertex{positions[1], colors[1]}, // 1
+            ExampleVertex{positions[2], colors[1]}, // 2
 
-            {0.2, 0.2f, 0.2f,       0, 0, 1, 0.5f}, // 0
-            {-0.2, 0.2f, -0.2f,     0, 0, 1, 0.5f}, // 2
-            {-0.2, -0.2f, 0.2f,     0, 0, 1, 0.5f}, // 3
+            ExampleVertex{positions[0], colors[2]}, // 0
+            ExampleVertex{positions[2], colors[2]}, // 2
+            ExampleVertex{positions[3], colors[2]}, // 3
 
-            {0.2, -0.2f, -0.2f,     1, 1, 0, 0.5f}, // 1
-            {-0.2, -0.2f, 0.2f,     1, 1, 0, 0.5f}, // 3
-            {-0.2, 0.2f, -0.2f,     1, 1, 0, 0.5f}  // 2
+            ExampleVertex{positions[1], colors[3]}, // 1
+            ExampleVertex{positions[3], colors[3]}, // 3
+            ExampleVertex{positions[2], colors[3]} // 2
         };
         u16 tetrahedronIndices[TetrahedronIndexCount] = {
             0, 1, 2,
@@ -162,14 +172,21 @@ namespace AtomSampleViewer
             9, 10, 11
         };
 
+        ExampleVertex tetrahedronWireFrameVerts[4] = {
+            ExampleVertex{ positions[0], colors[0] },
+            ExampleVertex{ positions[1], colors[1] }, 
+            ExampleVertex{ positions[2], colors[2] }, 
+            ExampleVertex{ positions[3], colors[3] }
+        };
+
         u16 tetrahedronWireframeIndices[TetrahedronIndexCount] =
         {
             0, 1,
             0, 2,
-            0, 4,
+            0, 3,
             1, 2,
-            2, 4,
-            4, 1
+            2, 3,
+            3, 1
         };
 
         // Enable depth test and write
@@ -228,7 +245,7 @@ namespace AtomSampleViewer
             drawSrg->SetConstant(index, Vector3(xPos, 0, 0));
             drawSrg->Compile();
             m_dynamicDraw->SetPrimitiveType(RHI::PrimitiveTopology::LineList);
-            m_dynamicDraw->DrawIndexed(tetrahedronVerts, TetrahedronVertexCount, tetrahedronWireframeIndices, TetrahedronIndexCount, RHI::IndexFormat::Uint16, drawSrg);
+            m_dynamicDraw->DrawIndexed(tetrahedronWireFrameVerts, 4, tetrahedronWireframeIndices, TetrahedronIndexCount, RHI::IndexFormat::Uint16, drawSrg);
             m_dynamicDraw->SetPrimitiveType(RHI::PrimitiveTopology::TriangleList);
         }
 
