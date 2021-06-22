@@ -131,6 +131,9 @@ namespace AtomSampleViewer
         // AZ::TickBus::Handler overrides ...
         void OnTick(float deltaTime, AZ::ScriptTimePoint timePoint) override;
 
+        // CommonSampleComponentBase overrides ...
+        void OnAllAssetsReadyActivate() override;
+
         void OpenSecondSceneWindow();
 
         AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_meshHandle;
