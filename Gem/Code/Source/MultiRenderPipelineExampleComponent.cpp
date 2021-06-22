@@ -50,12 +50,6 @@ namespace AtomSampleViewer
 {
     using namespace AZ;
 
-    namespace
-    {
-        const char* BunnyModelFilePath = "objects/bunny.azmodel";
-        const char* CubeModelFilePath = "testdata/objects/cube/cube.azmodel";
-    };
-
     void MultiRenderPipelineExampleComponent::Reflect(AZ::ReflectContext* context)
     {
         if (auto* serializeContext = azrtti_cast<AZ::SerializeContext*>(context))

@@ -43,13 +43,6 @@ namespace AtomSampleViewer
 {
     using namespace AZ;
 
-    namespace
-    {
-        const char* BunnyModelFilePath = "objects/bunny.azmodel";
-        const char* ShaderBallModelFilePath = "objects/shaderball_simple.azmodel";
-        const char* CubeModelFilePath = "testdata/objects/cube/cube.azmodel";
-    };
-
     //////////////////////////////////////////////////////////////////////////
     // SecondWindowedScene
 

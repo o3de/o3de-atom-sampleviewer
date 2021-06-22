@@ -34,12 +34,6 @@
 
 namespace AtomSampleViewer
 {
-    namespace
-    {
-        const char* BunnyModelFilePath = "objects/bunny.azmodel";
-        const char* CubeModelFilePath = "testdata/objects/cube/cube.azmodel";
-    };
-
     const AZ::Color ShadowExampleComponent::DirectionalLightColor = AZ::Color::CreateOne();
     AZ::Color ShadowExampleComponent::s_positionalLightColors[] = {
         // they will be initialized in the constructor.
