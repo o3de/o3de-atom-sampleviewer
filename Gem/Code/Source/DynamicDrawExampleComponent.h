@@ -51,9 +51,9 @@ namespace AtomSampleViewer
     private:
         struct ExampleVertex
         {
-            ExampleVertex(float positioin[3], float color[4])
+            ExampleVertex(float position[3], float color[4])
             {
-                memcpy(m_position, positioin, sizeof(float)*3);
+                memcpy(m_position, position, sizeof(float)*3);
                 memcpy(m_color, color, sizeof(float)*4);
             }
             float m_position[3];
