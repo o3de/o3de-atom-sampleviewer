@@ -99,7 +99,6 @@ namespace AtomSampleViewer
 
         Render::MeshHandleDescriptor meshDescriptor;
         meshDescriptor.m_modelAsset = m_modelAsset;
-        meshDescriptor.m_isSkinnedMeshWithMotion = false;
         meshDescriptor.m_isRayTracingEnabled = false;
         auto meshHandle = GetMeshFeatureProcessor()->AcquireMesh(meshDescriptor, materialMap);
         GetMeshFeatureProcessor()->SetTransform(meshHandle, transform);
