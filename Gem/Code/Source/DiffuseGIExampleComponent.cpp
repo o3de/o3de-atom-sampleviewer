@@ -433,7 +433,7 @@ namespace AtomSampleViewer
         
             m_origin.Set(1.4f, -1.25f, 5.0f);
             transform.SetTranslation(m_origin);
-            m_diffuseProbeGrid = diffuseProbeGridFeatureProcessor->AddProbeGrid(transform, AZ::Vector3(35.0f, 45.0f, 25.0f), AZ::Vector3(3.0f, 3.0f, 4.0f));           
+            m_diffuseProbeGrid = diffuseProbeGridFeatureProcessor->AddProbeGrid(transform, AZ::Vector3(35.0f, 45.0f, 25.0f), AZ::Vector3(3.0f, 3.0f, 4.0f));
             diffuseProbeGridFeatureProcessor->SetAmbientMultiplier(m_diffuseProbeGrid, m_ambientMultiplier);
 
             m_viewBias = 0.55f;
