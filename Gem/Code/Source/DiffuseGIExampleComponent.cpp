@@ -364,6 +364,9 @@ namespace AtomSampleViewer
 
             m_normalBias = 0.1f;
             diffuseProbeGridFeatureProcessor->SetNormalBias(m_diffuseProbeGrid, m_normalBias);
+
+            AZ::Render::DiffuseGlobalIlluminationFeatureProcessorInterface* diffuseGlobalIlluminationFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DiffuseGlobalIlluminationFeatureProcessorInterface>();
+            diffuseGlobalIlluminationFeatureProcessor->SetQualityLevel(AZ::Render::DiffuseGlobalIlluminationQualityLevel::Medium);
         }
 
         // camera
@@ -383,13 +386,13 @@ namespace AtomSampleViewer
         GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(SponzaMeshes::Inside)], transform);
         
         m_directionalLightPitch = AZ::DegToRad(-45.0f);
-        m_directionalLightYaw = AZ::DegToRad(180.0f);
+        m_directionalLightYaw = AZ::DegToRad(62.0f);
         m_directionalLightColor = AZ::Color(0.92f, 0.78f, 0.35f, 1.0f);
-        m_directionalLightIntensity = 20.0f;
+        m_directionalLightIntensity = 30.0f;
 
-        m_pointLightPos = AZ::Vector3(-3.75f, -4.5f, 1.5f);
-        m_pointLightColor = AZ::Color(1.0f, 1.0f, 1.0f, 1.0f);
-        m_pointLightIntensity = 20.0f;
+        m_pointLightPos = AZ::Vector3(10.0f, -4.25f, 1.5f);
+        m_pointLightColor = AZ::Color(1.0f, 0.0f, 0.0f, 1.0f);
+        m_pointLightIntensity = 10.0f;
 
         m_ambientMultiplier = 1.0f;
 
@@ -408,7 +411,7 @@ namespace AtomSampleViewer
             directionalLightFeatureProcessor->SetShadowBoundaryWidth(m_directionalLightHandle, 0.03f);
             directionalLightFeatureProcessor->SetPredictionSampleCount(m_directionalLightHandle, 4);
             directionalLightFeatureProcessor->SetFilteringSampleCount(m_directionalLightHandle, 16);
-            directionalLightFeatureProcessor->SetGroundHeight(m_directionalLightHandle, 0.f);
+            directionalLightFeatureProcessor->SetGroundHeight(m_directionalLightHandle, 0.0f);
         }
 
         // point light
@@ -430,7 +433,7 @@ namespace AtomSampleViewer
         
             m_origin.Set(1.4f, -1.25f, 5.0f);
             transform.SetTranslation(m_origin);
-            m_diffuseProbeGrid = diffuseProbeGridFeatureProcessor->AddProbeGrid(transform, AZ::Vector3(165.0f, 95.0f, 45.0f), AZ::Vector3(4.0f, 4.0f, 5.0f));
+            m_diffuseProbeGrid = diffuseProbeGridFeatureProcessor->AddProbeGrid(transform, AZ::Vector3(35.0f, 45.0f, 25.0f), AZ::Vector3(3.0f, 3.0f, 4.0f));           
             diffuseProbeGridFeatureProcessor->SetAmbientMultiplier(m_diffuseProbeGrid, m_ambientMultiplier);
 
             m_viewBias = 0.55f;
@@ -438,6 +441,9 @@ namespace AtomSampleViewer
 
             m_normalBias = 0.4f;
             diffuseProbeGridFeatureProcessor->SetNormalBias(m_diffuseProbeGrid, m_normalBias);
+
+            AZ::Render::DiffuseGlobalIlluminationFeatureProcessorInterface* diffuseGlobalIlluminationFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DiffuseGlobalIlluminationFeatureProcessorInterface>();
+            diffuseGlobalIlluminationFeatureProcessor->SetQualityLevel(AZ::Render::DiffuseGlobalIlluminationQualityLevel::Medium);
         }
 
         // camera

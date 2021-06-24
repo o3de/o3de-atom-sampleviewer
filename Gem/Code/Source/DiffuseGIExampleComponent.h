@@ -20,6 +20,7 @@
 #include <Atom/Feature/CoreLights/PointLightFeatureProcessorInterface.h>
 #include <Atom/Feature/CoreLights/DirectionalLightFeatureProcessorInterface.h>
 #include <Atom/Feature/DiffuseGlobalIllumination/DiffuseProbeGridFeatureProcessorInterface.h>
+#include <Atom/Feature/DiffuseGlobalIllumination/DiffuseGlobalIlluminationFeatureProcessorInterface.h>
 
 namespace AtomSampleViewer
 {
@@ -162,7 +163,7 @@ namespace AtomSampleViewer
         // diffuse IBL (Sponza only)
         bool m_useDiffuseIbl = true;
         AZ::Data::Asset<AZ::RPI::StreamingImageAsset> m_diffuseImageAsset;
-        float m_diffuseIblExposure = 1.0f;
+        float m_diffuseIblExposure = 2.0f;
 
         // shadow settings
         static const AZ::Render::ShadowmapSize s_shadowmapSizes[];
