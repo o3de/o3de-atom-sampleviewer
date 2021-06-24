@@ -1,14 +1,9 @@
 /*
-* All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
-* its licensors.
-*
-* For complete copyright and license terms please see the LICENSE at the root of this
-* distribution (the "License"). All use of this software is governed by the License,
-* or, if provided, by the license below or the license accompanying this file. Do not
-* remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*
-*/
+ * Copyright (c) Contributors to the Open 3D Engine Project
+ * 
+ * SPDX-License-Identifier: Apache-2.0 OR MIT
+ *
+ */
 
 #include <MaterialHotReloadTestComponent.h>
 #include <SampleComponentManager.h>
@@ -319,7 +314,7 @@ namespace AtomSampleViewer
             m_material = Material::Create(m_materialAsset);
 
             Transform meshTransform = Transform::CreateFromQuaternion(Quaternion::CreateFromAxisAngle(Vector3::CreateAxisX(), -AZ::Constants::HalfPi));
-            m_meshHandle = m_meshFeatureProcessor->AcquireMesh(m_modelAsset, m_material);
+            m_meshHandle = m_meshFeatureProcessor->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_modelAsset }, m_material);
             m_meshFeatureProcessor->SetTransform(m_meshHandle, meshTransform);
 
             Data::Instance<RPI::Model> model = GetMeshFeatureProcessor()->GetModel(m_meshHandle);
@@ -460,7 +455,7 @@ namespace AtomSampleViewer
             if (updateIndicatorMesh)
             {
                 m_meshFeatureProcessor->ReleaseMesh(m_shaderVariantIndicatorMeshHandle);
-                m_shaderVariantIndicatorMeshHandle = m_meshFeatureProcessor->AcquireMesh(m_modelAsset, m_shaderVariantIndicatorMaterial_current);
+                m_shaderVariantIndicatorMeshHandle = m_meshFeatureProcessor->AcquireMesh(Render::MeshHandleDescriptor{ m_modelAsset }, m_shaderVariantIndicatorMaterial_current);
                 m_meshFeatureProcessor->SetTransform(m_shaderVariantIndicatorMeshHandle, m_shaderVariantIndicatorMeshTransform,
                     m_shaderVariantIndicatorMeshNonUniformScale);
             }
