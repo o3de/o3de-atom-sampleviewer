@@ -49,26 +49,6 @@
                 "Path": "Passes/Monochrome.pass"
             },
             {
-                "Name": "MSAA_RPI_Pipeline_Core",
-                "Path": "Passes/MSAA_RPI_Pipeline_Core.pass"
-            },
-            {
-                "Name": "MSAA_2x_RPI_Pipeline",
-                "Path": "Passes/MSAA_2x_RPI_Pipeline.pass"
-            },
-            {
-                "Name": "MSAA_4x_RPI_Pipeline",
-                "Path": "Passes/MSAA_4x_RPI_Pipeline.pass"
-            },
-            {
-                "Name": "MSAA_8x_RPI_Pipeline",
-                "Path": "Passes/MSAA_8x_RPI_Pipeline.pass"
-            },
-            {
-                "Name": "No_MSAA_RPI_Pipeline",
-                "Path": "Passes/No_MSAA_RPI_Pipeline.pass"
-            },
-            {
                 "Name": "ColorInvertCS",
                 "Path": "Passes/ColorInvertCS.pass"
             },
