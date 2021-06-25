@@ -132,6 +132,17 @@ namespace AtomSampleViewer
         }
 
         SetupLights();
+
+        // disable any previous skybox
+        AZ::RPI::ScenePtr scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
+        if (scene)
+        {
+            AZ::Render::SkyBoxFeatureProcessorInterface* skyboxFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::SkyBoxFeatureProcessorInterface>();
+            if (skyboxFeatureProcessor)
+            {
+                skyboxFeatureProcessor->Enable(false);
+            }
+        }
     }
 
     void ExposureExampleComponent::SetupLights()
