@@ -432,8 +432,7 @@ namespace AtomSampleViewer
                 // Take layout of first object
                 pipelineStateDescriptor.m_inputStreamLayout = layout;
 
-                const ShaderVariant& shaderVariant2 = m_shader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId);
-                shaderVariant2.ConfigurePipelineState(pipelineStateDescriptor);
+                shaderVariant.ConfigurePipelineState(pipelineStateDescriptor);
 
                 RHI::RenderAttachmentLayoutBuilder attachmentsBuilder;
                 attachmentsBuilder.AddSubpass()
