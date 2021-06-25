@@ -20,6 +20,7 @@ ResizeViewport(800, 800)
 IDLE_COUNT = 100
 FRAME_COUNT = 100
 
+CaptureBenchmarkMetadata('CullingAndLod', g_performanceStatsOutputFolder .. '/benchmark_metadata.json')
 Print('Idling for ' .. tostring(IDLE_COUNT) .. ' frames..')
 IdleFrames(IDLE_COUNT)
 Print('Capturing timestamps for ' .. tostring(FRAME_COUNT) .. ' frames...')
