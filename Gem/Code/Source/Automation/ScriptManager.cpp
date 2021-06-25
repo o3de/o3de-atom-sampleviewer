@@ -756,6 +756,7 @@ namespace AtomSampleViewer
         behaviorContext->Method("CapturePassTimestamp", &Script_CapturePassTimestamp);
         behaviorContext->Method("CapturePassPipelineStatistics", &Script_CapturePassPipelineStatistics);
         behaviorContext->Method("CaptureCpuProfilingStatistics", &Script_CaptureCpuProfilingStatistics);
+        behaviorContext->Method("CaptureBenchmarkMetadata", &Script_CaptureBenchmarkMetadata);
 
         // Camera...
         behaviorContext->Method("ArcBallCameraController_SetCenter", &Script_ArcBallCameraController_SetCenter);
@@ -1081,7 +1082,7 @@ namespace AtomSampleViewer
         s_instance->m_isCapturePending = true;
         s_instance->AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect();
         s_instance->PauseScript();
-        
+
         return true;
     }
 
@@ -1277,6 +1278,13 @@ namespace AtomSampleViewer
         ResumeScript();
     }
 
+    void ScriptManager::OnCaptureBenchmarkMetadataFinished([[maybe_unused]] bool result, [[maybe_unused]] const AZStd::string& info)
+    {
+        m_isCapturePending = false;
+        AZ::Render::ProfilingCaptureNotificationBus::Handler::BusDisconnect();
+        ResumeScript();
+    }
+
     void ScriptManager::Script_CapturePassTimestamp(AZ::ScriptDataContext& dc)
     {
         AZStd::string outputFilePath;
@@ -1340,6 +1348,41 @@ namespace AtomSampleViewer
         s_instance->m_scriptOperations.push(AZStd::move(operation));
     }
 
+    void ScriptManager::Script_CaptureBenchmarkMetadata(AZ::ScriptDataContext& dc)
+    {
+        if (dc.GetNumArguments() != 2)
+        {
+            ReportScriptError("CaptureBenchmarkMetadata needs two arguments, benchmarkName and outputFilePath.");
+            return;
+        }
+
+        if (!dc.IsString(0) || !dc.IsString(1))
+        {
+            ReportScriptError("CaptureBenchmarkMetadata's arguments benchmarkName and outputFilePath must both be of type string.");
+            return;
+        }
+
+        const char* stringValue = nullptr;
+        AZStd::string benchmarkName;
+        AZStd::string outputFilePath;
+
+        dc.ReadArg(0, stringValue);
+        benchmarkName = AZStd::string(stringValue);
+        dc.ReadArg(1, stringValue);
+        outputFilePath = AZStd::string(stringValue);
+
+        auto operation = [benchmarkName, outputFilePath]()
+        {
+            s_instance->m_isCapturePending = true;
+            s_instance->AZ::Render::ProfilingCaptureNotificationBus::Handler::BusConnect();
+            s_instance->PauseScript();
+
+            AZ::Render::ProfilingCaptureRequestBus::Broadcast(&AZ::Render::ProfilingCaptureRequestBus::Events::CaptureBenchmarkMetadata, benchmarkName, outputFilePath);
+        };
+
+        s_instance->m_scriptOperations.push(AZStd::move(operation));
+    }
+
     bool ScriptManager::ValidateProfilingCaptureScripContexts(AZ::ScriptDataContext& dc, AZStd::string& outputFilePath)
     {
         if (dc.GetNumArguments() != 1)
@@ -1376,7 +1419,7 @@ namespace AtomSampleViewer
     {
         AZ::RPI::RPISystemInterface* rpiSystem = AZ::RPI::RPISystemInterface::Get();
         return rpiSystem->GetRenderApiName().GetCStr();
-        
+
     }
 
     int ScriptManager::Script_GetRandomTestSeed()

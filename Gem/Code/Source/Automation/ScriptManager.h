@@ -22,7 +22,7 @@
 #include <Automation/ImageComparisonConfig.h>
 #include <Utils/ImGuiAssetBrowser.h>
 
-namespace AZ 
+namespace AZ
 {
     class ScriptContext;
     class ScriptDataContext;
@@ -59,7 +59,7 @@ namespace AtomSampleViewer
 
         void Activate();
         void Deactivate();
-        
+
         void SetCameraEntity(AZ::Entity* cameraEntity);
 
         void TickScript(float deltaTime);
@@ -68,7 +68,7 @@ namespace AtomSampleViewer
         void OpenScriptRunnerDialog();
 
         void RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd, int randomSeed);
-        
+
     private:
 
         void ShowScriptRunnerDialog();
@@ -140,6 +140,7 @@ namespace AtomSampleViewer
         static void Script_CapturePassTimestamp(AZ::ScriptDataContext& dc);
         static void Script_CapturePassPipelineStatistics(AZ::ScriptDataContext& dc);
         static void Script_CaptureCpuProfilingStatistics(AZ::ScriptDataContext& dc);
+        static void Script_CaptureBenchmarkMetadata(AZ::ScriptDataContext& dc);
 
         // Camera...
         static void Script_ArcBallCameraController_SetCenter(AZ::Vector3 center);
@@ -207,6 +208,7 @@ namespace AtomSampleViewer
         void OnCaptureQueryTimestampFinished(bool result, const AZStd::string& info) override;
         void OnCaptureQueryPipelineStatisticsFinished(bool result, const AZStd::string& info) override;
         void OnCaptureCpuProfilingStatisticsFinished(bool result, const AZStd::string& info) override;
+        void OnCaptureBenchmarkMetadataFinished(bool result, const AZStd::string& info) override;
 
         void AbortScripts(const AZStd::string& reason);
 
