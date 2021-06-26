@@ -20,8 +20,7 @@ PROJECT_REPOSITORY_NAME = 'o3de-atom-sampleviewer'
 PROJECT_ORGANIZATION_NAME = 'aws-lumberyard'
 ENGINE_REPOSITORY_NAME = 'o3de'
 ENGINE_ORGANIZATION_NAME = 'aws-lumberyard'
-ENGINE_BRANCH_DEFAULT = 'main'
-ENGINE_REFSPEC_DEFAULT = 'origin/main'
+ENGINE_BRANCH_DEFAULT = 'development'
 
 def pipelineProperties = []
 
@@ -32,8 +31,7 @@ def pipelineParameters = [
     booleanParam(defaultValue: false, description: 'Deletes the contents of the output directories of the AssetProcessor before building.', name: 'CLEAN_ASSETS'),
     booleanParam(defaultValue: false, description: 'Deletes the contents of the workspace and forces a complete pull.', name: 'CLEAN_WORKSPACE'),
     booleanParam(defaultValue: false, description: 'Recreates the volume used for the workspace. The volume will be created out of a snapshot taken from main.', name: 'RECREATE_VOLUME'),
-    stringParam(defaultValue: "${ENGINE_BRANCH_DEFAULT}", description: 'Sets a different branch from o3de engine repo to use or use commit id. Default is mainline', trim: true, name: 'ENGINE_BRANCH'),
-    stringParam(defaultValue: "${ENGINE_REFSPEC_DEFAULT}", description: 'Sets a refspec for the mainline branch. Default is head of main', trim: true, name: 'ENGINE_REFSPEC')
+    stringParam(defaultValue: "${ENGINE_BRANCH_DEFAULT}", description: 'Sets a different branch from o3de engine repo to use or use commit id. Default is mainline', trim: true, name: 'ENGINE_BRANCH')
 ]
 
 def palSh(cmd, lbl = '', winSlashReplacement = true) {
@@ -209,7 +207,6 @@ def getEngineRemoteConfig(remoteConfigs) {
         url: remoteConfigs.url[0]
             .replace("${PROJECT_REPOSITORY_NAME}", "${ENGINE_REPOSITORY_NAME}")
             .replace("/${PROJECT_ORGANIZATION_NAME}/", "/${ENGINE_ORGANIZATION_NAME}/"),
-        refspec: "+refs/heads/main:refs/remotes/${refSpec}",
         credentialsId: remoteConfigs.credentialsId[0]
         ]
     return engineRemoteConfigs
@@ -389,10 +386,10 @@ def Build(Map options, String platform, String type, String workspace) {
         dir("${currentDir}") {
             if(env.IS_UNIX) {
                 sh label: "Registering project ${PROJECT_REPOSITORY_NAME}",
-                script: "${pathToEngine}/scripts/o3de.sh register -p ${workspace}/${PROJECT_REPOSITORY_NAME}"
+                script: "scripts/o3de.sh register -p ${workspace}/${PROJECT_REPOSITORY_NAME}"
             } else {
                 bat label: "Registering project ${PROJECT_REPOSITORY_NAME}",
-                script: "${pathToEngine}/scripts/o3de.bat register -p ${workspace}/${PROJECT_REPOSITORY_NAME}"
+                script: "scripts/o3de.bat register -p ${workspace}/${PROJECT_REPOSITORY_NAME}".replace('/','\\')
             }
         }
     }
