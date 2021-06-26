@@ -1,14 +1,9 @@
 /*
-* All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
-* its licensors.
-*
-* For complete copyright and license terms please see the LICENSE at the root of this
-* distribution (the "License"). All use of this software is governed by the License,
-* or, if provided, by the license below or the license accompanying this file. Do not
-* remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*
-*/
+ * Copyright (c) Contributors to the Open 3D Engine Project
+ * 
+ * SPDX-License-Identifier: Apache-2.0 OR MIT
+ *
+ */
 
 #pragma once
 
@@ -52,6 +47,7 @@ namespace AtomSampleViewer
 
         static const uint32_t MaxVariants = 10;
 
+        using MeshHandleDescriptor = AZ::Render::MeshHandleDescriptor;
         using MeshHandle = AZ::Render::MeshFeatureProcessorInterface::MeshHandle;
         using PointLightHandle = AZ::Render::PointLightFeatureProcessorInterface::LightHandle;
         using DiskLightHandle = AZ::Render::DiskLightFeatureProcessorInterface::LightHandle;
@@ -83,7 +79,7 @@ namespace AtomSampleViewer
         struct Configuration
         {
             LightType m_lightType = Point;
-            AZStd::string m_modelAssetPath = "models/sphere.azmodel";
+            AZStd::string m_modelAssetPath = "objects/test/area_light_test_sphere.azmodel";
             uint32_t m_count = 1;
 
             float m_intensity = 30.0f;

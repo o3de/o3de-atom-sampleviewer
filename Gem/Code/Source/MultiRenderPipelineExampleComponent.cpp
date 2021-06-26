@@ -1,14 +1,9 @@
 /*
-* All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
-* its licensors.
-*
-* For complete copyright and license terms please see the LICENSE at the root of this
-* distribution (the "License"). All use of this software is governed by the License,
-* or, if provided, by the license below or the license accompanying this file. Do not
-* remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*
-*/
+ * Copyright (c) Contributors to the Open 3D Engine Project
+ * 
+ * SPDX-License-Identifier: Apache-2.0 OR MIT
+ *
+ */
 
 #include <AtomSampleViewerOptions.h>
 #include <MultiRenderPipelineExampleComponent.h>
@@ -49,12 +44,6 @@
 namespace AtomSampleViewer
 {
     using namespace AZ;
-
-    namespace
-    {
-        const char* BunnyModelFilePath = "objects/bunny.azmodel";
-        const char* CubeModelFilePath = "testdata/objects/cube/cube.azmodel";
-    };
 
     void MultiRenderPipelineExampleComponent::Reflect(AZ::ReflectContext* context)
     {
@@ -122,10 +111,10 @@ namespace AtomSampleViewer
             RPI::AssetUtils::TraceLevel::Assert);
         auto floorAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::ModelAsset>(CubeModelFilePath,
             RPI::AssetUtils::TraceLevel::Assert);
-        m_floorMeshHandle = meshFeatureProcessor->AcquireMesh(floorAsset, material);
+        m_floorMeshHandle = meshFeatureProcessor->AcquireMesh(Render::MeshHandleDescriptor{ floorAsset }, material);
         for (uint32_t bunnyIndex = 0; bunnyIndex < BunnyCount; bunnyIndex++)
         {
-            m_bunnyMeshHandles[bunnyIndex] = meshFeatureProcessor->AcquireMesh(bunnyAsset, material);
+            m_bunnyMeshHandles[bunnyIndex] = meshFeatureProcessor->AcquireMesh(Render::MeshHandleDescriptor{ bunnyAsset }, material);
         }
 
         const Vector3 floorNonUniformScale{ 12.f, 12.f, 0.1f };
