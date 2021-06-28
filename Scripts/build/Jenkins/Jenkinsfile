@@ -380,11 +380,9 @@ def Build(Map options, String platform, String type, String workspace) {
     else {
         dir("${currentDir}") {
             if(env.IS_UNIX) {
-                sh label: "Registering project ${PROJECT_REPOSITORY_NAME}",
-                script: "scripts/o3de.sh register -p ${workspace}/${PROJECT_REPOSITORY_NAME}"
+                palSh("scripts/o3de.sh register -p ${workspace}/${PROJECT_REPOSITORY_NAME}", "Registering project ${PROJECT_REPOSITORY_NAME}")
             } else {
-                bat label: "Registering project ${PROJECT_REPOSITORY_NAME}",
-                script: "scripts/o3de.bat register -p ${workspace}/${PROJECT_REPOSITORY_NAME}".replace('/','\\')
+                palSh("scripts/o3de.bat register -p ${workspace}/${PROJECT_REPOSITORY_NAME}", "Registering project ${PROJECT_REPOSITORY_NAME}")
             }
         }
     }
