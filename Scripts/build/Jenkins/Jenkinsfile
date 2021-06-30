@@ -379,11 +379,7 @@ def Build(Map options, String platform, String type, String workspace) {
     }
     else {
         dir("${currentDir}") {
-            if(env.IS_UNIX) {
-                palSh("scripts/o3de.sh register -p ${workspace}/${PROJECT_REPOSITORY_NAME}", "Registering project ${PROJECT_REPOSITORY_NAME}")
-            } else {
-                palSh("scripts/o3de.bat register -p ${workspace}/${PROJECT_REPOSITORY_NAME}", "Registering project ${PROJECT_REPOSITORY_NAME}")
-            }
+                palSh("scripts/o3de register --project-path ${workspace}/${PROJECT_REPOSITORY_NAME}", "Registering project ${PROJECT_REPOSITORY_NAME}")
         }
     }
     def command = "${pathToEngine}${options.BUILD_ENTRY_POINT} --platform ${platform} --type ${type}"
