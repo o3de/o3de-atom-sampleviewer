@@ -1,13 +1,9 @@
 ----------------------------------------------------------------------------------------------------
 --
--- All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
--- its licensors.
+-- Copyright (c) Contributors to the Open 3D Engine Project
+-- 
+-- SPDX-License-Identifier: Apache-2.0 OR MIT
 --
--- For complete copyright and license terms please see the LICENSE at the root of this
--- distribution (the "License"). All use of this software is governed by the License,
--- or, if provided, by the license below or the license accompanying this file. Do not
--- remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
--- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 --
 --
 ----------------------------------------------------------------------------------------------------
@@ -110,7 +106,7 @@ GenerateMaterialScreenshot('Level H', '009_Opacity_Cutout_PackedAlpha_DoubleSide
 GenerateMaterialScreenshot('Level H', '009_Opacity_Cutout_SplitAlpha_DoubleSided', {lighting="Neutral Urban", model=g_beveledCubeModel})
 GenerateMaterialScreenshot('Level G', '009_Opacity_Cutout_SplitAlpha_SingleSided', {lighting="Neutral Urban", model=g_beveledCubeModel})
 GenerateMaterialScreenshot('Level F', '009_Opacity_TintedTransparent', {lighting="Neutral Urban", model=g_beveledCubeModel})
-GenerateMaterialScreenshot('Level G', '010_AmbientOcclusion', {lighting="Palermo Sidewalk (Alt)"})
+GenerateMaterialScreenshot('Level H', '010_AmbientOcclusion', {lighting="Palermo Sidewalk (Alt)"})
 GenerateMaterialScreenshot('Level G', '010_SpecularOcclusion', {lighting="Palermo Sidewalk (Alt)"})
 GenerateMaterialScreenshot('Level G', '010_BothOcclusion', {lighting="Palermo Sidewalk (Alt)"})
 GenerateMaterialScreenshot('Level G', '011_Emissive')
@@ -144,12 +140,12 @@ GenerateMaterialScreenshot('Level H', '100_UvTiling_Roughness')
 GenerateMaterialScreenshot('Level F', '100_UvTiling_SpecularF0')
 
 GenerateMaterialScreenshot('Level E', '101_DetailMaps_LucyBaseNoDetailMaps',    {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
-GenerateMaterialScreenshot('Level F', '102_DetailMaps_All',                     {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
+GenerateMaterialScreenshot('Level H', '102_DetailMaps_All',                     {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
 GenerateMaterialScreenshot('Level F', '103_DetailMaps_BaseColor',               {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
 GenerateMaterialScreenshot('Level F', '103_DetailMaps_BaseColorWithMask',       {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
-GenerateMaterialScreenshot('Level F', '104_DetailMaps_Normal',                  {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
-GenerateMaterialScreenshot('Level F', '104_DetailMaps_NormalWithMask',          {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
-GenerateMaterialScreenshot('Level F', '105_DetailMaps_BlendMaskUsingDetailUVs', {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
+GenerateMaterialScreenshot('Level H', '104_DetailMaps_Normal',                  {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
+GenerateMaterialScreenshot('Level H', '104_DetailMaps_NormalWithMask',          {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
+GenerateMaterialScreenshot('Level H', '105_DetailMaps_BlendMaskUsingDetailUVs', {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
 
 ----------------------------------------------------------------------
 -- StandardMultilayerPBR Materials...
@@ -161,7 +157,7 @@ Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 GenerateMaterialScreenshot('Level I', '001_ManyFeatures', {model=g_cubeModel, cameraHeading=-125.0, cameraPitch=-16.0, cameraZ=0.12})
 GenerateMaterialScreenshot('Level I', '001_ManyFeatures_Layer2Off', {model=g_cubeModel, cameraHeading=-125.0, cameraPitch=-16.0, cameraZ=0.12})
 GenerateMaterialScreenshot('Level I', '001_ManyFeatures_Layer3Off', {model=g_cubeModel, cameraHeading=-125.0, cameraPitch=-16.0, cameraZ=0.12})
-GenerateMaterialScreenshot('Level I', '002_ParallaxPdo', {model=g_cubeModel, cameraHeading=15.0, cameraPitch=28.0, lighting="Goegap (Alt)"})
+GenerateMaterialScreenshot('Level J', '002_ParallaxPdo', {model=g_cubeModel, cameraHeading=15.0, cameraPitch=28.0, lighting="Goegap (Alt)"})
 GenerateMaterialScreenshot('Level G', '003_Debug_BlendMask', {model=g_cubeModel})
 GenerateMaterialScreenshot('Level G', '003_Debug_Displacement', {model=g_cubeModel})
 GenerateMaterialScreenshot('Level G', '003_Debug_BlendWeights', {model=g_cubeModel})
