@@ -1,14 +1,9 @@
 /*
-* All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
-* its licensors.
-*
-* For complete copyright and license terms please see the LICENSE at the root of this
-* distribution (the "License"). All use of this software is governed by the License,
-* or, if provided, by the license below or the license accompanying this file. Do not
-* remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*
-*/
+ * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ * 
+ * SPDX-License-Identifier: Apache-2.0 OR MIT
+ *
+ */
 
 #include <DiffuseGIExampleComponent.h>
 
@@ -241,7 +236,7 @@ namespace AtomSampleViewer
             transform.SetTranslation(-5.0f, 0.0f, 0.0f);
             transform *= AZ::Transform::CreateRotationY(AZ::Constants::HalfPi);
             AZ::Vector3 nonUniformScale(10.05f, 10.05f, 1.0f);
-            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::LeftWall)] = GetMeshFeatureProcessor()->AcquireMesh(m_planeModelAsset, materialMap);
+            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::LeftWall)] = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_planeModelAsset }, materialMap);
             GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::LeftWall)], transform, nonUniformScale);
         }
         
@@ -256,7 +251,7 @@ namespace AtomSampleViewer
             transform.SetTranslation(5.0f, 0.0f, 0.0f);
             transform *= AZ::Transform::CreateRotationY(-AZ::Constants::HalfPi);
             AZ::Vector3 nonUniformScale(10.05f, 10.05f, 1.0f);
-            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::RightWall)] = GetMeshFeatureProcessor()->AcquireMesh(m_planeModelAsset, materialMap);
+            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::RightWall)] = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_planeModelAsset }, materialMap);
             GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::RightWall)], transform, nonUniformScale);
         }
         
@@ -271,7 +266,7 @@ namespace AtomSampleViewer
             transform.SetTranslation(0.0f, 5.0f, 0.0f);
             transform *= AZ::Transform::CreateRotationX(AZ::Constants::HalfPi);
             AZ::Vector3 nonUniformScale(10.05f, 10.05f, 1.0f);
-            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::BackWall)] = GetMeshFeatureProcessor()->AcquireMesh(m_planeModelAsset, materialMap);
+            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::BackWall)] = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_planeModelAsset }, materialMap);
             GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::BackWall)], transform, nonUniformScale);
         }
         
@@ -286,7 +281,7 @@ namespace AtomSampleViewer
             transform.SetTranslation(0.0f, 0.0f, 5.0f);
             transform *= AZ::Transform::CreateRotationX(AZ::Constants::Pi);
             AZ::Vector3 nonUniformScale(10.05f, 10.05f, 1.0f);
-            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Ceiling)] = GetMeshFeatureProcessor()->AcquireMesh(m_planeModelAsset, materialMap);
+            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Ceiling)] = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_planeModelAsset }, materialMap);
             GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Ceiling)], transform, nonUniformScale);
         }
         
@@ -300,7 +295,7 @@ namespace AtomSampleViewer
             AZ::Transform transform = AZ::Transform::CreateIdentity();
             transform.SetTranslation(0.0f, 0.0f, -5.0f);
             AZ::Vector3 nonUniformScale(10.05f, 10.05f, 1.0f);
-            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Floor)] = GetMeshFeatureProcessor()->AcquireMesh(m_planeModelAsset, materialMap);
+            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Floor)] = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_planeModelAsset }, materialMap);
             GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Floor)], transform, nonUniformScale);
         }
         
@@ -314,7 +309,7 @@ namespace AtomSampleViewer
             transform.SetTranslation(-2.0f, 0.0f, -2.0f);
             transform *= AZ::Transform::CreateRotationZ(AZ::Constants::HalfPi * 0.2f);
             AZ::Vector3 nonUniformScale(3.0f, 3.0f, 6.0f);
-            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::LargeBox)] = GetMeshFeatureProcessor()->AcquireMesh(m_cubeModelAsset, materialMap);
+            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::LargeBox)] = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_cubeModelAsset }, materialMap);
             GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::LargeBox)], transform, nonUniformScale);
         }
         
@@ -328,7 +323,7 @@ namespace AtomSampleViewer
             transform.SetTranslation(2.0f, -1.5f, -3.5f);
             transform *= AZ::Transform::CreateRotationZ(-AZ::Constants::HalfPi * 0.2f);
             AZ::Vector3 nonUniformScale(3.0f, 3.0f, 3.0f);
-            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::SmallBox)] = GetMeshFeatureProcessor()->AcquireMesh(m_cubeModelAsset, materialMap);
+            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::SmallBox)] = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_cubeModelAsset }, materialMap);
             GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::SmallBox)], transform, nonUniformScale);
         }
 
@@ -369,6 +364,9 @@ namespace AtomSampleViewer
 
             m_normalBias = 0.1f;
             diffuseProbeGridFeatureProcessor->SetNormalBias(m_diffuseProbeGrid, m_normalBias);
+
+            AZ::Render::DiffuseGlobalIlluminationFeatureProcessorInterface* diffuseGlobalIlluminationFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DiffuseGlobalIlluminationFeatureProcessorInterface>();
+            diffuseGlobalIlluminationFeatureProcessor->SetQualityLevel(AZ::Render::DiffuseGlobalIlluminationQualityLevel::Medium);
         }
 
         // camera
@@ -384,17 +382,17 @@ namespace AtomSampleViewer
         m_meshHandles.resize(aznumeric_cast<uint32_t>(SponzaMeshes::Count));
 
         AZ::Transform transform = AZ::Transform::CreateIdentity();
-        m_meshHandles[aznumeric_cast<uint32_t>(SponzaMeshes::Inside)] = GetMeshFeatureProcessor()->AcquireMesh(m_sponzaModelAsset);
+        m_meshHandles[aznumeric_cast<uint32_t>(SponzaMeshes::Inside)] = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_sponzaModelAsset });
         GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(SponzaMeshes::Inside)], transform);
         
         m_directionalLightPitch = AZ::DegToRad(-45.0f);
-        m_directionalLightYaw = AZ::DegToRad(180.0f);
+        m_directionalLightYaw = AZ::DegToRad(62.0f);
         m_directionalLightColor = AZ::Color(0.92f, 0.78f, 0.35f, 1.0f);
-        m_directionalLightIntensity = 20.0f;
+        m_directionalLightIntensity = 30.0f;
 
-        m_pointLightPos = AZ::Vector3(-3.75f, -4.5f, 1.5f);
-        m_pointLightColor = AZ::Color(1.0f, 1.0f, 1.0f, 1.0f);
-        m_pointLightIntensity = 20.0f;
+        m_pointLightPos = AZ::Vector3(10.0f, -4.25f, 1.5f);
+        m_pointLightColor = AZ::Color(1.0f, 0.0f, 0.0f, 1.0f);
+        m_pointLightIntensity = 10.0f;
 
         m_ambientMultiplier = 1.0f;
 
@@ -413,7 +411,7 @@ namespace AtomSampleViewer
             directionalLightFeatureProcessor->SetShadowBoundaryWidth(m_directionalLightHandle, 0.03f);
             directionalLightFeatureProcessor->SetPredictionSampleCount(m_directionalLightHandle, 4);
             directionalLightFeatureProcessor->SetFilteringSampleCount(m_directionalLightHandle, 16);
-            directionalLightFeatureProcessor->SetGroundHeight(m_directionalLightHandle, 0.f);
+            directionalLightFeatureProcessor->SetGroundHeight(m_directionalLightHandle, 0.0f);
         }
 
         // point light
@@ -435,7 +433,7 @@ namespace AtomSampleViewer
         
             m_origin.Set(1.4f, -1.25f, 5.0f);
             transform.SetTranslation(m_origin);
-            m_diffuseProbeGrid = diffuseProbeGridFeatureProcessor->AddProbeGrid(transform, AZ::Vector3(165.0f, 95.0f, 45.0f), AZ::Vector3(4.0f, 4.0f, 5.0f));
+            m_diffuseProbeGrid = diffuseProbeGridFeatureProcessor->AddProbeGrid(transform, AZ::Vector3(35.0f, 45.0f, 25.0f), AZ::Vector3(3.0f, 3.0f, 4.0f));
             diffuseProbeGridFeatureProcessor->SetAmbientMultiplier(m_diffuseProbeGrid, m_ambientMultiplier);
 
             m_viewBias = 0.55f;
@@ -443,6 +441,9 @@ namespace AtomSampleViewer
 
             m_normalBias = 0.4f;
             diffuseProbeGridFeatureProcessor->SetNormalBias(m_diffuseProbeGrid, m_normalBias);
+
+            AZ::Render::DiffuseGlobalIlluminationFeatureProcessorInterface* diffuseGlobalIlluminationFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DiffuseGlobalIlluminationFeatureProcessorInterface>();
+            diffuseGlobalIlluminationFeatureProcessor->SetQualityLevel(AZ::Render::DiffuseGlobalIlluminationQualityLevel::Medium);
         }
 
         // camera

@@ -1,14 +1,9 @@
 /*
-* All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
-* its licensors.
-*
-* For complete copyright and license terms please see the LICENSE at the root of this
-* distribution (the "License"). All use of this software is governed by the License,
-* or, if provided, by the license below or the license accompanying this file. Do not
-* remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*
-*/
+ * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ * 
+ * SPDX-License-Identifier: Apache-2.0 OR MIT
+ *
+ */
 
 #include <AtomSampleViewerOptions.h>
 #include <MultiSceneExampleComponent.h>
@@ -22,6 +17,8 @@
 #include <Atom/RPI.Public/RPISystemInterface.h>
 #include <Atom/RPI.Reflect/Asset/AssetUtils.h>
 #include <Atom/RPI.Reflect/Model/ModelAsset.h>
+
+#include <Automation/ScriptRunnerBus.h>
 
 #include <AzCore/Math/MatrixUtils.h>
 
@@ -39,6 +36,8 @@
 
 namespace AtomSampleViewer
 {
+    using namespace AZ;
+
     //////////////////////////////////////////////////////////////////////////
     // SecondWindowedScene
 
@@ -154,8 +153,12 @@ namespace AtomSampleViewer
         const auto LoadMesh = [this](const char* modelPath) -> Render::MeshFeatureProcessorInterface::MeshHandle
         {
             AZ_Assert(m_meshFeatureProcessor, "Cannot find mesh feature processor on scene");
-            auto meshAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>(modelPath, RPI::AssetUtils::TraceLevel::Assert);
-            Render::MeshFeatureProcessorInterface::MeshHandle meshHandle = m_meshFeatureProcessor->AcquireMesh(meshAsset);
+
+            auto meshAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>(modelPath, RPI::AssetUtils::TraceLevel::Assert);            
+            auto materialAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::MaterialAsset>(DefaultPbrMaterialPath,
+                RPI::AssetUtils::TraceLevel::Assert);
+            auto material = AZ::RPI::Material::FindOrCreate(materialAsset);
+            Render::MeshFeatureProcessorInterface::MeshHandle meshHandle = m_meshFeatureProcessor->AcquireMesh(Render::MeshHandleDescriptor{ meshAsset }, material);
 
             return meshHandle;
         };
@@ -164,7 +167,7 @@ namespace AtomSampleViewer
         {
             for (uint32_t i = 0u; i < ShaderBallCount; i++)
             {
-                m_shaderBallMeshHandles.push_back(LoadMesh("objects/shaderball_simple.azmodel"));
+                m_shaderBallMeshHandles.push_back(LoadMesh(ShaderBallModelFilePath));
                 auto updateShaderBallTransform = [this, i](Data::Instance<RPI::Model> model)
                 {
                     const Aabb& aabb = model->GetAabb();
@@ -192,7 +195,7 @@ namespace AtomSampleViewer
             const Vector3 nonUniformScale{ 24.f, 24.f, 1.0f };
             const Vector3 translation{ 0.f, 0.f, 0.0f };
             const auto transform = Transform::CreateTranslation(translation);
-            m_floorMeshHandle = LoadMesh("testdata/objects/cube/cube.azmodel");
+            m_floorMeshHandle = LoadMesh(CubeModelFilePath);
             m_meshFeatureProcessor->SetTransform(m_floorMeshHandle, transform, nonUniformScale);
         }
 
@@ -427,15 +430,38 @@ namespace AtomSampleViewer
         using namespace AZ;
 
         // Setup primary camera controls
-        Debug::CameraControllerRequestBus::Event(GetCameraEntityId(), &Debug::CameraControllerRequestBus::Events::Enable,
-            azrtti_typeid<Debug::NoClipControllerComponent>());
+        Debug::CameraControllerRequestBus::Event(
+            GetCameraEntityId(), &Debug::CameraControllerRequestBus::Events::Enable, azrtti_typeid<Debug::NoClipControllerComponent>());
+        
+        m_defaultIbl.PreloadAssets();
 
+        // preload assets
+        AZStd::vector<AssetCollectionAsyncLoader::AssetToLoadInfo> assetList = {
+            { DefaultPbrMaterialPath, azrtti_typeid<RPI::MaterialAsset>() },
+            { BunnyModelFilePath, azrtti_typeid<RPI::ModelAsset>() },
+            { CubeModelFilePath, azrtti_typeid<RPI::ModelAsset>() },
+            { ShaderBallModelFilePath, azrtti_typeid<RPI::ModelAsset>() }
+        };
+
+        PreloadAssets(assetList);
+
+        ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::PauseScriptWithTimeout, 120.0f);
+    }
+        
+    void MultiSceneExampleComponent::OnAllAssetsReadyActivate()
+    {
+        using namespace AZ;
         RPI::ScenePtr scene = RPI::RPISystemInterface::Get()->GetDefaultScene();
 
         // Setup Main Mesh Entity
         {
-            auto bunnyAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>("objects/bunny.azmodel", RPI::AssetUtils::TraceLevel::Assert);
-            m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(bunnyAsset);
+            auto materialAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::MaterialAsset>(DefaultPbrMaterialPath,
+                RPI::AssetUtils::TraceLevel::Assert);
+            auto material = AZ::RPI::Material::FindOrCreate(materialAsset);
+            auto bunnyAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::ModelAsset>(BunnyModelFilePath,
+                RPI::AssetUtils::TraceLevel::Assert);
+            m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(Render::MeshHandleDescriptor{ bunnyAsset }, material);
+
             GetMeshFeatureProcessor()->SetTransform(m_meshHandle, Transform::CreateRotationZ(Constants::Pi));
         }
 
@@ -448,7 +474,8 @@ namespace AtomSampleViewer
         {
             OpenSecondSceneWindow();
         }
-
+        
+        ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::ResumeScript);
         TickBus::Handler::BusConnect();
     }
 

@@ -1,14 +1,9 @@
 /*
-* All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
-* its licensors.
-*
-* For complete copyright and license terms please see the LICENSE at the root of this
-* distribution (the "License"). All use of this software is governed by the License,
-* or, if provided, by the license below or the license accompanying this file. Do not
-* remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
-* WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-*
-*/
+ * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ * 
+ * SPDX-License-Identifier: Apache-2.0 OR MIT
+ *
+ */
 
 #include <RHI/IndirectRenderingExampleComponent.h>
 #include <Utils/Utils.h>
@@ -42,7 +37,7 @@ namespace AtomSampleViewer
 
     float GetRandomFloat(float min, float max)
     {
-        float scale = static_cast<float>(rand()) / RAND_MAX;
+        float scale = aznumeric_cast<float>(rand()) / aznumeric_cast<float>(RAND_MAX);
         float range = max - min;
         return scale * range + min;
     }
@@ -1106,23 +1101,19 @@ namespace AtomSampleViewer
 
     ///////////////////////////////////////////////////////////////////////
     // ShaderReloadNotificationBus overrides
-    void IndirectRenderingExampleComponent::OnShaderVariantReinitialized(
-        const AZ::RPI::Shader& shader, const AZ::RPI::ShaderVariantId& shaderVariantId,
-        AZ::RPI::ShaderVariantStableId shaderVariantStableId)
-    {
-        AZ_UNUSED(shader);
-        AZ_UNUSED(shaderVariantId);
 
+    void IndirectRenderingExampleComponent::OnShaderVariantReinitialized(const AZ::RPI::ShaderVariant& shaderVariant)
+    {
         //AZ_TracePrintf(LogName, "Got variant %s\n", shaderVariantAsset.GetHint().c_str());
         const AZ::Data::AssetId* shaderAssetId = AZ::RPI::ShaderReloadNotificationBus::GetCurrentBusId();
         if (*shaderAssetId == m_indirectDrawShader->GetAsset().GetId())
         {
-            m_indirectDrawShaderVariantStableId = shaderVariantStableId;
+            m_indirectDrawShaderVariantStableId = shaderVariant.GetStableId();
             m_imguiProgressList.RemoveItem(IndirectDrawVariantLabel);
         }
         else if (*shaderAssetId == m_indirectDispatchShader->GetAsset().GetId())
         {
-            m_indirectDispatchShaderVariantStableId = shaderVariantStableId;
+            m_indirectDispatchShaderVariantStableId = shaderVariant.GetStableId();
             m_imguiProgressList.RemoveItem(IndirectDispatchVariantLabel);
         }
 
