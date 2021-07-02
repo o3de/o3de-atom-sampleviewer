@@ -1,12 +1,8 @@
 #
-# All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
-# its licensors.
+# Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
+# 
+# SPDX-License-Identifier: Apache-2.0 OR MIT
 #
-# For complete copyright and license terms please see the LICENSE at the root of this
-# distribution (the "License"). All use of this software is governed by the License,
-# or, if provided, by the license below or the license accompanying this file. Do not
-# remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 #
 
 
@@ -41,12 +37,10 @@ if (NOT LY_MONOLITHIC_GAME)
 
         add_subdirectory(PythonTests)
 
-        ly_add_target_dependencies(
-            TARGETS 
-                AtomSampleViewerStandalone
-            DEPENDENCIES_FILES 
-                ../Gem/Code/runtime_dependencies.cmake
-        )
+        ly_enable_gems(GEM_FILE ../Gem/Code/enabled_gems.cmake
+            TARGETS AtomSampleViewerStandalone
+            VARIANTS Clients)
+
 
         # Adds the AtomSampleViewerStandalone target as a C preprocessor define so that it can be used as a Settings Registry
         # specialization in order to look up the generated .setreg which contains the dependencies

@@ -1,13 +1,9 @@
 ----------------------------------------------------------------------------------------------------
 --
--- All or portions of this file Copyright (c) Amazon.com, Inc. or its affiliates or
--- its licensors.
+-- Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
+-- 
+-- SPDX-License-Identifier: Apache-2.0 OR MIT
 --
--- For complete copyright and license terms please see the LICENSE at the root of this
--- distribution (the "License"). All use of this software is governed by the License,
--- or, if provided, by the license below or the license accompanying this file. Do not
--- remove or modify any license notices. This file is distributed on an "AS IS" BASIS,
--- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 --
 --
 ----------------------------------------------------------------------------------------------------
@@ -22,13 +18,37 @@ ResizeViewport(500, 500)
 
 SelectImageComparisonToleranceLevel("Level E")
 
+function SetColorRed()
+    AssetTracking_Start()
+    AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.material")
+    SetImguiValue('ColorA = Red', true)
+    AssetTracking_IdleUntilExpectedAssetsFinish(5)
+    IdleSeconds(0.25) -- Idle for a bit to give time for the asset to reload
+end
+
+function SetBlendingOn()
+    AssetTracking_Start()
+    SetImguiValue('Blending On', true)
+    AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.material")
+    AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.materialtype")
+    AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.shader")
+    AssetTracking_IdleUntilExpectedAssetsFinish(60)
+    IdleSeconds(1) -- Idle for a bit to give time for the assets to reload
+end
+
+function SetBlendingOff()
+    AssetTracking_Start()
+    SetImguiValue('Blending Off', true)
+    AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.material")
+    AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.materialtype")
+    AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.shader")
+    AssetTracking_IdleUntilExpectedAssetsFinish(60)
+    IdleSeconds(1) -- Idle for a bit to give time for the assets to reload
+end
+
 CaptureScreenshot(g_screenshotOutputFolder .. '/01_Default.png')
 
-AssetTracking_Start()
-AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.material")
-SetImguiValue('ColorA = Red', true)
-AssetTracking_IdleUntilExpectedAssetsFinish(5)
-IdleSeconds(0.25) -- Idle for a bit to give time for the asset to reload
+SetColorRed()
 CaptureScreenshot(g_screenshotOutputFolder .. '/02_Red.png')
 
 AssetTracking_Start()
@@ -62,13 +82,7 @@ AssetTracking_IdleUntilExpectedAssetsFinish(60)
 IdleSeconds(1) -- Idle for a bit to give time for the assets to reload
 CaptureScreenshot(g_screenshotOutputFolder .. '/06_VerticalPattern.png')
 
-AssetTracking_Start()
-SetImguiValue('Blending On', true)
-AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.material")
-AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.materialtype")
-AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.shader")
-AssetTracking_IdleUntilExpectedAssetsFinish(60)
-IdleSeconds(1) -- Idle for a bit to give time for the assets to reload
+SetBlendingOn()
 CaptureScreenshot(g_screenshotOutputFolder .. '/07_BlendingOn.png')
 
 -- This will switch to showing the "Shader Variant: Fully Baked" message
@@ -105,13 +119,7 @@ CaptureScreenshot(g_screenshotOutputFolder .. '/11_Variants_None.png')
 -- Now, changing the .shader file will force the shader to reload and will not find
 -- any baked variants, since we switched to "None" above, and so this screenshot will 
 -- switch back to showing the "Shader Variant: Root" message.
-AssetTracking_Start()
-SetImguiValue('Blending Off', true)
-AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.material")
-AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.materialtype")
-AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.shader")
-AssetTracking_IdleUntilExpectedAssetsFinish(60)
-IdleSeconds(1) -- Idle for a bit to give time for the assets to reload
+SetBlendingOff()
 --[GFX TODO] This test is consistently failing due to an Asset Processor bug. Re-enable this test once that is fixed.
 --CaptureScreenshot(g_screenshotOutputFolder .. '/12_Variants_None_AfterUpdatingShader.png')
 
@@ -139,3 +147,10 @@ AssetTracking_IdleUntilExpectedAssetsFinish(60)
 -- choice ... we'll see)
 IdleSeconds(0.25) -- Idle for a bit to give time for the assets to reload
 CaptureScreenshot(g_screenshotOutputFolder .. '/14_HorizontalPattern.png')
+
+-- Test a specific scenario that was failing, where color changes fail to reload after making a shader change.
+SetBlendingOn()
+SetBlendingOff()
+SetColorRed()
+CaptureScreenshot(g_screenshotOutputFolder .. '/15_Red_AfterShaderReload.png')
+

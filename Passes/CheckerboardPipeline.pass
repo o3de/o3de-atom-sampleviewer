@@ -835,6 +835,13 @@
                                 "Pass": "ImGuiPass",
                                 "Attachment": "InputOutput"
                             }
+                        },
+                        {
+                            "LocalSlot": "DepthInputOutput",
+                            "AttachmentRef": {
+                                "Pass": "MSAAResolveDepthPass",
+                                "Attachment": "Output"
+                            }
                         }
                     ],
                     "PassData": {
