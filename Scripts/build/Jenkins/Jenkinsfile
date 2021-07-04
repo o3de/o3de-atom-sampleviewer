@@ -15,7 +15,7 @@ PROJECT_REPOSITORY_NAME = 'o3de-atom-sampleviewer'
 PROJECT_ORGANIZATION_NAME = 'aws-lumberyard'
 ENGINE_REPOSITORY_NAME = 'o3de'
 ENGINE_ORGANIZATION_NAME = 'aws-lumberyard'
-ENGINE_BRANCH_DEFAULT = 'stabilization/2106'
+ENGINE_BRANCH_DEFAULT = "${env.BRANCH_DEFAULT}" ?: 'development'
 
 def pipelineProperties = []
 
@@ -184,18 +184,6 @@ def GetEnvStringList(Map envVarMap) {
     return strList
 }
 
-def GetLfsConfig(cmd, lbl = '') {
-    if (env.IS_UNIX) {
-        sh label: lbl,
-           script: cmd,
-           returnStdout: true
-    } else {
-        powershell label: lbl, // Powershell is used due to bat output returning the prompt as well
-           script: cmd,
-           returnStdout: true
-    }
-}
-
 def getEngineRemoteConfig(remoteConfigs) {
     def refSpec = "${params.ENGINE_REFSPEC}" ?: "${ENGINE_REFSPEC_DEFAULT}"
     def engineRemoteConfigs = [name: "${ENGINE_REPOSITORY_NAME}",
@@ -278,7 +266,7 @@ def CheckoutRepo(boolean disableSubmodules = false) {
                     userRemoteConfigs: [projectAndUrl.value]
                 ]
                 if(fileExists(".lfsconfig")) {
-                    def localLfsUrl = GetLfsConfig("git config -f .lfsconfig --get lfs.url", "Getting LFS URL").replace("https://","").trim() // Read the lfs file instead of relying on env var
+                    def localLfsUrl = sh(script: "git config -f .lfsconfig --get lfs.url", label: "Getting LFS URL", returnStdout: true).replace("https://","").trim() // Read the lfs file instead of relying on env var
                     withCredentials([usernamePassword(credentialsId: "${env.GITHUB_USER}", passwordVariable: 'accesstoken', usernameVariable: 'username')]) {
                         palSh("git config -f .lfsconfig lfs.url https://${username}:${accesstoken}@${localLfsUrl}", 'Set credentials', false)
                     }
@@ -373,24 +361,22 @@ def Build(Map options, String platform, String type, String workspace) {
     // In both cases, the scripts are in the engine, is just what the current dir is and how we get to the scripts
     def currentDir = "${workspace}/${ENGINE_REPOSITORY_NAME}"
     def pathToEngine = ""
+    def scriptExt = ""
+    if (env.IS_UNIX) {
+        scriptExt = ".sh"
+    }
     if (env.EXECUTE_FROM_PROJECT?.toBoolean()) {
         currentDir = "${workspace}/${PROJECT_REPOSITORY_NAME}"
         pathToEngine = "../${ENGINE_REPOSITORY_NAME}/"
     }
     else {
         dir("${currentDir}") {
-                palSh("scripts/o3de.sh register --project-path ${workspace}/${PROJECT_REPOSITORY_NAME}", "Registering project ${PROJECT_REPOSITORY_NAME}") // o3de.sh will work under Windows in a Cygwin environment
+            palSh("scripts/o3de${scriptExt} register -p ${workspace}/${PROJECT_REPOSITORY_NAME}", "Registering project ${PROJECT_REPOSITORY_NAME}") // o3de.sh will work under Windows in a Cygwin environment
         }
     }
     def command = "${pathToEngine}${options.BUILD_ENTRY_POINT} --platform ${platform} --type ${type}"
     dir("${currentDir}") {
-        if (env.IS_UNIX) {
-            sh label: "Running ${platform} ${type}",
-               script: "${pathToEngine}${options.PYTHON_DIR}/python.sh -u ${command}"
-        } else {
-            bat label: "Running ${platform} ${type}",
-                script: "${pathToEngine}${options.PYTHON_DIR}/python.cmd -u ${command}".replace('/','\\')
-        }
+        palSh("${pathToEngine}${options.PYTHON_DIR}/python${scriptExt} -u ${command}", "Running ${platform} ${type}")
     }
 }
 
