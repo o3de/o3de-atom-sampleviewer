@@ -31,6 +31,26 @@
                     ]
                 },
                 {
+                    "Name": "ShadowPass",
+                    "TemplateName": "ShadowParentTemplate",
+                    "Connections": [
+                        {
+                            "LocalSlot": "SkinnedMeshes", 
+                            "AttachmentRef": {
+                                "Pass": "SkinningPass",
+                                "Attachment": "SkinnedMeshOutputStream"
+                            }
+                        },
+                        {
+                            "LocalSlot": "SwapChainOutput",
+                            "AttachmentRef": {
+                                "Pass": "Parent",
+                                "Attachment": "SwapChainOutput"
+                            }
+                        }
+                    ]
+                },   
+                {
                     "Name": "DepthPass",
                     "TemplateName": "DepthPassTemplate",
                     "PassData": {
@@ -102,24 +122,6 @@
                     ]
                 },
                 {
-                    "Name": "ProjectedShadowmapsPass",
-                    "TemplateName": "ProjectedShadowmapsTemplate",
-                    "PassData": {
-                        "$type": "RasterPassData",
-                        "DrawListTag": "shadow",
-                        "PipelineViewTag": "ProjectedShadowView"
-                    },
-                    "Connections": [
-                        {
-                            "LocalSlot": "SkinnedMeshes",
-                            "AttachmentRef": {
-                                "Pass": "SkinningPass",
-                                "Attachment": "SkinnedMeshOutputStream"
-                            }
-                        }
-                    ]
-                },
-                {
                     "Name": "ForwardPass",
                     "TemplateName": "ForwardPassTemplate",
                     "Connections": [
@@ -143,7 +145,35 @@
                                 "Pass": "LightCullingRemapPass",
                                 "Attachment": "LightListRemapped"
                             }
-                        }
+                        },
+                        {
+                            "LocalSlot": "DirectionalLightShadowmap",
+                            "AttachmentRef": {
+                                "Pass": "ShadowPass",
+                                "Attachment": "DirectionalShadowmap"
+                            } 
+                        },
+                        {
+                            "LocalSlot": "ExponentialShadowmapDirectional",
+                            "AttachmentRef": {
+                                "Pass": "ShadowPass",
+                                "Attachment": "DirectionalESM"
+                            }
+                        }, 
+                        {
+                            "LocalSlot": "ExponentialShadowmapProjected",
+                            "AttachmentRef": {
+                                "Pass": "ShadowPass",
+                                "Attachment": "ProjectedESM"
+                            }
+                        },                     
+                        {
+                            "LocalSlot": "ProjectedShadowmap",
+                            "AttachmentRef": {
+                                "Pass": "ShadowPass",
+                                "Attachment": "ProjectedShadowmap"
+                            } 
+                        }  
                     ],
                     "PassData": {
                         "$type": "RasterPassData",
@@ -190,7 +220,7 @@
                 },
                 {
                     "Name": "ReflectionsPass",
-                    "TemplateName": "ReflectionsParentPassTemplate",
+                    "TemplateName": "ReflectionsParentPass_nomsaaTemplate",
                     "Enabled": true,
                     "Connections": [
                         {

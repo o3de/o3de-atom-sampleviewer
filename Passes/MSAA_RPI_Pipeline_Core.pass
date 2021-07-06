@@ -12,73 +12,63 @@
                     "SlotType": "Input"
                 },
                 {
+                    "Name": "SkinnedMeshes",
+                    "SlotType": "Input"
+                },                  
+                {
                     "Name": "SwapChainOutput",
                     "SlotType": "InputOutput"
                 }
             ],
-            "PassRequests": [
+            "PassRequests": [ 
                 {
-                    "Name": "LightCullingTilePrepareMSAAPass",
-                    "TemplateName": "LightCullingTilePrepareMSAATemplate",
-                    "Connections": [
+                    "Name": "LightCullingPass",
+                    "TemplateName": "LightCullingParentTemplate",
+                    "Connections": [ 
                         {
-                            "LocalSlot": "Depth",
+                            "LocalSlot": "SkinnedMeshes",
+                            "AttachmentRef": {
+                                "Pass": "Parent",
+                                "Attachment": "SkinnedMeshes"
+                            }
+ 
+                        },
+                        {
+                            "LocalSlot": "DepthMSAA",
                             "AttachmentRef": {
                                 "Pass": "Parent",
                                 "Attachment": "Depth"
                             }
-                        }
-                    ]
-                },
-                {
-                    "Name": "LightCullingPass",
-                    "TemplateName": "LightCullingTemplate",
-                    "Connections": [
+                        },
                         {
-                            "LocalSlot": "TileLightData",
+                            "LocalSlot": "SwapChainOutput",
                             "AttachmentRef": {
-                                "Pass": "LightCullingTilePrepareMSAAPass",
-                                "Attachment": "TileLightData"
+                                "Pass": "Parent",
+                                "Attachment": "SwapChainOutput"
                             }
                         }
                     ]
                 },
                 {
-                    "Name": "LightCullingRemapPass",
-                    "TemplateName": "LightCullingRemapTemplate",
+                    "Name": "ShadowPass",
+                    "TemplateName": "ShadowParentTemplate",
                     "Connections": [
                         {
-                            "LocalSlot": "TileLightData",
+                            "LocalSlot": "SkinnedMeshes",
                             "AttachmentRef": {
-                                "Pass": "LightCullingTilePrepareMSAAPass",
-                                "Attachment": "TileLightData"
+                                "Pass": "Parent",
+                                "Attachment": "SkinnedMeshes"
                             }
                         },
                         {
-                            "LocalSlot": "LightCount",
+                            "LocalSlot": "SwapChainOutput",
                             "AttachmentRef": {
-                                "Pass": "LightCullingPass",
-                                "Attachment": "LightCount"
+                                "Pass": "Parent",
+                                "Attachment": "SwapChainOutput"
                             }
-                        },
-                        {
-                            "LocalSlot": "LightList",
-                            "AttachmentRef": {
-                                "Pass": "LightCullingPass",
-                                "Attachment": "LightList"
-                            }
-                        }
+                        }                         
                     ]
-                },
-                {
-                    "Name": "ProjectedShadowmapsPass",
-                    "TemplateName": "ProjectedShadowmapsTemplate",
-                    "PassData": {
-                        "$type": "RasterPassData",
-                        "DrawListTag": "shadow",
-                        "PipelineViewTag": "ProjectedShadowView"
-                    }
-                },
+                },               
                 {
                     "Name": "ForwardMSAAPass",
                     "TemplateName": "ForwardMSAAPassTemplate",
@@ -93,17 +83,46 @@
                         {
                             "LocalSlot": "TileLightData",
                             "AttachmentRef": {
-                                "Pass": "LightCullingTilePrepareMSAAPass",
+                                "Pass": "LightCullingPass",
                                 "Attachment": "TileLightData"
-                            }
+                            } 
                         },
                         {
                             "LocalSlot": "LightListRemapped",
                             "AttachmentRef": {
-                                "Pass": "LightCullingRemapPass",
+                                "Pass": "LightCullingPass",
                                 "Attachment": "LightListRemapped"
                             }
                         }
+			,
+                        {
+                            "LocalSlot": "DirectionalLightShadowmap",
+                            "AttachmentRef": {
+                                "Pass": "ShadowPass",
+                                "Attachment": "DirectionalShadowmap"
+                            } 
+                        },
+                        {
+                            "LocalSlot": "ExponentialShadowmapDirectional",
+                            "AttachmentRef": {
+                                "Pass": "ShadowPass",
+                                "Attachment": "DirectionalESM"
+                            }
+                        }, 
+                        {
+                            "LocalSlot": "ExponentialShadowmapProjected",
+                            "AttachmentRef": {
+                                "Pass": "ShadowPass",
+                                "Attachment": "ProjectedESM"
+                            }
+                        },                     
+                        {
+                            "LocalSlot": "ProjectedShadowmap",
+                            "AttachmentRef": {
+                                "Pass": "ShadowPass",
+                                "Attachment": "ProjectedShadowmap"
+                            } 
+                        }                      
                     ],
                     "PassData": {
                         "$type": "RasterPassData",
