@@ -315,7 +315,7 @@ namespace AtomSampleViewer
     {
         AZStd::string filePath = m_imguiFrameCaptureSaver.GetSaveFilePath();
         AZStd::string slot = "Output";
-        AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachment, m_capturePassHierarchy, slot, filePath);
+        AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachment, m_capturePassHierarchy, slot, filePath, true);
     }
 
     RPI::ColorSpaceId TonemappingExampleComponent::GetColorSpaceIdForIndex(uint8_t colorSpaceIndex) const
