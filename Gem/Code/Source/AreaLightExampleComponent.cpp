@@ -815,7 +815,7 @@ namespace AtomSampleViewer
             case Quad:
             {
                 AZ::Transform transform = AZ::Transform::CreateIdentity();
-                transform.SetRotation(AZ::ConvertEulerRadiansToQuaternion(AZ::Vector3(m_config.m_rotations[0], -m_config.m_rotations[1], m_config.m_rotations[2])));
+                transform.SetRotation(AZ::ConvertEulerRadiansToQuaternion(AZ::Vector3(m_config.m_rotations[0], -m_config.m_rotations[1], -m_config.m_rotations[2])));
                 transform.SetTranslation(lightPos);
                 transform *= AZ::Transform::CreateFromQuaternion(AZ::ConvertEulerRadiansToQuaternion(AZ::Vector3(AZ::Constants::Pi * 0.5f, 0.0f, 0.0f)));
                 m_auxGeom->DrawQuad(m_config.m_quadSize[0], m_config.m_quadSize[1], AZ::Matrix3x4::CreateFromTransform(transform), nitsColor, drawStyle);
