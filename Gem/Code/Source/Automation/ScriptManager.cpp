@@ -1181,9 +1181,9 @@ namespace AtomSampleViewer
             return;
         }
 
-        if (dc.GetNumArguments() == 4 && !dc.IsBoolean(3))
+        if (dc.GetNumArguments() == 4 && !dc.IsString(3))
         {
-            ReportScriptError("CapturePassAttachment's forth argument must be a boolean");
+            ReportScriptError("CapturePassAttachment's forth argument must be a string 'Input' or 'Output'");
             return;
         }
 
@@ -1199,10 +1199,15 @@ namespace AtomSampleViewer
         dc.ReadArg(2, stringValue);
         outputFilePath = AZStd::string(stringValue);
 
-        bool useOutput = true;
+        AZ::RPI::PassAttachmentReadbackOption readbackOption = AZ::RPI::PassAttachmentReadbackOption::Output;
         if (dc.GetNumArguments() == 4)
         {
-            dc.ReadArg(3, useOutput);
+            AZStd::string option;
+            dc.ReadArg(3, option);
+            if (option == "Input")
+            {
+                readbackOption = AZ::RPI::PassAttachmentReadbackOption::Input;
+            }
         }
 
         // read pass hierarchy
@@ -1231,12 +1236,12 @@ namespace AtomSampleViewer
             }
         }
 
-        auto operation = [passHierarchy, slot, outputFilePath, useOutput]()
+        auto operation = [passHierarchy, slot, outputFilePath, readbackOption]()
         {
             // Note this will pause the script until the capture is complete
             if (PrepareForScreenCapture(outputFilePath))
             {
-                AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachment, passHierarchy, slot, outputFilePath, useOutput);
+                AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachment, passHierarchy, slot, outputFilePath, readbackOption);
             }
         };
 
