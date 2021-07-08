@@ -1164,9 +1164,9 @@ namespace AtomSampleViewer
 
     void ScriptManager::Script_CapturePassAttachment(AZ::ScriptDataContext& dc)
     {
-        if (dc.GetNumArguments() != 3)
+        if (dc.GetNumArguments() != 3 && dc.GetNumArguments() != 4)
         {
-            ReportScriptError("CapturePassAttachment needs three arguments");
+            ReportScriptError("CapturePassAttachment needs three or four arguments");
             return;
         }
 
@@ -1182,6 +1182,12 @@ namespace AtomSampleViewer
             return;
         }
 
+        if (dc.GetNumArguments() == 4 && !dc.IsString(3))
+        {
+            ReportScriptError("CapturePassAttachment's forth argument must be a string 'Input' or 'Output'");
+            return;
+        }
+
         const char* stringValue = nullptr;
 
         AZStd::vector<AZStd::string> passHierarchy;
@@ -1193,6 +1199,17 @@ namespace AtomSampleViewer
         slot = AZStd::string(stringValue);
         dc.ReadArg(2, stringValue);
         outputFilePath = AZStd::string(stringValue);
+
+        AZ::RPI::PassAttachmentReadbackOption readbackOption = AZ::RPI::PassAttachmentReadbackOption::Output;
+        if (dc.GetNumArguments() == 4)
+        {
+            AZStd::string option;
+            dc.ReadArg(3, option);
+            if (option == "Input")
+            {
+                readbackOption = AZ::RPI::PassAttachmentReadbackOption::Input;
+            }
+        }
 
         // read pass hierarchy
         AZ::ScriptDataContext stringtable;
@@ -1220,12 +1237,12 @@ namespace AtomSampleViewer
             }
         }
 
-        auto operation = [passHierarchy, slot, outputFilePath]()
+        auto operation = [passHierarchy, slot, outputFilePath, readbackOption]()
         {
             // Note this will pause the script until the capture is complete
             if (PrepareForScreenCapture(outputFilePath))
             {
-                AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachment, passHierarchy, slot, outputFilePath);
+                AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachment, passHierarchy, slot, outputFilePath, readbackOption);
             }
         };
 
