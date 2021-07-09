@@ -48,9 +48,10 @@ class TestAutomationMainSuite:
         try:
             unexpected_lines = ["Script: Screenshot check failed. Diff score",  # "Diff score" ensures legit failure.
                                 "Trace::Error",
-                                "Trace::Assert"]
+                                "Trace::Assert",
+                                "Traceback (most recent call last):"]
             atomsampleviewer_log_monitor.monitor_log_for_lines(
-                unexpected_lines=unexpected_lines, halt_on_unexpected=True, timeout=200)
+                unexpected_lines=unexpected_lines, halt_on_unexpected=True, timeout=240)
         except ly_test_tools.log.log_monitor.LogMonitorException as e:
             expected_screenshots_path = os.path.join(
                 workspace.paths.project(), "Scripts", "ExpectedScreenshots")
