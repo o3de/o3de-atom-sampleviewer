@@ -24,7 +24,7 @@ class BenchmarkDataAggregator(object):
         self.test_suite = test_suite
         self.filebeat_client = FilebeatClient(logger)
 
-    def _update_pass(pass_stats, entry):
+    def _update_pass(self, pass_stats, entry):
         '''
         Modifies pass_stats dict keyed by pass name with the time recorded in a pass timestamp entry.
 
@@ -75,7 +75,7 @@ class BenchmarkDataAggregator(object):
             data = json.loads(file.read_text())
             entries = data['ClassData']['timestampEntries']
 
-            frame_time = sum(self._update_pass(entry) for entry in entries)
+            frame_time = sum(self._update_pass(pass_stats, entry) for entry in entries)
 
             frame_stats['totalTime'] += frame_time
             frame_stats['maxTime'] = max(frame_time, frame_stats['maxTime'])
@@ -87,7 +87,7 @@ class BenchmarkDataAggregator(object):
 
         return frame_stats, pass_stats
 
-    def _generate_payloads(benchmark_metadata, frame_stats, pass_stats):
+    def _generate_payloads(self, benchmark_metadata, frame_stats, pass_stats):
         '''
         Generates payloads to send to Filebeat based on aggregated stats and metadata.
 
