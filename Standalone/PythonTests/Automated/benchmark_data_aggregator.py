@@ -143,13 +143,14 @@ class BenchmarkDataAggregator(object):
 
         git_commit_data = subprocess.check_output(['git', 'rev-parse', '--short', 'HEAD'], cwd=self.build_dir)
         git_commit_hash = git_commit_data.decode('ascii').strip()
+        build_date = time.strftime('%m/%d/%y', time.localtime(start_timestamp))  # use gmtime if GMT is preferred
 
         for benchmark_dir in self.results_dir.iterdir():
             if not benchmark_dir.is_dir():
                 continue
 
             benchmark_metadata = {
-                'gitCommit': git_commit_hash,
+                'gitCommitAndBuildDate': f'{git_commit_hash} {build_date}',
                 'RHI': rhi
             }
             frame_stats, pass_stats = self._process_benchmark(benchmark_dir, benchmark_metadata)
