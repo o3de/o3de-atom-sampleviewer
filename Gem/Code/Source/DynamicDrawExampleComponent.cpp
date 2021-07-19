@@ -16,6 +16,8 @@
 #include <Atom/Component/DebugCamera/NoClipControllerComponent.h>
 
 #include <Atom/RPI.Public/DynamicDraw/DynamicDrawInterface.h>
+#include <Atom/RPI.Public/Pass/PassFilter.h>
+#include <Atom/RPI.Public/Pass/RasterPass.h>
 #include <Atom/RPI.Public/RPIUtils.h>
 
 namespace AtomSampleViewer
@@ -64,18 +66,21 @@ namespace AtomSampleViewer
         AZ::Debug::NoClipControllerRequestBus::Event(GetCameraEntityId(), &AZ::Debug::NoClipControllerRequestBus::Events::SetHeading, DegToRad(-4.0f));
         AZ::Debug::NoClipControllerRequestBus::Event(GetCameraEntityId(), &AZ::Debug::NoClipControllerRequestBus::Events::SetPitch, DegToRad(1.9f));
 
-        // Create and initialize dynamic draw context
-        m_dynamicDraw = RPI::DynamicDrawInterface::Get()->CreateDynamicDrawContext(RPI::RPISystemInterface::Get()->GetDefaultScene().get());
+        AZStd::vector<RPI::DynamicDrawContext::VertexChannel> vertexChannels = 
+            {
+                { "POSITION", RHI::Format::R32G32B32_FLOAT },
+                { "COLOR", RHI::Format::R32G32B32A32_FLOAT }
+            };
         
+        // Create and initialize dynamic draw context
+        m_dynamicDraw = RPI::DynamicDrawInterface::Get()->CreateDynamicDrawContext();
         const char* shaderFilepath = "Shaders/dynamicdraw/dynamicdrawexample.azshader";
         Data::Asset<RPI::ShaderAsset> shaderAsset = m_assetLoadManager.GetAsset<RPI::ShaderAsset>(shaderFilepath);
         m_dynamicDraw->InitShader(shaderAsset);
-        m_dynamicDraw->InitVertexFormat(
-            {{ "POSITION", RHI::Format::R32G32B32_FLOAT },
-            { "COLOR", RHI::Format::R32G32B32A32_FLOAT }}
-            );
+        m_dynamicDraw->InitVertexFormat(vertexChannels);
         m_dynamicDraw->AddDrawStateOptions(RPI::DynamicDrawContext::DrawStateOptions::BlendMode | RPI::DynamicDrawContext::DrawStateOptions::PrimitiveType
             | RPI::DynamicDrawContext::DrawStateOptions::DepthState | RPI::DynamicDrawContext::DrawStateOptions::FaceCullMode);
+        m_dynamicDraw->SetOutputScope(RPI::RPISystemInterface::Get()->GetDefaultScene().get());
         m_dynamicDraw->EndInit();
 
         Data::Instance<RPI::ShaderResourceGroup> contextSrg = m_dynamicDraw->GetPerContextSrg();
@@ -88,6 +93,31 @@ namespace AtomSampleViewer
 
         AZ_Assert(m_dynamicDraw->IsVertexSizeValid(sizeof(ExampleVertex)), "Invalid vertex format");
 
+        // Dynamic draw for pass        
+        m_dynamicDraw1ForPass = RPI::DynamicDrawInterface::Get()->CreateDynamicDrawContext();
+        m_dynamicDraw2ForPass = RPI::DynamicDrawInterface::Get()->CreateDynamicDrawContext();
+
+        // Get auxGeom pass from the current render pipeline
+        auto renderPipeline = RPI::RPISystemInterface::Get()->GetDefaultScene()->GetDefaultRenderPipeline();
+        RPI::PassHierarchyFilter filter(AZStd::vector<AZStd::string>{"MainPipeline", "AuxGeomPass"});
+        AZStd::vector<AZ::RPI::Pass*> foundPasses = AZ::RPI::PassSystemInterface::Get()->FindPasses(filter);
+        AZ_Assert(foundPasses.size() > 0, "AuxGeomPass doesn't exist in current render pipeline");
+        RPI::RasterPass* auxGeomPass = azrtti_cast<RPI::RasterPass*>(foundPasses[0]);
+        AZ_Assert(auxGeomPass, "AuxGeomPass should be a RasterPass or a derived RasterPass");
+        
+        m_dynamicDraw1ForPass->InitShader(shaderAsset);
+        m_dynamicDraw1ForPass->InitVertexFormat(vertexChannels);
+        m_dynamicDraw1ForPass->AddDrawStateOptions(RPI::DynamicDrawContext::DrawStateOptions::BlendMode
+            | RPI::DynamicDrawContext::DrawStateOptions::DepthState);
+        m_dynamicDraw1ForPass->SetOutputScope(auxGeomPass);
+        m_dynamicDraw1ForPass->EndInit();
+
+        m_dynamicDraw2ForPass->InitShader(shaderAsset);        
+        m_dynamicDraw2ForPass->InitVertexFormat(vertexChannels);
+        m_dynamicDraw2ForPass->AddDrawStateOptions(RPI::DynamicDrawContext::DrawStateOptions::BlendMode
+            | RPI::DynamicDrawContext::DrawStateOptions::DepthState);
+        m_dynamicDraw2ForPass->SetOutputScope(auxGeomPass);
+        m_dynamicDraw2ForPass->EndInit();
 
         ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::ResumeScript);
     }
@@ -104,6 +134,8 @@ namespace AtomSampleViewer
 
         m_dynamicDraw = nullptr;
         m_contextSrg = nullptr;
+        m_dynamicDraw1ForPass = nullptr;
+        m_dynamicDraw2ForPass = nullptr;
     }
 
     void DynamicDrawExampleComponent::OnTick([[maybe_unused]] float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint timePoint)
@@ -119,6 +151,7 @@ namespace AtomSampleViewer
             ScriptableImGui::Checkbox("Alpha Blend", &m_showAlphaBlend);
             ScriptableImGui::Checkbox("Alpha Additive", &m_showAlphaAdditive);
             ScriptableImGui::Checkbox("Per Draw Viewport", &m_showPerDrawViewport);
+            ScriptableImGui::Checkbox("Sorting", &m_showSorting);
 
             m_imguiSidebar.End();
         }
@@ -131,8 +164,7 @@ namespace AtomSampleViewer
 
         // Tetrahedron
         const uint32_t TetrahedronVertexCount = 12;
-        const uint32_t TetrahedronIndexCount = 12;
-        const uint32_t TetrahedronWireframeIndexCount = 6;
+        const uint32_t TetrahedronWireframeIndexCount = 12;
 
         float positions[4][3] =
         {
@@ -161,12 +193,6 @@ namespace AtomSampleViewer
             ExampleVertex{positions[3], colors[3]}, // 3
             ExampleVertex{positions[2], colors[3]} // 2
         };
-        u16 tetrahedronIndices[TetrahedronIndexCount] = {
-            0, 1, 2,
-            3, 4, 5,
-            6, 7, 8,
-            9, 10, 11
-        };
 
         ExampleVertex tetrahedronWireFrameVerts[4] = {
             ExampleVertex{ positions[0], colors[0] },
@@ -175,7 +201,7 @@ namespace AtomSampleViewer
             ExampleVertex{ positions[3], colors[3] }
         };
 
-        u16 tetrahedronWireframeIndices[TetrahedronIndexCount] =
+        u16 tetrahedronWireframeIndices[TetrahedronWireframeIndexCount] =
         {
             0, 1,
             0, 2,
@@ -206,7 +232,7 @@ namespace AtomSampleViewer
             drawSrg = m_dynamicDraw->NewDrawSrg();
             drawSrg->SetConstant(index, Vector3(xPos, 0, 0));
             drawSrg->Compile();
-            m_dynamicDraw->DrawIndexed(tetrahedronVerts, TetrahedronVertexCount, tetrahedronIndices, TetrahedronIndexCount, RHI::IndexFormat::Uint16, drawSrg);
+            m_dynamicDraw->DrawLinear(tetrahedronVerts, TetrahedronVertexCount, drawSrg);
         }
 
         //front cull
@@ -217,7 +243,7 @@ namespace AtomSampleViewer
             drawSrg = m_dynamicDraw->NewDrawSrg();
             drawSrg->SetConstant(index, Vector3(xPos, 0, 0));
             drawSrg->Compile();
-            m_dynamicDraw->DrawIndexed(tetrahedronVerts, TetrahedronVertexCount, tetrahedronIndices, TetrahedronIndexCount, RHI::IndexFormat::Uint16, drawSrg);
+            m_dynamicDraw->DrawLinear(tetrahedronVerts, TetrahedronVertexCount, drawSrg);
             m_dynamicDraw->SetCullMode(RHI::CullMode::None);
         }
 
@@ -229,7 +255,7 @@ namespace AtomSampleViewer
             drawSrg = m_dynamicDraw->NewDrawSrg();
             drawSrg->SetConstant(index, Vector3(xPos, 0, 0));
             drawSrg->Compile();
-            m_dynamicDraw->DrawIndexed(tetrahedronVerts, TetrahedronVertexCount, tetrahedronIndices, TetrahedronIndexCount, RHI::IndexFormat::Uint16, drawSrg);
+            m_dynamicDraw->DrawLinear(tetrahedronVerts, TetrahedronVertexCount, drawSrg);
             m_dynamicDraw->SetCullMode(RHI::CullMode::None);
         }
 
@@ -241,7 +267,7 @@ namespace AtomSampleViewer
             drawSrg->SetConstant(index, Vector3(xPos, 0, 0));
             drawSrg->Compile();
             m_dynamicDraw->SetPrimitiveType(RHI::PrimitiveTopology::LineList);
-            m_dynamicDraw->DrawIndexed(tetrahedronWireFrameVerts, 4, tetrahedronWireframeIndices, TetrahedronIndexCount, RHI::IndexFormat::Uint16, drawSrg);
+            m_dynamicDraw->DrawIndexed(tetrahedronWireFrameVerts, 4, tetrahedronWireframeIndices, TetrahedronWireframeIndexCount, RHI::IndexFormat::Uint16, drawSrg);
             m_dynamicDraw->SetPrimitiveType(RHI::PrimitiveTopology::TriangleList);
         }
 
@@ -261,7 +287,7 @@ namespace AtomSampleViewer
             drawSrg = m_dynamicDraw->NewDrawSrg();
             drawSrg->SetConstant(index, Vector3(xPos, 0, 0));
             drawSrg->Compile();
-            m_dynamicDraw->DrawIndexed(tetrahedronVerts, TetrahedronVertexCount, tetrahedronIndices, TetrahedronIndexCount, RHI::IndexFormat::Uint16, drawSrg);
+            m_dynamicDraw->DrawLinear(tetrahedronVerts, TetrahedronVertexCount, drawSrg);
         }
 
         // alpha additive
@@ -276,7 +302,7 @@ namespace AtomSampleViewer
             drawSrg = m_dynamicDraw->NewDrawSrg();
             drawSrg->SetConstant(index, Vector3(xPos, 0, 0));
             drawSrg->Compile();
-            m_dynamicDraw->DrawIndexed(tetrahedronVerts, TetrahedronVertexCount, tetrahedronIndices, TetrahedronIndexCount, RHI::IndexFormat::Uint16, drawSrg);
+            m_dynamicDraw->DrawLinear(tetrahedronVerts, TetrahedronVertexCount, drawSrg);
         }
 
         // enable depth write
@@ -294,8 +320,95 @@ namespace AtomSampleViewer
             drawSrg = m_dynamicDraw->NewDrawSrg();
             drawSrg->SetConstant(index, Vector3(0, 0, 0));
             drawSrg->Compile();
-            m_dynamicDraw->DrawIndexed(tetrahedronVerts, TetrahedronVertexCount, tetrahedronIndices, TetrahedronIndexCount, RHI::IndexFormat::Uint16, drawSrg);
+            m_dynamicDraw->DrawLinear(tetrahedronVerts, TetrahedronVertexCount, drawSrg);
             m_dynamicDraw->UnsetViewport();
+        }
+
+        // show draws from three different dynamic draw context with correct sorting
+        if (m_showSorting)
+        {
+            float black[4] = {0, 0, 0, 1};
+            float white[4] = {1, 1, 1, 1};
+            float red[4] = {1, 0, 0, 1};
+            float vertexPos[4][3] =
+            {
+                { -0.2, 0, 0.2f},
+                { -0.2, 0, -0.2f},
+                { 0.2, 0 , -0.2f},
+                { 0.2, 0 , 0.2f}
+            };
+            ExampleVertex blackQuad[4] =
+            {
+                ExampleVertex{ vertexPos[0], black },
+                ExampleVertex{ vertexPos[1], black }, 
+                ExampleVertex{ vertexPos[2], black }, 
+                ExampleVertex{ vertexPos[3], black }
+            };
+            ExampleVertex whiteQuad[4] =
+            {
+                ExampleVertex{ vertexPos[0], white },
+                ExampleVertex{ vertexPos[1], white }, 
+                ExampleVertex{ vertexPos[2], white }, 
+                ExampleVertex{ vertexPos[3], white }
+            };            
+            ExampleVertex redQuad[4] =
+            {
+                ExampleVertex{ vertexPos[0], red },
+                ExampleVertex{ vertexPos[1], red }, 
+                ExampleVertex{ vertexPos[2], red }, 
+                ExampleVertex{ vertexPos[3], red }
+            };
+            u16 quadIndics[6] =
+            {
+                0, 1, 2,
+                0, 2, 3
+            };
+
+            // disable depth for all and rely on sorting
+            depthState.m_writeMask = RHI::DepthWriteMask::Zero;
+            m_dynamicDraw->SetDepthState(depthState);
+            m_dynamicDraw1ForPass->SetDepthState(depthState);
+            m_dynamicDraw2ForPass->SetDepthState(depthState);
+            blendState.m_enable = false;
+            m_dynamicDraw->SetTarget0BlendState(blendState);
+            m_dynamicDraw1ForPass->SetTarget0BlendState(blendState);
+            m_dynamicDraw2ForPass->SetTarget0BlendState(blendState);                        
+
+            // draw two red quads via view
+            drawSrg = m_dynamicDraw->NewDrawSrg();
+            drawSrg->SetConstant(index, Vector3(-0.3f, 0, 0.7f));
+            drawSrg->Compile();
+            m_dynamicDraw->SetSortKey(0x200);
+            m_dynamicDraw->DrawIndexed(redQuad, 4, quadIndics, 6, RHI::IndexFormat::Uint16, drawSrg);
+            drawSrg = m_dynamicDraw->NewDrawSrg();
+            drawSrg->SetConstant(index, Vector3(0.3f, 0, 0.7f));
+            drawSrg->Compile();
+            m_dynamicDraw->SetSortKey(0);
+            m_dynamicDraw->DrawIndexed(redQuad, 4, quadIndics, 6, RHI::IndexFormat::Uint16, drawSrg);
+
+            // draw two white quads via ddc1 
+            drawSrg = m_dynamicDraw1ForPass->NewDrawSrg();
+            drawSrg->SetConstant(index, Vector3(-0.3f, 0, 0.8f));
+            drawSrg->Compile();
+            m_dynamicDraw1ForPass->SetSortKey(0x100);
+            m_dynamicDraw1ForPass->DrawIndexed(whiteQuad, 4, quadIndics, 6, RHI::IndexFormat::Uint16, drawSrg);
+            drawSrg = m_dynamicDraw1ForPass->NewDrawSrg();
+            drawSrg->SetConstant(index, Vector3(0.3f, 0, 0.8f));
+            drawSrg->Compile();
+            m_dynamicDraw1ForPass->SetSortKey(0x100);
+            m_dynamicDraw1ForPass->DrawIndexed(whiteQuad, 4, quadIndics, 6, RHI::IndexFormat::Uint16, drawSrg);
+        
+            // draw two black quads via dcc2
+            drawSrg = m_dynamicDraw2ForPass->NewDrawSrg();
+            drawSrg->SetConstant(index, Vector3(-0.3f, 0, 0.9f));
+            drawSrg->Compile();
+            m_dynamicDraw2ForPass->SetSortKey(0);
+            m_dynamicDraw2ForPass->DrawIndexed(blackQuad, 4, quadIndics, 6, RHI::IndexFormat::Uint16, drawSrg);
+            drawSrg = m_dynamicDraw2ForPass->NewDrawSrg();
+            drawSrg->SetConstant(index, Vector3(0.3f, 0, 0.9f));
+            drawSrg->Compile();
+            m_dynamicDraw2ForPass->SetSortKey(0x200);
+            m_dynamicDraw2ForPass->DrawIndexed(blackQuad, 4, quadIndics, 6, RHI::IndexFormat::Uint16, drawSrg);
         }
     }
 } // namespace AtomSampleViewer
