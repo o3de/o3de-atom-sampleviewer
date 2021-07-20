@@ -98,7 +98,7 @@ namespace AtomSampleViewer
         AZ::Aabb localAabb = AZ::Aabb::CreateCenterHalfExtents(AZ::Vector3(0.0f, 0.0f, 0.0f), AZ::Vector3(1000000.0f, 1000000.0f, 1000000.0f));
         modelLodCreator.SetMeshAabb(AZStd::move(localAabb));
 
-        modelLodCreator.SetMeshMaterialAsset(AZ::RPI::AssetUtils::LoadAssetByProductPath<AZ::RPI::MaterialAsset>(DefaultSkinnedMeshMaterial));
+        modelLodCreator.SetMeshMaterialSlot(RPI::ModelMaterialSlot{0, AZ::Name{}, AZ::RPI::AssetUtils::LoadAssetByProductPath<AZ::RPI::MaterialAsset>(DefaultSkinnedMeshMaterial)});
 
         modelLodCreator.EndMesh();
 
@@ -140,7 +140,8 @@ namespace AtomSampleViewer
             subMesh.m_vertexOffset = 0;
             subMesh.m_vertexCount = lodVertexCount;
             // Do a load blocking queue on the material asset because the ModelLod will ignore the material if it is not ready
-            subMesh.m_material = AZ::RPI::AssetUtils::LoadAssetByProductPath<AZ::RPI::MaterialAsset>(DefaultSkinnedMeshMaterial);
+            subMesh.m_materialSlot.m_defaultMaterialAsset = AZ::RPI::AssetUtils::LoadAssetByProductPath<AZ::RPI::MaterialAsset>(DefaultSkinnedMeshMaterial);
+            subMesh.m_materialSlot.m_stableId = 0;
 
             subMeshes.push_back(subMesh);
 
