@@ -6,4 +6,4 @@
  *
  */
 
-#define ATOMSAMPLEVIEWER_TRAIT_SSR_SAMPLE_LUCY_MODEL_NAME                       "objects/lucy/lucy_high.azmodel"
+#define ATOMSAMPLEVIEWER_TRAIT_SSR_SAMPLE_LUCY_MODEL_NAME                       "objects/lucy/lucy_low.azmodel"

@@ -125,7 +125,7 @@
                 },
                 {
                     "Name": "LightCullingTilePreparePass",
-                    "TemplateName": "LightCullingTilePrepareTemplate",
+                    "TemplateName": "LightCullingTilePrepareMSAATemplate",
                     "Connections": [
                         {
                             "LocalSlot": "Depth",

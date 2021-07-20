@@ -234,7 +234,7 @@ namespace AtomSampleViewer
         }
         else
         {
-            return AZ::RPI::AssetUtils::GetAssetIdForProductPath("shaders/staticmesh.azmaterial", AZ::RPI::AssetUtils::TraceLevel::Error);
+            return AZ::RPI::AssetUtils::GetAssetIdForProductPath(DefaultPbrMaterialPath, AZ::RPI::AssetUtils::TraceLevel::Error);
         }
     }
 

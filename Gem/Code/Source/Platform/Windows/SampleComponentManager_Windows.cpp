@@ -23,4 +23,9 @@ namespace AtomSampleViewer
     {
         return "MainPipeline";
     }
+
+    int SampleComponentManager::GutNumMSAASamples()
+    {
+        return 4;
+    }
 } // namespace AtomSampleViewer
