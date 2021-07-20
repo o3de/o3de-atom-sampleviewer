@@ -98,7 +98,9 @@ namespace AtomSampleViewer
         AZ::Aabb localAabb = AZ::Aabb::CreateCenterHalfExtents(AZ::Vector3(0.0f, 0.0f, 0.0f), AZ::Vector3(1000000.0f, 1000000.0f, 1000000.0f));
         modelLodCreator.SetMeshAabb(AZStd::move(localAabb));
 
-        modelLodCreator.SetMeshMaterialSlot(RPI::ModelMaterialSlot{0, AZ::Name{}, AZ::RPI::AssetUtils::LoadAssetByProductPath<AZ::RPI::MaterialAsset>(DefaultSkinnedMeshMaterial)});
+        RPI::ModelMaterialSlot::StableId slotId = 0;
+        modelCreator.AddMaterialSlot(RPI::ModelMaterialSlot{slotId, AZ::Name{}, AZ::RPI::AssetUtils::LoadAssetByProductPath<AZ::RPI::MaterialAsset>(DefaultSkinnedMeshMaterial)});
+        modelLodCreator.SetMeshMaterialSlot(slotId);
 
         modelLodCreator.EndMesh();
 
