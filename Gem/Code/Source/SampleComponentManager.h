@@ -165,6 +165,7 @@ namespace AtomSampleViewer
         static bool IsMultiViewportSwapchainSampleSupported();
         void AdjustImGuiFontScale();
         const char* GetRootPassTemplateName();
+        int GutNumMSAASamples();
         
         // ---------- variables -----------------
 

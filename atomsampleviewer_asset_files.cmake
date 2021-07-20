@@ -19,7 +19,6 @@ set(FILES
     Passes/ImGuiNoInput.pass
     Passes/ImGuiOnlyPipeline.pass
     Passes/LuxCoreTexture.pass
-    Passes/MainPipeline_Mobile.pass
     Passes/Monochrome.pass
     Passes/RayTracingAmbientOcclusion.pass
     Passes/RenderTexture.pass
@@ -54,10 +53,7 @@ set(FILES
     Shaders/DebugVertexNormals.materialtype
     Shaders/DebugVertexNormals.shader
     Shaders/Instanced.azsl
-    Shaders/MaterialEditorTest.materialtype
-    Shaders/StaticMesh.azsl
-    Shaders/StaticMesh.materialtype
-    Shaders/StaticMesh.shader
+    Shaders/MaterialEditorTest.materialtype    
     Shaders/ComprehensiveTestMaterial/Comprehensive.materialtype
     Shaders/ComprehensiveTestMaterial/Stacks.azsl
     Shaders/ComprehensiveTestMaterial/Stacks.shader

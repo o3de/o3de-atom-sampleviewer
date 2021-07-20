@@ -26,6 +26,11 @@ namespace AtomSampleViewer
 
     const char* SampleComponentManager::GetRootPassTemplateName()
     {
-        return "MainPipeline_Mobile";
+        return "LowEndPipelineTemplate";
+    }
+
+    int SampleComponentManager::GutNumMSAASamples()
+    {
+        return 1;
     }
 } // namespace AtomSampleViewer
