@@ -12,7 +12,7 @@ import pytest
 
 import ly_test_tools.environment.process_utils as process_utils
 import ly_test_tools.launchers.platforms.base
-from .benchmark_data_aggregator import BenchmarkDataAggregator
+from ly_test_tools.benchmark.data_aggregator import BenchmarkDataAggregator
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class AtomSampleViewerException(Exception):
 @pytest.mark.parametrize('rhi', ['dx12', 'vulkan'])
 @pytest.mark.usefixtures("clean_atomsampleviewer_logs", "atomsampleviewer_log_monitor")
 class TestPerformanceBenchmarksPeriodicSuite:
-    def test_BerformanceBenchmarkPeriodicSuite(self, request, workspace, launcher_platform, rhi, atomsampleviewer_log_monitor):
+    def test_PerformanceBenchmarkPeriodicSuite(self, request, workspace, launcher_platform, rhi, atomsampleviewer_log_monitor):
         # Script call setup.
         benchmark_script = '_AutomatedPeriodicBenchmarkSuite_.bv.lua'
         benchmark_script_path = os.path.join(workspace.paths.project(), 'Scripts', benchmark_script)
