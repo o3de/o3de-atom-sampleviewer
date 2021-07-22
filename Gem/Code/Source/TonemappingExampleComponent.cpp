@@ -1,5 +1,5 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project
+ * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
  * 
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
@@ -315,7 +315,8 @@ namespace AtomSampleViewer
     {
         AZStd::string filePath = m_imguiFrameCaptureSaver.GetSaveFilePath();
         AZStd::string slot = "Output";
-        AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachment, m_capturePassHierarchy, slot, filePath);
+        AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachment, m_capturePassHierarchy, slot, filePath,
+            AZ::RPI::PassAttachmentReadbackOption::Output);
     }
 
     RPI::ColorSpaceId TonemappingExampleComponent::GetColorSpaceIdForIndex(uint8_t colorSpaceIndex) const

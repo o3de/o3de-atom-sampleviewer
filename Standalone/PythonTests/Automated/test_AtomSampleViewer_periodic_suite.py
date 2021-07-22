@@ -1,5 +1,5 @@
 """
-Copyright (c) Contributors to the Open 3D Engine Project
+Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
 
 SPDX-License-Identifier: Apache-2.0 OR MIT
 """
@@ -46,7 +46,10 @@ class TestAutomationPeriodicSuite:
         # Execute test.
         process_utils.safe_check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
         try:
-            unexpected_lines = ["Script: Screenshot check failed. Diff score"]  # "Diff score" ensures legit failure.
+            unexpected_lines = ["Script: Screenshot check failed. Diff score",  # "Diff score" ensures legit failure.
+                                "Trace::Error",
+                                "Trace::Assert",
+                                "Traceback (most recent call last):"]
             atomsampleviewer_log_monitor.monitor_log_for_lines(
                 unexpected_lines=unexpected_lines, halt_on_unexpected=True, timeout=600)
         except ly_test_tools.log.log_monitor.LogMonitorException as e:
