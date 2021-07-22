@@ -11,6 +11,7 @@
 #include <AzCore/Math/Matrix3x4.h>
 #include <AzCore/Math/Aabb.h>
 #include <AzCore/std/containers/vector.h>
+#include <AzCore/std/containers/array.h>
 
 namespace AtomSampleViewer
 {
