@@ -85,7 +85,7 @@ namespace AtomSampleViewer
                 };
 
                 ImGui::PushItemWidth(-1.0f);
-                ScriptableImGui::ListBox("", &m_selectedItemIndex, listBoxGetter, &m_itemsList, m_itemsList.size());
+                ScriptableImGui::ListBox("", &m_selectedItemIndex, listBoxGetter, &m_itemsList, static_cast<int>(m_itemsList.size()));
                 ImGui::PopItemWidth();
 
                 if (ScriptableImGui::Button(m_actionButtonLabel.c_str()))

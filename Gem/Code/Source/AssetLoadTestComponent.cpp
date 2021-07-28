@@ -63,7 +63,7 @@ namespace AtomSampleViewer
         };
         m_materialBrowser.SetDefaultPinnedAssets(defaultMaterialAllowlist);
 
-        m_pinnedMaterialCount = m_materialBrowser.GetPinnedAssets().size();
+        m_pinnedMaterialCount = static_cast<uint32_t>(m_materialBrowser.GetPinnedAssets().size());
 
         const AZStd::vector<AZStd::string> defaultModelAllowist =
         {
@@ -307,7 +307,7 @@ namespace AtomSampleViewer
 
             if (materialsChanged)
             {
-                m_pinnedMaterialCount = pinnedMaterials.size();
+                m_pinnedMaterialCount = static_cast<uint32_t>(pinnedMaterials.size());
                 // Keep the current m_cachedMaterials to avoid release-load the same material
                 MaterialAssetSet newCache;
                 // clean up cached material which refcount is 1
