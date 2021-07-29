@@ -56,7 +56,7 @@ if(PAL_TRAIT_BUILD_HOST_TOOLS AND PAL_TRAIT_BUILD_TESTS_SUPPORTED)
         NAME AtomSampleViewer::PeriodicPerformanceBenchmarks
         PATH ${CMAKE_CURRENT_LIST_DIR}/Automated/benchmark_runner_periodic_suite.py
         TEST_REQUIRES gpu
-        TEST_SUITE periodic
+        TEST_SUITE main
         TEST_SERIAL
         TIMEOUT 600
         RUNTIME_DEPENDENCIES
