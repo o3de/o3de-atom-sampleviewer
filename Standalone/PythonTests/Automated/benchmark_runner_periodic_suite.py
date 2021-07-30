@@ -48,7 +48,7 @@ class TestPerformanceBenchmarksPeriodicSuite:
         process_utils.safe_check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
         try:
             expected_lines = ["Script: Capturing complete."]
-            atomsampleviewer_log_monitor.monitor_log_for_lines(expected_lines, timeout=300)
+            atomsampleviewer_log_monitor.monitor_log_for_lines(expected_lines, timeout=180)
 
             aggregator = BenchmarkDataAggregator(workspace, logger, 'periodic')
             aggregator.upload_metrics(rhi)
