@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -170,7 +171,7 @@ namespace AtomSampleViewer
     void ShadowedSponzaExampleComponent::OnModelReady(AZ::Data::Instance<AZ::RPI::Model> model)
     {
         m_sponzaExteriorAssetLoaded = true;
-        m_worldAabb = model->GetAabb();
+        m_worldAabb = model->GetModelAsset()->GetAabb();
         UpdateDiskLightCount(DiskLightCountDefault);
 
         // Now that the models are initialized, we can allow the script to continue.

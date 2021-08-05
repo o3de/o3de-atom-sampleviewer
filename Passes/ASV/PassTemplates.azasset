@@ -5,10 +5,6 @@
     "ClassData": {
         "AssetPaths": [
             {
-                "Name": "MainPipeline_Mobile",
-                "Path": "Passes/MainPipeline_Mobile.pass"
-            },
-            {
                 "Name": "ImGuiOnlyPipeline",
                 "Path": "Passes/ImGuiOnlyPipeline.pass"
             },
@@ -49,26 +45,6 @@
                 "Path": "Passes/Monochrome.pass"
             },
             {
-                "Name": "MSAA_RPI_Pipeline_Core",
-                "Path": "Passes/MSAA_RPI_Pipeline_Core.pass"
-            },
-            {
-                "Name": "MSAA_2x_RPI_Pipeline",
-                "Path": "Passes/MSAA_2x_RPI_Pipeline.pass"
-            },
-            {
-                "Name": "MSAA_4x_RPI_Pipeline",
-                "Path": "Passes/MSAA_4x_RPI_Pipeline.pass"
-            },
-            {
-                "Name": "MSAA_8x_RPI_Pipeline",
-                "Path": "Passes/MSAA_8x_RPI_Pipeline.pass"
-            },
-            {
-                "Name": "No_MSAA_RPI_Pipeline",
-                "Path": "Passes/No_MSAA_RPI_Pipeline.pass"
-            },
-            {
                 "Name": "ColorInvertCS",
                 "Path": "Passes/ColorInvertCS.pass"
             },
@@ -81,14 +57,6 @@
                 "Path": "Passes/RenderTexture.pass"
             },
             {
-                "Name": "ReflectionsParentPass_nomsaaTemplate",
-                "Path": "Passes/Reflections_nomsaa.pass"
-            },
-            {
-                "Name": "ReflectionGlobalFullscreenPass_nomsaaTemplate",
-                "Path": "Passes/ReflectionGlobalFullscreen_nomsaa.pass"
-            },
-            {
                 "Name": "RHISamplePassTemplate",
                 "Path": "Passes/RHISamplePass.pass"
             },
@@ -99,10 +67,6 @@
             {
                 "Name": "SsaoPipeline",
                 "Path": "Passes/SsaoPipeline.pass"
-            },
-            {
-                "Name": "DiffuseGlobalFullscreenPass_nomsaaTemplate",
-                "Path": "Passes/DiffuseGlobalFullscreen_nomsaa.pass"
             },
             {
                 "Name": "RayTracingAmbientOcclusionPassTemplate",

@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -779,6 +780,14 @@ namespace AtomSampleViewer
     {
         if (ImGui::BeginMainMenuBar())
         {
+            // If imgui doesn't have enough room to render a menu, it will fall back to the safe area which
+            // is typically 3 pixels. This causes the menu to overlap the menu bar, and makes it easy to
+            // accidentally select the first item on that menu bar. By altering the safe area temporarily
+            // while drawing the menu, this problem can be avoided.
+            
+            ImVec2 cachedSafeArea = ImGui::GetStyle().DisplaySafeAreaPadding;
+            ImGui::GetStyle().DisplaySafeAreaPadding = ImVec2(cachedSafeArea.x, cachedSafeArea.y + 16.0f);
+
             if (ImGui::BeginMenu("File"))
             {
                 if (ImGui::MenuItem("Exit", "Ctrl-Q"))
@@ -945,6 +954,9 @@ namespace AtomSampleViewer
                 }
                 ImGui::EndMenu();
             }
+
+            // Restore original safe area.
+            ImGui::GetStyle().DisplaySafeAreaPadding = cachedSafeArea;
 
             ImGui::EndMainMenuBar();
         }
@@ -1136,6 +1148,17 @@ namespace AtomSampleViewer
         {
             m_scriptManager->RunMainTestSuite(suiteFilePath, exitOnTestEnd, randomSeed);
         }
+    }
+
+    void SampleComponentManager::ResetRPIScene()
+    {
+        ReleaseRPIScene();
+        SwitchSceneForRPISample();
+    }
+
+    void SampleComponentManager::ClearRPIScene()
+    {
+        ReleaseRPIScene();
     }
 
     void SampleComponentManager::ShowFrameCaptureDialog()
@@ -1468,8 +1491,11 @@ namespace AtomSampleViewer
         pipelineDesc.m_name = "RPISamplePipeline";
         pipelineDesc.m_rootPassTemplate = GetRootPassTemplateName();
         pipelineDesc.m_mainViewTagName = "MainCamera";
-        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 4;
-        
+        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = GutNumMSAASamples();
+        bool isNonMsaaPipeline = (pipelineDesc.m_renderSettings.m_multisampleState.m_samples == 1);
+        const char* supervariantName = isNonMsaaPipeline ? AZ::RPI::NoMsaaSupervariantName : "";
+        AZ::RPI::ShaderSystemInterface::Get()->SetSupervariantName(AZ::Name(supervariantName));
+
         RPI::RenderPipelinePtr renderPipeline = RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext.get());
         m_rpiScene->AddRenderPipeline(renderPipeline);
 

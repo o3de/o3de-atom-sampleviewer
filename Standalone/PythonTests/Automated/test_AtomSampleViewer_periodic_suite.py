@@ -1,5 +1,6 @@
 """
-Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
+Copyright (c) Contributors to the Open 3D Engine Project.
+For complete copyright and license terms please see the LICENSE at the root of this distribution.
 
 SPDX-License-Identifier: Apache-2.0 OR MIT
 """
@@ -29,7 +30,7 @@ class TestAutomationPeriodicSuite:
     def test_AutomatedPeriodicTestSuite(self, request, workspace, launcher_platform, rhi, atomsampleviewer_log_monitor):
         # Script call setup.
         test_script = '_AutomatedPeriodicTestSuite_.bv.lua'
-        test_script_path = os.path.join(workspace.paths.engine_root(), 'AtomSampleViewer', 'Scripts', test_script)
+        test_script_path = os.path.join(workspace.paths.project(), 'Scripts', test_script)
         if not os.path.exists(test_script_path):
             raise AtomSampleViewerException(f'Test script does not exist in path: {test_script_path}')
         cmd = os.path.join(workspace.paths.build_directory(),
@@ -54,7 +55,7 @@ class TestAutomationPeriodicSuite:
                 unexpected_lines=unexpected_lines, halt_on_unexpected=True, timeout=600)
         except ly_test_tools.log.log_monitor.LogMonitorException as e:
             expected_screenshots_path = os.path.join(
-                workspace.paths.engine_root(), "AtomSampleViewer", "Scripts", "ExpectedScreenshots")
+                workspace.paths.project(), "Scripts", "ExpectedScreenshots")
             test_screenshots_path = os.path.join(
                 workspace.paths.project(), "user", "Scripts", "Screenshots")
             raise AtomSampleViewerException(

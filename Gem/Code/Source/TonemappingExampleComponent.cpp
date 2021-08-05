@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -203,8 +204,9 @@ namespace AtomSampleViewer
     void TonemappingExampleComponent::PrepareRenderData()
     {
         const auto CreatePipeline = [](const char* shaderFilepath,
-            const char* srgFilepath,
-            Data::Asset<AZ::RPI::ShaderResourceGroupAsset>& srgAsset,
+            const char* srgName,
+            Data::Asset<AZ::RPI::ShaderAsset>& shaderAsset,
+            RHI::Ptr<AZ::RHI::ShaderResourceGroupLayout>& srgLayout,
             RHI::ConstPtr<RHI::PipelineState>& pipelineState,
             RHI::DrawListTag& drawListTag)
         {
@@ -212,7 +214,7 @@ namespace AtomSampleViewer
             // Also, the index buffer is not needed with DrawLinear.
             RHI::PipelineStateDescriptorForDraw pipelineStateDescriptor;
 
-            Data::Asset<RPI::ShaderAsset> shaderAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::ShaderAsset>(shaderFilepath, RPI::AssetUtils::TraceLevel::Error);
+            shaderAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::ShaderAsset>(shaderFilepath, RPI::AssetUtils::TraceLevel::Error);
             Data::Instance<RPI::Shader> shader = RPI::Shader::FindOrCreate(shaderAsset);
 
             if (!shader)
@@ -237,22 +239,22 @@ namespace AtomSampleViewer
                 AZ_Error("Render", false, "Failed to acquire default pipeline state for shader %s", shaderFilepath);
             }
 
-            // Load shader resource group asset
-            srgAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::ShaderResourceGroupAsset>(srgFilepath, RPI::AssetUtils::TraceLevel::Error);
+            // Load shader resource group layout
+            srgLayout = shaderAsset->FindShaderResourceGroupLayout(AZ::Name(srgName));
         };
 
         // Create the example's main pipeline object
         {
-            CreatePipeline("Shaders/tonemappingexample/renderimage.azshader", "Shaders/tonemappingexample/renderimage_renderimagesrg.azsrg", m_srgAsset, m_pipelineState, m_drawListTag);
+            CreatePipeline("Shaders/tonemappingexample/renderimage.azshader", "RenderImageSrg", m_shaderAsset, m_srgLayout, m_pipelineState, m_drawListTag);
 
             // Set the input indices
-            m_imageInputIndex = m_srgAsset->GetLayout()->FindShaderInputImageIndex(Name("m_texture"));
-            m_positionInputIndex = m_srgAsset->GetLayout()->FindShaderInputConstantIndex(Name("m_position"));
-            m_sizeInputIndex = m_srgAsset->GetLayout()->FindShaderInputConstantIndex(Name("m_size"));
-            m_colorSpaceIndex = m_srgAsset->GetLayout()->FindShaderInputConstantIndex(Name("m_colorSpace"));
+            m_imageInputIndex = m_srgLayout->FindShaderInputImageIndex(Name("m_texture"));
+            m_positionInputIndex = m_srgLayout->FindShaderInputConstantIndex(Name("m_position"));
+            m_sizeInputIndex = m_srgLayout->FindShaderInputConstantIndex(Name("m_size"));
+            m_colorSpaceIndex = m_srgLayout->FindShaderInputConstantIndex(Name("m_colorSpace"));
         }
 
-        m_drawImage.m_srg = RPI::ShaderResourceGroup::Create(m_srgAsset);
+        m_drawImage.m_srg = RPI::ShaderResourceGroup::Create(m_shaderAsset, m_srgLayout->GetName());
         m_drawImage.m_wasStreamed = false;
 
         // Set the image to occupy the full screen.

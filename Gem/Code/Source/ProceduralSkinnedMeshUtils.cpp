@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -196,7 +197,9 @@ namespace AtomSampleViewer
             AZ::Aabb localAabb = proceduralMesh.m_aabb;
             modelLodCreator.SetMeshAabb(AZStd::move(localAabb));
 
-            modelLodCreator.SetMeshMaterialAsset(AZ::RPI::AssetUtils::LoadAssetByProductPath<AZ::RPI::MaterialAsset>(DefaultSkinnedMeshMaterial));
+            RPI::ModelMaterialSlot::StableId slotId = 0;
+            modelCreator.AddMaterialSlot(RPI::ModelMaterialSlot{slotId, AZ::Name{}, AZ::RPI::AssetUtils::LoadAssetByProductPath<AZ::RPI::MaterialAsset>(DefaultSkinnedMeshMaterial)});
+            modelLodCreator.SetMeshMaterialSlot(slotId);
 
             modelLodCreator.EndMesh();
         }

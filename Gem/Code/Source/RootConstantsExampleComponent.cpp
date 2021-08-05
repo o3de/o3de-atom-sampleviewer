@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -138,15 +139,14 @@ namespace AtomSampleViewer
             m_rootConstantData = RHI::ConstantsData(rootConstantsLayout);
 
             // Load shader resource group asset
-            auto srgAsset = shader->FindShaderResourceGroupAsset(Name{ "MaterialGroupSrg" });
-            m_srg = AZ::RPI::ShaderResourceGroup::Create(srgAsset);
+            m_srg = AZ::RPI::ShaderResourceGroup::Create(shaderAsset, Name { "MaterialGroupSrg" });
             if (!m_srg)
             {
                 AZ_Error("Render", false, "Failed to create shader resource group");
                 return;
             }
 
-            auto materialsInputIndex = srgAsset->GetLayout()->FindShaderInputConstantIndex(Name("m_materials"));
+            auto materialsInputIndex = m_srg->FindShaderInputConstantIndex(Name("m_materials"));
 
             struct MaterialInfo
             {
@@ -180,7 +180,7 @@ namespace AtomSampleViewer
                     for (uint32_t j = 0; j < m_modelStreamBufferViews[i].size(); ++j)
                     {
                         modelLod->GetStreamsForMesh(
-                            pipelineStateDescriptor.m_inputStreamLayout, m_modelStreamBufferViews[i][j], nullptr, shaderVariant.GetInputContract(),
+                            pipelineStateDescriptor.m_inputStreamLayout, m_modelStreamBufferViews[i][j], nullptr, shader->GetInputContract(),
                             j);
                     }
                 }

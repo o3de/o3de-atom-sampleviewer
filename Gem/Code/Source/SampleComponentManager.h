@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -144,6 +145,8 @@ namespace AtomSampleViewer
         void RequestFrameCapture(const AZStd::string& filePath, bool hideImGui) override;
         bool IsFrameCapturePending() override;
         void RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd, int randomSeed) override;
+        void ResetRPIScene() override;
+        void ClearRPIScene() override;
 
         // FrameCaptureNotificationBus overrides...
         void OnCaptureFinished(AZ::Render::FrameCaptureResult result, const AZStd::string& info) override;
@@ -162,6 +165,7 @@ namespace AtomSampleViewer
         static bool IsMultiViewportSwapchainSampleSupported();
         void AdjustImGuiFontScale();
         const char* GetRootPassTemplateName();
+        int GutNumMSAASamples();
         
         // ---------- variables -----------------
 

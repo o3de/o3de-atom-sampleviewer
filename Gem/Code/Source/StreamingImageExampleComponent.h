@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -173,8 +174,11 @@ namespace AtomSampleViewer
         AZ::RHI::DrawListTag m_drawListTag;
         AZ::RHI::DrawListTag m_image3dDrawListTag;
 
-        AZ::Data::Asset<AZ::RPI::ShaderResourceGroupAsset> m_srgAsset;
-        AZ::Data::Asset<AZ::RPI::ShaderResourceGroupAsset> m_image3dSrgAsset;
+        AZ::Data::Asset<AZ::RPI::ShaderAsset> m_shaderAsset;
+        AZ::RHI::Ptr<AZ::RHI::ShaderResourceGroupLayout> m_srgLayout;
+
+        AZ::Data::Asset<AZ::RPI::ShaderAsset> m_image3dShaderAsset;
+        AZ::RHI::Ptr<AZ::RHI::ShaderResourceGroupLayout> m_image3dSrgLayout;
 
         // shader input indices
         AZ::RHI::ShaderInputImageIndex m_imageInputIndex;

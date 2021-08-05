@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -170,7 +171,7 @@ namespace AtomSampleViewer
                 m_shaderBallMeshHandles.push_back(LoadMesh(ShaderBallModelFilePath));
                 auto updateShaderBallTransform = [this, i](Data::Instance<RPI::Model> model)
                 {
-                    const Aabb& aabb = model->GetAabb();
+                    const Aabb& aabb = model->GetModelAsset()->GetAabb();
                     const Vector3 translation{ 0.0f, -aabb.GetMin().GetZ() * aznumeric_cast<float>(i), -aabb.GetMin().GetY() };
                     const auto transform = Transform::CreateTranslation(translation);
                     m_meshFeatureProcessor->SetTransform(m_shaderBallMeshHandles[i], transform);

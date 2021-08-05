@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -457,19 +458,7 @@ namespace AtomSampleViewer
 
     AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> BasicRHIComponent::CreateShaderResourceGroup(AZ::Data::Instance<AZ::RPI::Shader> shader, const char* shaderResourceGroupId, [[maybe_unused]] const char* sampleName)
     {
-        auto perInstanceSrgAsset = shader->FindShaderResourceGroupAsset(AZ::Name{ shaderResourceGroupId });
-        if (!perInstanceSrgAsset.GetId().IsValid())
-        {
-            AZ_Error(sampleName, false, "Could not find shader resource group asset '%s'", shaderResourceGroupId);
-            return nullptr;
-        }
-        else if (!perInstanceSrgAsset.IsReady())
-        {
-            AZ_Error(sampleName, false, "Shader resource group asset is not loaded");
-            return nullptr;
-        }
-
-        auto srg = AZ::RPI::ShaderResourceGroup::Create(perInstanceSrgAsset);
+        auto srg = AZ::RPI::ShaderResourceGroup::Create(shader->GetAsset(), AZ::Name { shaderResourceGroupId });
         if (!srg)
         {
             AZ_Error(sampleName, false, "Failed to create shader resource group");

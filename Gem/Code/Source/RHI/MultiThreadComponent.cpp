@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -238,15 +239,10 @@ namespace AtomSampleViewer
             return;
         }
 
-        auto perInstanceSrgAsset = shader->FindShaderResourceGroupAsset(AZ::Name{ "MultiThreadInstanceSrg" });
-        if (!perInstanceSrgAsset.GetId().IsValid())
+        auto perInstanceSrgLayout = shader->FindShaderResourceGroupLayout(AZ::Name{ "MultiThreadInstanceSrg" });
+        if (!perInstanceSrgLayout)
         {
-            AZ_Error("MultiThreadComponent", false, "Failed to get shader resource group asset");
-            return;
-        }
-        else if (!perInstanceSrgAsset.IsReady())
-        {
-            AZ_Error("MultiThreadComponent", false, "Shader resource group asset is not loaded");
+            AZ_Error("MultiThreadComponent", false, "Failed to get shader resource group layout");
             return;
         }
 

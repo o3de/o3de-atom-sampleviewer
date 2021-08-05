@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -387,20 +388,12 @@ namespace AtomSampleViewer
                 // Any stale assets have been cleared, now we can create the new ones.
                 // Copy a default set files into the temp folder.
                 CopyTestFile(TestData::AzslFileNames::HorizontalPattern, Sources::AzslFileName);
-                m_initStatus = InitStatus::CopyingDefaultAzslTestFile;
-            }
-        }
-
-        if (m_initStatus == InitStatus::CopyingDefaultAzslTestFile)
-        {
-            AzFramework::AssetSystem::AssetStatus status = GetTestAssetStatus(Sources::AzslFileName);
-            if (status == AzFramework::AssetSystem::AssetStatus::AssetStatus_Compiled)
-            {
                 CopyTestFile(TestData::ShaderFileNames::BlendingOff, Sources::ShaderFileName);
                 m_initStatus = InitStatus::CopyingDefaultShaderTestFile;
             }
         }
-        else if (m_initStatus == InitStatus::CopyingDefaultShaderTestFile)
+
+        if (m_initStatus == InitStatus::CopyingDefaultShaderTestFile)
         {
             AzFramework::AssetSystem::AssetStatus status = GetTestAssetStatus(Sources::ShaderFileName);
             if (status == AzFramework::AssetSystem::AssetStatus::AssetStatus_Compiled)

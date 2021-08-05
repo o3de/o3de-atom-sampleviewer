@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -344,7 +345,7 @@ namespace AtomSampleViewer
 
         auto updateFloorTransform = [&](Data::Instance<RPI::Model> model)
         {
-            const AZ::Aabb& aabb = model->GetAabb();
+            const AZ::Aabb& aabb = model->GetModelAsset()->GetAabb();
             const float maxZ = aabb.GetMax().GetZ();
             const AZ::Vector3 nonUniformScale{ 12.f, 12.f, 0.1f };
             const AZ::Vector3 translation{ 0.f, 0.f, -maxZ * nonUniformScale.GetZ() };
@@ -360,7 +361,7 @@ namespace AtomSampleViewer
 
         auto updateBunnyTransform = [&](Data::Instance<RPI::Model> model)
         {
-            const AZ::Aabb& aabb = model->GetAabb();
+            const AZ::Aabb& aabb = model->GetModelAsset()->GetAabb();
             const float minZ = aabb.GetMin().GetZ();
             const AZ::Vector3 translation{ 0.f, 0.f, -minZ };
             auto transform = AZ::Transform::CreateTranslation(translation);

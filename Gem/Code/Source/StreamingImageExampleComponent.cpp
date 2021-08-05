@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -48,8 +49,9 @@ namespace AtomSampleViewer
     void StreamingImageExampleComponent::PrepareRenderData()
     {
         const auto CreatePipeline = [](const char* shaderFilepath,
-            const char* srgFilepath,
-            Data::Asset<AZ::RPI::ShaderResourceGroupAsset>& srgAsset,
+            const char* srgName,
+            Data::Asset<AZ::RPI::ShaderAsset>& shaderAsset,
+            RHI::Ptr<AZ::RHI::ShaderResourceGroupLayout>& srgLayout,
             RHI::ConstPtr<RHI::PipelineState>& pipelineState,
             RHI::DrawListTag& drawListTag)
         {
@@ -57,7 +59,7 @@ namespace AtomSampleViewer
             // Also, the index buffer is not needed with DrawLinear.
             RHI::PipelineStateDescriptorForDraw pipelineStateDescriptor;
 
-            Data::Asset<RPI::ShaderAsset> shaderAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::ShaderAsset>(shaderFilepath, RPI::AssetUtils::TraceLevel::Error);
+            shaderAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::ShaderAsset>(shaderFilepath, RPI::AssetUtils::TraceLevel::Error);
             Data::Instance<RPI::Shader> shader = RPI::Shader::FindOrCreate(shaderAsset);
 
             if (!shader)
@@ -68,10 +70,10 @@ namespace AtomSampleViewer
 
             const RPI::ShaderVariant& shaderVariant = shader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId);
             shaderVariant.ConfigurePipelineState(pipelineStateDescriptor);
-
             drawListTag = shader->GetDrawListTag();
+
             RPI::Scene* scene = RPI::RPISystemInterface::Get()->GetDefaultScene().get();
-            scene->ConfigurePipelineState(drawListTag, pipelineStateDescriptor);
+            scene->ConfigurePipelineState(shader->GetDrawListTag(), pipelineStateDescriptor);
 
             pipelineStateDescriptor.m_inputStreamLayout.SetTopology(AZ::RHI::PrimitiveTopology::TriangleStrip);
             pipelineStateDescriptor.m_inputStreamLayout.Finalize();
@@ -82,27 +84,28 @@ namespace AtomSampleViewer
                 AZ_Error("Render", false, "Failed to acquire default pipeline state for shader %s", shaderFilepath);
             }
 
-            // Load shader resource group asset
-            srgAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::ShaderResourceGroupAsset>(srgFilepath, RPI::AssetUtils::TraceLevel::Error);
+            // Load shader resource group layout
+            srgLayout = shaderAsset->FindShaderResourceGroupLayout(AZ::Name(srgName));
         };
 
         // Create the example's main pipeline object
         {
-            CreatePipeline("Shaders/streamingimageexample/imagemips.azshader", "Shaders/streamingimageexample/imagemips_imagemipssrg.azsrg", m_srgAsset, m_pipelineState, m_drawListTag);
+            CreatePipeline("Shaders/streamingimageexample/imagemips.azshader", "ImageMipsSrg", m_shaderAsset, m_srgLayout, m_pipelineState, m_drawListTag);
 
             // Set the input indices
-            m_imageInputIndex = m_srgAsset->GetLayout()->FindShaderInputImageIndex(Name("m_texture"));
-            m_positionInputIndex = m_srgAsset->GetLayout()->FindShaderInputConstantIndex(Name("m_position"));
-            m_sizeInputIndex = m_srgAsset->GetLayout()->FindShaderInputConstantIndex(Name("m_size"));
-            m_residentMipInputIndex = m_srgAsset->GetLayout()->FindShaderInputConstantIndex(Name("m_residentMip"));
+            m_imageInputIndex = m_srgLayout->FindShaderInputImageIndex(Name("m_texture"));
+            m_positionInputIndex = m_srgLayout->FindShaderInputConstantIndex(Name("m_position"));
+            m_sizeInputIndex = m_srgLayout->FindShaderInputConstantIndex(Name("m_size"));
+            m_residentMipInputIndex = m_srgLayout->FindShaderInputConstantIndex(Name("m_residentMip"));
 
             // Create an SRG instance for the hot reloaded image
-            m_imageHotReload.m_srg = RPI::ShaderResourceGroup::Create(m_srgAsset);
+            m_imageHotReload.m_srg = RPI::ShaderResourceGroup::Create(m_shaderAsset, m_srgLayout->GetName());
         }
 
         // Create the 3D pipeline object
         {
-            CreatePipeline("Shaders/streamingimageexample/image3d.azshader", "Shaders/streamingimageexample/image3d_imagesrg.azsrg", m_image3dSrgAsset, m_image3dPipelineState, m_image3dDrawListTag);
+            CreatePipeline("Shaders/streamingimageexample/image3d.azshader", "ImageSrg", m_image3dShaderAsset, m_image3dSrgLayout, m_image3dPipelineState,
+                m_image3dDrawListTag);
         }
 
     }
@@ -308,10 +311,12 @@ namespace AtomSampleViewer
 
         m_pipelineState = nullptr;
         m_drawListTag.Reset();
-        m_srgAsset = {};
+        m_shaderAsset = {};
+        m_srgLayout = nullptr;
 
         m_3dImages.clear();
-        m_image3dSrgAsset = {};
+        m_image3dShaderAsset = {};
+        m_image3dSrgLayout = nullptr;
         m_image3dPipelineState = nullptr;
         m_image3dDrawListTag.Reset();
     }
@@ -592,7 +597,7 @@ namespace AtomSampleViewer
             m_numImageAssetQueued++;
             ImageToDraw img;
             img.m_asset = AZ::Data::AssetManager::Instance().GetAsset<AZ::RPI::StreamingImageAsset>(imageAssetId, AZ::Data::AssetLoadBehavior::PreLoad);
-            img.m_srg = RPI::ShaderResourceGroup::Create(m_srgAsset);
+            img.m_srg = RPI::ShaderResourceGroup::Create(m_shaderAsset, m_srgLayout->GetName());
             img.m_assetId = imageAssetId;
             m_images.push_back(img);
 
@@ -606,10 +611,10 @@ namespace AtomSampleViewer
         const Data::Instance<RPI::StreamingImagePool>& imagePool = RPI::ImageSystemInterface::Get()->GetSystemStreamingPool();
 
         // Fetch the shader input indices
-        const RHI::ShaderInputImageIndex image3DInputIndex = m_image3dSrgAsset->GetLayout()->FindShaderInputImageIndex(Name("m_texture3D"));
-        const RHI::ShaderInputConstantIndex sliceCountInputIndex = m_image3dSrgAsset->GetLayout()->FindShaderInputConstantIndex(Name("m_sliceCount"));
-        const RHI::ShaderInputConstantIndex positionInputIndex = m_image3dSrgAsset->GetLayout()->FindShaderInputConstantIndex(Name("m_position"));
-        const RHI::ShaderInputConstantIndex sizeInputIndex = m_image3dSrgAsset->GetLayout()->FindShaderInputConstantIndex(Name("m_size"));
+        const RHI::ShaderInputImageIndex image3DInputIndex = m_image3dSrgLayout->FindShaderInputImageIndex(Name("m_texture3D"));
+        const RHI::ShaderInputConstantIndex sliceCountInputIndex = m_image3dSrgLayout->FindShaderInputConstantIndex(Name("m_sliceCount"));
+        const RHI::ShaderInputConstantIndex positionInputIndex = m_image3dSrgLayout->FindShaderInputConstantIndex(Name("m_position"));
+        const RHI::ShaderInputConstantIndex sizeInputIndex = m_image3dSrgLayout->FindShaderInputConstantIndex(Name("m_size"));
 
         // Create a small 3D image, where the row count of an image isn't the same as the height (e.g BC formats). A single slice of the image
         // will be uploaded with a single command
@@ -633,7 +638,7 @@ namespace AtomSampleViewer
 
             // Create the srg
             Image3dToDraw image3d;
-            image3d.m_srg = RPI::ShaderResourceGroup::Create(m_image3dSrgAsset);
+            image3d.m_srg = RPI::ShaderResourceGroup::Create(m_image3dShaderAsset, m_image3dSrgLayout->GetName());
             image3d.m_srg->SetImage(image3DInputIndex, image.get(), 0);
             image3d.m_sliceCount = layout.m_size.m_depth;
 
@@ -678,7 +683,7 @@ namespace AtomSampleViewer
 
             // Create the srg
             Image3dToDraw image3d;
-            image3d.m_srg = RPI::ShaderResourceGroup::Create(m_image3dSrgAsset);
+            image3d.m_srg = RPI::ShaderResourceGroup::Create(m_image3dShaderAsset, m_image3dSrgLayout->GetName());
             image3d.m_srg->SetImage(image3DInputIndex, image.get(), 0);
             image3d.m_sliceCount = depth;
 

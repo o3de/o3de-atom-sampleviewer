@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -368,7 +369,7 @@ namespace AtomSampleViewer
             TransformVertices(points, m_config.GetRotationQuaternion(), position);
 
             AZ::Vector3 direction = m_config.GetRotationQuaternion().TransformVector(AZ::Vector3::CreateAxisZ());
-            m_polygonLightFeatureProcessor->SetPolygonPoints(handle, points.data(), points.size(), direction);
+            m_polygonLightFeatureProcessor->SetPolygonPoints(handle, points.data(), static_cast<uint32_t>(points.size()), direction);
         }
     }
 
@@ -833,7 +834,7 @@ namespace AtomSampleViewer
                 AZ::RPI::AuxGeomDraw::AuxGeomDynamicDrawArguments args;
                 args.m_colorCount = 1;
                 args.m_colors = &nitsColor;
-                args.m_vertCount = tris.size();
+                args.m_vertCount = static_cast<uint32_t>(tris.size());
                 args.m_verts = tris.data();
                 m_auxGeom->DrawTriangles(args);
                 break;

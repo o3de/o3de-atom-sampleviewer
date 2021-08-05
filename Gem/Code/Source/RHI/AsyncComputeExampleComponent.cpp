@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -339,7 +340,7 @@ namespace AtomSampleViewer
                     pipelineDesc.m_inputStreamLayout,
                     m_modelStreamBufferViews[ShadowScope],
                     nullptr,
-                    variant.GetInputContract(),
+                    shader->GetInputContract(),
                     0);
 
                 m_modelPipelineStates[ShadowScope] = shader->AcquirePipelineState(pipelineDesc);
@@ -399,7 +400,7 @@ namespace AtomSampleViewer
                     pipelineDesc.m_inputStreamLayout,
                     m_modelStreamBufferViews[ForwardScope],
                     nullptr,
-                    variant.GetInputContract(),
+                    shader->GetInputContract(),
                     0);
 
                 m_modelPipelineStates[ForwardScope] = shader->AcquirePipelineState(pipelineDesc);

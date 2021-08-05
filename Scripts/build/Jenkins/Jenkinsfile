@@ -1,7 +1,8 @@
 #!/usr/bin/env groovy
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -12,10 +13,10 @@ INCREMENTAL_BUILD_SCRIPT_PATH = 'scripts/build/bootstrap/incremental_build_util.
 EMPTY_JSON = readJSON text: '{}'
 
 PROJECT_REPOSITORY_NAME = 'o3de-atom-sampleviewer'
-PROJECT_ORGANIZATION_NAME = 'aws-lumberyard'
+PROJECT_ORGANIZATION_NAME = 'o3de'
 ENGINE_REPOSITORY_NAME = 'o3de'
-ENGINE_ORGANIZATION_NAME = 'aws-lumberyard'
-ENGINE_BRANCH_DEFAULT = "${env.BRANCH_DEFAULT}" ?: 'development'
+ENGINE_ORGANIZATION_NAME = 'o3de'
+ENGINE_BRANCH_DEFAULT = "${env.BRANCH_DEFAULT}" ?: "${env.BRANCH_NAME}"
 
 def pipelineProperties = []
 
@@ -26,7 +27,7 @@ def pipelineParameters = [
     booleanParam(defaultValue: false, description: 'Deletes the contents of the output directories of the AssetProcessor before building.', name: 'CLEAN_ASSETS'),
     booleanParam(defaultValue: false, description: 'Deletes the contents of the workspace and forces a complete pull.', name: 'CLEAN_WORKSPACE'),
     booleanParam(defaultValue: false, description: 'Recreates the volume used for the workspace. The volume will be created out of a snapshot taken from main.', name: 'RECREATE_VOLUME'),
-    stringParam(defaultValue: "${ENGINE_BRANCH_DEFAULT}", description: 'Sets a different branch from o3de engine repo to use or use commit id. Default is mainline', trim: true, name: 'ENGINE_BRANCH')
+    stringParam(defaultValue: "${ENGINE_BRANCH_DEFAULT}", description: 'Sets a different branch from o3de engine repo to use or use commit id. Default is branchname', trim: true, name: 'ENGINE_BRANCH')
 ]
 
 def palSh(cmd, lbl = '', winSlashReplacement = true) {
@@ -60,7 +61,7 @@ def palRm(path) {
     } else {
         def win_path = path.replace('/','\\')
         bat label: "Removing ${win_path}",
-            script: "del ${win_path}"
+            script: "del /Q ${win_path}"
     }
 }
 
@@ -185,7 +186,6 @@ def GetEnvStringList(Map envVarMap) {
 }
 
 def getEngineRemoteConfig(remoteConfigs) {
-    def refSpec = "${params.ENGINE_REFSPEC}" ?: "${ENGINE_REFSPEC_DEFAULT}"
     def engineRemoteConfigs = [name: "${ENGINE_REPOSITORY_NAME}",
         url: remoteConfigs.url[0]
             .replace("${PROJECT_REPOSITORY_NAME}", "${ENGINE_REPOSITORY_NAME}")
@@ -196,19 +196,19 @@ def getEngineRemoteConfig(remoteConfigs) {
 }
 
 def CheckoutBootstrapScripts(String branchName) {
-    checkout([$class: "GitSCM",
+    checkout([$class: 'GitSCM',
         branches: [[name: "*/${branchName}"]],
         doGenerateSubmoduleConfigurations: false,
         extensions: [
-            [$class: "PruneStaleBranch"],
-            [$class: "SparseCheckoutPaths",
-                sparseCheckoutPaths: [
-                    [ $class: "SparseCheckoutPath", path: "scripts/build/Jenkins/" ],
-                    [ $class: "SparseCheckoutPath", path: "scripts/build/bootstrap/" ],
-                    [ $class: "SparseCheckoutPath", path: "scripts/build/Platform" ]
-                ]
-            ],
-            [$class: "CloneOption", depth: 1, noTags: false, reference: "", shallow: true]
+            [$class: 'PruneStaleBranch'],
+            [$class: 'AuthorInChangelog'],
+            [$class: 'SparseCheckoutPaths', sparseCheckoutPaths: [
+                [ $class: 'SparseCheckoutPath', path: 'scripts/build/Jenkins/' ],
+                [ $class: 'SparseCheckoutPath', path: 'scripts/build/bootstrap/' ],
+                [ $class: 'SparseCheckoutPath', path: 'scripts/build/Platform' ]
+            ]],
+            // Shallow checkouts break changelog computation. Do not enable.
+            [$class: 'CloneOption', noTags: false, reference: '', shallow: false]
         ],
         submoduleCfg: [],
         userRemoteConfigs: [getEngineRemoteConfig(scm.userRemoteConfigs)]
@@ -229,7 +229,7 @@ def CheckoutRepo(boolean disableSubmodules = false) {
         dir(projectAndUrl.key) {           
             if(fileExists('.git')) {
                 // If the repository after checkout is locked, likely we took a snapshot while git was running,
-                // to leave the repo in a usable state, garbagecollect. This also helps in situations where 
+                // to leave the repo in a usable state, garbage collect.
                 def indexLockFile = '.git/index.lock'
                 if(fileExists(indexLockFile)) {
                     palSh('git gc', 'Git GarbageCollect')    
@@ -245,13 +245,12 @@ def CheckoutRepo(boolean disableSubmodules = false) {
     def retryAttempt = 0
     retry(5) {
         if (retryAttempt > 0) {
-            sleep random.nextInt(60 * retryAttempt)  // Stagger checkouts to prevent HTTP 429 (Too Many Requests) response from CodeCommit
+            sleep random.nextInt(60 * retryAttempt)  // Stagger checkouts to prevent HTTP 429 (Too Many Requests) response from Github
         }
         retryAttempt = retryAttempt + 1
         projectsAndUrl.each { projectAndUrl ->
             dir(projectAndUrl.key) {
                 def branchName = scm.branches
-                palSh('git lfs uninstall', 'Git LFS Uninstall') // Prevent git from pulling lfs objects during checkout
                 if(projectAndUrl.key == "${ENGINE_REPOSITORY_NAME}") {
                     branchName = [[name: params.ENGINE_BRANCH]]
                 }
@@ -260,20 +259,12 @@ def CheckoutRepo(boolean disableSubmodules = false) {
                     branches: branchName,
                     extensions: [
                         [$class: 'PruneStaleBranch'],
+                        [$class: 'AuthorInChangelog'],
                         [$class: 'SubmoduleOption', disableSubmodules: disableSubmodules, recursiveSubmodules: true],
                         [$class: 'CheckoutOption', timeout: 60]
                     ],
                     userRemoteConfigs: [projectAndUrl.value]
                 ]
-                if(fileExists(".lfsconfig")) {
-                    def localLfsUrl = sh(script: "git config -f .lfsconfig --get lfs.url", label: "Getting LFS URL", returnStdout: true).replace("https://","").trim() // Read the lfs file instead of relying on env var
-                    withCredentials([usernamePassword(credentialsId: "${env.GITHUB_USER}", passwordVariable: 'accesstoken', usernameVariable: 'username')]) {
-                        palSh("git config -f .lfsconfig lfs.url https://${username}:${accesstoken}@${localLfsUrl}", 'Set credentials', false)
-                    }
-                }
-
-                palSh('git lfs install', 'Git LFS Install')
-                palSh('git lfs pull', 'Git LFS Pull')
             }
         }
     }
@@ -284,6 +275,14 @@ def CheckoutRepo(boolean disableSubmodules = false) {
         env.CHANGE_ID = readFile file: 'commitid'
         env.CHANGE_ID = env.CHANGE_ID.trim()
         palRm('commitid')
+            // CHANGE_DATE is used by the installer to provide some ability to sort tagged builds in addition to BRANCH_NAME and CHANGE_ID
+        commitDateFmt = '%%cI'
+        if (env.IS_UNIX) commitDateFmt = '%cI'
+
+        palSh("git show -s --format=${commitDateFmt} ${env.CHANGE_ID} > commitdate", 'Getting commit date')
+        env.CHANGE_DATE = readFile file: 'commitdate'
+        env.CHANGE_DATE = env.CHANGE_DATE.trim()
+        palRm('commitdate')
     }
 }
 
@@ -294,8 +293,8 @@ def PreBuildCommonSteps(Map pipelineConfig, String repositoryName, String projec
         unstash name: 'incremental_build_script'
 
         def pythonCmd = ''
-        if(env.IS_UNIX) pythonCmd = 'sudo -E python -u '
-        else pythonCmd = 'python -u '
+        if(env.IS_UNIX) pythonCmd = 'sudo -E python3 -u '
+        else pythonCmd = 'python3 -u '
 
         if(env.RECREATE_VOLUME?.toBoolean()) {
             palSh("${pythonCmd} ${INCREMENTAL_BUILD_SCRIPT_PATH} --action delete --repository_name ${repositoryName} --project ${projectName} --pipeline ${pipeline} --branch ${branchName} --platform ${platform} --build_type ${buildType}", 'Deleting volume', winSlashReplacement=false)
@@ -329,10 +328,8 @@ def PreBuildCommonSteps(Map pipelineConfig, String repositoryName, String projec
         if(!fileExists('3rdParty')) {
             palMkdir('3rdParty')
         }
-
         CheckoutRepo(disableSubmodules)
     }
-
     dir("${workspace}/${ENGINE_REPOSITORY_NAME}") {
         // Get python
         if(env.IS_UNIX) {
@@ -343,62 +340,94 @@ def PreBuildCommonSteps(Map pipelineConfig, String repositoryName, String projec
                 script: 'python/get_python.bat'
         }
 
-        if(env.CLEAN_OUTPUT_DIRECTORY?.toBoolean() || env.CLEAN_ASSETS?.toBoolean()) {
-            def command = "${pipelineConfig.BUILD_ENTRY_POINT} --platform ${platform} --type clean"
-            if (env.IS_UNIX) {
-                sh label: "Running ${platform} clean",
-                   script: "${pipelineConfig.PYTHON_DIR}/python.sh -u ${command}"
-            } else {
-                bat label: "Running ${platform} clean",
-                    script: "${pipelineConfig.PYTHON_DIR}/python.cmd -u ${command}".replace('/','\\')
-            }
-        }
+        // Always run the clean step, the scripts detect what variables were set, but it also cleans if
+        // the NODE_LABEL has changed
+        def command = "${pipelineConfig.PYTHON_DIR}/python"
+        if(env.IS_UNIX) command += '.sh'
+        else command += '.cmd'
+        command += " -u ${pipelineConfig.BUILD_ENTRY_POINT} --platform ${platform} --type clean"
+        palSh(command, "Running ${platform} clean")
     }
 }
 
-def Build(Map options, String platform, String type, String workspace) {
+def Build(Map pipelineConfig, String platform, String type, String workspace) {
     // If EXECUTE_FROM_PROJECT is defined, we execute the script from the project instead of from the engine
     // In both cases, the scripts are in the engine, is just what the current dir is and how we get to the scripts
     def currentDir = "${workspace}/${ENGINE_REPOSITORY_NAME}"
     def pathToEngine = ""
-    def scriptExt = ""
-    if (env.IS_UNIX) {
-        scriptExt = ".sh"
-    }
-    if (env.EXECUTE_FROM_PROJECT?.toBoolean()) {
-        currentDir = "${workspace}/${PROJECT_REPOSITORY_NAME}"
-        pathToEngine = "../${ENGINE_REPOSITORY_NAME}/"
-    }
-    else {
-        dir("${currentDir}") {
-            palSh("scripts/o3de${scriptExt} register --project-path ${workspace}/${PROJECT_REPOSITORY_NAME}", "Registering project ${PROJECT_REPOSITORY_NAME}") // o3de.sh will work under Windows in a Cygwin environment
+
+    timeout(time: env.TIMEOUT, unit: 'MINUTES', activity: true) {
+        def command = "${pipelineConfig.PYTHON_DIR}/python"
+        def ext = ''
+        if(env.IS_UNIX) {
+            command += '.sh'
+            ext = '.sh'
         }
-    }
-    def command = "${pathToEngine}${options.BUILD_ENTRY_POINT} --platform ${platform} --type ${type}"
-    dir("${currentDir}") {
-        palSh("${pathToEngine}${options.PYTHON_DIR}/python${scriptExt} -u ${command}", "Running ${platform} ${type}")
+        else command += '.cmd'
+
+        // Setup environment for project execution, otherwise, register the project
+        if (env.EXECUTE_FROM_PROJECT?.toBoolean()) {
+            currentDir = "${workspace}/${PROJECT_REPOSITORY_NAME}"
+            pathToEngine = "../${ENGINE_REPOSITORY_NAME}/"
+        } else {
+            dir("${workspace}/${ENGINE_REPOSITORY_NAME}") {
+                palSh("scripts/o3de${ext} register --project-path ${workspace}/${PROJECT_REPOSITORY_NAME}", "Registering project ${PROJECT_REPOSITORY_NAME}")
+            }
+        }
+        command += " -u ${pipelineConfig.BUILD_ENTRY_POINT} --platform ${platform} --type ${type}"
+        dir("${workspace}/${ENGINE_REPOSITORY_NAME}") {
+            palSh(command, "Running ${platform} ${type}")
+        }
     }
 }
 
-def TestMetrics(Map options, String workspace, String branchName, String repoName, String buildJobName, String outputDirectory, String configuration) {
+def TestMetrics(Map pipelineConfig, String workspace, String branchName, String repoName, String buildJobName, String outputDirectory, String configuration) {
     catchError(buildResult: null, stageResult: null) {
         def cmakeBuildDir = [workspace, ENGINE_REPOSITORY_NAME, outputDirectory].join('/')
         dir("${workspace}/${ENGINE_REPOSITORY_NAME}") {
             checkout scm: [
                 $class: 'GitSCM',
                 branches: [[name: '*/main']],
-                extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: 'mars']],
+                extensions: [
+                    [$class: 'AuthorInChangelog'],
+                    [$class: 'RelativeTargetDirectory', relativeTargetDir: 'mars']
+                ],
                 userRemoteConfigs: [[url: "${env.MARS_REPO}", name: 'mars', credentialsId: "${env.GITHUB_USER}"]]
             ]
             withCredentials([usernamePassword(credentialsId: "${env.SERVICE_USER}", passwordVariable: 'apitoken', usernameVariable: 'username')]) {
-                def command = "${options.PYTHON_DIR}/python.cmd -u mars/scripts/python/ctest_test_metric_scraper.py " +
+                def command = "${pipelineConfig.PYTHON_DIR}/python.cmd -u mars/scripts/python/ctest_test_metric_scraper.py " +
                               '-e jenkins.creds.user %username% -e jenkins.creds.pass %apitoken% ' +
                               "-e jenkins.base_url ${env.JENKINS_URL} " +
-                              "${cmakeBuildDir} ${branchName} %BUILD_NUMBER% AR ${configuration} ${repoName} "
+                              "${cmakeBuildDir} ${branchName} %BUILD_NUMBER% AR ${configuration} ${repoName} --url ${env.BUILD_URL}"
                 bat label: "Publishing ${buildJobName} Test Metrics",
                     script: command
             }
         }
+    }
+}
+
+def ExportTestResults(Map options, String platform, String type, String workspace, Map params) {
+    catchError(message: "Error exporting tests results (this won't fail the build)", buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+        def o3deroot = "${workspace}/${ENGINE_REPOSITORY_NAME}"
+        dir("${o3deroot}/${params.OUTPUT_DIRECTORY}") {
+            junit testResults: "Testing/**/*.xml"
+            palRmDir("Testing")
+            // Recreate test runner xml directories that need to be pre generated
+            palMkdir("Testing/Pytest")
+            palMkdir("Testing/Gtest")
+        }
+    }
+}
+
+def ExportTestScreenshots(Map options, String workspace, String platformName, String jobName, Map params) {
+    catchError(message: "Error exporting test screenshots (this won't fail the build)", buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+        def screenshotsFolder = '${workspace}/${PROJECT_REPOSITORY_NAME}/user/Scripts/Screenshots'
+        def s3Uploader = '${workspace}/${ENGINE_REPOSITORY_NAME}/scripts/build/tools/upload_to_s3.py'
+        def command = '${options.PYTHON_DIR}/python.cmd -u ${s3Uploader} --base_dir ${screenshotsFolder} ' +
+                      '--file_regex "(.*png$|.*ppm$)" --bucket ${env.TEST_SCREENSHOT_BUCKET} '
+                      '--search_subdirectories True --key_prefix ${branchName}_${env.BUILD_NUMBER}'
+        bat label: "Uploading test screenshots for ${jobName}",
+            script: command
     }
 }
 
@@ -407,8 +436,8 @@ def PostBuildCommonSteps(String workspace, boolean mount = true) {
 
     if (mount) {
         def pythonCmd = ''
-        if(env.IS_UNIX) pythonCmd = 'sudo -E python -u '
-        else pythonCmd = 'python -u '
+        if(env.IS_UNIX) pythonCmd = 'sudo -E python3 -u '
+        else pythonCmd = 'python3 -u '
 
         try {
             timeout(5) {
@@ -422,7 +451,7 @@ def PostBuildCommonSteps(String workspace, boolean mount = true) {
 
 def CreateSetupStage(Map pipelineConfig, String repositoryName, String projectName, String pipelineName, String branchName, String platformName, String jobName, Map environmentVars) {
     return {
-        stage("Setup") {
+        stage('Setup') {
             PreBuildCommonSteps(pipelineConfig, repositoryName, projectName, pipelineName, branchName, platformName, jobName,  environmentVars['WORKSPACE'], environmentVars['MOUNT_VOLUME'])
         }
     }
@@ -444,9 +473,25 @@ def CreateTestMetricsStage(Map pipelineConfig, String branchName, Map environmen
     }
 }
 
+def CreateExportTestResultsStage(Map pipelineConfig, String platformName, String jobName, Map environmentVars, Map params) {
+    return {
+        stage("${jobName}_results") {
+            ExportTestResults(pipelineConfig, platformName, jobName, environmentVars['WORKSPACE'], params)
+        }
+    }
+}
+
+def CreateExportTestScreenshotsStage(Map pipelineConfig, String platformName, String jobName, Map environmentVars, Map params) {
+    return {
+        stage("${jobName}_screenshots") {
+            ExportTestScreenshots(pipelineConfig, environmentVars['WORKSPACE'], platformName, jobName, params)
+        }
+    }
+}
+
 def CreateTeardownStage(Map environmentVars) {
     return {
-        stage("Teardown") {
+        stage('Teardown') {
             PostBuildCommonSteps(environmentVars['WORKSPACE'], environmentVars['MOUNT_VOLUME'])
         }
     }
@@ -481,8 +526,7 @@ try {
                     pipelineProperties.add(disableConcurrentBuilds())
                     
                     def engineBranch = params.ENGINE_BRANCH ?: "${ENGINE_BRANCH_DEFAULT}" // This allows the first run to work with parameters having null value, but use the engine branch parameter afterwards
-
-                    echo "Running \"${pipelineName}\" for \"${branchName}\" on engine branch \"${engineBranch}\"..."
+                    echo "Running repository: \"${repositoryName}\", pipeline: \"${pipelineName}\", branch: \"${branchName}\" on engine branch \"${engineBranch}\"..."
 
                     CheckoutBootstrapScripts(engineBranch)
 
@@ -536,34 +580,17 @@ try {
                             envVars['IS_UNIX'] = 1
                         }
                         withEnv(GetEnvStringList(envVars)) {
+                            def build_job_name = build_job.key
                             try {
-                                def build_job_name = build_job.key
-
                                 CreateSetupStage(pipelineConfig, repositoryName, projectName, pipelineName, branchName, platform.key, build_job.key, envVars).call()
 
                                 if(build_job.value.steps) { //this is a pipe with many steps so create all the build stages
                                     build_job.value.steps.each { build_step ->
                                         build_job_name = build_step
-                                
-                                        def buildTypeJson = platform.value.build_types["${build_job_name}"]
-                                        def buildTypePipelineEnv = buildTypeJson ? buildTypeJson.PIPELINE_ENV : EMPTY_JSON
-                                        def jobEnvVars = envVars
-                                        buildTypePipelineEnv.each { var ->
-                                            jobEnvVars[var.key] = var.value
-                                        }
-                                      
-                                        withEnv(GetEnvStringList(jobEnvVars)) {
-                                            CreateBuildStage(pipelineConfig,  platform.key, build_step, envVars).call()
-                                        }
+                                        CreateBuildStage(pipelineConfig,  platform.key, build_step, envVars).call()
                                     }
                                 } else {
                                     CreateBuildStage(pipelineConfig,  platform.key, build_job.key, envVars).call()
-                                }
-
-                                if (env.MARS_REPO && platform.key == 'Windows' && build_job_name.startsWith('test')) {
-                                    def output_directory = platform.value.build_types[build_job_name].PARAMETERS.OUTPUT_DIRECTORY
-                                    def configuration = platform.value.build_types[build_job_name].PARAMETERS.CONFIGURATION
-                                    CreateTestMetricsStage(pipelineConfig, branchName, envVars, build_job_name, output_directory, configuration).call()
                                 }
                             }
                             catch(Exception e) {
@@ -579,6 +606,18 @@ try {
                                 }
                             }
                             finally {
+                                def params = platform.value.build_types[build_job_name].PARAMETERS
+                                if (env.MARS_REPO && params && params.containsKey('TEST_METRICS') && params.TEST_METRICS == 'True') {
+                                    def output_directory = params.OUTPUT_DIRECTORY
+                                    def configuration = params.CONFIGURATION
+                                    CreateTestMetricsStage(pipelineConfig, branchName, envVars, build_job_name, output_directory, configuration).call()
+                                }
+                                if (params && params.containsKey('TEST_RESULTS') && params.TEST_RESULTS == 'True') {
+                                    CreateExportTestResultsStage(pipelineConfig,  platform.key, build_job_name, envVars, params).call()
+                                }
+                                if (params && params.containsKey('TEST_SCREENSHOTS') && params.TEST_SCREENSHOTS == 'True' && currentResult == 'FAILURE') {
+                                     CreateExportTestScreenshotsStage(pipelineConfig,  platform.key, build_job_name, envVars, params).call()
+                                }
                                 CreateTeardownStage(envVars).call()
                             }
                         }
@@ -612,15 +651,15 @@ finally {
                 message:"${currentBuild.currentResult}:${BUILD_URL}:${env.RECREATE_VOLUME}:${env.CLEAN_OUTPUT_DIRECTORY}:${env.CLEAN_ASSETS}"
             )
         }
-        step([
-            $class: 'Mailer',
-            notifyEveryUnstableBuild: true,
-            sendToIndividuals: true,
-            recipients: emailextrecipients([
-                [$class: 'CulpritsRecipientProvider'],
-                [$class: 'RequesterRecipientProvider']
+        node('controller') {
+            step([
+                $class: 'Mailer',
+                notifyEveryUnstableBuild: true,
+                recipients: emailextrecipients([
+                    [$class: 'RequesterRecipientProvider']
+                ])
             ])
-        ])
+        }
     } catch(Exception e) {
     }
 }
