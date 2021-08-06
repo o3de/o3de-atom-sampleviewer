@@ -750,6 +750,7 @@ namespace AtomSampleViewer
 
         // Profiling data...
         behaviorContext->Method("CapturePassTimestamp", &Script_CapturePassTimestamp);
+        behaviorContext->Method("CaptureCpuFrameTime", &Script_CaptureCpuFrameTime);
         behaviorContext->Method("CapturePassPipelineStatistics", &Script_CapturePassPipelineStatistics);
         behaviorContext->Method("CaptureCpuProfilingStatistics", &Script_CaptureCpuProfilingStatistics);
         behaviorContext->Method("CaptureBenchmarkMetadata", &Script_CaptureBenchmarkMetadata);
@@ -1277,6 +1278,13 @@ namespace AtomSampleViewer
         ResumeScript();
     }
 
+    void ScriptManager::OnCaptureCpuFrameTimeFinished([[maybe_unused]] bool result, [[maybe_unused]] const AZStd::string& info)
+    {
+        m_isCapturePending = false;
+        AZ::Render::ProfilingCaptureNotificationBus::Handler::BusDisconnect();
+        ResumeScript();
+    }
+
     void ScriptManager::OnCaptureQueryPipelineStatisticsFinished([[maybe_unused]] bool result, [[maybe_unused]] const AZStd::string& info)
     {
         m_isCapturePending = false;
@@ -1314,6 +1322,27 @@ namespace AtomSampleViewer
             s_instance->PauseScript();
 
             AZ::Render::ProfilingCaptureRequestBus::Broadcast(&AZ::Render::ProfilingCaptureRequestBus::Events::CapturePassTimestamp, outputFilePath);
+        };
+
+        s_instance->m_scriptOperations.push(AZStd::move(operation));
+    }
+
+    void ScriptManager::Script_CaptureCpuFrameTime(AZ::ScriptDataContext& dc)
+    {
+        AZStd::string outputFilePath;
+        const bool readScriptDataContext = ValidateProfilingCaptureScripContexts(dc, outputFilePath);
+        if (!readScriptDataContext)
+        {
+            return;
+        }
+
+        auto operation = [outputFilePath]()
+        {
+            s_instance->m_isCapturePending = true;
+            s_instance->AZ::Render::ProfilingCaptureNotificationBus::Handler::BusConnect();
+            s_instance->PauseScript();
+
+            AZ::Render::ProfilingCaptureRequestBus::Broadcast(&AZ::Render::ProfilingCaptureRequestBus::Events::CaptureCpuFrameTime, outputFilePath);
         };
 
         s_instance->m_scriptOperations.push(AZStd::move(operation));
