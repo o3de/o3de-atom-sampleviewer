@@ -30,7 +30,9 @@ for index, sample in ipairs(SAMPLES_TO_RUN) do
     Print('Capturing timestamps for ' .. tostring(FRAME_COUNT) .. ' frames...')
     for i = 1,FRAME_COUNT do
         frame_timestamps = output_path .. '/frame' .. tostring(i) .. '_timestamps.json'
+        cpu_timings = output_path .. '/cpu_frame' .. tostring(i) .. '_time.json'
         CapturePassTimestamp(frame_timestamps)
+        CaptureCpuFrameTime(cpu_timings)
     end
 end
 
