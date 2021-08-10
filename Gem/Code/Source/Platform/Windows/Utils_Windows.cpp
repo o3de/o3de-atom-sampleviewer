@@ -29,7 +29,7 @@ namespace AtomSampleViewer
             AZStd::to_wstring(filePathBW, filePathB.c_str());
             AZStd::wstring commandLineW = L"\"" + exeW + L"\" \"" + filePathAW + L"\" \"" + filePathBW + L"\"";
 
-            STARTUPINFO si;
+            STARTUPINFOW si;
             PROCESS_INFORMATION pi;
 
             ZeroMemory(&si, sizeof(si));
