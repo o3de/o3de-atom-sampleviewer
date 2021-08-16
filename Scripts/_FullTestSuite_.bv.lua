@@ -92,7 +92,7 @@ tests= {
 
     FastCheckSample('RPI/AssetLoadTest'),
     FastCheckSample('RPI/AuxGeom'),
-    FastCheckSample('RPI/BistroBenchmark'),
+    FastCheckSample('RPI/SponzaBenchmark'),
     FastCheckSample('RPI/MultiViewSingleSceneAuxGeom'),
     FastCheckSample('RPI/RootConstants'),
     FastCheckSample('RPI/Shading'),
