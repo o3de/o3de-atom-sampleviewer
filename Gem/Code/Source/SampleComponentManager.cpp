@@ -136,6 +136,11 @@ namespace AtomSampleViewer
         const char* TransientAttachmentProfilerToolName = "Transient Attachment Profiler";
     }
 
+    bool IsValidNumMSAASamples(int numSamples)
+    {
+        return (numSamples == 1) || (numSamples == 2) || (numSamples == 4) || (numSamples == 8);
+    }
+
     SampleEntry SampleEntry::NewRHISample(const AZStd::string& name, const AZ::Uuid& uuid)
     {
         SampleEntry entry;
@@ -301,7 +306,8 @@ namespace AtomSampleViewer
         AZ_Assert(passSystem, "Cannot get the pass system.");
 
         passSystem->AddPassCreator(Name("RayTracingAmbientOcclusionPass"), &AZ::Render::RayTracingAmbientOcclusionPass::Create);
- 
+
+        m_numMSAASamples = GetDefaultNumMSAASamples();
     }
 
     void SampleComponentManager::ActivateInternal()
@@ -1149,6 +1155,18 @@ namespace AtomSampleViewer
         }
     }
 
+    void SampleComponentManager::SetNumMSAASamples(int numMSAASamples)
+    {
+        AZ_Assert(IsValidNumMSAASamples(numMSAASamples), "Invalid MSAA sample setting");
+
+        m_numMSAASamples = numMSAASamples;
+    }
+
+    void SampleComponentManager::ResetNumMSAASamples()
+    {
+        m_numMSAASamples = GetDefaultNumMSAASamples();
+    }
+
     void SampleComponentManager::ResetRPIScene()
     {
         ReleaseRPIScene();
@@ -1490,7 +1508,10 @@ namespace AtomSampleViewer
         pipelineDesc.m_name = "RPISamplePipeline";
         pipelineDesc.m_rootPassTemplate = GetRootPassTemplateName();
         pipelineDesc.m_mainViewTagName = "MainCamera";
-        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = GutNumMSAASamples();
+
+        // set pipeline MSAA samples
+        AZ_Assert(IsValidNumMSAASamples(m_numMSAASamples), "Invalid MSAA sample setting");
+        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = m_numMSAASamples;
         bool isNonMsaaPipeline = (pipelineDesc.m_renderSettings.m_multisampleState.m_samples == 1);
         const char* supervariantName = isNonMsaaPipeline ? AZ::RPI::NoMsaaSupervariantName : "";
         AZ::RPI::ShaderSystemInterface::Get()->SetSupervariantName(AZ::Name(supervariantName));

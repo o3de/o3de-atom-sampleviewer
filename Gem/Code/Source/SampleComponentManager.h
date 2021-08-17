@@ -145,6 +145,8 @@ namespace AtomSampleViewer
         void RequestFrameCapture(const AZStd::string& filePath, bool hideImGui) override;
         bool IsFrameCapturePending() override;
         void RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd, int randomSeed) override;
+        void SetNumMSAASamples(int numMSAASamples) override;
+        void ResetNumMSAASamples() override;
         void ResetRPIScene() override;
         void ClearRPIScene() override;
 
@@ -165,8 +167,8 @@ namespace AtomSampleViewer
         static bool IsMultiViewportSwapchainSampleSupported();
         void AdjustImGuiFontScale();
         const char* GetRootPassTemplateName();
-        int GutNumMSAASamples();
-        
+        int GetDefaultNumMSAASamples();
+
         // ---------- variables -----------------
 
         bool m_wasActivated = false;
@@ -251,5 +253,8 @@ namespace AtomSampleViewer
         AZ::RPI::ScenePtr m_rpiScene;
         float m_simulateTime = 0;
         float m_deltaTime = 0.016f;
+
+        // number of MSAA samples, initialized in Activate() and can vary by platform
+        int m_numMSAASamples = 0;
     };
 } // namespace AtomSampleViewer
