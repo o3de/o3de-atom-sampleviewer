@@ -136,6 +136,11 @@ namespace AtomSampleViewer
         const char* TransientAttachmentProfilerToolName = "Transient Attachment Profiler";
     }
 
+    bool IsValidNumMSAASamples(int numSamples)
+    {
+        return (numSamples == 1) || (numSamples == 2) || (numSamples == 4) || (numSamples == 8);
+    }
+
     SampleEntry SampleEntry::NewRHISample(const AZStd::string& name, const AZ::Uuid& uuid)
     {
         SampleEntry entry;
@@ -1152,7 +1157,7 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::SetNumMSAASamples(int numMSAASamples)
     {
-        AZ_Assert(numMSAASamples >= 1 && numMSAASamples <= 8, "Invalid MSAA sample setting");
+        AZ_Assert(IsValidNumMSAASamples(numMSAASamples), "Invalid MSAA sample setting");
 
         m_numMSAASamples = numMSAASamples;
     }
@@ -1505,7 +1510,7 @@ namespace AtomSampleViewer
         pipelineDesc.m_mainViewTagName = "MainCamera";
 
         // set pipeline MSAA samples
-        AZ_Assert(m_numMSAASamples >= 1 && m_numMSAASamples <= 8, "Invalid MSAA sample setting");
+        AZ_Assert(IsValidNumMSAASamples(m_numMSAASamples), "Invalid MSAA sample setting");
         pipelineDesc.m_renderSettings.m_multisampleState.m_samples = m_numMSAASamples;
         bool isNonMsaaPipeline = (pipelineDesc.m_renderSettings.m_multisampleState.m_samples == 1);
         const char* supervariantName = isNonMsaaPipeline ? AZ::RPI::NoMsaaSupervariantName : "";
