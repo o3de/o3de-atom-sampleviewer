@@ -39,6 +39,13 @@ namespace AtomSampleViewer
         //! @param randomSeed the seed for the random generator, frequently used inside lua tests to shuffle the order of the test execution
         virtual void RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd, int randomSeed) = 0;
 
+        //! Set the number of MSAA samples
+        //! @param numMSAASamples the number of MSAA samples
+        virtual void SetNumMSAASamples(int numMSAASamples) = 0;
+
+        //! Set the number of MSAA samples to the platform default
+        virtual void ResetNumMSAASamples() = 0;
+
         //! Reset the RPI scene while keeping the current sample running
         virtual void ResetRPIScene() = 0;
 
