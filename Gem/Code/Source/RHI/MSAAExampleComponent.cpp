@@ -263,7 +263,7 @@ namespace AtomSampleViewer
         [[maybe_unused]] RHI::ResultCode result = attachmentsBuilder.End(pipelineStateDescriptor.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
         AZ_Assert(result == RHI::ResultCode::Success, "Failed to create render attachment layout");
 
-        pipelineStateDescriptor.m_renderStates.m_multisampleState.m_samples = properties.m_samplesCount;
+        pipelineStateDescriptor.m_renderStates.m_multisampleState.m_samples = static_cast<uint16_t>(properties.m_samplesCount);
         auto& customPositionList = pipelineStateDescriptor.m_renderStates.m_multisampleState.m_customPositions;
         AZStd::copy(properties.m_customPositions.begin(), properties.m_customPositions.end(), customPositionList.begin());
         pipelineStateDescriptor.m_renderStates.m_multisampleState.m_customPositionsCount = static_cast<uint32_t>(properties.m_customPositions.size());
@@ -300,7 +300,7 @@ namespace AtomSampleViewer
                         m_outputWidth,
                         m_outputHeight,
                         m_outputFormat);
-                    imageDesc.m_multisampleState = RHI::MultisampleState(m_sampleProperties[msaaTypeIndex].m_samplesCount, 0);
+                    imageDesc.m_multisampleState = RHI::MultisampleState(static_cast<uint16_t>(m_sampleProperties[msaaTypeIndex].m_samplesCount), 0);
                     if(m_sampleProperties[msaaTypeIndex].m_customPositions.size()>0)
                     {
                         imageDesc.m_multisampleState.m_customPositionsCount = static_cast<uint32_t>(m_sampleProperties[msaaTypeIndex].m_customPositions.size());
@@ -357,9 +357,9 @@ namespace AtomSampleViewer
             drawItem.m_arguments = drawIndexed;
             drawItem.m_pipelineState = m_pipelineStates[msaaTypeIndex].get();
             drawItem.m_indexBufferView = &indexBufferView;
-            drawItem.m_shaderResourceGroupCount = RHI::ArraySize(shaderResourceGroups);
+            drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
             drawItem.m_shaderResourceGroups = shaderResourceGroups;
-            drawItem.m_streamBufferViewCount = static_cast<uint32_t>(m_triangleStreamBufferViews.size());
+            drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_triangleStreamBufferViews.size());
             drawItem.m_streamBufferViews = m_triangleStreamBufferViews.data();
 
             // Submit the triangle draw item.
@@ -470,9 +470,9 @@ namespace AtomSampleViewer
             drawItem.m_arguments = drawIndexed;
             drawItem.m_pipelineState = m_customResolveMSAAPipelineState.get();
             drawItem.m_indexBufferView = &indexBufferView;
-            drawItem.m_shaderResourceGroupCount = RHI::ArraySize(shaderResourceGroups);
+            drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
             drawItem.m_shaderResourceGroups = shaderResourceGroups;
-            drawItem.m_streamBufferViewCount = static_cast<uint32_t>(m_quadStreamBufferViews.size());
+            drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_quadStreamBufferViews.size());
             drawItem.m_streamBufferViews = m_quadStreamBufferViews.data();
 
             // Submit the triangle draw item.

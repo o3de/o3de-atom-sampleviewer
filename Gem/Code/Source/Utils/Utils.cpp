@@ -196,7 +196,7 @@ namespace AtomSampleViewer
             AZ::RHI::Format format = AZ::RHI::Format::R8G8B8A8_UNORM_SRGB;
             AZ::RHI::ImageBindFlags bindFlag = AZ::RHI::ImageBindFlags::ShaderRead;
 
-            AZ::RHI::ImageDescriptor imageDesc = AZ::RHI::ImageDescriptor::Create2DArray(bindFlag, width, height, arraySize, format);
+            AZ::RHI::ImageDescriptor imageDesc = AZ::RHI::ImageDescriptor::Create2DArray(bindFlag, width, height, static_cast<uint16_t>(arraySize), format);
             imageDesc.m_mipLevels = 1;
             imageDesc.m_isCubemap = true;
 

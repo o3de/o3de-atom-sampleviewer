@@ -273,7 +273,7 @@ namespace AtomSampleViewer
                         AZStd::string name = AZStd::string::format(LodFormatString, i);
                         if (ScriptableImGui::Selectable(name.c_str(), m_lodOverride == i))
                         {
-                            m_lodOverride = i;
+                            m_lodOverride = static_cast<AZ::RPI::Cullable::LodOverride>(i);
                             GetMeshFeatureProcessor()->SetLodOverride(m_meshHandle, m_lodOverride);
                         }
                     }

@@ -213,7 +213,7 @@ namespace AtomSampleViewer
             // If there are no more in one direction, we'll just keep taking them from the other direction
             enum class BoneSelectionMethod { TakeClosest, TakeFarthest, TakeOnly };
             // If there is only one valid direction to start with, use TakeOnly. Otherwise, use TakeClosest
-            BoneSelectionMethod currentBoneSelectionMethod = boneIndexBelow < 0 || boneIndexAbove == m_boneCount ? BoneSelectionMethod::TakeOnly : BoneSelectionMethod::TakeClosest;
+            BoneSelectionMethod currentBoneSelectionMethod = boneIndexBelow < 0 || boneIndexAbove == static_cast<int>(m_boneCount) ? BoneSelectionMethod::TakeOnly : BoneSelectionMethod::TakeClosest;
 
             // Assume that we won't get into a state where there are no bones above and no bones below before we've finished
             AZ_Assert(m_influencesPerVertex <= m_boneCount && m_influencesPerVertex <= maxInfluencesPerVertex, "SkinnedMeshExampleComponent - m_influencesPerVertex was incorrectly clamped.");

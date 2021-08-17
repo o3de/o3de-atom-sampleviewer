@@ -166,7 +166,7 @@ namespace AtomSampleViewer
             s_colorSpaceLabels,
             AZ_ARRAY_SIZE(s_colorSpaceLabels)))
         {
-            m_inputColorSpace = GetColorSpaceIdForIndex(m_inputColorSpaceIndex);
+            m_inputColorSpace = GetColorSpaceIdForIndex(static_cast<uint8_t>(m_inputColorSpaceIndex));
             m_drawImage.m_srg->SetConstant<int>(m_colorSpaceIndex, static_cast<int>(m_inputColorSpace));
             m_drawImage.m_srg->Compile();
         }

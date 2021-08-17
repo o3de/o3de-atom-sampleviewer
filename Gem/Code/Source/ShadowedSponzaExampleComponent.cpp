@@ -249,8 +249,8 @@ namespace AtomSampleViewer
             featureProcessor->SetViewFrustumCorrectionEnabled(handle, m_isCascadeCorrectionEnabled);
             featureProcessor->SetShadowFilterMethod(handle, s_shadowFilterMethods[m_shadowFilterMethodIndexDirectional]);
             featureProcessor->SetShadowBoundaryWidth(handle, m_boundaryWidthDirectional);
-            featureProcessor->SetPredictionSampleCount(handle, m_predictionSampleCountDirectional);
-            featureProcessor->SetFilteringSampleCount(handle, m_filteringSampleCountDirectional);
+            featureProcessor->SetPredictionSampleCount(handle, static_cast<uint16_t>(m_predictionSampleCountDirectional));
+            featureProcessor->SetFilteringSampleCount(handle, static_cast<uint16_t>(m_filteringSampleCountDirectional));
             featureProcessor->SetGroundHeight(handle, 0.f);
 
             m_directionalLightHandle = handle;
@@ -435,7 +435,7 @@ namespace AtomSampleViewer
             {
                 m_directionalLightFeatureProcessor->SetCascadeCount(
                     m_directionalLightHandle,
-                    m_cascadeCount);
+                    static_cast<uint16_t>(m_cascadeCount));
             }
 
             ImGui::Spacing();
@@ -516,13 +516,13 @@ namespace AtomSampleViewer
                 {
                     m_directionalLightFeatureProcessor->SetPredictionSampleCount(
                         m_directionalLightHandle,
-                        m_predictionSampleCountDirectional);
+                        static_cast<uint16_t>(m_predictionSampleCountDirectional));
                 }
                 if (ScriptableImGui::SliderInt("Filtering # ##Directional", &m_filteringSampleCountDirectional, 4, 64))
                 {
                     m_directionalLightFeatureProcessor->SetFilteringSampleCount(
                         m_directionalLightHandle,
-                        m_filteringSampleCountDirectional);
+                        static_cast<uint16_t>(m_filteringSampleCountDirectional));
                 }
             }
         }
@@ -536,7 +536,7 @@ namespace AtomSampleViewer
             int diskLightCount = m_diskLightCount;
             if (ScriptableImGui::SliderInt("Number", &diskLightCount, 0, DiskLightCountMax))
             {
-                UpdateDiskLightCount(diskLightCount);
+                UpdateDiskLightCount(static_cast<uint16_t>(diskLightCount));
             }
 
             if (ScriptableImGui::SliderFloat("Intensity##spot", &m_diskLightIntensity, 0.f, 100000.f, "%.1f", ImGuiSliderFlags_Logarithmic))
@@ -615,14 +615,14 @@ namespace AtomSampleViewer
                 {
                     for (int index = 0; index < m_diskLightCount; ++index)
                     {
-                        m_diskLightFeatureProcessor->SetPredictionSampleCount(m_diskLights[index].m_handle, m_predictionSampleCountDisk);
+                        m_diskLightFeatureProcessor->SetPredictionSampleCount(m_diskLights[index].m_handle, static_cast<uint16_t>(m_predictionSampleCountDisk));
                     }
                 }
                 if (ScriptableImGui::SliderInt("Filtering # ##Spot", &m_filteringSampleCountDisk, 4, 64))
                 {
                     for (int index = 0; index < m_diskLightCount; ++index)
                     {
-                        m_diskLightFeatureProcessor->SetFilteringSampleCount(m_diskLights[index].m_handle, m_filteringSampleCountDisk);
+                        m_diskLightFeatureProcessor->SetFilteringSampleCount(m_diskLights[index].m_handle, static_cast<uint16_t>(m_filteringSampleCountDisk));
                     }
                 }
             }

@@ -227,7 +227,7 @@ namespace AtomSampleViewer
                 drawItem.m_arguments = drawIndexed;
                 drawItem.m_pipelineState = m_pipelineState.get();
                 drawItem.m_indexBufferView = nullptr;
-                drawItem.m_shaderResourceGroupCount = RHI::ArraySize(shaderResourceGroups);
+                drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
                 drawItem.m_streamBufferViewCount = 0;
                 drawItem.m_streamBufferViews = nullptr;

@@ -437,7 +437,7 @@ namespace AtomSampleViewer
         for (uint32_t i = 0; i < vertexCount; ++i)
         {
             // Get a point on the circle and scale it by the min or max radius for every other point.
-            AZ::Vector3 point = GetCirclePoint(i, vertexCount) * minMaxRadius[i % 2];
+            AZ::Vector3 point = GetCirclePoint(static_cast<float>(i), static_cast<float>(vertexCount)) * minMaxRadius[i % 2];
             points.push_back(point);
         }
         return points;
@@ -453,8 +453,8 @@ namespace AtomSampleViewer
         {
             uint32_t nextI = (i + 1) % vertexCount;
 
-            AZ::Vector3 p0 = GetCirclePoint(i, vertexCount) * minMaxRadius[i % 2];
-            AZ::Vector3 p1 = GetCirclePoint(nextI, vertexCount) * minMaxRadius[nextI % 2];
+            AZ::Vector3 p0 = GetCirclePoint(static_cast<float>(i), static_cast<float>(vertexCount)) * minMaxRadius[i % 2];
+            AZ::Vector3 p1 = GetCirclePoint(static_cast<float>(nextI), static_cast<float>(vertexCount)) * minMaxRadius[nextI % 2];
 
             tris.push_back(p0);
             tris.push_back(p1);

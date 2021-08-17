@@ -448,7 +448,7 @@ namespace AtomSampleViewer
                 drawItem.m_indexBufferView = &quadIndexBufferView;
                 drawItem.m_streamBufferViewCount = 1;
                 drawItem.m_streamBufferViews = &m_quadStreamBufferView;
-                drawItem.m_shaderResourceGroupCount = RHI::ArraySize(shaderResourceGroups);
+                drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
 
                 // Draw possibly occluded quad

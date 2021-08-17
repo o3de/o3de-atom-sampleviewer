@@ -407,13 +407,13 @@ namespace AtomSampleViewer
         featureProcessor->SetRgbIntensity(handle, lightColor);
         featureProcessor->SetShadowmapSize(handle, s_shadowmapImageSizes[m_directionalLightImageSizeIndex]);
         featureProcessor->SetShadowFarClipDistance(handle, FarClipDistance);
-        featureProcessor->SetCascadeCount(handle, m_cascadeCount);
+        featureProcessor->SetCascadeCount(handle, static_cast<uint16_t>(m_cascadeCount));
         featureProcessor->SetShadowmapFrustumSplitSchemeRatio(handle, m_ratioLogarithmUniform);
         featureProcessor->SetViewFrustumCorrectionEnabled(handle, m_isCascadeCorrectionEnabled);
         featureProcessor->SetShadowFilterMethod(handle, s_shadowFilterMethods[m_shadowFilterMethodIndexDirectional]);
         featureProcessor->SetShadowBoundaryWidth(handle, m_boundaryWidthDirectional);
-        featureProcessor->SetPredictionSampleCount(handle, m_predictionSampleCountDirectional);
-        featureProcessor->SetFilteringSampleCount(handle, m_filteringSampleCountDirectional);
+        featureProcessor->SetPredictionSampleCount(handle, static_cast<uint16_t>(m_predictionSampleCountDirectional));
+        featureProcessor->SetFilteringSampleCount(handle, static_cast<uint16_t>(m_filteringSampleCountDirectional));
         featureProcessor->SetGroundHeight(handle, 0.f);
 
         m_directionalLightHandle = handle;
@@ -524,7 +524,7 @@ namespace AtomSampleViewer
             cascadesChanged = cascadesChanged || ScriptableImGui::RadioButton("4", &m_cascadeCount, 4);
             if (cascadesChanged)
             {
-                m_directionalLightFeatureProcessor->SetCascadeCount(m_directionalLightHandle, m_cascadeCount);
+                m_directionalLightFeatureProcessor->SetCascadeCount(m_directionalLightHandle, static_cast<uint16_t>(m_cascadeCount));
             }
 
             ImGui::Spacing();
@@ -586,12 +586,12 @@ namespace AtomSampleViewer
                 if (ScriptableImGui::SliderInt("Prediction # ##Directional", &m_predictionSampleCountDirectional, 4, 16))
                 {
                     m_directionalLightFeatureProcessor->SetPredictionSampleCount(
-                        m_directionalLightHandle, m_predictionSampleCountDirectional);
+                        m_directionalLightHandle, static_cast<uint16_t>(m_predictionSampleCountDirectional));
                 }
                 if (ScriptableImGui::SliderInt("Filtering # ##Directional", &m_filteringSampleCountDirectional, 4, 64))
                 {
                     m_directionalLightFeatureProcessor->SetFilteringSampleCount(
-                        m_directionalLightHandle, m_filteringSampleCountDirectional);
+                        m_directionalLightHandle, static_cast<uint16_t>(m_filteringSampleCountDirectional));
                 }
             }
 
@@ -816,8 +816,8 @@ namespace AtomSampleViewer
                         lightHandle, s_shadowFilterMethods[m_shadowFilterMethodIndicesPositional[index]]);
 
                     m_diskLightFeatureProcessor->SetSofteningBoundaryWidthAngle(lightHandle, AZ::DegToRad(m_boundaryWidthsPositional[index]));
-                    m_diskLightFeatureProcessor->SetFilteringSampleCount(lightHandle, m_filteringSampleCountsPositional[index]);
-                    m_diskLightFeatureProcessor->SetPredictionSampleCount(lightHandle, m_predictionSampleCountsPositional[index]);
+                    m_diskLightFeatureProcessor->SetFilteringSampleCount(lightHandle, static_cast<uint16_t>(m_filteringSampleCountsPositional[index]));
+                    m_diskLightFeatureProcessor->SetPredictionSampleCount(lightHandle, static_cast<uint16_t>(m_predictionSampleCountsPositional[index]));
                     m_diskLightFeatureProcessor->SetPcfMethod(lightHandle, m_pcfMethod[index]);
                 }
             }
@@ -848,8 +848,8 @@ namespace AtomSampleViewer
                         lightHandle, s_shadowFilterMethods[m_shadowFilterMethodIndicesPositional[index]]);
 
                     m_pointLightFeatureProcessor->SetPcfMethod(lightHandle, m_pcfMethod[index]);
-                    m_pointLightFeatureProcessor->SetFilteringSampleCount(lightHandle, m_filteringSampleCountsPositional[index]);
-                    m_pointLightFeatureProcessor->SetPredictionSampleCount(lightHandle, m_predictionSampleCountsPositional[index]);
+                    m_pointLightFeatureProcessor->SetFilteringSampleCount(lightHandle, static_cast<uint16_t>(m_filteringSampleCountsPositional[index]));
+                    m_pointLightFeatureProcessor->SetPredictionSampleCount(lightHandle, static_cast<uint16_t>(m_predictionSampleCountsPositional[index]));
                     m_pointLightFeatureProcessor->SetSofteningBoundaryWidthAngle(lightHandle, AZ::DegToRad(m_boundaryWidthsPositional[index]));
                 }
             }

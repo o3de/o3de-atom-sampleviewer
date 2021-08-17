@@ -126,7 +126,7 @@ namespace AtomSampleViewer
         pipelineDesc.m_mainViewTagName = "MainCamera";
         pipelineDesc.m_name = "MSAA";
         pipelineDesc.m_rootPassTemplate = "MainPipeline";
-        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = m_numSamples;
+        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = static_cast<uint16_t>(m_numSamples);
         m_samplePipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
 
         // add the sample pipeline to the scene
