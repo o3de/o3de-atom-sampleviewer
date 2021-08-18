@@ -102,6 +102,10 @@ namespace AtomSampleViewer
         };
 
         PreloadAssets(assetList);
+
+        // initialize and then reset IBL, which will disable it by binding the default cubemaps
+        m_defaultIbl.Init(AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get());
+        m_defaultIbl.Reset();
     }
 
     void ShadowExampleComponent::OnAllAssetsReadyActivate()

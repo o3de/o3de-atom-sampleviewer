@@ -29,7 +29,7 @@ namespace AtomSampleViewer
         return "LowEndPipelineTemplate";
     }
 
-    int SampleComponentManager::GutNumMSAASamples()
+    int SampleComponentManager::GetDefaultNumMSAASamples()
     {
         return 1;
     }
