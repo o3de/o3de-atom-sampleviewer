@@ -21,6 +21,7 @@
 
 #include <Utils/ImGuiSidebar.h>
 #include <Utils/ImGuiMaterialDetails.h>
+#include <Utils/Utils.h>
 
 namespace AtomSampleViewer
 {
@@ -184,5 +185,7 @@ namespace AtomSampleViewer
         // original camera configuration
         float m_originalFarClipDistance = 0.f;
         float m_originalCameraFovRadians = 0.f;
+
+        Utils::DefaultIBL m_defaultIbl;
     };
 } // namespace AtomSampleViewer
