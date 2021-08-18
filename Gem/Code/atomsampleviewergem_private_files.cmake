@@ -90,8 +90,8 @@ set(FILES
     Source/AuxGeomSharedDrawFunctions.h
     Source/BakedShaderVariantExampleComponent.h
     Source/BakedShaderVariantExampleComponent.cpp
-    Source/BistroBenchmarkComponent.cpp
-    Source/BistroBenchmarkComponent.h
+    Source/SponzaBenchmarkComponent.cpp
+    Source/SponzaBenchmarkComponent.h
     Source/BloomExampleComponent.cpp
     Source/BloomExampleComponent.h
     Source/CheckerboardExampleComponent.h
