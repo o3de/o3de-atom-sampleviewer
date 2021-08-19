@@ -124,8 +124,8 @@ namespace AtomSampleViewer
         m_imGuiFrameTimer.PushValue(deltaTime);
 
         AZ::RPI::TimestampResult forwardTimestampResult = m_forwardPass->GetLatestTimestampResult();
-        double gpuForwardFrameTimeMs = aznumeric_cast<double>(forwardTimestampResult.GetDurationInNanoseconds()) / 1000000;
-        m_imGuiForwardPassTimer.PushValue(static_cast<float>(gpuForwardFrameTimeMs));
+        float gpuForwardFrameTimeMs = aznumeric_cast<float>(forwardTimestampResult.GetDurationInNanoseconds()) / 1000000;
+        m_imGuiForwardPassTimer.PushValue(gpuForwardFrameTimeMs);
 
 
         bool materialNeedsUpdate = false;
@@ -171,7 +171,7 @@ namespace AtomSampleViewer
             ImGui::Text("GPU Forward Pass");
             ImGuiHistogramQueue::WidgetSettings gpuMetricsSettings;
             gpuMetricsSettings.m_units = "ms";
-            m_imGuiForwardPassTimer.Tick(static_cast<float>(gpuForwardFrameTimeMs), gpuMetricsSettings);
+            m_imGuiForwardPassTimer.Tick(gpuForwardFrameTimeMs, gpuMetricsSettings);
 
             ImGui::Spacing();
             ImGui::Separator();
