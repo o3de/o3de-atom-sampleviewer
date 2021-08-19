@@ -199,7 +199,7 @@ namespace AtomSampleViewer
 
     void SponzaBenchmarkComponent::OnTick(float deltaTime, AZ::ScriptTimePoint timePoint)
     {
-        AZ_PROFILE_DATAPOINT(AZ::Debug::ProfileCategory::AzRender, deltaTime, "Frame Time");
+        AZ_PROFILE_DATAPOINT(AzRender, deltaTime, "Frame Time");
 
         // Camera Configuration
         {
@@ -328,7 +328,7 @@ namespace AtomSampleViewer
             BenchmarkLoadEnd();
         }
 
-        AZ_PROFILE_DATAPOINT(AZ::Debug::ProfileCategory::AzRender, m_currentLoadBenchmarkData.m_totalMBLoaded, "MB Loaded Off Disk");
+        AZ_PROFILE_DATAPOINT(AzRender, m_currentLoadBenchmarkData.m_totalMBLoaded, "MB Loaded Off Disk");
     }
 
     void SponzaBenchmarkComponent::BenchmarkLoadStart()
