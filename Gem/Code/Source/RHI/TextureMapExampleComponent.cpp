@@ -633,15 +633,15 @@ namespace AtomSampleViewer
 
     void TextureMapExampleComponent::SetVertexIndexRectsCounterClock(uint16_t* indexBuffer, size_t arraySize)
     {
-        int vertices = 0;
+        uint16_t vertices = 0;
         for (int i = 0; i < arraySize; i += 6)
         {
-            indexBuffer[i + 0] = static_cast<uint16_t>(vertices + 0);
-            indexBuffer[i + 1] = static_cast<uint16_t>(vertices + 3);
-            indexBuffer[i + 2] = static_cast<uint16_t>(vertices + 1);
-            indexBuffer[i + 3] = static_cast<uint16_t>(vertices + 1);
-            indexBuffer[i + 4] = static_cast<uint16_t>(vertices + 3);
-            indexBuffer[i + 5] = static_cast<uint16_t>(vertices + 2);
+            indexBuffer[i + 0] = vertices + 0;
+            indexBuffer[i + 1] = vertices + 3;
+            indexBuffer[i + 2] = vertices + 1;
+            indexBuffer[i + 3] = vertices + 1;
+            indexBuffer[i + 4] = vertices + 3;
+            indexBuffer[i + 5] = vertices + 2;
             vertices += 4;
         }
     }
