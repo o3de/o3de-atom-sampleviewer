@@ -15,9 +15,6 @@
 #include <AzFramework/IO/LocalFileIO.h>
 #include <AzCore/IO/SystemFile.h>
 #include <AzCore/Utils/Utils.h>
-#include <iostream>
-#include <fstream>
-#include <string>
 
 namespace AtomSampleViewer
 {
@@ -1112,15 +1109,28 @@ namespace AtomSampleViewer
             totalScreenshotWarningCount += scriptReport.m_screenshotWarningCount;
         }
 
-        std::ofstream exportResultsFile;
-        exportResultsFile.open("exported_results.txt");  // This will save to the default bin you built with.
-        exportResultsFile << AZStd::string::format("Asserts: %s \n", std::to_string(totalAssertCount).c_str()).c_str();
-        exportResultsFile << AZStd::string::format("Errors: %s \n", std::to_string(totalErrorCount).c_str()).c_str();
-        exportResultsFile << AZStd::string::format("Warnings: %s \n", std::to_string(totalWarningCount).c_str()).c_str();
-        exportResultsFile << AZStd::string::format("Screenshot errors: %s \n", std::to_string(totalScreenshotErrorCount).c_str()).c_str();
-        exportResultsFile << AZStd::string::format("Screenshot warnings: %s \n", std::to_string(totalScreenshotWarningCount).c_str()).c_str();
-        exportResultsFile.close();
+        AZStd::string assertLogLine = AZStd::string::format("Asserts: %i \n", totalAssertCount);
+        AZStd::string errorsLogLine = AZStd::string::format("Errors: %i \n", totalErrorCount);
+        AZStd::string warningsLogLine = AZStd::string::format("Warnings: %i \n", totalWarningCount);
+        AZStd::string screenshotErrorsLogLine = AZStd::string::format("Screenshot errors: %i \n", totalScreenshotErrorCount);
+        AZStd::string screenshotWarningsLogLine = AZStd::string::format("Screenshot warnings: %i \n", totalScreenshotWarningCount);
+
+        auto io = AZ::IO::LocalFileIO::GetInstance();
+        AZStd::string projectPath = AZ::Utils::GetProjectPath();
+        AZStd::string exportFileName = "exportedTestResults.txt";
+        AzFramework::StringFunc::Path::Join(projectPath.c_str(), "TestResults/", m_exportTestResultsFolder);
+        AzFramework::StringFunc::Path::Join(m_exportTestResultsFolder.c_str(), "exportedTestResults.txt", exportFileName);
+        AZ::IO::HandleType logHandle;
         
-        m_messageBox.OpenPopupMessage("Exported test results", "Check your build/bin folder containing AtomSampleViewerStandalone and find the file named 'exported_results.txt' to view the results.");
+        io->CreatePath(m_exportTestResultsFolder.c_str());
+        io->Open(exportFileName.c_str(), AZ::IO::OpenMode::ModeWrite, logHandle);
+        io->Write(logHandle, assertLogLine.c_str(), assertLogLine.size());
+        io->Write(logHandle, errorsLogLine.c_str(), errorsLogLine.size());
+        io->Write(logHandle, warningsLogLine.c_str(), warningsLogLine.size());
+        io->Write(logHandle, screenshotErrorsLogLine.c_str(), screenshotErrorsLogLine.size());
+        io->Write(logHandle, screenshotWarningsLogLine.c_str(), screenshotWarningsLogLine.size());
+        io->Close(logHandle);
+        
+        m_messageBox.OpenPopupMessage("Exported test results", "Results exported to " + exportFileName);
     }
 } // namespace AtomSampleViewer
