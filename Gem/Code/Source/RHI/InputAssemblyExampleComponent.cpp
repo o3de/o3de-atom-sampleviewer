@@ -69,7 +69,7 @@ namespace AtomSampleViewer
                 frameGraphBuilder.GetAttachmentDatabase().ImportBuffer(AZ::Name{ InputAssembly::ImportedInputAssemblyBufferAttachmentId }, m_inputAssemblyBuffer);
             }
 
-            float aspectRatio = m_outputWidth / m_outputHeight;
+            float aspectRatio = static_cast<float>(m_outputWidth / m_outputHeight);
             AZ::Vector2 scale(AZStd::min(1.0f / aspectRatio, 1.0f), AZStd::min(aspectRatio, 1.0f));
             {
                 AZ::Matrix4x4 scaleTranslate =

@@ -124,7 +124,7 @@ namespace AtomSampleViewer
         m_imGuiFrameTimer.PushValue(deltaTime);
 
         AZ::RPI::TimestampResult forwardTimestampResult = m_forwardPass->GetLatestTimestampResult();
-        double gpuForwardFrameTimeMs = aznumeric_cast<double>(forwardTimestampResult.GetDurationInNanoseconds()) / 1000000;
+        float gpuForwardFrameTimeMs = aznumeric_cast<float>(forwardTimestampResult.GetDurationInNanoseconds()) / 1000000;
         m_imGuiForwardPassTimer.PushValue(gpuForwardFrameTimeMs);
 
 

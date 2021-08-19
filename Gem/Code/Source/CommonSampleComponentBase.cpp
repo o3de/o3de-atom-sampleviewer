@@ -184,8 +184,8 @@ namespace AtomSampleViewer
 
                 // Each LightingPreset can have an alternate skybox (usually a blurred version of the primary skybox), so we expose both here as separate items in the UI.
 
-                bool useThisPresetWithNormalSkybox = (i == m_currentLightingPresetIndex) && !m_useAlternateSkybox;
-                bool useThisPresetWithAlternateSkybox = (i == m_currentLightingPresetIndex) && m_useAlternateSkybox;
+                bool useThisPresetWithNormalSkybox = (static_cast<int32_t>(i) == m_currentLightingPresetIndex) && !m_useAlternateSkybox;
+                bool useThisPresetWithAlternateSkybox = (static_cast<int32_t>(i) == m_currentLightingPresetIndex) && m_useAlternateSkybox;
 
                 useThisPresetWithNormalSkybox = ScriptableImGui::Selectable(name.c_str(), useThisPresetWithNormalSkybox);
                 useThisPresetWithAlternateSkybox = ScriptableImGui::Selectable(nameForAlternateSkybox.c_str(), useThisPresetWithAlternateSkybox);

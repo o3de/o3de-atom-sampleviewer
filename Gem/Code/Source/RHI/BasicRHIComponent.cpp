@@ -334,7 +334,7 @@ namespace AtomSampleViewer
     {
         for (int i = 0; i < bufferSize; ++i)
         {
-            indexBuffer[i] = i;
+            indexBuffer[i] = static_cast<uint16_t>(i);
         }
     }
 
