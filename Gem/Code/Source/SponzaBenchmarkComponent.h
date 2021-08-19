@@ -25,18 +25,18 @@ struct ImGuiContext;
 
 namespace AtomSampleViewer
 {
-    class BistroBenchmarkComponent final
+    class SponzaBenchmarkComponent final
         : public CommonSampleComponentBase
         , public AZ::TickBus::Handler
         , public AZ::Data::AssetBus::MultiHandler
     {
     public:
-        AZ_COMPONENT(BistroBenchmarkComponent, "{2AFFAA6B-1795-4635-AFAD-C2A98163832F}", CommonSampleComponentBase);
+        AZ_COMPONENT(SponzaBenchmarkComponent, "{2AFFAA6B-1795-4635-AFAD-C2A98163832F}", CommonSampleComponentBase);
 
         static void Reflect(AZ::ReflectContext* context);
 
-        BistroBenchmarkComponent() = default;
-        ~BistroBenchmarkComponent() override = default;
+        SponzaBenchmarkComponent() = default;
+        ~SponzaBenchmarkComponent() override = default;
 
         //AZ::Component
         void Activate() override;
