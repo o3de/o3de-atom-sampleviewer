@@ -38,6 +38,7 @@ namespace AtomSampleViewer
 
         //! Returns the path to the official baseline image that corresponds to @forScreenshotFile
         AZStd::string GetOfficialBaseline(const AZStd::string& forScreenshotFile);
+
     }
 
     //! Collects data about each script run by the ScriptManager.
@@ -225,6 +226,9 @@ namespace AtomSampleViewer
 
         // Show a message box to let the user know the results of updating local baseline images
         void ShowUpdateLocalBaselineResult(int successCount, int failureCount);
+
+        // For exporting test results
+        void ExportTestResults();
 
         const ImageComparisonToleranceLevel* FindBestToleranceLevel(float diffScore, bool filterImperceptibleDiffs) const;
 

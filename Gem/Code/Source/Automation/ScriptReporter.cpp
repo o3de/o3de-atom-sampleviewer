@@ -15,6 +15,9 @@
 #include <AzFramework/IO/LocalFileIO.h>
 #include <AzCore/IO/SystemFile.h>
 #include <AzCore/Utils/Utils.h>
+#include <iostream>
+#include <fstream>
+#include <string>
 
 namespace AtomSampleViewer
 {
@@ -434,6 +437,16 @@ namespace AtomSampleViewer
                     "Are you sure?",
                     [this]() {
                         UpdateAllLocalBaselineImages();
+                    });
+            }
+            if (ImGui::Button("Export Test Results"))
+            {
+                m_messageBox.OpenPopupConfirmation(
+                    "Export Test Results",
+                    "All test results will be exported \n"
+                    "Proceed?",
+                    [this]() {
+                        ExportTestResults();
                     });
             }
 
@@ -1080,5 +1093,34 @@ namespace AtomSampleViewer
             }
         }
 
+    }
+
+    void ScriptReporter::ExportTestResults()
+    {
+        uint32_t totalAssertCount = 0;
+        uint32_t totalErrorCount = 0;
+        uint32_t totalWarningCount = 0;
+        uint32_t totalScreenshotErrorCount = 0;
+        uint32_t totalScreenshotWarningCount = 0;
+        
+        for (ScriptReport& scriptReport : m_scriptReports)
+        {
+            totalAssertCount += scriptReport.m_assertCount;
+            totalErrorCount += scriptReport.m_generalErrorCount;
+            totalWarningCount += scriptReport.m_generalWarningCount;
+            totalScreenshotErrorCount += scriptReport.m_screenshotErrorCount;
+            totalScreenshotWarningCount += scriptReport.m_screenshotWarningCount;
+        }
+
+        std::ofstream exportResultsFile;
+        exportResultsFile.open("exported_results.txt");  // This will save to the default bin you built with.
+        exportResultsFile << AZStd::string::format("Asserts: %s \n", std::to_string(totalAssertCount).c_str()).c_str();
+        exportResultsFile << AZStd::string::format("Errors: %s \n", std::to_string(totalErrorCount).c_str()).c_str();
+        exportResultsFile << AZStd::string::format("Warnings: %s \n", std::to_string(totalWarningCount).c_str()).c_str();
+        exportResultsFile << AZStd::string::format("Screenshot errors: %s \n", std::to_string(totalScreenshotErrorCount).c_str()).c_str();
+        exportResultsFile << AZStd::string::format("Screenshot warnings: %s \n", std::to_string(totalScreenshotWarningCount).c_str()).c_str();
+        exportResultsFile.close();
+        
+        m_messageBox.OpenPopupMessage("Exported test results", "Check your build/bin folder containing AtomSampleViewerStandalone and find the file named 'exported_results.txt' to view the results.");
     }
 } // namespace AtomSampleViewer
