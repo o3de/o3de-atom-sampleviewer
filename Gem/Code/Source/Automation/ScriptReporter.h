@@ -38,7 +38,6 @@ namespace AtomSampleViewer
 
         //! Returns the path to the official baseline image that corresponds to @forScreenshotFile
         AZStd::string GetOfficialBaseline(const AZStd::string& forScreenshotFile);
-
     }
 
     //! Collects data about each script run by the ScriptManager.
