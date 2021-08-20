@@ -1100,37 +1100,65 @@ namespace AtomSampleViewer
         uint32_t totalScreenshotErrorCount = 0;
         uint32_t totalScreenshotWarningCount = 0;
         
-        for (ScriptReport& scriptReport : m_scriptReports)
+        for (const ScriptReport& scriptReport : m_scriptReports)
         {
             totalAssertCount += scriptReport.m_assertCount;
             totalErrorCount += scriptReport.m_generalErrorCount;
             totalWarningCount += scriptReport.m_generalWarningCount;
             totalScreenshotErrorCount += scriptReport.m_screenshotErrorCount;
             totalScreenshotWarningCount += scriptReport.m_screenshotWarningCount;
+
+            AZStd::string assertLogLine = AZStd::string::format("Asserts: %i \n", totalAssertCount);
+            AZStd::string errorsLogLine = AZStd::string::format("Errors: %i \n", totalErrorCount);
+            AZStd::string warningsLogLine = AZStd::string::format("Warnings: %i \n", totalWarningCount);
+            AZStd::string screenshotErrorsLogLine = AZStd::string::format("Screenshot errors: %i \n", totalScreenshotErrorCount);
+            AZStd::string screenshotWarningsLogLine = AZStd::string::format("Screenshot warnings: %i \n", totalScreenshotWarningCount);
+            AZStd::string failedScreenshotsLogLine = "\nFailed screenshot test info below.\n";
+
+            auto io = AZ::IO::LocalFileIO::GetInstance();
+            AZStd::string projectPath = AZ::Utils::GetProjectPath();
+            AZStd::string exportTestResultsFolder;
+            AZStd::string exportFileName = "exportedTestResults.txt";
+            AzFramework::StringFunc::Path::Join(projectPath.c_str(), "TestResults/", exportTestResultsFolder);
+            AzFramework::StringFunc::Path::Join(exportTestResultsFolder.c_str(), "exportedTestResults.txt", exportFileName);
+            AZ::IO::HandleType logHandle;
+
+            io->CreatePath(exportTestResultsFolder.c_str());
+            if (io->Open(exportFileName.c_str(), AZ::IO::OpenMode::ModeWrite, logHandle))
+            {
+                io->Write(logHandle, assertLogLine.c_str(), assertLogLine.size());
+                io->Write(logHandle, errorsLogLine.c_str(), errorsLogLine.size());
+                io->Write(logHandle, warningsLogLine.c_str(), warningsLogLine.size());
+                io->Write(logHandle, screenshotErrorsLogLine.c_str(), screenshotErrorsLogLine.size());
+                io->Write(logHandle, screenshotWarningsLogLine.c_str(), screenshotWarningsLogLine.size());
+                io->Write(logHandle, failedScreenshotsLogLine.c_str(), failedScreenshotsLogLine.size());
+
+                for (const ScreenshotTestInfo& screenshotTest : scriptReport.m_screenshotTests)
+                {
+                    AZStd::string baselineImagePath = screenshotTest.m_localBaselineScreenshotFilePath;
+                    AZStd::string screenshotImagePath = screenshotTest.m_screenshotFilePath;
+                    ImageComparisonToleranceLevel toleranceLevel = screenshotTest.m_toleranceLevel;
+                    AZStd::string toleranceLevelString = toleranceLevel.ToString();
+                    ImageComparisonResult localComparison = screenshotTest.m_localComparisonResult;
+                    AZStd::string localComparisonString = localComparison.GetSummaryString();
+                    ImageComparisonResult officialComparison = screenshotTest.m_officialComparisonResult;
+                    AZStd::string officialComparisonString = officialComparison.GetSummaryString();
+
+                    AZStd::string baselineImageLogLine = AZStd::string::format("Golden (baseline) image: %s \n", baselineImagePath.c_str());
+                    AZStd::string screenshotImageLogLine = AZStd::string::format("Test screenshot: %s \n", screenshotImagePath.c_str());
+                    AZStd::string toleranceLevelLogLine = AZStd::string::format("Tolerance level: %s \n", toleranceLevelString.c_str());
+                    AZStd::string localComparisonLogLine = AZStd::string::format("Error message: %s \n", localComparisonString.c_str());
+                    AZStd::string officialComparisonLogLine = AZStd::string::format("Comparison result: %s \n\n", officialComparisonString.c_str());
+
+                    io->Write(logHandle, baselineImageLogLine.c_str(), baselineImageLogLine.size());
+                    io->Write(logHandle, screenshotImageLogLine.c_str(), screenshotImageLogLine.size());
+                    io->Write(logHandle, toleranceLevelLogLine.c_str(), toleranceLevelLogLine.size());
+                    io->Write(logHandle, localComparisonLogLine.c_str(), localComparisonLogLine.size());
+                    io->Write(logHandle, officialComparisonLogLine.c_str(), officialComparisonLogLine.size());
+                }
+                io->Close(logHandle);
+            }
+            m_messageBox.OpenPopupMessage("Exported test results", "Results exported to " + exportFileName);
         }
-
-        AZStd::string assertLogLine = AZStd::string::format("Asserts: %i \n", totalAssertCount);
-        AZStd::string errorsLogLine = AZStd::string::format("Errors: %i \n", totalErrorCount);
-        AZStd::string warningsLogLine = AZStd::string::format("Warnings: %i \n", totalWarningCount);
-        AZStd::string screenshotErrorsLogLine = AZStd::string::format("Screenshot errors: %i \n", totalScreenshotErrorCount);
-        AZStd::string screenshotWarningsLogLine = AZStd::string::format("Screenshot warnings: %i \n", totalScreenshotWarningCount);
-
-        auto io = AZ::IO::LocalFileIO::GetInstance();
-        AZStd::string projectPath = AZ::Utils::GetProjectPath();
-        AZStd::string exportFileName = "exportedTestResults.txt";
-        AzFramework::StringFunc::Path::Join(projectPath.c_str(), "TestResults/", m_exportTestResultsFolder);
-        AzFramework::StringFunc::Path::Join(m_exportTestResultsFolder.c_str(), "exportedTestResults.txt", exportFileName);
-        AZ::IO::HandleType logHandle;
-        
-        io->CreatePath(m_exportTestResultsFolder.c_str());
-        io->Open(exportFileName.c_str(), AZ::IO::OpenMode::ModeWrite, logHandle);
-        io->Write(logHandle, assertLogLine.c_str(), assertLogLine.size());
-        io->Write(logHandle, errorsLogLine.c_str(), errorsLogLine.size());
-        io->Write(logHandle, warningsLogLine.c_str(), warningsLogLine.size());
-        io->Write(logHandle, screenshotErrorsLogLine.c_str(), screenshotErrorsLogLine.size());
-        io->Write(logHandle, screenshotWarningsLogLine.c_str(), screenshotWarningsLogLine.size());
-        io->Close(logHandle);
-        
-        m_messageBox.OpenPopupMessage("Exported test results", "Results exported to " + exportFileName);
     }
 } // namespace AtomSampleViewer

@@ -249,7 +249,6 @@ namespace AtomSampleViewer
         DisplayOption m_displayOption = DisplayOption::AllResults;
         bool m_forceShowUpdateButtons = false; //< By default, the "Update" buttons are visible only for failed screenshots. This forces them to be visible.
         AZStd::string m_officialBaselineSourceFolder; //< Used for updating official baseline screenshots
-        AZStd::string m_exportTestResultsFolder; //< Used for storing exported test results
     };
 
 } // namespace AtomSampleViewer
