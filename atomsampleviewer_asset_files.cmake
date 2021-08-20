@@ -46,7 +46,7 @@ set(FILES
     Scripts/ShadowTest.bv.lua
     Scripts/StreamingImageTest.bv.lua
     Scripts/TransparentTest.bv.lua
-	Scripts/_AutomatedReviewWARPTestSuite_.bv.lua
+    Scripts/_AutomatedReviewWARPTestSuite_.bv.lua
     Scripts/_FullTestSuite_.bv.lua
     Shaders/DebugVertexNormals.azsl
     Shaders/DebugVertexNormals.materialtype
