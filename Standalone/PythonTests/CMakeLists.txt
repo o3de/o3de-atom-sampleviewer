@@ -26,20 +26,6 @@ if(PAL_TRAIT_BUILD_HOST_TOOLS AND PAL_TRAIT_BUILD_TESTS_SUPPORTED)
             AtomSampleViewer.Assets
     )
     ly_add_pytest(
-        NAME AtomSampleViewer::PythonPeriodicTests
-        PATH ${CMAKE_CURRENT_LIST_DIR}/Automated/test_AtomSampleViewer_periodic_suite.py
-        TEST_REQUIRES gpu
-        TEST_SUITE periodic
-        TEST_SERIAL
-        TIMEOUT 1200
-        RUNTIME_DEPENDENCIES
-            AssetProcessor
-            AssetProcessorBatch
-            AtomSampleViewerStandalone
-            AtomSampleViewer.GameLauncher
-            AtomSampleViewer.Assets
-    )
-    ly_add_pytest(
         NAME AtomSampleViewer::PythonWARPTests
         PATH ${CMAKE_CURRENT_LIST_DIR}/Automated/test_AtomSampleViewer_warp_suite.py
         TEST_SUITE main
