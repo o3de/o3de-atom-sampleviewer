@@ -85,6 +85,9 @@ namespace AtomSampleViewer
         //! Returns true if there are any errors or asserts in the script report
         bool HasErrorsAssertsInReport() const;
 
+        // For exporting test results
+        void ExportTestResults();
+
         struct ImageComparisonResult
         {
             enum class ResultCode
@@ -225,9 +228,6 @@ namespace AtomSampleViewer
 
         // Show a message box to let the user know the results of updating local baseline images
         void ShowUpdateLocalBaselineResult(int successCount, int failureCount);
-
-        // For exporting test results
-        void ExportTestResults();
 
         const ImageComparisonToleranceLevel* FindBestToleranceLevel(float diffScore, bool filterImperceptibleDiffs) const;
 
