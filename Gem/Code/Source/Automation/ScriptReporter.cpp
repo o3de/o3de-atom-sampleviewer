@@ -1096,13 +1096,12 @@ namespace AtomSampleViewer
     {  
         for (const ScriptReport& scriptReport : m_scriptReports)
         {
-
-            const AZStd::string& assertLogLine = AZStd::string::format("Asserts: %u \n", scriptReport.m_assertCount);
-            const AZStd::string& errorsLogLine = AZStd::string::format("Errors: %u \n", scriptReport.m_generalErrorCount);
-            const AZStd::string& warningsLogLine = AZStd::string::format("Warnings: %u \n", scriptReport.m_generalWarningCount);
-            const AZStd::string& screenshotErrorsLogLine = AZStd::string::format("Screenshot errors: %u \n", scriptReport.m_screenshotErrorCount);
-            const AZStd::string& screenshotWarningsLogLine = AZStd::string::format("Screenshot warnings: %u \n", scriptReport.m_screenshotWarningCount);
-            const AZStd::string& failedScreenshotsLogLine = "\nFailed screenshot test info below.\n";     
+            const AZStd::string assertLogLine = AZStd::string::format("Asserts: %u \n", scriptReport.m_assertCount);
+            const AZStd::string errorsLogLine = AZStd::string::format("Errors: %u \n", scriptReport.m_generalErrorCount);
+            const AZStd::string warningsLogLine = AZStd::string::format("Warnings: %u \n", scriptReport.m_generalWarningCount);
+            const AZStd::string screenshotErrorsLogLine = AZStd::string::format("Screenshot errors: %u \n", scriptReport.m_screenshotErrorCount);
+            const AZStd::string screenshotWarningsLogLine = AZStd::string::format("Screenshot warnings: %u \n", scriptReport.m_screenshotWarningCount);
+            const AZStd::string failedScreenshotsLogLine = "\nFailed screenshot test info below.\n";     
 
             const AZStd::string projectPath = AZ::Utils::GetProjectPath();
             AZStd::chrono::system_clock::time_point now = AZStd::chrono::system_clock::now();
@@ -1111,6 +1110,7 @@ namespace AtomSampleViewer
             AZStd::string exportFileName = AZStd::string::format("exportedTestResults_%s.txt", timeString.c_str());
             AZStd::string exportTestResultsFolder;
             AzFramework::StringFunc::Path::Join(projectPath.c_str(), "TestResults/", exportTestResultsFolder);
+
             auto io = AZ::IO::LocalFileIO::GetInstance();
             io->CreatePath(exportTestResultsFolder.c_str());
             AZStd::string exportFile;
@@ -1128,10 +1128,10 @@ namespace AtomSampleViewer
 
             for (const ScreenshotTestInfo& screenshotTest : scriptReport.m_screenshotTests)
             {
-                const AZStd::string& baselineImageLogLine = AZStd::string::format("Golden (baseline) image: %s \n", screenshotTest.m_localBaselineScreenshotFilePath.c_str());
-                const AZStd::string& screenshotImageLogLine = AZStd::string::format("Test screenshot: %s \n", screenshotTest.m_screenshotFilePath.c_str());
-                const AZStd::string& toleranceLevelLogLine = AZStd::string::format("Tolerance level: %s \n", screenshotTest.m_toleranceLevel.ToString().c_str());
-                const AZStd::string& officialComparisonLogLine = AZStd::string::format("Image comparison result: %s \n", screenshotTest.m_officialComparisonResult.GetSummaryString().c_str());
+                const AZStd::string baselineImageLogLine = AZStd::string::format("Golden (baseline) image: %s \n", screenshotTest.m_localBaselineScreenshotFilePath.c_str());
+                const AZStd::string screenshotImageLogLine = AZStd::string::format("Test screenshot: %s \n", screenshotTest.m_screenshotFilePath.c_str());
+                const AZStd::string toleranceLevelLogLine = AZStd::string::format("Tolerance level: %s \n", screenshotTest.m_toleranceLevel.ToString().c_str());
+                const AZStd::string officialComparisonLogLine = AZStd::string::format("Image comparison result: %s \n", screenshotTest.m_officialComparisonResult.GetSummaryString().c_str());
 
                 io->Write(logHandle, baselineImageLogLine.c_str(), baselineImageLogLine.size());
                 io->Write(logHandle, screenshotImageLogLine.c_str(), screenshotImageLogLine.size());
