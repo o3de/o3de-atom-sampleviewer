@@ -1128,19 +1128,15 @@ namespace AtomSampleViewer
 
             for (const ScreenshotTestInfo& screenshotTest : scriptReport.m_screenshotTests)
             {
-                const AZStd::string baselineImageLogLine = AZStd::string::format("Golden (baseline) image: %s \n", screenshotTest.m_localBaselineScreenshotFilePath.c_str());
-                const AZStd::string screenshotImageLogLine = AZStd::string::format("Test screenshot: %s \n", screenshotTest.m_screenshotFilePath.c_str());
                 const AZStd::string toleranceLevelLogLine = AZStd::string::format("Tolerance level: %s \n", screenshotTest.m_toleranceLevel.ToString().c_str());
                 const AZStd::string officialComparisonLogLine = AZStd::string::format("Image comparison result: %s \n", screenshotTest.m_officialComparisonResult.GetSummaryString().c_str());
 
-                io->Write(logHandle, baselineImageLogLine.c_str(), baselineImageLogLine.size());
-                io->Write(logHandle, screenshotImageLogLine.c_str(), screenshotImageLogLine.size());
                 io->Write(logHandle, toleranceLevelLogLine.c_str(), toleranceLevelLogLine.size());
                 io->Write(logHandle, officialComparisonLogLine.c_str(), officialComparisonLogLine.size());
             }
             io->Close(logHandle);
         }
-        m_messageBox.OpenPopupMessage("Exported test results", "Results exported to " + exportFile);
-        }
+            m_messageBox.OpenPopupMessage("Exported test results", "Results exported to " + exportFile);
+            }
     }
 } // namespace AtomSampleViewer
