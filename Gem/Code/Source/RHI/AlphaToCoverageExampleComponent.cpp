@@ -304,7 +304,7 @@ namespace AtomSampleViewer
         const uint32_t typeIndex = static_cast<uint32_t>(type);
 
         // Creates a scope for blend type.
-        const auto prepareFunction = [this, type, typeIndex](RHI::FrameGraphInterface frameGraph, [[maybe_unused]] const ScopeData& scopeData)
+        const auto prepareFunction = [this, type](RHI::FrameGraphInterface frameGraph, [[maybe_unused]] const ScopeData& scopeData)
         {
             // Bind the color attachment
             {

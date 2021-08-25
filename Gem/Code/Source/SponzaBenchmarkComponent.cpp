@@ -290,7 +290,6 @@ namespace AtomSampleViewer
 
                     const AZ::Vector3 position = cameraPathPoint.m_position.Lerp(nextCameraPathPoint.m_position, percentToNextPoint);
                     const AZ::Vector3 target = cameraPathPoint.m_target.Lerp(nextCameraPathPoint.m_target, percentToNextPoint);
-                    const AZ::Vector3 up = cameraPathPoint.m_up.Lerp(nextCameraPathPoint.m_up, percentToNextPoint);
 
                     const AZ::Transform transform = AZ::Transform::CreateLookAt(position, target, AZ::Transform::Axis::YPositive);
 
