@@ -92,12 +92,6 @@ namespace AtomSampleViewer
 
         AzFramework::Application::StartCommon(systemEntity);
 
-        if (GetDrillerManager())
-        {
-            GetDrillerManager()->Register(aznew GridMate::Debug::CarrierDriller());
-            GetDrillerManager()->Register(aznew GridMate::Debug::ReplicaDriller());
-        }
-
         ReadTimeoutShutdown();
 
         WriteStartupLog();
