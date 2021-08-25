@@ -1101,7 +1101,7 @@ namespace AtomSampleViewer
             const AZStd::string warningsLogLine = AZStd::string::format("Warnings: %u \n", scriptReport.m_generalWarningCount);
             const AZStd::string screenshotErrorsLogLine = AZStd::string::format("Screenshot errors: %u \n", scriptReport.m_screenshotErrorCount);
             const AZStd::string screenshotWarningsLogLine = AZStd::string::format("Screenshot warnings: %u \n", scriptReport.m_screenshotWarningCount);
-            const AZStd::string failedScreenshotsLogLine = "\nFailed screenshot test info below.\n";     
+            const AZStd::string failedScreenshotsLogLine = "\nScreenshot test info below.\n";     
 
             const AZStd::string projectPath = AZ::Utils::GetProjectPath();
             AZStd::chrono::system_clock::time_point now = AZStd::chrono::system_clock::now();
@@ -1136,7 +1136,7 @@ namespace AtomSampleViewer
             }
             io->Close(logHandle);
         }
-            m_messageBox.OpenPopupMessage("Exported test results", "Results exported to " + exportFile);
-            }
+        m_messageBox.OpenPopupMessage("Exported test results", "Results exported to " + exportFile);
+        }
     }
 } // namespace AtomSampleViewer
