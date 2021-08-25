@@ -31,7 +31,6 @@
 #include <AzFramework/IO/LocalFileIO.h>
 #include <AzFramework/Windowing/WindowBus.h>
 
-#include <AtomCore/Serialization/Json/JsonUtils.h>
 #include <AtomSampleViewerRequestBus.h>
 #include <Utils/Utils.h>
 
