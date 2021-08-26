@@ -85,6 +85,9 @@ namespace AtomSampleViewer
         //! Returns true if there are any errors or asserts in the script report
         bool HasErrorsAssertsInReport() const;
 
+        // For exporting test results
+        void ExportTestResults();
+
         struct ImageComparisonResult
         {
             enum class ResultCode
