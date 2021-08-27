@@ -64,7 +64,7 @@ namespace AtomSampleViewer
         TickBus::Handler::BusConnect();
         m_imguiSidebar.Activate();
 
-        m_materialBrowser.SetFilter([this](const AZ::Data::AssetInfo& assetInfo) {
+        m_materialBrowser.SetFilter([](const AZ::Data::AssetInfo& assetInfo) {
             if (!AzFramework::StringFunc::Path::IsExtension(assetInfo.m_relativePath.c_str(), "azmaterial"))
             {
                 return false;

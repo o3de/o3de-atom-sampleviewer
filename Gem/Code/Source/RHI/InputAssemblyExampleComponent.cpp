@@ -239,7 +239,7 @@ namespace AtomSampleViewer
             //UserDataParam - Empty for this samples
         };
 
-        const auto prepareFunction = [this](RHI::FrameGraphInterface frameGraph, ScopeData& scopeData)
+        const auto prepareFunction = [](RHI::FrameGraphInterface frameGraph, ScopeData& scopeData)
         {
             AZ_UNUSED(scopeData);
             // Declare usage of the vertex buffer as UAV

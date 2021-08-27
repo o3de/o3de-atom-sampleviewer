@@ -55,7 +55,7 @@ namespace AtomSampleViewer
         ReflectScriptContext(m_sriptBehaviorContext.get());
         m_scriptContext->BindTo(m_sriptBehaviorContext.get());
 
-        m_scriptBrowser.SetFilter([this](const AZ::Data::AssetInfo& assetInfo)
+        m_scriptBrowser.SetFilter([](const AZ::Data::AssetInfo& assetInfo)
         {
             return AzFramework::StringFunc::EndsWith(assetInfo.m_relativePath, ".bv.luac");
         });
