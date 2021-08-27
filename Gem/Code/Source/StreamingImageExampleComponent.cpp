@@ -671,7 +671,7 @@ namespace AtomSampleViewer
             AZStd::vector<uint8_t> imageData;
             const uint32_t side = 1001;
             const uint32_t depth = 3;
-            const uint32_t colorIndex = static_cast<uint32_t>(-1);
+
             createColorImageData({ 1.0f,0.0f,0.0f,0.0f }, side, side, imageData);
             createColorImageData({ 0.0f,1.0f,0.0f,0.0f }, side, side, imageData);
             createColorImageData({ 0.0f,0.0f,1.0f,0.0f }, side, side, imageData);
