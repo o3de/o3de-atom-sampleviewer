@@ -100,7 +100,7 @@ namespace AtomSampleViewer
             azrtti_typeid<AZ::Debug::NoClipControllerComponent>());
 
         // Sidebar
-        m_materialBrowser.SetFilter([this](const AZ::Data::AssetInfo& assetInfo)
+        m_materialBrowser.SetFilter([](const AZ::Data::AssetInfo& assetInfo)
             {
                 return assetInfo.m_assetType == azrtti_typeid<AZ::RPI::MaterialAsset>() &&
                     assetInfo.m_assetId.m_subId == 0; // no materials generated from models.
