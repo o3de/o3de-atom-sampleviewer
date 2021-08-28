@@ -287,7 +287,7 @@ namespace AtomSampleViewer
             {
                 for (int32_t heightIdx = 0; heightIdx < m_objectCountDepth; heightIdx++)
                 {
-                    const int32_t objectCount = widthIdx * depthIdx * heightIdx;
+                    [[maybe_unused]] const int32_t objectCount = widthIdx * depthIdx * heightIdx;
                     AZ_Assert(static_cast<uint32_t>(objectCount) < m_objectCount, "Spawning too many objects");
 
                     // Calculate the object position

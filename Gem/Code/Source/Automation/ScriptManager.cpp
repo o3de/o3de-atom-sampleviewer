@@ -799,6 +799,7 @@ namespace AtomSampleViewer
     {
         auto func = [message]()
         {
+            AZ_UNUSED(message); // Prevent unused warning in release builds
             AZ_TracePrintf("Automation", "Script: %s\n", message.c_str());
         };
 
