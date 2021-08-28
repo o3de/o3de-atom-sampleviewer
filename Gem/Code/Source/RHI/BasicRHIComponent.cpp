@@ -439,6 +439,39 @@ namespace AtomSampleViewer
         return shader;
     }
 
+    AZ::Data::Instance<AZ::RPI::Shader> BasicRHIComponent::LoadShader(const char* shaderFilePath, const char* sampleName, const AZ::Name& supervariantName)
+    {
+        using namespace AZ;
+
+        Data::AssetId shaderAssetId;
+        Data::AssetCatalogRequestBus::BroadcastResult(
+            shaderAssetId, &Data::AssetCatalogRequestBus::Events::GetAssetIdByPath,
+            shaderFilePath, azrtti_typeid<RPI::ShaderAsset>(), false);
+        if (!shaderAssetId.IsValid())
+        {
+            AZ_Error(sampleName, false, "Failed to get shader asset id with path %s", shaderFilePath);
+            return nullptr;
+        }
+
+        auto shaderAsset = Data::AssetManager::Instance().GetAsset<RPI::ShaderAsset>(
+            shaderAssetId, AZ::Data::AssetLoadBehavior::PreLoad);
+        shaderAsset.BlockUntilLoadComplete();
+        if (!shaderAsset.IsReady())
+        {
+            AZ_Error(sampleName, false, "Failed to get shader asset with path %s", shaderFilePath);
+            return nullptr;
+        }
+
+        auto shader = RPI::Shader::FindOrCreate(shaderAsset, supervariantName);
+        if (!shader)
+        {
+            AZ_Error(sampleName, false, "Failed to find or create a shader instance from shader asset '%s'", shaderFilePath);
+            return nullptr;
+        }
+
+        return shader;
+    }
+
     AZ::Data::Instance<AZ::RPI::Shader> BasicRHIComponent::LoadShader(const AZ::AssetCollectionAsyncLoader& assetLoadMgr, const char* shaderFilePath, [[maybe_unused]] const char* sampleName)
     {
         using namespace AZ;
@@ -458,7 +491,7 @@ namespace AtomSampleViewer
 
     AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> BasicRHIComponent::CreateShaderResourceGroup(AZ::Data::Instance<AZ::RPI::Shader> shader, const char* shaderResourceGroupId, [[maybe_unused]] const char* sampleName)
     {
-        auto srg = AZ::RPI::ShaderResourceGroup::Create(shader->GetAsset(), AZ::Name { shaderResourceGroupId });
+        auto srg = AZ::RPI::ShaderResourceGroup::Create(shader->GetAsset(), shader->GetSupervariantIndex(), AZ::Name { shaderResourceGroupId });
         if (!srg)
         {
             AZ_Error(sampleName, false, "Failed to create shader resource group");

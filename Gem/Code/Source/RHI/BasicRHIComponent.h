@@ -153,6 +153,7 @@ namespace AtomSampleViewer
 
         // Shader
         AZ::Data::Instance<AZ::RPI::Shader> LoadShader(const char* shaderFilePath, const char* sampleName);
+        AZ::Data::Instance<AZ::RPI::Shader> LoadShader(const char* shaderFilePath, const char* sampleName, const AZ::Name& supervariantName);
         AZ::Data::Instance<AZ::RPI::Shader> LoadShader(const AZ::AssetCollectionAsyncLoader& assetLoadMgr, const char* shaderFilePath, const char* sampleName);
         static AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> CreateShaderResourceGroup(AZ::Data::Instance<AZ::RPI::Shader> shader, const char* shaderResourceGroupId, const char* sampleName);
 
