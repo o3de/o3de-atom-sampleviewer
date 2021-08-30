@@ -38,7 +38,7 @@
             "PassData": {
                 "$type": "FullscreenTrianglePassData",
                 "ShaderAsset": {
-                    "FilePath": "Shaders/LuxCore/RenderTexture.shader"
+                    "FilePath": "shaders/luxcore/rendertexture.shader"
                 }
             }
         }
