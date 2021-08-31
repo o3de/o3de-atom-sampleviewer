@@ -30,10 +30,8 @@ namespace AtomSampleViewer
         }
     }
 
-    void MatrixAlignmentTestExampleComponent::OnTick([[maybe_unused]] float deltaTime, AZ::ScriptTimePoint time)
+    void MatrixAlignmentTestExampleComponent::OnTick([[maybe_unused]] float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint time)
     {
-        AZ_UNUSED(time);
-
         bool numFloatsChanged = false;
 
         if (m_imguiSidebar.Begin())
@@ -280,7 +278,7 @@ namespace AtomSampleViewer
             const char* sampleName = "MatrixAlignmentTest";
 
             const AZ::Name supervariantName = (m_numFloatsAfterMatrix == 1) ? AZ::Name{""} : AZ::Name{"float2"}; 
-            auto shader = LoadShader(triangeShaderFilePath, sampleName, supervariantName);
+            auto shader = LoadShader(triangeShaderFilePath, sampleName, &supervariantName);
             if (shader == nullptr)
                 return;
 

@@ -406,7 +406,7 @@ namespace AtomSampleViewer
         AZ_Error(componentName, shaderInputSamplerIndex->IsValid(), "Failed to find sampler %s.", shaderInputName.GetCStr());
     }
 
-    AZ::Data::Instance<AZ::RPI::Shader> BasicRHIComponent::LoadShader(const char* shaderFilePath, [[maybe_unused]] const char* sampleName)
+    AZ::Data::Instance<AZ::RPI::Shader> BasicRHIComponent::LoadShader(const char* shaderFilePath, [[maybe_unused]] const char* sampleName, const AZ::Name* supervariantName)
     {
         using namespace AZ;
 
@@ -429,40 +429,7 @@ namespace AtomSampleViewer
             return nullptr;
         }
 
-        auto shader = RPI::Shader::FindOrCreate(shaderAsset);
-        if (!shader)
-        {
-            AZ_Error(sampleName, false, "Failed to find or create a shader instance from shader asset '%s'", shaderFilePath);
-            return nullptr;
-        }
-
-        return shader;
-    }
-
-    AZ::Data::Instance<AZ::RPI::Shader> BasicRHIComponent::LoadShader(const char* shaderFilePath, const char* sampleName, const AZ::Name& supervariantName)
-    {
-        using namespace AZ;
-
-        Data::AssetId shaderAssetId;
-        Data::AssetCatalogRequestBus::BroadcastResult(
-            shaderAssetId, &Data::AssetCatalogRequestBus::Events::GetAssetIdByPath,
-            shaderFilePath, azrtti_typeid<RPI::ShaderAsset>(), false);
-        if (!shaderAssetId.IsValid())
-        {
-            AZ_Error(sampleName, false, "Failed to get shader asset id with path %s", shaderFilePath);
-            return nullptr;
-        }
-
-        auto shaderAsset = Data::AssetManager::Instance().GetAsset<RPI::ShaderAsset>(
-            shaderAssetId, AZ::Data::AssetLoadBehavior::PreLoad);
-        shaderAsset.BlockUntilLoadComplete();
-        if (!shaderAsset.IsReady())
-        {
-            AZ_Error(sampleName, false, "Failed to get shader asset with path %s", shaderFilePath);
-            return nullptr;
-        }
-
-        auto shader = RPI::Shader::FindOrCreate(shaderAsset, supervariantName);
+        auto shader = RPI::Shader::FindOrCreate(shaderAsset, (supervariantName != nullptr) ? *supervariantName : AZ::Name{""});
         if (!shader)
         {
             AZ_Error(sampleName, false, "Failed to find or create a shader instance from shader asset '%s'", shaderFilePath);
