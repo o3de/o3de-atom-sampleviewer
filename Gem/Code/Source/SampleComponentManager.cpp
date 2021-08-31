@@ -63,6 +63,7 @@
 #include <RHI/TrianglesConstantBufferExampleComponent.h>
 #include <RHI/BindlessPrototypeExampleComponent.h>
 #include <RHI/RayTracingExampleComponent.h>
+#include <RHI/MatrixAlignmentTestExampleComponent.h>
 
 #include <AreaLightExampleComponent.h>
 #include <AssetLoadTestComponent.h>
@@ -259,6 +260,7 @@ namespace AtomSampleViewer
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/TextureMap", azrtti_typeid<TextureMapExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/Triangle", azrtti_typeid<TriangleExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/TrianglesConstantBuffer", azrtti_typeid<TrianglesConstantBufferExampleComponent>() ));
+        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/MatrixAlignmentTest", azrtti_typeid<MatrixAlignmentTestExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/AssetLoadTest", azrtti_typeid<AssetLoadTestComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/AuxGeom", azrtti_typeid<AuxGeomExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/BakedShaderVariant", azrtti_typeid<BakedShaderVariantExampleComponent>() ));

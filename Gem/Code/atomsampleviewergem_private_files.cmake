@@ -80,6 +80,8 @@ set(FILES
     Source/RHI/TrianglesConstantBufferExampleComponent.cpp
     Source/RHI/RayTracingExampleComponent.cpp
     Source/RHI/RayTracingExampleComponent.h
+    Source/RHI/MatrixAlignmentTestExampleComponent.cpp
+    Source/RHI/MatrixAlignmentTestExampleComponent.h
     Source/AreaLightExampleComponent.cpp
     Source/AreaLightExampleComponent.h
     Source/AssetLoadTestComponent.cpp

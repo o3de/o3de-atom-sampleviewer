@@ -406,7 +406,7 @@ namespace AtomSampleViewer
         AZ_Error(componentName, shaderInputSamplerIndex->IsValid(), "Failed to find sampler %s.", shaderInputName.GetCStr());
     }
 
-    AZ::Data::Instance<AZ::RPI::Shader> BasicRHIComponent::LoadShader(const char* shaderFilePath, [[maybe_unused]] const char* sampleName)
+    AZ::Data::Instance<AZ::RPI::Shader> BasicRHIComponent::LoadShader(const char* shaderFilePath, [[maybe_unused]] const char* sampleName, const AZ::Name* supervariantName)
     {
         using namespace AZ;
 
@@ -429,7 +429,7 @@ namespace AtomSampleViewer
             return nullptr;
         }
 
-        auto shader = RPI::Shader::FindOrCreate(shaderAsset);
+        auto shader = RPI::Shader::FindOrCreate(shaderAsset, (supervariantName != nullptr) ? *supervariantName : AZ::Name{""});
         if (!shader)
         {
             AZ_Error(sampleName, false, "Failed to find or create a shader instance from shader asset '%s'", shaderFilePath);
@@ -458,7 +458,7 @@ namespace AtomSampleViewer
 
     AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> BasicRHIComponent::CreateShaderResourceGroup(AZ::Data::Instance<AZ::RPI::Shader> shader, const char* shaderResourceGroupId, [[maybe_unused]] const char* sampleName)
     {
-        auto srg = AZ::RPI::ShaderResourceGroup::Create(shader->GetAsset(), AZ::Name { shaderResourceGroupId });
+        auto srg = AZ::RPI::ShaderResourceGroup::Create(shader->GetAsset(), shader->GetSupervariantIndex(), AZ::Name { shaderResourceGroupId });
         if (!srg)
         {
             AZ_Error(sampleName, false, "Failed to create shader resource group");
