@@ -1103,7 +1103,7 @@ namespace AtomSampleViewer
             const AZStd::string screenshotWarningsLogLine = AZStd::string::format("Screenshot warnings: %u \n", scriptReport.m_screenshotWarningCount);
             const AZStd::string failedScreenshotsLogLine = "\nScreenshot test info below.\n";     
 
-            const AZStd::string projectPath = AZ::Utils::GetProjectPath();
+            const auto projectPath = AZ::Utils::GetProjectPath();
             AZStd::chrono::system_clock::time_point now = AZStd::chrono::system_clock::now();
             float timeFloat = AZStd::chrono::duration<float>(now.time_since_epoch()).count();
             AZStd::string timeString = AZStd::string::format("%.4f", timeFloat);
