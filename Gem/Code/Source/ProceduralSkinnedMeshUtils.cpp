@@ -14,7 +14,7 @@
 #include <Atom/RPI.Reflect/Model/ModelAssetCreator.h>
 #include <Atom/RPI.Reflect/Model/ModelLodAssetCreator.h>
 #include <Atom/Feature/SkinnedMesh/SkinnedMeshInputBuffers.h>
-#pragma optimize("", off)
+
 namespace
 {
     static const char* const DefaultSkinnedMeshMaterial = "shaders/debugvertexnormals.azmaterial";
@@ -66,9 +66,9 @@ namespace AtomSampleViewer
     }
 
     // Create a buffer view descriptor based on the properties of the lod buffer, but using the sub-mesh's element count and offset
-    static RHI::BufferViewDescriptor CreateSubmeshBufferViewDescriptor(const AZ::Data::Asset<AZ::RPI::BufferAsset>& lodBufferAsset, uint32_t elementCount, uint32_t elementOffset)
+    static AZ::RHI::BufferViewDescriptor CreateSubmeshBufferViewDescriptor(const AZ::Data::Asset<AZ::RPI::BufferAsset>& lodBufferAsset, uint32_t elementCount, uint32_t elementOffset)
     {
-        RHI::BufferViewDescriptor viewDescriptor = lodBufferAsset->GetBufferViewDescriptor();
+        AZ::RHI::BufferViewDescriptor viewDescriptor = lodBufferAsset->GetBufferViewDescriptor();
         viewDescriptor.m_elementCount = elementCount;
         viewDescriptor.m_elementOffset = elementOffset;
         return viewDescriptor;
@@ -220,7 +220,7 @@ namespace AtomSampleViewer
 
         AZ::Data::AssetId assetId;
         assetId.m_guid = AZ::Uuid::CreateRandom();
-        Data::Instance<RPI::Model> model = CreateModelFromProceduralSkinnedMesh(proceduralMesh);
+        AZ::Data::Instance<AZ::RPI::Model> model = CreateModelFromProceduralSkinnedMesh(proceduralMesh);
         skinnedMeshInputBuffers->CreateFromModelAsset(model->GetModelAsset());
 
         return skinnedMeshInputBuffers;
