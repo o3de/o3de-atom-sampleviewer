@@ -90,7 +90,7 @@ namespace AtomSampleViewer
 
         // This is truncated, and the last sub-mesh may contain more vertices/jointIds, but that's okay because we're
         // only concerned about the offset here, and the last sub-mesh will start with this offset
-        uint32_t jointIdCountPerSubmesh = proceduralMesh.m_positions.size() * proceduralMesh.GetInfluencesPerVertex() / submeshCount;
+        uint32_t jointIdCountPerSubmesh = aznumeric_cast<uint32_t>((proceduralMesh.m_positions.size() * aznumeric_cast<size_t>(proceduralMesh.GetInfluencesPerVertex())) / submeshCount);
         uint32_t jointIdSizeInBytes = sizeof(uint16_t);
         uint32_t jointIdBytesPerSubmesh = jointIdCountPerSubmesh * jointIdSizeInBytes;
 
@@ -103,13 +103,13 @@ namespace AtomSampleViewer
         paddedJointIdOffset += roundUpTo - 1;
         paddedJointIdOffset = paddedJointIdOffset - paddedJointIdOffset % roundUpTo;
         // Determine how many padding id's we need to add, if any
-        size_t extraIdCount = paddedJointIdOffset - jointIdCountPerSubmesh;
+        uint32_t extraIdCount = paddedJointIdOffset - jointIdCountPerSubmesh;
         AZStd::vector<uint32_t> extraIds(extraIdCount / 2, 0);
 
         for (uint32_t subMeshIndex = 0; subMeshIndex < submeshCount; ++subMeshIndex)
         {
             // Get the count of all the jointIds from the previous submeshes
-            size_t insertPoint = (jointIdCountPerSubmesh + extraIdCount) * subMeshIndex;
+            uint32_t insertPoint = (jointIdCountPerSubmesh + extraIdCount) * subMeshIndex;
             // Add the current mesh's actual jointIdCount
             insertPoint += jointIdCountPerSubmesh;
             // Two jointId's per 32-bit uint
