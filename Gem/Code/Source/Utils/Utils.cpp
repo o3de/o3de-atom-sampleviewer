@@ -61,7 +61,7 @@ namespace AtomSampleViewer
             using MaskType = AZ::Debug::ProfileCategoryPrimitiveType;
 
             // Set all the category bits "below" Detailed by default
-            static const MaskType defaultCaptureMask = AZ_PROFILE_CAT_TO_RAD_CAPFLAGS(AZ::Debug::ProfileCategory::FirstDetailedCategory) - 1;
+            static const MaskType defaultCaptureMask = AZ_PROFILE_CAT_TO_RAD_CAPFLAGS(FirstDetailedCategory) - 1;
 
             static const char* s_telemetryAddress = "127.0.0.1";
             static int32_t s_telemetryPort = 4719;
@@ -70,7 +70,7 @@ namespace AtomSampleViewer
 
             ProfileTelemetryRequestBus::Broadcast(&ProfileTelemetryRequestBus::Events::SetAddress, s_telemetryAddress, s_telemetryPort);
 
-            const MaskType fullCaptureMask = s_telemetryCaptureMask | (s_memCaptureEnabled ? AZ_PROFILE_CAT_TO_RAD_CAPFLAGS(AZ::Debug::ProfileCategory::MemoryReserved) : 0);
+            const MaskType fullCaptureMask = s_telemetryCaptureMask | (s_memCaptureEnabled ? AZ_PROFILE_CAT_TO_RAD_CAPFLAGS(MemoryReserved) : 0);
             ProfileTelemetryRequestBus::Broadcast(&ProfileTelemetryRequestBus::Events::SetCaptureMask, fullCaptureMask);
 
             ProfileTelemetryRequestBus::Broadcast(&ProfileTelemetryRequestBus::Events::ToggleEnabled);
@@ -196,7 +196,7 @@ namespace AtomSampleViewer
             AZ::RHI::Format format = AZ::RHI::Format::R8G8B8A8_UNORM_SRGB;
             AZ::RHI::ImageBindFlags bindFlag = AZ::RHI::ImageBindFlags::ShaderRead;
 
-            AZ::RHI::ImageDescriptor imageDesc = AZ::RHI::ImageDescriptor::Create2DArray(bindFlag, width, height, arraySize, format);
+            AZ::RHI::ImageDescriptor imageDesc = AZ::RHI::ImageDescriptor::Create2DArray(bindFlag, width, height, static_cast<uint16_t>(arraySize), format);
             imageDesc.m_mipLevels = 1;
             imageDesc.m_isCubemap = true;
 

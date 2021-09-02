@@ -63,12 +63,13 @@
 #include <RHI/TrianglesConstantBufferExampleComponent.h>
 #include <RHI/BindlessPrototypeExampleComponent.h>
 #include <RHI/RayTracingExampleComponent.h>
+#include <RHI/MatrixAlignmentTestExampleComponent.h>
 
 #include <AreaLightExampleComponent.h>
 #include <AssetLoadTestComponent.h>
 #include <AuxGeomExampleComponent.h>
 #include <BakedShaderVariantExampleComponent.h>
-#include <BistroBenchmarkComponent.h>
+#include <SponzaBenchmarkComponent.h>
 #include <BloomExampleComponent.h>
 #include <CheckerboardExampleComponent.h>
 #include <CullingAndLodExampleComponent.h>
@@ -134,6 +135,11 @@ namespace AtomSampleViewer
         const char* CpuProfilerToolName = "CPU Profiler";
         const char* GpuProfilerToolName = "GPU Profiler";
         const char* TransientAttachmentProfilerToolName = "Transient Attachment Profiler";
+    }
+
+    bool IsValidNumMSAASamples(int numSamples)
+    {
+        return (numSamples == 1) || (numSamples == 2) || (numSamples == 4) || (numSamples == 8);
     }
 
     SampleEntry SampleEntry::NewRHISample(const AZStd::string& name, const AZ::Uuid& uuid)
@@ -254,10 +260,11 @@ namespace AtomSampleViewer
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/TextureMap", azrtti_typeid<TextureMapExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/Triangle", azrtti_typeid<TriangleExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/TrianglesConstantBuffer", azrtti_typeid<TrianglesConstantBufferExampleComponent>() ));
+        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/MatrixAlignmentTest", azrtti_typeid<MatrixAlignmentTestExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/AssetLoadTest", azrtti_typeid<AssetLoadTestComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/AuxGeom", azrtti_typeid<AuxGeomExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/BakedShaderVariant", azrtti_typeid<BakedShaderVariantExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/SponzaBenchmark", azrtti_typeid<BistroBenchmarkComponent>() ));
+        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/SponzaBenchmark", azrtti_typeid<SponzaBenchmarkComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/CullingAndLod", azrtti_typeid<CullingAndLodExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/Decals", azrtti_typeid<DecalExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/DynamicDraw", azrtti_typeid<DynamicDrawExampleComponent>() ));
@@ -302,7 +309,8 @@ namespace AtomSampleViewer
         AZ_Assert(passSystem, "Cannot get the pass system.");
 
         passSystem->AddPassCreator(Name("RayTracingAmbientOcclusionPass"), &AZ::Render::RayTracingAmbientOcclusionPass::Create);
- 
+
+        m_numMSAASamples = GetDefaultNumMSAASamples();
     }
 
     void SampleComponentManager::ActivateInternal()
@@ -1150,6 +1158,18 @@ namespace AtomSampleViewer
         }
     }
 
+    void SampleComponentManager::SetNumMSAASamples(int numMSAASamples)
+    {
+        AZ_Assert(IsValidNumMSAASamples(numMSAASamples), "Invalid MSAA sample setting");
+
+        m_numMSAASamples = numMSAASamples;
+    }
+
+    void SampleComponentManager::ResetNumMSAASamples()
+    {
+        m_numMSAASamples = GetDefaultNumMSAASamples();
+    }
+
     void SampleComponentManager::ResetRPIScene()
     {
         ReleaseRPIScene();
@@ -1491,7 +1511,10 @@ namespace AtomSampleViewer
         pipelineDesc.m_name = "RPISamplePipeline";
         pipelineDesc.m_rootPassTemplate = GetRootPassTemplateName();
         pipelineDesc.m_mainViewTagName = "MainCamera";
-        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = GutNumMSAASamples();
+
+        // set pipeline MSAA samples
+        AZ_Assert(IsValidNumMSAASamples(m_numMSAASamples), "Invalid MSAA sample setting");
+        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = static_cast<uint16_t>(m_numMSAASamples);
         bool isNonMsaaPipeline = (pipelineDesc.m_renderSettings.m_multisampleState.m_samples == 1);
         const char* supervariantName = isNonMsaaPipeline ? AZ::RPI::NoMsaaSupervariantName : "";
         AZ::RPI::ShaderSystemInterface::Get()->SetSupervariantName(AZ::Name(supervariantName));

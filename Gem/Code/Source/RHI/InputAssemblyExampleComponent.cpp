@@ -69,7 +69,7 @@ namespace AtomSampleViewer
                 frameGraphBuilder.GetAttachmentDatabase().ImportBuffer(AZ::Name{ InputAssembly::ImportedInputAssemblyBufferAttachmentId }, m_inputAssemblyBuffer);
             }
 
-            float aspectRatio = m_outputWidth / m_outputHeight;
+            float aspectRatio = static_cast<float>(m_outputWidth / m_outputHeight);
             AZ::Vector2 scale(AZStd::min(1.0f / aspectRatio, 1.0f), AZStd::min(aspectRatio, 1.0f));
             {
                 AZ::Matrix4x4 scaleTranslate =
@@ -239,7 +239,7 @@ namespace AtomSampleViewer
             //UserDataParam - Empty for this samples
         };
 
-        const auto prepareFunction = [this](RHI::FrameGraphInterface frameGraph, ScopeData& scopeData)
+        const auto prepareFunction = [](RHI::FrameGraphInterface frameGraph, ScopeData& scopeData)
         {
             AZ_UNUSED(scopeData);
             // Declare usage of the vertex buffer as UAV

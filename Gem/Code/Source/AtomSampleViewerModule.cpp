@@ -14,7 +14,7 @@
 #include <AuxGeomExampleComponent.h>
 #include <AtomSampleViewerSystemComponent.h>
 #include <BakedShaderVariantExampleComponent.h>
-#include <BistroBenchmarkComponent.h>
+#include <SponzaBenchmarkComponent.h>
 #include <BloomExampleComponent.h>
 #include <CheckerboardExampleComponent.h>
 #include <CullingAndLodExampleComponent.h>
@@ -70,6 +70,7 @@
 #include <RHI/TriangleExampleComponent.h>
 #include <RHI/TrianglesConstantBufferExampleComponent.h>
 #include <RHI/RayTracingExampleComponent.h>
+#include <RHI/MatrixAlignmentTestExampleComponent.h>
 #include <AzFramework/Scene/SceneSystemComponent.h>
 
 #include <Atom/Feature/SkinnedMesh/SkinnedMeshInputBuffers.h>
@@ -116,7 +117,8 @@ namespace AtomSampleViewer
                 TextureMapExampleComponent::CreateDescriptor(),
                 TriangleExampleComponent::CreateDescriptor(),
                 TrianglesConstantBufferExampleComponent::CreateDescriptor(),
-                RayTracingExampleComponent::CreateDescriptor()
+                RayTracingExampleComponent::CreateDescriptor(),
+                MatrixAlignmentTestExampleComponent::CreateDescriptor()
                 });
 
             // RPI Samples
@@ -124,7 +126,7 @@ namespace AtomSampleViewer
                 AreaLightExampleComponent::CreateDescriptor(),
                 AssetLoadTestComponent::CreateDescriptor(),
                 BakedShaderVariantExampleComponent::CreateDescriptor(),
-                BistroBenchmarkComponent::CreateDescriptor(),
+                SponzaBenchmarkComponent::CreateDescriptor(),
                 BloomExampleComponent::CreateDescriptor(),
                 CheckerboardExampleComponent::CreateDescriptor(),
                 CullingAndLodExampleComponent::CreateDescriptor(),

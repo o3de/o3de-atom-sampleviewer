@@ -80,6 +80,8 @@ set(FILES
     Source/RHI/TrianglesConstantBufferExampleComponent.cpp
     Source/RHI/RayTracingExampleComponent.cpp
     Source/RHI/RayTracingExampleComponent.h
+    Source/RHI/MatrixAlignmentTestExampleComponent.cpp
+    Source/RHI/MatrixAlignmentTestExampleComponent.h
     Source/AreaLightExampleComponent.cpp
     Source/AreaLightExampleComponent.h
     Source/AssetLoadTestComponent.cpp
@@ -90,8 +92,8 @@ set(FILES
     Source/AuxGeomSharedDrawFunctions.h
     Source/BakedShaderVariantExampleComponent.h
     Source/BakedShaderVariantExampleComponent.cpp
-    Source/BistroBenchmarkComponent.cpp
-    Source/BistroBenchmarkComponent.h
+    Source/SponzaBenchmarkComponent.cpp
+    Source/SponzaBenchmarkComponent.h
     Source/BloomExampleComponent.cpp
     Source/BloomExampleComponent.h
     Source/CheckerboardExampleComponent.h

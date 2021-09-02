@@ -249,7 +249,7 @@ namespace AtomSampleViewer
             if (modelChanged)
             {
                 // Reset LOD override when the model changes.
-                m_lodOverride = AZ::RPI::Cullable::NoLodOverride;
+                m_lodConfig.m_lodType = AZ::RPI::Cullable::LodType::Default;
             }
 
             AZ::Data::Instance<AZ::RPI::Model> model = GetMeshFeatureProcessor()->GetModel(m_meshHandle);
@@ -258,23 +258,26 @@ namespace AtomSampleViewer
                 const char* NoLodOverrideText = "No LOD Override";
                 const char* LodFormatString = "LOD %i";
 
-                AZStd::string previewText = m_lodOverride == AZ::RPI::Cullable::NoLodOverride ? NoLodOverrideText : AZStd::string::format(LodFormatString, m_lodOverride);
+                AZStd::string previewText = m_lodConfig.m_lodType == AZ::RPI::Cullable::LodType::Default ? 
+                    NoLodOverrideText : 
+                    AZStd::string::format(LodFormatString, m_lodConfig.m_lodOverride);
 
                 if (ScriptableImGui::BeginCombo("", previewText.c_str()))
                 {
-                    if (ScriptableImGui::Selectable(NoLodOverrideText, m_lodOverride == AZ::RPI::Cullable::NoLodOverride))
+                    if (ScriptableImGui::Selectable(NoLodOverrideText, m_lodConfig.m_lodType == AZ::RPI::Cullable::LodType::Default))
                     {
-                        m_lodOverride = AZ::RPI::Cullable::NoLodOverride;
-                        GetMeshFeatureProcessor()->SetLodOverride(m_meshHandle, m_lodOverride);
+                        m_lodConfig.m_lodType = AZ::RPI::Cullable::LodType::Default;
+                        GetMeshFeatureProcessor()->SetMeshLodConfiguration(m_meshHandle, m_lodConfig);
                     }
 
                     for (uint32_t i = 0; i < model->GetLodCount(); ++i)
                     {
                         AZStd::string name = AZStd::string::format(LodFormatString, i);
-                        if (ScriptableImGui::Selectable(name.c_str(), m_lodOverride == i))
+                        if (ScriptableImGui::Selectable(name.c_str(), m_lodConfig.m_lodOverride == i))
                         {
-                            m_lodOverride = i;
-                            GetMeshFeatureProcessor()->SetLodOverride(m_meshHandle, m_lodOverride);
+                            m_lodConfig.m_lodType = AZ::RPI::Cullable::LodType::SpecificLod;
+                            m_lodConfig.m_lodOverride = static_cast<AZ::RPI::Cullable::LodOverride>(i);
+                            GetMeshFeatureProcessor()->SetMeshLodConfiguration(m_meshHandle, m_lodConfig);
                         }
                     }
                     ScriptableImGui::EndCombo();
@@ -361,7 +364,7 @@ namespace AtomSampleViewer
             m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_modelAsset }, m_materialOverrideInstance);
             GetMeshFeatureProcessor()->SetTransform(m_meshHandle, AZ::Transform::CreateIdentity());
             GetMeshFeatureProcessor()->ConnectModelChangeEventHandler(m_meshHandle, m_changedHandler);
-            GetMeshFeatureProcessor()->SetLodOverride(m_meshHandle, m_lodOverride);
+            GetMeshFeatureProcessor()->SetMeshLodConfiguration(m_meshHandle, m_lodConfig);
         }
         else
         {

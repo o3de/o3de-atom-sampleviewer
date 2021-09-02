@@ -436,6 +436,16 @@ namespace AtomSampleViewer
                         UpdateAllLocalBaselineImages();
                     });
             }
+            if (ImGui::Button("Export Test Results"))
+            {
+                m_messageBox.OpenPopupConfirmation(
+                    "Export Test Results",
+                    "All test results will be exported \n"
+                    "Proceed?",
+                    [this]() {
+                        ExportTestResults();
+                    });
+            }
 
             int displayOption = m_displayOption;
             ImGui::Combo("Display", &displayOption, DiplayOptions, AZ_ARRAY_SIZE(DiplayOptions));
@@ -1080,5 +1090,53 @@ namespace AtomSampleViewer
             }
         }
 
+    }
+
+    void ScriptReporter::ExportTestResults()
+    {  
+        for (const ScriptReport& scriptReport : m_scriptReports)
+        {
+            const AZStd::string assertLogLine = AZStd::string::format("Asserts: %u \n", scriptReport.m_assertCount);
+            const AZStd::string errorsLogLine = AZStd::string::format("Errors: %u \n", scriptReport.m_generalErrorCount);
+            const AZStd::string warningsLogLine = AZStd::string::format("Warnings: %u \n", scriptReport.m_generalWarningCount);
+            const AZStd::string screenshotErrorsLogLine = AZStd::string::format("Screenshot errors: %u \n", scriptReport.m_screenshotErrorCount);
+            const AZStd::string screenshotWarningsLogLine = AZStd::string::format("Screenshot warnings: %u \n", scriptReport.m_screenshotWarningCount);
+            const AZStd::string failedScreenshotsLogLine = "\nScreenshot test info below.\n";     
+
+            const auto projectPath = AZ::Utils::GetProjectPath();
+            AZStd::chrono::system_clock::time_point now = AZStd::chrono::system_clock::now();
+            float timeFloat = AZStd::chrono::duration<float>(now.time_since_epoch()).count();
+            AZStd::string timeString = AZStd::string::format("%.4f", timeFloat);
+            AZStd::string exportFileName = AZStd::string::format("exportedTestResults_%s.txt", timeString.c_str());
+            AZStd::string exportTestResultsFolder;
+            AzFramework::StringFunc::Path::Join(projectPath.c_str(), "TestResults/", exportTestResultsFolder);
+
+            auto io = AZ::IO::LocalFileIO::GetInstance();
+            io->CreatePath(exportTestResultsFolder.c_str());
+            AZStd::string exportFile;
+            AzFramework::StringFunc::Path::Join(exportTestResultsFolder.c_str(), exportFileName.c_str(), exportFile);
+            AZ::IO::HandleType logHandle;
+
+        if (io->Open(exportFile.c_str(), AZ::IO::OpenMode::ModeWrite, logHandle))
+        {
+            io->Write(logHandle, assertLogLine.c_str(), assertLogLine.size());
+            io->Write(logHandle, errorsLogLine.c_str(), errorsLogLine.size());
+            io->Write(logHandle, warningsLogLine.c_str(), warningsLogLine.size());
+            io->Write(logHandle, screenshotErrorsLogLine.c_str(), screenshotErrorsLogLine.size());
+            io->Write(logHandle, screenshotWarningsLogLine.c_str(), screenshotWarningsLogLine.size());
+            io->Write(logHandle, failedScreenshotsLogLine.c_str(), failedScreenshotsLogLine.size());
+
+            for (const ScreenshotTestInfo& screenshotTest : scriptReport.m_screenshotTests)
+            {
+                const AZStd::string toleranceLevelLogLine = AZStd::string::format("Tolerance level: %s \n", screenshotTest.m_toleranceLevel.ToString().c_str());
+                const AZStd::string officialComparisonLogLine = AZStd::string::format("Image comparison result: %s \n", screenshotTest.m_officialComparisonResult.GetSummaryString().c_str());
+
+                io->Write(logHandle, toleranceLevelLogLine.c_str(), toleranceLevelLogLine.size());
+                io->Write(logHandle, officialComparisonLogLine.c_str(), officialComparisonLogLine.size());
+            }
+            io->Close(logHandle);
+        }
+        m_messageBox.OpenPopupMessage("Exported test results", "Results exported to " + exportFile);
+        }
     }
 } // namespace AtomSampleViewer

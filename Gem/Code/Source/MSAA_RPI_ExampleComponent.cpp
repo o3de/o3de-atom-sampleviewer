@@ -71,8 +71,8 @@ namespace AtomSampleViewer
         AZ::Debug::CameraControllerRequestBus::Event(GetCameraEntityId(), &AZ::Debug::CameraControllerRequestBus::Events::Disable);
         m_defaultIbl.Reset();
 
-        // clear the non-MSAA pipeline and the RPI scene
-        AZ::RPI::ShaderSystemInterface::Get()->SetSupervariantName(AZ::Name(""));
+        // reset the number of MSAA samples and the RPI scene
+        SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequests::ResetNumMSAASamples);
         SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequests::ClearRPIScene);
 
         AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusDisconnect();
@@ -100,9 +100,8 @@ namespace AtomSampleViewer
         // necessary to re-initialize all of the feature processor shaders and Srgs
         if (isNonMsaaPipeline != m_isNonMsaaPipeline)
         {      
-            // set the NoMsaa flag based on the pipeline type and reset the RPI scene
-            const char* supervariantName = isNonMsaaPipeline ? AZ::RPI::NoMsaaSupervariantName : "";
-            AZ::RPI::ShaderSystemInterface::Get()->SetSupervariantName(AZ::Name(supervariantName));
+            // set the number of MSAA samples and reset the RPI scene
+            SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequests::SetNumMSAASamples, m_numSamples);
             SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequests::ResetRPIScene);
 
             // reset internal sample scene related data
@@ -126,7 +125,7 @@ namespace AtomSampleViewer
         pipelineDesc.m_mainViewTagName = "MainCamera";
         pipelineDesc.m_name = "MSAA";
         pipelineDesc.m_rootPassTemplate = "MainPipeline";
-        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = m_numSamples;
+        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = static_cast<uint16_t>(m_numSamples);
         m_samplePipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
 
         // add the sample pipeline to the scene

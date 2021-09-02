@@ -64,7 +64,7 @@ namespace AtomSampleViewer
         TickBus::Handler::BusConnect();
         m_imguiSidebar.Activate();
 
-        m_materialBrowser.SetFilter([this](const AZ::Data::AssetInfo& assetInfo) {
+        m_materialBrowser.SetFilter([](const AZ::Data::AssetInfo& assetInfo) {
             if (!AzFramework::StringFunc::Path::IsExtension(assetInfo.m_relativePath.c_str(), "azmaterial"))
             {
                 return false;
@@ -124,7 +124,7 @@ namespace AtomSampleViewer
         m_imGuiFrameTimer.PushValue(deltaTime);
 
         AZ::RPI::TimestampResult forwardTimestampResult = m_forwardPass->GetLatestTimestampResult();
-        double gpuForwardFrameTimeMs = aznumeric_cast<double>(forwardTimestampResult.GetDurationInNanoseconds()) / 1000000;
+        float gpuForwardFrameTimeMs = aznumeric_cast<float>(forwardTimestampResult.GetDurationInNanoseconds()) / 1000000;
         m_imGuiForwardPassTimer.PushValue(gpuForwardFrameTimeMs);
 
 

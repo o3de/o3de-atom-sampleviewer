@@ -134,6 +134,7 @@ namespace AtomSampleViewer
 
         // Profiling statistics data...
         static void Script_CapturePassTimestamp(AZ::ScriptDataContext& dc);
+        static void Script_CaptureCpuFrameTime(AZ::ScriptDataContext& dc);
         static void Script_CapturePassPipelineStatistics(AZ::ScriptDataContext& dc);
         static void Script_CaptureCpuProfilingStatistics(AZ::ScriptDataContext& dc);
         static void Script_CaptureBenchmarkMetadata(AZ::ScriptDataContext& dc);
@@ -202,6 +203,7 @@ namespace AtomSampleViewer
 
         // ProfilingCaptureNotificationBus overrides...
         void OnCaptureQueryTimestampFinished(bool result, const AZStd::string& info) override;
+        void OnCaptureCpuFrameTimeFinished(bool result, const AZStd::string& info) override;
         void OnCaptureQueryPipelineStatisticsFinished(bool result, const AZStd::string& info) override;
         void OnCaptureCpuProfilingStatisticsFinished(bool result, const AZStd::string& info) override;
         void OnCaptureBenchmarkMetadataFinished(bool result, const AZStd::string& info) override;

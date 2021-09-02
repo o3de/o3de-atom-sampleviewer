@@ -140,31 +140,10 @@ endif()
 ################################################################################
 # Gem dependencies
 ################################################################################
-# The GameLauncher uses "Clients" gem variants:
-ly_enable_gems(PROJECT_NAME AtomSampleViewer GEM_FILE enabled_gems.cmake
-    TARGETS AtomSampleViewer.GameLauncher
-    VARIANTS Clients)
+
+ly_enable_gems(PROJECT_NAME AtomSampleViewer GEM_FILE enabled_gems.cmake)
 
 # If we build a server, then apply the gems to the server
 if(PAL_TRAIT_BUILD_SERVER_SUPPORTED)
-    # if we're making a server, then add the "Server" gem variants to it:
-    ly_enable_gems(PROJECT_NAME AtomSampleViewer GEM_FILE enabled_gems.cmake
-        TARGETS AtomSampleViewer.ServerLauncher
-        VARIANTS Servers)
-
     set_property(GLOBAL APPEND PROPERTY LY_LAUNCHER_SERVER_PROJECTS AtomSampleViewer)
-endif()
-
-if (PAL_TRAIT_BUILD_HOST_TOOLS)
-    # The Editor uses "Tools" gem variants:
-    ly_enable_gems(
-        PROJECT_NAME AtomSampleViewer GEM_FILE enabled_gems.cmake
-        TARGETS Editor
-        VARIANTS Tools)
-
-    # The pipeline tools use "Builders" gem variants:
-    ly_enable_gems(
-        PROJECT_NAME AtomSampleViewer GEM_FILE enabled_gems.cmake
-        TARGETS AssetBuilder AssetProcessor AssetProcessorBatch
-        VARIANTS Builders)
 endif()

@@ -220,7 +220,7 @@ namespace AtomSampleViewer
                 drawItem.m_arguments = drawIndexed;
                 drawItem.m_pipelineState = m_pipelineStateBasePass.get();
                 drawItem.m_indexBufferView = &indexBufferView;
-                drawItem.m_streamBufferViewCount = static_cast<uint32_t>(m_streamBufferViews.size());
+                drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
                 drawItem.m_streamBufferViews = m_streamBufferViews.data();
                 commandList->Submit(drawItem);
 

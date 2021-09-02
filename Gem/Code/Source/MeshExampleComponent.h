@@ -95,7 +95,7 @@ namespace AtomSampleViewer
         static constexpr float ArcballRadiusMaxModifier = 4.0f;
         static constexpr float ArcballRadiusDefaultModifier = 2.0f;
         
-        AZ::RPI::Cullable::LodOverride m_lodOverride = AZ::RPI::Cullable::NoLodOverride;
+        AZ::RPI::Cullable::LodConfiguration m_lodConfig;
 
         bool m_enableMaterialOverride = true;
 
