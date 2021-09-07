@@ -251,8 +251,6 @@ namespace AtomSampleViewer
 
         // Scene and some variables for RPI samples
         AZ::RPI::ScenePtr m_rpiScene;
-        float m_simulateTime = 0;
-        float m_deltaTime = 0.016f;
 
         // number of MSAA samples, initialized in Activate() and can vary by platform
         int m_numMSAASamples = 0;
