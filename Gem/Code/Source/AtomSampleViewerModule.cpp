@@ -70,6 +70,7 @@
 #include <RHI/TriangleExampleComponent.h>
 #include <RHI/TrianglesConstantBufferExampleComponent.h>
 #include <RHI/RayTracingExampleComponent.h>
+#include <RHI/MatrixAlignmentTestExampleComponent.h>
 #include <AzFramework/Scene/SceneSystemComponent.h>
 
 #include <Atom/Feature/SkinnedMesh/SkinnedMeshInputBuffers.h>
@@ -116,7 +117,8 @@ namespace AtomSampleViewer
                 TextureMapExampleComponent::CreateDescriptor(),
                 TriangleExampleComponent::CreateDescriptor(),
                 TrianglesConstantBufferExampleComponent::CreateDescriptor(),
-                RayTracingExampleComponent::CreateDescriptor()
+                RayTracingExampleComponent::CreateDescriptor(),
+                MatrixAlignmentTestExampleComponent::CreateDescriptor()
                 });
 
             // RPI Samples

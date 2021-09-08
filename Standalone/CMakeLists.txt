@@ -38,9 +38,7 @@ if (NOT LY_MONOLITHIC_GAME)
 
         add_subdirectory(PythonTests)
 
-        ly_enable_gems(GEM_FILE ../Gem/Code/enabled_gems.cmake
-            TARGETS AtomSampleViewerStandalone
-            VARIANTS Clients)
+        ly_set_gem_variant_to_load(TARGETS AtomSampleViewerStandalone VARIANTS Clients)
 
 
         # Adds the AtomSampleViewerStandalone target as a C preprocessor define so that it can be used as a Settings Registry
