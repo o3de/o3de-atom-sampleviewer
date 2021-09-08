@@ -287,7 +287,7 @@ namespace AtomSampleViewer
 
         ImGui::Text("Status:");
         ImGui::SameLine();
-        ImGui::Text(ToString(status));
+        ImGui::Text("%s", ToString(status));
 
         if (includeFileName)
         {

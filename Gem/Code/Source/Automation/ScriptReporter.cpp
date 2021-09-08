@@ -572,18 +572,18 @@ namespace AtomSampleViewer
                         {
                             resetTextHighlight();
 
-                            ImGui::Text(("Screenshot:        " + screenshotResult.m_screenshotFilePath).c_str());
+                            ImGui::Text("Screenshot:        %s", screenshotResult.m_screenshotFilePath.c_str());
 
                             ImGui::Spacing();
 
                             highlightTextIf(!screenshotPassed, HighlightFailed);
 
-                            ImGui::Text(("Official Baseline: " + screenshotResult.m_officialBaselineScreenshotFilePath).c_str());
+                            ImGui::Text("Official Baseline: %s", screenshotResult.m_officialBaselineScreenshotFilePath.c_str());
 
                             // Official Baseline Result
                             ImGui::Indent();
                             {
-                                ImGui::Text(screenshotResult.m_officialComparisonResult.GetSummaryString().c_str());
+                                ImGui::Text("%s", screenshotResult.m_officialComparisonResult.GetSummaryString().c_str());
 
                                 if (screenshotResult.m_officialComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::ThresholdExceeded ||
                                     screenshotResult.m_officialComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::Pass)
@@ -643,12 +643,12 @@ namespace AtomSampleViewer
 
                             highlightTextIf(localBaselineWarning, HighlightWarning);
 
-                            ImGui::Text(("Local Baseline:    " + screenshotResult.m_localBaselineScreenshotFilePath).c_str());
+                            ImGui::Text("Local Baseline:    %s", screenshotResult.m_localBaselineScreenshotFilePath.c_str());
 
                             // Local Baseline Result
                             ImGui::Indent();
                             {
-                                ImGui::Text(screenshotResult.m_localComparisonResult.GetSummaryString().c_str());
+                                ImGui::Text("%s", screenshotResult.m_localComparisonResult.GetSummaryString().c_str());
 
                                 resetTextHighlight();
 
