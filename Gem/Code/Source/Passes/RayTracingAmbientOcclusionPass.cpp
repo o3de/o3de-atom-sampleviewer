@@ -158,7 +158,7 @@ namespace AZ
 
             // Bind others for global srg
             const RHI::ShaderResourceGroupLayout* srgLayout = m_shaderResourceGroup->GetLayout();
-            RHI::ShaderInputImageIndex imageIndex;
+            
             RHI::ShaderInputBufferIndex bufferIndex;
             RHI::ShaderInputConstantIndex constantIndex;
 

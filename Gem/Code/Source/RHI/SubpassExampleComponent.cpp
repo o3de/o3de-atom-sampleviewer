@@ -590,8 +590,6 @@ namespace AtomSampleViewer
         } };
 
         const float zNear = 1.0f, zFar = 100.0f;
-        const AZ::Vector3 up = AZ::Vector3(0.0f, 0.0f, 1.0f);
-        const AZ::Vector3 lookAt = AZ::Vector3(0.0f, 0.0f, 0.0f);
 
         // Camera
         float fieldOfView = AZ::Constants::Pi / 4.0f;
