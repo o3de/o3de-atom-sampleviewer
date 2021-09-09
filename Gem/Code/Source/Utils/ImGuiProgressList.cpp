@@ -73,7 +73,7 @@ namespace AtomSampleViewer
 
             if (ImGui::BeginPopupModal(m_title.c_str(), nullptr, windowFlags))
             {
-                ImGui::Text(m_description.c_str());
+                ImGui::Text("%s", m_description.c_str());
 
                 ScriptableImGui::PushNameContext(m_title.c_str());
 
