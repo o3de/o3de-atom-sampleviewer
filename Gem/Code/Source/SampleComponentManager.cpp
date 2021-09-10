@@ -468,9 +468,6 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::OnTick(float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint time)
     {
-        m_simulateTime += deltaTime;
-        m_deltaTime = deltaTime;
-
         m_imGuiFrameTimer.PushValue(deltaTime);
 
         bool screenshotRequest = false;
@@ -1462,34 +1459,6 @@ namespace AtomSampleViewer
         RPI::SceneDescriptor sceneDesc;
         m_rpiScene = RPI::Scene::CreateScene(sceneDesc);
         m_rpiScene->EnableAllFeatureProcessors();
-
-        // Setup scene srg modification callback.
-        RPI::ShaderResourceGroupCallback callback = [this](RPI::ShaderResourceGroup* srg)
-        {
-            if (srg == nullptr)
-            {
-                return;
-            }
-            bool needCompile = false;
-            RHI::ShaderInputConstantIndex timeIndex = srg->FindShaderInputConstantIndex(Name{ "m_time" });
-            if (timeIndex.IsValid())
-            {
-                srg->SetConstant(timeIndex, m_simulateTime);
-                needCompile = true;
-            }
-            RHI::ShaderInputConstantIndex deltaTimeIndex = srg->FindShaderInputConstantIndex(Name{ "m_deltaTime" });
-            if (deltaTimeIndex.IsValid())
-            {
-                srg->SetConstant(deltaTimeIndex, m_deltaTime);
-                needCompile = true;
-            }
-
-            if (needCompile)
-            {
-                srg->Compile();
-            }
-        };
-        m_rpiScene->SetShaderResourceGroupCallback(callback);
 
         // Bind m_rpiScene to the GameEntityContext's AzFramework::Scene so the RPI Scene can be found by the entity context
         auto sceneSystem = AzFramework::SceneSystemInterface::Get();
