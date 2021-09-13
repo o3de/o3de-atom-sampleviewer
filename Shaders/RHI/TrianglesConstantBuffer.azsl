@@ -21,6 +21,22 @@
 
 #endif
 
+
+#if AZ_TRAIT_CONSTANT_BUFFER_ALIGNMENT <= 64
+
+#define NUM_INSTANCE_INFO_PADDINGS 0
+
+#elif AZ_TRAIT_CONSTANT_BUFFER_ALIGNMENT == 128
+
+#define NUM_INSTANCE_INFO_PADDINGS 3
+
+#else
+
+#define NUM_INSTANCE_INFO_PADDINGS 11
+
+#endif
+
+
 struct InstanceInfo
 {
     column_major float4x4 m_matrix;
@@ -28,7 +44,9 @@ struct InstanceInfo
     // NOTE: This actually shouldn't be required, but the current validation will give a false positive
     // when the stride isn't the same size as the stride defined on the applicaiton side.
     // This assumes 256 alignment, which is standard for DX12, but is variable in Vulkan
-    float4 m_padding0[11];
+#if NUM_INSTANCE_INFO_PADDINGS != 0
+    float4 m_padding0[NUM_INSTANCE_INFO_PADDINGS];
+#endif
 };
 
 struct InstanceData
