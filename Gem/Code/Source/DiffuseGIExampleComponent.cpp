@@ -410,7 +410,6 @@ namespace AtomSampleViewer
             directionalLightFeatureProcessor->SetViewFrustumCorrectionEnabled(m_directionalLightHandle, false);
             directionalLightFeatureProcessor->SetShadowFilterMethod(m_directionalLightHandle, AZ::Render::ShadowFilterMethod::EsmPcf);
             directionalLightFeatureProcessor->SetShadowBoundaryWidth(m_directionalLightHandle, 0.03f);
-            directionalLightFeatureProcessor->SetPredictionSampleCount(m_directionalLightHandle, 4);
             directionalLightFeatureProcessor->SetFilteringSampleCount(m_directionalLightHandle, 16);
             directionalLightFeatureProcessor->SetGroundHeight(m_directionalLightHandle, 0.0f);
         }
