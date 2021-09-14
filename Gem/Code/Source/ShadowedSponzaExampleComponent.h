@@ -140,10 +140,7 @@ namespace AtomSampleViewer
         int m_shadowFilterMethodIndexDisk = 0; // filter method is None
         float m_boundaryWidthDirectional = 0.03f; // 3cm
         float m_boundaryWidthDisk = 0.25f; // 0.25 degrees
-        int m_predictionSampleCountDirectional = 4;
-        int m_predictionSampleCountDisk = 4;
         int m_filteringSampleCountDirectional = 16;
-        AZ::Render::PcfMethod m_pcfMethodDirectional = AZ::Render::PcfMethod::BoundarySearch;
         int m_filteringSampleCountDisk = 16;
 
         bool m_isCascadeCorrectionEnabled = false;
