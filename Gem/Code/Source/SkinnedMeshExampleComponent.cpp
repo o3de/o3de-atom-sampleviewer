@@ -29,11 +29,6 @@
 
 namespace AtomSampleViewer
 {
-    namespace
-    {
-        static const char* const SkinnedMeshMaterial = "materials/defaultpbrmaterial.azmaterial";
-    }
-
     void SkinnedMeshExampleComponent::Reflect(AZ::ReflectContext* context)
     {
         if (AZ::SerializeContext* serializeContext = azrtti_cast<AZ::SerializeContext*>(context))

@@ -53,8 +53,6 @@ namespace AtomSampleViewer
         AZ::RPI::RenderPipelinePtr m_pipeline;
         AZ::Entity* m_cameraEntity = nullptr;
         AZ::RPI::ViewPtr m_view;
-        double m_simulateTime = 0.0f;
-        float m_deltaTime = 0.0f;
         MultiViewSingleSceneAuxGeomExampleComponent* m_parent;
 
     public:
