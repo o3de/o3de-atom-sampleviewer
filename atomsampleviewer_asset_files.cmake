@@ -168,7 +168,6 @@ set(FILES
     Shaders/RHI/TrianglesConstantBuffer.shader
     Shaders/RootConstantsExample/ColorMesh.azsl
     Shaders/RootConstantsExample/ColorMesh.shader
-    Shaders/ShaderResourceGroups/SceneSrg.azsli
     Shaders/StreamingImageExample/Image3d.azsl
     Shaders/StreamingImageExample/Image3d.shader
     Shaders/StreamingImageExample/ImageMips.azsl

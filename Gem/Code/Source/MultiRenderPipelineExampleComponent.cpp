@@ -221,7 +221,6 @@ namespace AtomSampleViewer
         featureProcessor->SetViewFrustumCorrectionEnabled(handle, true);
         featureProcessor->SetShadowFilterMethod(handle, aznumeric_cast<Render::ShadowFilterMethod>(m_shadowFilteringMethod));
         featureProcessor->SetShadowBoundaryWidth(handle, 0.03f);
-        featureProcessor->SetPredictionSampleCount(handle, 4);
         featureProcessor->SetFilteringSampleCount(handle, 32);
         featureProcessor->SetGroundHeight(handle, 0.f);
         featureProcessor->SetShadowFarClipDistance(handle, 100.f);

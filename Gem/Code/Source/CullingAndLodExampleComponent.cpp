@@ -233,7 +233,6 @@ namespace AtomSampleViewer
             dirLightFP->SetViewFrustumCorrectionEnabled(handle, m_isCascadeCorrectionEnabled);
             dirLightFP->SetShadowFilterMethod(handle, s_shadowFilterMethods[m_shadowFilterMethodIndex]);
             dirLightFP->SetShadowBoundaryWidth(handle, m_boundaryWidth);
-            dirLightFP->SetPredictionSampleCount(handle, static_cast<uint16_t>(m_predictionSampleCount));
             dirLightFP->SetFilteringSampleCount(handle, static_cast<uint16_t>(m_filteringSampleCount));
             dirLightFP->SetGroundHeight(handle, 0.f);
 
@@ -405,10 +404,6 @@ namespace AtomSampleViewer
 
             ImGui::Spacing();
             ImGui::Text("Filtering (PCF specific)");
-            if (ImGui::SliderInt("Prediction #", &m_predictionSampleCount, 4, 16))
-            {
-                m_directionalLightFeatureProcessor->SetPredictionSampleCount(m_directionalLightHandle, static_cast<uint16_t>(m_predictionSampleCount));
-            }
             if (ImGui::SliderInt("Filtering #", &m_filteringSampleCount, 4, 64))
             {
                 m_directionalLightFeatureProcessor->SetFilteringSampleCount(m_directionalLightHandle, static_cast<uint16_t>(m_filteringSampleCount));
