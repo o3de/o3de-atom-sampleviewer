@@ -23,7 +23,8 @@ namespace AtomSampleViewer
         AZ_RTTI(StacksShaderCollectionFunctor, "{4E51A7D5-7DF1-4402-8975-F6C9DFDEDC1E}", AZ::RPI::MaterialFunctor);
 
         static void Reflect(AZ::ReflectContext* context);
-
+        
+        using AZ::RPI::MaterialFunctor::Process;
         void Process(RuntimeContext& context) override;
 
     private:
