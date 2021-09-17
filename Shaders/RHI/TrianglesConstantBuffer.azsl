@@ -21,20 +21,50 @@
 
 #endif
 
+// Padding sizes for different platform memory alignment requirements
+#ifdef AZ_TRAIT_CONSTANT_BUFFER_ALIGNMENT
 
-#if AZ_TRAIT_CONSTANT_BUFFER_ALIGNMENT <= 64
 
-#define NUM_INSTANCE_INFO_PADDINGS 0
+// Size of InstanceInfo: sizeof(float4x4) + sizeof(float4) = 64 + 16 = 80
+// if InstanceInfo size < alignment size:
+//      diff = alignment size - InstanceInfo size 
+//      if diff > 0:
+//          padding = (alignment size - InstanceInfo size) / 16
+//      else:
+//          padding = 0
+// else:
+//      left_over = InstanceInfo size % alignment
+//      if left_over > 0: 
+//          padding = (alignment - left_over) / 16
+//      else:
+//          padding = 0
+#if AZ_TRAIT_CONSTANT_BUFFER_ALIGNMENT == 16
+
+#define NUM_INSTANCE_INFO_PADDINGS 0                    // 80 % 16 == 0
+
+#elif AZ_TRAIT_CONSTANT_BUFFER_ALIGNMENT == 32
+
+#define NUM_INSTANCE_INFO_PADDINGS 1                    // 80 % 32 => (16 > 0) => (32 - 16) / 16 = 1
+
+#elif AZ_TRAIT_CONSTANT_BUFFER_ALIGNMENT == 64         
+
+#define NUM_INSTANCE_INFO_PADDINGS 3                    // 80 % 64 => (16 > 0) => (64 - 16) / 16 = 3
 
 #elif AZ_TRAIT_CONSTANT_BUFFER_ALIGNMENT == 128
 
-#define NUM_INSTANCE_INFO_PADDINGS 3
+#define NUM_INSTANCE_INFO_PADDINGS 3                    // (128 - 80) / 16 = 3
 
 #else
 
-#define NUM_INSTANCE_INFO_PADDINGS 11
+#define NUM_INSTANCE_INFO_PADDINGS 11                   // (256 - 80) / 16 = 11
 
 #endif
+
+#else 
+
+#define NUM_INSTANCE_INFO_PADDINGS 11                   // account for platform default values
+
+#endif // #ifdef AZ_TRAIT_CONSTANT_BUFFER_ALIGNMENT
 
 
 struct InstanceInfo
@@ -47,6 +77,7 @@ struct InstanceInfo
 #if NUM_INSTANCE_INFO_PADDINGS != 0
     float4 m_padding0[NUM_INSTANCE_INFO_PADDINGS];
 #endif
+
 };
 
 struct InstanceData
