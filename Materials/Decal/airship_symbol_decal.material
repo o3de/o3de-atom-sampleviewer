@@ -14,7 +14,7 @@
             "useTexture": false
         },
         "normal": {
-            "useTexture": false
+            "textureMap": "Materials/Decal/airship_symbol_decal_nrm.tif"
         },
         "opacity": {
             "alphaSource": "Split",
