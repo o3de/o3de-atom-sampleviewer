@@ -318,7 +318,7 @@ namespace AtomSampleViewer
 
         AZ::ApplicationTypeQuery appType;
         ComponentApplicationBus::Broadcast(&AZ::ComponentApplicationBus::Events::QueryApplicationType, appType);
-        if (!appType.IsValid() || appType.IsEditor())
+        if (!appType.IsValid() || !appType.IsGame())
         {
             return;
         }
@@ -446,6 +446,10 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::Deactivate()
     {
+        AzFramework::EntityContextRequestBus::Event(
+            m_entityContextId, &AzFramework::EntityContextRequestBus::Events::DestroyEntity, m_cameraEntity);
+        m_cameraEntity = nullptr;
+
         AzFramework::AssetCatalogEventBus::Handler::BusDisconnect();
         AZ::Render::ImGuiSystemNotificationBus::Handler::BusDisconnect();
         m_scriptManager->Deactivate();
