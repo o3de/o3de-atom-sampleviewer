@@ -111,7 +111,7 @@ namespace AtomSampleViewer
             AZ::Render::Bootstrap::DefaultWindowBus::Broadcast(&AZ::Render::Bootstrap::DefaultWindowBus::Events::SetCreateDefaultScene, false);
         }
 
-        AZ::Data::AssetCatalogRequestBus::Broadcast(&AZ::Data::AssetCatalogRequestBus::Events::LoadCatalog, "@projectproductassets@/assetcatalog.xml");
+        AZ::Data::AssetCatalogRequestBus::Broadcast(&AZ::Data::AssetCatalogRequestBus::Events::LoadCatalog, "@products@/assetcatalog.xml");
 
         m_atomSampleViewerEntity->Activate();
 
