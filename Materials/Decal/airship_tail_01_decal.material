@@ -14,14 +14,14 @@
             "useTexture": false
         },
         "normal": {
-            "useTexture": false
+            "textureMap": "Materials/Decal/airship_tail_01_decal_nrm.tif"
         },
         "opacity": {
             "alphaSource": "Split",
             "doubleSided": true,
             "factor": 0.6899999976158142,
             "mode": "Cutout",
-            "textureMap": "Materials/Decal/airship_tail_01_decal.tif"
+            "textureMap": "Materials/Decal/airship_tail_01_decal_nrm.tif"
         },
         "roughness": {
             "useTexture": false
