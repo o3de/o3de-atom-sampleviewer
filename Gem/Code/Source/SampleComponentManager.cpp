@@ -1023,11 +1023,7 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::ShowCpuProfilerWindow()
     {
-        const AZ::RHI::CpuTimingStatistics* stats = AZ::RHI::RHISystemInterface::Get()->GetCpuTimingStatistics();
-        if (stats)
-        {
-            m_imguiCpuProfiler.Draw(m_showCpuProfiler, *stats);
-        }
+        m_imguiCpuProfiler.Draw(m_showCpuProfiler);
     }
 
     void SampleComponentManager::ShowGpuProfilerWindow()
