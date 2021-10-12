@@ -232,7 +232,6 @@ namespace AtomSampleViewer
                 AZ::Render::DirectionalLightFeatureProcessorInterface::DebugDrawFlags::DebugDrawNone);
             dirLightFP->SetViewFrustumCorrectionEnabled(handle, m_isCascadeCorrectionEnabled);
             dirLightFP->SetShadowFilterMethod(handle, s_shadowFilterMethods[m_shadowFilterMethodIndex]);
-            dirLightFP->SetShadowBoundaryWidth(handle, m_boundaryWidth);
             dirLightFP->SetFilteringSampleCount(handle, static_cast<uint16_t>(m_filteringSampleCount));
             dirLightFP->SetGroundHeight(handle, 0.f);
 
@@ -395,11 +394,6 @@ namespace AtomSampleViewer
             if (ImGui::Combo("Filter Method", &m_shadowFilterMethodIndex, s_shadowFilterMethodLabels, AZ_ARRAY_SIZE(s_shadowFilterMethodLabels)))
             {
                 m_directionalLightFeatureProcessor->SetShadowFilterMethod(m_directionalLightHandle, s_shadowFilterMethods[m_shadowFilterMethodIndex]);
-            }
-            ImGui::Text("Boundary Width in meter");
-            if (ImGui::SliderFloat("Width", &m_boundaryWidth, 0.f, 0.1f, "%.3f"))
-            {
-                m_directionalLightFeatureProcessor->SetShadowBoundaryWidth(m_directionalLightHandle, m_boundaryWidth);
             }
 
             ImGui::Spacing();
