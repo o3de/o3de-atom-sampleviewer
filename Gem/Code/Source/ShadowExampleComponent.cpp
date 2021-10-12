@@ -415,7 +415,6 @@ namespace AtomSampleViewer
         featureProcessor->SetShadowmapFrustumSplitSchemeRatio(handle, m_ratioLogarithmUniform);
         featureProcessor->SetViewFrustumCorrectionEnabled(handle, m_isCascadeCorrectionEnabled);
         featureProcessor->SetShadowFilterMethod(handle, s_shadowFilterMethods[m_shadowFilterMethodIndexDirectional]);
-        featureProcessor->SetShadowBoundaryWidth(handle, m_boundaryWidthDirectional);
         featureProcessor->SetFilteringSampleCount(handle, static_cast<uint16_t>(m_filteringSampleCountDirectional));
         featureProcessor->SetGroundHeight(handle, 0.f);
 
@@ -572,14 +571,6 @@ namespace AtomSampleViewer
                 m_directionalLightFeatureProcessor->SetShadowFilterMethod(
                     m_directionalLightHandle, s_shadowFilterMethods[m_shadowFilterMethodIndexDirectional]);
             }
-            if (m_shadowFilterMethodIndexDirectional != aznumeric_cast<int>(AZ::Render::ShadowFilterMethod::None))
-            {
-                ImGui::Text("Boundary Width in meter");
-                if (ScriptableImGui::SliderFloat("Width##Directional", &m_boundaryWidthDirectional, 0.f, 0.1f, "%.3f"))
-                {
-                    m_directionalLightFeatureProcessor->SetShadowBoundaryWidth(m_directionalLightHandle, m_boundaryWidthDirectional);
-                }
-            }
 
             if (m_shadowFilterMethodIndexDirectional == aznumeric_cast<int>(AZ::Render::ShadowFilterMethod::Pcf) ||
                 m_shadowFilterMethodIndexDirectional == aznumeric_cast<int>(AZ::Render::ShadowFilterMethod::EsmPcf))
@@ -673,7 +664,6 @@ namespace AtomSampleViewer
                 if (!m_positionalLightShadowEnabled[index])
                 {
                     m_shadowFilterMethodIndicesPositional[index] = 0;
-                    m_boundaryWidthsPositional[index] = 0.f;
                     m_filteringSampleCountsPositional[index] = 0;
                 }
                 settingsChanged = true;
@@ -687,15 +677,6 @@ namespace AtomSampleViewer
                     AZ_ARRAY_SIZE(s_shadowFilterMethodLabels)))
             {
                 settingsChanged = true;
-            }
-
-            if (m_shadowFilterMethodIndicesPositional[index] != aznumeric_cast<int>(ShadowFilterMethod::None))
-            {
-                ImGui::Text("Boundary Width in degrees");
-                if (ScriptableImGui::SliderFloat("Width##Positional", &m_boundaryWidthsPositional[index], 0.f, 1.0f, "%.3f"))
-                {
-                    settingsChanged = true;
-                }
             }
 
             if (m_shadowFilterMethodIndicesPositional[index] == aznumeric_cast<int>(ShadowFilterMethod::Pcf) ||
@@ -793,7 +774,6 @@ namespace AtomSampleViewer
                     m_diskLightFeatureProcessor->SetShadowFilterMethod(
                         lightHandle, s_shadowFilterMethods[m_shadowFilterMethodIndicesPositional[index]]);
 
-                    m_diskLightFeatureProcessor->SetSofteningBoundaryWidthAngle(lightHandle, AZ::DegToRad(m_boundaryWidthsPositional[index]));
                     m_diskLightFeatureProcessor->SetFilteringSampleCount(lightHandle, static_cast<uint16_t>(m_filteringSampleCountsPositional[index]));
                 }
             }
@@ -824,7 +804,6 @@ namespace AtomSampleViewer
                         lightHandle, s_shadowFilterMethods[m_shadowFilterMethodIndicesPositional[index]]);
 
                     m_pointLightFeatureProcessor->SetFilteringSampleCount(lightHandle, static_cast<uint16_t>(m_filteringSampleCountsPositional[index]));
-                    m_pointLightFeatureProcessor->SetSofteningBoundaryWidthAngle(lightHandle, AZ::DegToRad(m_boundaryWidthsPositional[index]));
                 }
             }
         }

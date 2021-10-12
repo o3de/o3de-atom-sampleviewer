@@ -138,8 +138,6 @@ namespace AtomSampleViewer
         static const char* s_shadowFilterMethodLabels[];
         int m_shadowFilterMethodIndexDirectional = 0; // filter method is None.
         int m_shadowFilterMethodIndexDisk = 0; // filter method is None
-        float m_boundaryWidthDirectional = 0.03f; // 3cm
-        float m_boundaryWidthDisk = 0.25f; // 0.25 degrees
         int m_filteringSampleCountDirectional = 16;
         int m_filteringSampleCountDisk = 16;
 
