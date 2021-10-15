@@ -32,6 +32,7 @@
 #include <Atom/RPI.Public/RenderPipeline.h>
 #include <Atom/RPI.Public/View.h>
 #include <Atom/RPI.Public/Pass/FullscreenTrianglePass.h>
+#include <Atom/RPI.Public/Pass/PassFilter.h>
 #include <Atom/RPI.Public/AuxGeom/AuxGeomFeatureProcessorInterface.h>
 #include <Atom/RPI.Public/AuxGeom/AuxGeomDraw.h>
 #include <Atom/RPI.Reflect/Asset/AssetUtils.h>
@@ -745,17 +746,19 @@ namespace AtomSampleViewer
         {
             if (const RenderPipelinePtr pipeline = scene->GetDefaultRenderPipeline())
             {
-                if (const Ptr<Pass> pass = pipeline->GetRootPass()->FindPassByNameRecursive(AZ::Name("LightCullingHeatmapPass")))
-                {
-                    if (const Ptr<RenderPass> trianglePass = azrtti_cast<RenderPass*>(pass))
+                AZ::RPI::PassFilter passFilter = AZ::RPI::PassFilter::CreateWithPassName(AZ::Name("LightCullingHeatmapPass"), pipeline.get());
+                AZ::RPI::PassSystemInterface::Get()->ForEachPass(passFilter, [this](AZ::RPI::Pass* pass) -> bool
                     {
-                        trianglePass->SetEnabled(m_heatmapOpacity > 0.0f);
-                        Data::Instance<ShaderResourceGroup> srg = trianglePass->GetShaderResourceGroup();
-                        RHI::ShaderInputConstantIndex opacityIndex = srg->FindShaderInputConstantIndex(AZ::Name("m_heatmapOpacity"));
-                        [[maybe_unused]] bool setOk = srg->SetConstant<float>(opacityIndex, m_heatmapOpacity);
-                        AZ_Warning("LightCullingExampleComponent", setOk, "Unable to set heatmap opacity");
-                    }
-                }
+                        if (const Ptr<RenderPass> trianglePass = azrtti_cast<RenderPass*>(pass))
+                        {
+                            trianglePass->SetEnabled(m_heatmapOpacity > 0.0f);
+                            Data::Instance<ShaderResourceGroup> srg = trianglePass->GetShaderResourceGroup();
+                            RHI::ShaderInputConstantIndex opacityIndex = srg->FindShaderInputConstantIndex(AZ::Name("m_heatmapOpacity"));
+                            [[maybe_unused]] bool setOk = srg->SetConstant<float>(opacityIndex, m_heatmapOpacity);
+                            AZ_Warning("LightCullingExampleComponent", setOk, "Unable to set heatmap opacity");
+                        }
+                        return true; // skip rest
+                    });
             }
         }
     }

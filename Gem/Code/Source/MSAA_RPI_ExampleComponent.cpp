@@ -134,7 +134,7 @@ namespace AtomSampleViewer
         defaultScene->SetDefaultRenderPipeline(m_samplePipeline->GetId());
 
         // create an ImGuiActiveContextScope to ensure the ImGui context on the new pipeline's ImGui pass is activated.
-        m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass(AZ::RPI::PassHierarchyFilter({ m_samplePipeline->GetId().GetCStr(), "ImGuiPass" }));
+        m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass({ m_samplePipeline->GetId().GetCStr(), "ImGuiPass" });
     }
 
     void MSAA_RPI_ExampleComponent::ResetCamera()

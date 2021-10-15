@@ -209,22 +209,22 @@ namespace AtomSampleViewer
     {
         // set screen space pass
         {
-            AZ::RPI::PassHierarchyFilter passFilter(AZ::Name("ReflectionScreenSpacePass"));
-            const AZStd::vector<AZ::RPI::Pass*>& passes = AZ::RPI::PassSystemInterface::Get()->FindPasses(passFilter);
-            for (auto& pass : passes)
-            {
-                pass->SetEnabled(enabled);
-            }
+            AZ::RPI::PassFilter passFilter = AZ::RPI::PassFilter::CreateWithPassName(AZ::Name("ReflectionScreenSpacePass"), (AZ::RPI::Scene*) nullptr);
+            AZ::RPI::PassSystemInterface::Get()->ForEachPass(passFilter, [enabled](AZ::RPI::Pass* pass) -> bool
+                {
+                    pass->SetEnabled(enabled);
+                    return false; // next pass
+                });
         }
 
         // set copy frame buffer pass
         {
-            AZ::RPI::PassHierarchyFilter passFilter(AZ::Name("ReflectionCopyFrameBufferPass"));
-            const AZStd::vector<AZ::RPI::Pass*>& passes = AZ::RPI::PassSystemInterface::Get()->FindPasses(passFilter);
-            for (auto& pass : passes)
-            {
-                pass->SetEnabled(enabled);
-            }
+            AZ::RPI::PassFilter passFilter = AZ::RPI::PassFilter::CreateWithPassName(AZ::Name("ReflectionCopyFrameBufferPass"), (AZ::RPI::Scene*) nullptr);
+            AZ::RPI::PassSystemInterface::Get()->ForEachPass(passFilter, [enabled](AZ::RPI::Pass* pass) -> bool
+                {
+                    pass->SetEnabled(enabled);
+                    return false; // next pass
+                });
         }
     }
 }
