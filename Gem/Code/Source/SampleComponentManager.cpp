@@ -120,6 +120,9 @@
 
 #include <Utils/Utils.h>
 
+#include <Profiler/ProfilerBus.h>
+#include <Profiler/ProfilerImGuiBus.h>
+
 #include "ExampleComponentBus.h"
 
 namespace Platform
@@ -926,11 +929,8 @@ namespace AtomSampleViewer
                 if (ImGui::MenuItem(CpuProfilerToolName))
                 {
                     m_showCpuProfiler = !m_showCpuProfiler;
-                    AZ::RHI::RHISystemInterface::Get()->ModifyFrameSchedulerStatisticsFlags(
-                        AZ::RHI::FrameSchedulerStatisticsFlags::GatherCpuTimingStatistics,
-                        m_showCpuProfiler);
-
-                    AZ::RHI::CpuProfiler::Get()->SetProfilerEnabled(m_showCpuProfiler);
+                    Profiler::ProfilerRequestBus::Broadcast(
+                        &Profiler::ProfilerRequestBus::Events::SetProfilerEnabled, m_showCpuProfiler);
 
                     Utils::ReportScriptableAction("ShowTool('%s', %s)", CpuProfilerToolName, m_showCpuProfiler ? "true" : "false");
                 }
@@ -1023,7 +1023,10 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::ShowCpuProfilerWindow()
     {
-        m_imguiCpuProfiler.Draw(m_showCpuProfiler);
+        Profiler::ProfilerImGuiRequestBus::Broadcast(
+            &Profiler::ProfilerImGuiRequestBus::Events::ShowCpuProfilerWindow,
+            m_showCpuProfiler
+        );
     }
 
     void SampleComponentManager::ShowGpuProfilerWindow()
