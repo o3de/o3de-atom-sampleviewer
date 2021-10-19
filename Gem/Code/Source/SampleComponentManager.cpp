@@ -929,8 +929,10 @@ namespace AtomSampleViewer
                 if (ImGui::MenuItem(CpuProfilerToolName))
                 {
                     m_showCpuProfiler = !m_showCpuProfiler;
-                    Profiler::ProfilerRequestBus::Broadcast(
-                        &Profiler::ProfilerRequestBus::Events::SetProfilerEnabled, m_showCpuProfiler);
+                    if (auto profiler = Profiler::ProfilerInterface::Get(); profiler)
+                    {
+                        profiler->SetProfilerEnabled(m_showCpuProfiler);
+                    }
 
                     Utils::ReportScriptableAction("ShowTool('%s', %s)", CpuProfilerToolName, m_showCpuProfiler ? "true" : "false");
                 }
@@ -1023,10 +1025,10 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::ShowCpuProfilerWindow()
     {
-        Profiler::ProfilerImGuiRequestBus::Broadcast(
-            &Profiler::ProfilerImGuiRequestBus::Events::ShowCpuProfilerWindow,
-            m_showCpuProfiler
-        );
+        if (auto profilerImGui = Profiler::ProfilerImGuiInterface::Get(); profilerImGui)
+        {
+            profilerImGui->ShowCpuProfilerWindow(m_showCpuProfiler);
+        }
     }
 
     void SampleComponentManager::ShowGpuProfilerWindow()
