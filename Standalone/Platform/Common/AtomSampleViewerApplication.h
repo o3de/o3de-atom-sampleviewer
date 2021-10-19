@@ -47,7 +47,7 @@ namespace AtomSampleViewer
         void CompileCriticalAssets();
 
         void StartCommon(AZ::Entity* systemEntity) override;
-        void Tick(float deltaOverride) override;
+        void Tick() override;
 
         //////////////////////////////////////////////////////////////////////////
         // AzFramework::ApplicationRequests::Bus
@@ -57,7 +57,7 @@ namespace AtomSampleViewer
         static const bool s_connectToAssetProcessor;
 
         void ReadTimeoutShutdown();
-        void TickTimeoutShutdown(float deltaTimeInSeconds);
+        void TickTimeoutShutdown();
         float m_secondsBeforeShutdown = 0.0f; // >0.0f If timeout shutdown is enabled, this will count down the time until quit() is called.
 
         //////////////////////////// Logging section /////////////////////////////

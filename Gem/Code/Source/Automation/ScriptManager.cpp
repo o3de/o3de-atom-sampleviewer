@@ -394,7 +394,7 @@ namespace AtomSampleViewer
 
                 if (m_frameTimeIsLocked)
                 {
-                    AZ::Interface<AZ::IConsole>::Get()->PerformCommand("t_frameTimeOverride 0");
+                    AZ::Interface<AZ::IConsole>::Get()->PerformCommand("t_simulationTickDeltaOverride 0");
                     m_frameTimeIsLocked = false;
                 }
 
@@ -903,7 +903,7 @@ namespace AtomSampleViewer
         {
             AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
 
-            AZ::Interface<AZ::IConsole>::Get()->PerformCommand(AZStd::string::format("t_frameTimeOverride %f", seconds).c_str());
+            AZ::Interface<AZ::IConsole>::Get()->PerformCommand(AZStd::string::format("t_simulationTickDeltaOverride %f", seconds).c_str());
             s_instance->m_frameTimeIsLocked = true;
         };
 
@@ -916,7 +916,7 @@ namespace AtomSampleViewer
         {
             AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
 
-            AZ::Interface<AZ::IConsole>::Get()->PerformCommand("t_frameTimeOverride 0");
+            AZ::Interface<AZ::IConsole>::Get()->PerformCommand("t_simulationTickDeltaOverride 0");
             s_instance->m_frameTimeIsLocked = false;
         };
 
