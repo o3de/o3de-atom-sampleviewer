@@ -174,8 +174,12 @@ namespace AtomSampleViewer
             uint32_t m_screenshotWarningCount = 0;
 
             AZStd::vector<ScreenshotTestInfo> m_screenshotTests;
+
+            // Path to the exported test results file.
+            AZStd::string GetExportedTestResultsPath() const;
+
         };
-        
+
         const AZStd::vector<ScriptReport>& GetScriptReport() const { return m_scriptReports; }
 
     private:
