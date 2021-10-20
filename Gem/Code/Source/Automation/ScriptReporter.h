@@ -178,9 +178,8 @@ namespace AtomSampleViewer
             uint32_t m_screenshotWarningCount = 0;
 
             AZStd::vector<ScreenshotTestInfo> m_screenshotTests;
-
         };
-
+        
         const AZStd::vector<ScriptReport>& GetScriptReport() const { return m_scriptReports; }
 
     private:

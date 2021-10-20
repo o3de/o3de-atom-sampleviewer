@@ -343,7 +343,6 @@ namespace AtomSampleViewer
             uint32_t totalScreenshotsCount = 0;
             uint32_t totalScreenshotsFailed = 0;
             uint32_t totalScreenshotWarnings = 0;
-            
             for (ScriptReport& scriptReport : m_scriptReports)
             {
                 totalAsserts += scriptReport.m_assertCount;
@@ -424,8 +423,6 @@ namespace AtomSampleViewer
             highlightTextIf(totalScreenshotWarnings > 0, HighlightWarning);
             ImGui::Text("Total Screenshot Warnings: %u %s", totalScreenshotWarnings, seeBelow(totalScreenshotWarnings).c_str());
 
-            // Path to exported test results
-            // const AZStd::string exportFile = scriptReport.GetExportedTestResultsPath();
             ImGui::Text("Exported test results: %s", m_exportedTestResultsPath.c_str());
 
             resetTextHighlight();
