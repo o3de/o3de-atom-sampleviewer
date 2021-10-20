@@ -88,6 +88,10 @@ namespace AtomSampleViewer
         // For exporting test results
         void ExportTestResults();
 
+        // Path to the exported test results file.
+        AZStd::string m_exportedTestResultsPath = "Click the 'Export Test Results' button.";
+        AZStd::string GetExportedTestResultsPath() const;
+
         struct ImageComparisonResult
         {
             enum class ResultCode
@@ -174,9 +178,6 @@ namespace AtomSampleViewer
             uint32_t m_screenshotWarningCount = 0;
 
             AZStd::vector<ScreenshotTestInfo> m_screenshotTests;
-
-            // Path to the exported test results file.
-            AZStd::string GetExportedTestResultsPath() const;
 
         };
 

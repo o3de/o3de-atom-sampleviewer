@@ -424,6 +424,10 @@ namespace AtomSampleViewer
             highlightTextIf(totalScreenshotWarnings > 0, HighlightWarning);
             ImGui::Text("Total Screenshot Warnings: %u %s", totalScreenshotWarnings, seeBelow(totalScreenshotWarnings).c_str());
 
+            // Path to exported test results
+            // const AZStd::string exportFile = scriptReport.GetExportedTestResultsPath();
+            ImGui::Text("Exported test results: %s", m_exportedTestResultsPath.c_str());
+
             resetTextHighlight();
 
             if (ImGui::Button("Update All Local Baseline Images"))
@@ -533,10 +537,6 @@ namespace AtomSampleViewer
                     {
                         ImGui::Text("Screenshot Warnings:     %u %s", scriptReport.m_screenshotWarningCount, seeBelow(scriptReport.m_screenshotWarningCount).c_str());
                     }
-
-                    // Path to exported test results
-                    const AZStd::string exportFile = scriptReport.GetExportedTestResultsPath();
-                    ImGui::Text("Exported test results: %s", exportFile.c_str());
 
                     resetTextHighlight();
 
@@ -1096,9 +1096,10 @@ namespace AtomSampleViewer
         }
 
     }
-
+     
     void ScriptReporter::ExportTestResults()
     {
+        m_exportedTestResultsPath = GetExportedTestResultsPath();
         for (const ScriptReport& scriptReport : m_scriptReports)
         {
             const AZStd::string assertLogLine = AZStd::string::format("Asserts: %u \n", scriptReport.m_assertCount);
@@ -1110,8 +1111,7 @@ namespace AtomSampleViewer
             
             AZ::IO::HandleType logHandle;
             auto io = AZ::IO::LocalFileIO::GetInstance();
-            AZStd::string exportFile = scriptReport.GetExportedTestResultsPath();
-            if (io->Open(exportFile.c_str(), AZ::IO::OpenMode::ModeWrite, logHandle))
+            if (io->Open(m_exportedTestResultsPath.c_str(), AZ::IO::OpenMode::ModeWrite, logHandle))
             {
                 io->Write(logHandle, assertLogLine.c_str(), assertLogLine.size());
                 io->Write(logHandle, errorsLogLine.c_str(), errorsLogLine.size());
@@ -1132,12 +1132,12 @@ namespace AtomSampleViewer
                 }
                 io->Close(logHandle);
             }
-            m_messageBox.OpenPopupMessage("Exported test results", AZStd::string::format("Results exported to %s", exportFile.c_str()));
-            AZ_Printf("Test results exported to %s", exportFile.c_str());
+            m_messageBox.OpenPopupMessage("Exported test results", AZStd::string::format("Results exported to %s", m_exportedTestResultsPath.c_str()));
+            AZ_Printf("Test results exported to %s", m_exportedTestResultsPath.c_str());
         }
     }
 
-    AZStd::string ScriptReporter::ScriptReport::GetExportedTestResultsPath() const
+    AZStd::string ScriptReporter::GetExportedTestResultsPath() const
     {
         // Setup our variables for the exported test results path and .txt file.
         const auto projectPath = AZ::Utils::GetProjectPath();
