@@ -892,7 +892,6 @@ finally {
                 subject: "${currentBuild.currentResult}: ${JOB_NAME} - Build # ${BUILD_NUMBER}",
                 recipientProviders: [
                     [$class: 'RequesterRecipientProvider']
-                ])
             ])
         }
     } catch(Exception e) {
