@@ -88,10 +88,6 @@ namespace AtomSampleViewer
         // For exporting test results
         void ExportTestResults();
 
-        // Path to the exported test results file.
-        AZStd::string m_exportedTestResultsPath = "Click the 'Export Test Results' button.";
-        AZStd::string GenerateAndCreateExportedTestResultsPath() const;
-
         struct ImageComparisonResult
         {
             enum class ResultCode
@@ -239,6 +235,9 @@ namespace AtomSampleViewer
 
         void ShowDiffButton(const char* buttonLabel, const AZStd::string& imagePathA, const AZStd::string& imagePathB);
 
+        // Generates a path to the exported test results file.
+        AZStd::string GenerateAndCreateExportedTestResultsPath() const;
+
         ScriptReport* GetCurrentScriptReport();
 
         ImGuiMessageBox m_messageBox;
@@ -253,6 +252,7 @@ namespace AtomSampleViewer
         DisplayOption m_displayOption = DisplayOption::AllResults;
         bool m_forceShowUpdateButtons = false; //< By default, the "Update" buttons are visible only for failed screenshots. This forces them to be visible.
         AZStd::string m_officialBaselineSourceFolder; //< Used for updating official baseline screenshots
+        AZStd::string m_exportedTestResultsPath = "Click the 'Export Test Results' button."; //< Path to exported test results file (if exported).
     };
 
 } // namespace AtomSampleViewer
