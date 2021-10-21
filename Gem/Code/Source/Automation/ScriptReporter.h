@@ -90,7 +90,7 @@ namespace AtomSampleViewer
 
         // Path to the exported test results file.
         AZStd::string m_exportedTestResultsPath = "Click the 'Export Test Results' button.";
-        AZStd::string GetExportedTestResultsPath() const;
+        AZStd::string GenerateAndCreateExportedTestResultsPath() const;
 
         struct ImageComparisonResult
         {

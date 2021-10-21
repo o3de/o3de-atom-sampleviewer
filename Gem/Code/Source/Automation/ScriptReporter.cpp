@@ -1096,7 +1096,7 @@ namespace AtomSampleViewer
      
     void ScriptReporter::ExportTestResults()
     {
-        m_exportedTestResultsPath = GetExportedTestResultsPath();
+        m_exportedTestResultsPath = GenerateAndCreateExportedTestResultsPath();
         for (const ScriptReport& scriptReport : m_scriptReports)
         {
             const AZStd::string assertLogLine = AZStd::string::format("Asserts: %u \n", scriptReport.m_assertCount);
@@ -1130,18 +1130,18 @@ namespace AtomSampleViewer
                 io->Close(logHandle);
             }
             m_messageBox.OpenPopupMessage("Exported test results", AZStd::string::format("Results exported to %s", m_exportedTestResultsPath.c_str()));
-            AZ_Printf("Test results exported to %s", m_exportedTestResultsPath.c_str());
+            AZ_Printf("Test results exported to %s \n", m_exportedTestResultsPath.c_str());
         }
     }
 
-    AZStd::string ScriptReporter::GetExportedTestResultsPath() const
+    AZStd::string ScriptReporter::GenerateAndCreateExportedTestResultsPath() const
     {
         // Setup our variables for the exported test results path and .txt file.
         const auto projectPath = AZ::Utils::GetProjectPath();
-        AZStd::chrono::system_clock::time_point now = AZStd::chrono::system_clock::now();
-        float timeFloat = AZStd::chrono::duration<float>(now.time_since_epoch()).count();
-        AZStd::string timeString = AZStd::string::format("%.4f", timeFloat);
-        AZStd::string exportFileName = AZStd::string::format("exportedTestResults_%s.txt", timeString.c_str());
+        const AZStd::chrono::system_clock::time_point now = AZStd::chrono::system_clock::now();
+        const float timeFloat = AZStd::chrono::duration<float>(now.time_since_epoch()).count();
+        const AZStd::string timeString = AZStd::string::format("%.4f", timeFloat);
+        const AZStd::string exportFileName = AZStd::string::format("exportedTestResults_%s.txt", timeString.c_str());
         AZStd::string exportTestResultsFolder;
         AzFramework::StringFunc::Path::Join(projectPath.c_str(), "TestResults/", exportTestResultsFolder);
 
