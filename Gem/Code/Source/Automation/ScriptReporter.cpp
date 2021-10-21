@@ -92,7 +92,7 @@ namespace AtomSampleViewer
             }
 
             // Turn it back into a full path
-            path = Utils::ResolvePath("@devassets@" + path);
+            path = Utils::ResolvePath("@projectroot@/" + path);
 
             return path;
         }

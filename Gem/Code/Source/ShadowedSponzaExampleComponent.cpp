@@ -248,7 +248,6 @@ namespace AtomSampleViewer
             featureProcessor->SetShadowmapSize(handle, s_shadowmapSizes[s_shadowmapSizeIndexDefault]);
             featureProcessor->SetViewFrustumCorrectionEnabled(handle, m_isCascadeCorrectionEnabled);
             featureProcessor->SetShadowFilterMethod(handle, s_shadowFilterMethods[m_shadowFilterMethodIndexDirectional]);
-            featureProcessor->SetShadowBoundaryWidth(handle, m_boundaryWidthDirectional);
             featureProcessor->SetFilteringSampleCount(handle, static_cast<uint16_t>(m_filteringSampleCountDirectional));
             featureProcessor->SetGroundHeight(handle, 0.f);
 
@@ -478,17 +477,6 @@ namespace AtomSampleViewer
                     s_shadowFilterMethods[m_shadowFilterMethodIndexDirectional]);
             }
 
-            if (m_shadowFilterMethodIndexDirectional != aznumeric_cast<int>(ShadowFilterMethod::None))
-            {
-                ImGui::Text("Boundary Width in meter");
-                if (ScriptableImGui::SliderFloat("Width##Directional", &m_boundaryWidthDirectional, 0.f, 0.1f, "%.3f"))
-                {
-                    m_directionalLightFeatureProcessor->SetShadowBoundaryWidth(
-                        m_directionalLightHandle,
-                        m_boundaryWidthDirectional);
-                }
-            }
-
             if (m_shadowFilterMethodIndexDirectional == aznumeric_cast<int>(ShadowFilterMethod::Pcf) ||
                 m_shadowFilterMethodIndexDirectional == aznumeric_cast<int>(ShadowFilterMethod::EsmPcf))
             {
@@ -568,18 +556,6 @@ namespace AtomSampleViewer
                 for (int index = 0; index < m_diskLightCount; ++index)
                 {
                     m_diskLightFeatureProcessor->SetShadowFilterMethod(m_diskLights[index].m_handle, aznumeric_cast<ShadowFilterMethod>(m_shadowFilterMethodIndexDisk));
-                }
-            }
-
-            if (m_shadowFilterMethodIndexDisk != aznumeric_cast<int>(ShadowFilterMethod::None))
-            {
-                ImGui::Text("Boundary Width in degrees");
-                if (ScriptableImGui::SliderFloat("Width##Spot", &m_boundaryWidthDisk, 0.f, 1.f, "%.3f"))
-                {
-                    for (int index = 0; index < m_diskLightCount; ++index)
-                    {
-                        m_diskLightFeatureProcessor->SetSofteningBoundaryWidthAngle(m_diskLights[index].m_handle, DegToRad(m_boundaryWidthDisk));
-                    }
                 }
             }
 

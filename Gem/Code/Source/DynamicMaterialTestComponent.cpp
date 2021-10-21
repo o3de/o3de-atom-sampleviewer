@@ -19,6 +19,7 @@
 
 #include <AzCore/Component/Entity.h>
 #include <AzCore/Debug/EventTrace.h>
+#include <AzCore/Debug/Timer.h>
 #include <AzCore/Math/Random.h>
 
 #include <RHI/BasicRHIComponent.h>

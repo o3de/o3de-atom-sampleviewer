@@ -14,7 +14,7 @@
             "useTexture": false
         },
         "normal": {
-            "useTexture": false
+            "textureMap": "Materials/Decal/am_road_dust_decal_nrm.tif"
         },
         "opacity": {
             "alphaSource": "Split",

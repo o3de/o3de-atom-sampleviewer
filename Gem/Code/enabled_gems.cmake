@@ -18,4 +18,5 @@ set(ENABLED_GEMS
     SceneProcessing
     EditorPythonBindings
     ImGui
+    Profiler
 )
