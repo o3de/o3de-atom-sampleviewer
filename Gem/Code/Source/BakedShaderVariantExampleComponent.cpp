@@ -94,13 +94,8 @@ namespace AtomSampleViewer
 
         AZ::RPI::PassFilter passFilter = AZ::RPI::PassFilter::CreateWithPassName(AZ::Name(ATOMSAMPLEVIEWER_TRAIT_BAKED_SHADERVARIANT_SAMPLE_PASS_NAME), 
             m_meshFeatureProcessor->GetParentScene());
-        AZ::RPI::PassSystemInterface::Get()->ForEachPass(passFilter, [this](AZ::RPI::Pass* pass) -> bool
-            {
-                m_forwardPass = pass;
-                m_forwardPass->SetTimestampQueryEnabled(true);
-                return true; // skip rest
-            });
-
+        m_forwardPass = AZ::RPI::PassSystemInterface::Get()->FindFirstPass(passFilter);
+        m_forwardPass->SetTimestampQueryEnabled(true);
         SetRootVariantUsage(true);
     }
 

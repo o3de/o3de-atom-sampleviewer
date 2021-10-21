@@ -747,18 +747,15 @@ namespace AtomSampleViewer
             if (const RenderPipelinePtr pipeline = scene->GetDefaultRenderPipeline())
             {
                 AZ::RPI::PassFilter passFilter = AZ::RPI::PassFilter::CreateWithPassName(AZ::Name("LightCullingHeatmapPass"), pipeline.get());
-                AZ::RPI::PassSystemInterface::Get()->ForEachPass(passFilter, [this](AZ::RPI::Pass* pass) -> bool
-                    {
-                        if (const Ptr<RenderPass> trianglePass = azrtti_cast<RenderPass*>(pass))
-                        {
-                            trianglePass->SetEnabled(m_heatmapOpacity > 0.0f);
-                            Data::Instance<ShaderResourceGroup> srg = trianglePass->GetShaderResourceGroup();
-                            RHI::ShaderInputConstantIndex opacityIndex = srg->FindShaderInputConstantIndex(AZ::Name("m_heatmapOpacity"));
-                            [[maybe_unused]] bool setOk = srg->SetConstant<float>(opacityIndex, m_heatmapOpacity);
-                            AZ_Warning("LightCullingExampleComponent", setOk, "Unable to set heatmap opacity");
-                        }
-                        return true; // skip rest
-                    });
+                const Ptr<RenderPass> trianglePass = azrtti_cast<RenderPass*>(AZ::RPI::PassSystemInterface::Get()->FindFirstPass(passFilter));
+                if (trianglePass)
+                {
+                    trianglePass->SetEnabled(m_heatmapOpacity > 0.0f);
+                    Data::Instance<ShaderResourceGroup> srg = trianglePass->GetShaderResourceGroup();
+                    RHI::ShaderInputConstantIndex opacityIndex = srg->FindShaderInputConstantIndex(AZ::Name("m_heatmapOpacity"));
+                    [[maybe_unused]] bool setOk = srg->SetConstant<float>(opacityIndex, m_heatmapOpacity);
+                    AZ_Warning("LightCullingExampleComponent", setOk, "Unable to set heatmap opacity");
+                }
             }
         }
     }

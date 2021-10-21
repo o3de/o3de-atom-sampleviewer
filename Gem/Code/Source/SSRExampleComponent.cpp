@@ -210,20 +210,20 @@ namespace AtomSampleViewer
         // set screen space pass
         {
             AZ::RPI::PassFilter passFilter = AZ::RPI::PassFilter::CreateWithPassName(AZ::Name("ReflectionScreenSpacePass"), (AZ::RPI::Scene*) nullptr);
-            AZ::RPI::PassSystemInterface::Get()->ForEachPass(passFilter, [enabled](AZ::RPI::Pass* pass) -> bool
+            AZ::RPI::PassSystemInterface::Get()->ForEachPass(passFilter, [enabled](AZ::RPI::Pass* pass) -> AZ::RPI::PassFilterExecutionFlow
                 {
                     pass->SetEnabled(enabled);
-                    return false; // next pass
+                    return  AZ::RPI::PassFilterExecutionFlow::ContinueVisitingPasses;
                 });
         }
 
         // set copy frame buffer pass
         {
             AZ::RPI::PassFilter passFilter = AZ::RPI::PassFilter::CreateWithPassName(AZ::Name("ReflectionCopyFrameBufferPass"), (AZ::RPI::Scene*) nullptr);
-            AZ::RPI::PassSystemInterface::Get()->ForEachPass(passFilter, [enabled](AZ::RPI::Pass* pass) -> bool
+            AZ::RPI::PassSystemInterface::Get()->ForEachPass(passFilter, [enabled](AZ::RPI::Pass* pass) -> AZ::RPI::PassFilterExecutionFlow
                 {
                     pass->SetEnabled(enabled);
-                    return false; // next pass
+                    return  AZ::RPI::PassFilterExecutionFlow::ContinueVisitingPasses;
                 });
         }
     }

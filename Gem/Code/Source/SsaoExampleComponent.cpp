@@ -128,14 +128,7 @@ namespace AtomSampleViewer
         if (m_rayTracingEnabled)
         {
             RPI::PassFilter passFilter = RPI::PassFilter::CreateWithPassName(AZ::Name("RayTracingAmbientOcclusionPass"), m_ssaoPipeline.get());
-            RPI::PassSystemInterface::Get()->ForEachPass(passFilter, [this](RPI::Pass* pass) -> bool
-                {
-                    m_RTAOPass = azrtti_cast<Render::RayTracingAmbientOcclusionPass*>(pass);
-
-                    // Only handles the first pass found
-                     return true;
-                });
-            
+            m_RTAOPass = azrtti_cast<Render::RayTracingAmbientOcclusionPass*>(RPI::PassSystemInterface::Get()->FindFirstPass(passFilter));
             AZ_Assert(m_RTAOPass, "Couldn't find the RayTracingAmbientOcclusionPass from the SsaoPipeline");
         }
         else
@@ -143,15 +136,8 @@ namespace AtomSampleViewer
             m_aoType = AmbientOcclusionType::SSAO;
         }
 
-        RPI::PassFilter passFilter = RPI::PassFilter::CreateWithPassName(AZ::Name("SelectorPass"), m_ssaoPipeline.get());
-        RPI::PassSystemInterface::Get()->ForEachPass(passFilter, [this](RPI::Pass* pass) -> bool
-            {
-                m_selector = azrtti_cast<RPI::SelectorPass*>(pass);
-
-                // Only handles the first pass found
-                    return true;
-            });
-        
+        RPI::PassFilter selectorPassFilter = RPI::PassFilter::CreateWithPassName(AZ::Name("SelectorPass"), m_ssaoPipeline.get());
+        m_selector = azrtti_cast<RPI::SelectorPass*>(RPI::PassSystemInterface::Get()->FindFirstPass(selectorPassFilter));
         AZ_Assert(m_selector, "Couldn't find the SelectorPass from the SsaoPipeline");
     }
 
