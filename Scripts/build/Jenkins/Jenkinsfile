@@ -6,9 +6,10 @@
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
-
+import groovy.json.JsonOutput
 PIPELINE_CONFIG_FILE = 'scripts/build/Jenkins/lumberyard.json'
 INCREMENTAL_BUILD_SCRIPT_PATH = 'scripts/build/bootstrap/incremental_build_util.py'
+PIPELINE_RETRY_ATTEMPTS = 3
 
 EMPTY_JSON = readJSON text: '{}'
 
@@ -17,6 +18,18 @@ PROJECT_ORGANIZATION_NAME = 'o3de'
 ENGINE_REPOSITORY_NAME = 'o3de'
 ENGINE_ORGANIZATION_NAME = 'o3de'
 ENGINE_BRANCH_DEFAULT = "${env.BRANCH_DEFAULT}" ?: "${env.BRANCH_NAME}"
+
+// Branches with build snapshots
+BUILD_SNAPSHOTS = ['development', 'stabilization/2106']
+
+// Build snapshots with empty snapshot (for use with 'SNAPSHOT' pipeline parameter)
+BUILD_SNAPSHOTS_WITH_EMPTY = BUILD_SNAPSHOTS + ''
+
+// The default build snapshot to be selected in the 'SNAPSHOT' pipeline parameter
+DEFAULT_BUILD_SNAPSHOT = BUILD_SNAPSHOTS_WITH_EMPTY.get(0)
+
+// Branches with build snapshots as comma separated value string
+env.BUILD_SNAPSHOTS = BUILD_SNAPSHOTS.join(",")
 
 def pipelineProperties = []
 
@@ -328,9 +341,9 @@ def PreBuildCommonSteps(Map pipelineConfig, String repositoryName, String projec
         if(!fileExists('3rdParty')) {
             palMkdir('3rdParty')
         }
-        CheckoutRepo(disableSubmodules)
     }
     dir("${workspace}/${ENGINE_REPOSITORY_NAME}") {
+        CheckoutRepo(disableSubmodules)
         // Get python
         if(env.IS_UNIX) {
             sh label: 'Getting python',
@@ -347,6 +360,11 @@ def PreBuildCommonSteps(Map pipelineConfig, String repositoryName, String projec
         else command += '.cmd'
         command += " -u ${pipelineConfig.BUILD_ENTRY_POINT} --platform ${platform} --type clean"
         palSh(command, "Running ${platform} clean")
+
+        if(fileExists('.lfsconfig')) {
+            palSh("git lfs install", "LFS config exists. Installing LFS hooks to local repo")
+            palSh("git lfs pull", "Pulling new LFS objects")
+        }
     }
 }
 
@@ -419,15 +437,18 @@ def ExportTestResults(Map options, String platform, String type, String workspac
     }
 }
 
-def ExportTestScreenshots(Map options, String workspace, String platformName, String jobName, Map params) {
+def ExportTestScreenshots(Map options, String branchName, String platformName, String jobName, String workspace, Map params) {
     catchError(message: "Error exporting test screenshots (this won't fail the build)", buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-        def screenshotsFolder = '${workspace}/${PROJECT_REPOSITORY_NAME}/user/Scripts/Screenshots'
-        def s3Uploader = '${workspace}/${ENGINE_REPOSITORY_NAME}/scripts/build/tools/upload_to_s3.py'
-        def command = '${options.PYTHON_DIR}/python.cmd -u ${s3Uploader} --base_dir ${screenshotsFolder} ' +
-                      '--file_regex "(.*png$|.*ppm$)" --bucket ${env.TEST_SCREENSHOT_BUCKET} '
-                      '--search_subdirectories True --key_prefix ${branchName}_${env.BUILD_NUMBER}'
-        bat label: "Uploading test screenshots for ${jobName}",
-            script: command
+        def screenshotsFolder = "${workspace}/${PROJECT_REPOSITORY_NAME}/user/PythonTests/Automated/Screenshots"
+        dir("${workspace}/${ENGINE_REPOSITORY_NAME}") {
+            def s3Uploader = "scripts/build/tools/upload_to_s3.py"
+            def command = "${options.PYTHON_DIR}/python.cmd -u ${s3Uploader} --base_dir ${screenshotsFolder} " +
+                          '--file_regex \\"(.*zip\$)\\" ' +
+                          "--bucket ${env.TEST_SCREENSHOT_BUCKET} " +
+                          "--search_subdirectories True --key_prefix ${branchName}_${env.BUILD_NUMBER} " +
+                          '--extra_args {\\"ACL\\":\\"bucket-owner-full-control\\"}'
+            palSh(command, "Uploading test screenshots for ${jobName}")
+        }
     }
 }
 
@@ -497,6 +518,153 @@ def CreateTeardownStage(Map environmentVars) {
     }
 }
 
+def CreateSingleNode(Map pipelineConfig, def platform, def build_job, Map envVars, String branchName, String pipelineName, String repositoryName, String projectName, boolean onlyMountEBSVolume = false) {
+    def nodeLabel = envVars['NODE_LABEL']
+    return {
+        def currentResult = ''
+        def currentException = ''
+        retry(PIPELINE_RETRY_ATTEMPTS) {
+            node("${nodeLabel}") {
+                if(isUnix()) { // Has to happen inside a node
+                    envVars['IS_UNIX'] = 1
+                }
+                withEnv(GetEnvStringList(envVars)) {
+                    def build_job_name = build_job.key
+                    try {
+                        CreateSetupStage(pipelineConfig, snapshot, repositoryName, projectName, pipelineName, branchName, platform.key, build_job.key, envVars, onlyMountEBSVolume).call()
+
+                        if(build_job.value.steps) { //this is a pipe with many steps so create all the build stages
+                            build_job.value.steps.each { build_step ->
+                                build_job_name = build_step
+                                envVars = GetBuildEnvVars(platform.value.PIPELINE_ENV ?: EMPTY_JSON, platform.value.build_types[build_step].PIPELINE_ENV ?: EMPTY_JSON, pipelineName)
+                                try {
+                                    CreateBuildStage(pipelineConfig,  platform.key, build_step, envVars).call()
+                                }
+                                catch (Exception e) {
+                                    if (envVars['NONBLOCKING_STEP']?.toBoolean()) {
+                                        unstable(message: "Build step ${build_step} failed but it's a non-blocking step in build job ${build_job.key}")
+                                    } else {
+                                        throw e
+                                    }
+                                }
+                            }
+                        } else {
+                            CreateBuildStage(pipelineConfig,  platform.key, build_job.key, envVars).call()
+                        }
+                    }
+                    catch(Exception e) {
+                        if (e instanceof org.jenkinsci.plugins.workflow.steps.FlowInterruptedException) {
+                            def causes = e.getCauses().toString()
+                            if (causes.contains('RemovedNodeCause')) {
+                                error "Node disconnected during build: ${e}"  // Error raised to retry stage on a new node
+                            }
+                        }
+                        // All other errors will be raised outside the retry block
+                        currentResult = envVars['ON_FAILURE_MARK'] ?: 'FAILURE'
+                        currentException = e.toString()
+                    }
+                    finally {
+                        def params = platform.value.build_types[build_job_name].PARAMETERS
+                        if (env.MARS_REPO && params && params.containsKey('TEST_METRICS') && params.TEST_METRICS == 'True') {
+                            def output_directory = params.OUTPUT_DIRECTORY
+                            def configuration = params.CONFIGURATION
+                            CreateTestMetricsStage(pipelineConfig, branchName, envVars, build_job_name, output_directory, configuration).call()
+                        }
+                        if (params && params.containsKey('TEST_RESULTS') && params.TEST_RESULTS == 'True') {
+                            CreateExportTestResultsStage(pipelineConfig,  platform.key, build_job_name, envVars, params).call()
+                        }
+                        if (params && params.containsKey('TEST_SCREENSHOTS') && params.TEST_SCREENSHOTS == 'True' && currentResult == 'FAILURE') {
+                            CreateExportTestScreenshotsStage(pipelineConfig,  platform.key, build_job_name, envVars, params).call()
+                        }
+                        CreateTeardownStage(envVars).call()
+                    }
+                }
+            }
+        }
+        // https://github.com/jenkinsci/jenkins/blob/master/core/src/main/java/hudson/model/Result.java
+        // {SUCCESS,UNSTABLE,FAILURE,NOT_BUILT,ABORTED}
+        if (currentResult == 'FAILURE') {
+            currentBuild.result = 'FAILURE'
+            error "FAILURE: ${currentException}"
+        } else if (currentResult == 'UNSTABLE') {
+            currentBuild.result = 'UNSTABLE'
+            unstable(message: "UNSTABLE: ${currentException}")
+        }
+    }
+}
+
+// Used in CreateBuildJobs() to preprocess the build_job steps to programically create
+// Node sections with a set of steps that can run on that node.
+class PipeStepJobData {
+    String m_nodeLabel = ""
+    def m_steps = []
+
+    PipeStepJobData(String label) {
+        this.m_nodeLabel = label
+    }
+
+    def addStep(def step) {
+        this.m_steps.add(step)
+    }
+}
+
+def CreateBuildJobs(Map pipelineConfig, def platform, def build_job, Map envVars, String branchName, String pipelineName, String repositoryName, String projectName) {
+
+    // if this is a pipeline, split jobs based on the NODE_LABEL
+    if(build_job.value.steps) {
+        def defaultLabel = envVars['NODE_LABEL']
+        def lastNodeLable = ""
+        def jobList = []
+        def currentIdx = -1;
+
+        // iterate the steps to build the order of node label + steps sets.
+        // Order matters, as it is executed from first to last.
+        // example layout.
+        // node A
+        //  step 1
+        //  step 2
+        // node B
+        //  step 3
+        // node C
+        //  step 4
+        build_job.value.steps.each { build_step ->
+            //if node label defined
+            if(platform.value.build_types[build_step] && platform.value.build_types[build_step].PIPELINE_ENV &&
+               platform.value.build_types[build_step].PIPELINE_ENV['NODE_LABEL']) {
+
+               //if the last node label doen't match the new one, append it.
+               if(platform.value.build_types[build_step].PIPELINE_ENV['NODE_LABEL'] != lastNodeLable) {
+                    lastNodeLable = platform.value.build_types[build_step].PIPELINE_ENV['NODE_LABEL']
+                    jobList.add(new PipeStepJobData(lastNodeLable))
+                    currentIdx++
+                }
+            }
+            //no label define, so it needs to run on the default node label
+            else if(lastNodeLable != defaultLabel) { //if the last node is not the default, append default
+                lastNodeLable = defaultLabel
+                jobList.add(new PipeStepJobData(lastNodeLable))
+                currentIdx++
+            }
+            //add the build_step to the current node
+            jobList[currentIdx].addStep(build_step)
+        }
+
+        return {
+            jobList.eachWithIndex{ element, idx ->
+                //update the node label + steps to the discovered data
+                envVars['NODE_LABEL'] = element.m_nodeLabel
+                build_job.value.steps = element.m_steps
+                //no any additional nodes just mount the drive, do not handle clean parameters as that will be done by the first node.
+                boolean onlyMountEBSVolume = idx != 0;
+                //add this node
+                CreateSingleNode(pipelineConfig, platform, build_job, envVars, branchName, pipelineName, repositoryName, projectName, onlyMountEBSVolume).call()
+            }
+        }
+    } else {
+        return CreateSingleNode(pipelineConfig, platform, build_job, envVars, branchName, pipelineName, repositoryName, projectName)
+    }
+}
+
 def projectName = ''
 def pipelineName = ''
 def branchName = ''
@@ -515,6 +683,7 @@ try {
                     repositoryUrl = scm.getUserRemoteConfigs()[0].getUrl()
                     // repositoryName is the full repository name
                     repositoryName = (repositoryUrl =~ /https:\/\/github.com\/(.*)\.git/)[0][1]
+                    env.REPOSITORY_NAME = repositoryName
                     (projectName, pipelineName) = GetRunningPipelineName(env.JOB_NAME) // env.JOB_NAME is the name of the job given by Jenkins
 
                     if(env.BRANCH_NAME) {
@@ -522,6 +691,21 @@ try {
                     } else {
                         branchName = scm.branches[0].name // for non-multibranch pipelines
                         env.BRANCH_NAME = branchName // so scripts that read this environment have it (e.g. incremental_build_util.py)
+                    }
+                    if(env.CHANGE_TARGET) {
+                        // PR builds
+                        if(BUILD_SNAPSHOTS.contains(env.CHANGE_TARGET)) {
+                            snapshot = env.CHANGE_TARGET
+                            echo "Snapshot for destination branch \"${env.CHANGE_TARGET}\" found."
+                        } else {
+                            snapshot = DEFAULT_BUILD_SNAPSHOT
+                            echo "Snapshot for destination branch \"${env.CHANGE_TARGET}\" does not exist, defaulting to snapshot \"${snapshot}\""
+                        }
+                    } else {
+                        // Non-PR builds
+                        pipelineParameters.add(choice(defaultValue: DEFAULT_BUILD_SNAPSHOT, name: 'SNAPSHOT', choices: BUILD_SNAPSHOTS_WITH_EMPTY, description: 'Selects the build snapshot to use. A more diverted snapshot will cause longer build times, but will not cause build failures.'))
+                        snapshot = env.SNAPSHOT
+                        echo "Snapshot \"${snapshot}\" selected."
                     }
                     pipelineProperties.add(disableConcurrentBuilds())
                     
@@ -541,6 +725,40 @@ try {
                             pipelineParameters.add(booleanParam(defaultValue: true, description: '', name: platform.key))
                         }
                     }
+                    // Add additional Jenkins parameters
+                    pipelineConfig.platforms.each { platform ->
+                        platformEnv = platform.value.PIPELINE_ENV
+                        pipelineJenkinsParameters = platformEnv['PIPELINE_JENKINS_PARAMETERS'] ?: [:]
+                        jenkinsParametersToAdd = pipelineJenkinsParameters[pipelineName] ?: [:]
+                        jenkinsParametersToAdd.each{ jenkinsParameter ->
+                            defaultValue = jenkinsParameter['default_value']
+                            // Use last run's value as default value so we can save values in different Jenkins environment
+                            if (jenkinsParameter['use_last_run_value']?.toBoolean()) {
+                                defaultValue = params."${jenkinsParameter['parameter_name']}" ?: jenkinsParameter['default_value']
+                            }
+                            switch (jenkinsParameter['parameter_type']) {
+                                case 'string':
+                                    pipelineParameters.add(stringParam(defaultValue: defaultValue,
+                                                                   description: jenkinsParameter['description'],
+                                                                   name: jenkinsParameter['parameter_name']
+                                                                   ))
+                                    break
+                                case 'boolean':
+                                    pipelineParameters.add(booleanParam(defaultValue: defaultValue,
+                                                                   description: jenkinsParameter['description'],
+                                                                   name: jenkinsParameter['parameter_name']
+                                                                   ))
+                                    break
+                                case 'password':
+                                    pipelineParameters.add(password(defaultValue: defaultValue,
+                                                                   description: jenkinsParameter['description'],
+                                                                   name: jenkinsParameter['parameter_name']
+                                                                   ))
+                                    break
+                            }
+                        }
+                    }
+
                     pipelineProperties.add(parameters(pipelineParameters))
                     properties(pipelineProperties)
 
@@ -644,18 +862,35 @@ catch(Exception e) {
 }
 finally {
     try {
-        if(env.SNS_TOPIC) {
-            snsPublish(
-                topicArn: env.SNS_TOPIC,
-                subject:'Build Result',
-                message:"${currentBuild.currentResult}:${BUILD_URL}:${env.RECREATE_VOLUME}:${env.CLEAN_OUTPUT_DIRECTORY}:${env.CLEAN_ASSETS}"
-            )
-        }
         node('controller') {
-            step([
-                $class: 'Mailer',
-                notifyEveryUnstableBuild: true,
-                recipients: emailextrecipients([
+            if("${currentBuild.currentResult}" == "SUCCESS") {
+                emailBody = "${BUILD_URL}\nSuccess!"
+            } else {
+                buildFailure = ""
+                emailBody = "${BUILD_URL}\n${buildFailure}!"
+            }
+            if(env.POST_AR_BUILD_SNS_TOPIC) {
+                message_json = [
+                    "build_url": env.BUILD_URL,
+                    "build_number": env.BUILD_NUMBER,
+                    "repository_name": env.REPOSITORY_NAME,
+                    "branch_name": env.BRANCH_NAME,
+                    "build_result": "${currentBuild.currentResult}",
+                    "build_failure": buildFailure,
+                    "recreate_volume": env.RECREATE_VOLUME,
+                    "clean_output_directory": env.CLEAN_OUTPUT_DIRECTORY,
+                    "clean_assets": env.CLEAN_ASSETS
+                ]
+                snsPublish(
+                    topicArn: env.POST_AR_BUILD_SNS_TOPIC,
+                    subject:'Build Result',
+                    message:JsonOutput.toJson(message_json)
+                )
+            }
+            emailext (
+                body: "${emailBody}",
+                subject: "${currentBuild.currentResult}: ${JOB_NAME} - Build # ${BUILD_NUMBER}",
+                recipientProviders: [
                     [$class: 'RequesterRecipientProvider']
                 ])
             ])
