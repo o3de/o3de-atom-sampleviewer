@@ -502,10 +502,10 @@ def CreateExportTestResultsStage(Map pipelineConfig, String platformName, String
     }
 }
 
-def CreateExportTestScreenshotsStage(Map pipelineConfig, String platformName, String jobName, Map environmentVars, Map params) {
+def CreateExportTestScreenshotsStage(Map pipelineConfig, String branchName, String platformName, String jobName, Map environmentVars, Map params) {
     return {
         stage("${jobName}_screenshots") {
-            ExportTestScreenshots(pipelineConfig, environmentVars['WORKSPACE'], platformName, jobName, params)
+            ExportTestScreenshots(pipelineConfig, branchName, environmentVars['WORKSPACE'], platformName, jobName, params)
         }
     }
 }
@@ -571,10 +571,10 @@ def CreateSingleNode(Map pipelineConfig, def platform, def build_job, Map envVar
                             CreateTestMetricsStage(pipelineConfig, branchName, envVars, build_job_name, output_directory, configuration).call()
                         }
                         if (params && params.containsKey('TEST_RESULTS') && params.TEST_RESULTS == 'True') {
-                            CreateExportTestResultsStage(pipelineConfig,  platform.key, build_job_name, envVars, params).call()
+                            CreateExportTestResultsStage(pipelineConfig, platform.key, build_job_name, envVars, params).call()
                         }
                         if (params && params.containsKey('TEST_SCREENSHOTS') && params.TEST_SCREENSHOTS == 'True' && currentResult == 'FAILURE') {
-                            CreateExportTestScreenshotsStage(pipelineConfig,  platform.key, build_job_name, envVars, params).call()
+                            CreateExportTestScreenshotsStage(pipelineConfig, platform.key, build_job_name, envVars, params).call()
                         }
                         CreateTeardownStage(envVars).call()
                     }
