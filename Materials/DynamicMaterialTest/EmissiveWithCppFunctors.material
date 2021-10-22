@@ -2,7 +2,7 @@
     "description": "",
     "materialType": "Materials/DynamicMaterialTest/EmissiveWithCppFunctors.materialtype",
     "parentMaterial": "",
-    "propertyLayoutVersion": 3,
+    "materialTypeVersion": 3,
     "properties": {
         "emissive": {
             "color": [

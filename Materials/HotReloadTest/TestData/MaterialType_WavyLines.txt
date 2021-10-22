@@ -1,6 +1,5 @@
 {
     "propertyLayout": {
-        "version": 1,
         "properties": {
             "general": [
                 {
