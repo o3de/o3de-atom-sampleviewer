@@ -1,5 +1,5 @@
 {
-    "Source" : "IndirectDraw",
+    "Source" : "IndirectDraw.azsl",
 
     "DepthStencilState" : { 
         "Depth" : { "Enable" : true, "CompareFunc" : "LessEqual" }

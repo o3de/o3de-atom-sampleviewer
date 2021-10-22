@@ -1,5 +1,5 @@
 {   
-    "Source": "AsyncComputeTonemapping",
+    "Source": "AsyncComputeTonemapping.azsl",
   
     "ProgramSettings":
     {

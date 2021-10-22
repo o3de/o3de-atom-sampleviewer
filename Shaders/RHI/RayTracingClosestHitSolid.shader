@@ -1,5 +1,5 @@
 {
-    "Source" : "RayTracingClosestHitSolid",
+    "Source" : "RayTracingClosestHitSolid.azsl",
     "DrawList" : "RayTracing",
 
     "CompilerHints":

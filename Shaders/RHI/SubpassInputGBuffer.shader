@@ -1,5 +1,5 @@
 {
-    "Source" : "SubpassInputGBuffer",
+    "Source" : "SubpassInputGBuffer.azsl",
 
     "DepthStencilState" : { 
         "Depth" : { "Enable" : true, "CompareFunc" : "GreaterEqual" }

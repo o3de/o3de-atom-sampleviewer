@@ -1,5 +1,5 @@
 {
-    "Source": "InputAssemblyDraw",
+    "Source": "InputAssemblyDraw.azsl",
 
     "DepthStencilState": {
         "Depth": {

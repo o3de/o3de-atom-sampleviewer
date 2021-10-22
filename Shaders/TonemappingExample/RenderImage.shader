@@ -1,5 +1,5 @@
 {
-    "Source" : "RenderImage",
+    "Source" : "RenderImage.azsl",
 
     "DepthStencilState" : { 
         "Depth" : { "Enable" : false, "CompareFunc" : "GreaterEqual" }

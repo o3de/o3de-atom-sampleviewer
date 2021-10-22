@@ -1,5 +1,5 @@
 {
-    "Source" : "ColorMesh",
+    "Source" : "ColorMesh.azsl",
 
     "DepthStencilState" : { 
         "Depth" : { "Enable" : false, "CompareFunc" : "GreaterEqual" }
