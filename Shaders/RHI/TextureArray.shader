@@ -1,5 +1,5 @@
 {
-    "Source" : "TextureArray",
+    "Source" : "TextureArray.azsl",
 
     "DepthStencilState" : { 
         "Depth" : { "Enable" : false, "CompareFunc" : "GreaterEqual" }

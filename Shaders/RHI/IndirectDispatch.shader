@@ -1,5 +1,5 @@
 {
-    "Source": "IndirectDispatch",
+    "Source": "IndirectDispatch.azsl",
 
     "ProgramSettings":
     {

@@ -1,5 +1,5 @@
 {
-    "Source": "TextureMap1DArray",
+    "Source": "TextureMap1DArray.azsl",
 
     "DepthStencilState": {
         "Depth": {

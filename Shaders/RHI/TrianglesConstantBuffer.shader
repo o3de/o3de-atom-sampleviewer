@@ -1,5 +1,5 @@
 {
-    "Source" : "TrianglesConstantBuffer",
+    "Source" : "TrianglesConstantBuffer.azsl",
 
     "DepthStencilState" : { 
         "Depth" : { "Enable" : false, "CompareFunc" : "GreaterEqual" }

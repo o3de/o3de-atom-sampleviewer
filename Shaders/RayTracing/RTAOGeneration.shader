@@ -1,5 +1,5 @@
 {
-    "Source" : "RTAOGeneration",
+    "Source" : "RTAOGeneration.azsl",
     "DrawList" : "RayTracing",
 
     "CompilerHints":
