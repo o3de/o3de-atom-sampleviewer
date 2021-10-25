@@ -20,7 +20,6 @@
 #include <Atom/RPI.Public/GpuQuery/GpuQuerySystemInterface.h>
 
 #include <Atom/Utils/ImGuiCullingDebug.h>
-#include <Atom/Utils/ImGuiCpuProfiler.h>
 #include <Atom/Utils/ImGuiGpuProfiler.h>
 #include <Atom/Utils/ImGuiPassTree.h>
 #include <Atom/Utils/ImGuiFrameVisualizer.h>
@@ -227,7 +226,6 @@ namespace AtomSampleViewer
 
         AZ::Render::ImGuiPassTree m_imguiPassTree;
         AZ::Render::ImGuiFrameVisualizer m_imguiFrameGraphVisualizer;
-        AZ::Render::ImGuiCpuProfiler m_imguiCpuProfiler;
         AZ::Render::ImGuiGpuProfiler m_imguiGpuProfiler;
         AZ::Render::ImGuiTransientAttachmentProfiler m_imguiTransientAttachmentProfiler;
         AZ::Render::ImGuiShaderMetrics m_imguiShaderMetrics;

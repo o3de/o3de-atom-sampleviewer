@@ -92,7 +92,7 @@ namespace AtomSampleViewer
             }
 
             // Turn it back into a full path
-            path = Utils::ResolvePath("@devassets@" + path);
+            path = Utils::ResolvePath("@projectroot@/" + path);
 
             return path;
         }
@@ -422,6 +422,8 @@ namespace AtomSampleViewer
 
             highlightTextIf(totalScreenshotWarnings > 0, HighlightWarning);
             ImGui::Text("Total Screenshot Warnings: %u %s", totalScreenshotWarnings, seeBelow(totalScreenshotWarnings).c_str());
+
+            ImGui::Text("Exported test results: %s", m_exportedTestResultsPath.c_str());
 
             resetTextHighlight();
 
@@ -1091,9 +1093,10 @@ namespace AtomSampleViewer
         }
 
     }
-
+     
     void ScriptReporter::ExportTestResults()
-    {  
+    {
+        m_exportedTestResultsPath = GenerateAndCreateExportedTestResultsPath();
         for (const ScriptReport& scriptReport : m_scriptReports)
         {
             const AZStd::string assertLogLine = AZStd::string::format("Asserts: %u \n", scriptReport.m_assertCount);
@@ -1101,42 +1104,53 @@ namespace AtomSampleViewer
             const AZStd::string warningsLogLine = AZStd::string::format("Warnings: %u \n", scriptReport.m_generalWarningCount);
             const AZStd::string screenshotErrorsLogLine = AZStd::string::format("Screenshot errors: %u \n", scriptReport.m_screenshotErrorCount);
             const AZStd::string screenshotWarningsLogLine = AZStd::string::format("Screenshot warnings: %u \n", scriptReport.m_screenshotWarningCount);
-            const AZStd::string failedScreenshotsLogLine = "\nScreenshot test info below.\n";     
-
-            const auto projectPath = AZ::Utils::GetProjectPath();
-            AZStd::chrono::system_clock::time_point now = AZStd::chrono::system_clock::now();
-            float timeFloat = AZStd::chrono::duration<float>(now.time_since_epoch()).count();
-            AZStd::string timeString = AZStd::string::format("%.4f", timeFloat);
-            AZStd::string exportFileName = AZStd::string::format("exportedTestResults_%s.txt", timeString.c_str());
-            AZStd::string exportTestResultsFolder;
-            AzFramework::StringFunc::Path::Join(projectPath.c_str(), "TestResults/", exportTestResultsFolder);
-
-            auto io = AZ::IO::LocalFileIO::GetInstance();
-            io->CreatePath(exportTestResultsFolder.c_str());
-            AZStd::string exportFile;
-            AzFramework::StringFunc::Path::Join(exportTestResultsFolder.c_str(), exportFileName.c_str(), exportFile);
+            const AZStd::string failedScreenshotsLogLine = "\nScreenshot test info below.\n";
+            
             AZ::IO::HandleType logHandle;
-
-        if (io->Open(exportFile.c_str(), AZ::IO::OpenMode::ModeWrite, logHandle))
-        {
-            io->Write(logHandle, assertLogLine.c_str(), assertLogLine.size());
-            io->Write(logHandle, errorsLogLine.c_str(), errorsLogLine.size());
-            io->Write(logHandle, warningsLogLine.c_str(), warningsLogLine.size());
-            io->Write(logHandle, screenshotErrorsLogLine.c_str(), screenshotErrorsLogLine.size());
-            io->Write(logHandle, screenshotWarningsLogLine.c_str(), screenshotWarningsLogLine.size());
-            io->Write(logHandle, failedScreenshotsLogLine.c_str(), failedScreenshotsLogLine.size());
-
-            for (const ScreenshotTestInfo& screenshotTest : scriptReport.m_screenshotTests)
+            auto io = AZ::IO::LocalFileIO::GetInstance();
+            if (io->Open(m_exportedTestResultsPath.c_str(), AZ::IO::OpenMode::ModeWrite, logHandle))
             {
-                const AZStd::string toleranceLevelLogLine = AZStd::string::format("Tolerance level: %s \n", screenshotTest.m_toleranceLevel.ToString().c_str());
-                const AZStd::string officialComparisonLogLine = AZStd::string::format("Image comparison result: %s \n", screenshotTest.m_officialComparisonResult.GetSummaryString().c_str());
+                io->Write(logHandle, assertLogLine.c_str(), assertLogLine.size());
+                io->Write(logHandle, errorsLogLine.c_str(), errorsLogLine.size());
+                io->Write(logHandle, warningsLogLine.c_str(), warningsLogLine.size());
+                io->Write(logHandle, screenshotErrorsLogLine.c_str(), screenshotErrorsLogLine.size());
+                io->Write(logHandle, screenshotWarningsLogLine.c_str(), screenshotWarningsLogLine.size());
+                io->Write(logHandle, failedScreenshotsLogLine.c_str(), failedScreenshotsLogLine.size());
 
-                io->Write(logHandle, toleranceLevelLogLine.c_str(), toleranceLevelLogLine.size());
-                io->Write(logHandle, officialComparisonLogLine.c_str(), officialComparisonLogLine.size());
+                for (const ScreenshotTestInfo& screenshotTest : scriptReport.m_screenshotTests)
+                {
+                    const AZStd::string screenshotPath = AZStd::string::format("Test screenshot path: %s \n", screenshotTest.m_screenshotFilePath.c_str());
+                    const AZStd::string officialBaselineScreenshotPath = AZStd::string::format("Official baseline screenshot path: %s \n", screenshotTest.m_officialBaselineScreenshotFilePath.c_str());
+                    const AZStd::string toleranceLevelLogLine = AZStd::string::format("Tolerance level: %s \n", screenshotTest.m_toleranceLevel.ToString().c_str());
+                    const AZStd::string officialComparisonLogLine = AZStd::string::format("Image comparison result: %s \n", screenshotTest.m_officialComparisonResult.GetSummaryString().c_str());
+
+                    io->Write(logHandle, toleranceLevelLogLine.c_str(), toleranceLevelLogLine.size());
+                    io->Write(logHandle, officialComparisonLogLine.c_str(), officialComparisonLogLine.size());
+                }
+                io->Close(logHandle);
             }
-            io->Close(logHandle);
+            m_messageBox.OpenPopupMessage("Exported test results", AZStd::string::format("Results exported to %s", m_exportedTestResultsPath.c_str()));
+            AZ_Printf("Test results exported to %s \n", m_exportedTestResultsPath.c_str());
         }
-        m_messageBox.OpenPopupMessage("Exported test results", "Results exported to " + exportFile);
-        }
+    }
+
+    AZStd::string ScriptReporter::GenerateAndCreateExportedTestResultsPath() const
+    {
+        // Setup our variables for the exported test results path and .txt file.
+        const auto projectPath = AZ::Utils::GetProjectPath();
+        const AZStd::chrono::system_clock::time_point now = AZStd::chrono::system_clock::now();
+        const float timeFloat = AZStd::chrono::duration<float>(now.time_since_epoch()).count();
+        const AZStd::string timeString = AZStd::string::format("%.4f", timeFloat);
+        const AZStd::string exportFileName = AZStd::string::format("exportedTestResults_%s.txt", timeString.c_str());
+        AZStd::string exportTestResultsFolder;
+        AzFramework::StringFunc::Path::Join(projectPath.c_str(), "TestResults/", exportTestResultsFolder);
+
+        // Create the exported test results path & return .txt file path.
+        auto io = AZ::IO::LocalFileIO::GetInstance();
+        io->CreatePath(exportTestResultsFolder.c_str());
+        AZStd::string exportFile;
+        AzFramework::StringFunc::Path::Join(exportTestResultsFolder.c_str(), exportFileName.c_str(), exportFile);
+
+        return exportFile;
     }
 } // namespace AtomSampleViewer

@@ -59,8 +59,6 @@ namespace AtomSampleViewer
 
         UseArcBallCameraController();
 
-        InitLightingPresets(true);
-        
         // Add an Image based light.
         m_defaultIbl.Init(AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get());
 

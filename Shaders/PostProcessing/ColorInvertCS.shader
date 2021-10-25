@@ -1,5 +1,5 @@
 {
-    "Source": "ColorInvertCS",
+    "Source": "ColorInvertCS.azsl",
 
     "ProgramSettings":
     {

@@ -2,7 +2,7 @@
     "description": "",
     "materialType": "Materials\\Types\\StandardPBR.materialtype",
     "parentMaterial": "",
-    "propertyLayoutVersion": 3,
+    "materialTypeVersion": 3,
     "properties": {
         "baseColor": {
             "textureMap": "Materials/Decal/am_road_dust_decal.tif"
@@ -14,7 +14,7 @@
             "useTexture": false
         },
         "normal": {
-            "useTexture": false
+            "textureMap": "Materials/Decal/am_road_dust_decal_nrm.tif"
         },
         "opacity": {
             "alphaSource": "Split",

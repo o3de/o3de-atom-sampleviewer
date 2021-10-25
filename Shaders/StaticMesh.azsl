@@ -70,6 +70,7 @@ VertexOutput MainVS(VertexInput input)
         DirectionalLightShadow::GetShadowCoords(
             lightIndex,
             worldPosition,
+            output.m_normal,
             output.m_shadowCoords);
     }
     

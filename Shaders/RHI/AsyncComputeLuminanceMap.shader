@@ -1,5 +1,5 @@
 {
-    "Source": "AsyncComputeLuminanceMap",
+    "Source": "AsyncComputeLuminanceMap.azsl",
 
     "DepthStencilState" : { 
         "Depth" : { "Enable" : false, "CompareFunc" : "GreaterEqual" }

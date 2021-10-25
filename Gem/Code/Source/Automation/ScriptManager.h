@@ -17,6 +17,7 @@
 #include <Automation/ScriptReporter.h>
 #include <Automation/ImageComparisonConfig.h>
 #include <Utils/ImGuiAssetBrowser.h>
+#include <Profiler/ProfilerBus.h>
 
 namespace AZ
 {
@@ -49,6 +50,7 @@ namespace AtomSampleViewer
         , public AZ::Debug::CameraControllerNotificationBus::Handler
         , public AZ::Render::FrameCaptureNotificationBus::Handler
         , public AZ::Render::ProfilingCaptureNotificationBus::Handler
+        , public Profiler::ProfilerNotificationBus::Handler
     {
     public:
         ScriptManager();
@@ -205,8 +207,10 @@ namespace AtomSampleViewer
         void OnCaptureQueryTimestampFinished(bool result, const AZStd::string& info) override;
         void OnCaptureCpuFrameTimeFinished(bool result, const AZStd::string& info) override;
         void OnCaptureQueryPipelineStatisticsFinished(bool result, const AZStd::string& info) override;
-        void OnCaptureCpuProfilingStatisticsFinished(bool result, const AZStd::string& info) override;
         void OnCaptureBenchmarkMetadataFinished(bool result, const AZStd::string& info) override;
+
+        // ProfilerNotificationBus overrides...
+        void OnCaptureCpuProfilingStatisticsFinished(bool result, const AZStd::string& info) override;
 
         void AbortScripts(const AZStd::string& reason);
 

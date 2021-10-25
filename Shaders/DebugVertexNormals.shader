@@ -1,5 +1,5 @@
 {
-    "Source" : "DebugVertexNormals",
+    "Source" : "DebugVertexNormals.azsl",
 
     "DepthStencilState" : { 
         "Depth" : { "Enable" : true, "CompareFunc" : "GreaterEqual" }

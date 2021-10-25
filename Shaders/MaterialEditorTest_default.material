@@ -1,6 +1,6 @@
 {
     "materialType": "MaterialEditorTest.materialtype",
-    "propertyLayoutVersion": 1,
+    "materialTypeVersion": 1,
     "properties": {
         "normal": {
             "myBool": false,

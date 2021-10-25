@@ -1,5 +1,5 @@
 {
-    "Source" : "RTAOMiss",
+    "Source" : "RTAOMiss.azsl",
     "DrawList" : "RayTracing",
 
     "CompilerHints":

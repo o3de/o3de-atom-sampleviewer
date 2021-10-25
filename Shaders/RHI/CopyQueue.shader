@@ -1,5 +1,5 @@
 {
-    "Source": "CopyQueue",
+    "Source": "CopyQueue.azsl",
 
     "DepthStencilState": {
         "Depth": {
