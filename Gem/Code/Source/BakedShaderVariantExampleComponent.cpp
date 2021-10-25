@@ -92,13 +92,10 @@ namespace AtomSampleViewer
         m_meshHandle = m_meshFeatureProcessor->AcquireMesh(Render::MeshHandleDescriptor{ m_modelAsset }, m_material);
         m_meshFeatureProcessor->SetTransform(m_meshHandle, meshTransform);
 
-        AZStd::vector<AZStd::string> passHierarchy;
-        passHierarchy.push_back(ATOMSAMPLEVIEWER_TRAIT_BAKED_SHADERVARIANT_SAMPLE_PASS_NAME);
-        AZ::RPI::PassHierarchyFilter passFilter(passHierarchy);
-        AZStd::vector<AZ::RPI::Pass*> foundPasses = AZ::RPI::PassSystemInterface::Get()->FindPasses(passFilter);
-        m_forwardPass = foundPasses[0];
+        AZ::RPI::PassFilter passFilter = AZ::RPI::PassFilter::CreateWithPassName(AZ::Name(ATOMSAMPLEVIEWER_TRAIT_BAKED_SHADERVARIANT_SAMPLE_PASS_NAME), 
+            m_meshFeatureProcessor->GetParentScene());
+        m_forwardPass = AZ::RPI::PassSystemInterface::Get()->FindFirstPass(passFilter);
         m_forwardPass->SetTimestampQueryEnabled(true);
-
         SetRootVariantUsage(true);
     }
 
