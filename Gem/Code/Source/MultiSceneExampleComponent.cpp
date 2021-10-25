@@ -83,7 +83,6 @@ namespace AtomSampleViewer
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::QuadLightFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("ReflectionProbeFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::SkyBoxFeatureProcessor");
-        sceneDesc.m_featureProcessorNames.push_back("AZ::Render::DiskLightFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::TransformServiceFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::ProjectedShadowFeatureProcessor");
         m_scene = RPI::Scene::CreateScene(sceneDesc);

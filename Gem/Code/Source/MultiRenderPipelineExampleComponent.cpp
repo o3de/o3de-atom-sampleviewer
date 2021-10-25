@@ -572,7 +572,7 @@ namespace AtomSampleViewer
 
         if (m_secondPipeline)
         {
-            Render::ImGuiActiveContextScope contextGuard = Render::ImGuiActiveContextScope::FromPass(RPI::PassHierarchyFilter({ "SecondPipeline", "ImGuiPass"}));
+            Render::ImGuiActiveContextScope contextGuard = Render::ImGuiActiveContextScope::FromPass({ "SecondPipeline", "ImGuiPass"});
             AZ_Error("MultiRenderPipelineExampleComponent", contextGuard.IsEnabled(), "Unable to activate imgui context for second pipeline.");
 
             if (contextGuard.IsEnabled())

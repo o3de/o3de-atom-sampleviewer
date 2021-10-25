@@ -1433,7 +1433,8 @@ namespace AtomSampleViewer
         RPI::RPISystemInterface::Get()->RegisterScene(m_rhiScene);
 
         // Get RHISamplePass
-        m_rhiSamplePass = azrtti_cast<RHISamplePass*>(renderPipeline->GetRootPass()->FindPassByNameRecursive(AZ::Name("RHISamplePass")).get());
+        AZ::RPI::PassFilter passFilter = AZ::RPI::PassFilter::CreateWithPassName(AZ::Name("RHISamplePass"), renderPipeline.get());
+        m_rhiSamplePass = azrtti_cast<RHISamplePass*>(AZ::RPI::PassSystemInterface::Get()->FindFirstPass(passFilter));
 
         // Setup imGui since a new render pipeline with imgui pass was created
         SetupImGuiContext();
