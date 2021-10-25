@@ -1,5 +1,5 @@
 {
-    "Source": "SHDemo",
+    "Source": "SHDemo.azsl",
 
     "DepthStencilState": {
         "Depth": {

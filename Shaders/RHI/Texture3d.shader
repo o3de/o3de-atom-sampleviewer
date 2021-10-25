@@ -1,5 +1,5 @@
 {
-    "Source" : "Texture3d",
+    "Source" : "Texture3d.azsl",
 
     "DepthStencilState" : { 
         "Depth" : { "Enable" : false, "CompareFunc" : "GreaterEqual" }

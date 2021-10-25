@@ -1,5 +1,5 @@
 {
-    "Source": "TexturedSurface",
+    "Source": "TexturedSurface.azsl",
 
     "DepthStencilState": {
         "Depth": {

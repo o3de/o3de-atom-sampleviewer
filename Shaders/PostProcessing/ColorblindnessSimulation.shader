@@ -1,5 +1,5 @@
 { 
-    "Source" : "ColorblindnessSimulation",
+    "Source" : "ColorblindnessSimulation.azsl",
 
     "DepthStencilState" : {
         "Depth" : { "Enable" : false }

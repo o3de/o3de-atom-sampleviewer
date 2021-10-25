@@ -1,5 +1,5 @@
 {
-    "Source": "RayTracingDraw",
+    "Source": "RayTracingDraw.azsl",
 
     "DepthStencilState": 
     {

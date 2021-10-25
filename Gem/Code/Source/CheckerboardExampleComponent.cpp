@@ -72,7 +72,7 @@ namespace AtomSampleViewer
         ActivateCheckerboardPipeline();
 
         // Create an ImGuiActiveContextScope to ensure the ImGui context on the new pipeline's ImGui pass is activated.
-        m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass(AZ::RPI::PassHierarchyFilter({ "CheckerboardPipeline", "ImGuiPass" }));
+        m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass({ "CheckerboardPipeline", "ImGuiPass" });
         m_imguiSidebar.Activate();
     }
 

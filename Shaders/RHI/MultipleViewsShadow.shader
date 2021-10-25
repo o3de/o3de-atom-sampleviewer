@@ -1,5 +1,5 @@
 {
-    "Source" : "MultipleViewsShadow",
+    "Source" : "MultipleViewsShadow.azsl",
 
     "DepthStencilState" : { 
         "Depth" : { "Enable" : true, "CompareFunc" : "LessEqual" }

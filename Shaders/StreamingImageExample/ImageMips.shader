@@ -1,5 +1,5 @@
 {
-    "Source" : "ImageMips",
+    "Source" : "ImageMips.azsl",
 
     "DepthStencilState" : { 
         "Depth" : { "Enable" : false, "CompareFunc" : "GreaterEqual" }

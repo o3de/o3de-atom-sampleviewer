@@ -1,5 +1,5 @@
 {
-    "Source" : "SubpassInputComposition",
+    "Source" : "SubpassInputComposition.azsl",
 
     "DepthStencilState" : { 
         "Depth" : { "Enable" : false, "CompareFunc" : "GreaterEqual" }

@@ -1,5 +1,5 @@
 {
-    "Source": "Texture",
+    "Source": "Texture.azsl",
 
     "DepthStencilState": {
         "Depth": {

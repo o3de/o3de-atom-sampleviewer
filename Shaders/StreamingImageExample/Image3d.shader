@@ -1,5 +1,5 @@
 {
-    "Source" : "Image3d",
+    "Source" : "Image3d.azsl",
 
     "DepthStencilState" : { 
         "Depth" : { "Enable" : false, "CompareFunc" : "GreaterEqual" }

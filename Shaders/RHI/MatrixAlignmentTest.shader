@@ -1,5 +1,5 @@
 {
-    "Source" : "MatrixAlignmentTest",
+    "Source" : "MatrixAlignmentTest.azsl",
 
     "DepthStencilState" : { 
         "Depth" : { "Enable" : false, "CompareFunc" : "GreaterEqual" }

@@ -106,7 +106,7 @@ namespace AtomSampleViewer
         m_lowEndPipeline->SetDefaultView(m_originalPipeline->GetDefaultView());
         defaultScene->RemoveRenderPipeline(m_originalPipeline->GetId());
 
-        m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass(AZ::RPI::PassHierarchyFilter({ m_lowEndPipeline->GetId().GetCStr(), "ImGuiPass" }));
+        m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass({ m_lowEndPipeline->GetId().GetCStr(), "ImGuiPass" });
     }
 
     void MeshExampleComponent::DeactivateLowEndPipeline()

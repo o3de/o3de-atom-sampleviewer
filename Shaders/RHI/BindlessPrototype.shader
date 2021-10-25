@@ -1,5 +1,5 @@
 {
-    "Source" : "BindlessPrototype",
+    "Source" : "BindlessPrototype.azsl",
 
     "DepthStencilState" : { 
         "Depth" : { "Enable" : false, "CompareFunc" : "GreaterEqual" }

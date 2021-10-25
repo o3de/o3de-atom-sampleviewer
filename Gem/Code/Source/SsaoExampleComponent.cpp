@@ -127,26 +127,18 @@ namespace AtomSampleViewer
 
         if (m_rayTracingEnabled)
         {
-            RPI::PassHierarchyFilter passFilter({ssaoPipelineDesc.m_name, "RayTracingAmbientOcclusionPass"});
-            const AZStd::vector<RPI::Pass*>& passes = RPI::PassSystemInterface::Get()->FindPasses(passFilter);
-            if (!passes.empty())
-            {
-                m_RTAOPass = azrtti_cast<Render::RayTracingAmbientOcclusionPass*>(passes.front());
-                AZ_Assert(m_RTAOPass, "Couldn't find the RayTracingAmbientOcclusionPass from the SsaoPipeline");
-            }
+            RPI::PassFilter passFilter = RPI::PassFilter::CreateWithPassName(AZ::Name("RayTracingAmbientOcclusionPass"), m_ssaoPipeline.get());
+            m_RTAOPass = azrtti_cast<Render::RayTracingAmbientOcclusionPass*>(RPI::PassSystemInterface::Get()->FindFirstPass(passFilter));
+            AZ_Assert(m_RTAOPass, "Couldn't find the RayTracingAmbientOcclusionPass from the SsaoPipeline");
         }
         else
         {
             m_aoType = AmbientOcclusionType::SSAO;
         }
 
-        RPI::PassHierarchyFilter passFilter({ssaoPipelineDesc.m_name, "SelectorPass"});
-        const AZStd::vector<RPI::Pass*>& passes = RPI::PassSystemInterface::Get()->FindPasses(passFilter);
-        if (!passes.empty())
-        {
-            m_selector = azrtti_cast<RPI::SelectorPass*>(passes.front());
-            AZ_Assert(m_selector, "Couldn't find the SelectorPass from the SsaoPipeline");
-        }
+        RPI::PassFilter selectorPassFilter = RPI::PassFilter::CreateWithPassName(AZ::Name("SelectorPass"), m_ssaoPipeline.get());
+        m_selector = azrtti_cast<RPI::SelectorPass*>(RPI::PassSystemInterface::Get()->FindFirstPass(selectorPassFilter));
+        AZ_Assert(m_selector, "Couldn't find the SelectorPass from the SsaoPipeline");
     }
 
     void SsaoExampleComponent::DestroySsaoPipeline()
@@ -165,7 +157,7 @@ namespace AtomSampleViewer
         defaultScene->RemoveRenderPipeline(m_originalPipeline->GetId());
 
         // Create an ImGuiActiveContextScope to ensure the ImGui context on the new pipeline's ImGui pass is activated.
-        m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass(AZ::RPI::PassHierarchyFilter({ m_ssaoPipeline->GetId().GetCStr(), "ImGuiPass" }));
+        m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass({ m_ssaoPipeline->GetId().GetCStr(), "ImGuiPass" });
     }
 
     void SsaoExampleComponent::DeactivateSsaoPipeline()

@@ -1,5 +1,5 @@
 {
-    "Source" : "Stencil",
+    "Source" : "Stencil.azsl",
 
     "DepthStencilState" : { 
         "Depth" : { "Enable" : false, "CompareFunc" : "Less" }
