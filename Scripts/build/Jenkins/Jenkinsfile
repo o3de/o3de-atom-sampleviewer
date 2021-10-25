@@ -341,9 +341,9 @@ def PreBuildCommonSteps(Map pipelineConfig, String repositoryName, String projec
         if(!fileExists('3rdParty')) {
             palMkdir('3rdParty')
         }
+        CheckoutRepo(disableSubmodules)
     }
     dir("${workspace}/${ENGINE_REPOSITORY_NAME}") {
-        CheckoutRepo(disableSubmodules)
         // Get python
         if(env.IS_UNIX) {
             sh label: 'Getting python',
