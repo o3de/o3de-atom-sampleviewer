@@ -328,8 +328,6 @@ def PreBuildCommonSteps(Map pipelineConfig, String repositoryName, String projec
         }
     }
 
-    CheckoutRepo(disableSubmodules)
-
     // Cleanup previous repo location, we are currently at the root of the workspace, if we have a .git folder
     // we need to cleanup. Once all branches take this relocation, we can remove this
     if(env.CLEAN_WORKSPACE?.toBoolean() || fileExists("${workspace}/.git")) {
@@ -345,6 +343,7 @@ def PreBuildCommonSteps(Map pipelineConfig, String repositoryName, String projec
         }
     }
     dir("${workspace}/${ENGINE_REPOSITORY_NAME}") {
+        CheckoutRepo(disableSubmodules)
         // Get python
         if(env.IS_UNIX) {
             sh label: 'Getting python',
