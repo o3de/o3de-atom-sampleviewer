@@ -331,11 +331,15 @@ namespace AtomSampleViewer
                 m_assetTrackingTimeout -= deltaTime;
                 if (m_assetTrackingTimeout < 0)
                 {
-                    AZ_Error("Automation", false, "Script asset tracking timed out. Continuing...");
+                    auto incomplateAssetList = m_assetStatusTracker.GetIncompleteAssetList();
+                    AZStd::string incompleteAssetListString;
+                    AzFramework::StringFunc::Join(incompleteAssetListString, incomplateAssetList.begin(), incomplateAssetList.end(), "\n    ");
+                    AZ_Error("Automation", false, "Script asset tracking timed out waiting for:\n    %s \n Continuing...", incompleteAssetListString.c_str());
                     m_waitForAssetTracker = false;
                 }
                 else if (m_assetStatusTracker.DidExpectedAssetsFinish())
                 {
+                    AZ_Printf("Automation", "Asset Tracker finished with %f seconds remaining.", m_assetTrackingTimeout);
                     m_waitForAssetTracker = false;
                 }
                 else
