@@ -33,6 +33,9 @@ namespace AtomSampleViewer
         //! Returns whether all of the expected assets have finished.
         bool DidExpectedAssetsFinish() const;
 
+        //! Return a list of assets that have not completed expected processing.
+        AZStd::vector<AZStd::string> GetIncompleteAssetList() const;
+
         //! Stops tracking asset status updates from the Asset Processor. Clears any asset status information already collected.
         void StopTracking();
 
@@ -44,7 +47,7 @@ namespace AtomSampleViewer
             uint32_t m_started = 0;
             uint32_t m_succeeded = 0;
             uint32_t m_failed = 0;
-            uint32_t m_expecteCount = 0;
+            uint32_t m_expectedCount = 0;
         };
 
         // AssetSystemInfoBus overrides...
