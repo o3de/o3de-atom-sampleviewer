@@ -16,6 +16,7 @@ g_beveledCubeModel = 'materialeditor/viewportmodels/beveledcube.azmodel'
 g_modelWithoutLayerMask = 'objects/bunny.azmodel'
 g_modelWithLayerMask = 'testdata/objects/paintedplane.azmodel'
 g_modelHermanubis = 'materialeditor/viewportmodels/hermanubis.azmodel'
+g_modelTube = 'testdata/objects/tube.azmodel'
 
 function GenerateMaterialScreenshot(imageComparisonThresholdLevel, materialName, options)
     if options == nil then options = {} end
@@ -106,6 +107,7 @@ GenerateMaterialScreenshot('Level F', '009_Opacity_Blended_Alpha_Affects_Specula
 GenerateMaterialScreenshot('Level H', '009_Opacity_Cutout_PackedAlpha_DoubleSided', {lighting="Neutral Urban", model=g_beveledCubeModel})
 GenerateMaterialScreenshot('Level H', '009_Opacity_Cutout_SplitAlpha_DoubleSided', {lighting="Neutral Urban", model=g_beveledCubeModel})
 GenerateMaterialScreenshot('Level G', '009_Opacity_Cutout_SplitAlpha_SingleSided', {lighting="Neutral Urban", model=g_beveledCubeModel})
+GenerateMaterialScreenshot('Level F', '009_Opacity_Opaque_DoubleSided', {lighting="Neutral Urban", model=g_modelTube, cameraDistance=4.0, cameraPitch=45.0})
 GenerateMaterialScreenshot('Level F', '009_Opacity_TintedTransparent', {lighting="Neutral Urban", model=g_beveledCubeModel})
 GenerateMaterialScreenshot('Level H', '010_AmbientOcclusion', {lighting="Palermo Sidewalk (Alt)"})
 GenerateMaterialScreenshot('Level G', '010_SpecularOcclusion', {lighting="Palermo Sidewalk (Alt)"})
