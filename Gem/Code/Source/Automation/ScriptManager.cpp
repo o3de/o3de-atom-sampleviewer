@@ -1383,7 +1383,10 @@ namespace AtomSampleViewer
             s_instance->AZ::Debug::ProfilerNotificationBus::Handler::BusConnect();
             s_instance->PauseScript();
 
-            AZ::Debug::ProfilerRequestBus::Broadcast(&AZ::Debug::ProfilerRequestBus::Events::CaptureFrame, outputFilePath);
+            if (auto profilerSystem = AZ::Debug::ProfilerSystemInterface::Get(); profilerSystem)
+            {
+                profilerSystem->CaptureFrame(outputFilePath);
+            }
         };
 
         s_instance->m_scriptOperations.push(AZStd::move(operation));

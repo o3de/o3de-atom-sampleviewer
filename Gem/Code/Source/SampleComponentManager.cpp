@@ -929,8 +929,10 @@ namespace AtomSampleViewer
                 if (ImGui::MenuItem(CpuProfilerToolName))
                 {
                     m_showCpuProfiler = !m_showCpuProfiler;
-                    AZ::Debug::ProfilerRequestBus::Broadcast(
-                        &AZ::Debug::ProfilerRequestBus::Events::SetActive, m_showCpuProfiler);
+                    if (auto profilerSystem = AZ::Debug::ProfilerSystemInterface::Get(); profilerSystem)
+                    {
+                        profilerSystem->SetActive(m_showCpuProfiler);
+                    }
 
                     Utils::ReportScriptableAction("ShowTool('%s', %s)", CpuProfilerToolName, m_showCpuProfiler ? "true" : "false");
                 }
