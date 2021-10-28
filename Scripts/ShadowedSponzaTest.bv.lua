@@ -21,8 +21,6 @@ function SetDirectionalFiltering()
     SetImguiValue('Intensity##directional', 5.0)
     SetImguiValue('Filter Method##Directional', 'ESM+PCF')
     IdleFrames(1)
-    SetImguiValue('Width##Directional', 0.053)
-    SetImguiValue('Prediction # ##Directional', 16)
     SetImguiValue('Filtering # ##Directional', 64)
 end
 
@@ -43,8 +41,6 @@ end
 function SetSpotFiltering()
     SetImguiValue('Filter Method##Spot', 'ESM+PCF')
     IdleFrames(1)
-    SetImguiValue('Width##Spot', 0.144)
-    SetImguiValue('Predictiona # ##Spot', 16)
     SetImguiValue('Filtering # ##Spot', 64)
 end
 
