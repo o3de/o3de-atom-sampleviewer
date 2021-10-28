@@ -19,7 +19,7 @@ namespace AtomSampleViewer
 
         const auto errorHandler = [path, traceLevel, &imageComparisonResult](const char* errorMessage)
         {
-            ReportScriptIssue(AZStd::string::format("Failed to load PNG file '%s' with error '%s'\n", path.c_str(), errorMessage),
+            ReportScriptIssue(AZStd::string::format("Failed to load PNG file '%s' with error '%s'", path.c_str(), errorMessage),
             traceLevel);
 
             imageComparisonResult.m_resultCode = ImageComparisonResult::ResultCode::FileNotLoaded;
