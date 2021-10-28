@@ -98,8 +98,9 @@ namespace AtomSampleViewer
         m_dynamicDraw2ForPass = RPI::DynamicDrawInterface::Get()->CreateDynamicDrawContext();
 
         // Get auxGeom pass from the current render pipeline
-        const char* pipelineName = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene()->GetDefaultRenderPipeline()->GetId().GetCStr();
-        AZ::RPI::PassFilter passFilter = AZ::RPI::PassFilter::CreateWithPassHierarchy({ pipelineName, "AuxGeomPass" });
+        AZ::RPI::PassFilter passFilter = AZ::RPI::PassFilter::CreateWithPassName(
+            Name("AuxGeomPass"),
+            AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get());
         RPI::RasterPass* auxGeomPass = azrtti_cast<RPI::RasterPass*>(AZ::RPI::PassSystemInterface::Get()->FindFirstPass(passFilter));
         AZ_Assert(auxGeomPass, "AuxGeomPass should be a RasterPass or a derived RasterPass");
         
