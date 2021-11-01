@@ -1,0 +1,104 @@
+/*
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
+ * SPDX-License-Identifier: Apache-2.0 OR MIT
+ *
+ */
+
+#pragma once
+
+#include <Atom/Bootstrap/DefaultWindowBus.h>
+#include <Atom/Feature/ImGui/ImGuiUtils.h>
+
+#include <AzCore/Component/Component.h>
+#include <AzCore/Component/EntityBus.h>
+#include <AzCore/Component/TickBus.h>
+
+#include <AzFramework/Entity/EntityContextBus.h>
+
+#include <Utils/ImGuiSidebar.h>
+#include <Utils/Utils.h>
+#include <Utils/FileIOErrorHandler.h>
+
+namespace AtomSampleViewer
+{
+    // This example component updates (upon user, or script input) the shader that is being used
+    // to render a FullscreenTrianglePass, with the purpose on validating that the
+    // shader reload notification events work properly.
+    class ShaderReloadSoakTestComponent final
+        : public AZ::Component
+        , public AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler
+        , public AZ::TickBus::Handler
+    {
+    public:
+        AZ_COMPONENT(ShaderReloadSoakTestComponent, "{47540623-2BB6-4A56-A013-760D5CDAD748}");
+
+        static void Reflect(AZ::ReflectContext* context);
+
+        ShaderReloadSoakTestComponent();
+        ~ShaderReloadSoakTestComponent() override = default;
+
+        void Activate() override;
+        void Deactivate() override;
+
+    private:
+
+        static constexpr char LogName[] = "ShaderReloadSoakTest";
+        static constexpr char RedShaderFile[] = "Fullscreen_RED.azsl";
+        static constexpr char GreenShaderFile[] = "Fullscreen_GREEN.azsl";
+        static constexpr char BlueShaderFile[] = "Fullscreen_BLUE.azsl";
+        static constexpr uint32_t RED_COLOR =   0xFF0000FF;
+        static constexpr uint32_t GREEN_COLOR = 0xFF00FF00;
+        static constexpr uint32_t BLUE_COLOR =  0xFFFF0000;
+
+        void InitTestDataFolders();
+        void CopyTestFile(const char * originalName, const char * newName, bool replaceIfExists = true);
+        void DeleteTestFile(const char* tempSourceFile);
+
+        // AZ::Component overrides...
+        bool ReadInConfig(const AZ::ComponentConfig* baseConfig) override;
+
+        // DefaultWindowNotificationBus::Handler overrides...
+        void DefaultWindowCreated() override;
+        
+        // AZ::TickBus::Handler overrides...
+        void OnTick(float deltaTime, AZ::ScriptTimePoint timePoint) override;
+
+        void ActivateFullscreenTrianglePipeline();
+        void DeactivateFullscreenTrianglePipeline();
+
+        // draw debug menu
+        void DrawSidebar();
+
+        // Starts the process of capturing the render output attachment.
+        // Returns true if the request was successfully enqueued.
+        bool StartRenderOutputCapture();
+
+        // Reads an 0xAABBGGRR pixel from the input buffer.
+        uint32_t ReadPixel(const uint8_t* rawRGBAPixelData, uint32_t width, uint32_t height, uint32_t x, uint32_t y) const;
+
+        // Validates if the given color is the expected color, and prepares for another
+        // render output capture and validation.
+        void ValidatePixelColor(uint32_t color);
+
+        FileIOErrorHandler m_fileIoErrorHandler;
+
+        AZStd::string m_testDataFolder;   //< Stores several txt files with contents to be copied over various source asset files.
+        AZStd::string m_tempSourceFolder; //< Folder for temp source asset files. These are what the sample edits and reloads.
+        bool m_isCapturingRenderOutput = false;
+        uint32_t m_expectedPixelColor;
+        AZStd::string m_capturedColorAsString;
+
+
+        // for checkerboard render pipeline
+        AZ::RPI::RenderPipelinePtr m_cbPipeline;
+        AZ::RPI::RenderPipelinePtr m_originalPipeline;
+        AZStd::shared_ptr<AZ::RPI::WindowContext> m_windowContext;
+        AZStd::vector<AZStd::string> m_passHierarchy; // Used to capture the CopyToSwapChain pass output.
+
+        // debug menu
+        ImGuiSidebar m_imguiSidebar;
+        AZ::Render::ImGuiActiveContextScope m_imguiScope;
+    };
+} // namespace AtomSampleViewer

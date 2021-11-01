@@ -75,6 +75,14 @@
             {
                 "Name": "SelectorPassTemplate",
                 "Path": "Passes/SelectorPass.pass"
+            },
+            {
+                "Name": "FullscreenPassTemplate",
+                "Path": "Passes/Fullscreen.pass"
+            },
+            {
+                "Name": "FullscreenPipeline",
+                "Path": "Passes/FullscreenPipeline.pass"
             }
         ]
     }
