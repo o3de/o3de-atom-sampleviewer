@@ -14,6 +14,7 @@
 
 #include <Atom/RPI.Public/View.h>
 #include <Atom/RPI.Public/Image/StreamingImage.h>
+#include <Atom/RPI.Public/Shader/ShaderSystemInterface.h>
 
 #include <Atom/RPI.Reflect/Asset/AssetUtils.h>
 #include <Atom/RPI.Reflect/Model/ModelAsset.h>
@@ -52,6 +53,10 @@ namespace AtomSampleViewer
 
     void SsaoExampleComponent::Activate()
     {
+        // We have a non-msaa pipeline, adjust the shader system supervariant settings accordingly
+        AZ::Name noMsaaSupervariant = AZ::Name(AZ::RPI::NoMsaaSupervariantName);
+        AZ::RPI::ShaderSystemInterface::Get()->SetSupervariantName(noMsaaSupervariant);
+
         RHI::Ptr<RHI::Device> device = RHI::RHISystemInterface::Get()->GetDevice();
         m_rayTracingEnabled = device->GetFeatures().m_rayTracing;
 
@@ -75,6 +80,10 @@ namespace AtomSampleViewer
         DeactivateSsaoPipeline();
         AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusDisconnect();
         AZ::TickBus::Handler::BusDisconnect();
+
+        // Reset the number of MSAA samples and the RPI scene
+        SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequests::ResetNumMSAASamples);
+        SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequests::ClearRPIScene);
     }
 
     // --- World Model ---
