@@ -61,8 +61,6 @@ namespace AtomSampleViewer
     private:
         static const char* s_trianglesConstantBufferExampleName;
 
-        static const uint32_t s_numberOfTrianglesSingleCB;
-        static const uint32_t s_numberOfTrianglesMultipleCB;
         static const uint32_t s_numberOfTrianglesTotal;
 
         // AZ::Component
@@ -75,10 +73,9 @@ namespace AtomSampleViewer
         // RHISystemNotificationBus::Handler
         void OnFramePrepare(AZ::RHI::FrameGraphBuilder& frameGraphBuilder) override;
 
-        // Updates a single buffer with multiple triangle instance data
-        void UploadDataToSingleConstantBuffer(InstanceInfo* data, uint32_t elementSize, uint32_t elementCount);
-        // Updates multiple buffers, each with a single triangle instance data
-        void UploadDataToMultipleConstantBuffers(InstanceInfo* data, uint32_t elementSize);
+        // Updates a single constant buffer with multiple triangle instances
+        void UploadDataToConstantBuffer(InstanceInfo* data, uint32_t elementSize, uint32_t elementCount);
+        void CreateConstantBufferView();
         
         AZ::RHI::DrawItem m_drawItem;
 
@@ -100,16 +97,11 @@ namespace AtomSampleViewer
         AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
         AZ::RHI::IndexBufferView m_indexBufferView;
 
-        // Pool where both buffers are allocated from
         AZ::RHI::Ptr<AZ::RHI::BufferPool> m_constantBufferPool;
 
-        // Pool with single Buffer
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_constantBuffer;
-        // Pool with multiple Buffers
-        AZStd::vector<AZ::RHI::Ptr<AZ::RHI::Buffer>> m_constantBufferArray;
 
-        // Buffer views that hold both from 
-        AZStd::vector<AZ::RHI::Ptr<AZ::RHI::BufferView>> m_constantBufferViewArray;
+        AZ::RHI::Ptr<AZ::RHI::BufferView> m_constantBufferView;
 
         // Cached Constant Buffer alignment queued from the device
         uint32_t m_constantBufferAlighment = 0u;
