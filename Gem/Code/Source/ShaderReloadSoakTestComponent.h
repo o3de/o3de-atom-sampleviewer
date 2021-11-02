@@ -48,6 +48,8 @@ namespace AtomSampleViewer
         static constexpr char RedShaderFile[] = "Fullscreen_RED.azsl";
         static constexpr char GreenShaderFile[] = "Fullscreen_GREEN.azsl";
         static constexpr char BlueShaderFile[] = "Fullscreen_BLUE.azsl";
+        // The following colors are specified in the format R8G8B8A8_UNORM (DX12).
+        // Vulkan produces pixels in the format B8G8R8A8_UNORM
         static constexpr uint32_t RED_COLOR =   0xFF0000FF;
         static constexpr uint32_t GREEN_COLOR = 0xFF00FF00;
         static constexpr uint32_t BLUE_COLOR =  0xFFFF0000;
@@ -76,7 +78,7 @@ namespace AtomSampleViewer
         bool StartRenderOutputCapture();
 
         // Reads an 0xAABBGGRR pixel from the input buffer.
-        uint32_t ReadPixel(const uint8_t* rawRGBAPixelData, uint32_t width, uint32_t height, uint32_t x, uint32_t y) const;
+        uint32_t ReadPixel(const uint8_t* rawRGBAPixelData, const AZ::RHI::ImageDescriptor& imageDescriptor, uint32_t x, uint32_t y) const;
 
         // Validates if the given color is the expected color, and prepares for another
         // render output capture and validation.

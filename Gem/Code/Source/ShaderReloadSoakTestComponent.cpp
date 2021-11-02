@@ -266,7 +266,7 @@ namespace AtomSampleViewer
             {
                 const auto width = result.m_imageDescriptor.m_size.m_width;
                 const auto height = result.m_imageDescriptor.m_size.m_height;
-                uint32_t pixelColor = ReadPixel(result.m_dataBuffer.get()->data(), width, height, width/2, height/2);
+                uint32_t pixelColor = ReadPixel(result.m_dataBuffer.get()->data(), result.m_imageDescriptor, width/2, height/2);
                 ValidatePixelColor(pixelColor);
             }
             else
@@ -278,19 +278,38 @@ namespace AtomSampleViewer
         };
 
         m_capturedColorAsString.clear();
-        m_cbPipeline->AddToRenderTickOnce();
         bool startedCapture = false;
         AZ::Render::FrameCaptureRequestBus::BroadcastResult(
             startedCapture, &AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachmentWithCallback, m_passHierarchy,
             AZStd::string("Output"), captureCallback, AZ::RPI::PassAttachmentReadbackOption::Output);
+        AZ_Error(LogName, startedCapture, "Failed to start CapturePassAttachmentWithCallback");
         return startedCapture;
     }
 
-    uint32_t ShaderReloadSoakTestComponent::ReadPixel(const uint8_t* rawRGBAPixelData, uint32_t width, uint32_t height, uint32_t x, uint32_t y) const
+    uint32_t ShaderReloadSoakTestComponent::ReadPixel(const uint8_t* rawRGBAPixelData, const AZ::RHI::ImageDescriptor& imageDescriptor, uint32_t x, uint32_t y) const
     {
+        const auto width = imageDescriptor.m_size.m_width;
+        const auto height = imageDescriptor.m_size.m_height;
         AZ_Assert((x < width) && (y < height), "Invalid read pixel location (x, y)=(%u, %u) for width=%u, height=%u", x, y, width, height);
         auto tmp = reinterpret_cast<const uint32_t *>(rawRGBAPixelData);
-        return tmp[ (width * y) + x];
+        const uint32_t pixelColor = tmp[ (width * y) + x];
+        if (imageDescriptor.m_format == AZ::RHI::Format::R8G8B8A8_UNORM)
+        {
+            return pixelColor;
+        }
+        else if (imageDescriptor.m_format == AZ::RHI::Format::B8G8R8A8_UNORM)
+        {
+            auto getColorComponent = +[](uint32_t color, int bitPosition) {
+                return (color >> bitPosition) & 0xFF;
+            };
+            const uint32_t blueValue =   getColorComponent(pixelColor, 0);
+            const uint32_t greenValue = getColorComponent(pixelColor, 8);
+            const uint32_t redValue =  getColorComponent(pixelColor, 16);
+            const uint32_t alphaValue =  getColorComponent(pixelColor, 24);
+            return (alphaValue << 24) | (blueValue << 16) | (greenValue << 8) | redValue;
+        }
+        AZ_Error(LogName, false, "Invalid pixel format=%u", aznumeric_cast<uint32_t>(imageDescriptor.m_format));
+        return pixelColor;
     }
 
     void ShaderReloadSoakTestComponent::ValidatePixelColor(uint32_t color)
@@ -299,6 +318,5 @@ namespace AtomSampleViewer
         AZ_Error(LogName, m_expectedPixelColor == color, "Invalid pixel color. Got 0x%08X, was expecting 0x%08X", color, m_expectedPixelColor);
         m_capturedColorAsString = AZStd::string::format("0x%08X", color);
         m_isCapturingRenderOutput = false;
-        m_cbPipeline->AddToRenderTick();
     }
 }
