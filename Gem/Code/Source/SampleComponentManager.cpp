@@ -753,14 +753,19 @@ namespace AtomSampleViewer
         {
             ShowPassTreeWindow();
         }
+
         if (m_showFrameGraphVisualizer)
         {
             ShowFrameGraphVisualizerWindow();
         }
+
         if (m_showCullingDebugWindow)
         {
-            AZ::RPI::Scene* defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get();
-            AZ::Render::ImGuiDrawCullingDebug(m_showCullingDebugWindow, defaultScene);
+            AZ::RPI::Scene* rpiScene = AZ::RPI::RPISystemInterface::Get()->GetSceneByName(AZ::Name("RPI"));
+            if (rpiScene)
+            {
+                AZ::Render::ImGuiDrawCullingDebug(m_showCullingDebugWindow, rpiScene);
+            }
         }
 
         if (m_showCpuProfiler)
@@ -1416,6 +1421,7 @@ namespace AtomSampleViewer
     {
         // Create and register the rhi scene with only feature processors required for AtomShimRenderer (only for AtomSampleViewerLauncher)
         RPI::SceneDescriptor sceneDesc;
+        sceneDesc.m_nameId = AZ::Name("RHI");
         sceneDesc.m_featureProcessorNames.push_back("AuxGeomFeatureProcessor");
         m_rhiScene = RPI::Scene::CreateScene(sceneDesc);
         m_rhiScene->Activate();
@@ -1463,6 +1469,7 @@ namespace AtomSampleViewer
     {
         // Create and register a scene with all available feature processors
         RPI::SceneDescriptor sceneDesc;
+        sceneDesc.m_nameId = AZ::Name("RPI");
         m_rpiScene = RPI::Scene::CreateScene(sceneDesc);
         m_rpiScene->EnableAllFeatureProcessors();
 

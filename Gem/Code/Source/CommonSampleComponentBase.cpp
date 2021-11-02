@@ -28,6 +28,7 @@ namespace AtomSampleViewer
         {
             m_cameraEntityId = config->m_cameraEntityId;
             m_entityContextId = config->m_entityContextId;
+            m_scene = Scene::GetSceneForEntityContextId(m_entityContextId);
             return true;
         }
         else

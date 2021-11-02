@@ -143,8 +143,7 @@ namespace AtomSampleViewer
             AzFramework::StringFunc::Path::Join(engineRoot, "Screenshots", m_screenshotFolder, true, false);
         }
 
-        auto defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        m_directionalLightFeatureProcessor = defaultScene->GetFeatureProcessor<AZ::Render::DirectionalLightFeatureProcessorInterface>();
+        m_directionalLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DirectionalLightFeatureProcessorInterface>();
 
         const auto handle = m_directionalLightFeatureProcessor->AcquireLight();
 
@@ -174,7 +173,7 @@ namespace AtomSampleViewer
         m_skyboxFeatureProcessor->SetSunPosition(azimuth, altitude);
 
         // Create IBL
-        m_defaultIbl.Init(AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get());
+        m_defaultIbl.Init(m_scene);
         m_defaultIbl.SetExposure(-3.0f);
     }
 
