@@ -150,11 +150,10 @@ namespace AtomSampleViewer
     {
         CreateSsaoPipeline();
 
-        AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        m_originalPipeline = defaultScene->GetDefaultRenderPipeline();
-        defaultScene->AddRenderPipeline(m_ssaoPipeline);
+        m_originalPipeline = m_scene->GetDefaultRenderPipeline();
+        m_scene->AddRenderPipeline(m_ssaoPipeline);
         m_ssaoPipeline->SetDefaultView(m_originalPipeline->GetDefaultView());
-        defaultScene->RemoveRenderPipeline(m_originalPipeline->GetId());
+        m_scene->RemoveRenderPipeline(m_originalPipeline->GetId());
 
         // Create an ImGuiActiveContextScope to ensure the ImGui context on the new pipeline's ImGui pass is activated.
         m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass({ m_ssaoPipeline->GetId().GetCStr(), "ImGuiPass" });
@@ -164,9 +163,8 @@ namespace AtomSampleViewer
     {
         m_imguiScope = {}; // restores previous ImGui context.
 
-        AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        defaultScene->AddRenderPipeline(m_originalPipeline);
-        defaultScene->RemoveRenderPipeline(m_ssaoPipeline->GetId());
+        m_scene->AddRenderPipeline(m_originalPipeline);
+        m_scene->RemoveRenderPipeline(m_ssaoPipeline->GetId());
         DestroySsaoPipeline();
     }
 
@@ -184,8 +182,7 @@ namespace AtomSampleViewer
             &ComponentDescriptorBus::Events::CreateComponent);
         m_ssaoEntity->AddComponent(transformComponent);
 
-        RPI::Scene* scene = RPI::RPISystemInterface::Get()->GetDefaultScene().get();
-        m_postProcessFeatureProcessor = scene->GetFeatureProcessor<Render::PostProcessFeatureProcessorInterface>();
+        m_postProcessFeatureProcessor = m_scene->GetFeatureProcessor<Render::PostProcessFeatureProcessorInterface>();
 
         auto* postProcessSettings = m_postProcessFeatureProcessor->GetOrCreateSettingsInterface(m_ssaoEntity->GetId());
         m_ssaoSettings = postProcessSettings->GetOrCreateSsaoSettingsInterface();

@@ -64,8 +64,6 @@ namespace AtomSampleViewer
 
     void MultiRenderPipelineExampleComponent::Activate()
     {
-        m_scene = RPI::RPISystemInterface::Get()->GetDefaultScene();
-
         // Save references of different feature processors
         m_diskLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DiskLightFeatureProcessorInterface>();
         m_directionalLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
@@ -280,7 +278,7 @@ namespace AtomSampleViewer
     
     void MultiRenderPipelineExampleComponent::AddIBL()
     {
-        m_ibl.Init(m_scene.get());
+        m_ibl.Init(m_scene);
     }
 
     void MultiRenderPipelineExampleComponent::RemoveIBL()

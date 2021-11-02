@@ -115,8 +115,7 @@ namespace AtomSampleViewer
             shaderVariant.ConfigurePipelineState(pipelineStateDescriptor);
             m_drawListTag = shader->GetDrawListTag();
 
-            RPI::Scene* scene = RPI::RPISystemInterface::Get()->GetDefaultScene().get();
-            scene->ConfigurePipelineState(m_drawListTag, pipelineStateDescriptor);
+            m_scene->ConfigurePipelineState(m_drawListTag, pipelineStateDescriptor);
             
             RHI::InputStreamLayoutBuilder layoutBuilder;
             layoutBuilder.AddBuffer()->Channel("POSITION", RHI::Format::R32G32B32_FLOAT);
@@ -190,9 +189,8 @@ namespace AtomSampleViewer
 
     void RootConstantsExampleComponent::SetupScene()
     {
-        RPI::Scene* scene = RPI::RPISystemInterface::Get()->GetDefaultScene().get();
         Render::DirectionalLightFeatureProcessorInterface* const featureProcessor =
-            scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
+            m_scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
         m_directionalLightFeatureProcessor = featureProcessor;
 
         // Light creation
@@ -320,7 +318,7 @@ namespace AtomSampleViewer
                 drawPacketBuilder.AddDrawItem(drawRequest);
 
                 AZStd::unique_ptr<const RHI::DrawPacket> drawPacket(drawPacketBuilder.End());
-                m_dynamicDraw->AddDrawPacket(RPI::RPISystemInterface::Get()->GetDefaultScene().get(), AZStd::move(drawPacket));
+                m_dynamicDraw->AddDrawPacket(m_scene, AZStd::move(drawPacket));
             }
         }
     }

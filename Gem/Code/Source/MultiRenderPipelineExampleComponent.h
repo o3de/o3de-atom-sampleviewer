@@ -132,9 +132,6 @@ namespace AtomSampleViewer
 
         // camera for the second render pipeline
         AZ::Entity* m_secondViewCameraEntity = nullptr;
-
-        // Reference to current scene
-        AZ::RPI::ScenePtr m_scene;
     };
 
 } // namespace AtomSampleViewer

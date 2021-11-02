@@ -80,9 +80,8 @@ namespace AtomSampleViewer
         m_diskLightsBasePosition[2] = -0.03f;
         m_diskLightsPositionScatteringRatio = 0.27f;
 
-        RPI::Scene* scene = RPI::RPISystemInterface::Get()->GetDefaultScene().get();
-        m_directionalLightFeatureProcessor = scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
-        m_diskLightFeatureProcessor = scene->GetFeatureProcessor<Render::DiskLightFeatureProcessorInterface>();
+        m_directionalLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
+        m_diskLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DiskLightFeatureProcessorInterface>();
 
         SetupScene();
 

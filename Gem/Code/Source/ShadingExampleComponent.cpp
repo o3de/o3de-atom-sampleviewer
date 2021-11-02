@@ -60,7 +60,7 @@ namespace AtomSampleViewer
         UseArcBallCameraController();
 
         // Add an Image based light.
-        m_defaultIbl.Init(AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get());
+        m_defaultIbl.Init(m_scene);
 
         // Load default IBL texture asset for LuxCore
         // We should be able to extract this information from SkyBox in the future
