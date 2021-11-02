@@ -164,7 +164,7 @@ namespace AtomSampleViewer
         AZ::Debug::ArcBallControllerRequestBus::Event(GetCameraEntityId(), &AZ::Debug::ArcBallControllerRequestBus::Events::SetPitch, DefaultCameraPitch);
 
         // Lighting
-        m_defaultIbl.Init(AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get());
+        m_defaultIbl.Init(m_scene);
         // Model
         m_modelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>(MeshPath, AZ::RPI::AssetUtils::TraceLevel::Assert);
         // Material

@@ -103,8 +103,8 @@ namespace AtomSampleViewer
 
     void SkinnedMeshContainer::DrawBones()
     {
-        auto defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        if (auto auxGeom = AZ::RPI::AuxGeomFeatureProcessorInterface::GetDrawQueueForScene(defaultScene))
+        auto rpiScene = AZ::RPI::RPISystemInterface::Get()->GetSceneByName(AZ::Name("RPI"));
+        if (auto auxGeom = AZ::RPI::AuxGeomFeatureProcessorInterface::GetDrawQueueForScene(rpiScene))
         {
             uint32_t skinnedMeshContainerSize = aznumeric_cast<uint32_t>(m_skinnedMeshes.size());
             for (uint32_t i = 0; i < skinnedMeshContainerSize; ++i)

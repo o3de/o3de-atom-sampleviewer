@@ -128,8 +128,7 @@ namespace AtomSampleViewer
 
     void AuxGeomExampleComponent::DrawSampleOfAllAuxGeom() const
     {
-        auto defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        if (auto auxGeom = AZ::RPI::AuxGeomFeatureProcessorInterface::GetDrawQueueForScene(defaultScene))
+        if (auto auxGeom = AZ::RPI::AuxGeomFeatureProcessorInterface::GetDrawQueueForScene(m_scene))
         {
             if (m_drawBackgroundBox)
             {

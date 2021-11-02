@@ -104,7 +104,7 @@ namespace AtomSampleViewer
         PreloadAssets(assetList);
 
         // initialize and then reset IBL, which will disable it by binding the default cubemaps
-        m_defaultIbl.Init(AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get());
+        m_defaultIbl.Init(m_scene);
         m_defaultIbl.Reset();
     }
 
@@ -129,10 +129,9 @@ namespace AtomSampleViewer
 
         UseArcBallCameraController();
 
-        RPI::Scene* scene = RPI::RPISystemInterface::Get()->GetDefaultScene().get();
-        m_directionalLightFeatureProcessor = scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
-        m_diskLightFeatureProcessor = scene->GetFeatureProcessor<Render::DiskLightFeatureProcessorInterface>();
-        m_pointLightFeatureProcessor = scene->GetFeatureProcessor<Render::PointLightFeatureProcessorInterface>();
+        m_directionalLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
+        m_diskLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DiskLightFeatureProcessorInterface>();
+        m_pointLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::PointLightFeatureProcessorInterface>();
 
         CreateMeshes();
         CreateDirectionalLight();
