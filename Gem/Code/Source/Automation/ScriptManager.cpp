@@ -1295,10 +1295,10 @@ namespace AtomSampleViewer
         ResumeScript();
     }
 
-    void ScriptManager::OnCaptureCpuProfilingStatisticsFinished([[maybe_unused]] bool result, [[maybe_unused]] const AZStd::string& info)
+    void ScriptManager::OnCaptureFinished([[maybe_unused]] bool result, [[maybe_unused]] const AZStd::string& info)
     {
         m_isCapturePending = false;
-        Profiler::ProfilerNotificationBus::Handler::BusDisconnect();
+        AZ::Debug::ProfilerNotificationBus::Handler::BusDisconnect();
         ResumeScript();
     }
 
@@ -1384,10 +1384,13 @@ namespace AtomSampleViewer
         auto operation = [outputFilePath]()
         {
             s_instance->m_isCapturePending = true;
-            s_instance->Profiler::ProfilerNotificationBus::Handler::BusConnect();
+            s_instance->AZ::Debug::ProfilerNotificationBus::Handler::BusConnect();
             s_instance->PauseScript();
 
-            Profiler::ProfilerRequestBus::Broadcast(&Profiler::ProfilerRequestBus::Events::CaptureCpuProfilingStatistics, outputFilePath);
+            if (auto profilerSystem = AZ::Debug::ProfilerSystemInterface::Get(); profilerSystem)
+            {
+                profilerSystem->CaptureFrame(outputFilePath);
+            }
         };
 
         s_instance->m_scriptOperations.push(AZStd::move(operation));

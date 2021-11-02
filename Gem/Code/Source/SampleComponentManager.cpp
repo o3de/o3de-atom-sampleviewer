@@ -104,6 +104,7 @@
 
 #include <AzCore/Component/Entity.h>
 #include <AzCore/Debug/Profiler.h>
+#include <AzCore/Debug/ProfilerBus.h>
 #include <AzCore/Serialization/SerializeContext.h>
 #include <AzCore/std/smart_ptr/make_shared.h>
 #include <AzCore/std/algorithm.h>
@@ -120,7 +121,6 @@
 
 #include <Utils/Utils.h>
 
-#include <Profiler/ProfilerBus.h>
 #include <Profiler/ProfilerImGuiBus.h>
 
 #include "ExampleComponentBus.h"
@@ -934,9 +934,9 @@ namespace AtomSampleViewer
                 if (ImGui::MenuItem(CpuProfilerToolName))
                 {
                     m_showCpuProfiler = !m_showCpuProfiler;
-                    if (auto profiler = Profiler::ProfilerInterface::Get(); profiler)
+                    if (auto profilerSystem = AZ::Debug::ProfilerSystemInterface::Get(); profilerSystem)
                     {
-                        profiler->SetProfilerEnabled(m_showCpuProfiler);
+                        profilerSystem->SetActive(m_showCpuProfiler);
                     }
 
                     Utils::ReportScriptableAction("ShowTool('%s', %s)", CpuProfilerToolName, m_showCpuProfiler ? "true" : "false");
