@@ -1376,14 +1376,23 @@ namespace AtomSampleViewer
 
         const SampleEntry& sampleEntry = m_availableSamples[m_selectedSampleIndex];
 
+        // Create scene and render pipeline before create sample component
+        if (sampleEntry.m_pipelineType == SamplePipelineType::RHI)
+        {
+            SwitchSceneForRHISample();
+        }
+        else if (sampleEntry.m_pipelineType == SamplePipelineType::RPI)
+        {
+            SwitchSceneForRPISample();
+        }
+
         SampleComponentConfig config(m_windowContext, m_cameraEntity->GetId(), m_entityContextId);
         m_activeSample = m_exampleEntity->CreateComponent(sampleEntry.m_sampleUuid);
         m_activeSample->SetConfiguration(config);
 
+        // special setup for RHI samples
         if (sampleEntry.m_pipelineType == SamplePipelineType::RHI)
         {
-            SwitchSceneForRHISample();
-
             BasicRHIComponent* rhiSampleComponent = static_cast<BasicRHIComponent*>(m_activeSample);
             if (rhiSampleComponent->IsSupportedRHISamplePipeline())
             {
@@ -1393,10 +1402,6 @@ namespace AtomSampleViewer
             {
                 m_rhiSamplePass->SetRHISample(nullptr);
             }
-        }
-        else if (sampleEntry.m_pipelineType == SamplePipelineType::RPI)
-        {
-            SwitchSceneForRPISample();
         }
 
         m_exampleEntity->Activate();

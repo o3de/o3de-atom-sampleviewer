@@ -23,12 +23,13 @@ namespace AtomSampleViewer
 
     bool CommonSampleComponentBase::ReadInConfig(const ComponentConfig* baseConfig)
     {
+        m_scene = RPI::RPISystemInterface::Get()->GetSceneByName(AZ::Name("RPI"));
+
         auto config = azrtti_cast<const SampleComponentConfig*>(baseConfig);
         if (config && config->IsValid())
         {
             m_cameraEntityId = config->m_cameraEntityId;
             m_entityContextId = config->m_entityContextId;
-            m_scene = Scene::GetSceneForEntityContextId(m_entityContextId);
             return true;
         }
         else
