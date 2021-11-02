@@ -43,7 +43,7 @@ namespace AtomSampleViewer
         Debug::CameraControllerRequestBus::Event(GetCameraEntityId(), &Debug::CameraControllerRequestBus::Events::Enable,
             azrtti_typeid<Debug::NoClipControllerComponent>());
 
-        m_defaultIbl.Init(RPI::RPISystemInterface::Get()->GetDefaultScene().get());
+        m_defaultIbl.Init(m_scene);
         BuildLattice();
     }
 

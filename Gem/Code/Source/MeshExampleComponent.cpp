@@ -100,11 +100,10 @@ namespace AtomSampleViewer
 
     void MeshExampleComponent::ActivateLowEndPipeline()
     {
-        AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        m_originalPipeline = defaultScene->GetDefaultRenderPipeline();
-        defaultScene->AddRenderPipeline(m_lowEndPipeline);
+        m_originalPipeline = m_scene->GetDefaultRenderPipeline();
+        m_scene->AddRenderPipeline(m_lowEndPipeline);
         m_lowEndPipeline->SetDefaultView(m_originalPipeline->GetDefaultView());
-        defaultScene->RemoveRenderPipeline(m_originalPipeline->GetId());
+        m_scene->RemoveRenderPipeline(m_originalPipeline->GetId());
 
         m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass({ m_lowEndPipeline->GetId().GetCStr(), "ImGuiPass" });
     }
@@ -113,9 +112,8 @@ namespace AtomSampleViewer
     {
         m_imguiScope = {}; // restores previous ImGui context.
 
-        AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        defaultScene->AddRenderPipeline(m_originalPipeline);
-        defaultScene->RemoveRenderPipeline(m_lowEndPipeline->GetId());
+        m_scene->AddRenderPipeline(m_originalPipeline);
+        m_scene->RemoveRenderPipeline(m_lowEndPipeline->GetId());
     }
 
     void MeshExampleComponent::Activate()

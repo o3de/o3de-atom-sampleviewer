@@ -101,15 +101,14 @@ namespace AtomSampleViewer
 
     void DecalExampleComponent::AddImageBasedLight()
     {
-        m_defaultIbl.Init(AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get());
+        m_defaultIbl.Init(m_scene);
     }
 
     void DecalExampleComponent::AcquireDirectionalLightFeatureProcessor()
     {
         using namespace AZ;
-		
-        RPI::Scene* scene = RPI::RPISystemInterface::Get()->GetDefaultScene().get();
-        m_directionalLightFeatureProcessor = scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
+
+        m_directionalLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
     }
 
     void DecalExampleComponent::CreateDirectionalLight()
@@ -176,8 +175,7 @@ namespace AtomSampleViewer
 
     void DecalExampleComponent::CreateDecalContainer()
     {
-        const AZ::RPI::Scene* scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get();
-        const auto decalFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DecalFeatureProcessorInterface>();
+        const auto decalFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DecalFeatureProcessorInterface>();
         m_decalContainer = AZStd::make_unique<DecalContainer>(decalFeatureProcessor, AZ::Vector3(1,0,0));
         m_decalContainerClone = AZStd::make_unique<DecalContainer>(decalFeatureProcessor, AZ::Vector3(-1,0,0));
     }

@@ -63,16 +63,15 @@ namespace AtomSampleViewer
     void AreaLightExampleComponent::Activate()
     {
         // Get Feature processors
-        AZ::RPI::ScenePtr scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        m_meshFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::MeshFeatureProcessorInterface>();
-        m_pointLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::PointLightFeatureProcessorInterface>();
-        m_diskLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DiskLightFeatureProcessorInterface>();
-        m_capsuleLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::CapsuleLightFeatureProcessorInterface>();
-        m_polygonLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::PolygonLightFeatureProcessorInterface>();
-        m_quadLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::QuadLightFeatureProcessorInterface>();
-        m_skyBoxFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::SkyBoxFeatureProcessorInterface>();
+        m_meshFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::MeshFeatureProcessorInterface>();
+        m_pointLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::PointLightFeatureProcessorInterface>();
+        m_diskLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DiskLightFeatureProcessorInterface>();
+        m_capsuleLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::CapsuleLightFeatureProcessorInterface>();
+        m_polygonLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::PolygonLightFeatureProcessorInterface>();
+        m_quadLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::QuadLightFeatureProcessorInterface>();
+        m_skyBoxFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::SkyBoxFeatureProcessorInterface>();
 
-        m_auxGeom = AZ::RPI::AuxGeomFeatureProcessorInterface::GetDrawQueueForScene(scene);
+        m_auxGeom = AZ::RPI::AuxGeomFeatureProcessorInterface::GetDrawQueueForScene(m_scene);
 
         // Create background
         m_skyBoxFeatureProcessor->SetSkyboxMode(AZ::Render::SkyBoxMode::Cubemap);

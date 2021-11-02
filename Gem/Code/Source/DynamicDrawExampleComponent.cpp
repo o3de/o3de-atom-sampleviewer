@@ -80,7 +80,7 @@ namespace AtomSampleViewer
         m_dynamicDraw->InitVertexFormat(vertexChannels);
         m_dynamicDraw->AddDrawStateOptions(RPI::DynamicDrawContext::DrawStateOptions::BlendMode | RPI::DynamicDrawContext::DrawStateOptions::PrimitiveType
             | RPI::DynamicDrawContext::DrawStateOptions::DepthState | RPI::DynamicDrawContext::DrawStateOptions::FaceCullMode);
-        m_dynamicDraw->SetOutputScope(RPI::RPISystemInterface::Get()->GetDefaultScene().get());
+        m_dynamicDraw->SetOutputScope(m_scene);
         m_dynamicDraw->EndInit();
 
         Data::Instance<RPI::ShaderResourceGroup> contextSrg = m_dynamicDraw->GetPerContextSrg();
@@ -98,7 +98,9 @@ namespace AtomSampleViewer
         m_dynamicDraw2ForPass = RPI::DynamicDrawInterface::Get()->CreateDynamicDrawContext();
 
         // Get auxGeom pass from the current render pipeline
-        AZ::RPI::PassFilter passFilter = AZ::RPI::PassFilter::CreateWithPassHierarchy({"MainPipeline", "AuxGeomPass"}); 
+        AZ::RPI::PassFilter passFilter = AZ::RPI::PassFilter::CreateWithPassName(
+            Name("AuxGeomPass"),
+            m_scene);
         RPI::RasterPass* auxGeomPass = azrtti_cast<RPI::RasterPass*>(AZ::RPI::PassSystemInterface::Get()->FindFirstPass(passFilter));
         AZ_Assert(auxGeomPass, "AuxGeomPass should be a RasterPass or a derived RasterPass");
         
