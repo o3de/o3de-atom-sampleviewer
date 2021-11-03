@@ -17,7 +17,7 @@
 
 namespace AtomSampleViewer
 {
-    static const int NumOfMeshs = 10;
+    static const int NumOfMeshes = 10;
     static const float MeshSpacing = 1.0f;
     static const char* MeshPath = "objects/plane.azmodel";
     static const char* MaterialPath = "materials/transparentdoubleside.azmaterial";
@@ -43,10 +43,10 @@ namespace AtomSampleViewer
         Prepare();
 
         // Mesh
-        for (int i = 0; i < NumOfMeshs; ++i)
+        for (int i = 0; i < NumOfMeshes; ++i)
         {
             AZ::Transform transform = AZ::Transform::CreateRotationX(AZ::Constants::HalfPi);
-            float pos = i / (NumOfMeshs - 1.0f); // range [0,1]
+            float pos = i / (NumOfMeshes - 1.0f); // range [0,1]
             pos = pos - 0.5f; // range [-0.5,0.5]
             pos *= MeshSpacing; // spaced out around 0
             transform.SetTranslation(AZ::Vector3(0, pos, 0));
@@ -102,21 +102,30 @@ namespace AtomSampleViewer
 
                 AZ::RPI::MaterialPropertyIndex colorProperty = m_materialAsset->GetMaterialPropertiesLayout()->FindPropertyIndex(AZ::Name(ColorPropertyName));
 
-                bool allMaterialsCompiled = true;
+                uint32_t numMaterialsCompiled = 0;
 
-                for (int i = 0; i < NumOfMeshs; ++i)
+                for (int i = 0; i < NumOfMeshes; ++i)
                 {
                     const AZ::Render::MaterialAssignmentMap& materials = GetMeshFeatureProcessor()->GetMaterialAssignmentMap(m_meshHandles[i]);
                     const AZ::Render::MaterialAssignment defaultMaterial = AZ::Render::GetMaterialAssignmentFromMap(materials, AZ::Render::DefaultMaterialAssignmentId);
                     AZ::Data::Instance<AZ::RPI::Material> material = defaultMaterial.m_materialInstance;
 
                     material->SetPropertyValue(colorProperty, colors[i]);
-                    bool thisMaterialsCompiled = material->Compile();
-                    allMaterialsCompiled = allMaterialsCompiled && thisMaterialsCompiled;
+
+                    if (material->NeedsCompile())
+                    {
+                        bool thisMaterialsCompiled = material->Compile();
+                        numMaterialsCompiled += uint32_t(thisMaterialsCompiled);
+                    }
+                    else
+                    {
+                        // Material already compiled
+                        ++numMaterialsCompiled;
+                    }
                 }
 
                 // If all the materials didn't compile, then try again next tick. This can happen if material properties are set on the same frame as the material initialized.
-                if (allMaterialsCompiled)
+                if (numMaterialsCompiled == NumOfMeshes)
                 {
                     m_waitingForMeshes = false;
                     ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::ResumeScript);
