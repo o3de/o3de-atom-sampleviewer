@@ -9,6 +9,7 @@
 #include <AtomSampleViewerApplication.h>
 #include <SampleComponentManagerBus.h>
 
+#include <AzCore/Component/ComponentApplicationLifecycle.h>
 #include <AzCore/PlatformIncl.h>
 #include <AzCore/Component/ComponentApplication.h>
 #include <AzCore/Debug/Trace.h>
@@ -91,6 +92,11 @@ namespace AtomSampleViewer
         AzFramework::AssetSystemStatusBus::Handler::BusConnect();
 
         AzFramework::Application::StartCommon(systemEntity);
+
+        if (auto settingsRegistry = AZ::SettingsRegistry::Get(); settingsRegistry != nullptr)
+        {
+            AZ::ComponentApplicationLifecycle::SignalEvent(*settingsRegistry, "LegacySystemInterfaceCreated", R"({})");
+        }
 
         ReadTimeoutShutdown();
 
