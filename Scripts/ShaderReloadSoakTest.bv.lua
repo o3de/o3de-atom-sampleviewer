@@ -12,27 +12,36 @@
 -- WARNING: This is a soak test, do not add this test to the fully automated
 -- test suites.
 
-OpenSample('RPI/ShaderReloadSoakTest')
+OpenSample('RPI/ShaderReloadTest')
 ResizeViewport(500, 500)
-IdleSeconds(2)
 
-function TestButton(buttonName, shaderReloadWaitSeconds, pixelCaptureWaitSeconds)
+
+function TestButton(buttonName)
+    AssetTracking_Start()
+    AssetTracking_ExpectAsset("shaders/shaderreloadtest/temp/fullscreen.shader")
     SetImguiValue(buttonName, true)
-    IdleSeconds(shaderReloadWaitSeconds) -- Idle for a bit to give time for the shader to reload
+    AssetTracking_IdleUntilExpectedAssetsFinish(10)
+    -- Even though the shader has been recompiled, it takes a few frames
+    -- for the notification to bubble up and get the screen refreshed.
+    IdleSeconds(0.25)
+
     SetShowImGui(false)
     SetImguiValue('Check color', true)
-    IdleSeconds(pixelCaptureWaitSeconds)
+
+    -- Need a few frames to capture the screen and compare expected color.
+    IdleSeconds(0.25)
+    
     SetShowImGui(true)
 end
-
-local shaderReloadWaitSeconds = 3
-local pixelCaptureWaitSeconds = 1
 
 
 -- Fixme. As a Soak Test, this should run for a long time and exit
 -- on the first failure, or upon user request.
 for i=1,5 do
-    TestButton("Red shader", shaderReloadWaitSeconds, pixelCaptureWaitSeconds)
-    TestButton("Green shader", shaderReloadWaitSeconds, pixelCaptureWaitSeconds)
-    TestButton("Blue shader", shaderReloadWaitSeconds, pixelCaptureWaitSeconds)
+    -- Always start with "Green shader" or "Blue shader" because when RPI/ShaderReloadTest
+    -- activates it starts with the "Red shader", so updating the source asset
+    --- to the exact same content won't trigger asset recompilation.
+    TestButton("Green shader")
+    TestButton("Blue shader")
+    TestButton("Red shader")
 end

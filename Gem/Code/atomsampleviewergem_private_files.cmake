@@ -167,8 +167,8 @@ set(FILES
     Source/TonemappingExampleComponent.h
     Source/TransparencyExampleComponent.cpp
     Source/TransparencyExampleComponent.h
-    Source/ShaderReloadSoakTestComponent.cpp
-    Source/ShaderReloadSoakTestComponent.h
+    Source/ShaderReloadTestComponent.cpp
+    Source/ShaderReloadTestComponent.h
     Source/Utils/FileIOErrorHandler.cpp
     Source/Utils/FileIOErrorHandler.h
     Source/Utils/ImGuiAssetBrowser.cpp

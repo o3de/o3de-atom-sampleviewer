@@ -26,25 +26,25 @@ namespace AtomSampleViewer
     // This example component updates (upon user, or script input) the shader that is being used
     // to render a FullscreenTrianglePass, with the purpose on validating that the
     // shader reload notification events work properly.
-    class ShaderReloadSoakTestComponent final
+    class ShaderReloadTestComponent final
         : public AZ::Component
         , public AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler
         , public AZ::TickBus::Handler
     {
     public:
-        AZ_COMPONENT(ShaderReloadSoakTestComponent, "{47540623-2BB6-4A56-A013-760D5CDAD748}");
+        AZ_COMPONENT(ShaderReloadTestComponent, "{47540623-2BB6-4A56-A013-760D5CDAD748}");
 
         static void Reflect(AZ::ReflectContext* context);
 
-        ShaderReloadSoakTestComponent();
-        ~ShaderReloadSoakTestComponent() override = default;
+        ShaderReloadTestComponent();
+        ~ShaderReloadTestComponent() override = default;
 
         void Activate() override;
         void Deactivate() override;
 
     private:
 
-        static constexpr char LogName[] = "ShaderReloadSoakTest";
+        static constexpr char LogName[] = "ShaderReloadTest";
         static constexpr char RedShaderFile[] = "Fullscreen_RED.azsl";
         static constexpr char GreenShaderFile[] = "Fullscreen_GREEN.azsl";
         static constexpr char BlueShaderFile[] = "Fullscreen_BLUE.azsl";
@@ -86,8 +86,10 @@ namespace AtomSampleViewer
 
         FileIOErrorHandler m_fileIoErrorHandler;
 
-        AZStd::string m_testDataFolder;   //< Stores several txt files with contents to be copied over various source asset files.
-        AZStd::string m_tempSourceFolder; //< Folder for temp source asset files. These are what the sample edits and reloads.
+        AZStd::string m_relativeTestDataFolder;   //< Stores several txt files with contents to be copied over various source asset files.
+        AZStd::string m_relativeTempSourceFolder; //< Folder for temp source asset files. These are what the sample edits and reloads.
+        AZStd::string m_absoluteTestDataFolder;   //< Stores several txt files with contents to be copied over various source asset files.
+        AZStd::string m_absoluteTempSourceFolder; //< Folder for temp source asset files. These are what the sample edits and reloads.
         bool m_isCapturingRenderOutput = false;
         uint32_t m_expectedPixelColor;
         AZStd::string m_capturedColorAsString;

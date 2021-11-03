@@ -20,7 +20,7 @@
                     "PassData": {
                         "$type": "FullscreenTrianglePassData",
                         "ShaderAsset": {
-                            "FilePath": "Shaders/ShaderReloadSoakTest/Temp/Fullscreen.shader"
+                            "FilePath": "Shaders/ShaderReloadTest/Temp/Fullscreen.shader"
                         },
                         "StencilRef": 1,
                         "PipelineViewTag": "MainCamera"

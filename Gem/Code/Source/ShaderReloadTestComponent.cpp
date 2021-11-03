@@ -17,52 +17,56 @@
 #include <SampleComponentManager.h>
 #include <SampleComponentConfig.h>
 
-#include "ShaderReloadSoakTestComponent.h"
+#include <Automation/AssetStatusTracker.h>
+
+#include "ShaderReloadTestComponent.h"
 
 namespace AtomSampleViewer
 {
-    void ShaderReloadSoakTestComponent::Reflect(AZ::ReflectContext* context)
+    void ShaderReloadTestComponent::Reflect(AZ::ReflectContext* context)
     {
         if (AZ::SerializeContext* serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
         {
-            serializeContext->Class < ShaderReloadSoakTestComponent, AZ::Component>()
+            serializeContext->Class < ShaderReloadTestComponent, AZ::Component>()
                 ->Version(0)
                 ;
         }
     }
 
-    ShaderReloadSoakTestComponent::ShaderReloadSoakTestComponent()
+    ShaderReloadTestComponent::ShaderReloadTestComponent()
     {
     }
 
-    void ShaderReloadSoakTestComponent::InitTestDataFolders()
+    void ShaderReloadTestComponent::InitTestDataFolders()
     {
+        m_relativeTestDataFolder = "Shaders/ShaderReloadTest/TestData";
+        m_relativeTempSourceFolder =  "Shaders/ShaderReloadTest/Temp";
+
         auto io = AZ::IO::LocalFileIO::GetInstance();
 
         auto projectPath = AZ::Utils::GetProjectPath();
-        AZStd::string mainTestFolder;
-        AzFramework::StringFunc::Path::Join(projectPath.c_str(), "Shaders/ShaderReloadSoakTest/", mainTestFolder);
-        AzFramework::StringFunc::Path::Join(mainTestFolder.c_str(), "TestData/", m_testDataFolder);
-        if (!io->Exists(m_testDataFolder.c_str()))
+        AzFramework::StringFunc::Path::Join(projectPath.c_str(), m_relativeTestDataFolder.c_str(), m_absoluteTestDataFolder);
+        if (!io->Exists(m_absoluteTestDataFolder.c_str()))
         {
-            AZ_Error("ShaderReloadSoakTestComponent", false, "Could not find source folder '%s'. This sample can only be used on dev platforms.", m_testDataFolder.c_str());
-            m_testDataFolder.clear();
+            AZ_Error("ShaderReloadTestComponent", false, "Could not find source folder '%s'. This sample can only be used on dev platforms.", m_absoluteTestDataFolder.c_str());
+            m_absoluteTestDataFolder.clear();
             return;
         }
 
-        AzFramework::StringFunc::Path::Join(mainTestFolder.c_str(), "Temp/", m_tempSourceFolder);
-        if (!io->CreatePath(m_tempSourceFolder.c_str()))
+        AzFramework::StringFunc::Path::Join(projectPath.c_str(), m_relativeTempSourceFolder.c_str(), m_absoluteTempSourceFolder);
+        if (!io->CreatePath(m_absoluteTempSourceFolder.c_str()))
         {
-            AZ_Error("ShaderReloadSoakTestComponent", false, "Could not create temp folder '%s'.", m_tempSourceFolder.c_str());
+            AZ_Error("ShaderReloadTestComponent", false, "Could not create temp folder '%s'.", m_absoluteTempSourceFolder.c_str());
+            m_absoluteTempSourceFolder.clear();
         }
     }
 
-    void ShaderReloadSoakTestComponent::CopyTestFile(const char * originalName, const char * newName, bool replaceIfExists)
+    void ShaderReloadTestComponent::CopyTestFile(const char * originalName, const char * newName, bool replaceIfExists)
     {
         auto io = AZ::IO::LocalFileIO::GetInstance();
 
         AZStd::string newFilePath;
-        AzFramework::StringFunc::Path::Join(m_tempSourceFolder.c_str(), newName, newFilePath);
+        AzFramework::StringFunc::Path::Join(m_absoluteTempSourceFolder.c_str(), newName, newFilePath);
         if (io->Exists(newFilePath.c_str()))
         {
             if (!replaceIfExists)
@@ -72,10 +76,10 @@ namespace AtomSampleViewer
         }
 
         AZStd::string originalFilePath;
-        AzFramework::StringFunc::Path::Join(m_testDataFolder.c_str(), originalName, originalFilePath);
+        AzFramework::StringFunc::Path::Join(m_absoluteTestDataFolder.c_str(), originalName, originalFilePath);
         if (!io->Exists(originalFilePath.c_str()))
         {
-            AZ_Error("ShaderReloadSoakTestComponent", false, "Could not find source file '%s'. This sample can only be used on dev platforms.", originalFilePath.c_str());
+            AZ_Error("ShaderReloadTestComponent", false, "Could not find source file '%s'. This sample can only be used on dev platforms.", originalFilePath.c_str());
             return;
         }
 
@@ -105,9 +109,9 @@ namespace AtomSampleViewer
         m_fileIoErrorHandler.BusDisconnect();
     }
 
-    void ShaderReloadSoakTestComponent::DeleteTestFile(const char* tempSourceFile)
+    void ShaderReloadTestComponent::DeleteTestFile(const char* tempSourceFile)
     {
-        AZ::IO::Path deletePath = AZ::IO::Path(m_tempSourceFolder).Append(tempSourceFile);
+        AZ::IO::Path deletePath = AZ::IO::Path(m_absoluteTempSourceFolder).Append(tempSourceFile);
 
         if (AZ::IO::LocalFileIO::GetInstance()->Exists(deletePath.c_str()))
         {
@@ -122,22 +126,51 @@ namespace AtomSampleViewer
         }
     }
 
-    bool ShaderReloadSoakTestComponent::ReadInConfig(const AZ::ComponentConfig*)
+    bool ShaderReloadTestComponent::ReadInConfig(const AZ::ComponentConfig*)
     {
         return true;
     }
 
-    void ShaderReloadSoakTestComponent::Activate()
+    void ShaderReloadTestComponent::Activate()
     {
         AZ::TickBus::Handler::BusConnect();
 
         InitTestDataFolders();
+
+        DeleteTestFile("Fullscreen.shader");
+        DeleteTestFile("Fullscreen.azsl");
+
+        AssetStatusTracker assetStatusTracker;
+        assetStatusTracker.StartTracking();
+
+        AZStd::string shaderSourcePath;
+        AzFramework::StringFunc::Path::Join(m_relativeTempSourceFolder.c_str(), "Fullscreen.shader", shaderSourcePath);
+        assetStatusTracker.ExpectAsset(shaderSourcePath, 1);
+
         CopyTestFile(RedShaderFile, "Fullscreen.azsl");
         CopyTestFile("Fullscreen.shader.txt", "Fullscreen.shader");
         m_expectedPixelColor = RED_COLOR;
 
         // A short wait is necessary as the pipeline creation will fatally fail
         // if the "Fullscreen.azshader" doesn't exist.
+        const uint32_t MaxWaitTimeMillis = 10000;
+        const uint32_t MilliWaits = 50;
+        uint32_t timeWaitMillis = 0;
+        while (!assetStatusTracker.DidExpectedAssetsFinish())
+        {
+            AZStd::this_thread::sleep_for(AZStd::chrono::milliseconds(MilliWaits));
+            timeWaitMillis += MilliWaits;
+            if (timeWaitMillis >= MaxWaitTimeMillis)
+            {
+                AZ_Error(LogName, false, "Failed to activate this test because exceeded wait time of %u milliseconds", MaxWaitTimeMillis);
+                return;
+            }
+        }
+        assetStatusTracker.StopTracking();
+
+        // The above wait time is just for shader recompilation, it is important to wait a little bit more
+        // for the shader asset to be discoverable when the FullscreenTriangle pass is loaded and tries
+        // to reference the shader. 1 second is plenty and generous.
         AZStd::this_thread::sleep_for(AZStd::chrono::milliseconds(1000));
 
         // connect to the bus before creating new pipeline
@@ -150,7 +183,7 @@ namespace AtomSampleViewer
         m_imguiSidebar.Activate();
     }
 
-    void ShaderReloadSoakTestComponent::Deactivate()
+    void ShaderReloadTestComponent::Deactivate()
     {
         m_imguiSidebar.Deactivate();
         m_imguiScope = {}; // restores previous ImGui context.
@@ -165,13 +198,13 @@ namespace AtomSampleViewer
         AZ::TickBus::Handler::BusDisconnect();
     }
 
-    void ShaderReloadSoakTestComponent::DefaultWindowCreated()
+    void ShaderReloadTestComponent::DefaultWindowCreated()
     {
         AZ::Render::Bootstrap::DefaultWindowBus::BroadcastResult(m_windowContext,
             &AZ::Render::Bootstrap::DefaultWindowBus::Events::GetDefaultWindowContext);
     }
 
-    void ShaderReloadSoakTestComponent::ActivateFullscreenTrianglePipeline()
+    void ShaderReloadTestComponent::ActivateFullscreenTrianglePipeline()
     {
         // save original render pipeline first and remove it from the scene
         AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
@@ -191,9 +224,14 @@ namespace AtomSampleViewer
         m_passHierarchy.push_back("CopyToSwapChain");
     }
 
-    void ShaderReloadSoakTestComponent::DeactivateFullscreenTrianglePipeline()
+    void ShaderReloadTestComponent::DeactivateFullscreenTrianglePipeline()
     {
         // remove cb pipeline before adding original pipeline.
+        if (!m_cbPipeline)
+        {
+            return;
+        }
+
         AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
         defaultScene->RemoveRenderPipeline(m_cbPipeline->GetId());
 
@@ -203,19 +241,19 @@ namespace AtomSampleViewer
         m_passHierarchy.clear();
     }
 
-    void ShaderReloadSoakTestComponent::OnTick([[maybe_unused]] float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint timePoint)
+    void ShaderReloadTestComponent::OnTick([[maybe_unused]] float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint timePoint)
     {
         DrawSidebar();
     }
 
-    void ShaderReloadSoakTestComponent::DrawSidebar()
+    void ShaderReloadTestComponent::DrawSidebar()
     {
         if (!m_imguiSidebar.Begin())
         {
             return;
         }
 
-        ImGui::Text("ShaderReloadSoakTest");
+        ImGui::Text("ShaderReloadTest");
         if (ScriptableImGui::Button("Red shader"))
         {
             m_capturedColorAsString.clear();
@@ -258,7 +296,7 @@ namespace AtomSampleViewer
         m_imguiSidebar.End();
     }
 
-    bool ShaderReloadSoakTestComponent::StartRenderOutputCapture()
+    bool ShaderReloadTestComponent::StartRenderOutputCapture()
     {
         auto captureCallback = [&](const AZ::RPI::AttachmentReadback::ReadbackResult& result)
         {
@@ -266,7 +304,7 @@ namespace AtomSampleViewer
             {
                 const auto width = result.m_imageDescriptor.m_size.m_width;
                 const auto height = result.m_imageDescriptor.m_size.m_height;
-                uint32_t pixelColor = ReadPixel(result.m_dataBuffer.get()->data(), result.m_imageDescriptor, width/2, height/2);
+                uint32_t pixelColor = ReadPixel(result.m_dataBuffer.get()->data(), result.m_imageDescriptor, width/8, height/8);
                 ValidatePixelColor(pixelColor);
             }
             else
@@ -286,7 +324,7 @@ namespace AtomSampleViewer
         return startedCapture;
     }
 
-    uint32_t ShaderReloadSoakTestComponent::ReadPixel(const uint8_t* rawRGBAPixelData, const AZ::RHI::ImageDescriptor& imageDescriptor, uint32_t x, uint32_t y) const
+    uint32_t ShaderReloadTestComponent::ReadPixel(const uint8_t* rawRGBAPixelData, const AZ::RHI::ImageDescriptor& imageDescriptor, uint32_t x, uint32_t y) const
     {
         const auto width = imageDescriptor.m_size.m_width;
         const auto height = imageDescriptor.m_size.m_height;
@@ -312,7 +350,7 @@ namespace AtomSampleViewer
         return pixelColor;
     }
 
-    void ShaderReloadSoakTestComponent::ValidatePixelColor(uint32_t color)
+    void ShaderReloadTestComponent::ValidatePixelColor(uint32_t color)
     {
         AZ_TracePrintf(LogName, "INFO: Got pixel color=0x%08X, expecting pixel color=0x%08X", color, m_expectedPixelColor);
         AZ_Error(LogName, m_expectedPixelColor == color, "Invalid pixel color. Got 0x%08X, was expecting 0x%08X", color, m_expectedPixelColor);
