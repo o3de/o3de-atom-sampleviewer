@@ -17,6 +17,8 @@
 
 #include <AzFramework/Entity/EntityContextBus.h>
 
+#include <Atom/Utils/AssetCollectionAsyncLoader.h>
+
 #include <Utils/ImGuiSidebar.h>
 #include <Utils/Utils.h>
 #include <Utils/FileIOErrorHandler.h>
@@ -67,6 +69,8 @@ namespace AtomSampleViewer
         // AZ::TickBus::Handler overrides...
         void OnTick(float deltaTime, AZ::ScriptTimePoint timePoint) override;
 
+        void PreloadFullscreenShader();
+        void OnAllAssetsReadyActivate();
         void ActivateFullscreenTrianglePipeline();
         void DeactivateFullscreenTrianglePipeline();
 
@@ -86,6 +90,11 @@ namespace AtomSampleViewer
 
         FileIOErrorHandler m_fileIoErrorHandler;
 
+        //! Async asset load. Used to guarantee that "Fullscreen.azshader" exists before
+        //! instantiating the FullscreenTriangle.pass.
+        AZ::AssetCollectionAsyncLoader m_assetLoadManager;
+
+        bool m_initialized = false;
         AZStd::string m_relativeTestDataFolder;   //< Stores several txt files with contents to be copied over various source asset files.
         AZStd::string m_relativeTempSourceFolder; //< Folder for temp source asset files. These are what the sample edits and reloads.
         AZStd::string m_absoluteTestDataFolder;   //< Stores several txt files with contents to be copied over various source asset files.

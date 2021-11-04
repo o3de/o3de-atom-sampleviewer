@@ -133,65 +133,91 @@ namespace AtomSampleViewer
 
     void ShaderReloadTestComponent::Activate()
     {
-        AZ::TickBus::Handler::BusConnect();
-
         InitTestDataFolders();
 
-        DeleteTestFile("Fullscreen.shader");
-        DeleteTestFile("Fullscreen.azsl");
+        AZ::TickBus::Handler::BusConnect();
+        // connect to the bus before creating new pipeline
+        AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusConnect();
 
-        AssetStatusTracker assetStatusTracker;
-        assetStatusTracker.StartTracking();
+        PreloadFullscreenShader();
 
-        AZStd::string shaderSourcePath;
-        AzFramework::StringFunc::Path::Join(m_relativeTempSourceFolder.c_str(), "Fullscreen.shader", shaderSourcePath);
-        assetStatusTracker.ExpectAsset(shaderSourcePath, 1);
 
-        CopyTestFile(RedShaderFile, "Fullscreen.azsl");
-        CopyTestFile("Fullscreen.shader.txt", "Fullscreen.shader");
-        m_expectedPixelColor = RED_COLOR;
-
-        // A short wait is necessary as the pipeline creation will fatally fail
-        // if the "Fullscreen.azshader" doesn't exist.
-        const uint32_t MaxWaitTimeMillis = 10000;
-        const uint32_t MilliWaits = 50;
-        uint32_t timeWaitMillis = 0;
-        while (!assetStatusTracker.DidExpectedAssetsFinish())
-        {
-            AZStd::this_thread::sleep_for(AZStd::chrono::milliseconds(MilliWaits));
-            timeWaitMillis += MilliWaits;
-            if (timeWaitMillis >= MaxWaitTimeMillis)
-            {
-                AZ_Error(LogName, false, "Failed to activate this test because exceeded wait time of %u milliseconds", MaxWaitTimeMillis);
-                return;
-            }
-        }
-        assetStatusTracker.StopTracking();
+        //AssetStatusTracker assetStatusTracker;
+        //assetStatusTracker.StartTracking();
+        //
+        //AZStd::string shaderSourcePath;
+        //AzFramework::StringFunc::Path::Join(m_relativeTempSourceFolder.c_str(), "Fullscreen.shader", shaderSourcePath);
+        //assetStatusTracker.ExpectAsset(shaderSourcePath, 1);
+        //
+        //// A short wait is necessary as the pipeline creation will fatally fail
+        //// if the "Fullscreen.azshader" doesn't exist.
+        //const uint32_t MaxWaitTimeMillis = 10000;
+        //const uint32_t MilliWaits = 50;
+        //uint32_t timeWaitMillis = 0;
+        //while (!assetStatusTracker.DidExpectedAssetsFinish())
+        //{
+        //    AZStd::this_thread::sleep_for(AZStd::chrono::milliseconds(MilliWaits));
+        //    timeWaitMillis += MilliWaits;
+        //    if (timeWaitMillis >= MaxWaitTimeMillis)
+        //    {
+        //        AZ_Error(LogName, false, "Failed to activate this test because exceeded wait time of %u milliseconds", MaxWaitTimeMillis);
+        //        return;
+        //    }
+        //}
+        //assetStatusTracker.StopTracking();
 
         // The above wait time is just for shader recompilation, it is important to wait a little bit more
         // for the shader asset to be discoverable when the FullscreenTriangle pass is loaded and tries
         // to reference the shader. 1 second is plenty and generous.
-        AZStd::this_thread::sleep_for(AZStd::chrono::milliseconds(1000));
+        //AZStd::this_thread::sleep_for(AZStd::chrono::milliseconds(1000));
 
-        // connect to the bus before creating new pipeline
-        AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusConnect();
+    }
 
+    void ShaderReloadTestComponent::PreloadFullscreenShader()
+    {
+        m_initialized = false;
+        CopyTestFile(RedShaderFile, "Fullscreen.azsl");
+        CopyTestFile("Fullscreen.shader.txt", "Fullscreen.shader");
+        m_expectedPixelColor = RED_COLOR;
+
+        AZStd::string shaderAssetPath;
+        AzFramework::StringFunc::Path::Join(m_relativeTempSourceFolder.c_str(), "Fullscreen.azshader", shaderAssetPath);
+
+        AZStd::vector<AZ::AssetCollectionAsyncLoader::AssetToLoadInfo> assetList = {
+            {shaderAssetPath, azrtti_typeid<AZ::RPI::ShaderAsset>()},
+        };
+
+        m_assetLoadManager.LoadAssetsAsync(assetList, [&](AZStd::string_view assetName, [[maybe_unused]] bool success, size_t pendingAssetCount)
+            {
+                AZ_Error(LogName, success, "Error loading asset %s, a crash will occur when OnAllAssetsReadyActivate() is called!", assetName.data());
+                AZ_TracePrintf(LogName, "Asset %s loaded %s. Wait for %zu more assets before full activation\n", assetName.data(), success ? "successfully" : "UNSUCCESSFULLY", pendingAssetCount);
+                if (!pendingAssetCount && !m_initialized)
+                {
+                    OnAllAssetsReadyActivate();
+                }
+            });
+    }
+
+    void ShaderReloadTestComponent::OnAllAssetsReadyActivate()
+    {
         ActivateFullscreenTrianglePipeline();
 
         // Create an ImGuiActiveContextScope to ensure the ImGui context on the new pipeline's ImGui pass is activated.
         m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass({ "FullscreenPipeline", "ImGuiPass" });
         m_imguiSidebar.Activate();
+
+        m_initialized = true;
     }
 
     void ShaderReloadTestComponent::Deactivate()
     {
-        m_imguiSidebar.Deactivate();
-        m_imguiScope = {}; // restores previous ImGui context.
-
-        DeactivateFullscreenTrianglePipeline();
-
-        DeleteTestFile("Fullscreen.shader");
-        DeleteTestFile("Fullscreen.azsl");
+        if (m_initialized)
+        {
+            m_imguiSidebar.Deactivate();
+            m_imguiScope = {}; // restores previous ImGui context.
+            DeactivateFullscreenTrianglePipeline();
+            m_initialized = false;
+        }
 
         AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusDisconnect();
 
@@ -243,6 +269,11 @@ namespace AtomSampleViewer
 
     void ShaderReloadTestComponent::OnTick([[maybe_unused]] float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint timePoint)
     {
+        if (!m_initialized)
+        {
+            return;
+        }
+
         DrawSidebar();
     }
 
