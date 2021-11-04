@@ -44,6 +44,7 @@
 #include <TransparencyExampleComponent.h>
 #include <DiffuseGIExampleComponent.h>
 #include <SSRExampleComponent.h>
+#include <ShaderReloadTestComponent.h>
 
 #include <RHI/AlphaToCoverageExampleComponent.h>
 #include <RHI/AsyncComputeExampleComponent.h>
@@ -156,6 +157,7 @@ namespace AtomSampleViewer
                 ParallaxMappingExampleComponent::CreateDescriptor(),
                 DiffuseGIExampleComponent::CreateDescriptor(),
                 SSRExampleComponent::CreateDescriptor(),
+                ShaderReloadTestComponent::CreateDescriptor(),
                 });
         }
 
