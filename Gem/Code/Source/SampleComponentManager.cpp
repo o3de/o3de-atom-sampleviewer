@@ -99,6 +99,7 @@
 #include <TransparencyExampleComponent.h>
 #include <DiffuseGIExampleComponent.h>
 #include <SSRExampleComponent.h>
+#include <ShaderReloadTestComponent.h>
 
 #include <Atom/Bootstrap/DefaultWindowBus.h>
 
@@ -282,6 +283,7 @@ namespace AtomSampleViewer
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/SceneReloadSoakTest", azrtti_typeid<SceneReloadSoakTestComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/Shading", azrtti_typeid<ShadingExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/StreamingImage", azrtti_typeid<StreamingImageExampleComponent>() ));
+        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/ShaderReloadTest", azrtti_typeid<ShaderReloadTestComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/AreaLight", azrtti_typeid<AreaLightExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Bloom", azrtti_typeid<BloomExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Checkerboard", azrtti_typeid<CheckerboardExampleComponent>(), []() {return (Utils::GetRHIDevice()->GetPhysicalDevice().GetDescriptor().m_vendorId != RHI::VendorId::ARM && Utils::GetRHIDevice()->GetPhysicalDevice().GetDescriptor().m_vendorId != RHI::VendorId::Qualcomm); } ));
