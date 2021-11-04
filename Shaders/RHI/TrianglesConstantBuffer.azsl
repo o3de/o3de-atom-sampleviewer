@@ -8,86 +8,20 @@
 
  #include <Atom/Features/SrgSemantics.azsli>
 
-// Number of triangles that will be rendered on screen
-// Uniform limitation need to be taken into consideration for mobile devices
-// [ATOM-14949]
-#if AZ_TRAIT_CONSTANT_BUFFER_LIMITATIONS
-
-#define MAX_NUMBER_OF_INSTANCES 12
-
-#else
-
-#define MAX_NUMBER_OF_INSTANCES 30
-
-#endif
-
-// Padding sizes for different platform memory alignment requirements
-#ifdef AZ_TRAIT_CONSTANT_BUFFER_ALIGNMENT
-
-
-// Size of InstanceInfo: sizeof(float4x4) + sizeof(float4) = 64 + 16 = 80
-// if InstanceInfo size < alignment size:
-//      diff = alignment size - InstanceInfo size 
-//      if diff > 0:
-//          padding = (alignment size - InstanceInfo size) / 16
-//      else:
-//          padding = 0
-// else:
-//      left_over = InstanceInfo size % alignment
-//      if left_over > 0: 
-//          padding = (alignment - left_over) / 16
-//      else:
-//          padding = 0
-#if AZ_TRAIT_CONSTANT_BUFFER_ALIGNMENT == 16
-
-#define NUM_INSTANCE_INFO_PADDINGS 0                    // 80 % 16 == 0
-
-#elif AZ_TRAIT_CONSTANT_BUFFER_ALIGNMENT == 32
-
-#define NUM_INSTANCE_INFO_PADDINGS 1                    // 80 % 32 => (16 > 0) => (32 - 16) / 16 = 1
-
-#elif AZ_TRAIT_CONSTANT_BUFFER_ALIGNMENT == 64         
-
-#define NUM_INSTANCE_INFO_PADDINGS 3                    // 80 % 64 => (16 > 0) => (64 - 16) / 16 = 3
-
-#elif AZ_TRAIT_CONSTANT_BUFFER_ALIGNMENT == 128
-
-#define NUM_INSTANCE_INFO_PADDINGS 3                    // (128 - 80) / 16 = 3
-
-#else
-
-#define NUM_INSTANCE_INFO_PADDINGS 11                   // (256 - 80) / 16 = 11
-
-#endif
-
-#else 
-
-#define NUM_INSTANCE_INFO_PADDINGS 11                   // account for platform default values
-
-#endif // #ifdef AZ_TRAIT_CONSTANT_BUFFER_ALIGNMENT
-
-
 struct InstanceInfo
 {
     column_major float4x4 m_matrix;
     float4 m_colorMultiplier;
-    // NOTE: This actually shouldn't be required, but the current validation will give a false positive
-    // when the stride isn't the same size as the stride defined on the applicaiton side.
-    // This assumes 256 alignment, which is standard for DX12, but is variable in Vulkan
-#if NUM_INSTANCE_INFO_PADDINGS != 0
-    float4 m_padding0[NUM_INSTANCE_INFO_PADDINGS];
-#endif
-
 };
 
 struct InstanceData
 {
-    InstanceInfo m_instancesInfo;
+    InstanceInfo m_instancesInfo[30];
 };
 
 ShaderResourceGroup TriangleSrg : SRG_PerObject
 {
-    ConstantBuffer<InstanceData> m_trianglesCB[MAX_NUMBER_OF_INSTANCES];
+    ConstantBuffer<InstanceData> m_trianglesCB;
 }
 
 struct VSInput
@@ -103,11 +37,11 @@ struct VSOutput
     float4 m_color : COLOR0;
 };
 
-VSOutput MainVS(VSInput vsInput)
+VSOutput MainVS(const VSInput vsInput)
 {
     VSOutput OUT;
     
-    InstanceInfo triangleInstanceInfo = TriangleSrg::m_trianglesCB[vsInput.m_instanceIndex].m_instancesInfo;
+    const InstanceInfo triangleInstanceInfo = TriangleSrg::m_trianglesCB.m_instancesInfo[vsInput.m_instanceIndex];
     
     OUT.m_position = mul(float4(vsInput.m_position, 1.0f),triangleInstanceInfo.m_matrix);
     OUT.m_color = vsInput.m_color * triangleInstanceInfo.m_colorMultiplier;
