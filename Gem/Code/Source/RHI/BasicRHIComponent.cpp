@@ -549,8 +549,8 @@ namespace AtomSampleViewer
         // Validate the compatibility of the image sub resources
         for (uint32_t i = 1; i < imageSubresourceLayouts.size(); i++)
         {
-            const bool compatibleFormat = imageDescriptors[0].m_format == imageDescriptors[i].m_format;
-            const bool compatibleLayout = imageSubresourceLayouts[0].m_size == imageSubresourceLayouts[i].m_size &&
+            [[maybe_unused]] const bool compatibleFormat = imageDescriptors[0].m_format == imageDescriptors[i].m_format;
+            [[maybe_unused]] const bool compatibleLayout = imageSubresourceLayouts[0].m_size == imageSubresourceLayouts[i].m_size &&
                 imageSubresourceLayouts[0].m_rowCount == imageSubresourceLayouts[i].m_rowCount &&
                 imageSubresourceLayouts[0].m_bytesPerRow == imageSubresourceLayouts[i].m_bytesPerRow &&
                 imageSubresourceLayouts[0].m_bytesPerImage == imageSubresourceLayouts[i].m_bytesPerImage;
