@@ -92,15 +92,6 @@ namespace AtomSampleViewer
         m_meshFeatureProcessor = nullptr;
     }
     
-    bool CheckerboardExampleComponent::ReadInConfig(const AZ::ComponentConfig* baseConfig)
-    {
-        auto config = azrtti_cast<const SampleComponentConfig*>(baseConfig);
-        AZ_Assert(config && config->IsValid(), "SampleComponentConfig required for sample component configuration.");
-        m_cameraEntityId = config->m_cameraEntityId;
-        m_entityContextId = config->m_entityContextId;
-        return true;
-    }
-
     void CheckerboardExampleComponent::DefaultWindowCreated()
     {
         AZ::Render::Bootstrap::DefaultWindowBus::BroadcastResult(m_windowContext,
