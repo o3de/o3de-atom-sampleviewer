@@ -44,9 +44,6 @@ namespace AtomSampleViewer
 
     private:
 
-        // AZ::Component overrides...
-        bool ReadInConfig(const AZ::ComponentConfig* baseConfig) override;
-
         // DefaultWindowNotificationBus::Handler overrides...
         void DefaultWindowCreated() override;
         
