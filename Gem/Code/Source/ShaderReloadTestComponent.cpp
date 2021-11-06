@@ -128,6 +128,7 @@ namespace AtomSampleViewer
 
     bool ShaderReloadTestComponent::ReadInConfig(const AZ::ComponentConfig*)
     {
+        m_scene = RPI::RPISystemInterface::Get()->GetSceneByName(AZ::Name("RPI"));
         return true;
     }
 
@@ -233,9 +234,8 @@ namespace AtomSampleViewer
     void ShaderReloadTestComponent::ActivateFullscreenTrianglePipeline()
     {
         // save original render pipeline first and remove it from the scene
-        AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        m_originalPipeline = defaultScene->GetDefaultRenderPipeline();
-        defaultScene->RemoveRenderPipeline(m_originalPipeline->GetId());
+        m_originalPipeline = m_scene->GetDefaultRenderPipeline();
+        m_scene->RemoveRenderPipeline(m_originalPipeline->GetId());
 
         // add the checker board pipeline
         const AZStd::string pipelineName("Fullscreen");
@@ -244,7 +244,7 @@ namespace AtomSampleViewer
         pipelineDesc.m_name = pipelineName;
         pipelineDesc.m_rootPassTemplate = "FullscreenPipeline";
         m_cbPipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
-        defaultScene->AddRenderPipeline(m_cbPipeline);
+        m_scene->AddRenderPipeline(m_cbPipeline);
         m_cbPipeline->SetDefaultView(m_originalPipeline->GetDefaultView());
         m_passHierarchy.push_back(pipelineName);
         m_passHierarchy.push_back("CopyToSwapChain");
@@ -258,10 +258,8 @@ namespace AtomSampleViewer
             return;
         }
 
-        AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        defaultScene->RemoveRenderPipeline(m_cbPipeline->GetId());
-
-        defaultScene->AddRenderPipeline(m_originalPipeline);
+        m_scene->RemoveRenderPipeline(m_cbPipeline->GetId());
+        m_scene->AddRenderPipeline(m_originalPipeline);
 
         m_cbPipeline = nullptr;
         m_passHierarchy.clear();

@@ -102,9 +102,9 @@ namespace AtomSampleViewer
         bool m_isCapturingRenderOutput = false;
         uint32_t m_expectedPixelColor;
         AZStd::string m_capturedColorAsString;
+        
+        AZ::RPI::Scene* m_scene = nullptr;
 
-
-        // for checkerboard render pipeline
         AZ::RPI::RenderPipelinePtr m_cbPipeline;
         AZ::RPI::RenderPipelinePtr m_originalPipeline;
         AZStd::shared_ptr<AZ::RPI::WindowContext> m_windowContext;
