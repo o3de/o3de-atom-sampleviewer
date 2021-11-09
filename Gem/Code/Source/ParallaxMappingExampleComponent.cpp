@@ -118,10 +118,9 @@ namespace AtomSampleViewer
         SetCameraConfiguration();
 
         // Light
-        AZ::RPI::Scene* scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get();
-        m_directionalLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DirectionalLightFeatureProcessorInterface>();
+        m_directionalLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DirectionalLightFeatureProcessorInterface>();
         CreateDirectionalLight();
-        m_diskLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DiskLightFeatureProcessorInterface>();
+        m_diskLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DiskLightFeatureProcessorInterface>();
         CreateDiskLight();
 
         m_imguiSidebar.Activate();

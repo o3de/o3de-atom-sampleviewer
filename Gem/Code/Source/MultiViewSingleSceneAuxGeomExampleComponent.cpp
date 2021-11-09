@@ -68,7 +68,7 @@ namespace AtomSampleViewer
             m_windowContext = AZStd::make_shared<AZ::RPI::WindowContext>();
             m_windowContext->Initialize(*device, m_nativeWindow->GetWindowHandle());
 
-            auto scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
+            auto scene = AZ::RPI::RPISystemInterface::Get()->GetSceneByName(AZ::Name("RPI"));
 
             // Create a custom pipeline descriptor
             AZ::RPI::RenderPipelineDescriptor pipelineDesc;
@@ -224,8 +224,7 @@ namespace AtomSampleViewer
 
     void MultiViewSingleSceneAuxGeomExampleComponent::DrawAuxGeom() const
     {
-        auto scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        auto auxGeomFP = scene->GetFeatureProcessor<AZ::RPI::AuxGeomFeatureProcessorInterface>();
+        auto auxGeomFP = m_scene->GetFeatureProcessor<AZ::RPI::AuxGeomFeatureProcessorInterface>();
         if (auto auxGeom = auxGeomFP->GetDrawQueue())
         {
             DrawBackgroundBox(auxGeom);

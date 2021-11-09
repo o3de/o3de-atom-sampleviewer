@@ -23,6 +23,8 @@ namespace AtomSampleViewer
 
     bool CommonSampleComponentBase::ReadInConfig(const ComponentConfig* baseConfig)
     {
+        m_scene = RPI::RPISystemInterface::Get()->GetSceneByName(AZ::Name("RPI"));
+
         auto config = azrtti_cast<const SampleComponentConfig*>(baseConfig);
         if (config && config->IsValid())
         {

@@ -755,14 +755,19 @@ namespace AtomSampleViewer
         {
             ShowPassTreeWindow();
         }
+
         if (m_showFrameGraphVisualizer)
         {
             ShowFrameGraphVisualizerWindow();
         }
+
         if (m_showCullingDebugWindow)
         {
-            AZ::RPI::Scene* defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get();
-            AZ::Render::ImGuiDrawCullingDebug(m_showCullingDebugWindow, defaultScene);
+            AZ::RPI::Scene* rpiScene = AZ::RPI::RPISystemInterface::Get()->GetSceneByName(AZ::Name("RPI"));
+            if (rpiScene)
+            {
+                AZ::Render::ImGuiDrawCullingDebug(m_showCullingDebugWindow, rpiScene);
+            }
         }
 
         if (m_showCpuProfiler)
@@ -1373,14 +1378,23 @@ namespace AtomSampleViewer
 
         const SampleEntry& sampleEntry = m_availableSamples[m_selectedSampleIndex];
 
+        // Create scene and render pipeline before create sample component
+        if (sampleEntry.m_pipelineType == SamplePipelineType::RHI)
+        {
+            SwitchSceneForRHISample();
+        }
+        else if (sampleEntry.m_pipelineType == SamplePipelineType::RPI)
+        {
+            SwitchSceneForRPISample();
+        }
+
         SampleComponentConfig config(m_windowContext, m_cameraEntity->GetId(), m_entityContextId);
         m_activeSample = m_exampleEntity->CreateComponent(sampleEntry.m_sampleUuid);
         m_activeSample->SetConfiguration(config);
 
+        // special setup for RHI samples
         if (sampleEntry.m_pipelineType == SamplePipelineType::RHI)
         {
-            SwitchSceneForRHISample();
-
             BasicRHIComponent* rhiSampleComponent = static_cast<BasicRHIComponent*>(m_activeSample);
             if (rhiSampleComponent->IsSupportedRHISamplePipeline())
             {
@@ -1390,10 +1404,6 @@ namespace AtomSampleViewer
             {
                 m_rhiSamplePass->SetRHISample(nullptr);
             }
-        }
-        else if (sampleEntry.m_pipelineType == SamplePipelineType::RPI)
-        {
-            SwitchSceneForRPISample();
         }
 
         m_exampleEntity->Activate();
@@ -1418,6 +1428,7 @@ namespace AtomSampleViewer
     {
         // Create and register the rhi scene with only feature processors required for AtomShimRenderer (only for AtomSampleViewerLauncher)
         RPI::SceneDescriptor sceneDesc;
+        sceneDesc.m_nameId = AZ::Name("RHI");
         sceneDesc.m_featureProcessorNames.push_back("AuxGeomFeatureProcessor");
         m_rhiScene = RPI::Scene::CreateScene(sceneDesc);
         m_rhiScene->Activate();
@@ -1465,6 +1476,7 @@ namespace AtomSampleViewer
     {
         // Create and register a scene with all available feature processors
         RPI::SceneDescriptor sceneDesc;
+        sceneDesc.m_nameId = AZ::Name("RPI");
         m_rpiScene = RPI::Scene::CreateScene(sceneDesc);
         m_rpiScene->EnableAllFeatureProcessors();
 
