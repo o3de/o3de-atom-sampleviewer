@@ -11,6 +11,7 @@
 #include <AzFramework/IO/LocalFileIO.h>
 
 #include <Atom/RPI.Public/View.h>
+#include <Atom/RPI.Public/RPISystemInterface.h>
 
 #include <Atom/RPI.Reflect/Asset/AssetUtils.h>
 
@@ -128,7 +129,7 @@ namespace AtomSampleViewer
 
     bool ShaderReloadTestComponent::ReadInConfig(const AZ::ComponentConfig*)
     {
-        m_scene = RPI::RPISystemInterface::Get()->GetSceneByName(AZ::Name("RPI"));
+        m_scene = AZ::RPI::RPISystemInterface::Get()->GetSceneByName(AZ::Name("RPI"));
         return true;
     }
 
@@ -188,7 +189,7 @@ namespace AtomSampleViewer
             {shaderAssetPath, azrtti_typeid<AZ::RPI::ShaderAsset>()},
         };
 
-        m_assetLoadManager.LoadAssetsAsync(assetList, [&](AZStd::string_view assetName, [[maybe_unused]] bool success, size_t pendingAssetCount)
+        m_assetLoadManager.LoadAssetsAsync(assetList, [&]([[maybe_unused]] AZStd::string_view assetName, [[maybe_unused]] bool success, size_t pendingAssetCount)
             {
                 AZ_Error(LogName, success, "Error loading asset %s, a crash will occur when OnAllAssetsReadyActivate() is called!", assetName.data());
                 AZ_TracePrintf(LogName, "Asset %s loaded %s. Wait for %zu more assets before full activation\n", assetName.data(), success ? "successfully" : "UNSUCCESSFULLY", pendingAssetCount);
