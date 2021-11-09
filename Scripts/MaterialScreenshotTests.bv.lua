@@ -17,6 +17,7 @@ g_modelWithoutLayerMask = 'objects/bunny.azmodel'
 g_modelWithLayerMask = 'testdata/objects/paintedplane.azmodel'
 g_modelHermanubis = 'materialeditor/viewportmodels/hermanubis.azmodel'
 g_modelTube = 'testdata/objects/tube.azmodel'
+g_modelGrass = 'objects/grass_tile_large.azmodel'
 
 function GenerateMaterialScreenshot(imageComparisonThresholdLevel, materialName, options)
     if options == nil then options = {} end
@@ -123,6 +124,7 @@ GenerateMaterialScreenshot('Level H', '014_ClearCoat_NormalMap_2ndUv', {lighting
 GenerateMaterialScreenshot('Level F', '014_ClearCoat_RoughnessMap', {lighting="Neutral Urban"})
 GenerateMaterialScreenshot('Level F', '015_SubsurfaceScattering', {lighting="Dark Test Lighting", cameraHeading = 45.0, cameraPitch=30.0, cameraDistance=1.5})
 GenerateMaterialScreenshot('Level D', '015_SubsurfaceScattering_Transmission', {lighting="Dark Test Lighting", cameraHeading = 45.0, cameraPitch=-30.0, cameraDistance=1.5})
+GenerateMaterialScreenshot('Level E', '015_SubsurfaceScattering_Transmission_Thin', {model=g_modelGrass, lighting="Goegap (Alt)", cameraHeading = -150.0, cameraPitch=5.0, cameraDistance=1.5})
 GenerateMaterialScreenshot('Level I', '100_UvTiling_AmbientOcclusion')
 GenerateMaterialScreenshot('Level I', '100_UvTiling_BaseColor')
 GenerateMaterialScreenshot('Level I', '100_UvTiling_Emissive')
