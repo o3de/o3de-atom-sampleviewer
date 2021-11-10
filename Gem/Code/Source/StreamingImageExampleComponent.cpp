@@ -130,15 +130,15 @@ namespace AtomSampleViewer
         // Queue load all the textures under Textures\Streaming folder
         for (uint32_t index = 0; index < TestDDSCount; index++)
         {
-            AZStd::string filePath = TestImageFolder + AZStd::string::format("streaming%d.dds.streamingimage", index);
-            QueueForLoad(filePath);
+            AZ::IO::Path filePath = TestImageFolder / AZStd::string::format("streaming%d.dds.streamingimage", index);
+            QueueForLoad(filePath.Native());
         }
 
         // All Images loaded here have non-power-of-two sizes
         for (uint32_t index = 0; index < TestPNGCount; index++)
         {
-            AZStd::string filePath = TestImageFolder + AZStd::string::format("streaming%d.png.streamingimage", index);
-            QueueForLoad(filePath);
+            AZ::IO::Path filePath = TestImageFolder / AZStd::string::format("streaming%d.png.streamingimage", index);
+            QueueForLoad(filePath.Native());
         }
 
         AZ::TickBus::Handler::BusConnect();
@@ -270,7 +270,7 @@ namespace AtomSampleViewer
     {
         if (!m_imageHotReload.m_assetId.IsValid())
         {
-            AZStd::string filePath = TestImageFolder + ReloadTestImageName + ".streamingimage";
+            AZ::IO::Path filePath = TestImageFolder / (ReloadTestImageName.Native() + ".streamingimage");
             AZ::Data::AssetCatalogRequestBus::BroadcastResult(
                 m_imageHotReload.m_assetId, &AZ::Data::AssetCatalogRequestBus::Events::GetAssetIdByPath, filePath.c_str(),
                 azrtti_typeid <AZ::RPI::StreamingImageAsset>(), false);
@@ -533,24 +533,17 @@ namespace AtomSampleViewer
         AZStd::string sourceImageFiles[] = {
             {"streaming1.png"}, {"streaming2.png" }
         };
-        
-        auto projectPath = AZ::Utils::GetProjectPath();
-        AZStd::string srcPath, destPath;
-        AzFramework::StringFunc::Path::Join(projectPath.c_str(), (TestImageFolder + sourceImageFiles[m_curSourceImage]).c_str(), srcPath);
-        AzFramework::StringFunc::Path::Join(projectPath.c_str(), (TestImageFolder + ReloadTestImageName).c_str(), destPath);
 
-        CopyFile(destPath, srcPath);
+        AZ::IO::FixedMaxPath projectPath = AZ::Utils::GetProjectPath();
+        AZ::IO::FixedMaxPath srcPath = projectPath / TestImageFolder / sourceImageFiles[m_curSourceImage];
+        AZ::IO::FixedMaxPath destPath = projectPath / TestImageFolder / ReloadTestImageName;
+
+        CopyFile(destPath.String(), srcPath.String());
     }
 
     void StreamingImageExampleComponent::DeleteHotReloadImage()
     {
-        const char* engineRoot = nullptr;
-        AzFramework::ApplicationRequests::Bus::BroadcastResult(engineRoot, &AzFramework::ApplicationRequests::GetEngineRoot);
-
-        AZStd::string testFilePath = "AtomSampleViewer/" + TestImageFolder + ReloadTestImageName;
-        AZStd::string testFileFullPath;
-        AzFramework::StringFunc::Path::Join(engineRoot, testFilePath.c_str(), testFileFullPath);
-
+        const auto testFileFullPath = AZ::IO::FixedMaxPath(AZ::Utils::GetProjectPath()) / TestImageFolder / ReloadTestImageName;
         if (AZ::IO::SystemFile::Exists(testFileFullPath.c_str()))
         {
             AZ::IO::SystemFile::Delete(testFileFullPath.c_str());

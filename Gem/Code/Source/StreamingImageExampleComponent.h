@@ -20,6 +20,7 @@
 
 #include <AzFramework/Asset/AssetCatalogBus.h>
 
+#include <AzCore/IO/Path/Path.h>
 #include <AzCore/Component/TickBus.h>
 
 #include <Utils/ImGuiSidebar.h>
@@ -128,8 +129,8 @@ namespace AtomSampleViewer
 
         const static uint32_t TestDDSCount = 36; // For image streaming and profile
         const static uint32_t TestPNGCount = 4; // For non-power-of-two textures
-        const AZStd::string TestImageFolder = "textures/streaming/";
-        const AZStd::string ReloadTestImageName = "reloadtest.png";
+        const AZ::IO::Path TestImageFolder = "Textures/Streaming";
+        const AZ::IO::Path ReloadTestImageName = "reloadtest.png";
         // Constants of display area for showing all streaming images.
         // As reference, the window's left bottom is (-1, -1). The window size is (2, 2)
         const float AreaWidth = 1.5f;
