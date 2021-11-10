@@ -13,6 +13,7 @@
 #include <AtomCore/Instance/InstanceId.h>
 
 #include <AzCore/Component/TickBus.h>
+#include <AzCore/IO/Path/Path.h>
 #include <AzCore/Math/Vector3.h>
 #include <AzCore/std/string/string_view.h>
 
@@ -158,7 +159,7 @@ namespace AtomSampleViewer
         AZ::Component* m_cameraControlComponent = nullptr;
 
         AZStd::vector<uint64_t> m_framesToCapture;
-        AZStd::string m_screenshotFolder;
+        AZ::IO::Path m_screenshotFolder;
 
         // Lights
         AZ::Render::DirectionalLightFeatureProcessorInterface* m_directionalLightFeatureProcessor = nullptr;
