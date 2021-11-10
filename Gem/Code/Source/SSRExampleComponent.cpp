@@ -47,14 +47,13 @@ namespace AtomSampleViewer
         CreateGroundPlane();
 
         // IBL
-        m_defaultIbl.Init(AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get());
+        m_defaultIbl.Init(m_scene);
 
         // skybox
         const constexpr char* SkyboxAssetPath = "textures/sampleenvironment/example_iblskyboxcm.dds.streamingimage";
         m_skyboxImageAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::StreamingImageAsset>(SkyboxAssetPath, AZ::RPI::AssetUtils::TraceLevel::Assert);
 
-        AZ::RPI::ScenePtr scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        AZ::Render::SkyBoxFeatureProcessorInterface* skyboxFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::SkyBoxFeatureProcessorInterface>();
+        AZ::Render::SkyBoxFeatureProcessorInterface* skyboxFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::SkyBoxFeatureProcessorInterface>();
         skyboxFeatureProcessor->Enable(true);
         skyboxFeatureProcessor->SetSkyboxMode(AZ::Render::SkyBoxMode::Cubemap);
         skyboxFeatureProcessor->SetCubemap(AZ::RPI::StreamingImage::FindOrCreate(m_skyboxImageAsset));
@@ -65,8 +64,6 @@ namespace AtomSampleViewer
 
     void SSRExampleComponent::Deactivate()
     {
-        AZ::RPI::ScenePtr scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-
         // disable the SSR pass in the pipeline
         EnableSSR(false);
 

@@ -11,6 +11,7 @@
 #include <AzFramework/IO/LocalFileIO.h>
 
 #include <Atom/RPI.Public/View.h>
+#include <Atom/RPI.Public/RPISystemInterface.h>
 
 #include <Atom/RPI.Reflect/Asset/AssetUtils.h>
 
@@ -128,6 +129,7 @@ namespace AtomSampleViewer
 
     bool ShaderReloadTestComponent::ReadInConfig(const AZ::ComponentConfig*)
     {
+        m_scene = AZ::RPI::RPISystemInterface::Get()->GetSceneByName(AZ::Name("RPI"));
         return true;
     }
 
@@ -187,7 +189,7 @@ namespace AtomSampleViewer
             {shaderAssetPath, azrtti_typeid<AZ::RPI::ShaderAsset>()},
         };
 
-        m_assetLoadManager.LoadAssetsAsync(assetList, [&](AZStd::string_view assetName, [[maybe_unused]] bool success, size_t pendingAssetCount)
+        m_assetLoadManager.LoadAssetsAsync(assetList, [&]([[maybe_unused]] AZStd::string_view assetName, [[maybe_unused]] bool success, size_t pendingAssetCount)
             {
                 AZ_Error(LogName, success, "Error loading asset %s, a crash will occur when OnAllAssetsReadyActivate() is called!", assetName.data());
                 AZ_TracePrintf(LogName, "Asset %s loaded %s. Wait for %zu more assets before full activation\n", assetName.data(), success ? "successfully" : "UNSUCCESSFULLY", pendingAssetCount);
@@ -233,9 +235,8 @@ namespace AtomSampleViewer
     void ShaderReloadTestComponent::ActivateFullscreenTrianglePipeline()
     {
         // save original render pipeline first and remove it from the scene
-        AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        m_originalPipeline = defaultScene->GetDefaultRenderPipeline();
-        defaultScene->RemoveRenderPipeline(m_originalPipeline->GetId());
+        m_originalPipeline = m_scene->GetDefaultRenderPipeline();
+        m_scene->RemoveRenderPipeline(m_originalPipeline->GetId());
 
         // add the checker board pipeline
         const AZStd::string pipelineName("Fullscreen");
@@ -244,7 +245,7 @@ namespace AtomSampleViewer
         pipelineDesc.m_name = pipelineName;
         pipelineDesc.m_rootPassTemplate = "FullscreenPipeline";
         m_cbPipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
-        defaultScene->AddRenderPipeline(m_cbPipeline);
+        m_scene->AddRenderPipeline(m_cbPipeline);
         m_cbPipeline->SetDefaultView(m_originalPipeline->GetDefaultView());
         m_passHierarchy.push_back(pipelineName);
         m_passHierarchy.push_back("CopyToSwapChain");
@@ -258,10 +259,8 @@ namespace AtomSampleViewer
             return;
         }
 
-        AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        defaultScene->RemoveRenderPipeline(m_cbPipeline->GetId());
-
-        defaultScene->AddRenderPipeline(m_originalPipeline);
+        m_scene->RemoveRenderPipeline(m_cbPipeline->GetId());
+        m_scene->AddRenderPipeline(m_originalPipeline);
 
         m_cbPipeline = nullptr;
         m_passHierarchy.clear();

@@ -70,6 +70,7 @@ namespace AtomSampleViewer
 
         // Create the RPI::Scene, add some feature processors
         RPI::SceneDescriptor sceneDesc;
+        sceneDesc.m_nameId = AZ::Name("SecondScene");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::SimplePointLightFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::SimpleSpotLightFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::CapsuleLightFeatureProcessor");
@@ -424,7 +425,6 @@ namespace AtomSampleViewer
     void MultiSceneExampleComponent::OnAllAssetsReadyActivate()
     {
         using namespace AZ;
-        RPI::ScenePtr scene = RPI::RPISystemInterface::Get()->GetDefaultScene();
 
         // Setup Main Mesh Entity
         {
@@ -440,7 +440,7 @@ namespace AtomSampleViewer
 
         // IBL
         {
-            m_defaultIbl.Init(scene.get());
+            m_defaultIbl.Init(m_scene);
         }
 
         if (SupportsMultipleWindows())

@@ -208,7 +208,8 @@ namespace AtomSampleViewer
             Data::Asset<AZ::RPI::ShaderAsset>& shaderAsset,
             RHI::Ptr<AZ::RHI::ShaderResourceGroupLayout>& srgLayout,
             RHI::ConstPtr<RHI::PipelineState>& pipelineState,
-            RHI::DrawListTag& drawListTag)
+            RHI::DrawListTag& drawListTag,
+            RPI::Scene* scene)
         {
             // Since the shader is using SV_VertexID and SV_InstanceID as VS input, we won't need to have vertex buffer.
             // Also, the index buffer is not needed with DrawLinear.
@@ -227,7 +228,6 @@ namespace AtomSampleViewer
             shaderVariant.ConfigurePipelineState(pipelineStateDescriptor);
             drawListTag = shader->GetDrawListTag();
 
-            RPI::Scene* scene = RPI::RPISystemInterface::Get()->GetDefaultScene().get();
             scene->ConfigurePipelineState(shader->GetDrawListTag(), pipelineStateDescriptor);
 
             pipelineStateDescriptor.m_inputStreamLayout.SetTopology(AZ::RHI::PrimitiveTopology::TriangleStrip);
@@ -245,7 +245,7 @@ namespace AtomSampleViewer
 
         // Create the example's main pipeline object
         {
-            CreatePipeline("Shaders/tonemappingexample/renderimage.azshader", "RenderImageSrg", m_shaderAsset, m_srgLayout, m_pipelineState, m_drawListTag);
+            CreatePipeline("Shaders/tonemappingexample/renderimage.azshader", "RenderImageSrg", m_shaderAsset, m_srgLayout, m_pipelineState, m_drawListTag, m_scene);
 
             // Set the input indices
             m_imageInputIndex = m_srgLayout->FindShaderInputImageIndex(Name("m_texture"));
@@ -288,7 +288,7 @@ namespace AtomSampleViewer
 
         // Submit draw packet
         AZStd::unique_ptr<const RHI::DrawPacket> drawPacket(drawPacketBuilder.End());
-        m_dynamicDraw->AddDrawPacket(RPI::RPISystemInterface::Get()->GetDefaultScene().get(), AZStd::move(drawPacket));
+        m_dynamicDraw->AddDrawPacket(m_scene, AZStd::move(drawPacket));
     }
 
     void TonemappingExampleComponent::UpdateCapturePassHierarchy()
