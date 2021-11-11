@@ -142,37 +142,6 @@ namespace AtomSampleViewer
         AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusConnect();
 
         PreloadFullscreenShader();
-
-
-        //AssetStatusTracker assetStatusTracker;
-        //assetStatusTracker.StartTracking();
-        //
-        //AZStd::string shaderSourcePath;
-        //AzFramework::StringFunc::Path::Join(m_relativeTempSourceFolder.c_str(), "Fullscreen.shader", shaderSourcePath);
-        //assetStatusTracker.ExpectAsset(shaderSourcePath, 1);
-        //
-        //// A short wait is necessary as the pipeline creation will fatally fail
-        //// if the "Fullscreen.azshader" doesn't exist.
-        //const uint32_t MaxWaitTimeMillis = 10000;
-        //const uint32_t MilliWaits = 50;
-        //uint32_t timeWaitMillis = 0;
-        //while (!assetStatusTracker.DidExpectedAssetsFinish())
-        //{
-        //    AZStd::this_thread::sleep_for(AZStd::chrono::milliseconds(MilliWaits));
-        //    timeWaitMillis += MilliWaits;
-        //    if (timeWaitMillis >= MaxWaitTimeMillis)
-        //    {
-        //        AZ_Error(LogName, false, "Failed to activate this test because exceeded wait time of %u milliseconds", MaxWaitTimeMillis);
-        //        return;
-        //    }
-        //}
-        //assetStatusTracker.StopTracking();
-
-        // The above wait time is just for shader recompilation, it is important to wait a little bit more
-        // for the shader asset to be discoverable when the FullscreenTriangle pass is loaded and tries
-        // to reference the shader. 1 second is plenty and generous.
-        //AZStd::this_thread::sleep_for(AZStd::chrono::milliseconds(1000));
-
     }
 
     void ShaderReloadTestComponent::PreloadFullscreenShader()
@@ -321,7 +290,7 @@ namespace AtomSampleViewer
         ImGui::Spacing();
 
         ImGui::Text("Captured Color:");
-        ImGui::Text(m_capturedColorAsString.c_str());
+        ImGui::Text("%s", m_capturedColorAsString.c_str());
 
         m_imguiSidebar.End();
     }
