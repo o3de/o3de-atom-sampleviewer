@@ -20,6 +20,7 @@
 
 #include <AzCore/Serialization/SerializeContext.h>
 #include <AzCore/Serialization/Utils.h>
+#include <AzCore/Settings/SettingsRegistryMergeUtils.h>
 #include <AzCore/std/sort.h>
 
 #include <AzFramework/IO/LocalFileIO.h>
@@ -136,12 +137,10 @@ namespace AtomSampleViewer
 
         AZ::TickBus::Handler::BusConnect();
 
-        const char* engineRoot = nullptr;
-        AzFramework::ApplicationRequests::Bus::BroadcastResult(engineRoot, &AzFramework::ApplicationRequests::GetEngineRoot);
-        if (engineRoot)
-        {
-            AzFramework::StringFunc::Path::Join(engineRoot, "Screenshots", m_screenshotFolder, true, false);
-        }
+        auto settingsRegistry = AZ::SettingsRegistry::Get();
+        AZ::IO::Path writableStoragePath;
+        settingsRegistry->Get(writableStoragePath.Native(), AZ::SettingsRegistryMergeUtils::FilePathKey_DevWriteStorage);
+        m_screenshotFolder = writableStoragePath / "Screenshots";
 
         m_directionalLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DirectionalLightFeatureProcessorInterface>();
 
@@ -259,16 +258,14 @@ namespace AtomSampleViewer
 
                 if (screenshotRequested)
                 {
-                    AZStd::string filePath;
-                    AZStd::string fileName = AZStd::string::format("screenshot_sponza_%llu.dds", m_frameCount);
-                    AzFramework::StringFunc::Path::Join(m_screenshotFolder.c_str(), fileName.c_str(), filePath, true, false);
-                    AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, filePath);
+                    AZ::IO::Path filePath = m_screenshotFolder / AZStd::string::format("screenshot_sponza_%llu.dds", m_frameCount);
+                    AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, filePath.Native());
                 }
 
                 if (m_frameCount == 1)
                 {
                     m_timeToFirstFrame = m_currentTimePointInSeconds - m_benchmarkStartTimePoint;
-                } 
+                }
 
                 CollectRunBenchmarkData(deltaTime, timePoint);
 
