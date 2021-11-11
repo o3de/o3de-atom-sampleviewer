@@ -85,14 +85,6 @@ namespace AtomSampleViewer
         // Load a default image
         QueueAssetPathForLoad("textures/tonemapping/hdr_test_pattern.exr.streamingimage");
 
-        const char* engineRoot = nullptr;
-        AZStd::string screenshotFolder;
-        AzFramework::ApplicationRequests::Bus::BroadcastResult(engineRoot, &AzFramework::ApplicationRequests::GetEngineRoot);
-        if (engineRoot)
-        {
-            AzFramework::StringFunc::Path::Join(engineRoot, "Screenshots", screenshotFolder, true, false);
-        }
-
         Data::Asset<RPI::AnyAsset> displayMapperAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::AnyAsset>("passes/DisplayMapperConfiguration.azasset", RPI::AssetUtils::TraceLevel::Error);
         const Render::DisplayMapperConfigurationDescriptor* displayMapperConfigurationDescriptor = RPI::GetDataFromAnyAsset<Render::DisplayMapperConfigurationDescriptor>(displayMapperAsset);
         if (displayMapperConfigurationDescriptor == nullptr)

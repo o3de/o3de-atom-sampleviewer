@@ -107,6 +107,7 @@
 #include <AzCore/Debug/Profiler.h>
 #include <AzCore/Debug/ProfilerBus.h>
 #include <AzCore/Serialization/SerializeContext.h>
+#include <AzCore/Settings/SettingsRegistryMergeUtils.h>
 #include <AzCore/std/smart_ptr/make_shared.h>
 #include <AzCore/std/algorithm.h>
 
@@ -420,25 +421,25 @@ namespace AtomSampleViewer
         }
 
         // Set default screenshot folder to relative path 'Screenshots'
-        AZStd::string screenshotFolder = "Screenshots";
+        AZ::IO::Path screenshotFolder = "Screenshots";
         // Get folder from command line if it exists
         static const char* screenshotFolderFlagName = "screenshotFolder";
         if (commandLine->HasSwitch(screenshotFolderFlagName))
         {
             screenshotFolder = commandLine->GetSwitchValue(screenshotFolderFlagName, 0);
-            AzFramework::StringFunc::Path::Normalize(screenshotFolder);
         }
 
-        if (AzFramework::StringFunc::Path::IsRelative(screenshotFolder.c_str()))
-        {
-            const char* engineRoot = nullptr;
-            AzFramework::ApplicationRequests::Bus::BroadcastResult(engineRoot, &AzFramework::ApplicationRequests::GetEngineRoot);
-            AzFramework::StringFunc::Path::Join(engineRoot, screenshotFolder.c_str(), screenshotFolder, true, false);
-        }
+        // Make the screenshot directory relative to the Writeable Storage Path
+        // The Path::operator/ smartly knows how to concatenate two absolute paths
+        // i.e <absolute path1> / <absolute path2> = <absolute path2>
+        auto settingsRegistry = AZ::SettingsRegistry::Get();
+        AZ::IO::Path writableStoragePath;
+        settingsRegistry->Get(writableStoragePath.Native(), AZ::SettingsRegistryMergeUtils::FilePathKey_DevWriteStorage);
+        screenshotFolder = writableStoragePath / screenshotFolder;
 
-        m_imguiFrameCaptureSaver.SetDefaultFolder(screenshotFolder);
+        m_imguiFrameCaptureSaver.SetDefaultFolder(screenshotFolder.Native());
         m_imguiFrameCaptureSaver.SetDefaultFileName("screenshot");
-        m_imguiFrameCaptureSaver.SetAvailableExtensions({"png", "ppm", "dds"});
+        m_imguiFrameCaptureSaver.SetAvailableExtensions({ "png", "ppm", "dds" });
         m_imguiFrameCaptureSaver.Activate();
 
         SampleComponentManagerRequestBus::Handler::BusConnect();

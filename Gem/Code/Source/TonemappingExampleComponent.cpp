@@ -10,6 +10,7 @@
 
 #include <AzCore/Component/Entity.h>
 #include <AzCore/IO/Path/Path.h>
+#include <AzCore/Settings/SettingsRegistryMergeUtils.h>
 #include <AzFramework/Components/TransformComponent.h>
 #include <AzFramework/Entity/EntityContextBus.h>
 
@@ -91,13 +92,10 @@ namespace AtomSampleViewer
         // Load a default image
         QueueAssetPathForLoad("textures/tonemapping/hdr_test_pattern.exr.streamingimage");
 
-        const char* engineRoot = nullptr;
-        AZStd::string screenshotFolder;
-        AzFramework::ApplicationRequests::Bus::BroadcastResult(engineRoot, &AzFramework::ApplicationRequests::GetEngineRoot);
-        if (engineRoot)
-        {
-            AzFramework::StringFunc::Path::Join(engineRoot, "Screenshots", screenshotFolder, true, false);
-        }
+        auto settingsRegistry = AZ::SettingsRegistry::Get();
+        AZ::IO::Path writableStoragePath;
+        settingsRegistry->Get(writableStoragePath.Native(), AZ::SettingsRegistryMergeUtils::FilePathKey_DevWriteStorage);
+        AZ::IO::Path screenshotFolder = writableStoragePath / "Screenshots";
 
         Data::Asset<RPI::AnyAsset> displayMapperAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::AnyAsset>("passes/DisplayMapperConfiguration.azasset", RPI::AssetUtils::TraceLevel::Error);
         const Render::DisplayMapperConfigurationDescriptor* displayMapperConfigurationDescriptor = RPI::GetDataFromAnyAsset<Render::DisplayMapperConfigurationDescriptor>(displayMapperAsset);
@@ -109,7 +107,7 @@ namespace AtomSampleViewer
         m_displayMapperConfiguration = *displayMapperConfigurationDescriptor;
         UpdateCapturePassHierarchy();
 
-        m_imguiFrameCaptureSaver.SetDefaultFolder(screenshotFolder);
+        m_imguiFrameCaptureSaver.SetDefaultFolder(screenshotFolder.Native());
         m_imguiFrameCaptureSaver.SetDefaultFileName("tonemap_capture");
         m_imguiFrameCaptureSaver.SetAvailableExtensions({ "dds" });
         m_imguiFrameCaptureSaver.Activate();
