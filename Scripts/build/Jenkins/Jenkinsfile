@@ -10,6 +10,7 @@ import groovy.json.JsonOutput
 PIPELINE_CONFIG_FILE = 'scripts/build/Jenkins/lumberyard.json'
 INCREMENTAL_BUILD_SCRIPT_PATH = 'scripts/build/bootstrap/incremental_build_util.py'
 PIPELINE_RETRY_ATTEMPTS = 3
+
 EMPTY_JSON = readJSON text: '{}'
 
 PROJECT_REPOSITORY_NAME = 'o3de-atom-sampleviewer'
@@ -21,14 +22,15 @@ ENGINE_BRANCH_DEFAULT = "${env.BRANCH_DEFAULT}" ?: "${env.BRANCH_NAME}"
 // Branches with build snapshots
 BUILD_SNAPSHOTS = ['development', 'stabilization/2110']
 
-// Build snapshots with empty snapshot (for use with 'SNAPSHOT' pipeline paramater)
+// Build snapshots with empty snapshot (for use with 'SNAPSHOT' pipeline parameter)
 BUILD_SNAPSHOTS_WITH_EMPTY = BUILD_SNAPSHOTS + ''
 
-// The default build snapshot to be selected in the 'SNAPSHOT' pipeline paramater
+// The default build snapshot to be selected in the 'SNAPSHOT' pipeline parameter
 DEFAULT_BUILD_SNAPSHOT = BUILD_SNAPSHOTS_WITH_EMPTY.get(0)
 
 // Branches with build snapshots as comma separated value string
 env.BUILD_SNAPSHOTS = BUILD_SNAPSHOTS.join(",")
+
 def pipelineProperties = []
 
 def pipelineParameters = [
@@ -291,7 +293,7 @@ def CheckoutRepo(boolean disableSubmodules = false) {
         env.CHANGE_ID = env.CHANGE_ID.trim()
         palRm('commitid')
 
-        // CHANGE_DATE is used by the installer to provide some ability to sort tagged builds in addition to BRANCH_NAME and CHANGE_ID
+            // CHANGE_DATE is used by the installer to provide some ability to sort tagged builds in addition to BRANCH_NAME and CHANGE_ID
         commitDateFmt = '%%cI'
         if (env.IS_UNIX) commitDateFmt = '%cI'
 
@@ -355,8 +357,6 @@ def PreBuildCommonSteps(Map pipelineConfig, String snapshot, String repositoryNa
         CheckoutRepo(disableSubmodules)
     }
     dir("${workspace}/${ENGINE_REPOSITORY_NAME}") {
-        CheckoutRepo(disableSubmodules)
-
         // Get python
         if(env.IS_UNIX) {
             sh label: 'Getting python',
@@ -680,8 +680,8 @@ class PipeStepJobData {
 }
 
 def CreateBuildJobs(Map pipelineConfig, def platform, def build_job, Map envVars, String branchName, String pipelineName, String repositoryName, String projectName) {
-    
-    // if this is a pipeline, split jobs based on the NODE_LABEL 
+
+    // if this is a pipeline, split jobs based on the NODE_LABEL
     if(build_job.value.steps) {
         def defaultLabel = envVars['NODE_LABEL']
         def lastNodeLable = ""
@@ -702,13 +702,13 @@ def CreateBuildJobs(Map pipelineConfig, def platform, def build_job, Map envVars
             //if node label defined
             if(platform.value.build_types[build_step] && platform.value.build_types[build_step].PIPELINE_ENV &&
                platform.value.build_types[build_step].PIPELINE_ENV['NODE_LABEL']) {
-               
+
                //if the last node label doen't match the new one, append it.
                if(platform.value.build_types[build_step].PIPELINE_ENV['NODE_LABEL'] != lastNodeLable) {
                     lastNodeLable = platform.value.build_types[build_step].PIPELINE_ENV['NODE_LABEL']
                     jobList.add(new PipeStepJobData(lastNodeLable))
                     currentIdx++
-                } 
+                }
             }
             //no label define, so it needs to run on the default node label
             else if(lastNodeLable != defaultLabel) { //if the last node is not the default, append default
@@ -719,7 +719,7 @@ def CreateBuildJobs(Map pipelineConfig, def platform, def build_job, Map envVars
             //add the build_step to the current node
             jobList[currentIdx].addStep(build_step)
         }
-        
+
         return {
             jobList.eachWithIndex{ element, idx ->
                 //update the node label + steps to the discovered data
@@ -735,6 +735,7 @@ def CreateBuildJobs(Map pipelineConfig, def platform, def build_job, Map envVars
         return CreateSingleNode(pipelineConfig, platform, build_job, envVars, branchName, pipelineName, repositoryName, projectName)
     }
 }
+
 def projectName = ''
 def pipelineName = ''
 def branchName = ''
@@ -753,6 +754,7 @@ try {
                     repositoryUrl = scm.getUserRemoteConfigs()[0].getUrl()
                     // repositoryName is the full repository name
                     repositoryName = (repositoryUrl =~ /https:\/\/github.com\/(.*)\.git/)[0][1]
+                    env.REPOSITORY_NAME = repositoryName
                     (projectName, pipelineName) = GetRunningPipelineName(env.JOB_NAME) // env.JOB_NAME is the name of the job given by Jenkins
                     env.PIPELINE_NAME = pipelineName
                     if(env.BRANCH_NAME) {
@@ -766,7 +768,7 @@ try {
                         if(BUILD_SNAPSHOTS.contains(env.CHANGE_TARGET)) {
                             snapshot = env.CHANGE_TARGET
                             echo "Snapshot for destination branch \"${env.CHANGE_TARGET}\" found."
-                        } else { 
+                        } else {
                             snapshot = DEFAULT_BUILD_SNAPSHOT
                             echo "Snapshot for destination branch \"${env.CHANGE_TARGET}\" does not exist, defaulting to snapshot \"${snapshot}\""
                         }
@@ -827,6 +829,7 @@ try {
                             }
                         }
                     }
+
                     pipelineProperties.add(parameters(pipelineParameters))
                     properties(pipelineProperties)
 
@@ -855,61 +858,12 @@ try {
         platform.value.build_types.each { build_job ->
             if (IsJobEnabled(branchName, build_job, pipelineName, platform.key)) {   // User can filter jobs, jobs are tagged by pipeline
                 def envVars = GetBuildEnvVars(platform.value.PIPELINE_ENV ?: EMPTY_JSON, build_job.value.PIPELINE_ENV ?: EMPTY_JSON, pipelineName)
-                envVars['JENKINS_JOB_NAME'] = env.JOB_NAME // Save original Jenkins job name to JENKINS_JOB_NAME
                 envVars['JOB_NAME'] = "${branchName}_${platform.key}_${build_job.key}" // backwards compatibility, some scripts rely on this
                 envVars['CMAKE_LY_PROJECTS'] = "../${PROJECT_REPOSITORY_NAME}"
                 def nodeLabel = envVars['NODE_LABEL']
                 someBuildHappened = true
 
-                buildConfigs["${platform.key} [${build_job.key}]"] = {
-                    node("${nodeLabel}") {
-                        if(isUnix()) { // Has to happen inside a node
-                            envVars['IS_UNIX'] = 1
-                        }
-                        withEnv(GetEnvStringList(envVars)) {
-                            def build_job_name = build_job.key
-                            try {
-                                CreateSetupStage(pipelineConfig, repositoryName, projectName, pipelineName, branchName, platform.key, build_job.key, envVars).call()
-
-                                if(build_job.value.steps) { //this is a pipe with many steps so create all the build stages
-                                    build_job.value.steps.each { build_step ->
-                                        build_job_name = build_step
-                                        CreateBuildStage(pipelineConfig,  platform.key, build_step, envVars).call()
-                                    }
-                                } else {
-                                    CreateBuildStage(pipelineConfig,  platform.key, build_job.key, envVars).call()
-                                }
-                            }
-                            catch(Exception e) {
-                                //  https://github.com/jenkinsci/jenkins/blob/master/core/src/main/java/hudson/model/Result.java
-                                //  {SUCCESS,UNSTABLE,FAILURE,NOT_BUILT,ABORTED}
-                                def currentResult = envVars['ON_FAILURE_MARK'] ?: 'FAILURE'
-                                if (currentResult == 'FAILURE') {
-                                    currentBuild.result = 'FAILURE'
-                                    error "FAILURE: ${e}"
-                                } else if (currentResult == 'UNSTABLE') {
-                                    currentBuild.result = 'UNSTABLE'
-                                    unstable(message: "UNSTABLE: ${e}")
-                                }
-                            }
-                            finally {
-                                def params = platform.value.build_types[build_job_name].PARAMETERS
-                                if (env.MARS_REPO && params && params.containsKey('TEST_METRICS') && params.TEST_METRICS == 'True') {
-                                    def output_directory = params.OUTPUT_DIRECTORY
-                                    def configuration = params.CONFIGURATION
-                                    CreateTestMetricsStage(pipelineConfig, branchName, envVars, build_job_name, output_directory, configuration).call()
-                                }
-                                if (params && params.containsKey('TEST_RESULTS') && params.TEST_RESULTS == 'True') {
-                                    CreateExportTestResultsStage(pipelineConfig,  platform.key, build_job_name, envVars, params).call()
-                                }
-                                if (params && params.containsKey('TEST_SCREENSHOTS') && params.TEST_SCREENSHOTS == 'True' && currentResult == 'FAILURE') {
-                                     CreateExportTestScreenshotsStage(pipelineConfig,  platform.key, build_job_name, envVars, params).call()
-                                }
-                                CreateTeardownStage(envVars).call()
-                            }
-                        }
-                    }
-                }
+                buildConfigs["${platform.key} [${build_job.key}]"] = CreateBuildJobs(pipelineConfig, platform, build_job, envVars, branchName, pipelineName, repositoryName, projectName)
             }
         }
     }
