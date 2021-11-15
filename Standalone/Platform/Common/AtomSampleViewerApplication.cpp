@@ -13,6 +13,7 @@
 #include <AzCore/PlatformIncl.h>
 #include <AzCore/Component/ComponentApplication.h>
 #include <AzCore/Debug/Trace.h>
+#include <AzCore/Time/ITime.h>
 
 #include <AzFramework/Asset/AssetSystemBus.h>
 #include <AzFramework/Asset/AssetProcessorMessages.h>
@@ -202,11 +203,11 @@ namespace AtomSampleViewer
         Application::Destroy();
     }
 
-    void AtomSampleViewerApplication::Tick(float deltaOverride)
+    void AtomSampleViewerApplication::Tick()
     {
         TickSystem();
-        Application::Tick(deltaOverride);
-        TickTimeoutShutdown(m_deltaTime); // deltaOverride comes in as -1.f in AtomSampleViewerApplication
+        Application::Tick();
+        TickTimeoutShutdown();
     }
 
     void AtomSampleViewerApplication::ReadTimeoutShutdown()
@@ -220,11 +221,12 @@ namespace AtomSampleViewer
         }
     }
 
-    void AtomSampleViewerApplication::TickTimeoutShutdown(float deltaTimeInSeconds)
+    void AtomSampleViewerApplication::TickTimeoutShutdown()
     {
         if (m_secondsBeforeShutdown > 0.f)
         {
-            m_secondsBeforeShutdown -= deltaTimeInSeconds;
+            const AZ::TimeUs deltaTimeUs = AZ::GetRealTickDeltaTimeUs();
+            m_secondsBeforeShutdown -= AZ::TimeUsToSeconds(deltaTimeUs);
             if (m_secondsBeforeShutdown <= 0.f)
             {
                 AZ_Printf("AtomSampleViewer", "Timeout reached, shutting down");
