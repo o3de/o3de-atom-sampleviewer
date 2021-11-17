@@ -100,6 +100,7 @@
 #include <DiffuseGIExampleComponent.h>
 #include <SSRExampleComponent.h>
 #include <ShaderReloadTestComponent.h>
+#include <HighInstanceExampleComponent.h>
 
 #include <Atom/Bootstrap/DefaultWindowBus.h>
 
@@ -274,6 +275,7 @@ namespace AtomSampleViewer
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/Decals", azrtti_typeid<DecalExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/DynamicDraw", azrtti_typeid<DynamicDrawExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/DynamicMaterialTest", azrtti_typeid<DynamicMaterialTestComponent>() ));
+        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/HighInstanceTest", azrtti_typeid<HighInstanceTestComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/MaterialHotReloadTest", azrtti_typeid<MaterialHotReloadTestComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/Mesh", azrtti_typeid<MeshExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/MSAA", azrtti_typeid<MSAA_RPI_ExampleComponent>() ));
@@ -1290,6 +1292,7 @@ namespace AtomSampleViewer
         //Add debug camera and controller components
         AZ::Debug::CameraComponentConfig cameraConfig(m_windowContext);
         cameraConfig.m_fovY = AZ::Constants::QuarterPi;
+        cameraConfig.m_depthFar = 1000.0f;
 
         m_cameraEntity->CreateComponent(azrtti_typeid<AZ::Debug::CameraComponent>())
             ->SetConfiguration(cameraConfig);

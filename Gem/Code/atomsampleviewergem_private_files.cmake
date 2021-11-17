@@ -120,6 +120,8 @@ set(FILES
     Source/EntityUtilityFunctions.h
     Source/ExposureExampleComponent.cpp
     Source/ExposureExampleComponent.h
+    Source/HighInstanceExampleComponent.cpp
+    Source/HighInstanceExampleComponent.h
     Source/LightCullingExampleComponent.cpp
     Source/LightCullingExampleComponent.h
     Source/MaterialHotReloadTestComponent.cpp
