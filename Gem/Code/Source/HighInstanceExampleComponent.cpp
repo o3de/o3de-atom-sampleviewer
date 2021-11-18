@@ -40,9 +40,9 @@ namespace AtomSampleViewer
 
 
     HighInstanceTestComponent::HighInstanceTestComponent() 
-        : m_materialBrowser("@user@/AssetLoadTestComponent/material_browser.xml")
-        , m_modelBrowser("@user@/AssetLoadTestComponent/model_browser.xml")
-        , m_imguiSidebar("@user@/AssetLoadTestComponent/sidebar.xml")
+        : m_materialBrowser("@user@/HighInstanceTestComponent/material_browser.xml")
+        , m_modelBrowser("@user@/HighInstanceTestComponent/model_browser.xml")
+        , m_imguiSidebar("@user@/HighInstanceTestComponent/sidebar.xml")
     {
         m_sampleName = "HighInstanceTest";
 

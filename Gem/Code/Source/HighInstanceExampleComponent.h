@@ -16,9 +16,9 @@
 namespace AtomSampleViewer
 {
     /*
-        This test loads a configurable lattice of entities with randomized meshes and materials.
+        This test loads a 22x22x22 lattice of entities with randomized meshes and materials.
 
-        The assets that are applied to the entities are chosen from a configurable 
+        The assets that are applied to the entities are chosen from the 
         "allow-list" of models and materials.
     */
     class HighInstanceTestComponent final
