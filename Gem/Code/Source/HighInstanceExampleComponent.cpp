@@ -18,6 +18,7 @@
 
 #include <AzCore/Debug/EventTrace.h>
 #include <AzCore/Serialization/SerializeContext.h>
+#include <AzFramework/Windowing/WindowBus.h>
 
 #include <RHI/BasicRHIComponent.h>
 
@@ -133,10 +134,36 @@ namespace AtomSampleViewer
             ATOMSAMPLEVIEWER_TRAIT_HIGH_INSTANCE_COUNT_TEST_COMPONENT_LATTICE_SIZE_Y, 
             ATOMSAMPLEVIEWER_TRAIT_HIGH_INSTANCE_COUNT_TEST_COMPONENT_LATTICE_SIZE_Z);
         Base::Activate();
+
+        AzFramework::NativeWindowHandle windowHandle = nullptr;
+        AzFramework::WindowSystemRequestBus::BroadcastResult(
+            windowHandle,
+            &AzFramework::WindowSystemRequestBus::Events::GetDefaultWindowHandle);
+
+        AzFramework::WindowRequestBus::EventResult(
+            m_preActivateVSyncInterval, 
+            windowHandle, 
+            &AzFramework::WindowRequestBus::Events::GetSyncInterval);
+
+        AzFramework::WindowRequestBus::Event(
+            windowHandle, 
+            &AzFramework::WindowRequestBus::Events::SetSyncInterval,
+            0);
+
     }
 
     void HighInstanceTestComponent::Deactivate()
     {
+        AzFramework::NativeWindowHandle windowHandle = nullptr;
+        AzFramework::WindowSystemRequestBus::BroadcastResult(
+            windowHandle,
+            &AzFramework::WindowSystemRequestBus::Events::GetDefaultWindowHandle);
+
+        AzFramework::WindowRequestBus::Event(
+            windowHandle, 
+            &AzFramework::WindowRequestBus::Events::SetSyncInterval,
+            m_preActivateVSyncInterval);
+
         m_materialBrowser.Deactivate();
         m_modelBrowser.Deactivate();
 

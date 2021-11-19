@@ -16,7 +16,7 @@
 namespace AtomSampleViewer
 {
     /*
-        This test loads a 22x22x22 lattice of entities with randomized meshes and materials.
+        This test loads a 22x22x22 lattice of entities with randomized meshes and materials. This test is used as a simple cpu performance stress test for Atom.
 
         The assets that are applied to the entities are chosen from the 
         "allow-list" of models and materials.
@@ -86,6 +86,7 @@ namespace AtomSampleViewer
         using MaterialAssetSet = AZStd::set<AZ::Data::Asset<AZ::RPI::MaterialAsset>, Compare>;
         MaterialAssetSet m_cachedMaterials;
         uint32_t m_pinnedMaterialCount = 0;
+        uint32_t m_preActivateVSyncInterval = 0;
         
         size_t m_lastPinnedModelCount = 0;
         bool m_updateTransformEnabled = false;
