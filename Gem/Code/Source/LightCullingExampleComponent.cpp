@@ -38,15 +38,13 @@
 #include <Atom/RPI.Reflect/Asset/AssetUtils.h>
 #include <RHI/BasicRHIComponent.h>
 
-#include <LightCullingExampleComponent_Traits_Platform.h>
-
 namespace AtomSampleViewer
 {
     using namespace AZ;
     using namespace AZ::Render;
     using namespace AZ::RPI;
 
-    static const char* WorldModelName = ATOMSAMPLEVIEWER_TRAIT_LIGHT_CULLING_SAMPLE_WORLD_MODEL_NAME;
+    static const char* WorldModelName = "Objects/Sponza.azmodel";
 
     static const char* TransparentModelName = "Objects/ShaderBall_simple.azmodel";
     static const char* TransparentMaterialName = "materials/DefaultPBRTransparent.azmaterial";
@@ -98,7 +96,7 @@ namespace AtomSampleViewer
         m_sampleName = "LightCullingExampleComponent";
 
         // Add some initial lights to illuminate the scene
-        m_settings[(int)LightType::Point].m_numActive = 150;
+        m_settings[(int)LightType::Point].m_numActive = 10;
         m_settings[(int)LightType::Disk].m_intensity = 40.0f;
         m_settings[(int)LightType::Capsule].m_intensity = 10.0f;
     }

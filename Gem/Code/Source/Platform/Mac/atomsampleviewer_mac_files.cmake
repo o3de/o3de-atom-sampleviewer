@@ -11,7 +11,6 @@ set(FILES
     AtomSampleViewerOptions_Mac.cpp
     EntityLatticeTestComponent_Traits_Platform.h
     MultiThreadComponent_Traits_Platform.h
-    LightCullingExampleComponent_Traits_Platform.h
     SceneReloadSoakTestComponent_Traits_Platform.h
     SSRExampleComponent_Traits_Platform.h
     TriangleConstantBufferExampleComponent_Traits_Platform.h
