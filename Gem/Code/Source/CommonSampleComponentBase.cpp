@@ -91,6 +91,18 @@ namespace AtomSampleViewer
             }
         }
 
+        // set the initial lighting preset
+        static const char* InitialLightingPresetName = "Palermo Sidewalk";
+        for (uint32_t index = 0; index < m_lightingPresets.size(); ++index)
+        {
+            if (m_lightingPresets[index].m_displayName == InitialLightingPresetName)
+            {
+                m_currentLightingPresetIndex = index;
+                OnLightingPresetSelected(m_lightingPresets[m_currentLightingPresetIndex], m_useAlternateSkybox);
+                break;
+            }
+        }
+
         AZ::TransformNotificationBus::MultiHandler::BusConnect(m_cameraEntityId);
         AZ::EntityBus::MultiHandler::BusConnect(m_postProcessEntity->GetId());
     }
