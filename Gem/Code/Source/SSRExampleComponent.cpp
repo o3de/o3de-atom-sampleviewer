@@ -46,17 +46,7 @@ namespace AtomSampleViewer
         CreateModels();
         CreateGroundPlane();
 
-        // IBL
-        m_defaultIbl.Init(m_scene);
-
-        // skybox
-        const constexpr char* SkyboxAssetPath = "textures/sampleenvironment/example_iblskyboxcm.dds.streamingimage";
-        m_skyboxImageAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::StreamingImageAsset>(SkyboxAssetPath, AZ::RPI::AssetUtils::TraceLevel::Assert);
-
-        AZ::Render::SkyBoxFeatureProcessorInterface* skyboxFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::SkyBoxFeatureProcessorInterface>();
-        skyboxFeatureProcessor->Enable(true);
-        skyboxFeatureProcessor->SetSkyboxMode(AZ::Render::SkyBoxMode::Cubemap);
-        skyboxFeatureProcessor->SetCubemap(AZ::RPI::StreamingImage::FindOrCreate(m_skyboxImageAsset));
+        InitLightingPresets(true);
 
         // enable the SSR pass in the pipeline
         EnableSSR(true);
@@ -67,7 +57,7 @@ namespace AtomSampleViewer
         // disable the SSR pass in the pipeline
         EnableSSR(false);
 
-        m_defaultIbl.Reset();
+        ShutdownLightingPresets();
 
         GetMeshFeatureProcessor()->ReleaseMesh(m_statueMeshHandle);
         GetMeshFeatureProcessor()->ReleaseMesh(m_boxMeshHandle);
@@ -140,10 +130,10 @@ namespace AtomSampleViewer
             materialName = AZStd::string::format("materials/ssrexample/groundplanealuminum.azmaterial");
             break;
         case 2:
-            materialName = AZStd::string::format("materials/ssrexample/groundplanewood.azmaterial");
+            materialName = AZStd::string::format("materials/presets/pbr/default_grid.azmaterial");
             break;
         default:
-            materialName = AZStd::string::format("materials/presets/pbr/default_grid.azmaterial");
+            materialName = AZStd::string::format("materials/ssrexample/groundplanemirror.azmaterial");
             break;
         }
 
@@ -192,12 +182,15 @@ namespace AtomSampleViewer
         bool materialChanged = false;
         materialChanged |= ScriptableImGui::RadioButton("Chrome", &m_groundPlaneMaterial, 0);
         materialChanged |= ScriptableImGui::RadioButton("Aluminum", &m_groundPlaneMaterial, 1);
-        materialChanged |= ScriptableImGui::RadioButton("Wood", &m_groundPlaneMaterial, 2);
-        materialChanged |= ScriptableImGui::RadioButton("Default Grid", &m_groundPlaneMaterial, 3);
+        materialChanged |= ScriptableImGui::RadioButton("Default Grid", &m_groundPlaneMaterial, 2);
+        materialChanged |= ScriptableImGui::RadioButton("Mirror", &m_groundPlaneMaterial, 3);
         if (materialChanged)
         {
             CreateGroundPlane();
         }
+
+        ImGui::NewLine();
+        ImGuiLightingPreset();
 
         m_imguiSidebar.End();
     }
