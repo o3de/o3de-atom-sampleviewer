@@ -1,5 +1,5 @@
 {
-    "Source": "MRTTarget",
+    "Source": "MRTTarget.azsl",
 
     "DepthStencilState": {
         "Depth": {

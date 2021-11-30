@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -125,7 +126,6 @@ namespace AtomSampleViewer
         static const AZ::Render::ShadowFilterMethod s_shadowFilterMethods[];
         static const char* s_shadowFilterMethodLabels[];
         int m_shadowFilterMethodIndex = 0; // filter method is None.
-        float m_boundaryWidth = 0.03f; // 3cm
         int m_predictionSampleCount = 4;
         int m_filteringSampleCount = 16;
 

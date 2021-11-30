@@ -1,5 +1,5 @@
 {
-    "Source": "DualSourceBlending",
+    "Source": "DualSourceBlending.azsl",
 
     "DepthStencilState": {
         "Depth": {

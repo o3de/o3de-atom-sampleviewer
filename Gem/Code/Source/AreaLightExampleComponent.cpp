@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -62,16 +63,15 @@ namespace AtomSampleViewer
     void AreaLightExampleComponent::Activate()
     {
         // Get Feature processors
-        AZ::RPI::ScenePtr scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        m_meshFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::MeshFeatureProcessorInterface>();
-        m_pointLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::PointLightFeatureProcessorInterface>();
-        m_diskLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DiskLightFeatureProcessorInterface>();
-        m_capsuleLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::CapsuleLightFeatureProcessorInterface>();
-        m_polygonLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::PolygonLightFeatureProcessorInterface>();
-        m_quadLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::QuadLightFeatureProcessorInterface>();
-        m_skyBoxFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::SkyBoxFeatureProcessorInterface>();
+        m_meshFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::MeshFeatureProcessorInterface>();
+        m_pointLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::PointLightFeatureProcessorInterface>();
+        m_diskLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DiskLightFeatureProcessorInterface>();
+        m_capsuleLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::CapsuleLightFeatureProcessorInterface>();
+        m_polygonLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::PolygonLightFeatureProcessorInterface>();
+        m_quadLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::QuadLightFeatureProcessorInterface>();
+        m_skyBoxFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::SkyBoxFeatureProcessorInterface>();
 
-        m_auxGeom = AZ::RPI::AuxGeomFeatureProcessorInterface::GetDrawQueueForScene(scene);
+        m_auxGeom = AZ::RPI::AuxGeomFeatureProcessorInterface::GetDrawQueueForScene(m_scene);
 
         // Create background
         m_skyBoxFeatureProcessor->SetSkyboxMode(AZ::Render::SkyBoxMode::Cubemap);
@@ -99,7 +99,7 @@ namespace AtomSampleViewer
             azrtti_typeid<AZ::Debug::NoClipControllerComponent>());
 
         // Sidebar
-        m_materialBrowser.SetFilter([this](const AZ::Data::AssetInfo& assetInfo)
+        m_materialBrowser.SetFilter([](const AZ::Data::AssetInfo& assetInfo)
             {
                 return assetInfo.m_assetType == azrtti_typeid<AZ::RPI::MaterialAsset>() &&
                     assetInfo.m_assetId.m_subId == 0; // no materials generated from models.
@@ -368,7 +368,7 @@ namespace AtomSampleViewer
             TransformVertices(points, m_config.GetRotationQuaternion(), position);
 
             AZ::Vector3 direction = m_config.GetRotationQuaternion().TransformVector(AZ::Vector3::CreateAxisZ());
-            m_polygonLightFeatureProcessor->SetPolygonPoints(handle, points.data(), points.size(), direction);
+            m_polygonLightFeatureProcessor->SetPolygonPoints(handle, points.data(), static_cast<uint32_t>(points.size()), direction);
         }
     }
 
@@ -436,7 +436,7 @@ namespace AtomSampleViewer
         for (uint32_t i = 0; i < vertexCount; ++i)
         {
             // Get a point on the circle and scale it by the min or max radius for every other point.
-            AZ::Vector3 point = GetCirclePoint(i, vertexCount) * minMaxRadius[i % 2];
+            AZ::Vector3 point = GetCirclePoint(static_cast<float>(i), static_cast<float>(vertexCount)) * minMaxRadius[i % 2];
             points.push_back(point);
         }
         return points;
@@ -452,8 +452,8 @@ namespace AtomSampleViewer
         {
             uint32_t nextI = (i + 1) % vertexCount;
 
-            AZ::Vector3 p0 = GetCirclePoint(i, vertexCount) * minMaxRadius[i % 2];
-            AZ::Vector3 p1 = GetCirclePoint(nextI, vertexCount) * minMaxRadius[nextI % 2];
+            AZ::Vector3 p0 = GetCirclePoint(static_cast<float>(i), static_cast<float>(vertexCount)) * minMaxRadius[i % 2];
+            AZ::Vector3 p1 = GetCirclePoint(static_cast<float>(nextI), static_cast<float>(vertexCount)) * minMaxRadius[nextI % 2];
 
             tris.push_back(p0);
             tris.push_back(p1);
@@ -833,7 +833,7 @@ namespace AtomSampleViewer
                 AZ::RPI::AuxGeomDraw::AuxGeomDynamicDrawArguments args;
                 args.m_colorCount = 1;
                 args.m_colors = &nitsColor;
-                args.m_vertCount = tris.size();
+                args.m_vertCount = static_cast<uint32_t>(tris.size());
                 args.m_verts = tris.data();
                 m_auxGeom->DrawTriangles(args);
                 break;

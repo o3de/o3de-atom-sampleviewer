@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -57,6 +58,9 @@ namespace AtomSampleViewer
         //! Clear all lighting presets.
         void ClearLightingPresets();
 
+        //! Reset internal scene related data
+        void ResetScene();
+
         //! Apply lighting presets to the scene.
         //! Derived samples can override this function to have custom behaviors.
         virtual void OnLightingPresetSelected(const AZ::Render::LightingPreset& preset, bool useAltSkybox);
@@ -86,6 +90,8 @@ namespace AtomSampleViewer
 
         AZStd::string m_sampleName;
 
+        AZ::RPI::Scene* m_scene = nullptr;
+
     private:
         // AZ::TransformNotificationBus::MultiHandler overrides...
         void OnTransformChanged(const AZ::Transform&, const AZ::Transform&) override;
@@ -113,6 +119,7 @@ namespace AtomSampleViewer
         constexpr static int32_t InvalidLightingPresetIndex = -1;
         int32_t m_currentLightingPresetIndex = InvalidLightingPresetIndex;
         bool m_useAlternateSkybox = false; //!< LightingPresets have an alternate skybox that can be used, when this is true. This is usually a blurred version of the primary skybox.
+
     };
 
 } // namespace AtomSampleViewer

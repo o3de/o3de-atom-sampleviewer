@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -271,8 +272,7 @@ namespace AtomSampleViewer
 
             // Set the buffer stream
             RHI::InputStreamLayout layout;
-            const ShaderVariant& shaderVariant = m_shader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId);
-            m_model->GetLods()[lodModel]->GetStreamsForMesh(layout, subMeshInstance.bufferStreamViewArray, nullptr, shaderVariant.GetInputContract(), subMeshIdx);
+            m_model->GetLods()[lodModel]->GetStreamsForMesh(layout, subMeshInstance.bufferStreamViewArray, nullptr, m_shader->GetInputContract(), subMeshIdx);
         }
     }
 
@@ -388,14 +388,10 @@ namespace AtomSampleViewer
 
         // Set up the SRGs
         {
-            const char* floatBufferSrgPath = "shaders/rhi/bindlessprototypesrg_floatbuffersrg.azsrg";
-            const char* imageSrgPath = "shaders/rhi/bindlessprototypesrg_imagesrg.azsrg";
-
             // Set the FloatBufferSrg
-            m_bindlessSrg = std::make_unique<BindlessSrg>(BindlessSrg({
-                {floatBufferSrgPath, m_floatBufferSrgName},
-                {imageSrgPath, m_imageSrgName}
-                }));
+            m_bindlessSrg = std::make_unique<BindlessSrg>(
+                BindlessSrg(m_shader, {m_floatBufferSrgName, m_imageSrgName})
+            );
         }
 
         // Create the BufferPool
@@ -424,14 +420,14 @@ namespace AtomSampleViewer
             const uint32_t meshIndex = 0u;
             RHI::InputStreamLayout layout;
             ModelLod::StreamBufferViewList streamBufferView;
-            const ShaderVariant& shaderVariant = m_shader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId);
-            m_model->GetLods()[m_modelLod]->GetStreamsForMesh(layout, streamBufferView, nullptr, shaderVariant.GetInputContract(), meshIndex);
+            m_model->GetLods()[m_modelLod]->GetStreamsForMesh(layout, streamBufferView, nullptr, m_shader->GetInputContract(), meshIndex);
             // Set the pipeline state
             {
                 RHI::PipelineStateDescriptorForDraw pipelineStateDescriptor;
                 // Take layout of first object
                 pipelineStateDescriptor.m_inputStreamLayout = layout;
 
+                const ShaderVariant& shaderVariant = m_shader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId);
                 shaderVariant.ConfigurePipelineState(pipelineStateDescriptor);
 
                 RHI::RenderAttachmentLayoutBuilder attachmentsBuilder;
@@ -582,9 +578,9 @@ namespace AtomSampleViewer
                     drawItem.m_arguments = subMesh.m_mesh->m_drawArguments;
                     drawItem.m_pipelineState = m_pipelineState.get();
                     drawItem.m_indexBufferView = &subMesh.m_mesh->m_indexBufferView;
-                    drawItem.m_shaderResourceGroupCount = RHI::ArraySize(shaderResourceGroups);
+                    drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                     drawItem.m_shaderResourceGroups = shaderResourceGroups;
-                    drawItem.m_streamBufferViewCount = static_cast<uint32_t>(subMesh.bufferStreamViewArray.size());
+                    drawItem.m_streamBufferViewCount = static_cast<uint8_t>(subMesh.bufferStreamViewArray.size());
                     drawItem.m_streamBufferViews = subMesh.bufferStreamViewArray.data();
 
                     // Submit the triangle draw item.
@@ -693,23 +689,6 @@ namespace AtomSampleViewer
             AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> srg = BasicRHIComponent::CreateShaderResourceGroup(shader, srgName, InternalBP::SampleName);
 
             m_srgMap[srgId] = srg;
-        }
-    }
-
-    BindlessPrototypeExampleComponent::BindlessSrg::BindlessSrg(AZStd::vector<SrgPathId> srgPathIdArray)
-    {
-        for (const SrgPathId& srgPathId : srgPathIdArray)
-        {
-            Data::AssetId srgAssetId;
-            Data::AssetCatalogRequestBus::BroadcastResult(
-                srgAssetId, &Data::AssetCatalogRequestBus::Events::GetAssetIdByPath,
-                srgPathId.first, azrtti_typeid<ShaderResourceGroupAsset>(), false);
-            AZ_Assert(srgAssetId.IsValid(), "Failed to get model asset id: %s", srgPathId.first);
-
-            AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> srg = InternalBP::CreateResourceImmediate<ShaderResourceGroupAsset, ShaderResourceGroup>(srgAssetId);
-
-            AZ::Name id(srgPathId.second);
-            m_srgMap[id] = srg;
         }
     }
 

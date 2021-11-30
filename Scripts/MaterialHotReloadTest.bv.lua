@@ -1,7 +1,8 @@
 ----------------------------------------------------------------------------------------------------
 --
--- Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
--- 
+-- Copyright (c) Contributors to the Open 3D Engine Project.
+-- For complete copyright and license terms please see the LICENSE at the root of this distribution.
+--
 -- SPDX-License-Identifier: Apache-2.0 OR MIT
 --
 --
@@ -22,27 +23,25 @@ function SetColorRed()
     AssetTracking_Start()
     AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.material")
     SetImguiValue('ColorA = Red', true)
-    AssetTracking_IdleUntilExpectedAssetsFinish(5)
+    AssetTracking_IdleUntilExpectedAssetsFinish(10)
     IdleSeconds(0.25) -- Idle for a bit to give time for the asset to reload
 end
 
 function SetBlendingOn()
     AssetTracking_Start()
     SetImguiValue('Blending On', true)
-    AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.material")
     AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.materialtype")
     AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.shader")
-    AssetTracking_IdleUntilExpectedAssetsFinish(60)
+    AssetTracking_IdleUntilExpectedAssetsFinish(10)
     IdleSeconds(1) -- Idle for a bit to give time for the assets to reload
 end
 
 function SetBlendingOff()
     AssetTracking_Start()
     SetImguiValue('Blending Off', true)
-    AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.material")
     AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.materialtype")
     AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.shader")
-    AssetTracking_IdleUntilExpectedAssetsFinish(60)
+    AssetTracking_IdleUntilExpectedAssetsFinish(10)
     IdleSeconds(1) -- Idle for a bit to give time for the assets to reload
 end
 
@@ -54,31 +53,29 @@ CaptureScreenshot(g_screenshotOutputFolder .. '/02_Red.png')
 AssetTracking_Start()
 SetImguiValue('ColorA = Blue', true)
 AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.material")
-AssetTracking_IdleUntilExpectedAssetsFinish(5)
+AssetTracking_IdleUntilExpectedAssetsFinish(10)
 IdleSeconds(0.25) -- Idle for a bit to give time for the asset to reload
 CaptureScreenshot(g_screenshotOutputFolder .. '/03_Blue.png')
 
 AssetTracking_Start()
 SetImguiValue('Default Colors', true)
 AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.material")
-AssetTracking_IdleUntilExpectedAssetsFinish(5)
+AssetTracking_IdleUntilExpectedAssetsFinish(10)
 IdleSeconds(0.25) -- Idle for a bit to give time for the asset to reload
 CaptureScreenshot(g_screenshotOutputFolder .. '/04_DefaultAgain.png')
 
 AssetTracking_Start()
 SetImguiValue('Wavy Lines', true)
-AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.material")
 AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.materialtype")
-AssetTracking_IdleUntilExpectedAssetsFinish(5)
+AssetTracking_IdleUntilExpectedAssetsFinish(10)
 IdleSeconds(0.25) -- Idle for a bit to give time for the assets to reload
 CaptureScreenshot(g_screenshotOutputFolder .. '/05_WavyLines.png')
 
 AssetTracking_Start()
 SetImguiValue('Vertical Pattern', true)
-AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.material")
 AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.materialtype")
 AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.shader")
-AssetTracking_IdleUntilExpectedAssetsFinish(60)
+AssetTracking_IdleUntilExpectedAssetsFinish(10)
 IdleSeconds(1) -- Idle for a bit to give time for the assets to reload
 CaptureScreenshot(g_screenshotOutputFolder .. '/06_VerticalPattern.png')
 
@@ -89,7 +86,7 @@ CaptureScreenshot(g_screenshotOutputFolder .. '/07_BlendingOn.png')
 AssetTracking_Start()
 SetImguiValue('ShaderVariantList/All', true)
 AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.shadervariantlist", 3) -- Waiting for 3 products, the list asset and two variant assets
-AssetTracking_IdleUntilExpectedAssetsFinish(60)
+AssetTracking_IdleUntilExpectedAssetsFinish(10)
 IdleSeconds(1) -- Idle for a bit to give time for the assets to reload
 CaptureScreenshot(g_screenshotOutputFolder .. '/08_Variants_All.png')
 
@@ -97,7 +94,7 @@ CaptureScreenshot(g_screenshotOutputFolder .. '/08_Variants_All.png')
 AssetTracking_Start()
 SetImguiValue('ShaderVariantList/Only Straight Lines', true)
 AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.shadervariantlist", 2) -- Waiting for 2 products, the list asset and one variant assets
-AssetTracking_IdleUntilExpectedAssetsFinish(60)
+AssetTracking_IdleUntilExpectedAssetsFinish(10)
 IdleSeconds(0.25) -- Idle for a bit to give time for the assets to reload
 CaptureScreenshot(g_screenshotOutputFolder .. '/09_Variants_OnlyStraightLines.png')
 
@@ -105,7 +102,7 @@ CaptureScreenshot(g_screenshotOutputFolder .. '/09_Variants_OnlyStraightLines.pn
 AssetTracking_Start()
 SetImguiValue('ShaderVariantList/Only Wavy Lines', true)
 AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.shadervariantlist", 2) -- Waiting for 2 products, the list asset and one variant assets
-AssetTracking_IdleUntilExpectedAssetsFinish(60)
+AssetTracking_IdleUntilExpectedAssetsFinish(10)
 IdleSeconds(0.25) -- Idle for a bit to give time for the assets to reload
 CaptureScreenshot(g_screenshotOutputFolder .. '/10_Variants_OnlyWavyLines.png')
 
@@ -127,7 +124,7 @@ SetBlendingOff()
 AssetTracking_Start()
 SetImguiValue('ShaderVariantList/All', true)
 AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.shadervariantlist", 3) -- Waiting for 3 products, the list asset and two variant assets
-AssetTracking_IdleUntilExpectedAssetsFinish(60)
+AssetTracking_IdleUntilExpectedAssetsFinish(10)
 IdleSeconds(1) -- Idle for a bit to give time for the assets to reload
 CaptureScreenshot(g_screenshotOutputFolder .. '/13_Variants_All.png')
 -- Now that the material is using a fully-baked variant, modify the .azsl file to force *everything* to rebuild. In the failure case, the runtime
@@ -137,10 +134,9 @@ AssetTracking_Start()
 SetImguiValue('Horizontal Pattern', true)
 -- Note that here we explicitly do NOT wait for HotReloadTest.shadervariantlist even though the ShaderVariantAssets will be rebuild here too; 
 -- part of this test is to ensure the updated shader code is used as soon as the root variant is available.
-AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.material")
 AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.materialtype")
 AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.shader")
-AssetTracking_IdleUntilExpectedAssetsFinish(60)
+AssetTracking_IdleUntilExpectedAssetsFinish(10)
 -- We want this idle to be short enough that the ShaderVariantAssets don't have time to finish building before we take the screenshot, as part
 -- of the validation that the root variant gets applied asap. But it also needs to be long enough to account for some delay between the
 -- AssetTracking utility and the asset system triggering the reload. We should avoid increasing this if possible (but maybe we'll have no 

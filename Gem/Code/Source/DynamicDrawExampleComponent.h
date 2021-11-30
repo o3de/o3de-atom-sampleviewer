@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -58,6 +59,10 @@ namespace AtomSampleViewer
         AZ::RHI::Ptr<AZ::RPI::DynamicDrawContext> m_dynamicDraw;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_contextSrg;
 
+        // Two dynamic draw for same pass to test sorting
+        AZ::RHI::Ptr<AZ::RPI::DynamicDrawContext> m_dynamicDraw1ForPass;
+        AZ::RHI::Ptr<AZ::RPI::DynamicDrawContext> m_dynamicDraw2ForPass;
+
         ImGuiSidebar m_imguiSidebar;
 
         bool m_showCullModeNull = true;
@@ -67,6 +72,7 @@ namespace AtomSampleViewer
         bool m_showAlphaAdditive = true;
         bool m_showLineList = true;
         bool m_showPerDrawViewport = true;
+        bool m_showSorting = true;
 
         // CommonSampleComponentBase overrides...
         void OnAllAssetsReadyActivate() override;

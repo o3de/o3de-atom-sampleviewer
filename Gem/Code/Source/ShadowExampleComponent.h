@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -20,6 +21,7 @@
 
 #include <Utils/ImGuiSidebar.h>
 #include <Utils/ImGuiMaterialDetails.h>
+#include <Utils/Utils.h>
 
 namespace AtomSampleViewer
 {
@@ -168,14 +170,8 @@ namespace AtomSampleViewer
         static const char* s_shadowFilterMethodLabels[];
         int m_shadowFilterMethodIndexDirectional = 0; // filter method is None.
         int m_shadowFilterMethodIndicesPositional[PositionalLightCount] = { 0, 0, 0 }; // filter method is None.
-        float m_boundaryWidthDirectional = 0.03f; // 3cm
-        float m_boundaryWidthsPositional[PositionalLightCount] = { 0.25f, 0.25f, 0.25f }; // 0.25 degrees
-        int m_predictionSampleCountDirectional = 8;
-        int m_predictionSampleCountsPositional[PositionalLightCount] = { 8, 8, 8 };
         int m_filteringSampleCountDirectional = 32;
         int m_filteringSampleCountsPositional[PositionalLightCount] = { 32, 32, 32 };
-        AZ::Render::PcfMethod m_pcfMethod[PositionalLightCount] = {
-            AZ::Render::PcfMethod::BoundarySearch, AZ::Render::PcfMethod::BoundarySearch, AZ::Render::PcfMethod::BoundarySearch};
 
         ImGuiSidebar m_imguiSidebar;
         ImGuiMaterialDetails m_imguiMaterialDetails;
@@ -183,5 +179,7 @@ namespace AtomSampleViewer
         // original camera configuration
         float m_originalFarClipDistance = 0.f;
         float m_originalCameraFovRadians = 0.f;
+
+        Utils::DefaultIBL m_defaultIbl;
     };
 } // namespace AtomSampleViewer

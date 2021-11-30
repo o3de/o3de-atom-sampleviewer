@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -19,6 +20,7 @@
 
 #include <AzFramework/Asset/AssetCatalogBus.h>
 
+#include <AzCore/IO/Path/Path.h>
 #include <AzCore/Component/TickBus.h>
 
 #include <Utils/ImGuiSidebar.h>
@@ -127,8 +129,8 @@ namespace AtomSampleViewer
 
         const static uint32_t TestDDSCount = 36; // For image streaming and profile
         const static uint32_t TestPNGCount = 4; // For non-power-of-two textures
-        const AZStd::string TestImageFolder = "textures/streaming/";
-        const AZStd::string ReloadTestImageName = "reloadtest.png";
+        const AZ::IO::Path TestImageFolder = "Textures/Streaming";
+        const AZ::IO::Path ReloadTestImageName = "reloadtest.png";
         // Constants of display area for showing all streaming images.
         // As reference, the window's left bottom is (-1, -1). The window size is (2, 2)
         const float AreaWidth = 1.5f;
@@ -173,8 +175,11 @@ namespace AtomSampleViewer
         AZ::RHI::DrawListTag m_drawListTag;
         AZ::RHI::DrawListTag m_image3dDrawListTag;
 
-        AZ::Data::Asset<AZ::RPI::ShaderResourceGroupAsset> m_srgAsset;
-        AZ::Data::Asset<AZ::RPI::ShaderResourceGroupAsset> m_image3dSrgAsset;
+        AZ::Data::Asset<AZ::RPI::ShaderAsset> m_shaderAsset;
+        AZ::RHI::Ptr<AZ::RHI::ShaderResourceGroupLayout> m_srgLayout;
+
+        AZ::Data::Asset<AZ::RPI::ShaderAsset> m_image3dShaderAsset;
+        AZ::RHI::Ptr<AZ::RHI::ShaderResourceGroupLayout> m_image3dSrgLayout;
 
         // shader input indices
         AZ::RHI::ShaderInputImageIndex m_imageInputIndex;

@@ -1,16 +1,11 @@
 {
-    "Source" : "StaticMesh",
+    "Source" : "MatrixAlignmentTest.azsl",
 
     "DepthStencilState" : { 
-        "Depth" : { "Enable" : true, "CompareFunc" : "Equal" }
+        "Depth" : { "Enable" : false, "CompareFunc" : "GreaterEqual" }
     },
 
     "DrawList" : "forward",
-    
-    "CompilerHints" : {
-        "AzslcWarningLevel" : 0,
-        "AzslcWarningAsError" : false
-    },
 
     "ProgramSettings":
     {
@@ -25,5 +20,14 @@
           "type": "Fragment"
         }
       ]
-    }
+    },
+
+    "Supervariants":
+    [
+      {
+        "Name" : "float2",
+        "PlusArguments" : "-DNUM_FLOATS_AFTER_MATRIX=2"
+      }
+    ]
+    
 }

@@ -1,6 +1,7 @@
 #
-# Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
-# 
+# Copyright (c) Contributors to the Open 3D Engine Project.
+# For complete copyright and license terms please see the LICENSE at the root of this distribution.
+#
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 #
 #
@@ -79,6 +80,8 @@ set(FILES
     Source/RHI/TrianglesConstantBufferExampleComponent.cpp
     Source/RHI/RayTracingExampleComponent.cpp
     Source/RHI/RayTracingExampleComponent.h
+    Source/RHI/MatrixAlignmentTestExampleComponent.cpp
+    Source/RHI/MatrixAlignmentTestExampleComponent.h
     Source/AreaLightExampleComponent.cpp
     Source/AreaLightExampleComponent.h
     Source/AssetLoadTestComponent.cpp
@@ -89,8 +92,8 @@ set(FILES
     Source/AuxGeomSharedDrawFunctions.h
     Source/BakedShaderVariantExampleComponent.h
     Source/BakedShaderVariantExampleComponent.cpp
-    Source/BistroBenchmarkComponent.cpp
-    Source/BistroBenchmarkComponent.h
+    Source/SponzaBenchmarkComponent.cpp
+    Source/SponzaBenchmarkComponent.h
     Source/BloomExampleComponent.cpp
     Source/BloomExampleComponent.h
     Source/CheckerboardExampleComponent.h
@@ -164,6 +167,8 @@ set(FILES
     Source/TonemappingExampleComponent.h
     Source/TransparencyExampleComponent.cpp
     Source/TransparencyExampleComponent.h
+    Source/ShaderReloadTestComponent.cpp
+    Source/ShaderReloadTestComponent.h
     Source/Utils/FileIOErrorHandler.cpp
     Source/Utils/FileIOErrorHandler.h
     Source/Utils/ImGuiAssetBrowser.cpp

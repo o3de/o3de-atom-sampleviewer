@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -31,6 +32,7 @@
 #include <Atom/RPI.Public/RenderPipeline.h>
 #include <Atom/RPI.Public/View.h>
 #include <Atom/RPI.Public/Pass/FullscreenTrianglePass.h>
+#include <Atom/RPI.Public/Pass/PassFilter.h>
 #include <Atom/RPI.Public/AuxGeom/AuxGeomFeatureProcessorInterface.h>
 #include <Atom/RPI.Public/AuxGeom/AuxGeomDraw.h>
 #include <Atom/RPI.Reflect/Asset/AssetUtils.h>
@@ -212,7 +214,7 @@ namespace AtomSampleViewer
     {
         m_meshChangedHandler.Disconnect();
         m_worldModelAssetLoaded = true;
-        m_worldModelAABB = model->GetAabb();
+        m_worldModelAABB = model->GetModelAsset()->GetAabb();
 
         InitLightArrays();
         CreateLightsAndDecals();
@@ -629,8 +631,7 @@ namespace AtomSampleViewer
 
     void LightCullingExampleComponent::DrawDebuggingHelpers()
     {
-        auto defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        if (auto auxGeom = AZ::RPI::AuxGeomFeatureProcessorInterface::GetDrawQueueForScene(defaultScene))
+        if (auto auxGeom = AZ::RPI::AuxGeomFeatureProcessorInterface::GetDrawQueueForScene(m_scene))
         {
             if (m_settings[(int)LightType::Point].m_enableDebugDraws)
             {
@@ -714,12 +715,11 @@ namespace AtomSampleViewer
 
     void LightCullingExampleComponent::GetFeatureProcessors()
     {
-        AZ::RPI::Scene* scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get();
-        m_pointLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::PointLightFeatureProcessorInterface>();
-        m_diskLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DiskLightFeatureProcessorInterface>();
-        m_capsuleLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::CapsuleLightFeatureProcessorInterface>();
-        m_quadLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::QuadLightFeatureProcessorInterface>();
-        m_decalFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DecalFeatureProcessorInterface>();
+        m_pointLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::PointLightFeatureProcessorInterface>();
+        m_diskLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DiskLightFeatureProcessorInterface>();
+        m_capsuleLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::CapsuleLightFeatureProcessorInterface>();
+        m_quadLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::QuadLightFeatureProcessorInterface>();
+        m_decalFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DecalFeatureProcessorInterface>();
     }
 
     float LightCullingExampleComponent::AutoCalculateAttenuationRadius(const AZ::Color& color, float intensity)
@@ -740,21 +740,17 @@ namespace AtomSampleViewer
 
     void LightCullingExampleComponent::UpdateHeatmapOpacity()
     {
-        if (const ScenePtr scene = RPISystemInterface::Get()->GetDefaultScene())
+        if (const RenderPipelinePtr pipeline = m_scene->GetDefaultRenderPipeline())
         {
-            if (const RenderPipelinePtr pipeline = scene->GetDefaultRenderPipeline())
+            AZ::RPI::PassFilter passFilter = AZ::RPI::PassFilter::CreateWithPassName(AZ::Name("LightCullingHeatmapPass"), pipeline.get());
+            const Ptr<RenderPass> trianglePass = azrtti_cast<RenderPass*>(AZ::RPI::PassSystemInterface::Get()->FindFirstPass(passFilter));
+            if (trianglePass)
             {
-                if (const Ptr<Pass> pass = pipeline->GetRootPass()->FindPassByNameRecursive(AZ::Name("LightCullingHeatmapPass")))
-                {
-                    if (const Ptr<RenderPass> trianglePass = azrtti_cast<RenderPass*>(pass))
-                    {
-                        trianglePass->SetEnabled(m_heatmapOpacity > 0.0f);
-                        Data::Instance<ShaderResourceGroup> srg = trianglePass->GetShaderResourceGroup();
-                        RHI::ShaderInputConstantIndex opacityIndex = srg->FindShaderInputConstantIndex(AZ::Name("m_heatmapOpacity"));
-                        [[maybe_unused]] bool setOk = srg->SetConstant<float>(opacityIndex, m_heatmapOpacity);
-                        AZ_Warning("LightCullingExampleComponent", setOk, "Unable to set heatmap opacity");
-                    }
-                }
+                trianglePass->SetEnabled(m_heatmapOpacity > 0.0f);
+                Data::Instance<ShaderResourceGroup> srg = trianglePass->GetShaderResourceGroup();
+                RHI::ShaderInputConstantIndex opacityIndex = srg->FindShaderInputConstantIndex(AZ::Name("m_heatmapOpacity"));
+                [[maybe_unused]] bool setOk = srg->SetConstant<float>(opacityIndex, m_heatmapOpacity);
+                AZ_Warning("LightCullingExampleComponent", setOk, "Unable to set heatmap opacity");
             }
         }
     }

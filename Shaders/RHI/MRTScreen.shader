@@ -1,5 +1,5 @@
 {
-    "Source": "MRTScreen",
+    "Source": "MRTScreen.azsl",
 
     "DepthStencilState": {
         "Depth": {

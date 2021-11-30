@@ -1,5 +1,5 @@
 {
-    "Source" : "Triangle",
+    "Source" : "Triangle.azsl",
 
     "DepthStencilState" : { 
         "Depth" : { "Enable" : false, "CompareFunc" : "GreaterEqual" }

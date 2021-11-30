@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -94,7 +95,7 @@ namespace AtomSampleViewer
         static constexpr float ArcballRadiusMaxModifier = 4.0f;
         static constexpr float ArcballRadiusDefaultModifier = 2.0f;
         
-        AZ::RPI::Cullable::LodOverride m_lodOverride = AZ::RPI::Cullable::NoLodOverride;
+        AZ::RPI::Cullable::LodConfiguration m_lodConfig;
 
         bool m_enableMaterialOverride = true;
 

@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -21,19 +22,10 @@
 
 #include <AzCore/Serialization/SerializeContext.h>
 
-#include <TriangleConstantBufferExampleComponent_Traits_Platform.h>
-
 namespace AtomSampleViewer
 {
     const char* TrianglesConstantBufferExampleComponent::s_trianglesConstantBufferExampleName = "TrianglesConstantBufferExample";
-    // The number of triangles that are represented with a single constant buffer, that contains multiple buffer views;
-    // each view containing a partial view of the constant buffer
-    const uint32_t TrianglesConstantBufferExampleComponent::s_numberOfTrianglesSingleCB = ATOMSAMPLEVIEWER_TRAIT_TRIANGLE_CONSTANT_BUFFER_SAMPLE_SINGLE_CONSTANT_BUFFER_SIZE;
-    // The number of triangles that are represented with multiple constant buffers;
-    // each having their own constant buffer and view containing the whole buffer
-    const uint32_t TrianglesConstantBufferExampleComponent::s_numberOfTrianglesMultipleCB = ATOMSAMPLEVIEWER_TRAIT_TRIANGLE_CONSTANT_BUFFER_SAMPLE_MULTIPLE_CONSTANT_BUFFER_SIZE;
-    // The total number of views and triangles that will be rendered for this sample
-    const uint32_t TrianglesConstantBufferExampleComponent::s_numberOfTrianglesTotal = s_numberOfTrianglesSingleCB + s_numberOfTrianglesMultipleCB;
+    const uint32_t TrianglesConstantBufferExampleComponent::s_numberOfTrianglesTotal = 30;
 
     void TrianglesConstantBufferExampleComponent::Reflect(AZ::ReflectContext* context)
     {
@@ -99,53 +91,22 @@ namespace AtomSampleViewer
         const uint32_t alignment = RHI::AlignUp(static_cast<uint32_t>(sizeof(InstanceInfo)), m_constantBufferAlighment);
 
         // All triangles data will be uploaded in one go to the constant buffer once per frame.
-        UploadDataToSingleConstantBuffer(trianglesData, alignment, s_numberOfTrianglesSingleCB);
-        UploadDataToMultipleConstantBuffers(trianglesData + s_numberOfTrianglesSingleCB, alignment);
+        UploadDataToConstantBuffer(trianglesData, alignment, s_numberOfTrianglesTotal);
         
         BasicRHIComponent::OnFramePrepare(frameGraphBuilder);
     }
 
-    void TrianglesConstantBufferExampleComponent::UploadDataToSingleConstantBuffer(InstanceInfo* data, uint32_t elementSize, uint32_t elementCount)
+    void TrianglesConstantBufferExampleComponent::UploadDataToConstantBuffer(InstanceInfo* data, uint32_t elementSize, uint32_t elementCount)
     {
         AZ::RHI::BufferMapRequest mapRequest;
         mapRequest.m_buffer = m_constantBuffer.get();
-        mapRequest.m_byteCount = elementSize;
-
-        // NOTE: Due to the Constant Buffer alignment not being handled internally by the RHI, updating the Constant Buffer
-        // that is bound to an alignment needs to be handled by the user.
-        // Update the instance data of the triangles that are mapped to a single Constant Buffer
-        for (uint32_t triangleIdx = 0u; triangleIdx < elementCount; ++triangleIdx)
+        mapRequest.m_byteCount = elementSize * elementCount;
+        AZ::RHI::BufferMapResponse mapResponse;
+        AZ::RHI::ResultCode resultCode = m_constantBufferPool->MapBuffer(mapRequest, mapResponse);
+        if (resultCode == AZ::RHI::ResultCode::Success)
         {
-            mapRequest.m_byteOffset = triangleIdx * elementSize;
-
-            AZ::RHI::BufferMapResponse mapResponse;
-            m_constantBufferPool->MapBuffer(mapRequest, mapResponse);
-            if (mapResponse.m_data)
-            {
-                memcpy(mapResponse.m_data, data + triangleIdx, sizeof(InstanceInfo));
-                m_constantBufferPool->UnmapBuffer(*mapRequest.m_buffer);
-            }
-        }
-    }
-
-    void TrianglesConstantBufferExampleComponent::UploadDataToMultipleConstantBuffers(InstanceInfo* data, uint32_t elementSize)
-    {
-        // Update the instance data of the triangles that are mapped to their individual Constant Buffer
-        for (uint32_t triangleIdx = 0u; triangleIdx < (uint32_t)m_constantBufferArray.size(); ++triangleIdx)
-        {
-            AZ::RHI::BufferMapRequest mapRequest;
-            mapRequest.m_buffer = m_constantBufferArray[triangleIdx].get();
-            mapRequest.m_byteCount = elementSize;
-            mapRequest.m_byteOffset = 0u;
-
-            AZ::RHI::BufferMapResponse mapResponse;
-            m_constantBufferPool->MapBuffer(mapRequest, mapResponse);
-
-            if(mapResponse.m_data)
-            {
-                memcpy(mapResponse.m_data, data + triangleIdx, sizeof(InstanceInfo));
-                m_constantBufferPool->UnmapBuffer(*mapRequest.m_buffer);
-            }
+            memcpy(mapResponse.m_data, data, sizeof(InstanceInfo) * elementCount);
+            m_constantBufferPool->UnmapBuffer(*mapRequest.m_buffer);
         }
     }
 
@@ -232,62 +193,7 @@ namespace AtomSampleViewer
             AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialized constant buffer pool");
         }
 
-        // Calculate the total constant buffer size depending on the device alignment limit
-        const uint32_t alignedBufferSize = RHI::AlignUp(static_cast<uint32_t>(sizeof(InstanceInfo)), m_constantBufferAlighment);
-
-        // NOTE: Alignment needs to be taken into account when creating a Constant Buffer which consists of Buffer Views
-        // that have an offset that isn't 0
-        // Create single Constant Buffer with multiple Buffer Views
-        {
-            const uint32_t constantBufferSize = alignedBufferSize * s_numberOfTrianglesSingleCB;
-
-            m_constantBuffer = RHI::Factory::Get().CreateBuffer();
-            RHI::BufferInitRequest request;
-            request.m_buffer = m_constantBuffer.get();
-            request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::Constant, constantBufferSize };
-            [[maybe_unused]] RHI::ResultCode result = m_constantBufferPool->InitBuffer(request);
-            AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialize constant buffer");
-
-            for (uint32_t triangleIdx = 0u; triangleIdx < s_numberOfTrianglesSingleCB; ++triangleIdx)
-            {
-                RHI::BufferViewDescriptor bufferDesc = RHI::BufferViewDescriptor::CreateStructured(triangleIdx, 1u, alignedBufferSize);
-                AZ::RHI::Ptr<AZ::RHI::BufferView> constantBufferView = m_constantBuffer->GetBufferView(bufferDesc);
-                          
-                if(!constantBufferView.get())
-                {
-                    AZ_Assert(false, "Failed to initialized constant buffer view");
-                }
-                m_constantBufferViewArray.push_back(constantBufferView);
-            }
-        }
-
-        // Create multiple Constant Buffers, each containing one Buffer View
-        {
-            RHI::ResultCode result;
-            m_constantBufferArray.reserve(s_numberOfTrianglesMultipleCB);
-
-            for (uint32_t triangleIdx = 0u; triangleIdx < s_numberOfTrianglesMultipleCB; ++triangleIdx)
-            {
-                AZ::RHI::Ptr<AZ::RHI::Buffer> constantBuffer = RHI::Factory::Get().CreateBuffer();
-                RHI::BufferInitRequest request;
-                request.m_buffer = constantBuffer.get();
-                request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::Constant, alignedBufferSize};
-                result = m_constantBufferPool->InitBuffer(request);
-                AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialized constant buffer");
-
-                RHI::BufferViewDescriptor bufferDesc = RHI::BufferViewDescriptor::CreateStructured(0u, 1u, alignedBufferSize);
-                AZ::RHI::Ptr<AZ::RHI::BufferView> constantBufferView = constantBuffer->GetBufferView(bufferDesc);
-                          
-                if(!constantBufferView.get())
-                {
-                    AZ_Assert(false, "Failed to initialized constant buffer view");
-                }
-                AZ_Assert(constantBufferView->IsFullView(), "Constant Buffer View initialization failed to cover in full the Constant Buffer");
-
-                m_constantBufferViewArray.push_back(constantBufferView);
-                m_constantBufferArray.push_back(constantBuffer);
-            }
-        }
+        CreateConstantBufferView();
 
         // Load the Shader and obtain the Pipeline state and its SRG
         {
@@ -318,13 +224,8 @@ namespace AtomSampleViewer
             RHI::ShaderInputBufferIndex trianglesBufferIndex;
             FindShaderInputIndex(&trianglesBufferIndex, m_shaderResourceGroup, trianglesBufferId, s_trianglesConstantBufferExampleName);
 
-            uint32_t viewIdx = 0u;
-            for (const AZ::RHI::Ptr<AZ::RHI::BufferView>& bufferView : m_constantBufferViewArray)
-            {
-                [[maybe_unused]] bool set = m_shaderResourceGroup->SetBufferView(trianglesBufferIndex, bufferView.get(), viewIdx);
-                AZ_Assert(set, "Failed to set the buffer view");
-                viewIdx++;
-            }
+            [[maybe_unused]] bool set = m_shaderResourceGroup->SetBufferView(trianglesBufferIndex, m_constantBufferView.get(), 0);
+            AZ_Assert(set, "Failed to set the buffer view");
 
             // All SRG data has been set already, it only had the buffer view to be set, we can compile now.
             // Later then only thing to do is to update the Buffer content itself, but the SRG won't need to be recompiled.
@@ -371,9 +272,9 @@ namespace AtomSampleViewer
                 drawItem.m_arguments = drawIndexed;
                 drawItem.m_pipelineState = m_pipelineState.get();
                 drawItem.m_indexBufferView = &m_indexBufferView;
-                drawItem.m_shaderResourceGroupCount = RHI::ArraySize(shaderResourceGroups);
+                drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
-                drawItem.m_streamBufferViewCount = static_cast<uint32_t>(m_streamBufferViews.size());
+                drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
                 drawItem.m_streamBufferViews = m_streamBufferViews.data();
 
                 // Submit the triangle draw item.
@@ -397,6 +298,22 @@ namespace AtomSampleViewer
         RHI::RHISystemNotificationBus::Handler::BusConnect();
     }
 
+    void TrianglesConstantBufferExampleComponent::CreateConstantBufferView()
+    {
+        using namespace AZ;
+        const uint32_t constantBufferSize = sizeof(InstanceInfo) * s_numberOfTrianglesTotal;
+
+        m_constantBuffer = RHI::Factory::Get().CreateBuffer();
+        RHI::BufferInitRequest request;
+        request.m_buffer = m_constantBuffer.get();
+        request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::Constant, constantBufferSize };
+        [[maybe_unused]] RHI::ResultCode result = m_constantBufferPool->InitBuffer(request);
+        AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialize constant buffer");
+
+        RHI::BufferViewDescriptor bufferDesc = RHI::BufferViewDescriptor::CreateStructured(0, 1u, constantBufferSize);
+        m_constantBufferView = m_constantBuffer->GetBufferView(bufferDesc);
+    }
+
     void TrianglesConstantBufferExampleComponent::Deactivate()
     {
         using namespace AZ;
@@ -405,8 +322,7 @@ namespace AtomSampleViewer
         m_inputAssemblyBufferPool = nullptr;
 
         m_constantBuffer = nullptr;
-        m_constantBufferArray.clear();
-        m_constantBufferViewArray.clear();
+        m_constantBufferView = nullptr;
 
         m_constantBuffer = nullptr;
         m_constantBufferPool = nullptr;

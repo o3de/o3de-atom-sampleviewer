@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -137,12 +138,7 @@ namespace AtomSampleViewer
         static const char* s_shadowFilterMethodLabels[];
         int m_shadowFilterMethodIndexDirectional = 0; // filter method is None.
         int m_shadowFilterMethodIndexDisk = 0; // filter method is None
-        float m_boundaryWidthDirectional = 0.03f; // 3cm
-        float m_boundaryWidthDisk = 0.25f; // 0.25 degrees
-        int m_predictionSampleCountDirectional = 4;
-        int m_predictionSampleCountDisk = 4;
         int m_filteringSampleCountDirectional = 16;
-        AZ::Render::PcfMethod m_pcfMethodDirectional = AZ::Render::PcfMethod::BoundarySearch;
         int m_filteringSampleCountDisk = 16;
 
         bool m_isCascadeCorrectionEnabled = false;

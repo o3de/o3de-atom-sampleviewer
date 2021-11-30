@@ -1,5 +1,5 @@
 {
-    "Source": "AsyncComputeLuminanceReduce",
+    "Source": "AsyncComputeLuminanceReduce.azsl",
        
     "ProgramSettings":
     {

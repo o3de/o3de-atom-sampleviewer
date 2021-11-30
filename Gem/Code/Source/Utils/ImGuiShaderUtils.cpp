@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -30,8 +31,8 @@ namespace AtomSampleViewer
             AZStd::string header = AZStd::string::format("%-*s |  Bits | Requested | Selected", longestOptionNameLength, "Option Name");
             AZStd::string divider{header.size(), '-'};
 
-            ImGui::Text(header.c_str());
-            ImGui::Text(divider.c_str());
+            ImGui::Text("%s", header.c_str());
+            ImGui::Text("%s", divider.c_str());
 
             for (size_t i = 0; i < shaderOptionDescriptors.size(); ++i)
             {

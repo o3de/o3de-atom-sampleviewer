@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -21,10 +22,14 @@ namespace AtomSampleViewer
         {
             bool result = false;
 
-            AZStd::string exe = "C:\\Program Files\\Beyond Compare 4\\BCompare.exe";
-            AZStd::string commandLine = "\"" + exe + "\" \"" + filePathA + "\" \"" + filePathB + "\"";
+            AZStd::wstring exeW = L"C:\\Program Files\\Beyond Compare 4\\BCompare.exe";
+            AZStd::wstring filePathAW;
+            AZStd::to_wstring(filePathAW, filePathA.c_str());
+            AZStd::wstring filePathBW;
+            AZStd::to_wstring(filePathBW, filePathB.c_str());
+            AZStd::wstring commandLineW = L"\"" + exeW + L"\" \"" + filePathAW + L"\" \"" + filePathBW + L"\"";
 
-            STARTUPINFO si;
+            STARTUPINFOW si;
             PROCESS_INFORMATION pi;
 
             ZeroMemory(&si, sizeof(si));
@@ -32,8 +37,8 @@ namespace AtomSampleViewer
             ZeroMemory(&pi, sizeof(pi));
 
             // start the program up
-            result = CreateProcess(exe.data(),   // the path
-                commandLine.data(),        // Command line
+            result = CreateProcessW(exeW.data(),   // the path
+                commandLineW.data(),        // Command line
                 NULL,           // Process handle not inheritable
                 NULL,           // Thread handle not inheritable
                 FALSE,          // Set handle inheritance to FALSE

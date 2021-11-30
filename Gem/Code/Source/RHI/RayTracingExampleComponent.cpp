@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -677,9 +678,9 @@ namespace AtomSampleViewer
             drawItem.m_arguments = drawIndexed;
             drawItem.m_pipelineState = m_drawPipelineState.get();
             drawItem.m_indexBufferView = &m_fullScreenIndexBufferView;
-            drawItem.m_streamBufferViewCount = static_cast<uint32_t>(m_fullScreenStreamBufferViews.size());
+            drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_fullScreenStreamBufferViews.size());
             drawItem.m_streamBufferViews = m_fullScreenStreamBufferViews.data();
-            drawItem.m_shaderResourceGroupCount = RHI::ArraySize(shaderResourceGroups);
+            drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
             drawItem.m_shaderResourceGroups = shaderResourceGroups;
 
             // submit the triangle draw item.

@@ -1,5 +1,5 @@
 {
-    "Source": "SHRender",
+    "Source": "SHRender.azsl",
 
     "DepthStencilState": {
         "Depth": {

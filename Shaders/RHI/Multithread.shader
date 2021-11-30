@@ -1,5 +1,5 @@
 {
-    "Source" : "Multithread",
+    "Source" : "Multithread.azsl",
 
     "DepthStencilState" : { 
         "Depth" : { "Enable" : false, "CompareFunc" : "GreaterEqual" }

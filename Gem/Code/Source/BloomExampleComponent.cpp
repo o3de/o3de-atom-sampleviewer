@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -50,9 +51,7 @@ namespace AtomSampleViewer
     {
         m_dynamicDraw = RPI::GetDynamicDraw();
 
-        RPI::Scene* scene = RPI::RPISystemInterface::Get()->GetDefaultScene().get();
-
-        m_postProcessFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::PostProcessFeatureProcessorInterface>();
+        m_postProcessFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::PostProcessFeatureProcessorInterface>();
 
         CreateBloomEntity();
 
@@ -85,14 +84,6 @@ namespace AtomSampleViewer
 
         // Load a default image
         QueueAssetPathForLoad("textures/tonemapping/hdr_test_pattern.exr.streamingimage");
-
-        const char* engineRoot = nullptr;
-        AZStd::string screenshotFolder;
-        AzFramework::ApplicationRequests::Bus::BroadcastResult(engineRoot, &AzFramework::ApplicationRequests::GetEngineRoot);
-        if (engineRoot)
-        {
-            AzFramework::StringFunc::Path::Join(engineRoot, "Screenshots", screenshotFolder, true, false);
-        }
 
         Data::Asset<RPI::AnyAsset> displayMapperAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::AnyAsset>("passes/DisplayMapperConfiguration.azasset", RPI::AssetUtils::TraceLevel::Error);
         const Render::DisplayMapperConfigurationDescriptor* displayMapperConfigurationDescriptor = RPI::GetDataFromAnyAsset<Render::DisplayMapperConfigurationDescriptor>(displayMapperAsset);
@@ -312,16 +303,18 @@ namespace AtomSampleViewer
     void BloomExampleComponent::PrepareRenderData()
     {
         const auto CreatePipeline = [](const char* shaderFilepath,
-            const char* srgFilepath,
-            Data::Asset<AZ::RPI::ShaderResourceGroupAsset>& srgAsset,
+            const char* srgName,
+            Data::Asset<AZ::RPI::ShaderAsset>& shaderAsset,
+            RHI::Ptr<AZ::RHI::ShaderResourceGroupLayout>& srgLayout,
             RHI::ConstPtr<RHI::PipelineState>& pipelineState,
-            RHI::DrawListTag& drawListTag)
+            RHI::DrawListTag& drawListTag,
+            RPI::Scene* scene)
         {
             // Since the shader is using SV_VertexID and SV_InstanceID as VS input, we won't need to have vertex buffer.
             // Also, the index buffer is not needed with DrawLinear.
             RHI::PipelineStateDescriptorForDraw pipelineStateDescriptor;
 
-            Data::Asset<RPI::ShaderAsset> shaderAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::ShaderAsset>(shaderFilepath, RPI::AssetUtils::TraceLevel::Error);
+            shaderAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::ShaderAsset>(shaderFilepath, RPI::AssetUtils::TraceLevel::Error);
             Data::Instance<RPI::Shader> shader = RPI::Shader::FindOrCreate(shaderAsset);
 
             if (!shader)
@@ -334,7 +327,6 @@ namespace AtomSampleViewer
             shaderVariant.ConfigurePipelineState(pipelineStateDescriptor);
             drawListTag = shader->GetDrawListTag();
 
-            RPI::Scene* scene = RPI::RPISystemInterface::Get()->GetDefaultScene().get();
             scene->ConfigurePipelineState(shader->GetDrawListTag(), pipelineStateDescriptor);
 
             pipelineStateDescriptor.m_inputStreamLayout.SetTopology(AZ::RHI::PrimitiveTopology::TriangleStrip);
@@ -346,13 +338,13 @@ namespace AtomSampleViewer
                 AZ_Error("Render", false, "Failed to acquire default pipeline state for shader %s", shaderFilepath);
             }
 
-            // Load shader resource group asset
-            srgAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::ShaderResourceGroupAsset>(srgFilepath, RPI::AssetUtils::TraceLevel::Error);
+            // Load shader resource group layout
+            srgLayout = shaderAsset->FindShaderResourceGroupLayout(AZ::Name(srgName));
         };
 
         // Create the example's main pipeline object
         {
-            CreatePipeline("Shaders/tonemappingexample/renderimage.azshader", "Shaders/tonemappingexample/renderimage_renderimagesrg.azsrg", m_srgAsset, m_pipelineState, m_drawListTag);
+            CreatePipeline("Shaders/tonemappingexample/renderimage.azshader", "RenderImageSrg", m_shaderAsset, m_srgLayout, m_pipelineState, m_drawListTag, m_scene);
 
             // Set the input indices
             m_imageInputIndex.Reset();
@@ -361,7 +353,7 @@ namespace AtomSampleViewer
             m_colorSpaceIndex.Reset();
         }
 
-        m_drawImage.m_srg = RPI::ShaderResourceGroup::Create(m_srgAsset);
+        m_drawImage.m_srg = RPI::ShaderResourceGroup::Create(m_shaderAsset, m_srgLayout->GetName());
         m_drawImage.m_wasStreamed = false;
 
         // Set the image to occupy the full screen.
@@ -395,7 +387,7 @@ namespace AtomSampleViewer
 
         // Submit draw packet
         AZStd::unique_ptr<const RHI::DrawPacket> drawPacket(drawPacketBuilder.End());
-        m_dynamicDraw->AddDrawPacket(RPI::RPISystemInterface::Get()->GetDefaultScene().get(), AZStd::move(drawPacket));
+        m_dynamicDraw->AddDrawPacket(m_scene, AZStd::move(drawPacket));
     }
 
     RPI::ColorSpaceId BloomExampleComponent::GetColorSpaceIdForIndex(uint8_t colorSpaceIndex) const

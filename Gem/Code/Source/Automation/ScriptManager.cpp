@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -30,7 +31,6 @@
 #include <AzFramework/IO/LocalFileIO.h>
 #include <AzFramework/Windowing/WindowBus.h>
 
-#include <AtomCore/Serialization/Json/JsonUtils.h>
 #include <AtomSampleViewerRequestBus.h>
 #include <Utils/Utils.h>
 
@@ -55,7 +55,7 @@ namespace AtomSampleViewer
         ReflectScriptContext(m_sriptBehaviorContext.get());
         m_scriptContext->BindTo(m_sriptBehaviorContext.get());
 
-        m_scriptBrowser.SetFilter([this](const AZ::Data::AssetInfo& assetInfo)
+        m_scriptBrowser.SetFilter([](const AZ::Data::AssetInfo& assetInfo)
         {
             return AzFramework::StringFunc::EndsWith(assetInfo.m_relativePath, ".bv.luac");
         });
@@ -331,11 +331,15 @@ namespace AtomSampleViewer
                 m_assetTrackingTimeout -= deltaTime;
                 if (m_assetTrackingTimeout < 0)
                 {
-                    AZ_Error("Automation", false, "Script asset tracking timed out. Continuing...");
+                    auto incomplateAssetList = m_assetStatusTracker.GetIncompleteAssetList();
+                    AZStd::string incompleteAssetListString;
+                    AzFramework::StringFunc::Join(incompleteAssetListString, incomplateAssetList.begin(), incomplateAssetList.end(), "\n    ");
+                    AZ_Error("Automation", false, "Script asset tracking timed out waiting for:\n    %s \n Continuing...", incompleteAssetListString.c_str());
                     m_waitForAssetTracker = false;
                 }
                 else if (m_assetStatusTracker.DidExpectedAssetsFinish())
                 {
+                    AZ_Printf("Automation", "Asset Tracker finished with %f seconds remaining.", m_assetTrackingTimeout);
                     m_waitForAssetTracker = false;
                 }
                 else
@@ -749,8 +753,10 @@ namespace AtomSampleViewer
 
         // Profiling data...
         behaviorContext->Method("CapturePassTimestamp", &Script_CapturePassTimestamp);
+        behaviorContext->Method("CaptureCpuFrameTime", &Script_CaptureCpuFrameTime);
         behaviorContext->Method("CapturePassPipelineStatistics", &Script_CapturePassPipelineStatistics);
         behaviorContext->Method("CaptureCpuProfilingStatistics", &Script_CaptureCpuProfilingStatistics);
+        behaviorContext->Method("CaptureBenchmarkMetadata", &Script_CaptureBenchmarkMetadata);
 
         // Camera...
         behaviorContext->Method("ArcBallCameraController_SetCenter", &Script_ArcBallCameraController_SetCenter);
@@ -1076,7 +1082,7 @@ namespace AtomSampleViewer
         s_instance->m_isCapturePending = true;
         s_instance->AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect();
         s_instance->PauseScript();
-        
+
         return true;
     }
 
@@ -1275,6 +1281,13 @@ namespace AtomSampleViewer
         ResumeScript();
     }
 
+    void ScriptManager::OnCaptureCpuFrameTimeFinished([[maybe_unused]] bool result, [[maybe_unused]] const AZStd::string& info)
+    {
+        m_isCapturePending = false;
+        AZ::Render::ProfilingCaptureNotificationBus::Handler::BusDisconnect();
+        ResumeScript();
+    }
+
     void ScriptManager::OnCaptureQueryPipelineStatisticsFinished([[maybe_unused]] bool result, [[maybe_unused]] const AZStd::string& info)
     {
         m_isCapturePending = false;
@@ -1283,6 +1296,13 @@ namespace AtomSampleViewer
     }
 
     void ScriptManager::OnCaptureCpuProfilingStatisticsFinished([[maybe_unused]] bool result, [[maybe_unused]] const AZStd::string& info)
+    {
+        m_isCapturePending = false;
+        Profiler::ProfilerNotificationBus::Handler::BusDisconnect();
+        ResumeScript();
+    }
+
+    void ScriptManager::OnCaptureBenchmarkMetadataFinished([[maybe_unused]] bool result, [[maybe_unused]] const AZStd::string& info)
     {
         m_isCapturePending = false;
         AZ::Render::ProfilingCaptureNotificationBus::Handler::BusDisconnect();
@@ -1305,6 +1325,27 @@ namespace AtomSampleViewer
             s_instance->PauseScript();
 
             AZ::Render::ProfilingCaptureRequestBus::Broadcast(&AZ::Render::ProfilingCaptureRequestBus::Events::CapturePassTimestamp, outputFilePath);
+        };
+
+        s_instance->m_scriptOperations.push(AZStd::move(operation));
+    }
+
+    void ScriptManager::Script_CaptureCpuFrameTime(AZ::ScriptDataContext& dc)
+    {
+        AZStd::string outputFilePath;
+        const bool readScriptDataContext = ValidateProfilingCaptureScripContexts(dc, outputFilePath);
+        if (!readScriptDataContext)
+        {
+            return;
+        }
+
+        auto operation = [outputFilePath]()
+        {
+            s_instance->m_isCapturePending = true;
+            s_instance->AZ::Render::ProfilingCaptureNotificationBus::Handler::BusConnect();
+            s_instance->PauseScript();
+
+            AZ::Render::ProfilingCaptureRequestBus::Broadcast(&AZ::Render::ProfilingCaptureRequestBus::Events::CaptureCpuFrameTime, outputFilePath);
         };
 
         s_instance->m_scriptOperations.push(AZStd::move(operation));
@@ -1343,10 +1384,45 @@ namespace AtomSampleViewer
         auto operation = [outputFilePath]()
         {
             s_instance->m_isCapturePending = true;
+            s_instance->Profiler::ProfilerNotificationBus::Handler::BusConnect();
+            s_instance->PauseScript();
+
+            Profiler::ProfilerRequestBus::Broadcast(&Profiler::ProfilerRequestBus::Events::CaptureCpuProfilingStatistics, outputFilePath);
+        };
+
+        s_instance->m_scriptOperations.push(AZStd::move(operation));
+    }
+
+    void ScriptManager::Script_CaptureBenchmarkMetadata(AZ::ScriptDataContext& dc)
+    {
+        if (dc.GetNumArguments() != 2)
+        {
+            ReportScriptError("CaptureBenchmarkMetadata needs two arguments, benchmarkName and outputFilePath.");
+            return;
+        }
+
+        if (!dc.IsString(0) || !dc.IsString(1))
+        {
+            ReportScriptError("CaptureBenchmarkMetadata's arguments benchmarkName and outputFilePath must both be of type string.");
+            return;
+        }
+
+        const char* stringValue = nullptr;
+        AZStd::string benchmarkName;
+        AZStd::string outputFilePath;
+
+        dc.ReadArg(0, stringValue);
+        benchmarkName = AZStd::string(stringValue);
+        dc.ReadArg(1, stringValue);
+        outputFilePath = AZStd::string(stringValue);
+
+        auto operation = [benchmarkName, outputFilePath]()
+        {
+            s_instance->m_isCapturePending = true;
             s_instance->AZ::Render::ProfilingCaptureNotificationBus::Handler::BusConnect();
             s_instance->PauseScript();
 
-            AZ::Render::ProfilingCaptureRequestBus::Broadcast(&AZ::Render::ProfilingCaptureRequestBus::Events::CaptureCpuProfilingStatistics, outputFilePath);
+            AZ::Render::ProfilingCaptureRequestBus::Broadcast(&AZ::Render::ProfilingCaptureRequestBus::Events::CaptureBenchmarkMetadata, benchmarkName, outputFilePath);
         };
 
         s_instance->m_scriptOperations.push(AZStd::move(operation));
@@ -1388,7 +1464,7 @@ namespace AtomSampleViewer
     {
         AZ::RPI::RPISystemInterface* rpiSystem = AZ::RPI::RPISystemInterface::Get();
         return rpiSystem->GetRenderApiName().GetCStr();
-        
+
     }
 
     int ScriptManager::Script_GetRandomTestSeed()

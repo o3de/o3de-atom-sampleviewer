@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -19,7 +20,6 @@
 #include <Atom/RPI.Public/GpuQuery/GpuQuerySystemInterface.h>
 
 #include <Atom/Utils/ImGuiCullingDebug.h>
-#include <Atom/Utils/ImGuiCpuProfiler.h>
 #include <Atom/Utils/ImGuiGpuProfiler.h>
 #include <Atom/Utils/ImGuiPassTree.h>
 #include <Atom/Utils/ImGuiFrameVisualizer.h>
@@ -144,6 +144,10 @@ namespace AtomSampleViewer
         void RequestFrameCapture(const AZStd::string& filePath, bool hideImGui) override;
         bool IsFrameCapturePending() override;
         void RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd, int randomSeed) override;
+        void SetNumMSAASamples(int numMSAASamples) override;
+        void ResetNumMSAASamples() override;
+        void ResetRPIScene() override;
+        void ClearRPIScene() override;
 
         // FrameCaptureNotificationBus overrides...
         void OnCaptureFinished(AZ::Render::FrameCaptureResult result, const AZStd::string& info) override;
@@ -162,7 +166,8 @@ namespace AtomSampleViewer
         static bool IsMultiViewportSwapchainSampleSupported();
         void AdjustImGuiFontScale();
         const char* GetRootPassTemplateName();
-        
+        int GetDefaultNumMSAASamples();
+
         // ---------- variables -----------------
 
         bool m_wasActivated = false;
@@ -221,7 +226,6 @@ namespace AtomSampleViewer
 
         AZ::Render::ImGuiPassTree m_imguiPassTree;
         AZ::Render::ImGuiFrameVisualizer m_imguiFrameGraphVisualizer;
-        AZ::Render::ImGuiCpuProfiler m_imguiCpuProfiler;
         AZ::Render::ImGuiGpuProfiler m_imguiGpuProfiler;
         AZ::Render::ImGuiTransientAttachmentProfiler m_imguiTransientAttachmentProfiler;
         AZ::Render::ImGuiShaderMetrics m_imguiShaderMetrics;
@@ -245,7 +249,8 @@ namespace AtomSampleViewer
 
         // Scene and some variables for RPI samples
         AZ::RPI::ScenePtr m_rpiScene;
-        float m_simulateTime = 0;
-        float m_deltaTime = 0.016f;
+
+        // number of MSAA samples, initialized in Activate() and can vary by platform
+        int m_numMSAASamples = 0;
     };
 } // namespace AtomSampleViewer

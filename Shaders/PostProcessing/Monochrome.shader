@@ -1,5 +1,5 @@
 { 
-    "Source" : "Monochrome",
+    "Source" : "Monochrome.azsl",
 
     "DepthStencilState" : {
         "Depth" : { "Enable" : false }

@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -425,9 +426,9 @@ namespace AtomSampleViewer
             drawItem.m_arguments = drawIndexed;
             drawItem.m_pipelineState = m_pipelineStates[0].get();
             drawItem.m_indexBufferView = &m_indexBufferView;
-            drawItem.m_shaderResourceGroupCount = AZ::RHI::ArraySize(shaderResourceGroups);
+            drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(AZ::RHI::ArraySize(shaderResourceGroups));
             drawItem.m_shaderResourceGroups = shaderResourceGroups;
-            drawItem.m_streamBufferViewCount = static_cast<uint32_t>(m_streamBufferViews.size());
+            drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
             drawItem.m_streamBufferViews = m_streamBufferViews.data();
 
             commandList->Submit(drawItem);
@@ -514,9 +515,9 @@ namespace AtomSampleViewer
             drawItem.m_arguments = drawIndexed;
             drawItem.m_pipelineState = m_pipelineStates[1].get();
             drawItem.m_indexBufferView = &m_indexBufferView;
-            drawItem.m_shaderResourceGroupCount = AZ::RHI::ArraySize(shaderResourceGroups);
+            drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(AZ::RHI::ArraySize(shaderResourceGroups));
             drawItem.m_shaderResourceGroups = shaderResourceGroups;
-            drawItem.m_streamBufferViewCount = static_cast<uint32_t>(m_streamBufferViews.size());
+            drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
             drawItem.m_streamBufferViews = m_streamBufferViews.data();
 
             commandList->Submit(drawItem);

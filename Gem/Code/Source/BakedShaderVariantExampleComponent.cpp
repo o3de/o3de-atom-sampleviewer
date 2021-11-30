@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -63,7 +64,7 @@ namespace AtomSampleViewer
         TickBus::Handler::BusConnect();
         m_imguiSidebar.Activate();
 
-        m_materialBrowser.SetFilter([this](const AZ::Data::AssetInfo& assetInfo) {
+        m_materialBrowser.SetFilter([](const AZ::Data::AssetInfo& assetInfo) {
             if (!AzFramework::StringFunc::Path::IsExtension(assetInfo.m_relativePath.c_str(), "azmaterial"))
             {
                 return false;
@@ -91,13 +92,10 @@ namespace AtomSampleViewer
         m_meshHandle = m_meshFeatureProcessor->AcquireMesh(Render::MeshHandleDescriptor{ m_modelAsset }, m_material);
         m_meshFeatureProcessor->SetTransform(m_meshHandle, meshTransform);
 
-        AZStd::vector<AZStd::string> passHierarchy;
-        passHierarchy.push_back(ATOMSAMPLEVIEWER_TRAIT_BAKED_SHADERVARIANT_SAMPLE_PASS_NAME);
-        AZ::RPI::PassHierarchyFilter passFilter(passHierarchy);
-        AZStd::vector<AZ::RPI::Pass*> foundPasses = AZ::RPI::PassSystemInterface::Get()->FindPasses(passFilter);
-        m_forwardPass = foundPasses[0];
+        AZ::RPI::PassFilter passFilter = AZ::RPI::PassFilter::CreateWithPassName(AZ::Name(ATOMSAMPLEVIEWER_TRAIT_BAKED_SHADERVARIANT_SAMPLE_PASS_NAME), 
+            m_meshFeatureProcessor->GetParentScene());
+        m_forwardPass = AZ::RPI::PassSystemInterface::Get()->FindFirstPass(passFilter);
         m_forwardPass->SetTimestampQueryEnabled(true);
-
         SetRootVariantUsage(true);
     }
 
@@ -123,7 +121,7 @@ namespace AtomSampleViewer
         m_imGuiFrameTimer.PushValue(deltaTime);
 
         AZ::RPI::TimestampResult forwardTimestampResult = m_forwardPass->GetLatestTimestampResult();
-        double gpuForwardFrameTimeMs = aznumeric_cast<double>(forwardTimestampResult.GetDurationInNanoseconds()) / 1000000;
+        float gpuForwardFrameTimeMs = aznumeric_cast<float>(forwardTimestampResult.GetDurationInNanoseconds()) / 1000000;
         m_imGuiForwardPassTimer.PushValue(gpuForwardFrameTimeMs);
 
 

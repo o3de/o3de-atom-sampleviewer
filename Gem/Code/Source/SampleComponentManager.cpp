@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -62,12 +63,13 @@
 #include <RHI/TrianglesConstantBufferExampleComponent.h>
 #include <RHI/BindlessPrototypeExampleComponent.h>
 #include <RHI/RayTracingExampleComponent.h>
+#include <RHI/MatrixAlignmentTestExampleComponent.h>
 
 #include <AreaLightExampleComponent.h>
 #include <AssetLoadTestComponent.h>
 #include <AuxGeomExampleComponent.h>
 #include <BakedShaderVariantExampleComponent.h>
-#include <BistroBenchmarkComponent.h>
+#include <SponzaBenchmarkComponent.h>
 #include <BloomExampleComponent.h>
 #include <CheckerboardExampleComponent.h>
 #include <CullingAndLodExampleComponent.h>
@@ -97,12 +99,14 @@
 #include <TransparencyExampleComponent.h>
 #include <DiffuseGIExampleComponent.h>
 #include <SSRExampleComponent.h>
+#include <ShaderReloadTestComponent.h>
 
 #include <Atom/Bootstrap/DefaultWindowBus.h>
 
 #include <AzCore/Component/Entity.h>
 #include <AzCore/Debug/Profiler.h>
 #include <AzCore/Serialization/SerializeContext.h>
+#include <AzCore/Settings/SettingsRegistryMergeUtils.h>
 #include <AzCore/std/smart_ptr/make_shared.h>
 #include <AzCore/std/algorithm.h>
 
@@ -117,6 +121,9 @@
 #include <Passes/RayTracingAmbientOcclusionPass.h>
 
 #include <Utils/Utils.h>
+
+#include <Profiler/ProfilerBus.h>
+#include <Profiler/ProfilerImGuiBus.h>
 
 #include "ExampleComponentBus.h"
 
@@ -133,6 +140,11 @@ namespace AtomSampleViewer
         const char* CpuProfilerToolName = "CPU Profiler";
         const char* GpuProfilerToolName = "GPU Profiler";
         const char* TransientAttachmentProfilerToolName = "Transient Attachment Profiler";
+    }
+
+    bool IsValidNumMSAASamples(int numSamples)
+    {
+        return (numSamples == 1) || (numSamples == 2) || (numSamples == 4) || (numSamples == 8);
     }
 
     SampleEntry SampleEntry::NewRHISample(const AZStd::string& name, const AZ::Uuid& uuid)
@@ -253,10 +265,11 @@ namespace AtomSampleViewer
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/TextureMap", azrtti_typeid<TextureMapExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/Triangle", azrtti_typeid<TriangleExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/TrianglesConstantBuffer", azrtti_typeid<TrianglesConstantBufferExampleComponent>() ));
+        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/MatrixAlignmentTest", azrtti_typeid<MatrixAlignmentTestExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/AssetLoadTest", azrtti_typeid<AssetLoadTestComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/AuxGeom", azrtti_typeid<AuxGeomExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/BakedShaderVariant", azrtti_typeid<BakedShaderVariantExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/SponzaBenchmark", azrtti_typeid<BistroBenchmarkComponent>() ));
+        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/SponzaBenchmark", azrtti_typeid<SponzaBenchmarkComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/CullingAndLod", azrtti_typeid<CullingAndLodExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/Decals", azrtti_typeid<DecalExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/DynamicDraw", azrtti_typeid<DynamicDrawExampleComponent>() ));
@@ -271,6 +284,7 @@ namespace AtomSampleViewer
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/SceneReloadSoakTest", azrtti_typeid<SceneReloadSoakTestComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/Shading", azrtti_typeid<ShadingExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/StreamingImage", azrtti_typeid<StreamingImageExampleComponent>() ));
+        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/ShaderReloadTest", azrtti_typeid<ShaderReloadTestComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/AreaLight", azrtti_typeid<AreaLightExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Bloom", azrtti_typeid<BloomExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Checkerboard", azrtti_typeid<CheckerboardExampleComponent>(), []() {return (Utils::GetRHIDevice()->GetPhysicalDevice().GetDescriptor().m_vendorId != RHI::VendorId::ARM && Utils::GetRHIDevice()->GetPhysicalDevice().GetDescriptor().m_vendorId != RHI::VendorId::Qualcomm); } ));
@@ -300,7 +314,8 @@ namespace AtomSampleViewer
         AZ_Assert(passSystem, "Cannot get the pass system.");
 
         passSystem->AddPassCreator(Name("RayTracingAmbientOcclusionPass"), &AZ::Render::RayTracingAmbientOcclusionPass::Create);
- 
+
+        m_numMSAASamples = GetDefaultNumMSAASamples();
     }
 
     void SampleComponentManager::ActivateInternal()
@@ -309,7 +324,7 @@ namespace AtomSampleViewer
 
         AZ::ApplicationTypeQuery appType;
         ComponentApplicationBus::Broadcast(&AZ::ComponentApplicationBus::Events::QueryApplicationType, appType);
-        if (!appType.IsValid() || appType.IsEditor())
+        if (!appType.IsValid() || !appType.IsGame())
         {
             return;
         }
@@ -406,25 +421,25 @@ namespace AtomSampleViewer
         }
 
         // Set default screenshot folder to relative path 'Screenshots'
-        AZStd::string screenshotFolder = "Screenshots";
+        AZ::IO::Path screenshotFolder = "Screenshots";
         // Get folder from command line if it exists
         static const char* screenshotFolderFlagName = "screenshotFolder";
         if (commandLine->HasSwitch(screenshotFolderFlagName))
         {
             screenshotFolder = commandLine->GetSwitchValue(screenshotFolderFlagName, 0);
-            AzFramework::StringFunc::Path::Normalize(screenshotFolder);
         }
 
-        if (AzFramework::StringFunc::Path::IsRelative(screenshotFolder.c_str()))
-        {
-            const char* engineRoot = nullptr;
-            AzFramework::ApplicationRequests::Bus::BroadcastResult(engineRoot, &AzFramework::ApplicationRequests::GetEngineRoot);
-            AzFramework::StringFunc::Path::Join(engineRoot, screenshotFolder.c_str(), screenshotFolder, true, false);
-        }
+        // Make the screenshot directory relative to the Writeable Storage Path
+        // The Path::operator/ smartly knows how to concatenate two absolute paths
+        // i.e <absolute path1> / <absolute path2> = <absolute path2>
+        auto settingsRegistry = AZ::SettingsRegistry::Get();
+        AZ::IO::Path writableStoragePath;
+        settingsRegistry->Get(writableStoragePath.Native(), AZ::SettingsRegistryMergeUtils::FilePathKey_DevWriteStorage);
+        screenshotFolder = writableStoragePath / screenshotFolder;
 
-        m_imguiFrameCaptureSaver.SetDefaultFolder(screenshotFolder);
+        m_imguiFrameCaptureSaver.SetDefaultFolder(screenshotFolder.Native());
         m_imguiFrameCaptureSaver.SetDefaultFileName("screenshot");
-        m_imguiFrameCaptureSaver.SetAvailableExtensions({"png", "ppm", "dds"});
+        m_imguiFrameCaptureSaver.SetAvailableExtensions({ "png", "ppm", "dds" });
         m_imguiFrameCaptureSaver.Activate();
 
         SampleComponentManagerRequestBus::Handler::BusConnect();
@@ -437,6 +452,10 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::Deactivate()
     {
+        AzFramework::EntityContextRequestBus::Event(
+            m_entityContextId, &AzFramework::EntityContextRequestBus::Events::DestroyEntity, m_cameraEntity);
+        m_cameraEntity = nullptr;
+
         AzFramework::AssetCatalogEventBus::Handler::BusDisconnect();
         AZ::Render::ImGuiSystemNotificationBus::Handler::BusDisconnect();
         m_scriptManager->Deactivate();
@@ -459,9 +478,6 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::OnTick(float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint time)
     {
-        m_simulateTime += deltaTime;
-        m_deltaTime = deltaTime;
-
         m_imGuiFrameTimer.PushValue(deltaTime);
 
         bool screenshotRequest = false;
@@ -740,14 +756,19 @@ namespace AtomSampleViewer
         {
             ShowPassTreeWindow();
         }
+
         if (m_showFrameGraphVisualizer)
         {
             ShowFrameGraphVisualizerWindow();
         }
+
         if (m_showCullingDebugWindow)
         {
-            AZ::RPI::Scene* defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get();
-            AZ::Render::ImGuiDrawCullingDebug(m_showCullingDebugWindow, defaultScene);
+            AZ::RPI::Scene* rpiScene = AZ::RPI::RPISystemInterface::Get()->GetSceneByName(AZ::Name("RPI"));
+            if (rpiScene)
+            {
+                AZ::Render::ImGuiDrawCullingDebug(m_showCullingDebugWindow, rpiScene);
+            }
         }
 
         if (m_showCpuProfiler)
@@ -778,6 +799,14 @@ namespace AtomSampleViewer
     {
         if (ImGui::BeginMainMenuBar())
         {
+            // If imgui doesn't have enough room to render a menu, it will fall back to the safe area which
+            // is typically 3 pixels. This causes the menu to overlap the menu bar, and makes it easy to
+            // accidentally select the first item on that menu bar. By altering the safe area temporarily
+            // while drawing the menu, this problem can be avoided.
+            
+            ImVec2 cachedSafeArea = ImGui::GetStyle().DisplaySafeAreaPadding;
+            ImGui::GetStyle().DisplaySafeAreaPadding = ImVec2(cachedSafeArea.x, cachedSafeArea.y + 16.0f);
+
             if (ImGui::BeginMenu("File"))
             {
                 if (ImGui::MenuItem("Exit", "Ctrl-Q"))
@@ -908,11 +937,10 @@ namespace AtomSampleViewer
                 if (ImGui::MenuItem(CpuProfilerToolName))
                 {
                     m_showCpuProfiler = !m_showCpuProfiler;
-                    AZ::RHI::RHISystemInterface::Get()->ModifyFrameSchedulerStatisticsFlags(
-                        AZ::RHI::FrameSchedulerStatisticsFlags::GatherCpuTimingStatistics,
-                        m_showCpuProfiler);
-
-                    AZ::RHI::CpuProfiler::Get()->SetProfilerEnabled(m_showCpuProfiler);
+                    if (auto profiler = Profiler::ProfilerInterface::Get(); profiler)
+                    {
+                        profiler->SetProfilerEnabled(m_showCpuProfiler);
+                    }
 
                     Utils::ReportScriptableAction("ShowTool('%s', %s)", CpuProfilerToolName, m_showCpuProfiler ? "true" : "false");
                 }
@@ -944,6 +972,9 @@ namespace AtomSampleViewer
                 }
                 ImGui::EndMenu();
             }
+
+            // Restore original safe area.
+            ImGui::GetStyle().DisplaySafeAreaPadding = cachedSafeArea;
 
             ImGui::EndMainMenuBar();
         }
@@ -1002,10 +1033,9 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::ShowCpuProfilerWindow()
     {
-        const AZ::RHI::CpuTimingStatistics* stats = AZ::RHI::RHISystemInterface::Get()->GetCpuTimingStatistics();
-        if (stats)
+        if (auto profilerImGui = Profiler::ProfilerImGuiInterface::Get(); profilerImGui)
         {
-            m_imguiCpuProfiler.Draw(m_showCpuProfiler, *stats);
+            profilerImGui->ShowCpuProfilerWindow(m_showCpuProfiler);
         }
     }
 
@@ -1135,6 +1165,29 @@ namespace AtomSampleViewer
         {
             m_scriptManager->RunMainTestSuite(suiteFilePath, exitOnTestEnd, randomSeed);
         }
+    }
+
+    void SampleComponentManager::SetNumMSAASamples(int numMSAASamples)
+    {
+        AZ_Assert(IsValidNumMSAASamples(numMSAASamples), "Invalid MSAA sample setting");
+
+        m_numMSAASamples = numMSAASamples;
+    }
+
+    void SampleComponentManager::ResetNumMSAASamples()
+    {
+        m_numMSAASamples = GetDefaultNumMSAASamples();
+    }
+
+    void SampleComponentManager::ResetRPIScene()
+    {
+        ReleaseRPIScene();
+        SwitchSceneForRPISample();
+    }
+
+    void SampleComponentManager::ClearRPIScene()
+    {
+        ReleaseRPIScene();
     }
 
     void SampleComponentManager::ShowFrameCaptureDialog()
@@ -1326,14 +1379,23 @@ namespace AtomSampleViewer
 
         const SampleEntry& sampleEntry = m_availableSamples[m_selectedSampleIndex];
 
+        // Create scene and render pipeline before create sample component
+        if (sampleEntry.m_pipelineType == SamplePipelineType::RHI)
+        {
+            SwitchSceneForRHISample();
+        }
+        else if (sampleEntry.m_pipelineType == SamplePipelineType::RPI)
+        {
+            SwitchSceneForRPISample();
+        }
+
         SampleComponentConfig config(m_windowContext, m_cameraEntity->GetId(), m_entityContextId);
         m_activeSample = m_exampleEntity->CreateComponent(sampleEntry.m_sampleUuid);
         m_activeSample->SetConfiguration(config);
 
+        // special setup for RHI samples
         if (sampleEntry.m_pipelineType == SamplePipelineType::RHI)
         {
-            SwitchSceneForRHISample();
-
             BasicRHIComponent* rhiSampleComponent = static_cast<BasicRHIComponent*>(m_activeSample);
             if (rhiSampleComponent->IsSupportedRHISamplePipeline())
             {
@@ -1343,10 +1405,6 @@ namespace AtomSampleViewer
             {
                 m_rhiSamplePass->SetRHISample(nullptr);
             }
-        }
-        else if (sampleEntry.m_pipelineType == SamplePipelineType::RPI)
-        {
-            SwitchSceneForRPISample();
         }
 
         m_exampleEntity->Activate();
@@ -1371,6 +1429,7 @@ namespace AtomSampleViewer
     {
         // Create and register the rhi scene with only feature processors required for AtomShimRenderer (only for AtomSampleViewerLauncher)
         RPI::SceneDescriptor sceneDesc;
+        sceneDesc.m_nameId = AZ::Name("RHI");
         sceneDesc.m_featureProcessorNames.push_back("AuxGeomFeatureProcessor");
         m_rhiScene = RPI::Scene::CreateScene(sceneDesc);
         m_rhiScene->Activate();
@@ -1388,7 +1447,8 @@ namespace AtomSampleViewer
         RPI::RPISystemInterface::Get()->RegisterScene(m_rhiScene);
 
         // Get RHISamplePass
-        m_rhiSamplePass = azrtti_cast<RHISamplePass*>(renderPipeline->GetRootPass()->FindPassByNameRecursive(AZ::Name("RHISamplePass")).get());
+        AZ::RPI::PassFilter passFilter = AZ::RPI::PassFilter::CreateWithPassName(AZ::Name("RHISamplePass"), renderPipeline.get());
+        m_rhiSamplePass = azrtti_cast<RHISamplePass*>(AZ::RPI::PassSystemInterface::Get()->FindFirstPass(passFilter));
 
         // Setup imGui since a new render pipeline with imgui pass was created
         SetupImGuiContext();
@@ -1417,36 +1477,9 @@ namespace AtomSampleViewer
     {
         // Create and register a scene with all available feature processors
         RPI::SceneDescriptor sceneDesc;
+        sceneDesc.m_nameId = AZ::Name("RPI");
         m_rpiScene = RPI::Scene::CreateScene(sceneDesc);
         m_rpiScene->EnableAllFeatureProcessors();
-
-        // Setup scene srg modification callback.
-        RPI::ShaderResourceGroupCallback callback = [this](RPI::ShaderResourceGroup* srg)
-        {
-            if (srg == nullptr)
-            {
-                return;
-            }
-            bool needCompile = false;
-            RHI::ShaderInputConstantIndex timeIndex = srg->FindShaderInputConstantIndex(Name{ "m_time" });
-            if (timeIndex.IsValid())
-            {
-                srg->SetConstant(timeIndex, m_simulateTime);
-                needCompile = true;
-            }
-            RHI::ShaderInputConstantIndex deltaTimeIndex = srg->FindShaderInputConstantIndex(Name{ "m_deltaTime" });
-            if (deltaTimeIndex.IsValid())
-            {
-                srg->SetConstant(deltaTimeIndex, m_deltaTime);
-                needCompile = true;
-            }
-
-            if (needCompile)
-            {
-                srg->Compile();
-            }
-        };
-        m_rpiScene->SetShaderResourceGroupCallback(callback);
 
         // Bind m_rpiScene to the GameEntityContext's AzFramework::Scene so the RPI Scene can be found by the entity context
         auto sceneSystem = AzFramework::SceneSystemInterface::Get();
@@ -1467,8 +1500,14 @@ namespace AtomSampleViewer
         pipelineDesc.m_name = "RPISamplePipeline";
         pipelineDesc.m_rootPassTemplate = GetRootPassTemplateName();
         pipelineDesc.m_mainViewTagName = "MainCamera";
-        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 4;
-        
+
+        // set pipeline MSAA samples
+        AZ_Assert(IsValidNumMSAASamples(m_numMSAASamples), "Invalid MSAA sample setting");
+        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = static_cast<uint16_t>(m_numMSAASamples);
+        bool isNonMsaaPipeline = (pipelineDesc.m_renderSettings.m_multisampleState.m_samples == 1);
+        const char* supervariantName = isNonMsaaPipeline ? AZ::RPI::NoMsaaSupervariantName : "";
+        AZ::RPI::ShaderSystemInterface::Get()->SetSupervariantName(AZ::Name(supervariantName));
+
         RPI::RenderPipelinePtr renderPipeline = RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext.get());
         m_rpiScene->AddRenderPipeline(renderPipeline);
 

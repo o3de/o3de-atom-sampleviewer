@@ -1,11 +1,14 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
 
 #pragma once
+
+#include <CommonSampleComponentBase.h>
 
 #include <Atom/Bootstrap/DefaultWindowBus.h>
 #include <Atom/Feature/ImGui/ImGuiUtils.h>
@@ -24,12 +27,12 @@ namespace AtomSampleViewer
 {
     // This component renders a model with pbr material using checkerboard render pipeline.
     class CheckerboardExampleComponent final
-        : public AZ::Component
+        : public CommonSampleComponentBase
         , public AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler
         , public AZ::TickBus::Handler
     {
     public:
-        AZ_COMPONENT(CheckerboardExampleComponent, "{0E5B3D5F-5BD2-41BF-BB1E-425AF976DFC9}");
+        AZ_COMPONENT(CheckerboardExampleComponent, "{0E5B3D5F-5BD2-41BF-BB1E-425AF976DFC9}", CommonSampleComponentBase);
 
         static void Reflect(AZ::ReflectContext* context);
 
@@ -40,9 +43,6 @@ namespace AtomSampleViewer
         void Deactivate() override;
 
     private:
-
-        // AZ::Component overrides...
-        bool ReadInConfig(const AZ::ComponentConfig* baseConfig) override;
 
         // DefaultWindowNotificationBus::Handler overrides...
         void DefaultWindowCreated() override;

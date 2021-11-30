@@ -1,7 +1,8 @@
 ----------------------------------------------------------------------------------------------------
 --
--- Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
--- 
+-- Copyright (c) Contributors to the Open 3D Engine Project.
+-- For complete copyright and license terms please see the LICENSE at the root of this distribution.
+--
 -- SPDX-License-Identifier: Apache-2.0 OR MIT
 --
 --
@@ -15,6 +16,8 @@ g_beveledCubeModel = 'materialeditor/viewportmodels/beveledcube.azmodel'
 g_modelWithoutLayerMask = 'objects/bunny.azmodel'
 g_modelWithLayerMask = 'testdata/objects/paintedplane.azmodel'
 g_modelHermanubis = 'materialeditor/viewportmodels/hermanubis.azmodel'
+g_modelTube = 'testdata/objects/tube.azmodel'
+g_modelGrass = 'objects/grass_tile_large.azmodel'
 
 function GenerateMaterialScreenshot(imageComparisonThresholdLevel, materialName, options)
     if options == nil then options = {} end
@@ -105,6 +108,7 @@ GenerateMaterialScreenshot('Level F', '009_Opacity_Blended_Alpha_Affects_Specula
 GenerateMaterialScreenshot('Level H', '009_Opacity_Cutout_PackedAlpha_DoubleSided', {lighting="Neutral Urban", model=g_beveledCubeModel})
 GenerateMaterialScreenshot('Level H', '009_Opacity_Cutout_SplitAlpha_DoubleSided', {lighting="Neutral Urban", model=g_beveledCubeModel})
 GenerateMaterialScreenshot('Level G', '009_Opacity_Cutout_SplitAlpha_SingleSided', {lighting="Neutral Urban", model=g_beveledCubeModel})
+GenerateMaterialScreenshot('Level F', '009_Opacity_Opaque_DoubleSided', {lighting="Neutral Urban", model=g_modelTube, cameraDistance=4.0, cameraPitch=45.0})
 GenerateMaterialScreenshot('Level F', '009_Opacity_TintedTransparent', {lighting="Neutral Urban", model=g_beveledCubeModel})
 GenerateMaterialScreenshot('Level H', '010_AmbientOcclusion', {lighting="Palermo Sidewalk (Alt)"})
 GenerateMaterialScreenshot('Level G', '010_SpecularOcclusion', {lighting="Palermo Sidewalk (Alt)"})
@@ -120,6 +124,7 @@ GenerateMaterialScreenshot('Level H', '014_ClearCoat_NormalMap_2ndUv', {lighting
 GenerateMaterialScreenshot('Level F', '014_ClearCoat_RoughnessMap', {lighting="Neutral Urban"})
 GenerateMaterialScreenshot('Level F', '015_SubsurfaceScattering', {lighting="Dark Test Lighting", cameraHeading = 45.0, cameraPitch=30.0, cameraDistance=1.5})
 GenerateMaterialScreenshot('Level D', '015_SubsurfaceScattering_Transmission', {lighting="Dark Test Lighting", cameraHeading = 45.0, cameraPitch=-30.0, cameraDistance=1.5})
+GenerateMaterialScreenshot('Level E', '015_SubsurfaceScattering_Transmission_Thin', {model=g_modelGrass, lighting="Goegap (Alt)", cameraHeading = -150.0, cameraPitch=5.0, cameraDistance=1.5})
 GenerateMaterialScreenshot('Level I', '100_UvTiling_AmbientOcclusion')
 GenerateMaterialScreenshot('Level I', '100_UvTiling_BaseColor')
 GenerateMaterialScreenshot('Level I', '100_UvTiling_Emissive')

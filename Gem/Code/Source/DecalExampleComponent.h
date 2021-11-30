@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -13,6 +14,7 @@
 #include <AzCore/Component/TickBus.h>
 
 #include <AzFramework/Input/Events/InputChannelEventListener.h>
+#include <Atom/Feature/CoreLights/DirectionalLightFeatureProcessorInterface.h>
 #include <Atom/Feature/Decals/DecalFeatureProcessorInterface.h>
 #include <Utils/Utils.h>
 #include <Utils/ImGuiSidebar.h>
@@ -49,6 +51,9 @@ namespace AtomSampleViewer
         void EnableArcBallCameraController();
         void ConfigureCameraToLookDownAtObject();
         void AddImageBasedLight();
+        void AcquireDirectionalLightFeatureProcessor();
+        void CreateDirectionalLight();
+        void UpdateDirectionalLight();
         void DrawSidebar();
         AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_meshHandle;
         Utils::DefaultIBL m_defaultIbl;
@@ -57,6 +62,9 @@ namespace AtomSampleViewer
         AZStd::unique_ptr<DecalContainer> m_decalContainerClone;
         ImGuiSidebar m_imguiSidebar;
         bool m_cloneDecalsEnabled = false;
+        float m_directionalLightRotationAngle = 0.f; // in radians
+        AZ::Render::DirectionalLightFeatureProcessorInterface* m_directionalLightFeatureProcessor = nullptr;
+        AZ::Render::DirectionalLightFeatureProcessorInterface::LightHandle m_directionalLightHandle;
 
         // CommonSampleComponentBase overrides...
         void OnAllAssetsReadyActivate() override;

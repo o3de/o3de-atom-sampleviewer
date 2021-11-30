@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -13,6 +14,7 @@
 
 #include <Atom/RPI.Public/View.h>
 #include <Atom/RPI.Public/Image/StreamingImage.h>
+#include <Atom/RPI.Public/Shader/ShaderSystemInterface.h>
 
 #include <Atom/RPI.Reflect/Asset/AssetUtils.h>
 #include <Atom/RPI.Reflect/Model/ModelAsset.h>
@@ -51,6 +53,10 @@ namespace AtomSampleViewer
 
     void SsaoExampleComponent::Activate()
     {
+        // We have a non-msaa pipeline, adjust the shader system supervariant settings accordingly
+        AZ::Name noMsaaSupervariant = AZ::Name(AZ::RPI::NoMsaaSupervariantName);
+        AZ::RPI::ShaderSystemInterface::Get()->SetSupervariantName(noMsaaSupervariant);
+
         RHI::Ptr<RHI::Device> device = RHI::RHISystemInterface::Get()->GetDevice();
         m_rayTracingEnabled = device->GetFeatures().m_rayTracing;
 
@@ -74,6 +80,10 @@ namespace AtomSampleViewer
         DeactivateSsaoPipeline();
         AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusDisconnect();
         AZ::TickBus::Handler::BusDisconnect();
+
+        // Reset the number of MSAA samples and the RPI scene
+        SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequests::ResetNumMSAASamples);
+        SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequests::ClearRPIScene);
     }
 
     // --- World Model ---
@@ -126,26 +136,18 @@ namespace AtomSampleViewer
 
         if (m_rayTracingEnabled)
         {
-            RPI::PassHierarchyFilter passFilter({ssaoPipelineDesc.m_name, "RayTracingAmbientOcclusionPass"});
-            const AZStd::vector<RPI::Pass*>& passes = RPI::PassSystemInterface::Get()->FindPasses(passFilter);
-            if (!passes.empty())
-            {
-                m_RTAOPass = azrtti_cast<Render::RayTracingAmbientOcclusionPass*>(passes.front());
-                AZ_Assert(m_RTAOPass, "Couldn't find the RayTracingAmbientOcclusionPass from the SsaoPipeline");
-            }
+            RPI::PassFilter passFilter = RPI::PassFilter::CreateWithPassName(AZ::Name("RayTracingAmbientOcclusionPass"), m_ssaoPipeline.get());
+            m_RTAOPass = azrtti_cast<Render::RayTracingAmbientOcclusionPass*>(RPI::PassSystemInterface::Get()->FindFirstPass(passFilter));
+            AZ_Assert(m_RTAOPass, "Couldn't find the RayTracingAmbientOcclusionPass from the SsaoPipeline");
         }
         else
         {
             m_aoType = AmbientOcclusionType::SSAO;
         }
 
-        RPI::PassHierarchyFilter passFilter({ssaoPipelineDesc.m_name, "SelectorPass"});
-        const AZStd::vector<RPI::Pass*>& passes = RPI::PassSystemInterface::Get()->FindPasses(passFilter);
-        if (!passes.empty())
-        {
-            m_selector = azrtti_cast<RPI::SelectorPass*>(passes.front());
-            AZ_Assert(m_selector, "Couldn't find the SelectorPass from the SsaoPipeline");
-        }
+        RPI::PassFilter selectorPassFilter = RPI::PassFilter::CreateWithPassName(AZ::Name("SelectorPass"), m_ssaoPipeline.get());
+        m_selector = azrtti_cast<RPI::SelectorPass*>(RPI::PassSystemInterface::Get()->FindFirstPass(selectorPassFilter));
+        AZ_Assert(m_selector, "Couldn't find the SelectorPass from the SsaoPipeline");
     }
 
     void SsaoExampleComponent::DestroySsaoPipeline()
@@ -157,23 +159,21 @@ namespace AtomSampleViewer
     {
         CreateSsaoPipeline();
 
-        AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        m_originalPipeline = defaultScene->GetDefaultRenderPipeline();
-        defaultScene->AddRenderPipeline(m_ssaoPipeline);
+        m_originalPipeline = m_scene->GetDefaultRenderPipeline();
+        m_scene->AddRenderPipeline(m_ssaoPipeline);
         m_ssaoPipeline->SetDefaultView(m_originalPipeline->GetDefaultView());
-        defaultScene->RemoveRenderPipeline(m_originalPipeline->GetId());
+        m_scene->RemoveRenderPipeline(m_originalPipeline->GetId());
 
         // Create an ImGuiActiveContextScope to ensure the ImGui context on the new pipeline's ImGui pass is activated.
-        m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass(AZ::RPI::PassHierarchyFilter({ m_ssaoPipeline->GetId().GetCStr(), "ImGuiPass" }));
+        m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass({ m_ssaoPipeline->GetId().GetCStr(), "ImGuiPass" });
     }
 
     void SsaoExampleComponent::DeactivateSsaoPipeline()
     {
         m_imguiScope = {}; // restores previous ImGui context.
 
-        AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        defaultScene->AddRenderPipeline(m_originalPipeline);
-        defaultScene->RemoveRenderPipeline(m_ssaoPipeline->GetId());
+        m_scene->AddRenderPipeline(m_originalPipeline);
+        m_scene->RemoveRenderPipeline(m_ssaoPipeline->GetId());
         DestroySsaoPipeline();
     }
 
@@ -191,8 +191,7 @@ namespace AtomSampleViewer
             &ComponentDescriptorBus::Events::CreateComponent);
         m_ssaoEntity->AddComponent(transformComponent);
 
-        RPI::Scene* scene = RPI::RPISystemInterface::Get()->GetDefaultScene().get();
-        m_postProcessFeatureProcessor = scene->GetFeatureProcessor<Render::PostProcessFeatureProcessorInterface>();
+        m_postProcessFeatureProcessor = m_scene->GetFeatureProcessor<Render::PostProcessFeatureProcessorInterface>();
 
         auto* postProcessSettings = m_postProcessFeatureProcessor->GetOrCreateSettingsInterface(m_ssaoEntity->GetId());
         m_ssaoSettings = postProcessSettings->GetOrCreateSsaoSettingsInterface();

@@ -1,5 +1,5 @@
 {
-    "Source" : "RayTracingDispatch",
+    "Source" : "RayTracingDispatch.azsl",
     "DrawList" : "RayTracing",
 
     "CompilerHints":

@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -16,8 +17,9 @@
 #include <Automation/ScriptReporter.h>
 #include <Automation/ImageComparisonConfig.h>
 #include <Utils/ImGuiAssetBrowser.h>
+#include <Profiler/ProfilerBus.h>
 
-namespace AZ 
+namespace AZ
 {
     class ScriptContext;
     class ScriptDataContext;
@@ -48,13 +50,14 @@ namespace AtomSampleViewer
         , public AZ::Debug::CameraControllerNotificationBus::Handler
         , public AZ::Render::FrameCaptureNotificationBus::Handler
         , public AZ::Render::ProfilingCaptureNotificationBus::Handler
+        , public Profiler::ProfilerNotificationBus::Handler
     {
     public:
         ScriptManager();
 
         void Activate();
         void Deactivate();
-        
+
         void SetCameraEntity(AZ::Entity* cameraEntity);
 
         void TickScript(float deltaTime);
@@ -63,7 +66,7 @@ namespace AtomSampleViewer
         void OpenScriptRunnerDialog();
 
         void RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd, int randomSeed);
-        
+
     private:
 
         void ShowScriptRunnerDialog();
@@ -133,8 +136,10 @@ namespace AtomSampleViewer
 
         // Profiling statistics data...
         static void Script_CapturePassTimestamp(AZ::ScriptDataContext& dc);
+        static void Script_CaptureCpuFrameTime(AZ::ScriptDataContext& dc);
         static void Script_CapturePassPipelineStatistics(AZ::ScriptDataContext& dc);
         static void Script_CaptureCpuProfilingStatistics(AZ::ScriptDataContext& dc);
+        static void Script_CaptureBenchmarkMetadata(AZ::ScriptDataContext& dc);
 
         // Camera...
         static void Script_ArcBallCameraController_SetCenter(AZ::Vector3 center);
@@ -200,7 +205,11 @@ namespace AtomSampleViewer
 
         // ProfilingCaptureNotificationBus overrides...
         void OnCaptureQueryTimestampFinished(bool result, const AZStd::string& info) override;
+        void OnCaptureCpuFrameTimeFinished(bool result, const AZStd::string& info) override;
         void OnCaptureQueryPipelineStatisticsFinished(bool result, const AZStd::string& info) override;
+        void OnCaptureBenchmarkMetadataFinished(bool result, const AZStd::string& info) override;
+
+        // ProfilerNotificationBus overrides...
         void OnCaptureCpuProfilingStatisticsFinished(bool result, const AZStd::string& info) override;
 
         void AbortScripts(const AZStd::string& reason);

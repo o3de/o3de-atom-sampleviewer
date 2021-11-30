@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -84,11 +85,7 @@ namespace AZ
             AZ_Assert(m_globalPipelineState, "Failed to acquire ray tracing global pipeline state");
 
             //Get pass srg
-            auto srgAsset = m_rayGenerationShader->FindShaderResourceGroupAsset(Name{"RayTracingGlobalSrg"});
-            AZ_Error("RayTracingAmbientOcclusionPass", srgAsset.GetId().IsValid(), "Failed to find PassSrg asset for shader [%s]", rayGenerationShaderFilePath);
-            AZ_Error("RayTracingAmbientOcclusionPass", srgAsset.IsReady(), "RayTracingGlobalSrg asset is not loaded for shader [%s]", rayGenerationShaderFilePath);
-
-            m_shaderResourceGroup = RPI::ShaderResourceGroup::Create(srgAsset);
+            m_shaderResourceGroup = RPI::ShaderResourceGroup::Create(m_rayGenerationShader->GetAsset(), Name { "RayTracingGlobalSrg" });
             AZ_Assert(m_shaderResourceGroup, "[RayTracingAmbientOcclusionPass '%s']: Failed to create SRG from shader asset '%s'",
                 GetPathName().GetCStr(), rayGenerationShaderFilePath);
                         
@@ -161,7 +158,6 @@ namespace AZ
 
             // Bind others for global srg
             const RHI::ShaderResourceGroupLayout* srgLayout = m_shaderResourceGroup->GetLayout();
-            RHI::ShaderInputImageIndex imageIndex;
             RHI::ShaderInputBufferIndex bufferIndex;
             RHI::ShaderInputConstantIndex constantIndex;
 
