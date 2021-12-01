@@ -9,4 +9,4 @@
 #define ENTITY_LATTICE_TEST_COMPONENT_WIDTH                     5
 #define ENTITY_LATTICE_TEST_COMPONENT_HEIGHT                    5
 #define ENTITY_LATTICE_TEST_COMPONENT_DEPTH                     5
-#define ENTITY_LATTEST_TEST_COMPONENT_MAX                       10
+#define ENTITY_LATTEST_TEST_COMPONENT_MAX                       25

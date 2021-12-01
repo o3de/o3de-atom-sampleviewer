@@ -45,6 +45,7 @@
 #include <DiffuseGIExampleComponent.h>
 #include <SSRExampleComponent.h>
 #include <ShaderReloadTestComponent.h>
+#include <HighInstanceExampleComponent.h>
 
 #include <RHI/AlphaToCoverageExampleComponent.h>
 #include <RHI/AsyncComputeExampleComponent.h>
@@ -158,6 +159,7 @@ namespace AtomSampleViewer
                 DiffuseGIExampleComponent::CreateDescriptor(),
                 SSRExampleComponent::CreateDescriptor(),
                 ShaderReloadTestComponent::CreateDescriptor(),
+                HighInstanceTestComponent::CreateDescriptor(),
                 });
         }
 
