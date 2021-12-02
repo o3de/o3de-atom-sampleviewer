@@ -10,6 +10,8 @@
 #include <SampleComponentManager.h>
 #include <SampleComponentConfig.h>
 
+#include <Atom/Component/DebugCamera/NoClipControllerBus.h>
+
 #include <Atom/RPI.Reflect/Model/ModelAsset.h>
 #include <Atom/RPI.Reflect/Material/MaterialAsset.h>
 #include <Atom/RPI.Reflect/Asset/AssetUtils.h>
@@ -150,10 +152,13 @@ namespace AtomSampleViewer
             &AzFramework::WindowRequestBus::Events::SetSyncInterval,
             0);
 
+            SaveCameraConfiguration();
+            ResetNoClipController();
     }
 
     void HighInstanceTestComponent::Deactivate()
     {
+        RestoreCameraConfiguration();
         AzFramework::NativeWindowHandle windowHandle = nullptr;
         AzFramework::WindowSystemRequestBus::BroadcastResult(
             windowHandle,
@@ -333,4 +338,22 @@ namespace AtomSampleViewer
         }
     }
 
+    void HighInstanceTestComponent::ResetNoClipController()
+    {
+        using namespace AZ;
+        using namespace AZ::Debug;
+        Camera::CameraRequestBus::Event(GetCameraEntityId(), &Camera::CameraRequestBus::Events::SetFarClipDistance, 2000.0f);
+        NoClipControllerRequestBus::Event(GetCameraEntityId(), &NoClipControllerRequestBus::Events::SetHeading, AZ::DegToRad(-44.722542));
+        NoClipControllerRequestBus::Event(GetCameraEntityId(), &NoClipControllerRequestBus::Events::SetPitch, AZ::DegToRad(24.987326));
+    }
+
+    void HighInstanceTestComponent::SaveCameraConfiguration()
+    {
+        Camera::CameraRequestBus::EventResult(m_originalFarClipDistance, GetCameraEntityId(), &Camera::CameraRequestBus::Events::GetFarClipDistance);
+    }
+
+    void HighInstanceTestComponent::RestoreCameraConfiguration()
+    {
+        Camera::CameraRequestBus::Event(GetCameraEntityId(), &Camera::CameraRequestBus::Events::SetFarClipDistance, m_originalFarClipDistance);
+    }
 } // namespace AtomSampleViewer

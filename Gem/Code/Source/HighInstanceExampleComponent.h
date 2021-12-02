@@ -57,6 +57,10 @@ namespace AtomSampleViewer
 
         void OnTick(float deltaTime, AZ::ScriptTimePoint scriptTime) override;
 
+        void ResetNoClipController();
+        void SaveCameraConfiguration();
+        void RestoreCameraConfiguration();
+        
         struct ModelInstanceData
         {
             AZ::Transform m_transform;
@@ -89,6 +93,8 @@ namespace AtomSampleViewer
         uint32_t m_preActivateVSyncInterval = 0;
         
         size_t m_lastPinnedModelCount = 0;
+
+        float m_originalFarClipDistance;
         bool m_updateTransformEnabled = false;
     };
 } // namespace AtomSampleViewer
