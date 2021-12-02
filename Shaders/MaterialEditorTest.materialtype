@@ -1,7 +1,7 @@
 {
     "description": "Just collects some dummy fields for testing the material editor.",
+    "version": 1,
     "propertyLayout": {
-        "version": 1,
         "groups": [
             {
                 "id": "normal",

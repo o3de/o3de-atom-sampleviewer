@@ -1,5 +1,6 @@
 """
-Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
+Copyright (c) Contributors to the Open 3D Engine Project.
+For complete copyright and license terms please see the LICENSE at the root of this distribution.
 
 SPDX-License-Identifier: Apache-2.0 OR MIT
 """
@@ -28,7 +29,7 @@ class TestAutomationMainSuite:
 
     def test_AutomatedReviewTestSuite(self, request, workspace, launcher_platform, rhi, atomsampleviewer_log_monitor):
         # Script call setup.
-        test_script = '_AutomatedReviewTestSuite_.bv.lua'
+        test_script = '_FullTestSuite_.bv.lua'
         test_script_path = os.path.join(workspace.paths.project(), 'Scripts', test_script)
         if not os.path.exists(test_script_path):
             raise AtomSampleViewerException(f'Test script does not exist in path: {test_script_path}')

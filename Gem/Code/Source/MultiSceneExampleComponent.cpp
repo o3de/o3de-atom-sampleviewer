@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -69,6 +70,7 @@ namespace AtomSampleViewer
 
         // Create the RPI::Scene, add some feature processors
         RPI::SceneDescriptor sceneDesc;
+        sceneDesc.m_nameId = AZ::Name("SecondScene");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::SimplePointLightFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::SimpleSpotLightFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::CapsuleLightFeatureProcessor");
@@ -82,33 +84,9 @@ namespace AtomSampleViewer
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::QuadLightFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("ReflectionProbeFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::SkyBoxFeatureProcessor");
-        sceneDesc.m_featureProcessorNames.push_back("AZ::Render::DiskLightFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::TransformServiceFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::ProjectedShadowFeatureProcessor");
         m_scene = RPI::Scene::CreateScene(sceneDesc);
-
-        // Setup scene srg modification callback (to push per-frame values to the shaders)
-        RPI::ShaderResourceGroupCallback srgCallback = [this](RPI::ShaderResourceGroup* srg)
-        {
-            if (srg == nullptr)
-            {
-                return;
-            }
-
-            RHI::ShaderInputNameIndex timeIndex = "m_time";
-            RHI::ShaderInputNameIndex deltaTimeIndex = "m_deltaTime";
-
-            srg->SetConstant(timeIndex, aznumeric_cast<float>(m_simulateTime));
-            srg->SetConstant(deltaTimeIndex, m_deltaTime);
-
-            bool needCompile = timeIndex.IsValid() || deltaTimeIndex.IsValid();
-
-            if (needCompile)
-            {
-                srg->Compile();
-            }
-        };
-        m_scene->SetShaderResourceGroupCallback(srgCallback);
 
         // Link our RPI::Scene to the AzFramework::Scene
         m_frameworkScene->SetSubsystem(m_scene);
@@ -170,7 +148,7 @@ namespace AtomSampleViewer
                 m_shaderBallMeshHandles.push_back(LoadMesh(ShaderBallModelFilePath));
                 auto updateShaderBallTransform = [this, i](Data::Instance<RPI::Model> model)
                 {
-                    const Aabb& aabb = model->GetAabb();
+                    const Aabb& aabb = model->GetModelAsset()->GetAabb();
                     const Vector3 translation{ 0.0f, -aabb.GetMin().GetZ() * aznumeric_cast<float>(i), -aabb.GetMin().GetY() };
                     const auto transform = Transform::CreateTranslation(translation);
                     m_meshFeatureProcessor->SetTransform(m_shaderBallMeshHandles[i], transform);
@@ -239,7 +217,6 @@ namespace AtomSampleViewer
             m_diskLightFeatureProcessor->SetShadowsEnabled(m_diskLightHandle, true);
             m_diskLightFeatureProcessor->SetShadowmapMaxResolution(m_diskLightHandle, Render::ShadowmapSize::Size512);
             m_diskLightFeatureProcessor->SetConeAngles(m_diskLightHandle, DegToRad(22.5f), DegToRad(27.5f));
-            m_diskLightFeatureProcessor->SetSofteningBoundaryWidthAngle(m_diskLightHandle, DegToRad(0.25f));
         }
 
         // Create DirectionalLight
@@ -368,12 +345,9 @@ namespace AtomSampleViewer
     }
 
     // AZ::TickBus::Handler overrides ...
-    void SecondWindowedScene::OnTick(float deltaTime, AZ::ScriptTimePoint timePoint)
+    void SecondWindowedScene::OnTick([[maybe_unused]] float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint timePoint)
     {
         using namespace AZ;
-
-        m_deltaTime = deltaTime;
-        m_simulateTime = timePoint.GetSeconds();
 
         // Move the camera a bit each frame
         // Note: view space in this scene is right-handed, Z-up, Y-forward
@@ -451,7 +425,6 @@ namespace AtomSampleViewer
     void MultiSceneExampleComponent::OnAllAssetsReadyActivate()
     {
         using namespace AZ;
-        RPI::ScenePtr scene = RPI::RPISystemInterface::Get()->GetDefaultScene();
 
         // Setup Main Mesh Entity
         {
@@ -467,7 +440,7 @@ namespace AtomSampleViewer
 
         // IBL
         {
-            m_defaultIbl.Init(scene.get());
+            m_defaultIbl.Init(m_scene);
         }
 
         if (SupportsMultipleWindows())

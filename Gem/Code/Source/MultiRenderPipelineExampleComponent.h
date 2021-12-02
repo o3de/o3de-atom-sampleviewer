@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -131,9 +132,6 @@ namespace AtomSampleViewer
 
         // camera for the second render pipeline
         AZ::Entity* m_secondViewCameraEntity = nullptr;
-
-        // Reference to current scene
-        AZ::RPI::ScenePtr m_scene;
     };
 
 } // namespace AtomSampleViewer

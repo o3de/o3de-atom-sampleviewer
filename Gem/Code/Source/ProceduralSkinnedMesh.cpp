@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -192,7 +193,7 @@ namespace AtomSampleViewer
 
             // Find the closest bone that is still below or equal to the current segment in height
             int boneIndexBelow = 0;
-            for (boneIndexBelow; boneIndexBelow < static_cast<int>(m_boneCount - 1); ++boneIndexBelow)
+            for (; boneIndexBelow < static_cast<int>(m_boneCount - 1); ++boneIndexBelow)
             {
                 // If the next bone is higher than the current height, we've found the below/above indices we're looking for
                 if (m_boneHeights[boneIndexBelow + 1] > currentSegmentHeight)
@@ -212,7 +213,7 @@ namespace AtomSampleViewer
             // If there are no more in one direction, we'll just keep taking them from the other direction
             enum class BoneSelectionMethod { TakeClosest, TakeFarthest, TakeOnly };
             // If there is only one valid direction to start with, use TakeOnly. Otherwise, use TakeClosest
-            BoneSelectionMethod currentBoneSelectionMethod = boneIndexBelow < 0 || boneIndexAbove == m_boneCount ? BoneSelectionMethod::TakeOnly : BoneSelectionMethod::TakeClosest;
+            BoneSelectionMethod currentBoneSelectionMethod = boneIndexBelow < 0 || boneIndexAbove == static_cast<int>(m_boneCount) ? BoneSelectionMethod::TakeOnly : BoneSelectionMethod::TakeClosest;
 
             // Assume that we won't get into a state where there are no bones above and no bones below before we've finished
             AZ_Assert(m_influencesPerVertex <= m_boneCount && m_influencesPerVertex <= maxInfluencesPerVertex, "SkinnedMeshExampleComponent - m_influencesPerVertex was incorrectly clamped.");

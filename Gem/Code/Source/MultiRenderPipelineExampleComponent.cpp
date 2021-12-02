@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -63,8 +64,6 @@ namespace AtomSampleViewer
 
     void MultiRenderPipelineExampleComponent::Activate()
     {
-        m_scene = RPI::RPISystemInterface::Get()->GetDefaultScene();
-
         // Save references of different feature processors
         m_diskLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DiskLightFeatureProcessorInterface>();
         m_directionalLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
@@ -219,8 +218,6 @@ namespace AtomSampleViewer
         featureProcessor->SetShadowmapSize(handle, Render::ShadowmapSize::Size2048);
         featureProcessor->SetViewFrustumCorrectionEnabled(handle, true);
         featureProcessor->SetShadowFilterMethod(handle, aznumeric_cast<Render::ShadowFilterMethod>(m_shadowFilteringMethod));
-        featureProcessor->SetShadowBoundaryWidth(handle, 0.03f);
-        featureProcessor->SetPredictionSampleCount(handle, 4);
         featureProcessor->SetFilteringSampleCount(handle, 32);
         featureProcessor->SetGroundHeight(handle, 0.f);
         featureProcessor->SetShadowFarClipDistance(handle, 100.f);
@@ -281,7 +278,7 @@ namespace AtomSampleViewer
     
     void MultiRenderPipelineExampleComponent::AddIBL()
     {
-        m_ibl.Init(m_scene.get());
+        m_ibl.Init(m_scene);
     }
 
     void MultiRenderPipelineExampleComponent::RemoveIBL()
@@ -573,7 +570,7 @@ namespace AtomSampleViewer
 
         if (m_secondPipeline)
         {
-            Render::ImGuiActiveContextScope contextGuard = Render::ImGuiActiveContextScope::FromPass(RPI::PassHierarchyFilter({ "SecondPipeline", "ImGuiPass"}));
+            Render::ImGuiActiveContextScope contextGuard = Render::ImGuiActiveContextScope::FromPass({ "SecondPipeline", "ImGuiPass"});
             AZ_Error("MultiRenderPipelineExampleComponent", contextGuard.IsEnabled(), "Unable to activate imgui context for second pipeline.");
 
             if (contextGuard.IsEnabled())

@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -219,7 +220,7 @@ namespace AtomSampleViewer
                 drawItem.m_arguments = drawIndexed;
                 drawItem.m_pipelineState = m_pipelineStateBasePass.get();
                 drawItem.m_indexBufferView = &indexBufferView;
-                drawItem.m_streamBufferViewCount = static_cast<uint32_t>(m_streamBufferViews.size());
+                drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
                 drawItem.m_streamBufferViews = m_streamBufferViews.data();
                 commandList->Submit(drawItem);
 

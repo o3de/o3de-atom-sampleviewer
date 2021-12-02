@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -127,8 +128,7 @@ namespace AtomSampleViewer
 
     void AuxGeomExampleComponent::DrawSampleOfAllAuxGeom() const
     {
-        auto defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        if (auto auxGeom = AZ::RPI::AuxGeomFeatureProcessorInterface::GetDrawQueueForScene(defaultScene))
+        if (auto auxGeom = AZ::RPI::AuxGeomFeatureProcessorInterface::GetDrawQueueForScene(m_scene))
         {
             if (m_drawBackgroundBox)
             {

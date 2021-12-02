@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -14,6 +15,7 @@
 #include <Atom/RHI/RayTracingShaderTable.h>
 #include <Atom/RPI.Public/RPIUtils.h>
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
+#include <Atom/RPI.Public/Shader/Shader.h>
 
 #include <RayTracing/RayTracingFeatureProcessor.h>
 
@@ -66,8 +68,7 @@ namespace AZ
             // ray tracing shader table
             RHI::Ptr<RHI::RayTracingShaderTable> m_rayTracingShaderTable;
 
-            // ray tracing global shader resource group asset and pipeline state
-            Data::Asset<RPI::ShaderResourceGroupAsset> m_globalSrgAsset;
+            // ray tracing global pipeline state
             RHI::ConstPtr<RHI::PipelineState> m_globalPipelineState;
 
             Render::RayTracingFeatureProcessor* m_rayTracingFeatureProcessor = nullptr;

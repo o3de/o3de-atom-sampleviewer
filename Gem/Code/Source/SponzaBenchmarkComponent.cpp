@@ -1,11 +1,12 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
 
-#include <BistroBenchmarkComponent.h>
+#include <SponzaBenchmarkComponent.h>
 
 #include <Atom/RHI/Device.h>
 #include <Atom/RHI/Factory.h>
@@ -19,6 +20,7 @@
 
 #include <AzCore/Serialization/SerializeContext.h>
 #include <AzCore/Serialization/Utils.h>
+#include <AzCore/Settings/SettingsRegistryMergeUtils.h>
 #include <AzCore/std/sort.h>
 
 #include <AzFramework/IO/LocalFileIO.h>
@@ -35,71 +37,71 @@
 
 namespace AtomSampleViewer
 {
-    void BistroBenchmarkComponent::Reflect(AZ::ReflectContext* context)
+    void SponzaBenchmarkComponent::Reflect(AZ::ReflectContext* context)
     {
         if (auto* serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
         {
-            serializeContext->Class<BistroBenchmarkComponent, AZ::Component>()
+            serializeContext->Class<SponzaBenchmarkComponent, AZ::Component>()
                 ->Version(0)
                 ;
         }
-        BistroBenchmarkComponent::LoadBenchmarkData::Reflect(context);
-        BistroBenchmarkComponent::LoadBenchmarkData::FileLoadedData::Reflect(context);
+        SponzaBenchmarkComponent::LoadBenchmarkData::Reflect(context);
+        SponzaBenchmarkComponent::LoadBenchmarkData::FileLoadedData::Reflect(context);
 
-        BistroBenchmarkComponent::RunBenchmarkData::Reflect(context);
+        SponzaBenchmarkComponent::RunBenchmarkData::Reflect(context);
     }
 
-    void BistroBenchmarkComponent::LoadBenchmarkData::Reflect(AZ::ReflectContext* context)
+    void SponzaBenchmarkComponent::LoadBenchmarkData::Reflect(AZ::ReflectContext* context)
     {
         if (auto* serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
         {
-            serializeContext->Class<BistroBenchmarkComponent::LoadBenchmarkData>()
+            serializeContext->Class<SponzaBenchmarkComponent::LoadBenchmarkData>()
                 ->Version(0)
-                ->Field("Name", &BistroBenchmarkComponent::LoadBenchmarkData::m_name)
-                ->Field("TimeInSeconds", &BistroBenchmarkComponent::LoadBenchmarkData::m_timeInSeconds)
-                ->Field("TotalMBLoaded", &BistroBenchmarkComponent::LoadBenchmarkData::m_totalMBLoaded)
-                ->Field("MB/s", &BistroBenchmarkComponent::LoadBenchmarkData::m_mbPerSec)
-                ->Field("# of Files Loaded", &BistroBenchmarkComponent::LoadBenchmarkData::m_numFilesLoaded)
-                ->Field("FilesLoaded", &BistroBenchmarkComponent::LoadBenchmarkData::m_filesLoaded)
-                ;
-        }
-    }
-
-    void BistroBenchmarkComponent::LoadBenchmarkData::FileLoadedData::Reflect(AZ::ReflectContext* context)
-    {
-        if (auto* serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
-        {
-            serializeContext->Class<BistroBenchmarkComponent::LoadBenchmarkData::FileLoadedData>()
-                ->Version(0)
-                ->Field("RelativePath", &BistroBenchmarkComponent::LoadBenchmarkData::FileLoadedData::m_relativePath)
-                ->Field("BytesLoaded", &BistroBenchmarkComponent::LoadBenchmarkData::FileLoadedData::m_bytesLoaded)
+                ->Field("Name", &SponzaBenchmarkComponent::LoadBenchmarkData::m_name)
+                ->Field("TimeInSeconds", &SponzaBenchmarkComponent::LoadBenchmarkData::m_timeInSeconds)
+                ->Field("TotalMBLoaded", &SponzaBenchmarkComponent::LoadBenchmarkData::m_totalMBLoaded)
+                ->Field("MB/s", &SponzaBenchmarkComponent::LoadBenchmarkData::m_mbPerSec)
+                ->Field("# of Files Loaded", &SponzaBenchmarkComponent::LoadBenchmarkData::m_numFilesLoaded)
+                ->Field("FilesLoaded", &SponzaBenchmarkComponent::LoadBenchmarkData::m_filesLoaded)
                 ;
         }
     }
 
-    void BistroBenchmarkComponent::RunBenchmarkData::Reflect(AZ::ReflectContext* context)
+    void SponzaBenchmarkComponent::LoadBenchmarkData::FileLoadedData::Reflect(AZ::ReflectContext* context)
     {
         if (auto* serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
         {
-            serializeContext->Class<BistroBenchmarkComponent::RunBenchmarkData>()
+            serializeContext->Class<SponzaBenchmarkComponent::LoadBenchmarkData::FileLoadedData>()
                 ->Version(0)
-                ->Field("Name", &BistroBenchmarkComponent::RunBenchmarkData::m_name)
-                ->Field("FrameCount", &BistroBenchmarkComponent::RunBenchmarkData::m_frameCount)
-                ->Field("TimeToFirstFrame", &BistroBenchmarkComponent::RunBenchmarkData::m_timeToFirstFrame)
-                ->Field("TimeInSeconds", &BistroBenchmarkComponent::RunBenchmarkData::m_timeInSeconds)
-                ->Field("AverageFrameTime", &BistroBenchmarkComponent::RunBenchmarkData::m_averageFrameTime)
-                ->Field("50% of FrameTimes Under", &BistroBenchmarkComponent::RunBenchmarkData::m_50pFramesUnder)
-                ->Field("90% of FrameTimes Under", &BistroBenchmarkComponent::RunBenchmarkData::m_90pFramesUnder)
-                ->Field("MinFrameTime", &BistroBenchmarkComponent::RunBenchmarkData::m_minFrameTime)
-                ->Field("MaxFrameTime", &BistroBenchmarkComponent::RunBenchmarkData::m_maxFrameTime)
-                ->Field("AverageFrameRate", &BistroBenchmarkComponent::RunBenchmarkData::m_averageFrameRate)
-                ->Field("MinFrameRate", &BistroBenchmarkComponent::RunBenchmarkData::m_minFrameRate)
-                ->Field("MaxFrameRate", &BistroBenchmarkComponent::RunBenchmarkData::m_maxFrameRate)
+                ->Field("RelativePath", &SponzaBenchmarkComponent::LoadBenchmarkData::FileLoadedData::m_relativePath)
+                ->Field("BytesLoaded", &SponzaBenchmarkComponent::LoadBenchmarkData::FileLoadedData::m_bytesLoaded)
                 ;
         }
     }
 
-    void BistroBenchmarkComponent::Activate()
+    void SponzaBenchmarkComponent::RunBenchmarkData::Reflect(AZ::ReflectContext* context)
+    {
+        if (auto* serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
+        {
+            serializeContext->Class<SponzaBenchmarkComponent::RunBenchmarkData>()
+                ->Version(0)
+                ->Field("Name", &SponzaBenchmarkComponent::RunBenchmarkData::m_name)
+                ->Field("FrameCount", &SponzaBenchmarkComponent::RunBenchmarkData::m_frameCount)
+                ->Field("TimeToFirstFrame", &SponzaBenchmarkComponent::RunBenchmarkData::m_timeToFirstFrame)
+                ->Field("TimeInSeconds", &SponzaBenchmarkComponent::RunBenchmarkData::m_timeInSeconds)
+                ->Field("AverageFrameTime", &SponzaBenchmarkComponent::RunBenchmarkData::m_averageFrameTime)
+                ->Field("50% of FrameTimes Under", &SponzaBenchmarkComponent::RunBenchmarkData::m_50pFramesUnder)
+                ->Field("90% of FrameTimes Under", &SponzaBenchmarkComponent::RunBenchmarkData::m_90pFramesUnder)
+                ->Field("MinFrameTime", &SponzaBenchmarkComponent::RunBenchmarkData::m_minFrameTime)
+                ->Field("MaxFrameTime", &SponzaBenchmarkComponent::RunBenchmarkData::m_maxFrameTime)
+                ->Field("AverageFrameRate", &SponzaBenchmarkComponent::RunBenchmarkData::m_averageFrameRate)
+                ->Field("MinFrameRate", &SponzaBenchmarkComponent::RunBenchmarkData::m_minFrameRate)
+                ->Field("MaxFrameRate", &SponzaBenchmarkComponent::RunBenchmarkData::m_maxFrameRate)
+                ;
+        }
+    }
+
+    void SponzaBenchmarkComponent::Activate()
     {
         auto traceLevel = AZ::RPI::AssetUtils::TraceLevel::Assert;
         m_sponzaInteriorAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>
@@ -135,15 +137,12 @@ namespace AtomSampleViewer
 
         AZ::TickBus::Handler::BusConnect();
 
-        const char* engineRoot = nullptr;
-        AzFramework::ApplicationRequests::Bus::BroadcastResult(engineRoot, &AzFramework::ApplicationRequests::GetEngineRoot);
-        if (engineRoot)
-        {
-            AzFramework::StringFunc::Path::Join(engineRoot, "Screenshots", m_screenshotFolder, true, false);
-        }
+        auto settingsRegistry = AZ::SettingsRegistry::Get();
+        AZ::IO::Path writableStoragePath;
+        settingsRegistry->Get(writableStoragePath.Native(), AZ::SettingsRegistryMergeUtils::FilePathKey_DevWriteStorage);
+        m_screenshotFolder = writableStoragePath / "Screenshots";
 
-        auto defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        m_directionalLightFeatureProcessor = defaultScene->GetFeatureProcessor<AZ::Render::DirectionalLightFeatureProcessorInterface>();
+        m_directionalLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DirectionalLightFeatureProcessorInterface>();
 
         const auto handle = m_directionalLightFeatureProcessor->AcquireLight();
 
@@ -157,15 +156,13 @@ namespace AtomSampleViewer
         m_directionalLightFeatureProcessor->SetShadowmapSize(handle, AZ::Render::ShadowmapSizeNamespace::ShadowmapSize::Size2048);
         m_directionalLightFeatureProcessor->SetViewFrustumCorrectionEnabled(handle, true);
         m_directionalLightFeatureProcessor->SetShadowFilterMethod(handle, AZ::Render::ShadowFilterMethod::EsmPcf);
-        m_directionalLightFeatureProcessor->SetShadowBoundaryWidth(handle, 0.03);
-        m_directionalLightFeatureProcessor->SetPredictionSampleCount(handle, 4);
         m_directionalLightFeatureProcessor->SetFilteringSampleCount(handle, 16);
         m_directionalLightFeatureProcessor->SetGroundHeight(handle, 0.f);
         m_directionalLightHandle = handle;
 
         // Enable physical sky
         m_skyboxFeatureProcessor = AZ::RPI::Scene::GetFeatureProcessorForEntityContextId<AZ::Render::SkyBoxFeatureProcessorInterface>(GetEntityContextId());
-        AZ_Assert(m_skyboxFeatureProcessor, "BistroBenchmarkComponent unable to find SkyBoxFeatureProcessorInterface.");
+        AZ_Assert(m_skyboxFeatureProcessor, "SponzaBenchmarkComponent unable to find SkyBoxFeatureProcessorInterface.");
         m_skyboxFeatureProcessor->SetSkyboxMode(AZ::Render::SkyBoxMode::PhysicalSky);
         m_skyboxFeatureProcessor->Enable(true);
 
@@ -175,11 +172,11 @@ namespace AtomSampleViewer
         m_skyboxFeatureProcessor->SetSunPosition(azimuth, altitude);
 
         // Create IBL
-        m_defaultIbl.Init(AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get());
+        m_defaultIbl.Init(m_scene);
         m_defaultIbl.SetExposure(-3.0f);
     }
 
-    void BistroBenchmarkComponent::Deactivate()
+    void SponzaBenchmarkComponent::Deactivate()
     {
         AZ::TickBus::Handler::BusDisconnect();
 
@@ -196,9 +193,9 @@ namespace AtomSampleViewer
         m_directionalLightFeatureProcessor = nullptr;
     }
 
-    void BistroBenchmarkComponent::OnTick(float deltaTime, AZ::ScriptTimePoint timePoint)
+    void SponzaBenchmarkComponent::OnTick(float deltaTime, AZ::ScriptTimePoint timePoint)
     {
-        AZ_PROFILE_DATAPOINT(AZ::Debug::ProfileCategory::AzRender, deltaTime, "Frame Time");
+        AZ_PROFILE_DATAPOINT(AzRender, deltaTime, "Frame Time");
 
         // Camera Configuration
         {
@@ -261,16 +258,14 @@ namespace AtomSampleViewer
 
                 if (screenshotRequested)
                 {
-                    AZStd::string filePath;
-                    AZStd::string fileName = AZStd::string::format("screenshot_sponza_%llu.dds", m_frameCount);
-                    AzFramework::StringFunc::Path::Join(m_screenshotFolder.c_str(), fileName.c_str(), filePath, true, false);
-                    AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, filePath);
+                    AZ::IO::Path filePath = m_screenshotFolder / AZStd::string::format("screenshot_sponza_%llu.dds", m_frameCount);
+                    AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, filePath.Native());
                 }
 
                 if (m_frameCount == 1)
                 {
                     m_timeToFirstFrame = m_currentTimePointInSeconds - m_benchmarkStartTimePoint;
-                } 
+                }
 
                 CollectRunBenchmarkData(deltaTime, timePoint);
 
@@ -289,7 +284,6 @@ namespace AtomSampleViewer
 
                     const AZ::Vector3 position = cameraPathPoint.m_position.Lerp(nextCameraPathPoint.m_position, percentToNextPoint);
                     const AZ::Vector3 target = cameraPathPoint.m_target.Lerp(nextCameraPathPoint.m_target, percentToNextPoint);
-                    const AZ::Vector3 up = cameraPathPoint.m_up.Lerp(nextCameraPathPoint.m_up, percentToNextPoint);
 
                     const AZ::Transform transform = AZ::Transform::CreateLookAt(position, target, AZ::Transform::Axis::YPositive);
 
@@ -302,7 +296,7 @@ namespace AtomSampleViewer
         }
     }
 
-    void BistroBenchmarkComponent::OnAssetReady(AZ::Data::Asset<AZ::Data::AssetData> asset)
+    void SponzaBenchmarkComponent::OnAssetReady(AZ::Data::Asset<AZ::Data::AssetData> asset)
     {
         if (asset.GetId() == m_sponzaInteriorAsset.GetId())
         {
@@ -327,10 +321,10 @@ namespace AtomSampleViewer
             BenchmarkLoadEnd();
         }
 
-        AZ_PROFILE_DATAPOINT(AZ::Debug::ProfileCategory::AzRender, m_currentLoadBenchmarkData.m_totalMBLoaded, "MB Loaded Off Disk");
+        AZ_PROFILE_DATAPOINT(AzRender, m_currentLoadBenchmarkData.m_totalMBLoaded, "MB Loaded Off Disk");
     }
 
-    void BistroBenchmarkComponent::BenchmarkLoadStart()
+    void SponzaBenchmarkComponent::BenchmarkLoadStart()
     {
         AZStd::vector<AZ::Data::AssetId> unloadedAssetsInCatalog;
 
@@ -362,20 +356,20 @@ namespace AtomSampleViewer
         }
 
         m_currentLoadBenchmarkData = LoadBenchmarkData();
-        m_currentLoadBenchmarkData.m_name = "Bistro Load";
+        m_currentLoadBenchmarkData.m_name = "Sponza Load";
 
         Utils::ToggleRadTMCapture();
         m_benchmarkStartTimePoint = static_cast<double>(AZStd::GetTimeUTCMilliSecond());
     }
 
-    void BistroBenchmarkComponent::FinalizeLoadBenchmarkData()
+    void SponzaBenchmarkComponent::FinalizeLoadBenchmarkData()
     {
         m_currentLoadBenchmarkData.m_timeInSeconds = (static_cast<double>(AZStd::GetTimeUTCMilliSecond()) - m_benchmarkStartTimePoint) / 1000.0f;
         m_currentLoadBenchmarkData.m_mbPerSec = m_currentLoadBenchmarkData.m_totalMBLoaded / m_currentLoadBenchmarkData.m_timeInSeconds;
         m_currentLoadBenchmarkData.m_numFilesLoaded = m_currentLoadBenchmarkData.m_filesLoaded.size();
     }
 
-    void BistroBenchmarkComponent::BenchmarkLoadEnd()
+    void SponzaBenchmarkComponent::BenchmarkLoadEnd()
     {
         AZ::Data::AssetBus::MultiHandler::BusDisconnect();
 
@@ -389,20 +383,20 @@ namespace AtomSampleViewer
 
         if (!AZ::Utils::SaveObjectToFile(sponzaLoadBenchmarkDataFilePath, AZ::DataStream::ST_XML, &m_currentLoadBenchmarkData))
         {
-            AZ_Error("BistroBenchmarkComponent", false, "Failed to save sponza benchmark load data to file %s", sponzaLoadBenchmarkDataFilePath);
+            AZ_Error("SponzaBenchmarkComponent", false, "Failed to save sponza benchmark load data to file %s", sponzaLoadBenchmarkDataFilePath);
         }
     }
 
-    void BistroBenchmarkComponent::BenchmarkRunStart()
+    void SponzaBenchmarkComponent::BenchmarkRunStart()
     {
         m_currentRunBenchmarkData = RunBenchmarkData();
-        m_currentRunBenchmarkData.m_name = "Bistro Run";
+        m_currentRunBenchmarkData.m_name = "Sponza Run";
 
         Utils::ToggleRadTMCapture();
         m_benchmarkStartTimePoint = m_currentTimePointInSeconds;
     }
 
-    void BistroBenchmarkComponent::CollectRunBenchmarkData(float deltaTime, AZ::ScriptTimePoint timePoint)
+    void SponzaBenchmarkComponent::CollectRunBenchmarkData(float deltaTime, AZ::ScriptTimePoint timePoint)
     {
         const float dtInMS = deltaTime * 1000.0f;
 
@@ -423,7 +417,7 @@ namespace AtomSampleViewer
         }
     }
 
-    void BistroBenchmarkComponent::FinalizeRunBenchmarkData()
+    void SponzaBenchmarkComponent::FinalizeRunBenchmarkData()
     {
         m_currentRunBenchmarkData.m_averageFrameTime =
             (m_currentRunBenchmarkData.m_timeInSeconds / m_currentRunBenchmarkData.m_frameCount) * 1000.0f;
@@ -475,7 +469,7 @@ namespace AtomSampleViewer
         m_currentRunBenchmarkData.m_averageFrameRate = averageFrameRate / m_currentRunBenchmarkData.m_frameRates.size();
     }
 
-    void BistroBenchmarkComponent::BenchmarkRunEnd()
+    void SponzaBenchmarkComponent::BenchmarkRunEnd()
     {
         Utils::ToggleRadTMCapture();
 
@@ -488,12 +482,12 @@ namespace AtomSampleViewer
 
         if (!AZ::Utils::SaveObjectToFile(sponzaRunBenchmarkDataFilePath, AZ::DataStream::ST_XML, &m_currentRunBenchmarkData))
         {
-            AZ_Error("BistroBenchmarkComponent", false, "Failed to save sponza benchmark run data to file %s", sponzaRunBenchmarkDataFilePath);
+            AZ_Error("SponzaBenchmarkComponent", false, "Failed to save sponza benchmark run data to file %s", sponzaRunBenchmarkDataFilePath);
         }
 
     }
 
-    void BistroBenchmarkComponent::DisplayLoadingDialog()
+    void SponzaBenchmarkComponent::DisplayLoadingDialog()
     {
         const ImGuiWindowFlags windowFlags =
             ImGuiWindowFlags_NoCollapse |
@@ -532,11 +526,11 @@ namespace AtomSampleViewer
 
             if (m_sponzaInteriorLoaded)
             {
-                ImGui::Text("Bistro Interior: Loaded!");
+                ImGui::Text("Sponza Interior: Loaded!");
             }
             else
             {
-                ImGui::Text("Bistro Interior: Loading%s", loadingIndicator);
+                ImGui::Text("Sponza Interior: Loading%s", loadingIndicator);
             }
 
             delete[] loadingIndicator;
@@ -544,7 +538,7 @@ namespace AtomSampleViewer
         ImGui::End();
     }
 
-    void BistroBenchmarkComponent::DisplayResults()
+    void SponzaBenchmarkComponent::DisplayResults()
     {
         AzFramework::NativeWindowHandle windowHandle = nullptr;
         AzFramework::WindowSystemRequestBus::BroadcastResult(

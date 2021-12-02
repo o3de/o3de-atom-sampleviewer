@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -22,6 +23,8 @@ namespace AtomSampleViewer
 
     bool CommonSampleComponentBase::ReadInConfig(const ComponentConfig* baseConfig)
     {
+        m_scene = RPI::RPISystemInterface::Get()->GetSceneByName(AZ::Name("RPI"));
+
         auto config = azrtti_cast<const SampleComponentConfig*>(baseConfig);
         if (config && config->IsValid())
         {
@@ -85,6 +88,18 @@ namespace AtomSampleViewer
             for (const auto& info : lightingAssetInfoList)
             {
                 AppendLightingPresetsFromAsset(info.m_relativePath);
+            }
+        }
+
+        // set the initial lighting preset
+        static const char* InitialLightingPresetName = "Palermo Sidewalk";
+        for (uint32_t index = 0; index < m_lightingPresets.size(); ++index)
+        {
+            if (m_lightingPresets[index].m_displayName == InitialLightingPresetName)
+            {
+                m_currentLightingPresetIndex = index;
+                OnLightingPresetSelected(m_lightingPresets[m_currentLightingPresetIndex], m_useAlternateSkybox);
+                break;
             }
         }
 
@@ -183,8 +198,8 @@ namespace AtomSampleViewer
 
                 // Each LightingPreset can have an alternate skybox (usually a blurred version of the primary skybox), so we expose both here as separate items in the UI.
 
-                bool useThisPresetWithNormalSkybox = (i == m_currentLightingPresetIndex) && !m_useAlternateSkybox;
-                bool useThisPresetWithAlternateSkybox = (i == m_currentLightingPresetIndex) && m_useAlternateSkybox;
+                bool useThisPresetWithNormalSkybox = (static_cast<int32_t>(i) == m_currentLightingPresetIndex) && !m_useAlternateSkybox;
+                bool useThisPresetWithAlternateSkybox = (static_cast<int32_t>(i) == m_currentLightingPresetIndex) && m_useAlternateSkybox;
 
                 useThisPresetWithNormalSkybox = ScriptableImGui::Selectable(name.c_str(), useThisPresetWithNormalSkybox);
                 useThisPresetWithAlternateSkybox = ScriptableImGui::Selectable(nameForAlternateSkybox.c_str(), useThisPresetWithAlternateSkybox);
@@ -277,6 +292,11 @@ namespace AtomSampleViewer
                     OnAllAssetsReadyActivate();
                 }
             });
+    }
+
+    void CommonSampleComponentBase::ResetScene()
+    {
+        m_meshFeatureProcessor = nullptr;
     }
 
 } // namespace AtomSampleViewer

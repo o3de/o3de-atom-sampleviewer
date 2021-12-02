@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -22,7 +23,8 @@ namespace AtomSampleViewer
         AZ_RTTI(StacksShaderCollectionFunctor, "{4E51A7D5-7DF1-4402-8975-F6C9DFDEDC1E}", AZ::RPI::MaterialFunctor);
 
         static void Reflect(AZ::ReflectContext* context);
-
+        
+        using AZ::RPI::MaterialFunctor::Process;
         void Process(RuntimeContext& context) override;
 
     private:

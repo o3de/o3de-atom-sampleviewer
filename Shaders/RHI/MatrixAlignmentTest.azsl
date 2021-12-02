@@ -1,0 +1,492 @@
+/*
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
+ * SPDX-License-Identifier: Apache-2.0 OR MIT
+ *
+ */
+
+ /*
+    This shader is used to graphically validate data offsets correctness when
+    floatRxC matrices are followed by float or float2 variables
+    in structs/classes/SRGs.
+
+    This shader was created in response to the problem that DXC, when
+    generating Spirv code, was not generating the expected data offsets
+    with the command line argument -fvk-use-dx-layout.
+ */
+
+#include <Atom/Features/SrgSemantics.azsli>
+
+// Defined in the supervariant.
+#ifndef NUM_FLOATS_AFTER_MATRIX
+#define NUM_FLOATS_AFTER_MATRIX 1
+#endif
+
+#define GET_COLOR_TEMPLATE(TheMatrix, r, g, b) \
+        int row = 0; \
+        int col = 0 ; \
+        bool isBottomRightCorner = false; \
+        if (GetMatrixLocationFromPixel(pixelCoord, row, col, isBottomRightCorner)) \
+        { \
+            float componentColor = TheMatrix[row][col]; \
+            return float4(componentColor, componentColor, componentColor, 1.0); \
+        } \
+        if (isBottomRightCorner) \
+        { \
+            return float4(r, g, b, 1.0); \
+        } \
+        return defaultColor;
+
+ShaderResourceGroup AlignmentValidatorSrg : SRG_PerDraw
+{
+    // Viewport resolution (in pixels).
+    // .x,.y are width and height respectively.
+    // .z,.w do not matter
+    float4 m_resolution;
+
+    // Based on the value of these two variables We pick which matrix
+    // to use to generate the color grid.
+    // For example:
+    // If m_numRows == 3 && m_numColumns == 2
+    // We draw a 3x2 grid where each cell gets a shade of gray color
+    // as m_matrix32[r][c].
+    // Another example:
+    // If m_numRows == 2 && m_numColumns == 4
+    // We draw a 2x4 grid where each cell gets a shade of gray color
+    // as m_matrix24[r][c].
+    int m_numRows;
+    int m_numColumns;
+
+    float4 __reserved; // Keep this here for alignment.
+
+    // All RxC 
+    
+    // 1xC
+    float1x1 m_matrix11;
+#if NUM_FLOATS_AFTER_MATRIX == 1
+    float m_fAfter11;
+#else
+    float2 m_fAfter11;
+#endif
+    float4 __reserved11; // Used to force 16 byte boundary
+
+    float1x2 m_matrix12;
+#if NUM_FLOATS_AFTER_MATRIX == 1
+    float m_fAfter12;
+#else
+    float2 m_fAfter12;
+#endif
+    float4 __reserved12; // Used to force 16 byte boundary 
+    
+    float1x3 m_matrix13;
+#if NUM_FLOATS_AFTER_MATRIX == 1
+    float m_fAfter13;
+#else
+    float2 m_fAfter13;
+#endif
+    float4 __reserved13; // Used to force 16 byte boundary 
+    
+    float1x4 m_matrix14;
+#if NUM_FLOATS_AFTER_MATRIX == 1
+    float m_fAfter14;
+#else
+    float2 m_fAfter14;
+#endif
+    float4 __reserved14; // Used to force 16 byte boundary
+    
+    // 2xC
+    // AZSLc: PackAsVectorMatrix: row_major packing for 2x1, 3x1 and 4x1 matrix types is not allowed!
+    // float2x1 m_matrix21;
+    // float m_fAfter21;
+    // float4 __reserved21; // Used to force 16 byte boundary
+    
+    float2x2 m_matrix22;
+    // This case is broken in vulkan. Add float3 padding or use AZSLc 1.7.26+ for automatic float3 padding.
+    float3 __padding22;
+#if NUM_FLOATS_AFTER_MATRIX == 1
+    float m_fAfter22;
+#else
+    float2 m_fAfter22;
+#endif
+    float4 __reserved22; // Used to force 16 byte boundary 
+    
+    // This case is broken in vulkan. Add float2 padding or use AZSLc 1.7.26+ for automatic float2 padding.
+    float2x3 m_matrix23;
+#if NUM_FLOATS_AFTER_MATRIX == 1
+    float2 __padding23;
+    float m_fAfter23;
+#else
+    float2 m_fAfter23;
+#endif
+    float4 __reserved23; // Used to force 16 byte boundary 
+    
+    float2x4 m_matrix24;
+#if NUM_FLOATS_AFTER_MATRIX == 1
+    float m_fAfter24;
+#else
+    float2 m_fAfter24;
+#endif
+    float4 __reserved24; // Used to force 16 byte boundary
+    
+    // 3xC
+    //AZSLc: PackAsVectorMatrix: row_major packing for 2x1, 3x1 and 4x1 matrix types is not allowed!
+    //float3x1 m_matrix31;
+    //float m_fAfter31;
+    //float4 __reserved31; // Used to force 16 byte boundary
+    
+    float3x2 m_matrix32;
+    // This case is broken in vulkan. Add float3 padding or use AZSLc 1.7.26+ for automatic float3 padding.
+    float3 __padding32;
+#if NUM_FLOATS_AFTER_MATRIX == 1
+    float m_fAfter32;
+#else
+    float2 m_fAfter32;
+#endif
+    float4 __reserved32; // Used to force 16 byte boundary 
+
+    float3x3 m_matrix33;
+#if NUM_FLOATS_AFTER_MATRIX == 1
+    // This case is broken in vulkan. Add float2 padding or use AZSLc 1.7.26+ for automatic float2 padding.
+    float2 __padding33;
+    float m_fAfter33;
+#else
+    float2 m_fAfter33;
+#endif
+    float4 __reserved33; // Used to force 16 byte boundary 
+    
+    float3x4 m_matrix34;
+#if NUM_FLOATS_AFTER_MATRIX == 1
+    float m_fAfter34;
+#else
+    float2 m_fAfter34;
+#endif
+    float4 __reserved34; // Used to force 16 byte boundary 
+    
+    // 4xC
+    //AZSLc: PackAsVectorMatrix: row_major packing for 2x1, 3x1 and 4x1 matrix types is not allowed!
+    //float4x1 m_matrix41;
+    //float m_fAfter41;
+    //float4 __reserved41; // Used to force 16 byte boundary
+    
+    float4x2 m_matrix42;
+    // This case is broken in vulkan. Add float3 padding or use AZSLc 1.7.26+ for automatic float3 padding.
+    float3 __padding42;
+#if NUM_FLOATS_AFTER_MATRIX == 1
+    float m_fAfter42;
+#else
+    float2 m_fAfter42;
+#endif
+    float4 __reserved42; // Used to force 16 byte boundary 
+    
+    // This case is broken in vulkan. Add float2 padding or use AZSLc 1.7.26+ for automatic float2 padding.
+    float4x3 m_matrix43;
+#if NUM_FLOATS_AFTER_MATRIX == 1
+    float2 __padding43;
+    float m_fAfter43;
+#else
+    float2 m_fAfter43;    
+#endif
+    float4 __reserved43; // Used to force 16 byte boundary 
+    
+    float4x4 m_matrix44;
+#if NUM_FLOATS_AFTER_MATRIX == 1
+    float m_fAfter44;
+#else
+    float2 m_fAfter44;   
+#endif
+    float4 __reserved44; // Used to force 16 byte boundary
+
+    // Returns true if the normalized pixel coordinate @pixelCoord falls inside a @row, @col cell whose coordinate is safe to use to fetch data from one of the @m_matrix<row><col> variables.
+    // Otherwise returns false.
+    // In addition when returning false, @isBottomRightCorner becomes true if the bottom right corner is being rendered.
+    // In such case the respective float or float2 variable @m_fAfter should be used to pick the color of the
+    // bottom right corner.
+    bool GetMatrixLocationFromPixel(float2 pixelCoord, out int row, out int col, out bool isBottomRightCorner)
+    {
+        const int clampedRowSelection = clamp(m_numRows, 1, 4);
+        const int clampedColSelection = clamp(m_numColumns, 1, 4);
+
+        const float NumRows =  clampedRowSelection + 1;
+        const float NumColumns = clampedColSelection + 1;
+        
+        row = floor(NumRows * pixelCoord.y);
+        col = floor(NumColumns * pixelCoord.x);
+
+        isBottomRightCorner = false;
+        if ((row < clampedRowSelection) && (col < clampedColSelection))
+        {
+            return true;
+        }
+
+        if ((row >= clampedRowSelection) && (col >= clampedColSelection))
+        {
+            isBottomRightCorner = true;
+        }
+
+        return false;
+    }
+
+    float4 GetColor11(float2 pixelCoord, float4 defaultColor)
+    {
+#if NUM_FLOATS_AFTER_MATRIX == 1
+        GET_COLOR_TEMPLATE(m_matrix11, m_fAfter11, m_fAfter11, m_fAfter11);
+#else
+        GET_COLOR_TEMPLATE(m_matrix11, m_fAfter11.x, m_fAfter11.y, 0);
+#endif
+    }
+
+    float4 GetColor12(float2 pixelCoord, float4 defaultColor)
+    {
+#if NUM_FLOATS_AFTER_MATRIX == 1
+        GET_COLOR_TEMPLATE(m_matrix12, m_fAfter12, m_fAfter12, m_fAfter12);
+#else
+        GET_COLOR_TEMPLATE(m_matrix12, m_fAfter12.x, m_fAfter12.y, 0);
+#endif
+    }
+
+    float4 GetColor13(float2 pixelCoord, float4 defaultColor)
+    {
+#if NUM_FLOATS_AFTER_MATRIX == 1
+        GET_COLOR_TEMPLATE(m_matrix13, m_fAfter13, m_fAfter13, m_fAfter13);
+#else
+        GET_COLOR_TEMPLATE(m_matrix13, m_fAfter13.x, m_fAfter13.y, 0);
+#endif
+    }
+
+    float4 GetColor14(float2 pixelCoord, float4 defaultColor)
+    {
+#if NUM_FLOATS_AFTER_MATRIX == 1
+        GET_COLOR_TEMPLATE(m_matrix14, m_fAfter14, m_fAfter14, m_fAfter14);
+#else
+        GET_COLOR_TEMPLATE(m_matrix14, m_fAfter14.x, m_fAfter14.y, 0);
+#endif
+    }
+
+    // Case not supported
+    //float4 GetColor21(float2 pixelCoord, float4 defaultColor)
+    //{
+    //    GET_COLOR_TEMPLATE(m_matrix21, m_fAfter21);
+    //}
+
+    float4 GetColor22(float2 pixelCoord, float4 defaultColor)
+    {
+#if NUM_FLOATS_AFTER_MATRIX == 1
+        GET_COLOR_TEMPLATE(m_matrix22, m_fAfter22, m_fAfter22, m_fAfter22);
+#else
+        GET_COLOR_TEMPLATE(m_matrix22, m_fAfter22.x, m_fAfter22.y, 0);
+#endif
+    }
+
+    float4 GetColor23(float2 pixelCoord, float4 defaultColor)
+    {
+#if NUM_FLOATS_AFTER_MATRIX == 1
+        GET_COLOR_TEMPLATE(m_matrix23, m_fAfter23, m_fAfter23, m_fAfter23);
+#else
+        GET_COLOR_TEMPLATE(m_matrix23, m_fAfter23.x, m_fAfter23.y, 0);
+#endif
+    }
+
+    float4 GetColor24(float2 pixelCoord, float4 defaultColor)
+    {
+#if NUM_FLOATS_AFTER_MATRIX == 1
+        GET_COLOR_TEMPLATE(m_matrix24, m_fAfter24, m_fAfter24, m_fAfter24);
+#else
+        GET_COLOR_TEMPLATE(m_matrix24, m_fAfter24.x, m_fAfter24.y, 0);
+#endif
+    }
+
+    // Case not supported
+    //float4 GetColor31(float2 pixelCoord, float4 defaultColor)
+    //{
+    //    GET_COLOR_TEMPLATE(m_matrix31, m_fAfter31);
+    //}
+
+    float4 GetColor32(float2 pixelCoord, float4 defaultColor)
+    {
+#if NUM_FLOATS_AFTER_MATRIX == 1
+        GET_COLOR_TEMPLATE(m_matrix32, m_fAfter32, m_fAfter32, m_fAfter32);
+#else
+        GET_COLOR_TEMPLATE(m_matrix32, m_fAfter32.x, m_fAfter32.y, 0);
+#endif
+    }
+
+    float4 GetColor33(float2 pixelCoord, float4 defaultColor)
+    {
+#if NUM_FLOATS_AFTER_MATRIX == 1
+        GET_COLOR_TEMPLATE(m_matrix33, m_fAfter33, m_fAfter33, m_fAfter33);
+#else
+        GET_COLOR_TEMPLATE(m_matrix33, m_fAfter33.x, m_fAfter33.y, 0);
+#endif
+    }
+
+    float4 GetColor34(float2 pixelCoord, float4 defaultColor)
+    {
+#if NUM_FLOATS_AFTER_MATRIX == 1
+        GET_COLOR_TEMPLATE(m_matrix34, m_fAfter34, m_fAfter34, m_fAfter34);
+#else
+        GET_COLOR_TEMPLATE(m_matrix34, m_fAfter34.x, m_fAfter34.y, 0);
+#endif
+    }
+      
+    // Case not supported
+    //float4 GetColor41(float2 pixelCoord, float4 defaultColor)
+    //{
+    //    GET_COLOR_TEMPLATE(m_matrix41, m_fAfter41);
+    //}
+
+    float4 GetColor42(float2 pixelCoord, float4 defaultColor)
+    {
+#if NUM_FLOATS_AFTER_MATRIX == 1
+        GET_COLOR_TEMPLATE(m_matrix42, m_fAfter42, m_fAfter42, m_fAfter42);
+#else
+        GET_COLOR_TEMPLATE(m_matrix42, m_fAfter42.x, m_fAfter42.y, 0);
+#endif
+    }
+
+    float4 GetColor43(float2 pixelCoord, float4 defaultColor)
+    {
+#if NUM_FLOATS_AFTER_MATRIX == 1
+        GET_COLOR_TEMPLATE(m_matrix43, m_fAfter43, m_fAfter43, m_fAfter43);
+#else
+        GET_COLOR_TEMPLATE(m_matrix43, m_fAfter43.x, m_fAfter43.y, 0);
+#endif
+    }
+
+    float4 GetColor44(float2 pixelCoord, float4 defaultColor)
+    {
+#if NUM_FLOATS_AFTER_MATRIX == 1
+        GET_COLOR_TEMPLATE(m_matrix44, m_fAfter44, m_fAfter44, m_fAfter44);
+#else
+        GET_COLOR_TEMPLATE(m_matrix44, m_fAfter44.x, m_fAfter44.y, 0);
+#endif
+    }
+}
+
+struct VSInput
+{
+    float3 m_position : POSITION;
+    float4 m_color : COLOR0;
+};
+
+struct VSOutput
+{
+    float4 m_position : SV_Position;
+    float4 m_color : COLOR0;
+};
+
+VSOutput MainVS(VSInput vsInput)
+{
+    VSOutput OUT;
+    OUT.m_position = float4(vsInput.m_position, 1.0);
+    OUT.m_color = vsInput.m_color;
+    return OUT;
+}
+
+struct PSOutput
+{
+    float4 m_color : SV_Target0;
+};
+
+PSOutput MainPS(VSOutput vsOutput)
+{
+    PSOutput OUT;
+
+    // Normalized pixel coordinates (from 0 to 1)
+    float2 pixelCoord = vsOutput.m_position.xy / AlignmentValidatorSrg::m_resolution.xy;
+
+    // The screen will be split in a grid where:
+    // Number of rows is:    m_numRows + 1;
+    // Number of columns is: m_numColumns + 1;
+    // The 0-indexed cells where Row < m_numRows & Col < m_numColumns
+    // will take the color of float4(m_matrix<m_numRows><m_numRows>[row][col], ...)
+    // The last cell will take the color (m_fAfter<m_numRows+1><m_numRows+1>, ...)
+
+    float4 color = vsOutput.m_color.rgba;
+
+    switch(AlignmentValidatorSrg::m_numRows)
+    {
+        case 1:
+        switch(AlignmentValidatorSrg::m_numColumns)
+        {
+            case 1:
+            color = AlignmentValidatorSrg::GetColor11(pixelCoord, color);
+            break;
+            case 2:
+            color = AlignmentValidatorSrg::GetColor12(pixelCoord, color);
+            break;
+            case 3:
+            color = AlignmentValidatorSrg::GetColor13(pixelCoord, color);
+            break;
+            case 4:
+            color = AlignmentValidatorSrg::GetColor14(pixelCoord, color);
+            break;
+            default:
+            break;
+        }
+        break;
+        case 2:
+        switch(AlignmentValidatorSrg::m_numColumns)
+        {
+            case 1:
+            // color = AlignmentValidatorSrg::GetColor21(pixelCoord, color); // Not Supported
+            break;
+            case 2:
+            color = AlignmentValidatorSrg::GetColor22(pixelCoord, color);
+            break;
+            case 3:
+            color = AlignmentValidatorSrg::GetColor23(pixelCoord, color);
+            break;
+            case 4:
+            color = AlignmentValidatorSrg::GetColor24(pixelCoord, color);
+            break;
+            default:
+            break;
+        }
+        break;
+        case 3:
+        switch(AlignmentValidatorSrg::m_numColumns)
+        {
+            case 1:
+            // color = AlignmentValidatorSrg::GetColor31(pixelCoord, color); // Not Supported
+            break;
+            case 2:
+            color = AlignmentValidatorSrg::GetColor32(pixelCoord, color);
+            break;
+            case 3:
+            color = AlignmentValidatorSrg::GetColor33(pixelCoord, color);
+            break;
+            case 4:
+            color = AlignmentValidatorSrg::GetColor34(pixelCoord, color);
+            break;
+            default:
+            break;
+        }
+        break;
+        case 4:
+        switch(AlignmentValidatorSrg::m_numColumns)
+        {
+            case 1:
+            // color = AlignmentValidatorSrg::GetColor41(pixelCoord, color); // Not Supported
+            break;
+            case 2:
+            color = AlignmentValidatorSrg::GetColor42(pixelCoord, color);
+            break;
+            case 3:
+            color = AlignmentValidatorSrg::GetColor43(pixelCoord, color);
+            break;
+            case 4:
+            color = AlignmentValidatorSrg::GetColor44(pixelCoord, color);
+            break;
+            default:
+            break;
+        }
+        break;
+        default:
+        break;
+    }
+
+    OUT.m_color = color;
+
+    return OUT;
+}

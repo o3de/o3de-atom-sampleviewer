@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -56,7 +57,7 @@ namespace AtomSampleViewer
 
             if (ImGui::BeginPopupModal(m_title.c_str(), nullptr, windowFlags))
             {
-                ImGui::Text(m_message.c_str());
+                ImGui::Text("%s", m_message.c_str());
 
                 ScriptableImGui::PushNameContext(m_title.c_str());
 

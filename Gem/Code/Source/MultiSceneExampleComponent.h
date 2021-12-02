@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -94,8 +95,6 @@ namespace AtomSampleViewer
         DirectionalLightHandle m_directionalLightHandle;
         ReflectinoProbeHandle m_reflectionProbeHandle;
 
-        double m_simulateTime = 0.0f;
-        float m_deltaTime = 0.0f;
         MultiSceneExampleComponent* m_parent = nullptr;
         const AZ::Vector3 m_cameraOffset{ 0.0f, -4.0f, 2.0f };
         AZ::Vector3 m_dynamicCameraOffset{ 3.73f, 0.0f, 0.0f };

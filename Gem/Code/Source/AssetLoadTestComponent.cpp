@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -62,7 +63,7 @@ namespace AtomSampleViewer
         };
         m_materialBrowser.SetDefaultPinnedAssets(defaultMaterialAllowlist);
 
-        m_pinnedMaterialCount = m_materialBrowser.GetPinnedAssets().size();
+        m_pinnedMaterialCount = static_cast<uint32_t>(m_materialBrowser.GetPinnedAssets().size());
 
         const AZStd::vector<AZStd::string> defaultModelAllowist =
         {
@@ -233,7 +234,7 @@ namespace AtomSampleViewer
         }
         else
         {
-            return AZ::RPI::AssetUtils::GetAssetIdForProductPath("shaders/staticmesh.azmaterial", AZ::RPI::AssetUtils::TraceLevel::Error);
+            return AZ::RPI::AssetUtils::GetAssetIdForProductPath(DefaultPbrMaterialPath, AZ::RPI::AssetUtils::TraceLevel::Error);
         }
     }
 
@@ -306,7 +307,7 @@ namespace AtomSampleViewer
 
             if (materialsChanged)
             {
-                m_pinnedMaterialCount = pinnedMaterials.size();
+                m_pinnedMaterialCount = static_cast<uint32_t>(pinnedMaterials.size());
                 // Keep the current m_cachedMaterials to avoid release-load the same material
                 MaterialAssetSet newCache;
                 // clean up cached material which refcount is 1

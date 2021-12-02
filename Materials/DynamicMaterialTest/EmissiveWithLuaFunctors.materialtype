@@ -1,7 +1,7 @@
 {
     "description": "Simple material for comparing the performance of hard-coded C++ material functors.",
+    "version": 3,
     "propertyLayout": {
-        "version": 3,
         "groups": [
             {
                 "id": "emissive",

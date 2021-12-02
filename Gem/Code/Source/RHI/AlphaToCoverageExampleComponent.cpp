@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -303,7 +304,7 @@ namespace AtomSampleViewer
         const uint32_t typeIndex = static_cast<uint32_t>(type);
 
         // Creates a scope for blend type.
-        const auto prepareFunction = [this, type, typeIndex](RHI::FrameGraphInterface frameGraph, [[maybe_unused]] const ScopeData& scopeData)
+        const auto prepareFunction = [this, type](RHI::FrameGraphInterface frameGraph, [[maybe_unused]] const ScopeData& scopeData)
         {
             // Bind the color attachment
             {
@@ -392,7 +393,7 @@ namespace AtomSampleViewer
                 RHI::DrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
                 drawItem.m_pipelineState = m_pipelineStates[typeIndex].get();
-                drawItem.m_shaderResourceGroupCount = RHI::ArraySize(shaderResourceGroups);
+                drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
 
                 const RHI::IndexBufferView indexBufferView =
@@ -405,7 +406,7 @@ namespace AtomSampleViewer
                 drawItem.m_indexBufferView = &indexBufferView;
 
                 AZStd::array<AZ::RHI::StreamBufferView, 2>& streamBufferViews = m_rectangleStreamBufferViews;
-                drawItem.m_streamBufferViewCount = static_cast<uint32_t>(streamBufferViews.size());
+                drawItem.m_streamBufferViewCount = static_cast<uint8_t>(streamBufferViews.size());
                 drawItem.m_streamBufferViews = streamBufferViews.data();
 
                 // Submit the rectangle draw item.

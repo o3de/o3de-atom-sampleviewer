@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -83,6 +84,9 @@ namespace AtomSampleViewer
 
         //! Returns true if there are any errors or asserts in the script report
         bool HasErrorsAssertsInReport() const;
+
+        // For exporting test results
+        void ExportTestResults();
 
         struct ImageComparisonResult
         {
@@ -231,6 +235,9 @@ namespace AtomSampleViewer
 
         void ShowDiffButton(const char* buttonLabel, const AZStd::string& imagePathA, const AZStd::string& imagePathB);
 
+        // Generates a path to the exported test results file.
+        AZStd::string GenerateAndCreateExportedTestResultsPath() const;
+
         ScriptReport* GetCurrentScriptReport();
 
         ImGuiMessageBox m_messageBox;
@@ -245,6 +252,7 @@ namespace AtomSampleViewer
         DisplayOption m_displayOption = DisplayOption::AllResults;
         bool m_forceShowUpdateButtons = false; //< By default, the "Update" buttons are visible only for failed screenshots. This forces them to be visible.
         AZStd::string m_officialBaselineSourceFolder; //< Used for updating official baseline screenshots
+        AZStd::string m_exportedTestResultsPath = "Click the 'Export Test Results' button."; //< Path to exported test results file (if exported).
     };
 
 } // namespace AtomSampleViewer

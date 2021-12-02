@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -8,6 +9,7 @@
 #include <AtomSampleViewerApplication.h>
 #include <SampleComponentManagerBus.h>
 
+#include <AzCore/Component/ComponentApplicationLifecycle.h>
 #include <AzCore/PlatformIncl.h>
 #include <AzCore/Component/ComponentApplication.h>
 #include <AzCore/Debug/Trace.h>
@@ -91,10 +93,9 @@ namespace AtomSampleViewer
 
         AzFramework::Application::StartCommon(systemEntity);
 
-        if (GetDrillerManager())
+        if (auto settingsRegistry = AZ::SettingsRegistry::Get(); settingsRegistry != nullptr)
         {
-            GetDrillerManager()->Register(aznew GridMate::Debug::CarrierDriller());
-            GetDrillerManager()->Register(aznew GridMate::Debug::ReplicaDriller());
+            AZ::ComponentApplicationLifecycle::SignalEvent(*settingsRegistry, "LegacySystemInterfaceCreated", R"({})");
         }
 
         ReadTimeoutShutdown();
@@ -121,7 +122,7 @@ namespace AtomSampleViewer
         AzFramework::StringFunc::Path::Join(resolveBuffer, "log", logDirectory);
         fileIO->SetAlias("@log@", logDirectory.c_str());
 
-        fileIO->CreatePath("@root@");
+        fileIO->CreatePath("@products@");
         fileIO->CreatePath("@user@");
         fileIO->CreatePath("@log@");
 

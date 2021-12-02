@@ -1,5 +1,5 @@
 {
-    "Source": "ComputeDraw",
+    "Source": "ComputeDraw.azsl",
 
     "DepthStencilState": {
         "Depth": {

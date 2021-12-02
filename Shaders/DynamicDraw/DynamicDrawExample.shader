@@ -1,5 +1,5 @@
 {
-    "Source" : "DynamicDrawExample",
+    "Source" : "DynamicDrawExample.azsl",
 
     "DepthStencilState" : { 
         "Depth" : { 

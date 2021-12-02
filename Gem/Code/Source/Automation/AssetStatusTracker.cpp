@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -47,7 +48,7 @@ namespace AtomSampleViewer
         AZStd::to_lower(sourceAssetPath.begin(), sourceAssetPath.end());
 
         AZStd::lock_guard<AZStd::mutex> lock(m_mutex);
-        m_allAssetStatusData[sourceAssetPath].m_expecteCount += expectedCount;
+        m_allAssetStatusData[sourceAssetPath].m_expectedCount += expectedCount;
     }
 
     bool AssetStatusTracker::DidExpectedAssetsFinish() const
@@ -58,7 +59,7 @@ namespace AtomSampleViewer
         {
             const AssetStatusEvents& status = assetData.second;
 
-            if (status.m_expecteCount > (status.m_succeeded + status.m_failed))
+            if (status.m_expectedCount > (status.m_succeeded + status.m_failed))
             {
                 return false;
             }
@@ -66,6 +67,24 @@ namespace AtomSampleViewer
 
         return true;
     }
+    
+    AZStd::vector<AZStd::string> AssetStatusTracker::GetIncompleteAssetList() const
+    {
+        AZStd::vector<AZStd::string> incomplete;
+        
+        for (auto& assetData : m_allAssetStatusData)
+        {
+            const AssetStatusEvents& status = assetData.second;
+
+            if (status.m_expectedCount > (status.m_succeeded + status.m_failed))
+            {
+                incomplete.push_back(assetData.first);
+            }
+        }
+
+        return incomplete;
+    }
+
 
     void AssetStatusTracker::AssetCompilationStarted(const AZStd::string& assetPath)
     {

@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -10,6 +11,7 @@
 #include <AzCore/Math/Matrix3x4.h>
 #include <AzCore/Math/Aabb.h>
 #include <AzCore/std/containers/vector.h>
+#include <AzCore/std/containers/array.h>
 
 namespace AtomSampleViewer
 {

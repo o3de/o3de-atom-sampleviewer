@@ -1,5 +1,5 @@
 {
-    "Source" : "AsyncComputeShadow",
+    "Source" : "AsyncComputeShadow.azsl",
 
     "DepthStencilState" : { 
         "Depth" : { "Enable" : true, "CompareFunc" : "LessEqual" }

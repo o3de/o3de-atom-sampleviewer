@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -231,9 +232,7 @@ namespace AtomSampleViewer
                 AZ::Render::DirectionalLightFeatureProcessorInterface::DebugDrawFlags::DebugDrawNone);
             dirLightFP->SetViewFrustumCorrectionEnabled(handle, m_isCascadeCorrectionEnabled);
             dirLightFP->SetShadowFilterMethod(handle, s_shadowFilterMethods[m_shadowFilterMethodIndex]);
-            dirLightFP->SetShadowBoundaryWidth(handle, m_boundaryWidth);
-            dirLightFP->SetPredictionSampleCount(handle, m_predictionSampleCount);
-            dirLightFP->SetFilteringSampleCount(handle, m_filteringSampleCount);
+            dirLightFP->SetFilteringSampleCount(handle, static_cast<uint16_t>(m_filteringSampleCount));
             dirLightFP->SetGroundHeight(handle, 0.f);
 
             m_directionalLightHandle = handle;
@@ -362,7 +361,7 @@ namespace AtomSampleViewer
                 ImGui::RadioButton("4", &m_cascadeCount, 4);
             if (cascadesChanged)
             {
-                m_directionalLightFeatureProcessor->SetCascadeCount(m_directionalLightHandle, m_cascadeCount);
+                m_directionalLightFeatureProcessor->SetCascadeCount(m_directionalLightHandle, static_cast<uint16_t>(m_cascadeCount));
             }
 
             ImGui::Spacing();
@@ -396,21 +395,12 @@ namespace AtomSampleViewer
             {
                 m_directionalLightFeatureProcessor->SetShadowFilterMethod(m_directionalLightHandle, s_shadowFilterMethods[m_shadowFilterMethodIndex]);
             }
-            ImGui::Text("Boundary Width in meter");
-            if (ImGui::SliderFloat("Width", &m_boundaryWidth, 0.f, 0.1f, "%.3f"))
-            {
-                m_directionalLightFeatureProcessor->SetShadowBoundaryWidth(m_directionalLightHandle, m_boundaryWidth);
-            }
 
             ImGui::Spacing();
             ImGui::Text("Filtering (PCF specific)");
-            if (ImGui::SliderInt("Prediction #", &m_predictionSampleCount, 4, 16))
-            {
-                m_directionalLightFeatureProcessor->SetPredictionSampleCount(m_directionalLightHandle, m_predictionSampleCount);
-            }
             if (ImGui::SliderInt("Filtering #", &m_filteringSampleCount, 4, 64))
             {
-                m_directionalLightFeatureProcessor->SetFilteringSampleCount(m_directionalLightHandle, m_filteringSampleCount);
+                m_directionalLightFeatureProcessor->SetFilteringSampleCount(m_directionalLightHandle, static_cast<uint16_t>(m_filteringSampleCount));
             }
         }
         ImGui::Unindent();
@@ -423,7 +413,7 @@ namespace AtomSampleViewer
             int diskLightCount = m_diskLightCount;
             if (ImGui::SliderInt("Number", &diskLightCount, 0, DiskLightCountMax))
             {
-                UpdateDiskLightCount(diskLightCount);
+                UpdateDiskLightCount(static_cast<uint16_t>(diskLightCount));
             }
 
             if (ImGui::SliderFloat("Intensity##disk", &m_diskLightIntensity, 0.f, 100000.f, "%.1f", ImGuiSliderFlags_Logarithmic))

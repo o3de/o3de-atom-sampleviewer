@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -101,6 +102,10 @@ namespace AtomSampleViewer
         };
 
         PreloadAssets(assetList);
+
+        // initialize and then reset IBL, which will disable it by binding the default cubemaps
+        m_defaultIbl.Init(m_scene);
+        m_defaultIbl.Reset();
     }
 
     void ShadowExampleComponent::OnAllAssetsReadyActivate()
@@ -124,10 +129,9 @@ namespace AtomSampleViewer
 
         UseArcBallCameraController();
 
-        RPI::Scene* scene = RPI::RPISystemInterface::Get()->GetDefaultScene().get();
-        m_directionalLightFeatureProcessor = scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
-        m_diskLightFeatureProcessor = scene->GetFeatureProcessor<Render::DiskLightFeatureProcessorInterface>();
-        m_pointLightFeatureProcessor = scene->GetFeatureProcessor<Render::PointLightFeatureProcessorInterface>();
+        m_directionalLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
+        m_diskLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DiskLightFeatureProcessorInterface>();
+        m_pointLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::PointLightFeatureProcessorInterface>();
 
         CreateMeshes();
         CreateDirectionalLight();
@@ -344,7 +348,7 @@ namespace AtomSampleViewer
 
         auto updateFloorTransform = [&](Data::Instance<RPI::Model> model)
         {
-            const AZ::Aabb& aabb = model->GetAabb();
+            const AZ::Aabb& aabb = model->GetModelAsset()->GetAabb();
             const float maxZ = aabb.GetMax().GetZ();
             const AZ::Vector3 nonUniformScale{ 12.f, 12.f, 0.1f };
             const AZ::Vector3 translation{ 0.f, 0.f, -maxZ * nonUniformScale.GetZ() };
@@ -360,7 +364,7 @@ namespace AtomSampleViewer
 
         auto updateBunnyTransform = [&](Data::Instance<RPI::Model> model)
         {
-            const AZ::Aabb& aabb = model->GetAabb();
+            const AZ::Aabb& aabb = model->GetModelAsset()->GetAabb();
             const float minZ = aabb.GetMin().GetZ();
             const AZ::Vector3 translation{ 0.f, 0.f, -minZ };
             auto transform = AZ::Transform::CreateTranslation(translation);
@@ -406,13 +410,11 @@ namespace AtomSampleViewer
         featureProcessor->SetRgbIntensity(handle, lightColor);
         featureProcessor->SetShadowmapSize(handle, s_shadowmapImageSizes[m_directionalLightImageSizeIndex]);
         featureProcessor->SetShadowFarClipDistance(handle, FarClipDistance);
-        featureProcessor->SetCascadeCount(handle, m_cascadeCount);
+        featureProcessor->SetCascadeCount(handle, static_cast<uint16_t>(m_cascadeCount));
         featureProcessor->SetShadowmapFrustumSplitSchemeRatio(handle, m_ratioLogarithmUniform);
         featureProcessor->SetViewFrustumCorrectionEnabled(handle, m_isCascadeCorrectionEnabled);
         featureProcessor->SetShadowFilterMethod(handle, s_shadowFilterMethods[m_shadowFilterMethodIndexDirectional]);
-        featureProcessor->SetShadowBoundaryWidth(handle, m_boundaryWidthDirectional);
-        featureProcessor->SetPredictionSampleCount(handle, m_predictionSampleCountDirectional);
-        featureProcessor->SetFilteringSampleCount(handle, m_filteringSampleCountDirectional);
+        featureProcessor->SetFilteringSampleCount(handle, static_cast<uint16_t>(m_filteringSampleCountDirectional));
         featureProcessor->SetGroundHeight(handle, 0.f);
 
         m_directionalLightHandle = handle;
@@ -523,7 +525,7 @@ namespace AtomSampleViewer
             cascadesChanged = cascadesChanged || ScriptableImGui::RadioButton("4", &m_cascadeCount, 4);
             if (cascadesChanged)
             {
-                m_directionalLightFeatureProcessor->SetCascadeCount(m_directionalLightHandle, m_cascadeCount);
+                m_directionalLightFeatureProcessor->SetCascadeCount(m_directionalLightHandle, static_cast<uint16_t>(m_cascadeCount));
             }
 
             ImGui::Spacing();
@@ -568,29 +570,16 @@ namespace AtomSampleViewer
                 m_directionalLightFeatureProcessor->SetShadowFilterMethod(
                     m_directionalLightHandle, s_shadowFilterMethods[m_shadowFilterMethodIndexDirectional]);
             }
-            if (m_shadowFilterMethodIndexDirectional != aznumeric_cast<int>(AZ::Render::ShadowFilterMethod::None))
-            {
-                ImGui::Text("Boundary Width in meter");
-                if (ScriptableImGui::SliderFloat("Width##Directional", &m_boundaryWidthDirectional, 0.f, 0.1f, "%.3f"))
-                {
-                    m_directionalLightFeatureProcessor->SetShadowBoundaryWidth(m_directionalLightHandle, m_boundaryWidthDirectional);
-                }
-            }
 
             if (m_shadowFilterMethodIndexDirectional == aznumeric_cast<int>(AZ::Render::ShadowFilterMethod::Pcf) ||
                 m_shadowFilterMethodIndexDirectional == aznumeric_cast<int>(AZ::Render::ShadowFilterMethod::EsmPcf))
             {
                 ImGui::Spacing();
                 ImGui::Text("Filtering (PCF specific)");
-                if (ScriptableImGui::SliderInt("Prediction # ##Directional", &m_predictionSampleCountDirectional, 4, 16))
-                {
-                    m_directionalLightFeatureProcessor->SetPredictionSampleCount(
-                        m_directionalLightHandle, m_predictionSampleCountDirectional);
-                }
                 if (ScriptableImGui::SliderInt("Filtering # ##Directional", &m_filteringSampleCountDirectional, 4, 64))
                 {
                     m_directionalLightFeatureProcessor->SetFilteringSampleCount(
-                        m_directionalLightHandle, m_filteringSampleCountDirectional);
+                        m_directionalLightHandle, static_cast<uint16_t>(m_filteringSampleCountDirectional));
                 }
             }
 
@@ -674,8 +663,6 @@ namespace AtomSampleViewer
                 if (!m_positionalLightShadowEnabled[index])
                 {
                     m_shadowFilterMethodIndicesPositional[index] = 0;
-                    m_boundaryWidthsPositional[index] = 0.f;
-                    m_predictionSampleCountsPositional[index] = 0;
                     m_filteringSampleCountsPositional[index] = 0;
                 }
                 settingsChanged = true;
@@ -691,41 +678,13 @@ namespace AtomSampleViewer
                 settingsChanged = true;
             }
 
-            if (m_shadowFilterMethodIndicesPositional[index] != aznumeric_cast<int>(ShadowFilterMethod::None))
-            {
-                ImGui::Text("Boundary Width in degrees");
-                if (ScriptableImGui::SliderFloat("Width##Positional", &m_boundaryWidthsPositional[index], 0.f, 1.0f, "%.3f"))
-                {
-                    settingsChanged = true;
-                }
-            }
-
             if (m_shadowFilterMethodIndicesPositional[index] == aznumeric_cast<int>(ShadowFilterMethod::Pcf) ||
                 m_shadowFilterMethodIndicesPositional[index] == aznumeric_cast<int>(ShadowFilterMethod::EsmPcf))
             {
                 ImGui::Spacing();
                 ImGui::Text("Filtering (PCF specific)");
-
-                if (m_pcfMethod[index] == PcfMethod::BoundarySearch &&
-                    ScriptableImGui::SliderInt("Prediction # ##Positional", &m_predictionSampleCountsPositional[index], 4, 16))
-                {
-                    settingsChanged = true;
-                }
                 if (ScriptableImGui::SliderInt("Filtering # ##Positional", &m_filteringSampleCountsPositional[index], 4, 64))
                 {
-                    settingsChanged = true;
-                }
-
-                int pcfMethodAsInteger = aznumeric_cast<int>(m_pcfMethod[index]);
-                if (ScriptableImGui::RadioButton(
-                        "Boundary Search filtering", &pcfMethodAsInteger, static_cast<int>(PcfMethod::BoundarySearch)))
-                {
-                    m_pcfMethod[index] = PcfMethod::BoundarySearch;
-                    settingsChanged = true;
-                }
-                if (ScriptableImGui::RadioButton("Bicubic filtering", &pcfMethodAsInteger, static_cast<int>(PcfMethod::Bicubic)))
-                {
-                    m_pcfMethod[index] = PcfMethod::Bicubic;
                     settingsChanged = true;
                 }
             }
@@ -814,10 +773,7 @@ namespace AtomSampleViewer
                     m_diskLightFeatureProcessor->SetShadowFilterMethod(
                         lightHandle, s_shadowFilterMethods[m_shadowFilterMethodIndicesPositional[index]]);
 
-                    m_diskLightFeatureProcessor->SetSofteningBoundaryWidthAngle(lightHandle, AZ::DegToRad(m_boundaryWidthsPositional[index]));
-                    m_diskLightFeatureProcessor->SetFilteringSampleCount(lightHandle, m_filteringSampleCountsPositional[index]);
-                    m_diskLightFeatureProcessor->SetPredictionSampleCount(lightHandle, m_predictionSampleCountsPositional[index]);
-                    m_diskLightFeatureProcessor->SetPcfMethod(lightHandle, m_pcfMethod[index]);
+                    m_diskLightFeatureProcessor->SetFilteringSampleCount(lightHandle, static_cast<uint16_t>(m_filteringSampleCountsPositional[index]));
                 }
             }
         }
@@ -846,10 +802,7 @@ namespace AtomSampleViewer
                     m_pointLightFeatureProcessor->SetShadowFilterMethod(
                         lightHandle, s_shadowFilterMethods[m_shadowFilterMethodIndicesPositional[index]]);
 
-                    m_pointLightFeatureProcessor->SetPcfMethod(lightHandle, m_pcfMethod[index]);
-                    m_pointLightFeatureProcessor->SetFilteringSampleCount(lightHandle, m_filteringSampleCountsPositional[index]);
-                    m_pointLightFeatureProcessor->SetPredictionSampleCount(lightHandle, m_predictionSampleCountsPositional[index]);
-                    m_pointLightFeatureProcessor->SetSofteningBoundaryWidthAngle(lightHandle, AZ::DegToRad(m_boundaryWidthsPositional[index]));
+                    m_pointLightFeatureProcessor->SetFilteringSampleCount(lightHandle, static_cast<uint16_t>(m_filteringSampleCountsPositional[index]));
                 }
             }
         }

@@ -1,6 +1,7 @@
 # 
-# Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
-# 
+# Copyright (c) Contributors to the Open 3D Engine Project.
+# For complete copyright and license terms please see the LICENSE at the root of this distribution.
+#
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 #
 # 
@@ -18,13 +19,7 @@ set(FILES
     Passes/ImGuiNoInput.pass
     Passes/ImGuiOnlyPipeline.pass
     Passes/LuxCoreTexture.pass
-    Passes/MainPipeline_Mobile.pass
     Passes/Monochrome.pass
-    Passes/MSAA_2x_RPI_Pipeline.pass
-    Passes/MSAA_4x_RPI_Pipeline.pass
-    Passes/MSAA_8x_RPI_Pipeline.pass
-    Passes/MSAA_RPI_Pipeline_Core.pass
-    Passes/No_MSAA_RPI_Pipeline.pass
     Passes/RayTracingAmbientOcclusion.pass
     Passes/RenderTexture.pass
     Passes/RHISamplePass.pass
@@ -51,17 +46,13 @@ set(FILES
     Scripts/ShadowTest.bv.lua
     Scripts/StreamingImageTest.bv.lua
     Scripts/TransparentTest.bv.lua
-    Scripts/_AutomatedPeriodicTestSuite_.bv.lua
-    Scripts/_AutomatedReviewTestSuite_.bv.lua
+    Scripts/_AutomatedReviewWARPTestSuite_.bv.lua
     Scripts/_FullTestSuite_.bv.lua
     Shaders/DebugVertexNormals.azsl
     Shaders/DebugVertexNormals.materialtype
     Shaders/DebugVertexNormals.shader
     Shaders/Instanced.azsl
-    Shaders/MaterialEditorTest.materialtype
-    Shaders/StaticMesh.azsl
-    Shaders/StaticMesh.materialtype
-    Shaders/StaticMesh.shader
+    Shaders/MaterialEditorTest.materialtype    
     Shaders/ComprehensiveTestMaterial/Comprehensive.materialtype
     Shaders/ComprehensiveTestMaterial/Stacks.azsl
     Shaders/ComprehensiveTestMaterial/Stacks.shader
@@ -177,7 +168,6 @@ set(FILES
     Shaders/RHI/TrianglesConstantBuffer.shader
     Shaders/RootConstantsExample/ColorMesh.azsl
     Shaders/RootConstantsExample/ColorMesh.shader
-    Shaders/ShaderResourceGroups/SceneSrg.azsli
     Shaders/StreamingImageExample/Image3d.azsl
     Shaders/StreamingImageExample/Image3d.shader
     Shaders/StreamingImageExample/ImageMips.azsl

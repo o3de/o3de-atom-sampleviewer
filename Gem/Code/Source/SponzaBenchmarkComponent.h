@@ -1,6 +1,7 @@
 /*
- * Copyright (c) Contributors to the Open 3D Engine Project. For complete copyright and license terms please see the LICENSE at the root of this distribution.
- * 
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
@@ -12,6 +13,7 @@
 #include <AtomCore/Instance/InstanceId.h>
 
 #include <AzCore/Component/TickBus.h>
+#include <AzCore/IO/Path/Path.h>
 #include <AzCore/Math/Vector3.h>
 #include <AzCore/std/string/string_view.h>
 
@@ -24,18 +26,18 @@ struct ImGuiContext;
 
 namespace AtomSampleViewer
 {
-    class BistroBenchmarkComponent final
+    class SponzaBenchmarkComponent final
         : public CommonSampleComponentBase
         , public AZ::TickBus::Handler
         , public AZ::Data::AssetBus::MultiHandler
     {
     public:
-        AZ_COMPONENT(BistroBenchmarkComponent, "{2AFFAA6B-1795-4635-AFAD-C2A98163832F}", CommonSampleComponentBase);
+        AZ_COMPONENT(SponzaBenchmarkComponent, "{2AFFAA6B-1795-4635-AFAD-C2A98163832F}", CommonSampleComponentBase);
 
         static void Reflect(AZ::ReflectContext* context);
 
-        BistroBenchmarkComponent() = default;
-        ~BistroBenchmarkComponent() override = default;
+        SponzaBenchmarkComponent() = default;
+        ~SponzaBenchmarkComponent() override = default;
 
         //AZ::Component
         void Activate() override;
@@ -157,7 +159,7 @@ namespace AtomSampleViewer
         AZ::Component* m_cameraControlComponent = nullptr;
 
         AZStd::vector<uint64_t> m_framesToCapture;
-        AZStd::string m_screenshotFolder;
+        AZ::IO::Path m_screenshotFolder;
 
         // Lights
         AZ::Render::DirectionalLightFeatureProcessorInterface* m_directionalLightFeatureProcessor = nullptr;
