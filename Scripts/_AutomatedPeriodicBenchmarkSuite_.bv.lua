@@ -13,7 +13,8 @@ IDLE_COUNT = 100
 FRAME_COUNT = 100
 SAMPLES_TO_RUN = {
     {prefix = 'RPI', name = 'CullingAndLod', width = 1400, height = 800},
-    {prefix = 'RPI', name = 'SponzaBenchmark', width = 1400, height = 800}
+    {prefix = 'RPI', name = 'SponzaBenchmark', width = 1400, height = 800},
+    {prefix = 'RPI', name = 'HighInstanceTest', width = 800, height = 600}
 }
 
 Print('Capturing data for ' .. tostring(#SAMPLES_TO_RUN) .. ' benchmarks')
