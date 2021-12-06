@@ -83,6 +83,11 @@ end
 OpenSample('RPI/Mesh')
 ResizeViewport(999, 999)
 
+-- This is just quick regression test for a crash that happened when turning on the ground plane with no model
+SetImguiValue('Show Ground Plane', true)
+IdleFrames(1) 
+SetImguiValue('Show Ground Plane', false)
+
 ----------------------------------------------------------------------
 -- StandardPBR Materials...
 
