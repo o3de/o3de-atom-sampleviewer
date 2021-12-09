@@ -171,8 +171,6 @@ set(FILES
     Source/TransparencyExampleComponent.h
     Source/ShaderReloadTestComponent.cpp
     Source/ShaderReloadTestComponent.h
-    Source/Utils/FileIOErrorHandler.cpp
-    Source/Utils/FileIOErrorHandler.h
     Source/Utils/ImGuiAssetBrowser.cpp
     Source/Utils/ImGuiAssetBrowser.h
     Source/Utils/ImGuiHistogramQueue.cpp
