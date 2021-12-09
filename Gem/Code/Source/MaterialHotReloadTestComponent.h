@@ -10,7 +10,6 @@
 
 #include <CommonSampleComponentBase.h>
 #include <Utils/ImGuiSidebar.h>
-#include <Utils/FileIOErrorHandler.h>
 #include <AzCore/Component/TickBus.h>
 #include <Atom/RPI.Reflect/Material/MaterialAsset.h>
 #include <Atom/RPI.Reflect/Model/ModelAsset.h>
@@ -107,8 +106,6 @@ namespace AtomSampleViewer
         AZ::Data::Instance<AZ::RPI::Material> m_shaderVariantIndicatorMaterial_root;
         AZ::Data::Instance<AZ::RPI::Material> m_shaderVariantIndicatorMaterial_fullyBaked;
         AZ::Data::Instance<AZ::RPI::Material>  m_shaderVariantIndicatorMaterial_current;
-
-        FileIOErrorHandler m_fileIoErrorHandler;
 
         float m_clearAssetsTimeout = 0.0f;
     };
