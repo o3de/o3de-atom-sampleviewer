@@ -36,6 +36,8 @@
 #include <Utils/ImGuiSaveFilePath.h>
 #include <Utils/Utils.h>
 
+AZ_DEFINE_BUDGET(AtomSampleViewer);
+
 namespace AtomSampleViewer
 {
     void AtomSampleViewerSystemComponent::Reflect(AZ::ReflectContext* context)

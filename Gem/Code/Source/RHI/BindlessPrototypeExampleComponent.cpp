@@ -20,7 +20,6 @@
 #include <AzCore/Math/MatrixUtils.h>
 
 #include <AzCore/Component/Entity.h>
-#include <AzCore/Debug/EventTrace.h>
 
 #include <AzFramework/Components/CameraBus.h>
 

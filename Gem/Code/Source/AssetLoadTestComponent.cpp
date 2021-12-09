@@ -16,10 +16,11 @@
 
 #include <Automation/ScriptRunnerBus.h>
 
-#include <AzCore/Debug/EventTrace.h>
 #include <AzCore/Serialization/SerializeContext.h>
 
 #include <RHI/BasicRHIComponent.h>
+
+AZ_DECLARE_BUDGET(AtomSampleViewer);
 
 namespace AtomSampleViewer
 {
@@ -241,7 +242,7 @@ namespace AtomSampleViewer
 
     void AssetLoadTestComponent::OnTick([[maybe_unused]] float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint scriptTime)
     {
-        AZ_TRACE_METHOD();
+        AZ_PROFILE_FUNCTION(AtomSampleViewer);
 
         const float timeSeconds = static_cast<float>(scriptTime.GetSeconds());
 
