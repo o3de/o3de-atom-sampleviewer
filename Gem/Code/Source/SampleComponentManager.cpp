@@ -127,6 +127,7 @@
 #include <Profiler/ProfilerImGuiBus.h>
 
 #include "ExampleComponentBus.h"
+#include <EntityUtilityFunctions.h>
 
 namespace Platform
 {
@@ -454,9 +455,7 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::Deactivate()
     {
-        AzFramework::EntityContextRequestBus::Event(
-            m_entityContextId, &AzFramework::EntityContextRequestBus::Events::DestroyEntity, m_cameraEntity);
-        m_cameraEntity = nullptr;
+        DestroyEntity(m_cameraEntity);
 
         AzFramework::AssetCatalogEventBus::Handler::BusDisconnect();
         AZ::Render::ImGuiSystemNotificationBus::Handler::BusDisconnect();
