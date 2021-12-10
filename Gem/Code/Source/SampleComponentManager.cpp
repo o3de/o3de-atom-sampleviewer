@@ -327,11 +327,6 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::Init()
     {
-        auto isSupportedFunc = []()
-        {
-            return SampleComponentManager::IsMultiViewportSwapchainSampleSupported();
-        };
-
         const AZStd::vector<SampleEntry>& samples = GetSamples();
         for (const SampleEntry& sample : samples)
         {
