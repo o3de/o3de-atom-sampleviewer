@@ -29,6 +29,7 @@
 #include <AzCore/PlatformIncl.h>
 #include <AzCore/IO/SystemFile.h>
 #include <AzCore/IO/Path/Path.h>
+#include <Atom/Utils/PngFile.h>
 
 #include <Automation/ScriptRepeaterBus.h>
 

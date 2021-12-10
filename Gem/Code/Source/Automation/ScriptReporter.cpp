@@ -15,6 +15,7 @@
 #include <AzFramework/IO/LocalFileIO.h>
 #include <AzCore/IO/SystemFile.h>
 #include <AzCore/Utils/Utils.h>
+#include <Atom/Utils/PngFile.h>
 
 namespace AtomSampleViewer
 {
@@ -1119,6 +1120,27 @@ namespace AtomSampleViewer
 
                 for (const ScreenshotTestInfo& screenshotTest : scriptReport.m_screenshotTests)
                 {
+                    // Check if the image comparison result failed to determine whether a diff .PNG image will be needed in the exported results.
+                    if (screenshotTest.m_officialComparisonResult.m_resultCode != ImageComparisonResult::ResultCode::Pass &&
+                        screenshotTest.m_officialComparisonResult.m_resultCode != ImageComparisonResult::ResultCode::None)
+                    {
+                        // Required for PngFile to function.
+                        using namespace AZ;
+                        using namespace AZ::Utils;
+
+                        PngFile::LoadSettings loadSettings;
+                        PngFile goldenImage = PngFile::Load(screenshotTest.m_officialBaselineScreenshotFilePath.c_str(), loadSettings);
+                        PngFile screenshotImage = PngFile::Load(screenshotTest.m_screenshotFilePath.c_str(), loadSettings);
+
+                        auto goldenImageBuffer = goldenImage.GetBuffer();
+                        auto goldenImageBufferFormat = goldenImage.GetBufferFormat();
+                        auto screenshotImageBuffer = screenshotImage.GetBuffer();
+                        auto screenshotImageBufferFormat = screenshotImage.GetBufferFormat();
+                        // 4. Create a buffer to store the outputs of #1, #2, and #3.
+
+                        // 5. Save #4 to disk at the same location as the test report text file.
+                    }
+
                     const AZStd::string screenshotPath = AZStd::string::format("Test screenshot path: %s \n", screenshotTest.m_screenshotFilePath.c_str());
                     const AZStd::string officialBaselineScreenshotPath = AZStd::string::format("Official baseline screenshot path: %s \n", screenshotTest.m_officialBaselineScreenshotFilePath.c_str());
                     const AZStd::string toleranceLevelLogLine = AZStd::string::format("Tolerance level: %s \n", screenshotTest.m_toleranceLevel.ToString().c_str());
@@ -1126,6 +1148,7 @@ namespace AtomSampleViewer
 
                     io->Write(logHandle, toleranceLevelLogLine.c_str(), toleranceLevelLogLine.size());
                     io->Write(logHandle, officialComparisonLogLine.c_str(), officialComparisonLogLine.size());
+
                 }
                 io->Close(logHandle);
             }
