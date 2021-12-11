@@ -228,9 +228,9 @@ namespace AtomSampleViewer
         dependent.push_back(AZ_CRC("AzFrameworkConfigurationSystemComponentService", 0xcc49c96e)); // Ensures a scene is created for the GameEntityContext
     }
 
-    const AZStd::vector<SampleEntry>& SampleComponentManager::GetSamples()
+    const AZStd::array_view<SampleEntry> SampleComponentManager::GetSamples()
     {
-        static AZStd::vector<SampleEntry> sampleEntries{
+        static SampleEntry sampleEntries[] = {
             NewRHISample<AlphaToCoverageExampleComponent>("AlphaToCoverage"),
             NewRHISample<AsyncComputeExampleComponent>("AsyncCompute"),
             NewRHISample<BindlessPrototypeExampleComponent>("BindlessPrototype", []() {return Utils::GetRHIDevice()->GetFeatures().m_unboundedArrays; }),
@@ -293,7 +293,7 @@ namespace AtomSampleViewer
             NewFeaturesSample<TransparencyExampleComponent>("Transparency"),
         };
 
-        return sampleEntries;
+        return {sampleEntries, AZ_ARRAY_SIZE(sampleEntries)};
     }
 
     void SampleComponentManager::RegisterSampleComponent(const SampleEntry& sample)
@@ -327,14 +327,13 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::Init()
     {
-        const AZStd::vector<SampleEntry>& samples = GetSamples();
+        AZStd::array_view<SampleEntry> samples = GetSamples();
         for (const SampleEntry& sample : samples)
         {
             RegisterSampleComponent(sample);
         }
 
         m_scriptManager = AZStd::make_unique<ScriptManager>();
-
     }
 
     void SampleComponentManager::Activate()

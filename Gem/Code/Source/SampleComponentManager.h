@@ -12,6 +12,8 @@
 
 #include <Automation/ScriptableImGui.h> // This file needs to be included before "<Atom/Utils/ImGuiPassTree.h>" to enable scriptable imgui for ImguiPassTree
 
+#include <AtomCore/std/containers/array_view.h>
+
 #include <Atom/Feature/ImGui/SystemBus.h>
 #include <Atom/Feature/Utils/FrameCaptureBus.h>
 #include <Atom/RPI.Public/WindowContext.h>
@@ -87,7 +89,7 @@ namespace AtomSampleViewer
         static void GetRequiredServices(AZ::ComponentDescriptor::DependencyArrayType& required);
         static void GetDependentServices(AZ::ComponentDescriptor::DependencyArrayType& dependent);
 
-        static const AZStd::vector<SampleEntry>& GetSamples();
+        static const AZStd::array_view<SampleEntry> GetSamples();
 
         SampleComponentManager();
         ~SampleComponentManager() override;

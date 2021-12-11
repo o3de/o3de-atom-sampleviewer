@@ -14,8 +14,6 @@
 
 #include <AzFramework/Scene/SceneSystemComponent.h>
 
-#include <Atom/Feature/SkinnedMesh/SkinnedMeshInputBuffers.h>
-
 namespace AtomSampleViewer
 {
     class Module final
@@ -32,7 +30,7 @@ namespace AtomSampleViewer
                 SampleComponentManager::CreateDescriptor(),
                 });
 
-            const AZStd::vector<SampleEntry>& samples = SampleComponentManager::GetSamples();
+            AZStd::array_view<SampleEntry> samples = SampleComponentManager::GetSamples();
             for (const SampleEntry& sample : samples)
             {
                 m_descriptors.emplace_back(sample.m_componentDescriptor);
