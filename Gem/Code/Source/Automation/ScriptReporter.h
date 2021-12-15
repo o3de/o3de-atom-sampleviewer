@@ -13,7 +13,6 @@
 #include <Atom/Utils/ImageComparison.h>
 #include <Automation/ImageComparisonConfig.h>
 #include <Utils/ImGuiMessageBox.h>
-#include <Utils/FileIOErrorHandler.h>
 
 namespace AtomSampleViewer
 {
@@ -241,7 +240,6 @@ namespace AtomSampleViewer
         ScriptReport* GetCurrentScriptReport();
 
         ImGuiMessageBox m_messageBox;
-        FileIOErrorHandler m_fileIoErrorHandler;
 
         AZStd::vector<ImageComparisonToleranceLevel> m_availableToleranceLevels;
         AZStd::string m_invalidationMessage;

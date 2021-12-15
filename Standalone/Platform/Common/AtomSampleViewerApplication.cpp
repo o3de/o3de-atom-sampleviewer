@@ -21,9 +21,6 @@
 #include <AzFramework/Network/AssetProcessorConnection.h>
 #include <AzFramework/StringFunc/StringFunc.h>
 
-#include <GridMate/Drillers/CarrierDriller.h>
-#include <GridMate/Drillers/ReplicaDriller.h>
-
 #include <Atom/RPI.Public/RPISystemInterface.h>
 #include <AzCore/Math/Random.h>
 #include <AzCore/Script/ScriptAsset.h>

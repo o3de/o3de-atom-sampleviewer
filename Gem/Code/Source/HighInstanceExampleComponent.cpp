@@ -18,7 +18,6 @@
 
 #include <Automation/ScriptRunnerBus.h>
 
-#include <AzCore/Debug/EventTrace.h>
 #include <AzCore/Serialization/SerializeContext.h>
 #include <AzFramework/Windowing/WindowBus.h>
 
@@ -26,6 +25,7 @@
 
 #include <HighInstanceTestComponent_Traits_Platform.h>
 
+AZ_DECLARE_BUDGET(AtomSampleViewer);
 
 namespace AtomSampleViewer
 {
@@ -309,7 +309,7 @@ namespace AtomSampleViewer
 
     void HighInstanceTestComponent::OnTick([[maybe_unused]] float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint scriptTime)
     {
-        AZ_TRACE_METHOD();
+		AZ_PROFILE_FUNCTION(AtomSampleViewer);
 
         if (m_updateTransformEnabled)
         {

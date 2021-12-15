@@ -71,7 +71,7 @@ namespace AtomSampleViewer
 
         // directional light
         float m_directionalLightPitch = -AZ::Constants::QuarterPi;
-        float m_directionalLightYaw = 0.f;
+        float m_directionalLightYaw = 0.0f;
         float m_directionalLightIntensity = 20.0f;
         AZ::Color m_directionalLightColor;
 

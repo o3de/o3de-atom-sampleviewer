@@ -856,23 +856,19 @@ namespace AtomSampleViewer
         AZStd::string destinationFolder = destinationFile;
         AzFramework::StringFunc::Path::StripFullName(destinationFolder);
 
-        m_fileIoErrorHandler.BusConnect();
-
         bool failed = false;
 
         if (!AZ::IO::LocalFileIO::GetInstance()->CreatePath(destinationFolder.c_str()))
         {
             failed = true;
-            m_fileIoErrorHandler.ReportLatestIOError(AZStd::string::format("Failed to create folder '%s'.", destinationFolder.c_str()));
+            AZ_Error("ScriptReporter", false, "Failed to create folder '%s'.", destinationFolder.c_str());
         }
 
         if (!AZ::IO::LocalFileIO::GetInstance()->Copy(screenshotTest.m_screenshotFilePath.c_str(), destinationFile.c_str()))
         {
             failed = true;
-            m_fileIoErrorHandler.ReportLatestIOError(AZStd::string::format("Failed to copy '%s' to '%s'.", screenshotTest.m_screenshotFilePath.c_str(), destinationFile.c_str()));
+            AZ_Error("ScriptReporter", false, "Failed to copy '%s' to '%s'.", screenshotTest.m_screenshotFilePath.c_str(), destinationFile.c_str());
         }
-
-        m_fileIoErrorHandler.BusDisconnect();
 
         if (!failed)
         {
@@ -928,23 +924,19 @@ namespace AtomSampleViewer
         // ".../AtomSampleViewer/Scripts/ExpectedScreenshots/MyTestFolder/" + "MyTest.png"
         AZStd::string sourceFilePath = AZStd::string::format("%s\\%s", sourceFolderPath.c_str(), reversePathComponents[0].c_str());
 
-        m_fileIoErrorHandler.BusConnect();
-
         // Create parent folder if it doesn't exist
         if (success && !io->CreatePath(sourceFolderPath.c_str()))
         {
             success = false;
-            m_fileIoErrorHandler.ReportLatestIOError(AZStd::string::format("Failed to create folder '%s'.", sourceFolderPath.c_str()));
+            AZ_Error("ScriptReporter", false, "Failed to create folder '%s'.", sourceFolderPath.c_str());
         }
 
         // Replace source screenshot with new result
         if (success && !io->Copy(screenshotTest.m_screenshotFilePath.c_str(), sourceFilePath.c_str()))
         {
             success = false;
-            m_fileIoErrorHandler.ReportLatestIOError(AZStd::string::format("Failed to copy '%s' to '%s'.", screenshotTest.m_screenshotFilePath.c_str(), sourceFilePath.c_str()));
+            AZ_Error("ScriptReporter", false, "Failed to copy '%s' to '%s'.", screenshotTest.m_screenshotFilePath.c_str(), sourceFilePath.c_str());
         }
-
-        m_fileIoErrorHandler.BusDisconnect();
 
         if (success)
         {
