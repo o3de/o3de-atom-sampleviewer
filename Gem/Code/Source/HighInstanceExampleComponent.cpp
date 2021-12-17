@@ -103,7 +103,7 @@ namespace AtomSampleViewer
 
         m_pinnedMaterialCount = static_cast<uint32_t>(m_materialBrowser.GetPinnedAssets().size());
 
-        const AZStd::vector<AZStd::string> modelAllowlist =
+        m_expandedModelList =
         {
             "materialeditor/viewportmodels/cone.azmodel",
             "materialeditor/viewportmodels/cube.azmodel",
@@ -115,7 +115,11 @@ namespace AtomSampleViewer
             "objects/cube.azmodel",
             "objects/cylinder.azmodel",
         };
-        m_modelBrowser.SetDefaultPinnedAssets(modelAllowlist);
+        m_simpleModelList =
+        {
+            "objects/cube.azmodel"
+        };
+        m_modelBrowser.SetDefaultPinnedAssets(m_simpleModelList);
     }
 
     void HighInstanceTestComponent::Activate()
@@ -324,6 +328,7 @@ namespace AtomSampleViewer
             }
         }
 
+        bool currentUseSimpleModels = m_useSimpleModels;
         if (m_imguiSidebar.Begin())
         {
             ImGui::Checkbox("Update Transforms Every Frame", &m_updateTransformEnabled);
@@ -334,7 +339,24 @@ namespace AtomSampleViewer
 
             RenderImGuiLatticeControls();
 
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            ImGui::Checkbox("Use simple models", &m_useSimpleModels);
+
             m_imguiSidebar.End();
+        }
+
+        if (currentUseSimpleModels != m_useSimpleModels)
+        {
+            m_modelBrowser.SetPinnedAssets(m_useSimpleModels?m_simpleModelList:m_expandedModelList);
+            for (ModelInstanceData& instanceData : m_modelInstanceData)
+            {
+                instanceData.m_modelAssetId = GetRandomModelId();
+            }
+            DestroyHandles();
+            FinalizeLatticeInstances();
         }
     }
 
