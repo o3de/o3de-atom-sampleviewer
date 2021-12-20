@@ -17,10 +17,12 @@
 #include <AzCore/Asset/AssetManager.h>
 #include <AzCore/Serialization/SerializeContext.h>
 #include <AzCore/Component/Entity.h>
+#include <AzCore/IO/Path/Path.h>
 #include <AzCore/IO/SystemFile.h>
 
 #include <AzFramework/Input/Buses/Requests/InputSystemCursorRequestBus.h>
 #include <AzFramework/Input/Devices/Mouse/InputDeviceMouse.h>
+#include <AzFramework/IO/LocalFileIO.h>
 
 #include <Atom/Bootstrap/DefaultWindowBus.h>
 
@@ -226,6 +228,8 @@ namespace AtomSampleViewer
 
     void AtomSampleViewerSystemComponent::LogPerfMetrics() const
     {
-        AZ::Utils::SaveObjectToFile("metrics.xml", AZ::DataStream::ST_XML, &m_perfMetrics);
+        AZ::IO::FixedMaxPath resolvedPath;
+        AZ::IO::LocalFileIO::GetInstance()->ResolvePath(resolvedPath, "@user@/PerformanceMetrics.xml");
+        AZ::Utils::SaveObjectToFile(resolvedPath.String(), AZ::DataStream::ST_XML, &m_perfMetrics);
     }
 } // namespace AtomSampleViewer
