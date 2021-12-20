@@ -33,7 +33,6 @@
 #include <ParallaxMappingExampleComponent.h>
 #include <SampleComponentManager.h>
 #include <SceneReloadSoakTestComponent.h>
-#include <ShadingExampleComponent.h>
 #include <ShadowExampleComponent.h>
 #include <ShadowedSponzaExampleComponent.h>
 #include <SkinnedMeshExampleComponent.h>
@@ -143,7 +142,6 @@ namespace AtomSampleViewer
                 MeshExampleComponent::CreateDescriptor(),
                 DynamicDrawExampleComponent::CreateDescriptor(),
                 SceneReloadSoakTestComponent::CreateDescriptor(),
-                ShadingExampleComponent::CreateDescriptor(),
                 ShadowExampleComponent::CreateDescriptor(),
                 ShadowedSponzaExampleComponent::CreateDescriptor(),
                 SkinnedMeshExampleComponent::CreateDescriptor(),

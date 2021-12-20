@@ -87,7 +87,6 @@
 #include <MultiSceneExampleComponent.h>
 #include <ParallaxMappingExampleComponent.h>
 #include <SceneReloadSoakTestComponent.h>
-#include <ShadingExampleComponent.h>
 #include <ShadowExampleComponent.h>
 #include <ShadowedSponzaExampleComponent.h>
 #include <SkinnedMeshExampleComponent.h>
@@ -284,7 +283,6 @@ namespace AtomSampleViewer
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/MultiViewSingleSceneAuxGeom", azrtti_typeid<MultiViewSingleSceneAuxGeomExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/RootConstants", azrtti_typeid<RootConstantsExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/SceneReloadSoakTest", azrtti_typeid<SceneReloadSoakTestComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/Shading", azrtti_typeid<ShadingExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/StreamingImage", azrtti_typeid<StreamingImageExampleComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/ShaderReloadTest", azrtti_typeid<ShaderReloadTestComponent>() ));
         SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/AreaLight", azrtti_typeid<AreaLightExampleComponent>() ));
