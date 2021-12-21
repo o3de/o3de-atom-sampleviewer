@@ -147,42 +147,64 @@ namespace AtomSampleViewer
         return (numSamples == 1) || (numSamples == 2) || (numSamples == 4) || (numSamples == 8);
     }
 
-    SampleEntry SampleEntry::NewRHISample(const AZStd::string& name, const AZ::Uuid& uuid)
+    template <typename T>
+    static SampleEntry NewSample(SamplePipelineType type, const char* menuName, const AZStd::string& name)
     {
         SampleEntry entry;
         entry.m_sampleName = name;
-        entry.m_sampleUuid = uuid;
-        entry.m_pipelineType = SamplePipelineType::RHI;
+        entry.m_sampleUuid = azrtti_typeid<T>();
+        entry.m_pipelineType = type;
+        entry.m_componentDescriptor = T::CreateDescriptor();
+        entry.m_parentMenuName = menuName;
+        entry.m_fullName = entry.m_parentMenuName + '/' + entry.m_sampleName;
+
         return entry;
     }
 
-    SampleEntry SampleEntry::NewRHISample(const AZStd::string& name, const AZ::Uuid& uuid, AZStd::function<bool()> isSupportedFunction)
+    template <typename T>
+    static SampleEntry NewSample(SamplePipelineType type, const char* menuName, const AZStd::string& name, AZStd::function<bool()> isSupportedFunction)
     {
-        SampleEntry entry;
-        entry.m_sampleName = name;
-        entry.m_sampleUuid = uuid;
-        entry.m_pipelineType = SamplePipelineType::RHI;
+        SampleEntry entry = NewSample<T>(type, menuName, name);
         entry.m_isSupportedFunc = isSupportedFunction;
         return entry;
     }
 
-    SampleEntry SampleEntry::NewRPISample(const AZStd::string& name, const AZ::Uuid& uuid)
+    template <typename T>
+    static SampleEntry NewRHISample(const AZStd::string& name)
     {
-        SampleEntry entry;
-        entry.m_sampleName = name;
-        entry.m_sampleUuid = uuid;
-        entry.m_pipelineType = SamplePipelineType::RPI;
+        return NewSample<T>(SamplePipelineType::RHI, "RHI", name);
+    }
+
+    template <typename T>
+    static SampleEntry NewRHISample(const AZStd::string& name, AZStd::function<bool()> isSupportedFunction)
+    {
+        SampleEntry entry = NewSample<T>(SamplePipelineType::RHI, "RHI", name, isSupportedFunction);
+        entry.m_isSupportedFunc = isSupportedFunction;
         return entry;
     }
 
-    SampleEntry SampleEntry::NewRPISample(const AZStd::string& name, const AZ::Uuid& uuid, AZStd::function<bool()> isSupportedFunction)
+    template <typename T>
+    static SampleEntry NewRPISample(const AZStd::string& name)
     {
-        SampleEntry entry;
-        entry.m_sampleName = name;
-        entry.m_sampleUuid = uuid;
-        entry.m_pipelineType = SamplePipelineType::RPI;
-        entry.m_isSupportedFunc = isSupportedFunction;
-        return entry;
+        return NewSample<T>(SamplePipelineType::RPI, "RPI", name);
+    }
+
+    template <typename T>
+    static SampleEntry NewRPISample(const AZStd::string& name, AZStd::function<bool()> isSupportedFunction)
+    {
+        return NewSample<T>(SamplePipelineType::RPI, "RPI", name, isSupportedFunction);
+    }
+
+    template <typename T>
+    static SampleEntry NewFeaturesSample(const AZStd::string& name)
+    {
+        return NewSample<T>(SamplePipelineType::RPI, "Features", name);
+    }
+
+    template <typename T>
+    static SampleEntry NewFeaturesSample(const AZStd::string& name, AZStd::function<bool()> isSupportedFunction)
+    {
+        return NewSample<T>(SamplePipelineType::RPI, "Features", name, isSupportedFunction);
     }
 
     void SampleComponentManager::Reflect(AZ::ReflectContext* context)
@@ -205,11 +227,79 @@ namespace AtomSampleViewer
         dependent.push_back(AZ_CRC("AzFrameworkConfigurationSystemComponentService", 0xcc49c96e)); // Ensures a scene is created for the GameEntityContext
     }
 
+    const AZStd::array_view<SampleEntry> SampleComponentManager::GetSamples()
+    {
+        static SampleEntry sampleEntries[] = {
+            NewRHISample<AlphaToCoverageExampleComponent>("AlphaToCoverage"),
+            NewRHISample<AsyncComputeExampleComponent>("AsyncCompute"),
+            NewRHISample<BindlessPrototypeExampleComponent>("BindlessPrototype", []() {return Utils::GetRHIDevice()->GetFeatures().m_unboundedArrays; }),
+            NewRHISample<ComputeExampleComponent>("Compute"),
+            NewRHISample<CopyQueueComponent>("CopyQueue"),
+            NewRHISample<DualSourceBlendingComponent>("DualSourceBlending", []() {return Utils::GetRHIDevice()->GetFeatures().m_dualSourceBlending; }),
+            NewRHISample<IndirectRenderingExampleComponent>("IndirectRendering", []() {return Utils::GetRHIDevice()->GetFeatures().m_indirectCommandTier > RHI::IndirectCommandTiers::Tier0; }),
+            NewRHISample<InputAssemblyExampleComponent>("InputAssembly"),
+            NewRHISample<MSAAExampleComponent>("MSAA"),
+            NewRHISample<MultipleViewsComponent>("MultipleViews"),
+            NewRHISample<MRTExampleComponent>("MultiRenderTarget"),
+            NewRHISample<MultiThreadComponent>("MultiThread"),
+            NewRHISample<MultiViewportSwapchainComponent>("MultiViewportSwapchainComponent", [] { return IsMultiViewportSwapchainSampleSupported(); }),
+            NewRHISample<QueryExampleComponent>("Queries"),
+            NewRHISample<RayTracingExampleComponent>("RayTracing", []() {return Utils::GetRHIDevice()->GetFeatures().m_rayTracing; }),
+            NewRHISample<SphericalHarmonicsExampleComponent>("SphericalHarmonics"),
+            NewRHISample<StencilExampleComponent>("Stencil"),
+            NewRHISample<SubpassExampleComponent>("Subpass", []() {return Utils::GetRHIDevice()->GetFeatures().m_renderTargetSubpassInputSupport != AZ::RHI::SubpassInputSupportType::NotSupported; }),
+            NewRHISample<SwapchainExampleComponent>("Swapchain"),
+            NewRHISample<TextureExampleComponent>("Texture"),
+            NewRHISample<Texture3dExampleComponent>("Texture3d"),
+            NewRHISample<TextureArrayExampleComponent>("TextureArray"),
+            NewRHISample<TextureMapExampleComponent>("TextureMap"),
+            NewRHISample<TriangleExampleComponent>("Triangle"),
+            NewRHISample<TrianglesConstantBufferExampleComponent>("TrianglesConstantBuffer"),
+            NewRHISample<MatrixAlignmentTestExampleComponent>("MatrixAlignmentTest"),
+            NewRPISample<AssetLoadTestComponent>("AssetLoadTest"),
+            NewRPISample<AuxGeomExampleComponent>("AuxGeom"),
+            NewRPISample<BakedShaderVariantExampleComponent>("BakedShaderVariant"),
+            NewRPISample<SponzaBenchmarkComponent>("SponzaBenchmark"),
+            NewRPISample<CullingAndLodExampleComponent>("CullingAndLod"),
+            NewRPISample<DecalExampleComponent>("Decals"),
+            NewRPISample<DynamicDrawExampleComponent>("DynamicDraw"),
+            NewRPISample<DynamicMaterialTestComponent>("DynamicMaterialTest"),
+            NewRPISample<HighInstanceTestComponent>("HighInstanceTest"),
+            NewRPISample<MaterialHotReloadTestComponent>("MaterialHotReloadTest"),
+            NewRPISample<MeshExampleComponent>("Mesh"),
+            NewRPISample<MSAA_RPI_ExampleComponent>("MSAA"),
+            NewRPISample<MultiRenderPipelineExampleComponent>("MultiRenderPipeline"),
+            NewRPISample<MultiSceneExampleComponent>("MultiScene"),
+            NewRPISample<MultiViewSingleSceneAuxGeomExampleComponent>("MultiViewSingleSceneAuxGeom"),
+            NewRPISample<RootConstantsExampleComponent>("RootConstants"),
+            NewRPISample<SceneReloadSoakTestComponent>("SceneReloadSoakTest"),
+            NewRPISample<StreamingImageExampleComponent>("StreamingImage"),
+            NewRPISample<ShaderReloadTestComponent>("ShaderReloadTest"),
+            NewFeaturesSample<AreaLightExampleComponent>("AreaLight"),
+            NewFeaturesSample<BloomExampleComponent>("Bloom"),
+            NewFeaturesSample<CheckerboardExampleComponent>("Checkerboard", []() {return (Utils::GetRHIDevice()->GetPhysicalDevice().GetDescriptor().m_vendorId != RHI::VendorId::ARM && Utils::GetRHIDevice()->GetPhysicalDevice().GetDescriptor().m_vendorId != RHI::VendorId::Qualcomm); }),
+            NewFeaturesSample<DepthOfFieldExampleComponent>("DepthOfField"),
+            NewFeaturesSample<DiffuseGIExampleComponent>("DiffuseGI", []() {return Utils::GetRHIDevice()->GetFeatures().m_rayTracing; }),
+            NewFeaturesSample<ExposureExampleComponent>("Exposure"),
+            NewFeaturesSample<LightCullingExampleComponent>("LightCulling"),
+            NewFeaturesSample<ParallaxMappingExampleComponent>("Parallax"),
+            NewFeaturesSample<ShadowExampleComponent>("Shadow"),
+            NewFeaturesSample<ShadowedSponzaExampleComponent>("ShadowedSponza"),
+            NewFeaturesSample<SsaoExampleComponent>("SSAO"),
+            NewFeaturesSample<SSRExampleComponent>("SSR"),
+            NewFeaturesSample<TonemappingExampleComponent>("Tonemapping"),
+            NewFeaturesSample<TransparencyExampleComponent>("Transparency"),
+        };
+
+        return {sampleEntries, AZ_ARRAY_SIZE(sampleEntries)};
+    }
+
     void SampleComponentManager::RegisterSampleComponent(const SampleEntry& sample)
     {
         if (AZStd::find(m_availableSamples.begin(), m_availableSamples.end(), sample) == m_availableSamples.end())
         {
             m_availableSamples.push_back(sample);
+            m_groupedSamples[sample.m_parentMenuName].push_back(static_cast<int32_t>(m_availableSamples.size() - 1));
         }
     }
 
@@ -235,73 +325,13 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::Init()
     {
-        auto isSupportedFunc = []()
+        AZStd::array_view<SampleEntry> samples = GetSamples();
+        for (const SampleEntry& sample : samples)
         {
-            return SampleComponentManager::IsMultiViewportSwapchainSampleSupported();
-        };
-
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/AlphaToCoverage", azrtti_typeid<AlphaToCoverageExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/AsyncCompute", azrtti_typeid<AsyncComputeExampleComponent>() ) );
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/BindlessPrototype", azrtti_typeid<BindlessPrototypeExampleComponent>(), []() {return Utils::GetRHIDevice()->GetFeatures().m_unboundedArrays; } ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/Compute", azrtti_typeid<ComputeExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/CopyQueue", azrtti_typeid<CopyQueueComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/DualSourceBlending", azrtti_typeid<DualSourceBlendingComponent>(), []() {return Utils::GetRHIDevice()->GetFeatures().m_dualSourceBlending; } ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/IndirectRendering", azrtti_typeid<IndirectRenderingExampleComponent>(), []() {return Utils::GetRHIDevice()->GetFeatures().m_indirectCommandTier > RHI::IndirectCommandTiers::Tier0; } ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/InputAssembly", azrtti_typeid<InputAssemblyExampleComponent>()));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/MSAA", azrtti_typeid<MSAAExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/MultipleViews", azrtti_typeid<MultipleViewsComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/MultiRenderTarget", azrtti_typeid<MRTExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/MultiThread", azrtti_typeid<MultiThreadComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/MultiViewportSwapchainComponent", azrtti_typeid<MultiViewportSwapchainComponent>(), isSupportedFunc ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/Queries", azrtti_typeid<QueryExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/RayTracing", azrtti_typeid<RayTracingExampleComponent>(), []() {return Utils::GetRHIDevice()->GetFeatures().m_rayTracing; } ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/SphericalHarmonics", azrtti_typeid<SphericalHarmonicsExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/Stencil", azrtti_typeid<StencilExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/Subpass", azrtti_typeid<SubpassExampleComponent>(), []() {return Utils::GetRHIDevice()->GetFeatures().m_renderTargetSubpassInputSupport != AZ::RHI::SubpassInputSupportType::NotSupported; } ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/Swapchain", azrtti_typeid<SwapchainExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/Texture", azrtti_typeid<TextureExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/Texture3d", azrtti_typeid<Texture3dExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/TextureArray", azrtti_typeid<TextureArrayExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/TextureMap", azrtti_typeid<TextureMapExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/Triangle", azrtti_typeid<TriangleExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/TrianglesConstantBuffer", azrtti_typeid<TrianglesConstantBufferExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRHISample( "RHI/MatrixAlignmentTest", azrtti_typeid<MatrixAlignmentTestExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/AssetLoadTest", azrtti_typeid<AssetLoadTestComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/AuxGeom", azrtti_typeid<AuxGeomExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/BakedShaderVariant", azrtti_typeid<BakedShaderVariantExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/SponzaBenchmark", azrtti_typeid<SponzaBenchmarkComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/CullingAndLod", azrtti_typeid<CullingAndLodExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/Decals", azrtti_typeid<DecalExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/DynamicDraw", azrtti_typeid<DynamicDrawExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/DynamicMaterialTest", azrtti_typeid<DynamicMaterialTestComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/HighInstanceTest", azrtti_typeid<HighInstanceTestComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/MaterialHotReloadTest", azrtti_typeid<MaterialHotReloadTestComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/Mesh", azrtti_typeid<MeshExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/MSAA", azrtti_typeid<MSAA_RPI_ExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/MultiRenderPipeline", azrtti_typeid<MultiRenderPipelineExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/MultiScene", azrtti_typeid<MultiSceneExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/MultiViewSingleSceneAuxGeom", azrtti_typeid<MultiViewSingleSceneAuxGeomExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/RootConstants", azrtti_typeid<RootConstantsExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/SceneReloadSoakTest", azrtti_typeid<SceneReloadSoakTestComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/StreamingImage", azrtti_typeid<StreamingImageExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "RPI/ShaderReloadTest", azrtti_typeid<ShaderReloadTestComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/AreaLight", azrtti_typeid<AreaLightExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Bloom", azrtti_typeid<BloomExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Checkerboard", azrtti_typeid<CheckerboardExampleComponent>(), []() {return (Utils::GetRHIDevice()->GetPhysicalDevice().GetDescriptor().m_vendorId != RHI::VendorId::ARM && Utils::GetRHIDevice()->GetPhysicalDevice().GetDescriptor().m_vendorId != RHI::VendorId::Qualcomm); } ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/DepthOfField", azrtti_typeid<DepthOfFieldExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/DiffuseGI", azrtti_typeid<DiffuseGIExampleComponent>(), []() {return Utils::GetRHIDevice()->GetFeatures().m_rayTracing; }));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Exposure", azrtti_typeid<ExposureExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/LightCulling", azrtti_typeid<LightCullingExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Parallax", azrtti_typeid<ParallaxMappingExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Shadow", azrtti_typeid<ShadowExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/ShadowedSponza", azrtti_typeid<ShadowedSponzaExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/SSAO", azrtti_typeid<SsaoExampleComponent>()));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/SSR", azrtti_typeid<SSRExampleComponent>()));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Tonemapping", azrtti_typeid<TonemappingExampleComponent>() ));
-        SampleComponentManager::RegisterSampleComponent(SampleEntry::NewRPISample( "Features/Transparency", azrtti_typeid<TransparencyExampleComponent>() ));
+            RegisterSampleComponent(sample);
+        }
 
         m_scriptManager = AZStd::make_unique<ScriptManager>();
-
     }
 
     void SampleComponentManager::Activate()
@@ -372,7 +402,7 @@ namespace AtomSampleViewer
         AZ_Printf("SampleComponentManager", "Available Samples -------------------------\n");
         for (size_t i = 0; i < m_availableSamples.size(); ++i)
         {
-            AZStd::string printStr = "\t[" + m_availableSamples[i].m_sampleName + "]";
+            AZStd::string printStr = "\t[" + m_availableSamples[i].m_fullName + "]";
             if (!m_isSampleSupported[i])
             {
                 printStr += " Not Supported ";
@@ -402,7 +432,7 @@ namespace AtomSampleViewer
 
             for (int32_t i = 0; i < m_availableSamples.size(); ++i)
             {
-                AZStd::string sampleName = m_availableSamples[i].m_sampleName;
+                AZStd::string sampleName = m_availableSamples[i].m_fullName;
                 AZStd::to_lower(sampleName.begin(), sampleName.end());
 
                 if (sampleName == targetSampleName)
@@ -861,27 +891,36 @@ namespace AtomSampleViewer
             }
             if (ImGui::BeginMenu("Samples"))
             {
-                for (int32_t i = 0; i < m_availableSamples.size(); i++)
+                for (auto&& [parentMenuName, samples] : m_groupedSamples)
                 {
-                    const char* sampleName = m_availableSamples[i].m_sampleName.c_str();
-                    bool enabled = m_isSampleSupported[i];
-                    if (i < s_alphanumericCount)
+                    if (ImGui::BeginMenu(parentMenuName.c_str()))
                     {
-                        const AZStd::string hotkeyName = AZStd::string::format("Ctrl-%d: ", (i + 1) % 10);
+                        for (int32_t index : samples)
+                        {
+                            SampleEntry& sample = m_availableSamples[index];
+                            const char* sampleName = sample.m_sampleName.c_str();
+                            bool enabled = m_isSampleSupported[index];
+                            if (index < s_alphanumericCount)
+                            {
+                                const AZStd::string hotkeyName = AZStd::string::format("Ctrl-%d: ", (index + 1) % 10);
 
-                        if (ImGui::MenuItem(sampleName, hotkeyName.c_str(), false, enabled))
-                        {
-                            m_selectedSampleIndex = i;
-                            m_sampleChangeRequest = true;
+                                if (ImGui::MenuItem(sampleName, hotkeyName.c_str(), false, enabled))
+                                {
+                                    m_selectedSampleIndex = index;
+                                    m_sampleChangeRequest = true;
+                                }
+                            }
+                            else
+                            {
+                                if (ImGui::MenuItem(sampleName, nullptr, false, enabled))
+                                {
+                                    m_selectedSampleIndex = index;
+                                    m_sampleChangeRequest = true;
+                                }
+                            }
                         }
-                    }
-                    else
-                    {
-                        if (ImGui::MenuItem(sampleName, nullptr, false, enabled))
-                        {
-                            m_selectedSampleIndex = i;
-                            m_sampleChangeRequest = true;
-                        }
+
+                        ImGui::EndMenu();
                     }
                 }
 
