@@ -87,7 +87,6 @@
 #include <MultiSceneExampleComponent.h>
 #include <ParallaxMappingExampleComponent.h>
 #include <SceneReloadSoakTestComponent.h>
-#include <ShadingExampleComponent.h>
 #include <ShadowExampleComponent.h>
 #include <ShadowedSponzaExampleComponent.h>
 #include <SkinnedMeshExampleComponent.h>
@@ -274,7 +273,6 @@ namespace AtomSampleViewer
             NewRPISample<MultiViewSingleSceneAuxGeomExampleComponent>("MultiViewSingleSceneAuxGeom"),
             NewRPISample<RootConstantsExampleComponent>("RootConstants"),
             NewRPISample<SceneReloadSoakTestComponent>("SceneReloadSoakTest"),
-            NewRPISample<ShadingExampleComponent>("Shading"),
             NewRPISample<StreamingImageExampleComponent>("StreamingImage"),
             NewRPISample<ShaderReloadTestComponent>("ShaderReloadTest"),
             NewFeaturesSample<AreaLightExampleComponent>("AreaLight"),
