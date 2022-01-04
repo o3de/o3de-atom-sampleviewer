@@ -18,7 +18,6 @@ set(FILES
     Passes/ComplexPipeline.pass
     Passes/ImGuiNoInput.pass
     Passes/ImGuiOnlyPipeline.pass
-    Passes/LuxCoreTexture.pass
     Passes/Monochrome.pass
     Passes/RayTracingAmbientOcclusion.pass
     Passes/RenderTexture.pass

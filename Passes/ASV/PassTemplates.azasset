@@ -49,10 +49,6 @@
                 "Path": "Passes/ColorInvertCS.pass"
             },
             {
-                "Name": "LuxCoreTexturePassTemplate",
-                "Path": "Passes/LuxCoreTexture.pass"
-            },
-            {
                 "Name": "RenderTextureTemplate",
                 "Path": "Passes/RenderTexture.pass"
             },

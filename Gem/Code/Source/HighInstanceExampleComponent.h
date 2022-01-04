@@ -92,9 +92,12 @@ namespace AtomSampleViewer
         uint32_t m_pinnedMaterialCount = 0;
         uint32_t m_preActivateVSyncInterval = 0;
         
+        AZStd::vector<AZStd::string> m_expandedModelList; // has models that are more expensive on the gpu
+        AZStd::vector<AZStd::string> m_simpleModelList; // Aims to keep the test cpu bottlenecked by using trivial geometry such as a cube
         size_t m_lastPinnedModelCount = 0;
 
         float m_originalFarClipDistance;
         bool m_updateTransformEnabled = false;
+        bool m_useSimpleModels = true;
     };
 } // namespace AtomSampleViewer

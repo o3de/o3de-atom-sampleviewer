@@ -149,8 +149,6 @@ set(FILES
     Source/RootConstantsExampleComponent.cpp
     Source/SceneReloadSoakTestComponent.cpp
     Source/SceneReloadSoakTestComponent.h
-    Source/ShadingExampleComponent.cpp
-    Source/ShadingExampleComponent.h
     Source/ShadowExampleComponent.cpp
     Source/ShadowExampleComponent.h
     Source/ShadowedSponzaExampleComponent.cpp

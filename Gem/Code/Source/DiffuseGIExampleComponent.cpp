@@ -351,12 +351,12 @@ namespace AtomSampleViewer
             AZ::Render::DiffuseProbeGridFeatureProcessorInterface* diffuseProbeGridFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DiffuseProbeGridFeatureProcessorInterface>();
             AZ::Transform transform = AZ::Transform::CreateIdentity();
 
-            m_origin.Set(0.3f, -0.25f, 0.5f);
+            m_origin.Set(-0.8f, 0.5f, -0.055f);
             transform.SetTranslation(m_origin);
             m_diffuseProbeGrid = diffuseProbeGridFeatureProcessor->AddProbeGrid(transform, AZ::Vector3(12.0f, 12.0f, 12.0f), AZ::Vector3(1.5f, 1.5f, 2.0f));
             diffuseProbeGridFeatureProcessor->SetAmbientMultiplier(m_diffuseProbeGrid, m_ambientMultiplier);
 
-            m_viewBias = 0.7f;
+            m_viewBias = 0.5f;
             diffuseProbeGridFeatureProcessor->SetViewBias(m_diffuseProbeGrid, m_viewBias);
 
             m_normalBias = 0.1f;
@@ -382,12 +382,12 @@ namespace AtomSampleViewer
         m_meshHandles[aznumeric_cast<uint32_t>(SponzaMeshes::Inside)] = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_sponzaModelAsset });
         GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(SponzaMeshes::Inside)], transform);
         
-        m_directionalLightPitch = AZ::DegToRad(-45.0f);
-        m_directionalLightYaw = AZ::DegToRad(62.0f);
+        m_directionalLightPitch = AZ::DegToRad(-65.0f);
+        m_directionalLightYaw = AZ::DegToRad(65.0f);
         m_directionalLightColor = AZ::Color(0.92f, 0.78f, 0.35f, 1.0f);
         m_directionalLightIntensity = 30.0f;
 
-        m_pointLightPos = AZ::Vector3(10.0f, -4.25f, 1.5f);
+        m_pointLightPos = AZ::Vector3(9.2f, -3.7f, 1.0f);
         m_pointLightColor = AZ::Color(1.0f, 0.0f, 0.0f, 1.0f);
         m_pointLightIntensity = 10.0f;
 
@@ -423,7 +423,7 @@ namespace AtomSampleViewer
             AZ::Render::DiffuseProbeGridFeatureProcessorInterface* diffuseProbeGridFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DiffuseProbeGridFeatureProcessorInterface>();
             transform = AZ::Transform::CreateIdentity();
         
-            m_origin.Set(1.4f, -1.25f, 5.0f);
+            m_origin.Set(0.0f, -0.275f, 5.0f);
             transform.SetTranslation(m_origin);
             m_diffuseProbeGrid = diffuseProbeGridFeatureProcessor->AddProbeGrid(transform, AZ::Vector3(35.0f, 45.0f, 25.0f), AZ::Vector3(3.0f, 3.0f, 4.0f));
             diffuseProbeGridFeatureProcessor->SetAmbientMultiplier(m_diffuseProbeGrid, m_ambientMultiplier);

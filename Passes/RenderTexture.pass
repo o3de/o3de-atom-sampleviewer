@@ -34,13 +34,7 @@
                         "Attachment": "RenderTargetAttachment"
                     }
                 }
-            ],
-            "PassData": {
-                "$type": "FullscreenTrianglePassData",
-                "ShaderAsset": {
-                    "FilePath": "Shaders/LuxCore/RenderTexture.shader"
-                }
-            }
+            ]
         }
     }
 }
