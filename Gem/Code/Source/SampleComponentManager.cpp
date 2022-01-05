@@ -1360,7 +1360,7 @@ namespace AtomSampleViewer
     {
         for (int32_t i = 0; i < m_availableSamples.size(); i++)
         {
-            if (m_availableSamples[i].m_sampleName == sampleName)
+            if (m_availableSamples[i].m_parentMenuName + '/' + m_availableSamples[i].m_sampleName == sampleName)
             {
                 if (!m_availableSamples[i].m_isSupportedFunc || m_availableSamples[i].m_isSupportedFunc())
                 {
