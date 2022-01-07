@@ -68,7 +68,10 @@ namespace AtomSampleViewer
         SamplePipelineType m_pipelineType = SamplePipelineType::RHI;
         AZ::ComponentDescriptor* m_componentDescriptor;
 
-        bool operator==(const SampleEntry& other) { return other.m_sampleName == m_sampleName; }
+        bool operator==(const SampleEntry& other)
+        {
+            return other.m_sampleName == m_sampleName && other.m_parentMenuName == m_parentMenuName;
+        }
     };
 
     class SampleComponentManager final
