@@ -903,7 +903,9 @@ namespace AtomSampleViewer
         {
             AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
 
-            AZ::Interface<AZ::IConsole>::Get()->PerformCommand(AZStd::string::format("t_simulationTickDeltaOverride %f", seconds).c_str());
+            int milliseconds = static_cast<int>(seconds * 1000);
+
+            AZ::Interface<AZ::IConsole>::Get()->PerformCommand(AZStd::string::format("t_simulationTickDeltaOverride %d", milliseconds).c_str());
             s_instance->m_frameTimeIsLocked = true;
         };
 
