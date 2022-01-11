@@ -234,8 +234,11 @@ namespace AtomSampleViewer
 
         void ShowDiffButton(const char* buttonLabel, const AZStd::string& imagePathA, const AZStd::string& imagePathB);
 
-        // Generates a path to the exported test results file.
-        AZStd::string GenerateAndCreateExportedTestResultsPath() const;
+        // Generates a path to the exported test results folder.
+        AZStd::string GenerateTestResultsFolder() const;
+
+        // Generates a path to the test results .txt file.
+        AZStd::string GenerateTestResultsTxtFile(AZStd::string& testResultsFolder) const;
 
         ScriptReport* GetCurrentScriptReport();
 
@@ -250,7 +253,8 @@ namespace AtomSampleViewer
         DisplayOption m_displayOption = DisplayOption::AllResults;
         bool m_forceShowUpdateButtons = false; //< By default, the "Update" buttons are visible only for failed screenshots. This forces them to be visible.
         AZStd::string m_officialBaselineSourceFolder; //< Used for updating official baseline screenshots
-        AZStd::string m_exportedTestResultsPath = "Click the 'Export Test Results' button."; //< Path to exported test results file (if exported).
+        AZStd::string m_testResultsFolder = "Click the 'Export Test Results' button."; //< Path to the test results folder where exported test results are stored.
+        AZStd::string m_exportedTestResultsFile = "Click the 'Export Test Results' button."; //< Path to exported test results file (if exported).
     };
 
 } // namespace AtomSampleViewer

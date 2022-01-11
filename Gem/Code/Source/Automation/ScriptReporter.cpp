@@ -424,7 +424,9 @@ namespace AtomSampleViewer
             highlightTextIf(totalScreenshotWarnings > 0, HighlightWarning);
             ImGui::Text("Total Screenshot Warnings: %u %s", totalScreenshotWarnings, seeBelow(totalScreenshotWarnings).c_str());
 
-            ImGui::Text("Exported test results: %s", m_exportedTestResultsPath.c_str());
+            ImGui::Text("Test results folder: %s", m_testResultsFolder.c_str());
+
+            ImGui::Text("Test results .txt file: %s", m_exportedTestResultsFile.c_str());
 
             resetTextHighlight();
 
@@ -1089,7 +1091,10 @@ namespace AtomSampleViewer
      
     void ScriptReporter::ExportTestResults()
     {
-        m_exportedTestResultsPath = GenerateAndCreateExportedTestResultsPath();
+        auto io = AZ::IO::LocalFileIO::GetInstance();
+        m_testResultsFolder = GenerateTestResultsFolder();
+        io->CreatePath(m_testResultsFolder.c_str());
+        m_exportedTestResultsFile = GenerateTestResultsTxtFile(m_testResultsFolder);
         for (const ScriptReport& scriptReport : m_scriptReports)
         {
             const AZStd::string assertLogLine = AZStd::string::format("Asserts: %u \n", scriptReport.m_assertCount);
@@ -1100,8 +1105,7 @@ namespace AtomSampleViewer
             const AZStd::string failedScreenshotsLogLine = "\nScreenshot test info below.\n";
             
             AZ::IO::HandleType logHandle;
-            auto io = AZ::IO::LocalFileIO::GetInstance();
-            if (io->Open(m_exportedTestResultsPath.c_str(), AZ::IO::OpenMode::ModeWrite, logHandle))
+            if (io->Open(m_exportedTestResultsFile.c_str(), AZ::IO::OpenMode::ModeWrite, logHandle))
             {
                 io->Write(logHandle, assertLogLine.c_str(), assertLogLine.size());
                 io->Write(logHandle, errorsLogLine.c_str(), errorsLogLine.size());
@@ -1120,17 +1124,57 @@ namespace AtomSampleViewer
                         using namespace AZ;
                         using namespace AZ::Utils;
 
+                        // 1. Read the golden image.
                         PngFile::LoadSettings loadSettings;
                         PngFile goldenImage = PngFile::Load(screenshotTest.m_officialBaselineScreenshotFilePath.c_str(), loadSettings);
-                        PngFile screenshotImage = PngFile::Load(screenshotTest.m_screenshotFilePath.c_str(), loadSettings);
-
                         auto goldenImageBuffer = goldenImage.GetBuffer();
-                        auto goldenImageBufferFormat = goldenImage.GetBufferFormat();
+                        //auto goldenImageBufferFormat = goldenImage.GetBufferFormat();
+
+                        // 2. Read the actual image.
+                        PngFile screenshotImage = PngFile::Load(screenshotTest.m_screenshotFilePath.c_str(), loadSettings);
                         auto screenshotImageBuffer = screenshotImage.GetBuffer();
-                        auto screenshotImageBufferFormat = screenshotImage.GetBufferFormat();
+                        // auto screenshotImageBufferFormat = screenshotImage.GetBufferFormat();
+
+                        // 3. Create a buffer to store the difference of the golden and actual image (This can even be moved to a separate task)
+                        // Not clear how to do this part, this is all I have for now:
+                        //if (goldenImageBuffer.size() > screenshotImageBuffer.size())
+                        //{
+                        //    auto diffImageBuffer = goldenImageBuffer.size() - screenshotImageBuffer.size();
+                        //}
+                        //else
+                        //{
+                        //    auto diffImageBuffer = screenshotImageBuffer.size() - goldenImageBuffer.size();
+                        //}
+                        //
+
                         // 4. Create a buffer to store the outputs of #1, #2, and #3.
+                        // I created this for now as a reference, but I am using the goldenImageBuffer instead of this diffImageColorData buffer:
+                        AZStd::vector<uint8_t> diffImageColorData = {
+                            255u,   0u,   0u, 255u,
+                            0u,   255u,   0u, 255u,
+                            0u,     0u, 255u, 255u
+                        };
+                        AZStd::array_view<uint8_t> diffImageData{ goldenImageBuffer };
+                        PngFile::ErrorHandler errorHandler;
+                        // Since I can't get #3 buffer created correctly, I just used expected signature for now to make sure I understand this code.
+                        // I copied AZ::RHI::Size{3, 1, 0} from C:\git\o3de\Gems\Atom\Utils\Code\Tests\PngFileTests.
+                        PngFile diffImage = PngFile::Create(AZ::RHI::Size{3, 1, 0}, AZ::RHI::Format::R8G8B8A8_UNORM, diffImageData, errorHandler);
+                        PngFile::SaveSettings saveSettings;
+                        saveSettings.m_stripAlpha = false;
 
                         // 5. Save #4 to disk at the same location as the test report text file.
+                        AZStd::string diffImageFile;
+                        AZStd::string diffImageFileName = "make_me_unique.png";
+                        AzFramework::StringFunc::Path::Join(m_testResultsFolder.c_str(), diffImageFileName.c_str(), diffImageFile);
+
+                        if (diffImage && diffImage.Save(diffImageFile.c_str(), saveSettings))
+                        {
+                            AZ_Printf("Created new diff PNG image at: %s \n", diffImageFile.c_str())
+                        }
+                        else
+                        {
+                            AZ_Warning("Failed to save new diff PNG image.", false, "Failed to save new diff PNG image.")
+                        }
                     }
 
                     const AZStd::string screenshotPath = AZStd::string::format("Test screenshot path: %s \n", screenshotTest.m_screenshotFilePath.c_str());
@@ -1144,28 +1188,53 @@ namespace AtomSampleViewer
                 }
                 io->Close(logHandle);
             }
-            m_messageBox.OpenPopupMessage("Exported test results", AZStd::string::format("Results exported to %s", m_exportedTestResultsPath.c_str()));
-            AZ_Printf("Test results exported to %s \n", m_exportedTestResultsPath.c_str());
+            m_messageBox.OpenPopupMessage("Exported test results", AZStd::string::format("Results exported to %s", m_testResultsFolder.c_str()));
+            AZ_Printf("Test results exported to %s \n", m_testResultsFolder.c_str());
+            AZ_Printf("Test results .txt file exported to %s \n", m_exportedTestResultsFile.c_str())
         }
     }
 
-    AZStd::string ScriptReporter::GenerateAndCreateExportedTestResultsPath() const
+    AZStd::string ScriptReporter::GenerateTestResultsFolder() const
     {
-        // Setup our variables for the exported test results path and .txt file.
+        // Create the folder path for our test results & return it.
         const auto projectPath = AZ::Utils::GetProjectPath();
         const AZStd::chrono::system_clock::time_point now = AZStd::chrono::system_clock::now();
         const float timeFloat = AZStd::chrono::duration<float>(now.time_since_epoch()).count();
         const AZStd::string timeString = AZStd::string::format("%.4f", timeFloat);
-        const AZStd::string exportFileName = AZStd::string::format("exportedTestResults_%s.txt", timeString.c_str());
-        AZStd::string exportTestResultsFolder;
-        AzFramework::StringFunc::Path::Join(projectPath.c_str(), "TestResults/", exportTestResultsFolder);
+        const AZStd::string testResultsFolderName = AZStd::string::format("TestResults/testResultsFolder_%s/", timeString.c_str());
+        AZStd::string testResultsFolder;
+        AzFramework::StringFunc::Path::Join(projectPath.c_str(), testResultsFolderName.c_str(), testResultsFolder);
 
+        return testResultsFolder;
+    }
+
+    AZStd::string ScriptReporter::GenerateTestResultsTxtFile(AZStd::string& testResultsFolder) const
+    {
         // Create the exported test results path & return .txt file path.
-        auto io = AZ::IO::LocalFileIO::GetInstance();
-        io->CreatePath(exportTestResultsFolder.c_str());
+        const AZStd::string exportFileName = "exportedTestResultsFile.txt";
         AZStd::string exportFile;
-        AzFramework::StringFunc::Path::Join(exportTestResultsFolder.c_str(), exportFileName.c_str(), exportFile);
+        AzFramework::StringFunc::Path::Join(testResultsFolder.c_str(), exportFileName.c_str(), exportFile);
 
         return exportFile;
     }
+
+    //AZStd::string ScriptReporter::GenerateAndCreateExportedTestResultsPath() const
+    //{
+    //    // Setup our variables for the exported test results path and .txt file.
+    //    const auto projectPath = AZ::Utils::GetProjectPath();
+    //    const AZStd::chrono::system_clock::time_point now = AZStd::chrono::system_clock::now();
+    //    const float timeFloat = AZStd::chrono::duration<float>(now.time_since_epoch()).count();
+    //    const AZStd::string timeString = AZStd::string::format("%.4f", timeFloat);
+    //    const AZStd::string exportFileName = AZStd::string::format("exportedTestResults_%s.txt", timeString.c_str());
+    //    AZStd::string exportTestResultsFolder;
+    //    AzFramework::StringFunc::Path::Join(projectPath.c_str(), "TestResults/", exportTestResultsFolder);
+
+    //    // Create the exported test results path & return .txt file path.
+    //    auto io = AZ::IO::LocalFileIO::GetInstance();
+    //    io->CreatePath(exportTestResultsFolder.c_str());
+    //    AZStd::string exportFile;
+    //    AzFramework::StringFunc::Path::Join(exportTestResultsFolder.c_str(), exportFileName.c_str(), exportFile);
+
+    //    return exportFile;
+    //}
 } // namespace AtomSampleViewer
