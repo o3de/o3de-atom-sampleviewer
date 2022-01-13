@@ -156,6 +156,7 @@ namespace AtomSampleViewer
         m_directionalLightFeatureProcessor->SetShadowmapSize(handle, AZ::Render::ShadowmapSizeNamespace::ShadowmapSize::Size2048);
         m_directionalLightFeatureProcessor->SetViewFrustumCorrectionEnabled(handle, true);
         m_directionalLightFeatureProcessor->SetShadowFilterMethod(handle, AZ::Render::ShadowFilterMethod::EsmPcf);
+        m_directionalLightFeatureProcessor->SetShadowFarClipDistance(handle, 100.0);
         m_directionalLightFeatureProcessor->SetFilteringSampleCount(handle, 16);
         m_directionalLightFeatureProcessor->SetGroundHeight(handle, 0.f);
         m_directionalLightHandle = handle;
