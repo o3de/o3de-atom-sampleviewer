@@ -58,9 +58,7 @@ namespace AtomSampleViewer
         {
             "materials/defaultpbr.azmaterial",
             "materials/presets/pbr/metal_aluminum_polished.azmaterial",
-            "shaders/staticmesh_colorr.azmaterial",
-            "shaders/staticmesh_colorg.azmaterial",
-            "shaders/staticmesh_colorb.azmaterial"
+            "materials/basic_gray.azmaterial"
         };
         m_materialBrowser.SetDefaultPinnedAssets(defaultMaterialAllowlist);
 
