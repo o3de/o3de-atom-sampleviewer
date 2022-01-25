@@ -627,6 +627,30 @@ namespace AtomSampleViewer
                                 ShowDiffButton("View Diff", screenshotResult.m_officialBaselineScreenshotFilePath, screenshotResult.m_screenshotFilePath);
                                 ImGui::PopID();
 
+                                if (screenshotResult.m_officialComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::ThresholdExceeded && ImGui::Button("Export Png Diff"))
+                                {
+                                    const auto projectPath = AZ::Utils::GetProjectPath();
+                                    AZStd::string imageDiffPath;
+                                    AZStd::string scriptFilenameWithouExtension;
+                                    AzFramework::StringFunc::Path::GetFileName(scriptReport.m_scriptAssetPath.c_str(), scriptFilenameWithouExtension);
+                                    AzFramework::StringFunc::Path::StripExtension(scriptFilenameWithouExtension);
+
+                                    AZStd::string screenshotFilenameWithouExtension;
+                                    AzFramework::StringFunc::Path::GetFileName(screenshotResult.m_screenshotFilePath.c_str(), screenshotFilenameWithouExtension);
+                                    AzFramework::StringFunc::Path::StripExtension(screenshotFilenameWithouExtension);
+
+                                    AZStd::string timestring = GenerateTimestamp();
+
+                                    AZStd::string imageDiffFilename = "imageDiff_" +
+                                        scriptFilenameWithouExtension + "_" +
+                                        screenshotFilenameWithouExtension + "_" +
+                                        m_uniqueTimestamp +
+                                        ".png";
+                                    AzFramework::StringFunc::Path::Join(projectPath.c_str(), AZStd::string("TestResults/" + imageDiffFilename).c_str(), imageDiffPath);
+                                    ExportImageDiff(imageDiffPath.c_str(), screenshotResult);
+                                    m_messageBox.OpenPopupMessage("Image Diff Exported Successfully", AZStd::string::format("The image diff file was saved in %s", imageDiffPath.c_str()).c_str());
+                                }
+
                                 if ((!screenshotPassed || m_forceShowUpdateButtons) && ImGui::Button("Update##Official"))
                                 {
                                     if (screenshotResult.m_localComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::FileNotFound)
@@ -665,30 +689,6 @@ namespace AtomSampleViewer
                                 ImGui::PushID("Local");
                                 ShowDiffButton("View Diff", screenshotResult.m_localBaselineScreenshotFilePath, screenshotResult.m_screenshotFilePath);
                                 ImGui::PopID();
-
-                                if (!screenshotPassed && ImGui::Button("Export Png Diff"))
-                                {
-                                    const auto projectPath = AZ::Utils::GetProjectPath();
-                                    AZStd::string imageDiffPath;
-                                    AZStd::string scriptFilenameWithouExtension;
-                                    AzFramework::StringFunc::Path::GetFileName(scriptReport.m_scriptAssetPath.c_str(), scriptFilenameWithouExtension);
-                                    AzFramework::StringFunc::Path::StripExtension(scriptFilenameWithouExtension);
-
-                                    AZStd::string screenshotFilenameWithouExtension;
-                                    AzFramework::StringFunc::Path::GetFileName(screenshotResult.m_screenshotFilePath.c_str(), screenshotFilenameWithouExtension);
-                                    AzFramework::StringFunc::Path::StripExtension(screenshotFilenameWithouExtension);
-
-                                    AZStd::string timestring = GenerateTimestamp();
-
-                                    AZStd::string imageDiffFilename = "imageDiff_" +
-                                        scriptFilenameWithouExtension + "_" +
-                                        screenshotFilenameWithouExtension + "_" +
-                                        m_uniqueTimestamp +
-                                        ".png";
-                                    AzFramework::StringFunc::Path::Join(projectPath.c_str(), AZStd::string("TestResults/" + imageDiffFilename).c_str(), imageDiffPath);
-                                    ExportImageDiff(imageDiffPath.c_str(), screenshotResult);
-                                    m_messageBox.OpenPopupMessage("Image Diff Exported Successfully", AZStd::string::format("The image diff file was saved in %s", imageDiffPath.c_str()).c_str());
-                                }
 
                                 if ((localBaselineWarning || m_forceShowUpdateButtons) && ImGui::Button("Update##Local"))
                                 {
