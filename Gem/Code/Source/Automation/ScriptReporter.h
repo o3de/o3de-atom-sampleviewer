@@ -177,7 +177,7 @@ namespace AtomSampleViewer
 
         // For exporting test results
         void ExportTestResults();
-        void ExportImageComparison(const char* filePath, const ScreenshotTestInfo& screenshotTestInfo);
+        void ExportImageDiff(const char* filePath, const ScreenshotTestInfo& screenshotTestInfo);
 
     private:
 
