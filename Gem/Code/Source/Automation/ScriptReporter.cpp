@@ -150,6 +150,7 @@ namespace AtomSampleViewer
         m_scriptReports.clear();
         m_currentScriptIndexStack.clear();
         m_invalidationMessage.clear();
+        m_uniqueTimestamp = GenerateTimestamp();     
     }
 
     void ScriptReporter::SetInvalidationMessage(const AZStd::string& message)
@@ -237,6 +238,13 @@ namespace AtomSampleViewer
                 m_messageBox.OpenPopupMessage("Can't Diff", "Image diff is not supported on this platform, or the required diff tool is not installed.");
             }
         }
+    }
+
+    AZStd::string ScriptReporter::GenerateTimestamp() const
+    {
+        const AZStd::chrono::system_clock::time_point now = AZStd::chrono::system_clock::now();
+        const float timeFloat = AZStd::chrono::duration<float>(now.time_since_epoch()).count();
+        return AZStd::string::format("%.4f", timeFloat);
     }
 
     const ImageComparisonToleranceLevel* ScriptReporter::FindBestToleranceLevel(float diffScore, bool filterImperceptibleDiffs) const
@@ -657,6 +665,30 @@ namespace AtomSampleViewer
                                 ImGui::PushID("Local");
                                 ShowDiffButton("View Diff", screenshotResult.m_localBaselineScreenshotFilePath, screenshotResult.m_screenshotFilePath);
                                 ImGui::PopID();
+
+                                if (!screenshotPassed && ImGui::Button("Export Png Diff"))
+                                {
+                                    const auto projectPath = AZ::Utils::GetProjectPath();
+                                    AZStd::string imageComparisonPath;
+                                    AZStd::string scriptFilenameWithouExtension;
+                                    AzFramework::StringFunc::Path::GetFileName(scriptReport.m_scriptAssetPath.c_str(), scriptFilenameWithouExtension);
+                                    AzFramework::StringFunc::Path::StripExtension(scriptFilenameWithouExtension);
+
+                                    AZStd::string screenshotFilenameWithouExtension;
+                                    AzFramework::StringFunc::Path::GetFileName(screenshotResult.m_screenshotFilePath.c_str(), screenshotFilenameWithouExtension);
+                                    AzFramework::StringFunc::Path::StripExtension(screenshotFilenameWithouExtension);
+
+                                    AZStd::string timestring = GenerateTimestamp();
+
+                                    AZStd::string imageComparisonFilename = "imageComparison_" +
+                                        scriptFilenameWithouExtension + "_" +
+                                        screenshotFilenameWithouExtension + "_" +
+                                        m_uniqueTimestamp +
+                                        ".png";
+                                    AzFramework::StringFunc::Path::Join(projectPath.c_str(), AZStd::string("TestResults/" + imageComparisonFilename).c_str(), imageComparisonPath);
+                                    ExportImageComparison(imageComparisonPath.c_str(), screenshotResult);
+                                    m_messageBox.OpenPopupMessage("Image comparison saved", AZStd::string::format("Image comparison file saved in %s", imageComparisonPath.c_str()).c_str());
+                                }
 
                                 if ((localBaselineWarning || m_forceShowUpdateButtons) && ImGui::Button("Update##Local"))
                                 {
@@ -1083,9 +1115,8 @@ namespace AtomSampleViewer
                 }
             }
         }
-
     }
-     
+
     void ScriptReporter::ExportTestResults()
     {
         m_exportedTestResultsPath = GenerateAndCreateExportedTestResultsPath();
@@ -1126,14 +1157,31 @@ namespace AtomSampleViewer
         }
     }
 
+    void ScriptReporter::ExportImageComparison(const char* filePath, const ScreenshotTestInfo& screenshotTestInfo)
+    {
+        using namespace AZ::Utils;
+        PngFile officialBaseline = PngFile::Load(screenshotTestInfo.m_officialBaselineScreenshotFilePath.c_str());
+        PngFile actualScreenshot = PngFile::Load(screenshotTestInfo.m_screenshotFilePath.c_str());
+
+        const size_t bufferSize = officialBaseline.GetBuffer().size();
+
+        AZStd::vector<uint8_t> diffBuffer = AZStd::vector<uint8_t>(bufferSize);
+        GenerateImageDiff(officialBaseline.GetBuffer(), actualScreenshot.GetBuffer(), diffBuffer);
+
+        AZStd::vector<uint8_t> buffer = AZStd::vector<uint8_t>(bufferSize * 3);
+        memcpy(buffer.data(), officialBaseline.GetBuffer().data(), bufferSize);
+        memcpy(buffer.data() + bufferSize, actualScreenshot.GetBuffer().data(), bufferSize);
+        memcpy(buffer.data() + bufferSize*2, diffBuffer.data(), bufferSize);
+
+        PngFile imageComparison = PngFile::Create(RHI::Size(officialBaseline.GetWidth(), officialBaseline.GetHeight()*3, 1), RHI::Format::R8G8B8A8_UNORM, buffer);
+        imageComparison.Save(filePath);
+    }
+
     AZStd::string ScriptReporter::GenerateAndCreateExportedTestResultsPath() const
     {
         // Setup our variables for the exported test results path and .txt file.
         const auto projectPath = AZ::Utils::GetProjectPath();
-        const AZStd::chrono::system_clock::time_point now = AZStd::chrono::system_clock::now();
-        const float timeFloat = AZStd::chrono::duration<float>(now.time_since_epoch()).count();
-        const AZStd::string timeString = AZStd::string::format("%.4f", timeFloat);
-        const AZStd::string exportFileName = AZStd::string::format("exportedTestResults_%s.txt", timeString.c_str());
+        const AZStd::string exportFileName = AZStd::string::format("exportedTestResults_%s.txt", m_uniqueTimestamp.c_str());
         AZStd::string exportTestResultsFolder;
         AzFramework::StringFunc::Path::Join(projectPath.c_str(), "TestResults/", exportTestResultsFolder);
 
@@ -1145,4 +1193,27 @@ namespace AtomSampleViewer
 
         return exportFile;
     }
+
+    void ScriptReporter::GenerateImageDiff(AZStd::array_view<uint8_t> img1, AZStd::array_view<uint8_t> img2, AZStd::vector<uint8_t>& buffer)
+    {
+        static constexpr size_t BytesPerPixel = 4;
+        static constexpr float minDiffFilter = 0.01;
+        static constexpr uint8_t defaultPixelValue = 122;
+
+        memset(buffer.data(), defaultPixelValue, buffer.size() * sizeof(uint8_t));
+
+        for (size_t i = 0; i < img1.size(); i += BytesPerPixel)
+        {
+            const int16_t maxDiff = AZ::Utils::CalcMaxChannelDifference(img1, img2, i);
+
+            if (maxDiff/255.0f > minDiffFilter)
+            {
+                buffer[i] = aznumeric_cast<uint8_t>(maxDiff);
+                buffer[i + 1] = 0;
+                buffer[i + 2] = 0;
+            }
+            buffer[i+3] = 255;
+        }
+    }
+
 } // namespace AtomSampleViewer
