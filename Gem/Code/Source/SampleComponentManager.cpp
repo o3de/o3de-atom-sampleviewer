@@ -228,7 +228,7 @@ namespace AtomSampleViewer
         dependent.push_back(AZ_CRC("AzFrameworkConfigurationSystemComponentService", 0xcc49c96e)); // Ensures a scene is created for the GameEntityContext
     }
 
-    const AZStd::array_view<SampleEntry> SampleComponentManager::GetSamples()
+    const AZStd::span<const SampleEntry> SampleComponentManager::GetSamples()
     {
         static SampleEntry sampleEntries[] = {
             NewRHISample<AlphaToCoverageExampleComponent>("AlphaToCoverage"),
@@ -326,7 +326,7 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::Init()
     {
-        AZStd::array_view<SampleEntry> samples = GetSamples();
+        AZStd::span<const SampleEntry> samples = GetSamples();
         for (const SampleEntry& sample : samples)
         {
             RegisterSampleComponent(sample);
