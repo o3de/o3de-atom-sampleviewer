@@ -462,6 +462,7 @@ namespace AtomSampleViewer
             m_displayOption = (DisplayOption)displayOption;
 
             ImGui::Checkbox("Force Show 'Update' Buttons", &m_forceShowUpdateButtons);
+            ImGui::Checkbox("Force Show 'Export Png Diff' Buttons", &m_forceShowExportPngDiffButtons);
 
             bool showWarnings = (m_displayOption == DisplayOption::AllResults) || (m_displayOption == DisplayOption::WarningsAndErrors);
             bool showAll = (m_displayOption == DisplayOption::AllResults);
@@ -627,7 +628,7 @@ namespace AtomSampleViewer
                                 ShowDiffButton("View Diff", screenshotResult.m_officialBaselineScreenshotFilePath, screenshotResult.m_screenshotFilePath);
                                 ImGui::PopID();
 
-                                if (screenshotResult.m_officialComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::ThresholdExceeded && ImGui::Button("Export Png Diff"))
+                                if ((m_forceShowExportPngDiffButtons || screenshotResult.m_officialComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::ThresholdExceeded) && ImGui::Button("Export Png Diff"))
                                 {
                                     const auto projectPath = AZ::Utils::GetProjectPath();
                                     AZStd::string imageDiffPath;
@@ -646,7 +647,15 @@ namespace AtomSampleViewer
                                         screenshotFilenameWithouExtension + "_" +
                                         m_uniqueTimestamp +
                                         ".png";
-                                    AzFramework::StringFunc::Path::Join(projectPath.c_str(), AZStd::string("TestResults/" + imageDiffFilename).c_str(), imageDiffPath);
+                                    AzFramework::StringFunc::Path::Join(projectPath.c_str(), UserFolder, imageDiffPath);
+                                    AzFramework::StringFunc::Path::Join(imageDiffPath.c_str(), TestResultsFolder, imageDiffPath);
+                                    AzFramework::StringFunc::Path::Join(imageDiffPath.c_str(), imageDiffFilename.c_str(), imageDiffPath);
+
+                                    AZStd::string imageDiffFolderPath;
+                                    AzFramework::StringFunc::Path::GetFolderPath(imageDiffPath.c_str(), imageDiffFolderPath);
+                                    auto io = AZ::IO::LocalFileIO::GetInstance();
+                                    io->CreatePath(imageDiffFolderPath.c_str());
+
                                     ExportImageDiff(imageDiffPath.c_str(), screenshotResult);
                                     m_messageBox.OpenPopupMessage("Image Diff Exported Successfully", AZStd::string::format("The image diff file was saved in %s", imageDiffPath.c_str()).c_str());
                                 }
@@ -1183,7 +1192,7 @@ namespace AtomSampleViewer
         const auto projectPath = AZ::Utils::GetProjectPath();
         const AZStd::string exportFileName = AZStd::string::format("exportedTestResults_%s.txt", m_uniqueTimestamp.c_str());
         AZStd::string exportTestResultsFolder;
-        AzFramework::StringFunc::Path::Join(projectPath.c_str(), "TestResults/", exportTestResultsFolder);
+        AzFramework::StringFunc::Path::Join(projectPath.c_str(), TestResultsFolder, exportTestResultsFolder);
 
         // Create the exported test results path & return .txt file path.
         auto io = AZ::IO::LocalFileIO::GetInstance();

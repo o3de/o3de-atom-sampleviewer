@@ -45,6 +45,8 @@ namespace AtomSampleViewer
     class ScriptReporter
     {
     public:
+        static constexpr const char* TestResultsFolder = "TestResults";
+        static constexpr const char* UserFolder = "user";
 
         //! Set the list of available tolerance levels, so the report can suggest an alternate level that matches the actual results.
         void SetAvailableToleranceLevels(const AZStd::vector<ImageComparisonToleranceLevel>& toleranceLevels);
@@ -255,6 +257,7 @@ namespace AtomSampleViewer
         bool m_showReportDialog = false;
         DisplayOption m_displayOption = DisplayOption::AllResults;
         bool m_forceShowUpdateButtons = false; //< By default, the "Update" buttons are visible only for failed screenshots. This forces them to be visible.
+        bool m_forceShowExportPngDiffButtons = false; //< By default, "Export Png Diff" buttons are visible only for failed screenshots. This forces them to be visible.
         AZStd::string m_officialBaselineSourceFolder; //< Used for updating official baseline screenshots
         AZStd::string m_exportedTestResultsPath = "Click the 'Export Test Results' button."; //< Path to exported test results file (if exported).
         AZStd::string m_uniqueTimestamp;
