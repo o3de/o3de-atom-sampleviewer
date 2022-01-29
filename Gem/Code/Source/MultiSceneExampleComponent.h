@@ -16,6 +16,7 @@
 #include <AzCore/Asset/AssetCommon.h>
 #include <AzCore/Component/TickBus.h>
 
+#include <AzFramework/Scene/Scene.h>
 #include <AzFramework/Windowing/WindowBus.h>
 #include <AzFramework/Windowing/NativeWindow.h>
 
