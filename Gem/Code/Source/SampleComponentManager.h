@@ -92,7 +92,7 @@ namespace AtomSampleViewer
         static void GetRequiredServices(AZ::ComponentDescriptor::DependencyArrayType& required);
         static void GetDependentServices(AZ::ComponentDescriptor::DependencyArrayType& dependent);
 
-        static const AZStd::span<const SampleEntry> GetSamples();
+        static AZStd::vector<SampleEntry> GetSamples();
 
         SampleComponentManager();
         ~SampleComponentManager() override;

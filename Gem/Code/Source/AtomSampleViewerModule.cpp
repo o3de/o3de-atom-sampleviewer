@@ -30,7 +30,7 @@ namespace AtomSampleViewer
                 SampleComponentManager::CreateDescriptor(),
                 });
 
-            AZStd::span<const SampleEntry> samples = SampleComponentManager::GetSamples();
+            AZStd::vector<SampleEntry> samples = SampleComponentManager::GetSamples();
             for (const SampleEntry& sample : samples)
             {
                 m_descriptors.emplace_back(sample.m_componentDescriptor);
