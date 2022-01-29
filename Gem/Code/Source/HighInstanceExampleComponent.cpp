@@ -42,12 +42,17 @@ namespace AtomSampleViewer
     }
 
 
-    HighInstanceTestComponent::HighInstanceTestComponent() 
+    HighInstanceTestComponent::HighInstanceTestComponent(const HighInstanceTestParameters& params) 
         : m_materialBrowser("@user@/HighInstanceTestComponent/material_browser.xml")
         , m_modelBrowser("@user@/HighInstanceTestComponent/model_browser.xml")
         , m_imguiSidebar("@user@/HighInstanceTestComponent/sidebar.xml")
     {
-        m_sampleName = "HighInstanceTest";
+        m_sampleName = params.m_sampleName;
+        for (int i = 0; i < 3; ++i)
+        {
+            m_latticeSize[i] = params.m_latticeSize[i];
+            m_latticeSpacing[i] = params.m_latticeSpacing[i];
+        }
 
         m_materialBrowser.SetFilter([](const AZ::Data::AssetInfo& assetInfo)
         {
@@ -124,6 +129,10 @@ namespace AtomSampleViewer
 
     void HighInstanceTestComponent::Activate()
     {
+
+        m_directionalLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
+        m_diskLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DiskLightFeatureProcessorInterface>();
+
         AZ::TickBus::Handler::BusConnect();
 
         m_imguiSidebar.Activate();
@@ -136,9 +145,13 @@ namespace AtomSampleViewer
         m_modelBrowser.ResetPinnedAssetsToDefault();
 
         SetLatticeDimensions(
-            ATOMSAMPLEVIEWER_TRAIT_HIGH_INSTANCE_COUNT_TEST_COMPONENT_LATTICE_SIZE_X, 
-            ATOMSAMPLEVIEWER_TRAIT_HIGH_INSTANCE_COUNT_TEST_COMPONENT_LATTICE_SIZE_Y, 
-            ATOMSAMPLEVIEWER_TRAIT_HIGH_INSTANCE_COUNT_TEST_COMPONENT_LATTICE_SIZE_Z);
+            m_latticeSize[0], 
+            m_latticeSize[1], 
+            m_latticeSize[2]);
+        SetLatticeSpacing(
+            m_latticeSpacing[0],
+            m_latticeSpacing[1],
+            m_latticeSpacing[2]);
         Base::Activate();
 
         AzFramework::NativeWindowHandle windowHandle = nullptr;
@@ -236,6 +249,9 @@ namespace AtomSampleViewer
 
     void HighInstanceTestComponent::OnAllAssetsReadyActivate()
     {
+        m_directionalLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
+        m_diskLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DiskLightFeatureProcessorInterface>();
+
         AZ::Render::MaterialAssignmentMap materials;
         for (ModelInstanceData& instanceData : m_modelInstanceData)
         {
@@ -378,4 +394,26 @@ namespace AtomSampleViewer
     {
         Camera::CameraRequestBus::Event(GetCameraEntityId(), &Camera::CameraRequestBus::Events::SetFarClipDistance, m_originalFarClipDistance);
     }
+
+    void HighInstanceTestComponent::CreateSpotLight(int index)
+    {
+        auto& light = m_diskLights[index];
+        light.m_lightHandle = m_diskLightFeatureProcessor->AcquireLight();
+
+        const LightSettings& settings = m_settings[(int)LightType::Disk];
+
+        m_diskLightFeatureProcessor->SetDiskRadius(light.m_lightHandle, m_diskRadius);
+        m_diskLightFeatureProcessor->SetPosition(light.m_lightHandle, light.m_position);
+        m_diskLightFeatureProcessor->SetRgbIntensity(light.m_lightHandle, PhotometricColor<PhotometricUnit::Candela>(settings.m_intensity * light.m_color));
+        m_diskLightFeatureProcessor->SetDirection(light.m_lightHandle, light.m_direction);
+        
+        m_diskLightFeatureProcessor->SetConstrainToConeLight(light.m_lightHandle, m_diskConesEnabled);
+        if (m_diskConesEnabled)
+        {
+            m_diskLightFeatureProcessor->SetConeAngles(light.m_lightHandle, DegToRad(m_diskInnerConeDegrees), DegToRad(m_diskOuterConeDegrees));
+        }
+
+        m_diskLightFeatureProcessor->SetAttenuationRadius(light.m_lightHandle, m_settings[(int)LightType::Disk].m_attenuationRadius);
+    }
+
 } // namespace AtomSampleViewer

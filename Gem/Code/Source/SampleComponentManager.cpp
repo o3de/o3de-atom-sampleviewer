@@ -209,6 +209,18 @@ namespace AtomSampleViewer
         return NewSample<T>(SamplePipelineType::RPI, "Features", name, isSupportedFunction);
     }
 
+    template <typename T>
+    static SampleEntry NewPerfSample(const AZStd::string& name)
+    {
+        return NewSample<T>(SamplePipelineType::RPI, "Performance", name);
+    }
+
+    template <typename T>
+    static SampleEntry NewPerfSample(const AZStd::string& name, AZStd::function<bool()> isSupportedFunction)
+    {
+        return NewSample<T>(SamplePipelineType::RPI, "Performance", name, isSupportedFunction);
+    }
+
     void SampleComponentManager::Reflect(AZ::ReflectContext* context)
     {
         if (AZ::SerializeContext* serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
@@ -266,7 +278,6 @@ namespace AtomSampleViewer
             NewRPISample<DecalExampleComponent>("Decals"),
             NewRPISample<DynamicDrawExampleComponent>("DynamicDraw"),
             NewRPISample<DynamicMaterialTestComponent>("DynamicMaterialTest"),
-            NewRPISample<HighInstanceTestComponent>("HighInstanceTest"),
             NewRPISample<MaterialHotReloadTestComponent>("MaterialHotReloadTest"),
             NewRPISample<MeshExampleComponent>("Mesh"),
             NewRPISample<MSAA_RPI_ExampleComponent>("MSAA"),
@@ -292,6 +303,8 @@ namespace AtomSampleViewer
             NewFeaturesSample<SSRExampleComponent>("SSR"),
             NewFeaturesSample<TonemappingExampleComponent>("Tonemapping"),
             NewFeaturesSample<TransparencyExampleComponent>("Transparency"),
+            NewPerfSample<HighInstanceTestComponent>("HighInstanceTest"),
+            NewPerfSample<HighInstanceTestComponent>("10KDraw10KEntityTest"),
         };
     }
 

@@ -27,15 +27,6 @@ namespace AtomSampleViewer
        AZStd::string m_sampleName;
        int m_latticeSize[3];
        float m_latticeSpacing[3];
-       float m_entityScale;
-
-       int m_numShadowCastingSpotLights;
-       int m_shadowSpotlightInnerAngleDeg;
-       int m_shadowSpotlightOuterAngleDeg;
-
-       bool m_activateDirectionalLight;
-       int m_numDirectionalLightShadowCascades;
-       AZ::Vector3 m_directionalLightDir;
    };
     class HighInstanceTestComponent
         : public EntityLatticeTestComponent
@@ -118,10 +109,5 @@ namespace AtomSampleViewer
 
         uint32_t m_latticeSize[3]; // size in X, Y, & Z.
         float    m_latticeSpacing[3]; // space between entites in X, Y, & Z.
-        float    m_entityScale;
-
-        AZ::Render::DirectionalLightFeatureProcessorInterface* m_directionalLightFeatureProcessor = nullptr;
-        AZ::Render::DiskLightFeatureProcessorInterface* m_diskLightFeatureProcessor = nullptr;
-
     };
 } // namespace AtomSampleViewer

@@ -27,6 +27,8 @@ namespace AtomSampleViewer
     using namespace RPI;
 
     constexpr int32_t s_latticeSizeMax = ENTITY_LATTEST_TEST_COMPONENT_MAX;
+    constexpr float s_spacingMax = ENTITY_LATTEST_TEST_COMPONENT_SPACING_MAX;
+    constexpr float s_entityScaleMax = ENTITY_LATTEST_TEST_COMPONENT_ENTITY_SCALE_MAX;
 
     void EntityLatticeTestComponent::Reflect(ReflectContext* context)
     {
@@ -69,7 +71,6 @@ namespace AtomSampleViewer
         // when the world was Y-up.
         Transform transform = Transform::CreateRotationZ(Constants::Pi);
 
-        static Vector3 distance(5.0f, 5.0f, 5.0f);
         for (int32_t x = 0; x < m_latticeWidth; ++x)
         {
             for (int32_t y = 0; y < m_latticeDepth; ++y)
@@ -77,9 +78,9 @@ namespace AtomSampleViewer
                 for (int32_t z = 0; z < m_latticeHeight; ++z)
                 {
                     Vector3 position(
-                        static_cast<float>(x) * distance.GetX(),
-                        static_cast<float>(y) * distance.GetY(),
-                        static_cast<float>(z) * distance.GetZ());
+                        static_cast<float>(x) * m_spacingX,
+                        static_cast<float>(y) * m_spacingY,
+                        static_cast<float>(z) * m_spacingZ);
 
                     transform.SetTranslation(position);
                     CreateLatticeInstance(transform);
@@ -101,6 +102,19 @@ namespace AtomSampleViewer
         m_latticeDepth = GetClamp<int32_t>(depth, 1, s_latticeSizeMax);
     }
 
+    void EntityLatticeTestComponent::SetLatticeSpacing( float spaceX, float spaceY, float spaceZ)
+    {
+        m_spacingX = spaceX;
+        m_spacingY = spaceY;
+        m_spacingZ = spaceZ;
+    }
+
+    void EntityLatticeTestComponent::SetLatticeEntityScale(float scale)
+    {
+        m_entityScale = scale;
+    }
+
+
     void EntityLatticeTestComponent::RenderImGuiLatticeControls()
     {
         bool latticeChanged = false;
@@ -117,6 +131,27 @@ namespace AtomSampleViewer
 
         ImGui::Text("Lattice Depth");
         latticeChanged |= ScriptableImGui::SliderInt("##LatticeDepth", &m_latticeDepth, 1, s_latticeSizeMax);
+
+        ImGui::Spacing();
+
+        ImGui::Text("Lattice Spacing X");
+        latticeChanged |= ScriptableImGui::SliderFloat("##LatticeSpaceX", &m_spacingX, 0.5, s_spacingMax);
+
+        ImGui::Spacing();
+
+        ImGui::Text("Lattice Spacing Y");
+        latticeChanged |= ScriptableImGui::SliderFloat("##LatticeSpaceY", &m_spacingY, 0.5, s_spacingMax);
+
+        ImGui::Spacing();
+
+        ImGui::Text("Lattice Spacing Z");
+        latticeChanged |= ScriptableImGui::SliderFloat("##LatticeSpaceZ", &m_spacingZ, 0.5, s_spacingMax);
+
+        ImGui::Spacing();
+
+        ImGui::Text("Entity Scale");
+        latticeChanged |= ScriptableImGui::SliderFloat("##EntityScale", &m_entityScale, 0.01, s_spacingMax);
+
 
         if (latticeChanged)
         {

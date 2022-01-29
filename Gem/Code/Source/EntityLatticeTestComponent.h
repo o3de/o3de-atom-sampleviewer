@@ -41,6 +41,8 @@ namespace AtomSampleViewer
         virtual void RebuildLattice();
 
         void SetLatticeDimensions(uint32_t width, uint32_t depth, uint32_t height);
+        void SetLatticeSpacing(float spaceX, float spaceY, float spaceZ);
+        void SetLatticeEntityScale(float scale);
 
     private:
 
@@ -63,6 +65,12 @@ namespace AtomSampleViewer
         int32_t m_latticeWidth = ENTITY_LATTICE_TEST_COMPONENT_WIDTH;
         int32_t m_latticeHeight = ENTITY_LATTICE_TEST_COMPONENT_HEIGHT;
         int32_t m_latticeDepth = ENTITY_LATTICE_TEST_COMPONENT_DEPTH;
+
+        float m_spacingX = ENTITY_LATTICE_TEST_COMPONENT_SPACING_X;
+        float m_spacingY = ENTITY_LATTICE_TEST_COMPONENT_SPACING_Y;
+        float m_spacingZ = ENTITY_LATTICE_TEST_COMPONENT_SPACING_Z;
+
+        float m_entityScale = 1.0f;
         
         Utils::DefaultIBL m_defaultIbl;
     };
