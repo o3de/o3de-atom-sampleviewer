@@ -192,7 +192,7 @@ namespace AtomSampleViewer
             layoutBuilder.AddBuffer()->Channel("POSITION", RHI::Format::R32G32B32_FLOAT);
             m_quadInputStreamLayout = layoutBuilder.End();
 
-            RHI::ValidateStreamBufferViews(m_quadInputStreamLayout, AZStd::array_view<RHI::StreamBufferView>(&m_quadStreamBufferView, 1));
+            RHI::ValidateStreamBufferViews(m_quadInputStreamLayout, AZStd::span<const RHI::StreamBufferView>(&m_quadStreamBufferView, 1));
         }
     }
 
