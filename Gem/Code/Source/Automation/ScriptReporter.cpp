@@ -1203,7 +1203,7 @@ namespace AtomSampleViewer
         return exportFile;
     }
 
-    void ScriptReporter::GenerateImageDiff(AZStd::array_view<uint8_t> img1, AZStd::array_view<uint8_t> img2, AZStd::vector<uint8_t>& buffer)
+    void ScriptReporter::GenerateImageDiff(AZStd::span<const uint8_t> img1, AZStd::span<const uint8_t> img2, AZStd::vector<uint8_t>& buffer)
     {
         static constexpr size_t BytesPerPixel = 4;
         static constexpr float MinDiffFilter = 0.01;

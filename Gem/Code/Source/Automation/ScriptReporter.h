@@ -243,7 +243,7 @@ namespace AtomSampleViewer
         AZStd::string GenerateAndCreateExportedTestResultsPath() const;
 
         // Generates a diff between two images of the same size.
-        void GenerateImageDiff(AZStd::array_view<uint8_t> img1, AZStd::array_view<uint8_t> img2, AZStd::vector<uint8_t>& buffer);
+        void GenerateImageDiff(AZStd::span<const uint8_t> img1, AZStd::span<const uint8_t> img2, AZStd::vector<uint8_t>& buffer);
 
         ScriptReport* GetCurrentScriptReport();
 
