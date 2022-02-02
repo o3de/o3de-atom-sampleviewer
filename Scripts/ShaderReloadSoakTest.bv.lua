@@ -38,10 +38,11 @@ end
 -- Fixme. As a Soak Test, this should run for a long time and exit
 -- on the first failure, or upon user request.
 for i=1,5 do
-    -- Always start with "Green shader" or "Blue shader" because when RPI/ShaderReloadTest
+    -- Always start with "White shader", "Green shader", or "Blue shader" because when RPI/ShaderReloadTest
     -- activates it starts with the "Red shader", so updating the source asset
     --- to the exact same content won't trigger asset recompilation.
     TestButton("Green shader")
     TestButton("Blue shader")
+    TestButton("White shader")
     TestButton("Red shader")
 end

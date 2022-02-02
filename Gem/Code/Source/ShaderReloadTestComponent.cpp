@@ -248,20 +248,39 @@ namespace AtomSampleViewer
         if (ScriptableImGui::Button("Red shader"))
         {
             m_capturedColorAsString.clear();
+            if (m_expectedPixelColor == WHITE_COLOR)
+            {
+                CopyTestFile("Fullscreen.shader.txt", "Fullscreen.shader");
+            }
             m_expectedPixelColor = RED_COLOR;
             CopyTestFile(RedShaderFile, "Fullscreen.azsl");
         }
         if (ScriptableImGui::Button("Green shader"))
         {
             m_capturedColorAsString.clear();
+            if (m_expectedPixelColor == WHITE_COLOR)
+            {
+                CopyTestFile("Fullscreen.shader.txt", "Fullscreen.shader");
+            }
             m_expectedPixelColor = GREEN_COLOR;
             CopyTestFile(GreenShaderFile, "Fullscreen.azsl");
         }
         if (ScriptableImGui::Button("Blue shader"))
         {
             m_capturedColorAsString.clear();
+            if (m_expectedPixelColor == WHITE_COLOR)
+            {
+                CopyTestFile("Fullscreen.shader.txt", "Fullscreen.shader");
+            }
             m_expectedPixelColor = BLUE_COLOR;
             CopyTestFile(BlueShaderFile, "Fullscreen.azsl");
+        }
+        if (ScriptableImGui::Button("White shader"))
+        {
+            // The white shader reload operates by changing the shader file (not the azsl file) which defines a WHITE preprocessor macro
+            m_capturedColorAsString.clear();
+            m_expectedPixelColor = WHITE_COLOR;
+            CopyTestFile("Fullscreenmacrowhite.shader.txt", "Fullscreen.shader");
         }
 
         ImGui::Spacing();
