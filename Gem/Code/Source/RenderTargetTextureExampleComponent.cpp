@@ -431,6 +431,6 @@ namespace AtomSampleViewer
 
         drawSrg->Compile();
 
-        m_dynamicDraw->DrawIndexed(vertices, numVerts, &indices, static_cast<uint32_t>(indices.size()), RHI::IndexFormat::Uint16, drawSrg);
+        m_dynamicDraw->DrawIndexed(vertices, numVerts, &indices, aznumeric_cast<uint32_t>(indices.size()), RHI::IndexFormat::Uint16, drawSrg);
     }
 } // namespace AtomSampleViewer

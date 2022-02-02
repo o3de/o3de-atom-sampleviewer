@@ -24,7 +24,7 @@
 
 namespace AtomSampleViewer
 {
-    // This example shows how to use a render targe as a texture for a mesh's material.
+    // This example shows how to use a render target as a texture for a mesh's material.
     // It does following things:
     // 1. creates a raster pass at runtime with one render target 
     // 2. the render target is used as a texture input for a standard pbr material
