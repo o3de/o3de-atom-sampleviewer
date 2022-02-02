@@ -1,0 +1,64 @@
+{
+    "properties": [
+        {
+            "name": "color",
+            "displayName": "Color",
+            "type": "Color",
+            "defaultValue": [ 1.0, 1.0, 1.0 ],
+            "connection": {
+                "type": "ShaderInput",
+                "name": "baseColor"
+            }
+        },
+        {
+            "name": "texture",
+            "displayName": "Color Texture",
+            "type": "Image",
+            "connection": {
+                "type": "ShaderInput",
+                "name": "baseColorTexture"
+            }
+        },
+        {
+            "name": "useTexture",
+            "displayName": "Use Color Texture",
+            "type": "Bool"
+        },
+        {
+            "name": "metallic",
+            "displayName": "Metallic",
+            "type": "Float",
+            "defaultValue": 0.0,
+            "min": 0.0,
+            "max": 1.0,
+            "connection": {
+                "type": "ShaderInput",
+                "name": "metallic"
+            }
+        },
+        {
+            "name": "roughness",
+            "displayName": "Roughness",
+            "type": "Float",
+            "defaultValue": 1.0,
+            "min": 0.0,
+            "max": 1.0,
+            "connection": {
+                "type": "ShaderInput",
+                "name": "roughness"
+            }
+        }
+    ],
+    "functors": 
+    [
+        {
+            "type": "UseTexture",
+            "args": {
+                "textureProperty": "texture",
+                "useTextureProperty": "useTexture",
+                "shaderOption": "useBaseColorTexture"
+            }
+        }
+    ]
+}
+

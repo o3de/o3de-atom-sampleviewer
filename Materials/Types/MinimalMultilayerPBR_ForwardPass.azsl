@@ -1,0 +1,164 @@
+/*
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
+ * SPDX-License-Identifier: Apache-2.0 OR MIT
+ *
+ */
+
+#include <viewsrg.srgi>
+#include <Atom/Features/PBR/DefaultObjectSrg.azsli>
+#include <Atom/Features/PBR/ForwardPassSrg.azsli>
+#include <Atom/Features/PBR/ForwardPassOutput.azsli>
+#include <Atom/Features/PBR/AlphaUtils.azsli>
+#include <Atom/Features/SrgSemantics.azsli>
+#include <Atom/Features/ColorManagement/TransformColor.azsli>
+#include <Atom/Features/PBR/Lighting/StandardLighting.azsli>
+#include <Atom/Features/PBR/Decals.azsli>
+
+#include <Atom/Feature/Common/Assets/Materials/Types/MaterialInputs/BaseColorInput.azsli>
+
+ShaderResourceGroup MaterialSrg : SRG_PerMaterial
+{
+    float3 m_layer1_baseColor;
+    float  m_layer1_metallic;
+    float  m_layer1_roughness;
+    float3 m_layer2_baseColor;
+    float  m_layer2_metallic;
+    float  m_layer2_roughness;
+    
+    Texture2D m_layer1_baseColorTexture;
+    Texture2D m_layer2_baseColorTexture;
+
+    Sampler m_sampler
+    {
+       AddressU = Wrap;
+       AddressV = Wrap;
+       MinFilter = Linear;
+       MagFilter = Linear;
+       MipFilter = Linear;
+       MaxAnisotropy = 16;
+    };
+    
+    Texture2D m_blendMaskTexture;
+}
+
+option bool o_layer1_useBaseColorTexture;
+option bool o_layer2_useBaseColorTexture;
+
+struct VSInput
+{
+    float3 m_position : POSITION;
+    float3 m_normal : NORMAL;
+    float4 m_tangent : TANGENT; 
+    float3 m_bitangent : BITANGENT; 
+    float2 m_uv : UV0;
+};
+
+struct VSOutput
+{
+    precise linear centroid float4 m_position : SV_Position;
+    float3 m_normal: NORMAL;
+    float3 m_tangent : TANGENT; 
+    float3 m_bitangent : BITANGENT; 
+    float2 m_uv : UV0;
+    float3 m_worldPosition : UV1;
+    float3 m_shadowCoords[ViewSrg::MaxCascadeCount] : UV2;
+};
+
+#include <Atom/Features/Vertex/VertexHelper.azsli>
+
+VSOutput MinimalMultilayerPBR_MainPassVS(VSInput IN)
+{
+    VSOutput OUT;
+ 
+    float3 worldPosition = mul(ObjectSrg::GetWorldMatrix(), float4(IN.m_position, 1.0)).xyz;
+ 
+    OUT.m_uv = IN.m_uv;
+
+    VertexHelper(IN, OUT, worldPosition);
+
+    return OUT;
+}
+
+
+
+ForwardPassOutput MinimalMultilayerPBR_MainPassPS(VSOutput IN)
+{
+    float3 baseColor1 = GetBaseColorInput(MaterialSrg::m_layer1_baseColorTexture, MaterialSrg::m_sampler, IN.m_uv, MaterialSrg::m_layer1_baseColor, o_layer1_useBaseColorTexture);
+    float3 baseColor2 = GetBaseColorInput(MaterialSrg::m_layer2_baseColorTexture, MaterialSrg::m_sampler, IN.m_uv, MaterialSrg::m_layer2_baseColor, o_layer2_useBaseColorTexture);
+    
+    baseColor1 = BlendBaseColor(baseColor1, MaterialSrg::m_layer1_baseColor, 1.0, TextureBlendMode::Multiply, o_layer1_useBaseColorTexture);
+    baseColor2 = BlendBaseColor(baseColor2, MaterialSrg::m_layer2_baseColor, 1.0, TextureBlendMode::Multiply, o_layer2_useBaseColorTexture);
+
+    float blendValue = MaterialSrg::m_blendMaskTexture.Sample(MaterialSrg::m_sampler, IN.m_uv).r;
+    float3 baseColor = lerp(baseColor1, baseColor2, blendValue);
+    float roughness = lerp(MaterialSrg::m_layer1_roughness, MaterialSrg::m_layer2_roughness, blendValue);
+    float metallic = lerp(MaterialSrg::m_layer1_metallic, MaterialSrg::m_layer2_metallic, blendValue);
+
+    // ------- Surface -------
+
+    Surface surface;
+    
+    // Position, Normal, Roughness
+    surface.position = IN.m_worldPosition.xyz;
+    surface.normal = normalize(IN.m_normal);
+    surface.vertexNormal = normalize(IN.m_normal);
+    surface.roughnessLinear = roughness;
+    surface.CalculateRoughnessA();
+
+    // Albedo, SpecularF0
+    const float specularF0Factor = 0.5f;
+    surface.SetAlbedoAndSpecularF0(baseColor, specularF0Factor, metallic);
+
+    // Clear Coat, Transmission
+    surface.clearCoat.InitializeToZero();
+    surface.transmission.InitializeToZero();
+
+    // ------- LightingData -------
+
+    LightingData lightingData;
+
+    // Light iterator
+    lightingData.tileIterator.Init(IN.m_position, PassSrg::m_lightListRemapped, PassSrg::m_tileLightData);
+    lightingData.Init(surface.position, surface.normal, surface.roughnessLinear);
+
+    // Shadow, Occlusion
+    lightingData.shadowCoords = IN.m_shadowCoords;
+
+    // Diffuse and Specular response
+    lightingData.specularResponse = FresnelSchlickWithRoughness(lightingData.NdotV, surface.specularF0, surface.roughnessLinear);
+    lightingData.diffuseResponse = 1.0f - lightingData.specularResponse;
+
+    const float alpha = 1.0f;
+
+    // ------- Lighting Calculation -------
+
+    // Apply Decals
+    ApplyDecals(lightingData.tileIterator, surface);
+
+    // Apply Direct Lighting
+    ApplyDirectLighting(surface, lightingData);
+
+    // Apply Image Based Lighting (IBL)
+    ApplyIBL(surface, lightingData);
+
+    // Finalize Lighting
+    lightingData.FinalizeLighting(surface.transmission.tint);
+
+    PbrLightingOutput lightingOutput = GetPbrLightingOutput(surface, lightingData, alpha);
+
+    // ------- Output -------
+
+    ForwardPassOutput OUT;
+
+    OUT.m_diffuseColor = lightingOutput.m_diffuseColor;
+    OUT.m_diffuseColor.w = -1; // Subsurface scattering is disabled
+    OUT.m_specularColor = lightingOutput.m_specularColor;
+    OUT.m_specularF0 = lightingOutput.m_specularF0;
+    OUT.m_albedo = lightingOutput.m_albedo;
+    OUT.m_normal = lightingOutput.m_normal;
+
+    return OUT;
+}
+
