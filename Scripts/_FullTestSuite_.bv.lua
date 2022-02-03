@@ -62,6 +62,7 @@ tests= {
     RunScriptWrapper('scripts/multiscene.bv.luac'),
     RunScriptWrapper('scripts/shadowtest.bv.luac'),
     RunScriptWrapper('scripts/shadowedsponzatest.bv.luac'),
+    RunScriptWrapper('scripts/RenderTargetTexture.bv.luac'),
 
     --Fast checking for the samples which don't have a test. Samples should be removed from this list once they have their own tests
 
