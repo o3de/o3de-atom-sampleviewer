@@ -70,6 +70,7 @@ namespace AtomSampleViewer
         // We first rotate the model by 180 degrees before translating it. This is to make it face the camera as it did
         // when the world was Y-up.
         Transform transform = Transform::CreateRotationZ(Constants::Pi);
+        m_worldAabb = AZ::Aabb::CreateNull();
 
         for (int32_t x = 0; x < m_latticeWidth; ++x)
         {
@@ -84,6 +85,7 @@ namespace AtomSampleViewer
 
                     transform.SetTranslation(position);
                     CreateLatticeInstance(transform);
+                    m_worldAabb.AddPoint(transform.GetTranslation());
                 }
             }
         }
@@ -93,6 +95,11 @@ namespace AtomSampleViewer
     uint32_t EntityLatticeTestComponent::GetInstanceCount() const
     {
         return m_latticeWidth * m_latticeHeight * m_latticeDepth;
+    }
+
+    AZ::Aabb EntityLatticeTestComponent::GetLatticeAabb() const
+    {
+        return m_worldAabb;
     }
 
     void EntityLatticeTestComponent::SetLatticeDimensions(uint32_t width, uint32_t depth, uint32_t height)
@@ -114,6 +121,10 @@ namespace AtomSampleViewer
         m_entityScale = scale;
     }
 
+    void EntityLatticeTestComponent::SetIBLExposure(float exposure)
+    {
+        m_defaultIbl.SetExposure(exposure);
+    }
 
     void EntityLatticeTestComponent::RenderImGuiLatticeControls()
     {
@@ -133,6 +144,8 @@ namespace AtomSampleViewer
         latticeChanged |= ScriptableImGui::SliderInt("##LatticeDepth", &m_latticeDepth, 1, s_latticeSizeMax);
 
         ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
 
         ImGui::Text("Lattice Spacing X");
         latticeChanged |= ScriptableImGui::SliderFloat("##LatticeSpaceX", &m_spacingX, 0.5, s_spacingMax);
@@ -148,9 +161,11 @@ namespace AtomSampleViewer
         latticeChanged |= ScriptableImGui::SliderFloat("##LatticeSpaceZ", &m_spacingZ, 0.5, s_spacingMax);
 
         ImGui::Spacing();
+        ImGui::Separator();
+        ImGui::Spacing();
 
         ImGui::Text("Entity Scale");
-        latticeChanged |= ScriptableImGui::SliderFloat("##EntityScale", &m_entityScale, 0.01, s_spacingMax);
+        latticeChanged |= ScriptableImGui::SliderFloat("##EntityScale", &m_entityScale, 0.01, s_entityScaleMax);
 
 
         if (latticeChanged)

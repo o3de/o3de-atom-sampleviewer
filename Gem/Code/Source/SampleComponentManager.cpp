@@ -65,6 +65,9 @@
 #include <RHI/RayTracingExampleComponent.h>
 #include <RHI/MatrixAlignmentTestExampleComponent.h>
 
+#include <Performance/100KEntityExampleComponent.h>
+#include <Performance/100KDraw10KEntityExampleComponent.h>
+
 #include <AreaLightExampleComponent.h>
 #include <AssetLoadTestComponent.h>
 #include <AuxGeomExampleComponent.h>
@@ -100,7 +103,6 @@
 #include <DiffuseGIExampleComponent.h>
 #include <SSRExampleComponent.h>
 #include <ShaderReloadTestComponent.h>
-#include <HighInstanceExampleComponent.h>
 
 #include <Atom/Bootstrap/DefaultWindowBus.h>
 
@@ -303,8 +305,8 @@ namespace AtomSampleViewer
             NewFeaturesSample<SSRExampleComponent>("SSR"),
             NewFeaturesSample<TonemappingExampleComponent>("Tonemapping"),
             NewFeaturesSample<TransparencyExampleComponent>("Transparency"),
-            NewPerfSample<HighInstanceTestComponent>("HighInstanceTest"),
-            NewPerfSample<HighInstanceTestComponent>("10KDraw10KEntityTest"),
+            NewPerfSample<HundredKEntityExampleComponent>("100KEntity"),
+            NewPerfSample<HundredKDraw10KEntityExampleComponent>("100KDraw10KEntityTest"),
         };
     }
 

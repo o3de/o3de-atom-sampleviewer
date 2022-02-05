@@ -12,30 +12,44 @@
 #include <Utils/ImGuiSidebar.h>
 #include <Utils/ImGuiAssetBrowser.h>
 #include <AzCore/Component/TickBus.h>
+#include <AzCore/Math/Random.h>
+#include <AzCore/Math/Vector3.h>
+#include <AzCore/Math/Color.h>
+#include <AzCore/std/containers/vector.h>
+
+#include <Atom/Feature/CoreLights/DirectionalLightFeatureProcessorInterface.h>
+#include <Atom/Feature/CoreLights/ShadowConstants.h>
+#include <Atom/Feature/CoreLights/DiskLightFeatureProcessorInterface.h>
 
 namespace AtomSampleViewer
 {
     /*
-        This test loads a 22x22x22 lattice of entities with randomized meshes and materials. This test is used as a simple cpu performance stress test for Atom.
-
-        The assets that are applied to the entities are chosen from the 
-        "allow-list" of models and materials.
+        This class is used as base of a set of simple cpu performance stress test for Atom.
+        This test loads a X*Y*Z lattice of entities with randomized meshes and materials and creates N shadow casting spotlights plus 0-1 Directional lights
     */
 
    struct HighInstanceTestParameters
    {
-       AZStd::string m_sampleName;
-       int m_latticeSize[3];
-       float m_latticeSpacing[3];
-       float m_entityScale;
+       int m_latticeSize[3] = {22, 22, 22};
+       float m_latticeSpacing[3] = {5.0f, 5.0f, 5.0f};
+       float m_entityScale = 1.0f;
 
-       int m_numShadowCastingSpotLights;
-       int m_shadowSpotlightInnerAngleDeg;
-       int m_shadowSpotlightOuterAngleDeg;
+       AZ::Render::ShadowmapSize m_shadowmapSize = AZ::Render::ShadowmapSize::Size256;
+       AZ::Render::ShadowFilterMethod m_shadowFilterMethod = AZ::Render::ShadowFilterMethod::None;
+       int m_numShadowCastingSpotLights = 0;
+       float m_shadowSpotlightInnerAngleDeg = 10.0f;
+       float m_shadowSpotlightOuterAngleDeg = 30.0f;
+       float m_shadowSpotlightMaxDistance = 200.0f;
+       float m_shadowSpotlightIntensity = 500.f;
 
-       bool m_activateDirectionalLight;
-       int m_numDirectionalLightShadowCascades;
-       AZ::Vector3 m_directionalLightDir;
+       bool m_activateDirectionalLight = false;
+       uint16_t m_numDirectionalLightShadowCascades = 4;
+       float m_directionalLightIntensity = 5.0f;
+
+       float m_cameraPosition[3] = {-136.0f, 52.0f, 40.0f};
+       float m_cameraHeadingDeg = -90.0f;
+       float m_cameraPitchDeg = 5.0f;
+       float m_iblExposure = -10.0f;
    };
     class HighInstanceTestComponent
         : public EntityLatticeTestComponent
@@ -44,11 +58,11 @@ namespace AtomSampleViewer
         using Base = EntityLatticeTestComponent;
 
     public:
-        AZ_COMPONENT(HighInstanceTestComponent, "{DAA2B63B-7CC0-4696-A44F-49E53C6390B9}", EntityLatticeTestComponent);
+        AZ_RTTI(HighInstanceTestComponent, "{DAA2B63B-7CC0-4696-A44F-49E53C6390B9}", EntityLatticeTestComponent);
 
         static void Reflect(AZ::ReflectContext* context);
 
-        HighInstanceTestComponent(const HighInstanceTestParameters& params);
+        HighInstanceTestComponent();
         
         //! AZ::Component overrides...
         void Activate() override;
@@ -65,6 +79,7 @@ namespace AtomSampleViewer
         void CreateLatticeInstance(const AZ::Transform& transform) override;
         void FinalizeLatticeInstances() override;
         void DestroyLatticeInstances() override;
+        void DestroyLights();
 
         void DestroyHandles();
 
@@ -76,7 +91,20 @@ namespace AtomSampleViewer
         void ResetNoClipController();
         void SaveCameraConfiguration();
         void RestoreCameraConfiguration();
-        
+
+        const AZ::Color& GetNextLightColor();
+        AZ::Vector3 GetRandomDirection();
+        void BuildDiskLightParameters();
+        void CreateSpotLights();
+        void CreateSpotLight(int index);
+        void DrawDiskLightDebugObjects();
+
+        void CreateDirectionalLight();
+
+    protected:
+        HighInstanceTestParameters m_testParameters;
+
+    private:
         struct ModelInstanceData
         {
             AZ::Transform m_transform;
@@ -107,7 +135,8 @@ namespace AtomSampleViewer
         MaterialAssetSet m_cachedMaterials;
         uint32_t m_pinnedMaterialCount = 0;
         uint32_t m_preActivateVSyncInterval = 0;
-        
+        AZ::SimpleLcgRandom m_random;
+
         AZStd::vector<AZStd::string> m_expandedModelList; // has models that are more expensive on the gpu
         AZStd::vector<AZStd::string> m_simpleModelList; // Aims to keep the test cpu bottlenecked by using trivial geometry such as a cube
         size_t m_lastPinnedModelCount = 0;
@@ -116,12 +145,38 @@ namespace AtomSampleViewer
         bool m_updateTransformEnabled = false;
         bool m_useSimpleModels = true;
 
-        uint32_t m_latticeSize[3]; // size in X, Y, & Z.
-        float    m_latticeSpacing[3]; // space between entites in X, Y, & Z.
-        float    m_entityScale;
+        // light settings
+        using DirectionalLightHandle = AZ::Render::DirectionalLightFeatureProcessorInterface::LightHandle;
+        using DiskLightHandle = AZ::Render::DiskLightFeatureProcessorInterface::LightHandle;
+
+        class DiskLight
+        {
+        public:
+            DiskLight() = delete;
+            explicit DiskLight(
+                const AZ::Color& color,
+                const AZ::Vector3& relativePosition,
+                AZ::Render::ShadowmapSize shadowmapSize)
+                : m_color{ color }
+                , m_relativePosition{ relativePosition }
+                , m_shadowmapSize{ shadowmapSize }
+            {}
+            ~DiskLight() = default;
+
+            const AZ::Color m_color;
+            const AZ::Vector3 m_relativePosition;
+            const AZ::Render::ShadowmapSize m_shadowmapSize;
+            DiskLightHandle m_handle;
+        };
+
+        static constexpr float CutoffIntensity = 0.1f;
 
         AZ::Render::DirectionalLightFeatureProcessorInterface* m_directionalLightFeatureProcessor = nullptr;
         AZ::Render::DiskLightFeatureProcessorInterface* m_diskLightFeatureProcessor = nullptr;
-
+        DirectionalLightHandle m_directionalLightHandle;
+        AZStd::vector<DiskLight> m_diskLights;
+        bool m_drawDiskLightDebug = false;
+        bool m_diskLightsEnabled = true; // combined with test parameters to determine final state.
+        bool m_directionalLightEnabled = true; // combined with test parameters to determine final state.
     };
 } // namespace AtomSampleViewer

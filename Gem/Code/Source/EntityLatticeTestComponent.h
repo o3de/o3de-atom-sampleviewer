@@ -12,6 +12,8 @@
 #include <Utils/Utils.h>
 #include <EntityLatticeTestComponent_Traits_Platform.h>
 
+#include <AzCore/Math/Aabb.h>
+
 struct ImGuiContext;
 
 namespace AtomSampleViewer
@@ -34,6 +36,9 @@ namespace AtomSampleViewer
         //! Returns total number of instances (width * height * depth)
         uint32_t GetInstanceCount() const;
         
+        //! Returns world space Aabb for the lattice.
+        AZ::Aabb GetLatticeAabb() const;
+
         //! Call this to render ImGui controls for controlling the size of the lattice.
         void RenderImGuiLatticeControls();
         
@@ -43,6 +48,8 @@ namespace AtomSampleViewer
         void SetLatticeDimensions(uint32_t width, uint32_t depth, uint32_t height);
         void SetLatticeSpacing(float spaceX, float spaceY, float spaceZ);
         void SetLatticeEntityScale(float scale);
+
+        void SetIBLExposure(float exposure);
 
     private:
 
@@ -61,6 +68,10 @@ namespace AtomSampleViewer
 
         void BuildLattice();
 
+    protected:
+        AZ::Aabb m_worldAabb;
+
+    private:
         // These are signed to avoid casting with imgui controls.
         int32_t m_latticeWidth = ENTITY_LATTICE_TEST_COMPONENT_WIDTH;
         int32_t m_latticeHeight = ENTITY_LATTICE_TEST_COMPONENT_HEIGHT;

@@ -82,6 +82,12 @@ set(FILES
     Source/RHI/RayTracingExampleComponent.h
     Source/RHI/MatrixAlignmentTestExampleComponent.cpp
     Source/RHI/MatrixAlignmentTestExampleComponent.h
+    Source/Performance/HighInstanceExampleComponent.cpp
+    Source/Performance/HighInstanceExampleComponent.h
+    Source/Performance/100KEntityExampleComponent.cpp
+    Source/Performance/100KEntityExampleComponent.h
+    Source/Performance/100KDraw10KEntityExampleComponent.cpp
+    Source/Performance/100KDraw10KEntityExampleComponent.h
     Source/AreaLightExampleComponent.cpp
     Source/AreaLightExampleComponent.h
     Source/AssetLoadTestComponent.cpp
@@ -120,8 +126,6 @@ set(FILES
     Source/EntityUtilityFunctions.h
     Source/ExposureExampleComponent.cpp
     Source/ExposureExampleComponent.h
-    Source/HighInstanceExampleComponent.cpp
-    Source/HighInstanceExampleComponent.h
     Source/LightCullingExampleComponent.cpp
     Source/LightCullingExampleComponent.h
     Source/MaterialHotReloadTestComponent.cpp

@@ -6,7 +6,7 @@
  *
  */
 
-#include <HighInstanceExampleComponent.h>
+#include <Performance/HighInstanceExampleComponent.h>
 #include <SampleComponentManager.h>
 #include <SampleComponentConfig.h>
 
@@ -15,6 +15,8 @@
 #include <Atom/RPI.Reflect/Model/ModelAsset.h>
 #include <Atom/RPI.Reflect/Material/MaterialAsset.h>
 #include <Atom/RPI.Reflect/Asset/AssetUtils.h>
+#include <Atom/RPI.Public/AuxGeom/AuxGeomFeatureProcessorInterface.h>
+#include <Atom/RPI.Public/AuxGeom/AuxGeomDraw.h>
 
 #include <Automation/ScriptRunnerBus.h>
 
@@ -24,6 +26,10 @@
 #include <RHI/BasicRHIComponent.h>
 
 #include <HighInstanceTestComponent_Traits_Platform.h>
+
+#pragma optimize("", off)
+#pragma inline_depth(0)
+#pragma inline_depth(0)
 
 AZ_DECLARE_BUDGET(AtomSampleViewer);
 
@@ -42,18 +48,11 @@ namespace AtomSampleViewer
     }
 
 
-    HighInstanceTestComponent::HighInstanceTestComponent(const HighInstanceTestParameters& params) 
+    HighInstanceTestComponent::HighInstanceTestComponent() 
         : m_materialBrowser("@user@/HighInstanceTestComponent/material_browser.xml")
         , m_modelBrowser("@user@/HighInstanceTestComponent/model_browser.xml")
         , m_imguiSidebar("@user@/HighInstanceTestComponent/sidebar.xml")
     {
-        m_sampleName = params.m_sampleName;
-        for (int i = 0; i < 3; ++i)
-        {
-            m_latticeSize[i] = params.m_latticeSize[i];
-            m_latticeSpacing[i] = params.m_latticeSpacing[i];
-        }
-
         m_materialBrowser.SetFilter([](const AZ::Data::AssetInfo& assetInfo)
         {
             return assetInfo.m_assetType == azrtti_typeid<AZ::RPI::MaterialAsset>();
@@ -66,43 +65,44 @@ namespace AtomSampleViewer
 
         const AZStd::vector<AZStd::string> materialAllowlist =
         {
-            "materials/presets/pbr/metal_aluminum.azmaterial",
-            "materials/presets/pbr/metal_aluminum_matte.azmaterial",
-            "materials/presets/pbr/metal_aluminum_polished.azmaterial",
-            "materials/presets/pbr/metal_brass.azmaterial",
-            "materials/presets/pbr/metal_brass_matte.azmaterial",
-            "materials/presets/pbr/metal_brass_polished.azmaterial",
-            "materials/presets/pbr/metal_chrome.azmaterial",
-            "materials/presets/pbr/metal_chrome_matte.azmaterial",
-            "materials/presets/pbr/metal_chrome_polished.azmaterial",
-            "materials/presets/pbr/metal_cobalt.azmaterial",
-            "materials/presets/pbr/metal_cobalt_matte.azmaterial",
-            "materials/presets/pbr/metal_cobalt_polished.azmaterial",
-            "materials/presets/pbr/metal_copper.azmaterial",
-            "materials/presets/pbr/metal_copper_matte.azmaterial",
-            "materials/presets/pbr/metal_copper_polished.azmaterial",
-            "materials/presets/pbr/metal_gold.azmaterial",
-            "materials/presets/pbr/metal_gold_matte.azmaterial",
-            "materials/presets/pbr/metal_gold_polished.azmaterial",
-            "materials/presets/pbr/metal_iron.azmaterial",
-            "materials/presets/pbr/metal_iron_matte.azmaterial",
-            "materials/presets/pbr/metal_iron_polished.azmaterial",
-            "materials/presets/pbr/metal_mercury.azmaterial",
-            "materials/presets/pbr/metal_nickel.azmaterial",
-            "materials/presets/pbr/metal_nickel_matte.azmaterial",
-            "materials/presets/pbr/metal_nickel_polished.azmaterial",
-            "materials/presets/pbr/metal_palladium.azmaterial",
-            "materials/presets/pbr/metal_palladium_matte.azmaterial",
-            "materials/presets/pbr/metal_palladium_polished.azmaterial",
-            "materials/presets/pbr/metal_platinum.azmaterial",
-            "materials/presets/pbr/metal_platinum_matte.azmaterial",
-            "materials/presets/pbr/metal_platinum_polished.azmaterial",
-            "materials/presets/pbr/metal_silver.azmaterial",
-            "materials/presets/pbr/metal_silver_matte.azmaterial",
-            "materials/presets/pbr/metal_silver_polished.azmaterial",
-            "materials/presets/pbr/metal_titanium.azmaterial",
-            "materials/presets/pbr/metal_titanium_matte.azmaterial",
-            "materials/presets/pbr/metal_titanium_polished.azmaterial",
+            "materials/presets/macbeth/19_white_9-5_0-05d.azmaterial",
+            //"materials/presets/pbr/metal_aluminum.azmaterial",
+            //"materials/presets/pbr/metal_aluminum_matte.azmaterial",
+            //"materials/presets/pbr/metal_aluminum_polished.azmaterial",
+            //"materials/presets/pbr/metal_brass.azmaterial",
+            //"materials/presets/pbr/metal_brass_matte.azmaterial",
+            //"materials/presets/pbr/metal_brass_polished.azmaterial",
+            //"materials/presets/pbr/metal_chrome.azmaterial",
+            //"materials/presets/pbr/metal_chrome_matte.azmaterial",
+            //"materials/presets/pbr/metal_chrome_polished.azmaterial",
+            //"materials/presets/pbr/metal_cobalt.azmaterial",
+            //"materials/presets/pbr/metal_cobalt_matte.azmaterial",
+            //"materials/presets/pbr/metal_cobalt_polished.azmaterial",
+            //"materials/presets/pbr/metal_copper.azmaterial",
+            //"materials/presets/pbr/metal_copper_matte.azmaterial",
+            //"materials/presets/pbr/metal_copper_polished.azmaterial",
+            //"materials/presets/pbr/metal_gold.azmaterial",
+            //"materials/presets/pbr/metal_gold_matte.azmaterial",
+            //"materials/presets/pbr/metal_gold_polished.azmaterial",
+            //"materials/presets/pbr/metal_iron.azmaterial",
+            //"materials/presets/pbr/metal_iron_matte.azmaterial",
+            //"materials/presets/pbr/metal_iron_polished.azmaterial",
+            //"materials/presets/pbr/metal_mercury.azmaterial",
+            //"materials/presets/pbr/metal_nickel.azmaterial",
+            //"materials/presets/pbr/metal_nickel_matte.azmaterial",
+            //"materials/presets/pbr/metal_nickel_polished.azmaterial",
+            //"materials/presets/pbr/metal_palladium.azmaterial",
+            //"materials/presets/pbr/metal_palladium_matte.azmaterial",
+            //"materials/presets/pbr/metal_palladium_polished.azmaterial",
+            //"materials/presets/pbr/metal_platinum.azmaterial",
+            //"materials/presets/pbr/metal_platinum_matte.azmaterial",
+            //"materials/presets/pbr/metal_platinum_polished.azmaterial",
+            //"materials/presets/pbr/metal_silver.azmaterial",
+            //"materials/presets/pbr/metal_silver_matte.azmaterial",
+            //"materials/presets/pbr/metal_silver_polished.azmaterial",
+            //"materials/presets/pbr/metal_titanium.azmaterial",
+            //"materials/presets/pbr/metal_titanium_matte.azmaterial",
+            //"materials/presets/pbr/metal_titanium_polished.azmaterial",
         };
         m_materialBrowser.SetDefaultPinnedAssets(materialAllowlist);
 
@@ -129,6 +129,7 @@ namespace AtomSampleViewer
 
     void HighInstanceTestComponent::Activate()
     {
+        BuildDiskLightParameters();
 
         m_directionalLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
         m_diskLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DiskLightFeatureProcessorInterface>();
@@ -145,13 +146,15 @@ namespace AtomSampleViewer
         m_modelBrowser.ResetPinnedAssetsToDefault();
 
         SetLatticeDimensions(
-            m_latticeSize[0], 
-            m_latticeSize[1], 
-            m_latticeSize[2]);
+            m_testParameters.m_latticeSize[0], 
+            m_testParameters.m_latticeSize[1], 
+            m_testParameters.m_latticeSize[2]);
         SetLatticeSpacing(
-            m_latticeSpacing[0],
-            m_latticeSpacing[1],
-            m_latticeSpacing[2]);
+            m_testParameters.m_latticeSpacing[0],
+            m_testParameters.m_latticeSpacing[1],
+            m_testParameters.m_latticeSpacing[2]);
+        SetLatticeEntityScale(m_testParameters.m_entityScale);
+
         Base::Activate();
 
         AzFramework::NativeWindowHandle windowHandle = nullptr;
@@ -171,10 +174,13 @@ namespace AtomSampleViewer
 
             SaveCameraConfiguration();
             ResetNoClipController();
+
+            SetIBLExposure(m_testParameters.m_iblExposure);
     }
 
     void HighInstanceTestComponent::Deactivate()
     {
+        DestroyLights();
         RestoreCameraConfiguration();
         AzFramework::NativeWindowHandle windowHandle = nullptr;
         AzFramework::WindowSystemRequestBus::BroadcastResult(
@@ -197,6 +203,7 @@ namespace AtomSampleViewer
     void HighInstanceTestComponent::PrepareCreateLatticeInstances(uint32_t instanceCount)
     {
         m_modelInstanceData.reserve(instanceCount);
+        DestroyLights();
     }
 
     void HighInstanceTestComponent::CreateLatticeInstance(const AZ::Transform& transform)
@@ -245,6 +252,16 @@ namespace AtomSampleViewer
         // pause script and tick until assets are ready
         ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::PauseScriptWithTimeout, 120.0f);
         AZ::TickBus::Handler::BusDisconnect();
+
+        if (m_testParameters.m_numShadowCastingSpotLights > 0 && m_diskLightsEnabled)
+        {
+            CreateSpotLights();
+        }
+
+        if (m_testParameters.m_activateDirectionalLight && m_directionalLightEnabled)
+        {
+            CreateDirectionalLight();
+        }
     }
 
     void HighInstanceTestComponent::OnAllAssetsReadyActivate()
@@ -285,6 +302,18 @@ namespace AtomSampleViewer
     {
         DestroyHandles();
         m_modelInstanceData.clear();
+    }
+
+    void HighInstanceTestComponent::DestroyLights()
+    {
+        m_directionalLightFeatureProcessor->ReleaseLight(m_directionalLightHandle);
+        m_directionalLightHandle = {};
+        for (int index = 0; index < m_diskLights.size(); ++index)
+        {
+            DiskLightHandle& handle = m_diskLights[index].m_handle;
+            m_diskLightFeatureProcessor->ReleaseLight(handle);
+            handle = {};
+        }
     }
 
     void HighInstanceTestComponent::DestroyHandles()
@@ -345,6 +374,8 @@ namespace AtomSampleViewer
         }
 
         bool currentUseSimpleModels = m_useSimpleModels;
+        bool diskLightsEnabled = m_diskLightsEnabled;
+        bool directionalLightEnabled = m_directionalLightEnabled;
         if (m_imguiSidebar.Begin())
         {
             ImGui::Checkbox("Update Transforms Every Frame", &m_updateTransformEnabled);
@@ -361,7 +392,39 @@ namespace AtomSampleViewer
 
             ImGui::Checkbox("Use simple models", &m_useSimpleModels);
 
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            ImGui::Checkbox("Display SpotLight Debug", &m_drawDiskLightDebug);
+
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+
+            if (m_testParameters.m_numShadowCastingSpotLights > 0)
+            {
+                ImGui::Checkbox("Enable SpotLights", &m_diskLightsEnabled);
+            }
+            if (m_testParameters.m_activateDirectionalLight)
+            {
+                ImGui::Checkbox("Enable Directional Light", &m_directionalLightEnabled);
+            }
+
             m_imguiSidebar.End();
+        }
+
+        if(diskLightsEnabled != m_diskLightsEnabled || directionalLightEnabled != m_directionalLightEnabled)
+        {
+            DestroyLights();
+            if (m_testParameters.m_numShadowCastingSpotLights > 0 && m_diskLightsEnabled)
+            {
+                CreateSpotLights();
+            }
+            if(m_testParameters.m_activateDirectionalLight && m_directionalLightEnabled)
+            {
+                CreateDirectionalLight();
+            }
         }
 
         if (currentUseSimpleModels != m_useSimpleModels)
@@ -372,17 +435,22 @@ namespace AtomSampleViewer
                 instanceData.m_modelAssetId = GetRandomModelId();
             }
             DestroyHandles();
+            DestroyLights();
             FinalizeLatticeInstances();
         }
+
+        DrawDiskLightDebugObjects();
     }
 
     void HighInstanceTestComponent::ResetNoClipController()
     {
         using namespace AZ;
         using namespace AZ::Debug;
+        AZ::Vector3 camPos = AZ::Vector3::CreateFromFloat3(m_testParameters.m_cameraPosition);
         Camera::CameraRequestBus::Event(GetCameraEntityId(), &Camera::CameraRequestBus::Events::SetFarClipDistance, 2000.0f);
-        NoClipControllerRequestBus::Event(GetCameraEntityId(), &NoClipControllerRequestBus::Events::SetHeading, AZ::DegToRad(-44.722542));
-        NoClipControllerRequestBus::Event(GetCameraEntityId(), &NoClipControllerRequestBus::Events::SetPitch, AZ::DegToRad(24.987326));
+        NoClipControllerRequestBus::Event(GetCameraEntityId(), &NoClipControllerRequestBus::Events::SetPosition, camPos);
+        NoClipControllerRequestBus::Event(GetCameraEntityId(), &NoClipControllerRequestBus::Events::SetHeading, AZ::DegToRad(m_testParameters.m_cameraHeadingDeg));
+        NoClipControllerRequestBus::Event(GetCameraEntityId(), &NoClipControllerRequestBus::Events::SetPitch, AZ::DegToRad(m_testParameters.m_cameraPitchDeg));
     }
 
     void HighInstanceTestComponent::SaveCameraConfiguration()
@@ -395,25 +463,131 @@ namespace AtomSampleViewer
         Camera::CameraRequestBus::Event(GetCameraEntityId(), &Camera::CameraRequestBus::Events::SetFarClipDistance, m_originalFarClipDistance);
     }
 
+    void HighInstanceTestComponent::CreateSpotLights()
+    {
+        for (int index = 0; index < m_testParameters.m_numShadowCastingSpotLights; ++index)
+        {
+            CreateSpotLight(index);
+        }
+   }
+
     void HighInstanceTestComponent::CreateSpotLight(int index)
     {
-        auto& light = m_diskLights[index];
-        light.m_lightHandle = m_diskLightFeatureProcessor->AcquireLight();
+        Render::DiskLightFeatureProcessorInterface* const featureProcessor = m_diskLightFeatureProcessor;
+        const DiskLightHandle handle = featureProcessor->AcquireLight();
 
-        const LightSettings& settings = m_settings[(int)LightType::Disk];
+        AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Candela> lightColor(m_diskLights[index].m_color * m_testParameters.m_shadowSpotlightIntensity);
+        featureProcessor->SetRgbIntensity(handle, lightColor);
+        featureProcessor->SetAttenuationRadius(handle, m_testParameters.m_shadowSpotlightMaxDistance);
+        featureProcessor->SetConeAngles(
+            handle, 
+            DegToRad(m_testParameters.m_shadowSpotlightInnerAngleDeg), 
+            DegToRad(m_testParameters.m_shadowSpotlightOuterAngleDeg));
+        featureProcessor->SetShadowsEnabled(handle, true);
+        featureProcessor->SetShadowmapMaxResolution(handle, m_testParameters.m_shadowmapSize);
+        featureProcessor->SetShadowFilterMethod(handle, m_testParameters.m_shadowFilterMethod);
+        featureProcessor->SetFilteringSampleCount(handle, 1);
 
-        m_diskLightFeatureProcessor->SetDiskRadius(light.m_lightHandle, m_diskRadius);
-        m_diskLightFeatureProcessor->SetPosition(light.m_lightHandle, light.m_position);
-        m_diskLightFeatureProcessor->SetRgbIntensity(light.m_lightHandle, PhotometricColor<PhotometricUnit::Candela>(settings.m_intensity * light.m_color));
-        m_diskLightFeatureProcessor->SetDirection(light.m_lightHandle, light.m_direction);
-        
-        m_diskLightFeatureProcessor->SetConstrainToConeLight(light.m_lightHandle, m_diskConesEnabled);
-        if (m_diskConesEnabled)
+        const Vector3 aabbOffset = m_worldAabb.GetExtents() * m_diskLights[index].m_relativePosition.GetNormalized() * 0.6f;
+        const Vector3 position = m_worldAabb.GetCenter() + aabbOffset;
+
+        featureProcessor->SetPosition(handle, position);
+        featureProcessor->SetDirection(handle, (-aabbOffset).GetNormalized());
+
+        m_diskLights[index].m_handle = handle;
+    }
+
+    const AZ::Color& HighInstanceTestComponent::GetNextLightColor()
+    {
+        static uint16_t colorIndex = 0;
+        static const AZStd::vector<AZ::Color> colors =
         {
-            m_diskLightFeatureProcessor->SetConeAngles(light.m_lightHandle, DegToRad(m_diskInnerConeDegrees), DegToRad(m_diskOuterConeDegrees));
-        }
+            AZ::Colors::Red,
+            AZ::Colors::Green,
+            AZ::Colors::Blue,
+            AZ::Colors::Cyan,
+            AZ::Colors::Fuchsia,
+            AZ::Colors::Yellow,
+            AZ::Colors::SpringGreen
+        };
 
-        m_diskLightFeatureProcessor->SetAttenuationRadius(light.m_lightHandle, m_settings[(int)LightType::Disk].m_attenuationRadius);
+        const AZ::Color& result = colors[colorIndex];
+        colorIndex = (colorIndex + 1) % colors.size();
+        return result;
+    }
+
+    AZ::Vector3 HighInstanceTestComponent::GetRandomDirection()
+    {
+        // returns a position in the range [-0.5, +0.5]^3.
+        return AZ::Vector3(
+            m_random.GetRandomFloat() - 0.5f,
+            m_random.GetRandomFloat() - 0.5f,
+            m_random.GetRandomFloat() - 0.5f).GetNormalized();
+    }
+
+    void HighInstanceTestComponent::BuildDiskLightParameters()
+    {
+        m_random.SetSeed(0);
+        m_diskLights.clear();
+        m_diskLights.reserve(m_testParameters.m_numShadowCastingSpotLights);
+        for (int index = 0; index < m_testParameters.m_numShadowCastingSpotLights; ++index)
+        {
+            m_diskLights.emplace_back(
+                GetNextLightColor(),
+                GetRandomDirection(),
+                m_testParameters.m_shadowmapSize);
+        }
+    }
+
+    void HighInstanceTestComponent::CreateDirectionalLight()
+    {
+        Render::DirectionalLightFeatureProcessorInterface* featureProcessor = m_directionalLightFeatureProcessor;
+        const DirectionalLightHandle handle = featureProcessor->AcquireLight();
+
+        const auto lightTransform = Transform::CreateLookAt(
+            -m_worldAabb.GetMax(),
+            Vector3::CreateZero());
+        featureProcessor->SetDirection(
+            handle,
+            lightTransform.GetBasis(1));
+
+        featureProcessor->SetRgbIntensity(handle, AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Lux>(AZ::Color::CreateOne() * m_testParameters.m_directionalLightIntensity));
+        featureProcessor->SetCascadeCount(handle, m_testParameters.m_numDirectionalLightShadowCascades);
+        featureProcessor->SetShadowmapSize(handle, m_testParameters.m_shadowmapSize);
+        featureProcessor->SetViewFrustumCorrectionEnabled(handle, false);
+        featureProcessor->SetShadowFilterMethod(handle, m_testParameters.m_shadowFilterMethod);
+        featureProcessor->SetFilteringSampleCount(handle, 1);
+        featureProcessor->SetGroundHeight(handle, 0.f);
+
+        m_directionalLightHandle = handle;
+    }
+
+
+
+    void HighInstanceTestComponent::DrawDiskLightDebugObjects()
+    {
+        if (auto auxGeom = AZ::RPI::AuxGeomFeatureProcessorInterface::GetDrawQueueForScene(m_scene); 
+            m_drawDiskLightDebug && auxGeom)
+        {
+            for (int i = 0; i < m_diskLights.size(); ++i)
+            {
+                const auto& light = m_diskLights[i];
+                if (light.m_handle.IsValid())
+                {
+                    const Render::DiskLightData& lightData = m_diskLightFeatureProcessor->GetDiskData(light.m_handle);
+                    const float lightDistance = sqrt(1.0f/lightData.m_invAttenuationRadiusSquared);
+                    AZ::Vector3 position = AZ::Vector3::CreateFromFloat3(lightData.m_position.data());
+                    AZ::Vector3 direction = AZ::Vector3::CreateFromFloat3(lightData.m_direction.data()).GetNormalized();
+                    position += direction * lightDistance;
+                    direction *= -1.0f;
+                    float coneSlantLength = lightDistance / lightData.m_cosOuterConeAngle;
+                    float farEndCapRadius = sqrt(coneSlantLength * coneSlantLength - lightDistance * lightDistance);
+                    auxGeom->DrawCone(position, direction, farEndCapRadius, lightDistance, light.m_color, AZ::RPI::AuxGeomDraw::DrawStyle::Line);
+                }
+            }
+        }
     }
 
 } // namespace AtomSampleViewer
+
+#pragma optimize("", on)
