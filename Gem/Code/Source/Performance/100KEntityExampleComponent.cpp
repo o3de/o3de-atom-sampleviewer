@@ -40,6 +40,13 @@ namespace AtomSampleViewer
         }
         m_testParameters.m_numShadowCastingSpotLights = 0;
         m_testParameters.m_activateDirectionalLight = false;
+
+        m_testParameters.m_cameraPosition[0] = -173.0f;
+        m_testParameters.m_cameraPosition[1] = 66.0f;
+        m_testParameters.m_cameraPosition[2] = 68.0f;
+        m_testParameters.m_cameraHeadingDeg = -90.0f;
+        m_testParameters.m_cameraPitchDeg = 0.0f;
+        m_testParameters.m_iblExposure = 0.0f;
     }
     
 } // namespace AtomSampleViewer

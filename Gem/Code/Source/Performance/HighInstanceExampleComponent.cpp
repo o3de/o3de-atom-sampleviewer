@@ -63,46 +63,10 @@ namespace AtomSampleViewer
             return assetInfo.m_assetType == azrtti_typeid<AZ::RPI::ModelAsset>();
         });
 
+        // Only use a diffuse white material so light colors are easily visible.
         const AZStd::vector<AZStd::string> materialAllowlist =
         {
             "materials/presets/macbeth/19_white_9-5_0-05d.azmaterial",
-            //"materials/presets/pbr/metal_aluminum.azmaterial",
-            //"materials/presets/pbr/metal_aluminum_matte.azmaterial",
-            //"materials/presets/pbr/metal_aluminum_polished.azmaterial",
-            //"materials/presets/pbr/metal_brass.azmaterial",
-            //"materials/presets/pbr/metal_brass_matte.azmaterial",
-            //"materials/presets/pbr/metal_brass_polished.azmaterial",
-            //"materials/presets/pbr/metal_chrome.azmaterial",
-            //"materials/presets/pbr/metal_chrome_matte.azmaterial",
-            //"materials/presets/pbr/metal_chrome_polished.azmaterial",
-            //"materials/presets/pbr/metal_cobalt.azmaterial",
-            //"materials/presets/pbr/metal_cobalt_matte.azmaterial",
-            //"materials/presets/pbr/metal_cobalt_polished.azmaterial",
-            //"materials/presets/pbr/metal_copper.azmaterial",
-            //"materials/presets/pbr/metal_copper_matte.azmaterial",
-            //"materials/presets/pbr/metal_copper_polished.azmaterial",
-            //"materials/presets/pbr/metal_gold.azmaterial",
-            //"materials/presets/pbr/metal_gold_matte.azmaterial",
-            //"materials/presets/pbr/metal_gold_polished.azmaterial",
-            //"materials/presets/pbr/metal_iron.azmaterial",
-            //"materials/presets/pbr/metal_iron_matte.azmaterial",
-            //"materials/presets/pbr/metal_iron_polished.azmaterial",
-            //"materials/presets/pbr/metal_mercury.azmaterial",
-            //"materials/presets/pbr/metal_nickel.azmaterial",
-            //"materials/presets/pbr/metal_nickel_matte.azmaterial",
-            //"materials/presets/pbr/metal_nickel_polished.azmaterial",
-            //"materials/presets/pbr/metal_palladium.azmaterial",
-            //"materials/presets/pbr/metal_palladium_matte.azmaterial",
-            //"materials/presets/pbr/metal_palladium_polished.azmaterial",
-            //"materials/presets/pbr/metal_platinum.azmaterial",
-            //"materials/presets/pbr/metal_platinum_matte.azmaterial",
-            //"materials/presets/pbr/metal_platinum_polished.azmaterial",
-            //"materials/presets/pbr/metal_silver.azmaterial",
-            //"materials/presets/pbr/metal_silver_matte.azmaterial",
-            //"materials/presets/pbr/metal_silver_polished.azmaterial",
-            //"materials/presets/pbr/metal_titanium.azmaterial",
-            //"materials/presets/pbr/metal_titanium_matte.azmaterial",
-            //"materials/presets/pbr/metal_titanium_polished.azmaterial",
         };
         m_materialBrowser.SetDefaultPinnedAssets(materialAllowlist);
 
@@ -488,7 +452,7 @@ namespace AtomSampleViewer
         featureProcessor->SetShadowFilterMethod(handle, m_testParameters.m_shadowFilterMethod);
         featureProcessor->SetFilteringSampleCount(handle, 1);
 
-        const Vector3 aabbOffset = m_worldAabb.GetExtents() * m_diskLights[index].m_relativePosition.GetNormalized() * 0.6f;
+        const Vector3 aabbOffset = m_diskLights[index].m_relativePosition.GetNormalized() * (0.5f * m_testParameters.m_shadowSpotlightMaxDistance);
         const Vector3 position = m_worldAabb.GetCenter() + aabbOffset;
 
         featureProcessor->SetPosition(handle, position);

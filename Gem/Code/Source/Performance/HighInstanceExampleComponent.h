@@ -40,16 +40,16 @@ namespace AtomSampleViewer
        float m_shadowSpotlightInnerAngleDeg = 10.0f;
        float m_shadowSpotlightOuterAngleDeg = 30.0f;
        float m_shadowSpotlightMaxDistance = 200.0f;
-       float m_shadowSpotlightIntensity = 500.f;
+       float m_shadowSpotlightIntensity = 500.f; // Value in Candela
 
        bool m_activateDirectionalLight = false;
        uint16_t m_numDirectionalLightShadowCascades = 4;
-       float m_directionalLightIntensity = 5.0f;
+       float m_directionalLightIntensity = 5.0f; // Value in Lux
 
-       float m_cameraPosition[3] = {-136.0f, 52.0f, 40.0f};
-       float m_cameraHeadingDeg = -90.0f;
-       float m_cameraPitchDeg = 5.0f;
-       float m_iblExposure = -10.0f;
+       float m_cameraPosition[3] = {0.0f, 0.0f, 0.0f};
+       float m_cameraHeadingDeg = -44.7f;
+       float m_cameraPitchDeg = 25.0f;
+       float m_iblExposure = 0.0f;
    };
     class HighInstanceTestComponent
         : public EntityLatticeTestComponent

@@ -84,6 +84,7 @@ namespace AtomSampleViewer
                         static_cast<float>(z) * m_spacingZ);
 
                     transform.SetTranslation(position);
+                    transform.SetUniformScale(m_entityScale);
                     CreateLatticeInstance(transform);
                     m_worldAabb.AddPoint(transform.GetTranslation());
                 }
