@@ -1,32 +1,26 @@
 {
-    "materialType": "MinimalMultilayerPBR.materialtype",
+    "materialType": "Materials/Types/MinimalMultilayerPBR.materialtype",
     "materialTypeVersion": 1,
-    "properties": {
-        "blend": {
-            "texture": "TestData/Textures/checker8x8_512.png"
-        },
-        "layer1": {
-            "color": [
-                1.0,
-                0.7495536804199219,
-                0.3466697037220001,
-                1.0
-            ],
-            "metallic": 1.0,
-            "roughness": 0.23000000417232513,
-            "texture": "Textures/bricks_1k_basecolor.png",
-            "useTexture": true
-        },
-        "layer2": {
-            "color": [
-                0.34021514654159546,
-                0.14996567368507385,
-                0.42177462577819824,
-                1.0
-            ],
-            "roughness": 0.8399999737739563,
-            "texture": "TestData/Textures/cc0/Concrete019_1K_Color.jpg",
-            "useTexture": true
-        }
+    "propertyValues": {
+        "blend.texture": "TestData/Textures/checker8x8_512.png",
+        "layer1.color": [
+            1.0,
+            0.7495536804199219,
+            0.3466697037220001,
+            1.0
+        ],
+        "layer1.metallic": 1.0,
+        "layer1.roughness": 0.23000000417232513,
+        "layer1.texture": "Textures/bricks_1k_basecolor.png",
+        "layer1.useTexture": true,
+        "layer2.color": [
+            0.34021514654159546,
+            0.14996567368507385,
+            0.42177462577819824,
+            1.0
+        ],
+        "layer2.roughness": 0.8399999737739563,
+        "layer2.texture": "TestData/Textures/cc0/Concrete019_1K_Color.jpg",
+        "layer2.useTexture": true
     }
 }
