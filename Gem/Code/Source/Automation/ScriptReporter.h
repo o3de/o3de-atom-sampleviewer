@@ -13,6 +13,7 @@
 #include <Atom/Utils/ImageComparison.h>
 #include <Automation/ImageComparisonConfig.h>
 #include <Utils/ImGuiMessageBox.h>
+#include <Atom/Utils/PngFile.h>
 
 namespace AtomSampleViewer
 {
@@ -44,6 +45,8 @@ namespace AtomSampleViewer
     class ScriptReporter
     {
     public:
+        static constexpr const char* TestResultsFolder = "TestResults";
+        static constexpr const char* UserFolder = "user";
 
         //! Set the list of available tolerance levels, so the report can suggest an alternate level that matches the actual results.
         void SetAvailableToleranceLevels(const AZStd::vector<ImageComparisonToleranceLevel>& toleranceLevels);
@@ -83,9 +86,6 @@ namespace AtomSampleViewer
 
         //! Returns true if there are any errors or asserts in the script report
         bool HasErrorsAssertsInReport() const;
-
-        // For exporting test results
-        void ExportTestResults();
 
         struct ImageComparisonResult
         {
@@ -177,6 +177,10 @@ namespace AtomSampleViewer
         
         const AZStd::vector<ScriptReport>& GetScriptReport() const { return m_scriptReports; }
 
+        // For exporting test results
+        void ExportTestResults();
+        void ExportImageDiff(const char* filePath, const ScreenshotTestInfo& screenshotTestInfo);
+
     private:
 
         // Reports a script error using standard formatting that matches ScriptManager
@@ -235,7 +239,11 @@ namespace AtomSampleViewer
         void ShowDiffButton(const char* buttonLabel, const AZStd::string& imagePathA, const AZStd::string& imagePathB);
 
         // Generates a path to the exported test results file.
+        AZStd::string GenerateTimestamp() const;
         AZStd::string GenerateAndCreateExportedTestResultsPath() const;
+
+        // Generates a diff between two images of the same size.
+        void GenerateImageDiff(AZStd::span<const uint8_t> img1, AZStd::span<const uint8_t> img2, AZStd::vector<uint8_t>& buffer);
 
         ScriptReport* GetCurrentScriptReport();
 
@@ -249,8 +257,10 @@ namespace AtomSampleViewer
         bool m_showReportDialog = false;
         DisplayOption m_displayOption = DisplayOption::AllResults;
         bool m_forceShowUpdateButtons = false; //< By default, the "Update" buttons are visible only for failed screenshots. This forces them to be visible.
+        bool m_forceShowExportPngDiffButtons = false; //< By default, "Export Png Diff" buttons are visible only for failed screenshots. This forces them to be visible.
         AZStd::string m_officialBaselineSourceFolder; //< Used for updating official baseline screenshots
         AZStd::string m_exportedTestResultsPath = "Click the 'Export Test Results' button."; //< Path to exported test results file (if exported).
+        AZStd::string m_uniqueTimestamp;
     };
 
 } // namespace AtomSampleViewer

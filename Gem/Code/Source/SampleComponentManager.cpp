@@ -86,6 +86,7 @@
 #include <MultiRenderPipelineExampleComponent.h>
 #include <MultiSceneExampleComponent.h>
 #include <ParallaxMappingExampleComponent.h>
+#include <RenderTargetTextureExampleComponent.h>
 #include <SceneReloadSoakTestComponent.h>
 #include <ShadowExampleComponent.h>
 #include <ShadowedSponzaExampleComponent.h>
@@ -272,6 +273,7 @@ namespace AtomSampleViewer
             NewRPISample<MultiRenderPipelineExampleComponent>("MultiRenderPipeline"),
             NewRPISample<MultiSceneExampleComponent>("MultiScene"),
             NewRPISample<MultiViewSingleSceneAuxGeomExampleComponent>("MultiViewSingleSceneAuxGeom"),
+            NewRPISample<RenderTargetTextureExampleComponent>("RenderTargetTexture"),
             NewRPISample<RootConstantsExampleComponent>("RootConstants"),
             NewRPISample<SceneReloadSoakTestComponent>("SceneReloadSoakTest"),
             NewRPISample<StreamingImageExampleComponent>("StreamingImage"),

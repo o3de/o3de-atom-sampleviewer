@@ -145,6 +145,8 @@ set(FILES
     Source/ProceduralSkinnedMesh.h
     Source/ProceduralSkinnedMeshUtils.cpp
     Source/ProceduralSkinnedMeshUtils.h
+    Source/RenderTargetTextureExampleComponent.cpp
+    Source/RenderTargetTextureExampleComponent.h
     Source/RootConstantsExampleComponent.h
     Source/RootConstantsExampleComponent.cpp
     Source/SceneReloadSoakTestComponent.cpp
