@@ -1,6 +1,4 @@
 {
-    "description": "",
     "materialType": "TestData/Materials/Types/MinimalPBR.materialtype",
-    "parentMaterial": "",
     "materialTypeVersion": 3
 }
