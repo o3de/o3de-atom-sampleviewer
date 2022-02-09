@@ -105,21 +105,21 @@ namespace AtomSampleViewer
 
     void EntityLatticeTestComponent::SetLatticeDimensions(uint32_t width, uint32_t depth, uint32_t height)
     {
-        m_latticeWidth = GetClamp<int32_t>(width, 1, s_latticeSizeMax);
-        m_latticeHeight = GetClamp<int32_t>(height, 1, s_latticeSizeMax);
-        m_latticeDepth = GetClamp<int32_t>(depth, 1, s_latticeSizeMax);
+        m_latticeWidth  = AZ::GetClamp<int32_t>(width, 1, s_latticeSizeMax);
+        m_latticeHeight = AZ::GetClamp<int32_t>(height, 1, s_latticeSizeMax);
+        m_latticeDepth  = AZ::GetClamp<int32_t>(depth, 1, s_latticeSizeMax);
     }
 
     void EntityLatticeTestComponent::SetLatticeSpacing( float spaceX, float spaceY, float spaceZ)
     {
-        m_spacingX = spaceX;
-        m_spacingY = spaceY;
-        m_spacingZ = spaceZ;
+        m_spacingX = AZ::GetClamp<float>(spaceX, 0.0f, s_spacingMax);
+        m_spacingY = AZ::GetClamp<float>(spaceY, 0.0f, s_spacingMax);
+        m_spacingZ = AZ::GetClamp<float>(spaceZ, 0.0f, s_spacingMax);
     }
 
     void EntityLatticeTestComponent::SetLatticeEntityScale(float scale)
     {
-        m_entityScale = scale;
+        m_entityScale = AZ::GetClamp<float>(scale, 0.0f, s_entityScaleMax);
     }
 
     void EntityLatticeTestComponent::SetIBLExposure(float exposure)
