@@ -1,24 +1,25 @@
 {
     "description": "",
-    "materialType": "Materials/Types/StandardPBR.materialtype",
     "parentMaterial": "",
-    "materialTypeVersion": 3,
+    "materialType": "Materials/Types/StandardPBR.materialtype",
+    "materialTypeVersion": 4,
     "properties": {
         "baseColor": {
-            "textureMap": "Materials/Decal/scorch_01_decal.tif"
+            "textureMap": "scorch_01_decal.tif"
+        },
+        "general": {
+            "doubleSided": true
         },
         "metallic": {
             "useTexture": false
         },
         "normal": {
-            "textureMap": "Materials/Decal/scorch_01_decal_nrm.tif"
-        }, 
+            "textureMap": "scorch_01_decal_nrm.tif"
+        },
         "opacity": {
-            "alphaSource": "Split",
-            "doubleSided": true,
-            "factor": 0.6899999976158142,
-            "mode": "Cutout",
-            "textureMap": "Materials/Decal/scorch_01_decal.tif"
+            "factor": 1.0,
+            "mode": "Blended",
+            "textureMap": "scorch_01_decal.tif"
         },
         "roughness": {
             "useTexture": false
