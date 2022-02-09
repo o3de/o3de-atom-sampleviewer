@@ -27,10 +27,6 @@
 
 #include <HighInstanceTestComponent_Traits_Platform.h>
 
-#pragma optimize("", off)
-#pragma inline_depth(0)
-#pragma inline_depth(0)
-
 AZ_DECLARE_BUDGET(AtomSampleViewer);
 
 namespace AtomSampleViewer
@@ -553,5 +549,3 @@ namespace AtomSampleViewer
     }
 
 } // namespace AtomSampleViewer
-
-#pragma optimize("", on)
