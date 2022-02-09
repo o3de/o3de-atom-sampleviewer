@@ -96,7 +96,7 @@ namespace AtomSampleViewer
         m_sampleName = "LightCullingExampleComponent";
 
         // Add some initial lights to illuminate the scene
-        m_settings[(int)LightType::Point].m_numActive = 150;
+        m_settings[(int)LightType::Point].m_numActive = 10;
         m_settings[(int)LightType::Disk].m_intensity = 40.0f;
         m_settings[(int)LightType::Capsule].m_intensity = 10.0f;
     }
