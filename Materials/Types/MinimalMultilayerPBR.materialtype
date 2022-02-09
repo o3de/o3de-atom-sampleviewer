@@ -6,6 +6,7 @@
             {
                 "name": "blend",
                 "displayName": "Blend",
+                "description": "Controls how the layers blend together.",
                 "properties": [
                     {
                         "name": "texture",

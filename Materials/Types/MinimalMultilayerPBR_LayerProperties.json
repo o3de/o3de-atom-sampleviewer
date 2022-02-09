@@ -1,32 +1,10 @@
 {
+    "description": "Settings that affect one layer of the multilayer material.",
     "properties": [
-        {
-            "name": "color",
-            "displayName": "Color",
-            "type": "Color",
-            "defaultValue": [ 1.0, 1.0, 1.0 ],
-            "connection": {
-                "type": "ShaderInput",
-                "name": "baseColor"
-            }
-        },
-        {
-            "name": "texture",
-            "displayName": "Color Texture",
-            "type": "Image",
-            "connection": {
-                "type": "ShaderInput",
-                "name": "baseColorTexture"
-            }
-        },
-        {
-            "name": "useTexture",
-            "displayName": "Use Color Texture",
-            "type": "Bool"
-        },
         {
             "name": "metallic",
             "displayName": "Metallic",
+            "description": "Controls how metallic the surface appears.",
             "type": "Float",
             "defaultValue": 0.0,
             "min": 0.0,
@@ -49,16 +27,49 @@
             }
         }
     ],
-    "functors": 
-    [
+    "propertyGroups": [
         {
-            "type": "UseTexture",
-            "args": {
-                "textureProperty": "texture",
-                "useTextureProperty": "useTexture",
-                "shaderOption": "useBaseColorTexture"
-            }
+            "name": "baseColor",
+            "displayName": "Base Color",
+            "description": "Settings that control the diffuse color for non-metals or specular color for metals.",
+            "properties": [
+                {
+                    "name": "color",
+                    "displayName": "Color",
+                    "type": "Color",
+                    "defaultValue": [ 1.0, 1.0, 1.0 ],
+                    "connection": {
+                        "type": "ShaderInput",
+                        "name": "baseColor"
+                    }
+                },
+                {
+                    "name": "texture",
+                    "displayName": "Color Texture",
+                    "type": "Image",
+                    "connection": {
+                        "type": "ShaderInput",
+                        "name": "baseColorTexture"
+                    }
+                },
+                {
+                    "name": "useTexture",
+                    "displayName": "Use Color Texture",
+                    "type": "Bool",
+                    "defaultValue": true
+                }
+            ],
+            "functors": 
+            [
+                {
+                    "type": "UseTexture",
+                    "args": {
+                        "textureProperty": "texture",
+                        "useTextureProperty": "useTexture",
+                        "shaderOption": "useBaseColorTexture"
+                    }
+                }
+            ]
         }
     ]
 }
-
