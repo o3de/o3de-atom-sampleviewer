@@ -1,18 +1,14 @@
 {
-    "description": "",
     "materialType": "Materials/DynamicMaterialTest/EmissiveWithLuaFunctors.materialtype",
-    "parentMaterial": "",
     "materialTypeVersion": 3,
-    "properties": {
-        "emissive": {
-            "color": [
-                0.0313725508749485,
-                0.4941176474094391,
-                1.0,
-                1.0
-            ],
-            "intensity": 3.0,
-            "textureMap": "Textures/Default/default_basecolor.tif"
-        }
+    "propertyValues": {
+        "emissive.color": [
+            0.0313725508749485,
+            0.4941176474094391,
+            1.0,
+            1.0
+        ],
+        "emissive.intensity": 3.0,
+        "emissive.textureMap": "Textures/Default/default_basecolor.tif"
     }
 }
