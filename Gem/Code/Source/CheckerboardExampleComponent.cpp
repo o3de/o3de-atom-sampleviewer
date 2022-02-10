@@ -52,16 +52,15 @@ namespace AtomSampleViewer
         defaultMaterial.m_materialAsset = materialAsset;
         defaultMaterial.m_materialInstance = AZ::RPI::Material::FindOrCreate(defaultMaterial.m_materialAsset);
 
-        AZ::RPI::ScenePtr scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        m_meshFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::MeshFeatureProcessorInterface>();
+        m_meshFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::MeshFeatureProcessorInterface>();
         m_meshHandle = m_meshFeatureProcessor->AcquireMesh(AZ::Render::MeshHandleDescriptor{ meshAsset }, materials);
         m_meshFeatureProcessor->SetTransform(m_meshHandle, AZ::Transform::CreateIdentity());
         
-        AZ::Debug::CameraControllerRequestBus::Event(m_cameraEntityId, &AZ::Debug::CameraControllerRequestBus::Events::Enable,
+        AZ::Debug::CameraControllerRequestBus::Event(GetCameraEntityId(), &AZ::Debug::CameraControllerRequestBus::Events::Enable,
             azrtti_typeid<AZ::Debug::ArcBallControllerComponent>());
 
         // Add an Image based light.
-        m_defaultIbl.Init(scene.get());
+        m_defaultIbl.Init(m_scene);
 
 
         AZ::TickBus::Handler::BusConnect();
@@ -72,7 +71,7 @@ namespace AtomSampleViewer
         ActivateCheckerboardPipeline();
 
         // Create an ImGuiActiveContextScope to ensure the ImGui context on the new pipeline's ImGui pass is activated.
-        m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass(AZ::RPI::PassHierarchyFilter({ "CheckerboardPipeline", "ImGuiPass" }));
+        m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass({ "CheckerboardPipeline", "ImGuiPass" });
         m_imguiSidebar.Activate();
     }
 
@@ -93,15 +92,6 @@ namespace AtomSampleViewer
         m_meshFeatureProcessor = nullptr;
     }
     
-    bool CheckerboardExampleComponent::ReadInConfig(const AZ::ComponentConfig* baseConfig)
-    {
-        auto config = azrtti_cast<const SampleComponentConfig*>(baseConfig);
-        AZ_Assert(config && config->IsValid(), "SampleComponentConfig required for sample component configuration.");
-        m_cameraEntityId = config->m_cameraEntityId;
-        m_entityContextId = config->m_entityContextId;
-        return true;
-    }
-
     void CheckerboardExampleComponent::DefaultWindowCreated()
     {
         AZ::Render::Bootstrap::DefaultWindowBus::BroadcastResult(m_windowContext,
@@ -111,9 +101,8 @@ namespace AtomSampleViewer
     void CheckerboardExampleComponent::ActivateCheckerboardPipeline()
     {        
         // save original render pipeline first and remove it from the scene
-        AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        m_originalPipeline = defaultScene->GetDefaultRenderPipeline();
-        defaultScene->RemoveRenderPipeline(m_originalPipeline->GetId());
+        m_originalPipeline = m_scene->GetDefaultRenderPipeline();
+        m_scene->RemoveRenderPipeline(m_originalPipeline->GetId());
 
         // add the checker board pipeline
         AZ::RPI::RenderPipelineDescriptor pipelineDesc;
@@ -121,17 +110,15 @@ namespace AtomSampleViewer
         pipelineDesc.m_name = "Checkerboard";
         pipelineDesc.m_rootPassTemplate = "CheckerboardPipeline";
         m_cbPipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
-        defaultScene->AddRenderPipeline(m_cbPipeline);
+        m_scene->AddRenderPipeline(m_cbPipeline);
         m_cbPipeline->SetDefaultView(m_originalPipeline->GetDefaultView());
     }
 
     void CheckerboardExampleComponent::DeactivateCheckerboardPipeline()
     {
         // remove cb pipeline before adding original pipeline.
-        AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        defaultScene->RemoveRenderPipeline(m_cbPipeline->GetId());
-
-        defaultScene->AddRenderPipeline(m_originalPipeline);
+        m_scene->RemoveRenderPipeline(m_cbPipeline->GetId());
+        m_scene->AddRenderPipeline(m_originalPipeline);
 
         m_cbPipeline = nullptr;
     }

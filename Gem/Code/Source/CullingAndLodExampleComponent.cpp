@@ -232,8 +232,6 @@ namespace AtomSampleViewer
                 AZ::Render::DirectionalLightFeatureProcessorInterface::DebugDrawFlags::DebugDrawNone);
             dirLightFP->SetViewFrustumCorrectionEnabled(handle, m_isCascadeCorrectionEnabled);
             dirLightFP->SetShadowFilterMethod(handle, s_shadowFilterMethods[m_shadowFilterMethodIndex]);
-            dirLightFP->SetShadowBoundaryWidth(handle, m_boundaryWidth);
-            dirLightFP->SetPredictionSampleCount(handle, static_cast<uint16_t>(m_predictionSampleCount));
             dirLightFP->SetFilteringSampleCount(handle, static_cast<uint16_t>(m_filteringSampleCount));
             dirLightFP->SetGroundHeight(handle, 0.f);
 
@@ -397,18 +395,9 @@ namespace AtomSampleViewer
             {
                 m_directionalLightFeatureProcessor->SetShadowFilterMethod(m_directionalLightHandle, s_shadowFilterMethods[m_shadowFilterMethodIndex]);
             }
-            ImGui::Text("Boundary Width in meter");
-            if (ImGui::SliderFloat("Width", &m_boundaryWidth, 0.f, 0.1f, "%.3f"))
-            {
-                m_directionalLightFeatureProcessor->SetShadowBoundaryWidth(m_directionalLightHandle, m_boundaryWidth);
-            }
 
             ImGui::Spacing();
             ImGui::Text("Filtering (PCF specific)");
-            if (ImGui::SliderInt("Prediction #", &m_predictionSampleCount, 4, 16))
-            {
-                m_directionalLightFeatureProcessor->SetPredictionSampleCount(m_directionalLightHandle, static_cast<uint16_t>(m_predictionSampleCount));
-            }
             if (ImGui::SliderInt("Filtering #", &m_filteringSampleCount, 4, 64))
             {
                 m_directionalLightFeatureProcessor->SetFilteringSampleCount(m_directionalLightHandle, static_cast<uint16_t>(m_filteringSampleCount));

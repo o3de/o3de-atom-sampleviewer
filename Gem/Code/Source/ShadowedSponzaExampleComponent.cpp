@@ -80,9 +80,8 @@ namespace AtomSampleViewer
         m_diskLightsBasePosition[2] = -0.03f;
         m_diskLightsPositionScatteringRatio = 0.27f;
 
-        RPI::Scene* scene = RPI::RPISystemInterface::Get()->GetDefaultScene().get();
-        m_directionalLightFeatureProcessor = scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
-        m_diskLightFeatureProcessor = scene->GetFeatureProcessor<Render::DiskLightFeatureProcessorInterface>();
+        m_directionalLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
+        m_diskLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DiskLightFeatureProcessorInterface>();
 
         SetupScene();
 
@@ -248,8 +247,6 @@ namespace AtomSampleViewer
             featureProcessor->SetShadowmapSize(handle, s_shadowmapSizes[s_shadowmapSizeIndexDefault]);
             featureProcessor->SetViewFrustumCorrectionEnabled(handle, m_isCascadeCorrectionEnabled);
             featureProcessor->SetShadowFilterMethod(handle, s_shadowFilterMethods[m_shadowFilterMethodIndexDirectional]);
-            featureProcessor->SetShadowBoundaryWidth(handle, m_boundaryWidthDirectional);
-            featureProcessor->SetPredictionSampleCount(handle, static_cast<uint16_t>(m_predictionSampleCountDirectional));
             featureProcessor->SetFilteringSampleCount(handle, static_cast<uint16_t>(m_filteringSampleCountDirectional));
             featureProcessor->SetGroundHeight(handle, 0.f);
 
@@ -315,7 +312,6 @@ namespace AtomSampleViewer
                     m_diskLights[index].m_shadowmapSize :
                     Render::ShadowmapSize::None);
                 featureProcessor->SetShadowFilterMethod(handle, aznumeric_cast<Render::ShadowFilterMethod>(m_shadowFilterMethodIndexDisk));
-                featureProcessor->SetPredictionSampleCount(handle, aznumeric_cast<uint16_t>(m_predictionSampleCountDisk));
                 featureProcessor->SetFilteringSampleCount(handle, aznumeric_cast<uint16_t>(m_filteringSampleCountDisk));
             }
             m_diskLights[index].m_handle = handle;
@@ -480,44 +476,12 @@ namespace AtomSampleViewer
                     s_shadowFilterMethods[m_shadowFilterMethodIndexDirectional]);
             }
 
-            if (m_shadowFilterMethodIndexDirectional != aznumeric_cast<int>(ShadowFilterMethod::None))
-            {
-                ImGui::Text("Boundary Width in meter");
-                if (ScriptableImGui::SliderFloat("Width##Directional", &m_boundaryWidthDirectional, 0.f, 0.1f, "%.3f"))
-                {
-                    m_directionalLightFeatureProcessor->SetShadowBoundaryWidth(
-                        m_directionalLightHandle,
-                        m_boundaryWidthDirectional);
-                }
-            }
-
             if (m_shadowFilterMethodIndexDirectional == aznumeric_cast<int>(ShadowFilterMethod::Pcf) ||
                 m_shadowFilterMethodIndexDirectional == aznumeric_cast<int>(ShadowFilterMethod::EsmPcf))
             {
                 ImGui::Spacing();
                 ImGui::Text("Filtering (PCF specific)");
 
-                int pcfMethodAsInteger = aznumeric_cast<int>(m_pcfMethodDirectional);
-                if (ScriptableImGui::RadioButton(
-                        "Boundary Search filtering", &pcfMethodAsInteger, static_cast<int>(PcfMethod::BoundarySearch)))
-                {
-                    m_pcfMethodDirectional = PcfMethod::BoundarySearch;
-                    m_directionalLightFeatureProcessor->SetPcfMethod(m_directionalLightHandle, m_pcfMethodDirectional);
-                }
-                if (ScriptableImGui::RadioButton("Bicubic filtering", &pcfMethodAsInteger, static_cast<int>(PcfMethod::Bicubic)))
-                {
-                    m_pcfMethodDirectional = PcfMethod::Bicubic;
-                    m_directionalLightFeatureProcessor->SetPcfMethod(m_directionalLightHandle, m_pcfMethodDirectional);
-                }
-
-                if (m_pcfMethodDirectional ==
-                    AZ::Render::PcfMethod::BoundarySearch && ScriptableImGui::SliderInt(
-                        "Prediction # ##Directional", &m_predictionSampleCountDirectional, 4, 16))
-                {
-                    m_directionalLightFeatureProcessor->SetPredictionSampleCount(
-                        m_directionalLightHandle,
-                        static_cast<uint16_t>(m_predictionSampleCountDirectional));
-                }
                 if (ScriptableImGui::SliderInt("Filtering # ##Directional", &m_filteringSampleCountDirectional, 4, 64))
                 {
                     m_directionalLightFeatureProcessor->SetFilteringSampleCount(
@@ -594,30 +558,11 @@ namespace AtomSampleViewer
                 }
             }
 
-            if (m_shadowFilterMethodIndexDisk != aznumeric_cast<int>(ShadowFilterMethod::None))
-            {
-                ImGui::Text("Boundary Width in degrees");
-                if (ScriptableImGui::SliderFloat("Width##Spot", &m_boundaryWidthDisk, 0.f, 1.f, "%.3f"))
-                {
-                    for (int index = 0; index < m_diskLightCount; ++index)
-                    {
-                        m_diskLightFeatureProcessor->SetSofteningBoundaryWidthAngle(m_diskLights[index].m_handle, DegToRad(m_boundaryWidthDisk));
-                    }
-                }
-            }
-
             if (m_shadowFilterMethodIndexDisk == aznumeric_cast<int>(ShadowFilterMethod::Pcf) ||
                 m_shadowFilterMethodIndexDisk == aznumeric_cast<int>(ShadowFilterMethod::EsmPcf))
             {
                 ImGui::Spacing();
                 ImGui::Text("Filtering (PCF specific)");
-                if (ScriptableImGui::SliderInt("Predictiona # ##Spot", &m_predictionSampleCountDisk, 4, 16))
-                {
-                    for (int index = 0; index < m_diskLightCount; ++index)
-                    {
-                        m_diskLightFeatureProcessor->SetPredictionSampleCount(m_diskLights[index].m_handle, static_cast<uint16_t>(m_predictionSampleCountDisk));
-                    }
-                }
                 if (ScriptableImGui::SliderInt("Filtering # ##Spot", &m_filteringSampleCountDisk, 4, 64))
                 {
                     for (int index = 0; index < m_diskLightCount; ++index)

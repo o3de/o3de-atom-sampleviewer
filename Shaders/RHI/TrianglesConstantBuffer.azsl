@@ -8,37 +8,20 @@
 
  #include <Atom/Features/SrgSemantics.azsli>
 
-// Number of triangles that will be rendered on screen
-// Uniform limitation need to be taken into consideration for mobile devices
-// [ATOM-14949]
-#if AZ_TRAIT_CONSTANT_BUFFER_LIMITATIONS
-
-#define MAX_NUMBER_OF_INSTANCES 12
-
-#else
-
-#define MAX_NUMBER_OF_INSTANCES 30
-
-#endif
-
 struct InstanceInfo
 {
     column_major float4x4 m_matrix;
     float4 m_colorMultiplier;
-    // NOTE: This actually shouldn't be required, but the current validation will give a false positive
-    // when the stride isn't the same size as the stride defined on the applicaiton side.
-    // This assumes 256 alignment, which is standard for DX12, but is variable in Vulkan
-    float4 m_padding0[11];
 };
 
 struct InstanceData
 {
-    InstanceInfo m_instancesInfo;
+    InstanceInfo m_instancesInfo[30];
 };
 
 ShaderResourceGroup TriangleSrg : SRG_PerObject
 {
-    ConstantBuffer<InstanceData> m_trianglesCB[MAX_NUMBER_OF_INSTANCES];
+    ConstantBuffer<InstanceData> m_trianglesCB;
 }
 
 struct VSInput
@@ -54,11 +37,11 @@ struct VSOutput
     float4 m_color : COLOR0;
 };
 
-VSOutput MainVS(VSInput vsInput)
+VSOutput MainVS(const VSInput vsInput)
 {
     VSOutput OUT;
     
-    InstanceInfo triangleInstanceInfo = TriangleSrg::m_trianglesCB[vsInput.m_instanceIndex].m_instancesInfo;
+    const InstanceInfo triangleInstanceInfo = TriangleSrg::m_trianglesCB.m_instancesInfo[vsInput.m_instanceIndex];
     
     OUT.m_position = mul(float4(vsInput.m_position, 1.0f),triangleInstanceInfo.m_matrix);
     OUT.m_color = vsInput.m_color * triangleInstanceInfo.m_colorMultiplier;

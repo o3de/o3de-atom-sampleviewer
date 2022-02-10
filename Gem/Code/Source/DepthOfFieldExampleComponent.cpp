@@ -40,9 +40,8 @@ namespace AtomSampleViewer
     {
         using namespace AZ;
 
-        RPI::Scene* scene = RPI::RPISystemInterface::Get()->GetDefaultScene().get();
-        m_postProcessFeatureProcessor = scene->GetFeatureProcessor<Render::PostProcessFeatureProcessorInterface>();
-        m_directionalLightFeatureProcessor = scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
+        m_postProcessFeatureProcessor = m_scene->GetFeatureProcessor<Render::PostProcessFeatureProcessorInterface>();
+        m_directionalLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
 
         // Create the assets
         m_bunnyModelAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>("objects/bunny.azmodel", RPI::AssetUtils::TraceLevel::Assert);

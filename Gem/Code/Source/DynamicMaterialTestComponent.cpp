@@ -18,10 +18,12 @@
 #include <Atom/RPI.Reflect/Asset/AssetUtils.h>
 
 #include <AzCore/Component/Entity.h>
-#include <AzCore/Debug/EventTrace.h>
+#include <AzCore/Debug/Timer.h>
 #include <AzCore/Math/Random.h>
 
 #include <RHI/BasicRHIComponent.h>
+
+AZ_DECLARE_BUDGET(AtomSampleViewer);
 
 namespace AtomSampleViewer
 {
@@ -228,7 +230,7 @@ namespace AtomSampleViewer
 
     void DynamicMaterialTestComponent::OnTick(float deltaTime, ScriptTimePoint /*scriptTime*/)
     {
-        AZ_TRACE_METHOD();
+        AZ_PROFILE_FUNCTION(AtomSampleViewer);
 
         if (m_waitingForMeshes)
         {

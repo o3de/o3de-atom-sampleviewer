@@ -126,7 +126,6 @@ namespace AtomSampleViewer
         static const AZ::Render::ShadowFilterMethod s_shadowFilterMethods[];
         static const char* s_shadowFilterMethodLabels[];
         int m_shadowFilterMethodIndex = 0; // filter method is None.
-        float m_boundaryWidth = 0.03f; // 3cm
         int m_predictionSampleCount = 4;
         int m_filteringSampleCount = 16;
 

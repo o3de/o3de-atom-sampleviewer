@@ -53,7 +53,8 @@ namespace AtomSampleViewer
             Data::Asset<AZ::RPI::ShaderAsset>& shaderAsset,
             RHI::Ptr<AZ::RHI::ShaderResourceGroupLayout>& srgLayout,
             RHI::ConstPtr<RHI::PipelineState>& pipelineState,
-            RHI::DrawListTag& drawListTag)
+            RHI::DrawListTag& drawListTag, 
+            RPI::Scene* scene)
         {
             // Since the shader is using SV_VertexID and SV_InstanceID as VS input, we won't need to have vertex buffer.
             // Also, the index buffer is not needed with DrawLinear.
@@ -72,7 +73,6 @@ namespace AtomSampleViewer
             shaderVariant.ConfigurePipelineState(pipelineStateDescriptor);
             drawListTag = shader->GetDrawListTag();
 
-            RPI::Scene* scene = RPI::RPISystemInterface::Get()->GetDefaultScene().get();
             scene->ConfigurePipelineState(shader->GetDrawListTag(), pipelineStateDescriptor);
 
             pipelineStateDescriptor.m_inputStreamLayout.SetTopology(AZ::RHI::PrimitiveTopology::TriangleStrip);
@@ -90,7 +90,7 @@ namespace AtomSampleViewer
 
         // Create the example's main pipeline object
         {
-            CreatePipeline("Shaders/streamingimageexample/imagemips.azshader", "ImageMipsSrg", m_shaderAsset, m_srgLayout, m_pipelineState, m_drawListTag);
+            CreatePipeline("Shaders/streamingimageexample/imagemips.azshader", "ImageMipsSrg", m_shaderAsset, m_srgLayout, m_pipelineState, m_drawListTag, m_scene);
 
             // Set the input indices
             m_imageInputIndex = m_srgLayout->FindShaderInputImageIndex(Name("m_texture"));
@@ -105,7 +105,7 @@ namespace AtomSampleViewer
         // Create the 3D pipeline object
         {
             CreatePipeline("Shaders/streamingimageexample/image3d.azshader", "ImageSrg", m_image3dShaderAsset, m_image3dSrgLayout, m_image3dPipelineState,
-                m_image3dDrawListTag);
+                m_image3dDrawListTag, m_scene);
         }
 
     }
@@ -130,15 +130,15 @@ namespace AtomSampleViewer
         // Queue load all the textures under Textures\Streaming folder
         for (uint32_t index = 0; index < TestDDSCount; index++)
         {
-            AZStd::string filePath = TestImageFolder + AZStd::string::format("streaming%d.dds.streamingimage", index);
-            QueueForLoad(filePath);
+            AZ::IO::Path filePath = TestImageFolder / AZStd::string::format("streaming%d.dds.streamingimage", index);
+            QueueForLoad(filePath.Native());
         }
 
         // All Images loaded here have non-power-of-two sizes
         for (uint32_t index = 0; index < TestPNGCount; index++)
         {
-            AZStd::string filePath = TestImageFolder + AZStd::string::format("streaming%d.png.streamingimage", index);
-            QueueForLoad(filePath);
+            AZ::IO::Path filePath = TestImageFolder / AZStd::string::format("streaming%d.png.streamingimage", index);
+            QueueForLoad(filePath.Native());
         }
 
         AZ::TickBus::Handler::BusConnect();
@@ -270,7 +270,7 @@ namespace AtomSampleViewer
     {
         if (!m_imageHotReload.m_assetId.IsValid())
         {
-            AZStd::string filePath = TestImageFolder + ReloadTestImageName + ".streamingimage";
+            AZ::IO::Path filePath = TestImageFolder / (ReloadTestImageName.Native() + ".streamingimage");
             AZ::Data::AssetCatalogRequestBus::BroadcastResult(
                 m_imageHotReload.m_assetId, &AZ::Data::AssetCatalogRequestBus::Events::GetAssetIdByPath, filePath.c_str(),
                 azrtti_typeid <AZ::RPI::StreamingImageAsset>(), false);
@@ -466,7 +466,7 @@ namespace AtomSampleViewer
 
             // Submit draw packet...
             AZStd::unique_ptr<const RHI::DrawPacket> drawPacket(drawPacketBuilder.End());
-            m_dynamicDraw->AddDrawPacket(RPI::RPISystemInterface::Get()->GetDefaultScene().get(), AZStd::move(drawPacket));
+            m_dynamicDraw->AddDrawPacket(m_scene, AZStd::move(drawPacket));
         }
     }
 
@@ -489,7 +489,7 @@ namespace AtomSampleViewer
 
         // Submit draw packet...
         AZStd::unique_ptr<const RHI::DrawPacket> drawPacket(drawPacketBuilder.End());
-        m_dynamicDraw->AddDrawPacket(RPI::RPISystemInterface::Get()->GetDefaultScene().get(), AZStd::move(drawPacket));
+        m_dynamicDraw->AddDrawPacket(m_scene, AZStd::move(drawPacket));
     }
 
     void StreamingImageExampleComponent::DisplayStreamingProfileData()
@@ -533,24 +533,17 @@ namespace AtomSampleViewer
         AZStd::string sourceImageFiles[] = {
             {"streaming1.png"}, {"streaming2.png" }
         };
-        
-        auto projectPath = AZ::Utils::GetProjectPath();
-        AZStd::string srcPath, destPath;
-        AzFramework::StringFunc::Path::Join(projectPath.c_str(), (TestImageFolder + sourceImageFiles[m_curSourceImage]).c_str(), srcPath);
-        AzFramework::StringFunc::Path::Join(projectPath.c_str(), (TestImageFolder + ReloadTestImageName).c_str(), destPath);
 
-        CopyFile(destPath, srcPath);
+        AZ::IO::FixedMaxPath projectPath = AZ::Utils::GetProjectPath();
+        AZ::IO::FixedMaxPath srcPath = projectPath / TestImageFolder / sourceImageFiles[m_curSourceImage];
+        AZ::IO::FixedMaxPath destPath = projectPath / TestImageFolder / ReloadTestImageName;
+
+        CopyFile(destPath.String(), srcPath.String());
     }
 
     void StreamingImageExampleComponent::DeleteHotReloadImage()
     {
-        const char* engineRoot = nullptr;
-        AzFramework::ApplicationRequests::Bus::BroadcastResult(engineRoot, &AzFramework::ApplicationRequests::GetEngineRoot);
-
-        AZStd::string testFilePath = "AtomSampleViewer/" + TestImageFolder + ReloadTestImageName;
-        AZStd::string testFileFullPath;
-        AzFramework::StringFunc::Path::Join(engineRoot, testFilePath.c_str(), testFileFullPath);
-
+        const auto testFileFullPath = AZ::IO::FixedMaxPath(AZ::Utils::GetProjectPath()) / TestImageFolder / ReloadTestImageName;
         if (AZ::IO::SystemFile::Exists(testFileFullPath.c_str()))
         {
             AZ::IO::SystemFile::Delete(testFileFullPath.c_str());
@@ -671,7 +664,6 @@ namespace AtomSampleViewer
             AZStd::vector<uint8_t> imageData;
             const uint32_t side = 1001;
             const uint32_t depth = 3;
-            const uint32_t colorIndex = static_cast<uint32_t>(-1);
             createColorImageData({ 1.0f,0.0f,0.0f,0.0f }, side, side, imageData);
             createColorImageData({ 0.0f,1.0f,0.0f,0.0f }, side, side, imageData);
             createColorImageData({ 0.0f,0.0f,1.0f,0.0f }, side, side, imageData);

@@ -24,6 +24,7 @@ namespace AtomSampleViewer
         static void Reflect(AZ::ReflectContext* context);
 
     private:
+        using AZ::RPI::MaterialFunctorSourceData::CreateFunctor;
         FunctorResult CreateFunctor(const RuntimeContext& context) const override;
     };
 

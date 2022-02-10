@@ -10,6 +10,7 @@
 
 #include <AzCore/Component/Entity.h>
 #include <AzCore/IO/Path/Path.h>
+#include <AzCore/Settings/SettingsRegistryMergeUtils.h>
 #include <AzFramework/Components/TransformComponent.h>
 #include <AzFramework/Entity/EntityContextBus.h>
 
@@ -91,13 +92,10 @@ namespace AtomSampleViewer
         // Load a default image
         QueueAssetPathForLoad("textures/tonemapping/hdr_test_pattern.exr.streamingimage");
 
-        const char* engineRoot = nullptr;
-        AZStd::string screenshotFolder;
-        AzFramework::ApplicationRequests::Bus::BroadcastResult(engineRoot, &AzFramework::ApplicationRequests::GetEngineRoot);
-        if (engineRoot)
-        {
-            AzFramework::StringFunc::Path::Join(engineRoot, "Screenshots", screenshotFolder, true, false);
-        }
+        auto settingsRegistry = AZ::SettingsRegistry::Get();
+        AZ::IO::Path writableStoragePath;
+        settingsRegistry->Get(writableStoragePath.Native(), AZ::SettingsRegistryMergeUtils::FilePathKey_DevWriteStorage);
+        AZ::IO::Path screenshotFolder = writableStoragePath / "Screenshots";
 
         Data::Asset<RPI::AnyAsset> displayMapperAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::AnyAsset>("passes/DisplayMapperConfiguration.azasset", RPI::AssetUtils::TraceLevel::Error);
         const Render::DisplayMapperConfigurationDescriptor* displayMapperConfigurationDescriptor = RPI::GetDataFromAnyAsset<Render::DisplayMapperConfigurationDescriptor>(displayMapperAsset);
@@ -109,7 +107,7 @@ namespace AtomSampleViewer
         m_displayMapperConfiguration = *displayMapperConfigurationDescriptor;
         UpdateCapturePassHierarchy();
 
-        m_imguiFrameCaptureSaver.SetDefaultFolder(screenshotFolder);
+        m_imguiFrameCaptureSaver.SetDefaultFolder(screenshotFolder.Native());
         m_imguiFrameCaptureSaver.SetDefaultFileName("tonemap_capture");
         m_imguiFrameCaptureSaver.SetAvailableExtensions({ "dds" });
         m_imguiFrameCaptureSaver.Activate();
@@ -208,7 +206,8 @@ namespace AtomSampleViewer
             Data::Asset<AZ::RPI::ShaderAsset>& shaderAsset,
             RHI::Ptr<AZ::RHI::ShaderResourceGroupLayout>& srgLayout,
             RHI::ConstPtr<RHI::PipelineState>& pipelineState,
-            RHI::DrawListTag& drawListTag)
+            RHI::DrawListTag& drawListTag,
+            RPI::Scene* scene)
         {
             // Since the shader is using SV_VertexID and SV_InstanceID as VS input, we won't need to have vertex buffer.
             // Also, the index buffer is not needed with DrawLinear.
@@ -227,7 +226,6 @@ namespace AtomSampleViewer
             shaderVariant.ConfigurePipelineState(pipelineStateDescriptor);
             drawListTag = shader->GetDrawListTag();
 
-            RPI::Scene* scene = RPI::RPISystemInterface::Get()->GetDefaultScene().get();
             scene->ConfigurePipelineState(shader->GetDrawListTag(), pipelineStateDescriptor);
 
             pipelineStateDescriptor.m_inputStreamLayout.SetTopology(AZ::RHI::PrimitiveTopology::TriangleStrip);
@@ -245,7 +243,7 @@ namespace AtomSampleViewer
 
         // Create the example's main pipeline object
         {
-            CreatePipeline("Shaders/tonemappingexample/renderimage.azshader", "RenderImageSrg", m_shaderAsset, m_srgLayout, m_pipelineState, m_drawListTag);
+            CreatePipeline("Shaders/tonemappingexample/renderimage.azshader", "RenderImageSrg", m_shaderAsset, m_srgLayout, m_pipelineState, m_drawListTag, m_scene);
 
             // Set the input indices
             m_imageInputIndex = m_srgLayout->FindShaderInputImageIndex(Name("m_texture"));
@@ -288,7 +286,7 @@ namespace AtomSampleViewer
 
         // Submit draw packet
         AZStd::unique_ptr<const RHI::DrawPacket> drawPacket(drawPacketBuilder.End());
-        m_dynamicDraw->AddDrawPacket(RPI::RPISystemInterface::Get()->GetDefaultScene().get(), AZStd::move(drawPacket));
+        m_dynamicDraw->AddDrawPacket(m_scene, AZStd::move(drawPacket));
     }
 
     void TonemappingExampleComponent::UpdateCapturePassHierarchy()

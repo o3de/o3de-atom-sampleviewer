@@ -34,13 +34,7 @@
                         "Attachment": "RenderTargetAttachment"
                     }
                 }
-            ],
-            "PassData": {
-                "$type": "FullscreenTrianglePassData",
-                "ShaderAsset": {
-                    "FilePath": "shaders/luxcore/rendertexture.shader"
-                }
-            }
+            ]
         }
     }
 }

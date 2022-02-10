@@ -68,6 +68,8 @@ namespace AtomSampleViewer
         EnableArcBallCameraController();
         ConfigureCameraToLookDownAtObject();
         AddImageBasedLight();
+        AcquireDirectionalLightFeatureProcessor();
+        CreateDirectionalLight();
 
         ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::ResumeScript);
         AZ::TickBus::Handler::BusConnect();
@@ -94,11 +96,29 @@ namespace AtomSampleViewer
         m_imguiSidebar.Deactivate();
         m_defaultIbl.Reset();
         GetMeshFeatureProcessor()->ReleaseMesh(m_meshHandle);
+        m_directionalLightFeatureProcessor->ReleaseLight(m_directionalLightHandle);
     }
 
     void DecalExampleComponent::AddImageBasedLight()
     {
-        m_defaultIbl.Init(AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get());
+        m_defaultIbl.Init(m_scene);
+    }
+
+    void DecalExampleComponent::AcquireDirectionalLightFeatureProcessor()
+    {
+        using namespace AZ;
+
+        m_directionalLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
+    }
+
+    void DecalExampleComponent::CreateDirectionalLight()
+    {
+        using namespace AZ;
+
+        const auto directionalLightHandle = m_directionalLightFeatureProcessor->AcquireLight();
+        const Render::PhotometricColor<Render::PhotometricUnit::Lux> lightColor(AZ::Color::CreateOne());
+        m_directionalLightFeatureProcessor->SetRgbIntensity(directionalLightHandle, lightColor);
+        m_directionalLightHandle = directionalLightHandle;
     }
 
     void DecalExampleComponent::EnableArcBallCameraController()
@@ -121,6 +141,7 @@ namespace AtomSampleViewer
     void DecalExampleComponent::OnTick([[maybe_unused]] float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint timePoint)
     {
         DrawSidebar();
+        UpdateDirectionalLight();
     }
 
     void DecalExampleComponent::DrawSidebar()
@@ -147,15 +168,26 @@ namespace AtomSampleViewer
             }
         }
 
+        ScriptableImGui::SliderAngle("Direction##Directional", &m_directionalLightRotationAngle, 0, 360);
+
         m_imguiSidebar.End();
     }
 
     void DecalExampleComponent::CreateDecalContainer()
     {
-        const AZ::RPI::Scene* scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get();
-        const auto decalFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DecalFeatureProcessorInterface>();
+        const auto decalFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DecalFeatureProcessorInterface>();
         m_decalContainer = AZStd::make_unique<DecalContainer>(decalFeatureProcessor, AZ::Vector3(1,0,0));
         m_decalContainerClone = AZStd::make_unique<DecalContainer>(decalFeatureProcessor, AZ::Vector3(-1,0,0));
     }
 
+    void DecalExampleComponent::UpdateDirectionalLight()
+    {
+        using namespace AZ;
+
+        constexpr float directionalLightDist = 10.0f;
+
+        const auto lightLocation = Vector3(directionalLightDist * sinf(m_directionalLightRotationAngle), directionalLightDist * cosf(m_directionalLightRotationAngle), 10.0f);
+        const auto lightTransform = Transform::CreateLookAt(lightLocation, Vector3::CreateZero());
+        m_directionalLightFeatureProcessor->SetDirection(m_directionalLightHandle, lightTransform.GetBasis(1));
+    }
 }

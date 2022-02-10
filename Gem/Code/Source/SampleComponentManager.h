@@ -12,6 +12,8 @@
 
 #include <Automation/ScriptableImGui.h> // This file needs to be included before "<Atom/Utils/ImGuiPassTree.h>" to enable scriptable imgui for ImguiPassTree
 
+#include <AzCore/std/containers/span.h>
+
 #include <Atom/Feature/ImGui/SystemBus.h>
 #include <Atom/Feature/Utils/FrameCaptureBus.h>
 #include <Atom/RPI.Public/WindowContext.h>
@@ -20,7 +22,6 @@
 #include <Atom/RPI.Public/GpuQuery/GpuQuerySystemInterface.h>
 
 #include <Atom/Utils/ImGuiCullingDebug.h>
-#include <Atom/Utils/ImGuiCpuProfiler.h>
 #include <Atom/Utils/ImGuiGpuProfiler.h>
 #include <Atom/Utils/ImGuiPassTree.h>
 #include <Atom/Utils/ImGuiFrameVisualizer.h>
@@ -29,6 +30,8 @@
 
 #include <AzCore/Component/Component.h>
 #include <AzCore/Component/TickBus.h>
+#include <AzCore/std/containers/vector.h>
+#include <AzCore/std/containers/map.h>
 #include <AzCore/std/smart_ptr/shared_ptr.h>
 
 #include <AzFramework/Input/Events/InputChannelEventListener.h>
@@ -56,17 +59,19 @@ namespace AtomSampleViewer
     class SampleEntry
     {
     public:
-        static SampleEntry NewRHISample(const AZStd::string& name, const AZ::Uuid& uuid);
-        static SampleEntry NewRHISample(const AZStd::string& name, const AZ::Uuid& uuid, AZStd::function<bool()> isSupportedFunction);
-        static SampleEntry NewRPISample(const AZStd::string& name, const AZ::Uuid& uuid);
-        static SampleEntry NewRPISample(const AZStd::string& name, const AZ::Uuid& uuid, AZStd::function<bool()> isSupportedFunction);
-
+        AZStd::string m_parentMenuName;
         AZStd::string m_sampleName;
+        // m_parentMenuName/m_sampleName
+        AZStd::string m_fullName;
         AZ::Uuid m_sampleUuid;
         AZStd::function<bool()> m_isSupportedFunc;
         SamplePipelineType m_pipelineType = SamplePipelineType::RHI;
+        AZ::ComponentDescriptor* m_componentDescriptor;
 
-        bool operator==(const SampleEntry& other) { return other.m_sampleName == m_sampleName; }
+        bool operator==(const SampleEntry& other)
+        {
+            return other.m_sampleName == m_sampleName && other.m_parentMenuName == m_parentMenuName;
+        }
     };
 
     class SampleComponentManager final
@@ -86,6 +91,8 @@ namespace AtomSampleViewer
 
         static void GetRequiredServices(AZ::ComponentDescriptor::DependencyArrayType& required);
         static void GetDependentServices(AZ::ComponentDescriptor::DependencyArrayType& dependent);
+
+        static AZStd::vector<SampleEntry> GetSamples();
 
         SampleComponentManager();
         ~SampleComponentManager() override;
@@ -174,6 +181,9 @@ namespace AtomSampleViewer
         bool m_wasActivated = false;
 
         AZStd::vector<SampleEntry> m_availableSamples;
+        // Maps from parent menu item name to a vector of indices into the available samples vector above
+        // Note: we specifically use an ordered map to ensure menus are alphabatized.
+        AZStd::map<AZStd::string, AZStd::vector<int32_t>> m_groupedSamples;
 
         // Entity to hold only example component. It doesn't need an entity context.
         AZ::Entity* m_exampleEntity = nullptr;
@@ -227,7 +237,6 @@ namespace AtomSampleViewer
 
         AZ::Render::ImGuiPassTree m_imguiPassTree;
         AZ::Render::ImGuiFrameVisualizer m_imguiFrameGraphVisualizer;
-        AZ::Render::ImGuiCpuProfiler m_imguiCpuProfiler;
         AZ::Render::ImGuiGpuProfiler m_imguiGpuProfiler;
         AZ::Render::ImGuiTransientAttachmentProfiler m_imguiTransientAttachmentProfiler;
         AZ::Render::ImGuiShaderMetrics m_imguiShaderMetrics;
@@ -251,8 +260,6 @@ namespace AtomSampleViewer
 
         // Scene and some variables for RPI samples
         AZ::RPI::ScenePtr m_rpiScene;
-        float m_simulateTime = 0;
-        float m_deltaTime = 0.016f;
 
         // number of MSAA samples, initialized in Activate() and can vary by platform
         int m_numMSAASamples = 0;

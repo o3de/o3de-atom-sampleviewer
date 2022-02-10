@@ -1,5 +1,5 @@
 {
-    "Source" : "RayTracingMiss",
+    "Source" : "RayTracingMiss.azsl",
     "DrawList" : "RayTracing",
 
     "CompilerHints":

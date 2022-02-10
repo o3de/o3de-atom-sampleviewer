@@ -1,36 +1,25 @@
 {
-    "description": "",
     "materialType": "Materials\\Types\\StandardPBR.materialtype",
-    "propertyLayoutVersion": 3,
-    "properties": {
-        "baseColor": {
-            "color": [
-                0.0,
-                0.0,
-                1.0,
-                1.0
-            ],
-            "useTexture": false
-        },
-        "specularF0": {
-            "factor": 0.0,
-            "useTexture": false
-        },
-        "metallic": {
-            "factor": 0.0,
-            "useTexture": false
-        },
-        "roughness": {
-            "factor": 1.0,
-            "useTexture": false
-        },
-        "irradiance": {
-            "color": [
-                0.0,
-                0.0,
-                1.0,
-                1.0
-            ]
-        }
+    "materialTypeVersion": 3,
+    "propertyValues": {
+        "baseColor.color": [
+            0.0,
+            0.0,
+            1.0,
+            1.0
+        ],
+        "baseColor.useTexture": false,
+        "irradiance.color": [
+            0.0,
+            0.0,
+            1.0,
+            1.0
+        ],
+        "metallic.factor": 0.0,
+        "metallic.useTexture": false,
+        "roughness.factor": 1.0,
+        "roughness.useTexture": false,
+        "specularF0.factor": 0.0,
+        "specularF0.useTexture": false
     }
 }

@@ -118,10 +118,9 @@ namespace AtomSampleViewer
         SetCameraConfiguration();
 
         // Light
-        AZ::RPI::Scene* scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get();
-        m_directionalLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DirectionalLightFeatureProcessorInterface>();
+        m_directionalLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DirectionalLightFeatureProcessorInterface>();
         CreateDirectionalLight();
-        m_diskLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DiskLightFeatureProcessorInterface>();
+        m_diskLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DiskLightFeatureProcessorInterface>();
         CreateDiskLight();
 
         m_imguiSidebar.Activate();
@@ -172,8 +171,6 @@ namespace AtomSampleViewer
         m_directionalLightFeatureProcessor->SetShadowmapFrustumSplitSchemeRatio(handle, 0.5f);
         m_directionalLightFeatureProcessor->SetViewFrustumCorrectionEnabled(handle, true);
         m_directionalLightFeatureProcessor->SetShadowFilterMethod(handle, AZ::Render::ShadowFilterMethod::Esm);
-        m_directionalLightFeatureProcessor->SetShadowBoundaryWidth(handle, 0.03f);
-        m_directionalLightFeatureProcessor->SetPredictionSampleCount(handle, 8);
         m_directionalLightFeatureProcessor->SetFilteringSampleCount(handle, 32);
         m_directionalLightFeatureProcessor->SetGroundHeight(handle, 0.f);
 

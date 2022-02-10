@@ -92,7 +92,7 @@ namespace AtomSampleViewer
             }
 
             // Turn it back into a full path
-            path = Utils::ResolvePath("@devassets@" + path);
+            path = Utils::ResolvePath("@projectroot@/" + path);
 
             return path;
         }
@@ -150,6 +150,7 @@ namespace AtomSampleViewer
         m_scriptReports.clear();
         m_currentScriptIndexStack.clear();
         m_invalidationMessage.clear();
+        m_uniqueTimestamp = GenerateTimestamp();     
     }
 
     void ScriptReporter::SetInvalidationMessage(const AZStd::string& message)
@@ -237,6 +238,13 @@ namespace AtomSampleViewer
                 m_messageBox.OpenPopupMessage("Can't Diff", "Image diff is not supported on this platform, or the required diff tool is not installed.");
             }
         }
+    }
+
+    AZStd::string ScriptReporter::GenerateTimestamp() const
+    {
+        const AZStd::chrono::system_clock::time_point now = AZStd::chrono::system_clock::now();
+        const float timeFloat = AZStd::chrono::duration<float>(now.time_since_epoch()).count();
+        return AZStd::string::format("%.4f", timeFloat);
     }
 
     const ImageComparisonToleranceLevel* ScriptReporter::FindBestToleranceLevel(float diffScore, bool filterImperceptibleDiffs) const
@@ -423,6 +431,8 @@ namespace AtomSampleViewer
             highlightTextIf(totalScreenshotWarnings > 0, HighlightWarning);
             ImGui::Text("Total Screenshot Warnings: %u %s", totalScreenshotWarnings, seeBelow(totalScreenshotWarnings).c_str());
 
+            ImGui::Text("Exported test results: %s", m_exportedTestResultsPath.c_str());
+
             resetTextHighlight();
 
             if (ImGui::Button("Update All Local Baseline Images"))
@@ -452,6 +462,7 @@ namespace AtomSampleViewer
             m_displayOption = (DisplayOption)displayOption;
 
             ImGui::Checkbox("Force Show 'Update' Buttons", &m_forceShowUpdateButtons);
+            ImGui::Checkbox("Force Show 'Export Png Diff' Buttons", &m_forceShowExportPngDiffButtons);
 
             bool showWarnings = (m_displayOption == DisplayOption::AllResults) || (m_displayOption == DisplayOption::WarningsAndErrors);
             bool showAll = (m_displayOption == DisplayOption::AllResults);
@@ -572,18 +583,18 @@ namespace AtomSampleViewer
                         {
                             resetTextHighlight();
 
-                            ImGui::Text(("Screenshot:        " + screenshotResult.m_screenshotFilePath).c_str());
+                            ImGui::Text("Screenshot:        %s", screenshotResult.m_screenshotFilePath.c_str());
 
                             ImGui::Spacing();
 
                             highlightTextIf(!screenshotPassed, HighlightFailed);
 
-                            ImGui::Text(("Official Baseline: " + screenshotResult.m_officialBaselineScreenshotFilePath).c_str());
+                            ImGui::Text("Official Baseline: %s", screenshotResult.m_officialBaselineScreenshotFilePath.c_str());
 
                             // Official Baseline Result
                             ImGui::Indent();
                             {
-                                ImGui::Text(screenshotResult.m_officialComparisonResult.GetSummaryString().c_str());
+                                ImGui::Text("%s", screenshotResult.m_officialComparisonResult.GetSummaryString().c_str());
 
                                 if (screenshotResult.m_officialComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::ThresholdExceeded ||
                                     screenshotResult.m_officialComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::Pass)
@@ -617,6 +628,38 @@ namespace AtomSampleViewer
                                 ShowDiffButton("View Diff", screenshotResult.m_officialBaselineScreenshotFilePath, screenshotResult.m_screenshotFilePath);
                                 ImGui::PopID();
 
+                                if ((m_forceShowExportPngDiffButtons || screenshotResult.m_officialComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::ThresholdExceeded) && ImGui::Button("Export Png Diff"))
+                                {
+                                    const auto projectPath = AZ::Utils::GetProjectPath();
+                                    AZStd::string imageDiffPath;
+                                    AZStd::string scriptFilenameWithouExtension;
+                                    AzFramework::StringFunc::Path::GetFileName(scriptReport.m_scriptAssetPath.c_str(), scriptFilenameWithouExtension);
+                                    AzFramework::StringFunc::Path::StripExtension(scriptFilenameWithouExtension);
+
+                                    AZStd::string screenshotFilenameWithouExtension;
+                                    AzFramework::StringFunc::Path::GetFileName(screenshotResult.m_screenshotFilePath.c_str(), screenshotFilenameWithouExtension);
+                                    AzFramework::StringFunc::Path::StripExtension(screenshotFilenameWithouExtension);
+
+                                    AZStd::string timestring = GenerateTimestamp();
+
+                                    AZStd::string imageDiffFilename = "imageDiff_" +
+                                        scriptFilenameWithouExtension + "_" +
+                                        screenshotFilenameWithouExtension + "_" +
+                                        m_uniqueTimestamp +
+                                        ".png";
+                                    AzFramework::StringFunc::Path::Join(projectPath.c_str(), UserFolder, imageDiffPath);
+                                    AzFramework::StringFunc::Path::Join(imageDiffPath.c_str(), TestResultsFolder, imageDiffPath);
+                                    AzFramework::StringFunc::Path::Join(imageDiffPath.c_str(), imageDiffFilename.c_str(), imageDiffPath);
+
+                                    AZStd::string imageDiffFolderPath;
+                                    AzFramework::StringFunc::Path::GetFolderPath(imageDiffPath.c_str(), imageDiffFolderPath);
+                                    auto io = AZ::IO::LocalFileIO::GetInstance();
+                                    io->CreatePath(imageDiffFolderPath.c_str());
+
+                                    ExportImageDiff(imageDiffPath.c_str(), screenshotResult);
+                                    m_messageBox.OpenPopupMessage("Image Diff Exported Successfully", AZStd::string::format("The image diff file was saved in %s", imageDiffPath.c_str()).c_str());
+                                }
+
                                 if ((!screenshotPassed || m_forceShowUpdateButtons) && ImGui::Button("Update##Official"))
                                 {
                                     if (screenshotResult.m_localComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::FileNotFound)
@@ -643,12 +686,12 @@ namespace AtomSampleViewer
 
                             highlightTextIf(localBaselineWarning, HighlightWarning);
 
-                            ImGui::Text(("Local Baseline:    " + screenshotResult.m_localBaselineScreenshotFilePath).c_str());
+                            ImGui::Text("Local Baseline:    %s", screenshotResult.m_localBaselineScreenshotFilePath.c_str());
 
                             // Local Baseline Result
                             ImGui::Indent();
                             {
-                                ImGui::Text(screenshotResult.m_localComparisonResult.GetSummaryString().c_str());
+                                ImGui::Text("%s", screenshotResult.m_localComparisonResult.GetSummaryString().c_str());
 
                                 resetTextHighlight();
 
@@ -853,23 +896,19 @@ namespace AtomSampleViewer
         AZStd::string destinationFolder = destinationFile;
         AzFramework::StringFunc::Path::StripFullName(destinationFolder);
 
-        m_fileIoErrorHandler.BusConnect();
-
         bool failed = false;
 
         if (!AZ::IO::LocalFileIO::GetInstance()->CreatePath(destinationFolder.c_str()))
         {
             failed = true;
-            m_fileIoErrorHandler.ReportLatestIOError(AZStd::string::format("Failed to create folder '%s'.", destinationFolder.c_str()));
+            AZ_Error("ScriptReporter", false, "Failed to create folder '%s'.", destinationFolder.c_str());
         }
 
         if (!AZ::IO::LocalFileIO::GetInstance()->Copy(screenshotTest.m_screenshotFilePath.c_str(), destinationFile.c_str()))
         {
             failed = true;
-            m_fileIoErrorHandler.ReportLatestIOError(AZStd::string::format("Failed to copy '%s' to '%s'.", screenshotTest.m_screenshotFilePath.c_str(), destinationFile.c_str()));
+            AZ_Error("ScriptReporter", false, "Failed to copy '%s' to '%s'.", screenshotTest.m_screenshotFilePath.c_str(), destinationFile.c_str());
         }
-
-        m_fileIoErrorHandler.BusDisconnect();
 
         if (!failed)
         {
@@ -925,23 +964,19 @@ namespace AtomSampleViewer
         // ".../AtomSampleViewer/Scripts/ExpectedScreenshots/MyTestFolder/" + "MyTest.png"
         AZStd::string sourceFilePath = AZStd::string::format("%s\\%s", sourceFolderPath.c_str(), reversePathComponents[0].c_str());
 
-        m_fileIoErrorHandler.BusConnect();
-
         // Create parent folder if it doesn't exist
         if (success && !io->CreatePath(sourceFolderPath.c_str()))
         {
             success = false;
-            m_fileIoErrorHandler.ReportLatestIOError(AZStd::string::format("Failed to create folder '%s'.", sourceFolderPath.c_str()));
+            AZ_Error("ScriptReporter", false, "Failed to create folder '%s'.", sourceFolderPath.c_str());
         }
 
         // Replace source screenshot with new result
         if (success && !io->Copy(screenshotTest.m_screenshotFilePath.c_str(), sourceFilePath.c_str()))
         {
             success = false;
-            m_fileIoErrorHandler.ReportLatestIOError(AZStd::string::format("Failed to copy '%s' to '%s'.", screenshotTest.m_screenshotFilePath.c_str(), sourceFilePath.c_str()));
+            AZ_Error("ScriptReporter", false, "Failed to copy '%s' to '%s'.", screenshotTest.m_screenshotFilePath.c_str(), sourceFilePath.c_str());
         }
-
-        m_fileIoErrorHandler.BusDisconnect();
 
         if (success)
         {
@@ -1089,11 +1124,11 @@ namespace AtomSampleViewer
                 }
             }
         }
-
     }
 
     void ScriptReporter::ExportTestResults()
-    {  
+    {
+        m_exportedTestResultsPath = GenerateAndCreateExportedTestResultsPath();
         for (const ScriptReport& scriptReport : m_scriptReports)
         {
             const AZStd::string assertLogLine = AZStd::string::format("Asserts: %u \n", scriptReport.m_assertCount);
@@ -1101,42 +1136,93 @@ namespace AtomSampleViewer
             const AZStd::string warningsLogLine = AZStd::string::format("Warnings: %u \n", scriptReport.m_generalWarningCount);
             const AZStd::string screenshotErrorsLogLine = AZStd::string::format("Screenshot errors: %u \n", scriptReport.m_screenshotErrorCount);
             const AZStd::string screenshotWarningsLogLine = AZStd::string::format("Screenshot warnings: %u \n", scriptReport.m_screenshotWarningCount);
-            const AZStd::string failedScreenshotsLogLine = "\nScreenshot test info below.\n";     
-
-            const auto projectPath = AZ::Utils::GetProjectPath();
-            AZStd::chrono::system_clock::time_point now = AZStd::chrono::system_clock::now();
-            float timeFloat = AZStd::chrono::duration<float>(now.time_since_epoch()).count();
-            AZStd::string timeString = AZStd::string::format("%.4f", timeFloat);
-            AZStd::string exportFileName = AZStd::string::format("exportedTestResults_%s.txt", timeString.c_str());
-            AZStd::string exportTestResultsFolder;
-            AzFramework::StringFunc::Path::Join(projectPath.c_str(), "TestResults/", exportTestResultsFolder);
-
-            auto io = AZ::IO::LocalFileIO::GetInstance();
-            io->CreatePath(exportTestResultsFolder.c_str());
-            AZStd::string exportFile;
-            AzFramework::StringFunc::Path::Join(exportTestResultsFolder.c_str(), exportFileName.c_str(), exportFile);
+            const AZStd::string failedScreenshotsLogLine = "\nScreenshot test info below.\n";
+            
             AZ::IO::HandleType logHandle;
-
-        if (io->Open(exportFile.c_str(), AZ::IO::OpenMode::ModeWrite, logHandle))
-        {
-            io->Write(logHandle, assertLogLine.c_str(), assertLogLine.size());
-            io->Write(logHandle, errorsLogLine.c_str(), errorsLogLine.size());
-            io->Write(logHandle, warningsLogLine.c_str(), warningsLogLine.size());
-            io->Write(logHandle, screenshotErrorsLogLine.c_str(), screenshotErrorsLogLine.size());
-            io->Write(logHandle, screenshotWarningsLogLine.c_str(), screenshotWarningsLogLine.size());
-            io->Write(logHandle, failedScreenshotsLogLine.c_str(), failedScreenshotsLogLine.size());
-
-            for (const ScreenshotTestInfo& screenshotTest : scriptReport.m_screenshotTests)
+            auto io = AZ::IO::LocalFileIO::GetInstance();
+            if (io->Open(m_exportedTestResultsPath.c_str(), AZ::IO::OpenMode::ModeWrite, logHandle))
             {
-                const AZStd::string toleranceLevelLogLine = AZStd::string::format("Tolerance level: %s \n", screenshotTest.m_toleranceLevel.ToString().c_str());
-                const AZStd::string officialComparisonLogLine = AZStd::string::format("Image comparison result: %s \n", screenshotTest.m_officialComparisonResult.GetSummaryString().c_str());
+                io->Write(logHandle, assertLogLine.c_str(), assertLogLine.size());
+                io->Write(logHandle, errorsLogLine.c_str(), errorsLogLine.size());
+                io->Write(logHandle, warningsLogLine.c_str(), warningsLogLine.size());
+                io->Write(logHandle, screenshotErrorsLogLine.c_str(), screenshotErrorsLogLine.size());
+                io->Write(logHandle, screenshotWarningsLogLine.c_str(), screenshotWarningsLogLine.size());
+                io->Write(logHandle, failedScreenshotsLogLine.c_str(), failedScreenshotsLogLine.size());
 
-                io->Write(logHandle, toleranceLevelLogLine.c_str(), toleranceLevelLogLine.size());
-                io->Write(logHandle, officialComparisonLogLine.c_str(), officialComparisonLogLine.size());
+                for (const ScreenshotTestInfo& screenshotTest : scriptReport.m_screenshotTests)
+                {
+                    const AZStd::string screenshotPath = AZStd::string::format("Test screenshot path: %s \n", screenshotTest.m_screenshotFilePath.c_str());
+                    const AZStd::string officialBaselineScreenshotPath = AZStd::string::format("Official baseline screenshot path: %s \n", screenshotTest.m_officialBaselineScreenshotFilePath.c_str());
+                    const AZStd::string toleranceLevelLogLine = AZStd::string::format("Tolerance level: %s \n", screenshotTest.m_toleranceLevel.ToString().c_str());
+                    const AZStd::string officialComparisonLogLine = AZStd::string::format("Image comparison result: %s \n", screenshotTest.m_officialComparisonResult.GetSummaryString().c_str());
+
+                    io->Write(logHandle, toleranceLevelLogLine.c_str(), toleranceLevelLogLine.size());
+                    io->Write(logHandle, officialComparisonLogLine.c_str(), officialComparisonLogLine.size());
+                }
+                io->Close(logHandle);
             }
-            io->Close(logHandle);
-        }
-        m_messageBox.OpenPopupMessage("Exported test results", "Results exported to " + exportFile);
+            m_messageBox.OpenPopupMessage("Exported test results", AZStd::string::format("Results exported to %s", m_exportedTestResultsPath.c_str()));
+            AZ_Printf("Test results exported to %s \n", m_exportedTestResultsPath.c_str());
         }
     }
+
+    void ScriptReporter::ExportImageDiff(const char* filePath, const ScreenshotTestInfo& screenshotTestInfo)
+    {
+        using namespace AZ::Utils;
+        PngFile officialBaseline = PngFile::Load(screenshotTestInfo.m_officialBaselineScreenshotFilePath.c_str());
+        PngFile actualScreenshot = PngFile::Load(screenshotTestInfo.m_screenshotFilePath.c_str());
+
+        const size_t bufferSize = officialBaseline.GetBuffer().size();
+
+        AZStd::vector<uint8_t> diffBuffer = AZStd::vector<uint8_t>(bufferSize);
+        GenerateImageDiff(officialBaseline.GetBuffer(), actualScreenshot.GetBuffer(), diffBuffer);
+
+        AZStd::vector<uint8_t> buffer = AZStd::vector<uint8_t>(bufferSize * 3);
+        memcpy(buffer.data(), officialBaseline.GetBuffer().data(), bufferSize);
+        memcpy(buffer.data() + bufferSize, actualScreenshot.GetBuffer().data(), bufferSize);
+        memcpy(buffer.data() + bufferSize * 2, diffBuffer.data(), bufferSize);
+
+        PngFile imageDiff = PngFile::Create(AZ::RHI::Size(officialBaseline.GetWidth(), officialBaseline.GetHeight() * 3, 1), AZ::RHI::Format::R8G8B8A8_UNORM, buffer);
+        imageDiff.Save(filePath);
+    }
+
+    AZStd::string ScriptReporter::GenerateAndCreateExportedTestResultsPath() const
+    {
+        // Setup our variables for the exported test results path and .txt file.
+        const auto projectPath = AZ::Utils::GetProjectPath();
+        const AZStd::string exportFileName = AZStd::string::format("exportedTestResults_%s.txt", m_uniqueTimestamp.c_str());
+        AZStd::string exportTestResultsFolder;
+        AzFramework::StringFunc::Path::Join(projectPath.c_str(), TestResultsFolder, exportTestResultsFolder);
+
+        // Create the exported test results path & return .txt file path.
+        auto io = AZ::IO::LocalFileIO::GetInstance();
+        io->CreatePath(exportTestResultsFolder.c_str());
+        AZStd::string exportFile;
+        AzFramework::StringFunc::Path::Join(exportTestResultsFolder.c_str(), exportFileName.c_str(), exportFile);
+
+        return exportFile;
+    }
+
+    void ScriptReporter::GenerateImageDiff(AZStd::span<const uint8_t> img1, AZStd::span<const uint8_t> img2, AZStd::vector<uint8_t>& buffer)
+    {
+        static constexpr size_t BytesPerPixel = 4;
+        static constexpr float MinDiffFilter = 0.01;
+        static constexpr uint8_t DefaultPixelValue = 122;
+
+        memset(buffer.data(), DefaultPixelValue, buffer.size() * sizeof(uint8_t));
+
+        for (size_t i = 0; i < img1.size(); i += BytesPerPixel)
+        {
+            const int16_t maxDiff = AZ::Utils::CalcMaxChannelDifference(img1, img2, i);
+
+            if (maxDiff / 255.0f > MinDiffFilter)
+            {
+                buffer[i] = aznumeric_cast<uint8_t>(maxDiff);
+                buffer[i + 1] = 0;
+                buffer[i + 2] = 0;
+            }
+            buffer[i + 3] = 255;
+        }
+    }
+
 } // namespace AtomSampleViewer

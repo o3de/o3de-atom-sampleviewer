@@ -80,7 +80,7 @@ namespace AtomSampleViewer
         m_dynamicDraw->InitVertexFormat(vertexChannels);
         m_dynamicDraw->AddDrawStateOptions(RPI::DynamicDrawContext::DrawStateOptions::BlendMode | RPI::DynamicDrawContext::DrawStateOptions::PrimitiveType
             | RPI::DynamicDrawContext::DrawStateOptions::DepthState | RPI::DynamicDrawContext::DrawStateOptions::FaceCullMode);
-        m_dynamicDraw->SetOutputScope(RPI::RPISystemInterface::Get()->GetDefaultScene().get());
+        m_dynamicDraw->SetOutputScope(m_scene);
         m_dynamicDraw->EndInit();
 
         Data::Instance<RPI::ShaderResourceGroup> contextSrg = m_dynamicDraw->GetPerContextSrg();
@@ -93,16 +93,15 @@ namespace AtomSampleViewer
 
         AZ_Assert(m_dynamicDraw->IsVertexSizeValid(sizeof(ExampleVertex)), "Invalid vertex format");
 
-        // Dynamic draw for pass        
+        // Dynamic draw for pass
         m_dynamicDraw1ForPass = RPI::DynamicDrawInterface::Get()->CreateDynamicDrawContext();
         m_dynamicDraw2ForPass = RPI::DynamicDrawInterface::Get()->CreateDynamicDrawContext();
 
         // Get auxGeom pass from the current render pipeline
-        auto renderPipeline = RPI::RPISystemInterface::Get()->GetDefaultScene()->GetDefaultRenderPipeline();
-        RPI::PassHierarchyFilter filter(AZStd::vector<AZStd::string>{"MainPipeline", "AuxGeomPass"});
-        AZStd::vector<AZ::RPI::Pass*> foundPasses = AZ::RPI::PassSystemInterface::Get()->FindPasses(filter);
-        AZ_Assert(foundPasses.size() > 0, "AuxGeomPass doesn't exist in current render pipeline");
-        RPI::RasterPass* auxGeomPass = azrtti_cast<RPI::RasterPass*>(foundPasses[0]);
+        AZ::RPI::PassFilter passFilter = AZ::RPI::PassFilter::CreateWithPassName(
+            Name("AuxGeomPass"),
+            m_scene);
+        RPI::RasterPass* auxGeomPass = azrtti_cast<RPI::RasterPass*>(AZ::RPI::PassSystemInterface::Get()->FindFirstPass(passFilter));
         AZ_Assert(auxGeomPass, "AuxGeomPass should be a RasterPass or a derived RasterPass");
         
         m_dynamicDraw1ForPass->InitShader(shaderAsset);
@@ -112,7 +111,7 @@ namespace AtomSampleViewer
         m_dynamicDraw1ForPass->SetOutputScope(auxGeomPass);
         m_dynamicDraw1ForPass->EndInit();
 
-        m_dynamicDraw2ForPass->InitShader(shaderAsset);        
+        m_dynamicDraw2ForPass->InitShader(shaderAsset);
         m_dynamicDraw2ForPass->InitVertexFormat(vertexChannels);
         m_dynamicDraw2ForPass->AddDrawStateOptions(RPI::DynamicDrawContext::DrawStateOptions::BlendMode
             | RPI::DynamicDrawContext::DrawStateOptions::DepthState);
@@ -372,7 +371,7 @@ namespace AtomSampleViewer
             blendState.m_enable = false;
             m_dynamicDraw->SetTarget0BlendState(blendState);
             m_dynamicDraw1ForPass->SetTarget0BlendState(blendState);
-            m_dynamicDraw2ForPass->SetTarget0BlendState(blendState);                        
+            m_dynamicDraw2ForPass->SetTarget0BlendState(blendState);
 
             // draw two red quads via view
             drawSrg = m_dynamicDraw->NewDrawSrg();

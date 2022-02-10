@@ -1,5 +1,5 @@
 {
-    "Source": "ComputeDispatch",
+    "Source": "ComputeDispatch.azsl",
 
     "ProgramSettings":
     {

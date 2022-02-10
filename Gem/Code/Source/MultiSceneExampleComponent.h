@@ -16,6 +16,7 @@
 #include <AzCore/Asset/AssetCommon.h>
 #include <AzCore/Component/TickBus.h>
 
+#include <AzFramework/Scene/Scene.h>
 #include <AzFramework/Windowing/WindowBus.h>
 #include <AzFramework/Windowing/NativeWindow.h>
 
@@ -23,7 +24,6 @@
 #include <Atom/Feature/CoreLights/DiskLightFeatureProcessorInterface.h>
 #include <Atom/Feature/CoreLights/DirectionalLightFeatureProcessorInterface.h>
 #include <Atom/Feature/ReflectionProbe/ReflectionProbeFeatureProcessorInterface.h>
-#include <Atom/Feature/ReflectionProbe/ReflectionProbeFeatureProcessor.h>
 
 #include <Utils/Utils.h>
 
@@ -95,8 +95,6 @@ namespace AtomSampleViewer
         DirectionalLightHandle m_directionalLightHandle;
         ReflectinoProbeHandle m_reflectionProbeHandle;
 
-        double m_simulateTime = 0.0f;
-        float m_deltaTime = 0.0f;
         MultiSceneExampleComponent* m_parent = nullptr;
         const AZ::Vector3 m_cameraOffset{ 0.0f, -4.0f, 2.0f };
         AZ::Vector3 m_dynamicCameraOffset{ 3.73f, 0.0f, 0.0f };

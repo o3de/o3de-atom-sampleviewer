@@ -29,11 +29,6 @@
 
 namespace AtomSampleViewer
 {
-    namespace
-    {
-        static const char* const SkinnedMeshMaterial = "materials/defaultpbrmaterial.azmaterial";
-    }
-
     void SkinnedMeshExampleComponent::Reflect(AZ::ReflectContext* context)
     {
         if (AZ::SerializeContext* serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
@@ -73,7 +68,7 @@ namespace AtomSampleViewer
 
     void SkinnedMeshExampleComponent::AddImageBasedLight()
     {
-        m_defaultIbl.Init(AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get());
+        m_defaultIbl.Init(m_scene);
     }
 
     void SkinnedMeshExampleComponent::ConfigureCamera()
@@ -138,9 +133,8 @@ namespace AtomSampleViewer
 
     void SkinnedMeshExampleComponent::CreateSkinnedMeshContainer()
     {
-        const AZ::RPI::Scene* scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get();
-        const auto skinnedMeshFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::SkinnedMeshFeatureProcessorInterface>();
-        const auto meshFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::MeshFeatureProcessorInterface>();
+        const auto skinnedMeshFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::SkinnedMeshFeatureProcessorInterface>();
+        const auto meshFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::MeshFeatureProcessorInterface>();
 
         // Default settings for the sample
         SkinnedMeshConfig config;

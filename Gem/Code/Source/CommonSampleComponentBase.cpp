@@ -23,6 +23,8 @@ namespace AtomSampleViewer
 
     bool CommonSampleComponentBase::ReadInConfig(const ComponentConfig* baseConfig)
     {
+        m_scene = RPI::RPISystemInterface::Get()->GetSceneByName(AZ::Name("RPI"));
+
         auto config = azrtti_cast<const SampleComponentConfig*>(baseConfig);
         if (config && config->IsValid())
         {
@@ -86,6 +88,18 @@ namespace AtomSampleViewer
             for (const auto& info : lightingAssetInfoList)
             {
                 AppendLightingPresetsFromAsset(info.m_relativePath);
+            }
+        }
+
+        // set the initial lighting preset
+        static const char* InitialLightingPresetName = "Palermo Sidewalk";
+        for (uint32_t index = 0; index < m_lightingPresets.size(); ++index)
+        {
+            if (m_lightingPresets[index].m_displayName == InitialLightingPresetName)
+            {
+                m_currentLightingPresetIndex = index;
+                OnLightingPresetSelected(m_lightingPresets[m_currentLightingPresetIndex], m_useAlternateSkybox);
+                break;
             }
         }
 

@@ -46,18 +46,7 @@ namespace AtomSampleViewer
         CreateModels();
         CreateGroundPlane();
 
-        // IBL
-        m_defaultIbl.Init(AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get());
-
-        // skybox
-        const constexpr char* SkyboxAssetPath = "textures/sampleenvironment/example_iblskyboxcm.dds.streamingimage";
-        m_skyboxImageAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::StreamingImageAsset>(SkyboxAssetPath, AZ::RPI::AssetUtils::TraceLevel::Assert);
-
-        AZ::RPI::ScenePtr scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        AZ::Render::SkyBoxFeatureProcessorInterface* skyboxFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::SkyBoxFeatureProcessorInterface>();
-        skyboxFeatureProcessor->Enable(true);
-        skyboxFeatureProcessor->SetSkyboxMode(AZ::Render::SkyBoxMode::Cubemap);
-        skyboxFeatureProcessor->SetCubemap(AZ::RPI::StreamingImage::FindOrCreate(m_skyboxImageAsset));
+        InitLightingPresets(true);
 
         // enable the SSR pass in the pipeline
         EnableSSR(true);
@@ -65,12 +54,10 @@ namespace AtomSampleViewer
 
     void SSRExampleComponent::Deactivate()
     {
-        AZ::RPI::ScenePtr scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-
         // disable the SSR pass in the pipeline
         EnableSSR(false);
 
-        m_defaultIbl.Reset();
+        ShutdownLightingPresets();
 
         GetMeshFeatureProcessor()->ReleaseMesh(m_statueMeshHandle);
         GetMeshFeatureProcessor()->ReleaseMesh(m_boxMeshHandle);
@@ -90,10 +77,9 @@ namespace AtomSampleViewer
 
         // statue
         {
-            AZ::Data::Asset<AZ::RPI::MaterialAsset> materialAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::MaterialAsset>("objects/lucy/lucy_stone.azmaterial", AZ::RPI::AssetUtils::TraceLevel::Assert);
-            AZ::Data::Asset<AZ::RPI::ModelAsset> modelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>(ATOMSAMPLEVIEWER_TRAIT_SSR_SAMPLE_LUCY_MODEL_NAME, AZ::RPI::AssetUtils::TraceLevel::Assert);
+            AZ::Data::Asset<AZ::RPI::MaterialAsset> materialAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::MaterialAsset>("objects/hermanubis/hermanubis_stone.azmaterial", AZ::RPI::AssetUtils::TraceLevel::Assert);
+            AZ::Data::Asset<AZ::RPI::ModelAsset> modelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>(ATOMSAMPLEVIEWER_TRAIT_SSR_SAMPLE_HERMANUBIS_MODEL_NAME, AZ::RPI::AssetUtils::TraceLevel::Assert);
             AZ::Transform transform = AZ::Transform::CreateIdentity();
-            transform *= AZ::Transform::CreateRotationZ(AZ::Constants::Pi);
             transform.SetTranslation(0.0f, 0.0f, -0.05f);
 
             m_statueMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ modelAsset }, AZ::RPI::Material::FindOrCreate(materialAsset));
@@ -143,10 +129,10 @@ namespace AtomSampleViewer
             materialName = AZStd::string::format("materials/ssrexample/groundplanealuminum.azmaterial");
             break;
         case 2:
-            materialName = AZStd::string::format("materials/ssrexample/groundplanewood.azmaterial");
+            materialName = AZStd::string::format("materials/presets/pbr/default_grid.azmaterial");
             break;
         default:
-            materialName = AZStd::string::format("materials/presets/pbr/default_grid.azmaterial");
+            materialName = AZStd::string::format("materials/ssrexample/groundplanemirror.azmaterial");
             break;
         }
 
@@ -195,12 +181,15 @@ namespace AtomSampleViewer
         bool materialChanged = false;
         materialChanged |= ScriptableImGui::RadioButton("Chrome", &m_groundPlaneMaterial, 0);
         materialChanged |= ScriptableImGui::RadioButton("Aluminum", &m_groundPlaneMaterial, 1);
-        materialChanged |= ScriptableImGui::RadioButton("Wood", &m_groundPlaneMaterial, 2);
-        materialChanged |= ScriptableImGui::RadioButton("Default Grid", &m_groundPlaneMaterial, 3);
+        materialChanged |= ScriptableImGui::RadioButton("Default Grid", &m_groundPlaneMaterial, 2);
+        materialChanged |= ScriptableImGui::RadioButton("Mirror", &m_groundPlaneMaterial, 3);
         if (materialChanged)
         {
             CreateGroundPlane();
         }
+
+        ImGui::NewLine();
+        ImGuiLightingPreset();
 
         m_imguiSidebar.End();
     }
@@ -209,22 +198,22 @@ namespace AtomSampleViewer
     {
         // set screen space pass
         {
-            AZ::RPI::PassHierarchyFilter passFilter(AZ::Name("ReflectionScreenSpacePass"));
-            const AZStd::vector<AZ::RPI::Pass*>& passes = AZ::RPI::PassSystemInterface::Get()->FindPasses(passFilter);
-            for (auto& pass : passes)
-            {
-                pass->SetEnabled(enabled);
-            }
+            AZ::RPI::PassFilter passFilter = AZ::RPI::PassFilter::CreateWithPassName(AZ::Name("ReflectionScreenSpacePass"), (AZ::RPI::Scene*) nullptr);
+            AZ::RPI::PassSystemInterface::Get()->ForEachPass(passFilter, [enabled](AZ::RPI::Pass* pass) -> AZ::RPI::PassFilterExecutionFlow
+                {
+                    pass->SetEnabled(enabled);
+                    return  AZ::RPI::PassFilterExecutionFlow::ContinueVisitingPasses;
+                });
         }
 
         // set copy frame buffer pass
         {
-            AZ::RPI::PassHierarchyFilter passFilter(AZ::Name("ReflectionCopyFrameBufferPass"));
-            const AZStd::vector<AZ::RPI::Pass*>& passes = AZ::RPI::PassSystemInterface::Get()->FindPasses(passFilter);
-            for (auto& pass : passes)
-            {
-                pass->SetEnabled(enabled);
-            }
+            AZ::RPI::PassFilter passFilter = AZ::RPI::PassFilter::CreateWithPassName(AZ::Name("ReflectionCopyFrameBufferPass"), (AZ::RPI::Scene*) nullptr);
+            AZ::RPI::PassSystemInterface::Get()->ForEachPass(passFilter, [enabled](AZ::RPI::Pass* pass) -> AZ::RPI::PassFilterExecutionFlow
+                {
+                    pass->SetEnabled(enabled);
+                    return  AZ::RPI::PassFilterExecutionFlow::ContinueVisitingPasses;
+                });
         }
     }
 }

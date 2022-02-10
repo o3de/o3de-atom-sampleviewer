@@ -212,14 +212,10 @@ namespace AtomSampleViewer
 
         if (AZ::IO::LocalFileIO::GetInstance()->Exists(deletePath.c_str()))
         {
-            m_fileIoErrorHandler.BusConnect();
-
             if (!AZ::IO::LocalFileIO::GetInstance()->Remove(deletePath.c_str()))
             {
-                m_fileIoErrorHandler.ReportLatestIOError(AZStd::string::format("Failed to delete '%s'.", deletePath.c_str()));
+                AZ_Error("MaterialHotReloadTestComponent", false, "Failed to delete '%s'.", deletePath.c_str());
             }
-
-            m_fileIoErrorHandler.BusDisconnect();
         }
     }
 
@@ -232,23 +228,19 @@ namespace AtomSampleViewer
         AZ::IO::Path copyFrom = AZ::IO::Path(m_testDataFolder).Append(testDataFile);
         AZ::IO::Path copyTo = AZ::IO::Path(m_tempSourceFolder).Append(tempSourceFile);
 
-        m_fileIoErrorHandler.BusConnect();
-
         auto readResult = AZ::Utils::ReadFile(copyFrom.c_str());
         if (!readResult.IsSuccess())
         {
-            m_fileIoErrorHandler.ReportLatestIOError(readResult.GetError());
+            AZ_Error("MaterialHotReloadTestComponent", false, "%s", readResult.GetError().c_str());
             return;
         }
 
         auto writeResult = AZ::Utils::WriteFile(readResult.GetValue(), copyTo.c_str());
         if (!writeResult.IsSuccess())
         {
-            m_fileIoErrorHandler.ReportLatestIOError(writeResult.GetError());
+            AZ_Error("MaterialHotReloadTestComponent", false, "%s", writeResult.GetError().c_str());
             return;
         }
-
-        m_fileIoErrorHandler.BusDisconnect();
     }
 
     const char* ToString(AzFramework::AssetSystem::AssetStatus status)
@@ -287,7 +279,7 @@ namespace AtomSampleViewer
 
         ImGui::Text("Status:");
         ImGui::SameLine();
-        ImGui::Text(ToString(status));
+        ImGui::Text("%s", ToString(status));
 
         if (includeFileName)
         {

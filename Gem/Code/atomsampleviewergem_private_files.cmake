@@ -120,6 +120,8 @@ set(FILES
     Source/EntityUtilityFunctions.h
     Source/ExposureExampleComponent.cpp
     Source/ExposureExampleComponent.h
+    Source/HighInstanceExampleComponent.cpp
+    Source/HighInstanceExampleComponent.h
     Source/LightCullingExampleComponent.cpp
     Source/LightCullingExampleComponent.h
     Source/MaterialHotReloadTestComponent.cpp
@@ -143,12 +145,12 @@ set(FILES
     Source/ProceduralSkinnedMesh.h
     Source/ProceduralSkinnedMeshUtils.cpp
     Source/ProceduralSkinnedMeshUtils.h
+    Source/RenderTargetTextureExampleComponent.cpp
+    Source/RenderTargetTextureExampleComponent.h
     Source/RootConstantsExampleComponent.h
     Source/RootConstantsExampleComponent.cpp
     Source/SceneReloadSoakTestComponent.cpp
     Source/SceneReloadSoakTestComponent.h
-    Source/ShadingExampleComponent.cpp
-    Source/ShadingExampleComponent.h
     Source/ShadowExampleComponent.cpp
     Source/ShadowExampleComponent.h
     Source/ShadowedSponzaExampleComponent.cpp
@@ -167,8 +169,8 @@ set(FILES
     Source/TonemappingExampleComponent.h
     Source/TransparencyExampleComponent.cpp
     Source/TransparencyExampleComponent.h
-    Source/Utils/FileIOErrorHandler.cpp
-    Source/Utils/FileIOErrorHandler.h
+    Source/ShaderReloadTestComponent.cpp
+    Source/ShaderReloadTestComponent.h
     Source/Utils/ImGuiAssetBrowser.cpp
     Source/Utils/ImGuiAssetBrowser.h
     Source/Utils/ImGuiHistogramQueue.cpp

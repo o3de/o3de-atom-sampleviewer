@@ -31,8 +31,8 @@ namespace AtomSampleViewer
             AZStd::string header = AZStd::string::format("%-*s |  Bits | Requested | Selected", longestOptionNameLength, "Option Name");
             AZStd::string divider{header.size(), '-'};
 
-            ImGui::Text(header.c_str());
-            ImGui::Text(divider.c_str());
+            ImGui::Text("%s", header.c_str());
+            ImGui::Text("%s", divider.c_str());
 
             for (size_t i = 0; i < shaderOptionDescriptors.size(); ++i)
             {

@@ -331,11 +331,15 @@ namespace AtomSampleViewer
                 m_assetTrackingTimeout -= deltaTime;
                 if (m_assetTrackingTimeout < 0)
                 {
-                    AZ_Error("Automation", false, "Script asset tracking timed out. Continuing...");
+                    auto incomplateAssetList = m_assetStatusTracker.GetIncompleteAssetList();
+                    AZStd::string incompleteAssetListString;
+                    AzFramework::StringFunc::Join(incompleteAssetListString, incomplateAssetList.begin(), incomplateAssetList.end(), "\n    ");
+                    AZ_Error("Automation", false, "Script asset tracking timed out waiting for:\n    %s \n Continuing...", incompleteAssetListString.c_str());
                     m_waitForAssetTracker = false;
                 }
                 else if (m_assetStatusTracker.DidExpectedAssetsFinish())
                 {
+                    AZ_Printf("Automation", "Asset Tracker finished with %f seconds remaining.", m_assetTrackingTimeout);
                     m_waitForAssetTracker = false;
                 }
                 else
@@ -390,7 +394,7 @@ namespace AtomSampleViewer
 
                 if (m_frameTimeIsLocked)
                 {
-                    AZ::Interface<AZ::IConsole>::Get()->PerformCommand("t_frameTimeOverride 0");
+                    AZ::Interface<AZ::IConsole>::Get()->PerformCommand("t_simulationTickDeltaOverride 0");
                     m_frameTimeIsLocked = false;
                 }
 
@@ -899,7 +903,9 @@ namespace AtomSampleViewer
         {
             AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
 
-            AZ::Interface<AZ::IConsole>::Get()->PerformCommand(AZStd::string::format("t_frameTimeOverride %f", seconds).c_str());
+            int milliseconds = static_cast<int>(seconds * 1000);
+
+            AZ::Interface<AZ::IConsole>::Get()->PerformCommand(AZStd::string::format("t_simulationTickDeltaOverride %d", milliseconds).c_str());
             s_instance->m_frameTimeIsLocked = true;
         };
 
@@ -912,7 +918,7 @@ namespace AtomSampleViewer
         {
             AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
 
-            AZ::Interface<AZ::IConsole>::Get()->PerformCommand("t_frameTimeOverride 0");
+            AZ::Interface<AZ::IConsole>::Get()->PerformCommand("t_simulationTickDeltaOverride 0");
             s_instance->m_frameTimeIsLocked = false;
         };
 
@@ -1291,10 +1297,10 @@ namespace AtomSampleViewer
         ResumeScript();
     }
 
-    void ScriptManager::OnCaptureCpuProfilingStatisticsFinished([[maybe_unused]] bool result, [[maybe_unused]] const AZStd::string& info)
+    void ScriptManager::OnCaptureFinished([[maybe_unused]] bool result, [[maybe_unused]] const AZStd::string& info)
     {
         m_isCapturePending = false;
-        AZ::Render::ProfilingCaptureNotificationBus::Handler::BusDisconnect();
+        AZ::Debug::ProfilerNotificationBus::Handler::BusDisconnect();
         ResumeScript();
     }
 
@@ -1380,10 +1386,13 @@ namespace AtomSampleViewer
         auto operation = [outputFilePath]()
         {
             s_instance->m_isCapturePending = true;
-            s_instance->AZ::Render::ProfilingCaptureNotificationBus::Handler::BusConnect();
+            s_instance->AZ::Debug::ProfilerNotificationBus::Handler::BusConnect();
             s_instance->PauseScript();
 
-            AZ::Render::ProfilingCaptureRequestBus::Broadcast(&AZ::Render::ProfilingCaptureRequestBus::Events::CaptureCpuProfilingStatistics, outputFilePath);
+            if (auto profilerSystem = AZ::Debug::ProfilerSystemInterface::Get(); profilerSystem)
+            {
+                profilerSystem->CaptureFrame(outputFilePath);
+            }
         };
 
         s_instance->m_scriptOperations.push(AZStd::move(operation));

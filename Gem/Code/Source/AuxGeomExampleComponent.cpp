@@ -71,6 +71,7 @@ namespace AtomSampleViewer
     
     void AuxGeomExampleComponent::OnTick([[maybe_unused]] float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint time)
     {
+        AZ_PROFILE_SCOPE(AzRender, "AuxGeomExampleComponent: OnTick");
         if (m_imguiSidebar.Begin())
         {
             ImGui::Text("Draw Options");
@@ -128,8 +129,7 @@ namespace AtomSampleViewer
 
     void AuxGeomExampleComponent::DrawSampleOfAllAuxGeom() const
     {
-        auto defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        if (auto auxGeom = AZ::RPI::AuxGeomFeatureProcessorInterface::GetDrawQueueForScene(defaultScene))
+        if (auto auxGeom = AZ::RPI::AuxGeomFeatureProcessorInterface::GetDrawQueueForScene(m_scene))
         {
             if (m_drawBackgroundBox)
             {

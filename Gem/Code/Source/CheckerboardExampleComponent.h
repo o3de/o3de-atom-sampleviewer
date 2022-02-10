@@ -8,6 +8,8 @@
 
 #pragma once
 
+#include <CommonSampleComponentBase.h>
+
 #include <Atom/Bootstrap/DefaultWindowBus.h>
 #include <Atom/Feature/ImGui/ImGuiUtils.h>
 #include <Atom/Feature/Mesh/MeshFeatureProcessorInterface.h>
@@ -25,12 +27,12 @@ namespace AtomSampleViewer
 {
     // This component renders a model with pbr material using checkerboard render pipeline.
     class CheckerboardExampleComponent final
-        : public AZ::Component
+        : public CommonSampleComponentBase
         , public AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler
         , public AZ::TickBus::Handler
     {
     public:
-        AZ_COMPONENT(CheckerboardExampleComponent, "{0E5B3D5F-5BD2-41BF-BB1E-425AF976DFC9}");
+        AZ_COMPONENT(CheckerboardExampleComponent, "{0E5B3D5F-5BD2-41BF-BB1E-425AF976DFC9}", CommonSampleComponentBase);
 
         static void Reflect(AZ::ReflectContext* context);
 
@@ -41,9 +43,6 @@ namespace AtomSampleViewer
         void Deactivate() override;
 
     private:
-
-        // AZ::Component overrides...
-        bool ReadInConfig(const AZ::ComponentConfig* baseConfig) override;
 
         // DefaultWindowNotificationBus::Handler overrides...
         void DefaultWindowCreated() override;
@@ -59,11 +58,6 @@ namespace AtomSampleViewer
                         
         // shader ball model
         AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_meshHandle;
-
-        // Not owned by this sample, we look this up based on the config from the
-        // SampleComponentManager
-        AZ::EntityId m_cameraEntityId;
-        AzFramework::EntityContextId m_entityContextId;
 
         AZ::Render::MeshFeatureProcessorInterface* m_meshFeatureProcessor = nullptr;
         Utils::DefaultIBL m_defaultIbl;

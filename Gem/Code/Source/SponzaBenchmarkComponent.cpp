@@ -20,6 +20,7 @@
 
 #include <AzCore/Serialization/SerializeContext.h>
 #include <AzCore/Serialization/Utils.h>
+#include <AzCore/Settings/SettingsRegistryMergeUtils.h>
 #include <AzCore/std/sort.h>
 
 #include <AzFramework/IO/LocalFileIO.h>
@@ -136,15 +137,12 @@ namespace AtomSampleViewer
 
         AZ::TickBus::Handler::BusConnect();
 
-        const char* engineRoot = nullptr;
-        AzFramework::ApplicationRequests::Bus::BroadcastResult(engineRoot, &AzFramework::ApplicationRequests::GetEngineRoot);
-        if (engineRoot)
-        {
-            AzFramework::StringFunc::Path::Join(engineRoot, "Screenshots", m_screenshotFolder, true, false);
-        }
+        auto settingsRegistry = AZ::SettingsRegistry::Get();
+        AZ::IO::Path writableStoragePath;
+        settingsRegistry->Get(writableStoragePath.Native(), AZ::SettingsRegistryMergeUtils::FilePathKey_DevWriteStorage);
+        m_screenshotFolder = writableStoragePath / "Screenshots";
 
-        auto defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        m_directionalLightFeatureProcessor = defaultScene->GetFeatureProcessor<AZ::Render::DirectionalLightFeatureProcessorInterface>();
+        m_directionalLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DirectionalLightFeatureProcessorInterface>();
 
         const auto handle = m_directionalLightFeatureProcessor->AcquireLight();
 
@@ -158,8 +156,7 @@ namespace AtomSampleViewer
         m_directionalLightFeatureProcessor->SetShadowmapSize(handle, AZ::Render::ShadowmapSizeNamespace::ShadowmapSize::Size2048);
         m_directionalLightFeatureProcessor->SetViewFrustumCorrectionEnabled(handle, true);
         m_directionalLightFeatureProcessor->SetShadowFilterMethod(handle, AZ::Render::ShadowFilterMethod::EsmPcf);
-        m_directionalLightFeatureProcessor->SetShadowBoundaryWidth(handle, 0.03);
-        m_directionalLightFeatureProcessor->SetPredictionSampleCount(handle, 4);
+        m_directionalLightFeatureProcessor->SetShadowFarClipDistance(handle, 100.0f);
         m_directionalLightFeatureProcessor->SetFilteringSampleCount(handle, 16);
         m_directionalLightFeatureProcessor->SetGroundHeight(handle, 0.f);
         m_directionalLightHandle = handle;
@@ -176,7 +173,7 @@ namespace AtomSampleViewer
         m_skyboxFeatureProcessor->SetSunPosition(azimuth, altitude);
 
         // Create IBL
-        m_defaultIbl.Init(AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get());
+        m_defaultIbl.Init(m_scene);
         m_defaultIbl.SetExposure(-3.0f);
     }
 
@@ -262,16 +259,14 @@ namespace AtomSampleViewer
 
                 if (screenshotRequested)
                 {
-                    AZStd::string filePath;
-                    AZStd::string fileName = AZStd::string::format("screenshot_sponza_%llu.dds", m_frameCount);
-                    AzFramework::StringFunc::Path::Join(m_screenshotFolder.c_str(), fileName.c_str(), filePath, true, false);
-                    AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, filePath);
+                    AZ::IO::Path filePath = m_screenshotFolder / AZStd::string::format("screenshot_sponza_%llu.dds", m_frameCount);
+                    AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, filePath.Native());
                 }
 
                 if (m_frameCount == 1)
                 {
                     m_timeToFirstFrame = m_currentTimePointInSeconds - m_benchmarkStartTimePoint;
-                } 
+                }
 
                 CollectRunBenchmarkData(deltaTime, timePoint);
 
@@ -290,7 +285,6 @@ namespace AtomSampleViewer
 
                     const AZ::Vector3 position = cameraPathPoint.m_position.Lerp(nextCameraPathPoint.m_position, percentToNextPoint);
                     const AZ::Vector3 target = cameraPathPoint.m_target.Lerp(nextCameraPathPoint.m_target, percentToNextPoint);
-                    const AZ::Vector3 up = cameraPathPoint.m_up.Lerp(nextCameraPathPoint.m_up, percentToNextPoint);
 
                     const AZ::Transform transform = AZ::Transform::CreateLookAt(position, target, AZ::Transform::Axis::YPositive);
 

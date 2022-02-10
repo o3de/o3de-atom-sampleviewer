@@ -50,9 +50,8 @@ namespace AtomSampleViewer
         AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusConnect();
 
         // save the current render pipeline
-        AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        m_originalPipeline = defaultScene->GetDefaultRenderPipeline();
-        defaultScene->RemoveRenderPipeline(m_originalPipeline->GetId());
+        m_originalPipeline = m_scene->GetDefaultRenderPipeline();
+        m_scene->RemoveRenderPipeline(m_originalPipeline->GetId());
 
         // switch to the sample render pipeline
         ChangeRenderPipeline();
@@ -83,14 +82,12 @@ namespace AtomSampleViewer
 
     void MSAA_RPI_ExampleComponent::ChangeRenderPipeline()
     {
-        AZ::RPI::ScenePtr defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-
         m_imguiScope = {}; // restores previous ImGui context.
 
         // remove currently running sample pipeline, if any
         if (m_samplePipeline)
         {
-            defaultScene->RemoveRenderPipeline(m_samplePipeline->GetId());
+            m_scene->RemoveRenderPipeline(m_samplePipeline->GetId());
             m_samplePipeline = nullptr;
         }
         
@@ -107,12 +104,9 @@ namespace AtomSampleViewer
             // reset internal sample scene related data
             ResetScene();
 
-            // re-acquire the default scene
-            defaultScene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-
             // remove the default render pipeline
-            AZ::RPI::RenderPipelinePtr defaultPipeline = defaultScene->GetDefaultRenderPipeline();
-            defaultScene->RemoveRenderPipeline(defaultPipeline->GetId());
+            AZ::RPI::RenderPipelinePtr defaultPipeline = m_scene->GetDefaultRenderPipeline();
+            m_scene->RemoveRenderPipeline(defaultPipeline->GetId());
 
             // scene IBL is cleared after the reset, re-activate it
             ActivateIbl();
@@ -129,12 +123,12 @@ namespace AtomSampleViewer
         m_samplePipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
 
         // add the sample pipeline to the scene
-        defaultScene->AddRenderPipeline(m_samplePipeline);
+        m_scene->AddRenderPipeline(m_samplePipeline);
         m_samplePipeline->SetDefaultView(m_originalPipeline->GetDefaultView());
-        defaultScene->SetDefaultRenderPipeline(m_samplePipeline->GetId());
+        m_scene->SetDefaultRenderPipeline(m_samplePipeline->GetId());
 
         // create an ImGuiActiveContextScope to ensure the ImGui context on the new pipeline's ImGui pass is activated.
-        m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass(AZ::RPI::PassHierarchyFilter({ m_samplePipeline->GetId().GetCStr(), "ImGuiPass" }));
+        m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass({ m_samplePipeline->GetId().GetCStr(), "ImGuiPass" });
     }
 
     void MSAA_RPI_ExampleComponent::ResetCamera()
@@ -203,7 +197,7 @@ namespace AtomSampleViewer
 
     void MSAA_RPI_ExampleComponent::ActivateIbl()
     {
-        m_defaultIbl.Init(AZ::RPI::RPISystemInterface::Get()->GetDefaultScene().get());
+        m_defaultIbl.Init(m_scene);
 
         // reduce the exposure so the model isn't overly bright
         m_defaultIbl.SetExposure(-0.5f);

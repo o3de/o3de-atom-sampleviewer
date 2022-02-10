@@ -39,7 +39,7 @@
     },
 
     "CompilerHints" : { 
-        "DxcDisableOptimizations" : false
+        "DisableOptimizations" : false
     },
 
     "DrawList" : "forward"

@@ -1,30 +1,19 @@
 {
-    "description": "",
     "materialType": "Materials\\Types\\StandardPBR.materialtype",
-    "propertyLayoutVersion": 3,
-    "properties": {
-        "baseColor": {
-            "color": [
-                1.0,
-                0.0,
-                0.0,
-                1.0
-            ],
-            "useTexture": false
-        },
-        "specularF0": {
-            "factor": 0.0,
-            "useTexture": false
-        },
-        "metallic": {
-            "factor": 0.0,
-            "useTexture": false
-        },        
-        "normal": {
-            "textureMap": "Textures/Default/default_normal.tif"
-        },
-        "roughness": {
-            "textureMap": "Textures/Default/default_roughness.tif"
-        }
+    "materialTypeVersion": 3,
+    "propertyValues": {
+        "baseColor.color": [
+            1.0,
+            0.0,
+            0.0,
+            1.0
+        ],
+        "baseColor.useTexture": false,
+        "metallic.factor": 0.0,
+        "metallic.useTexture": false,
+        "normal.textureMap": "Textures/Default/default_normal.tif",
+        "roughness.textureMap": "Textures/Default/default_roughness.tif",
+        "specularF0.factor": 0.0,
+        "specularF0.useTexture": false
     }
 }

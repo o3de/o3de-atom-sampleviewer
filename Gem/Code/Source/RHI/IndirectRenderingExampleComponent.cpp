@@ -239,7 +239,7 @@ namespace AtomSampleViewer
                 sizeof(uint32_t)
             };
 
-            RHI::ValidateStreamBufferViews(m_inputStreamLayout, AZStd::array_view<RHI::StreamBufferView>(m_streamBufferViews.data(), 2));
+            RHI::ValidateStreamBufferViews(m_inputStreamLayout, AZStd::span<const RHI::StreamBufferView>(m_streamBufferViews.data(), 2));
         }
     }
 

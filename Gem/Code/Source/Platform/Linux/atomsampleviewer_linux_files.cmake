@@ -13,6 +13,7 @@ set(FILES
     SceneReloadSoakTestComponent_Traits_Platform.h
     SSRExampleComponent_Traits_Platform.h
     TriangleConstantBufferExampleComponent_Traits_Platform.h
+    HighInstanceTestComponent_Traits_Platform.h
     SampleComponentManager_Linux.cpp
     StreamingImageExampleComponent_Linux.cpp
     Utils_Linux.cpp

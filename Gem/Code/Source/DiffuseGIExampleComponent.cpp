@@ -86,10 +86,8 @@ namespace AtomSampleViewer
 
     void DiffuseGIExampleComponent::UnloadSampleScene(bool geometryOnly)
     {
-        AZ::RPI::ScenePtr scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-
         // release meshes
-        AZ::Render::MeshFeatureProcessorInterface* meshFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::MeshFeatureProcessorInterface>();
+        AZ::Render::MeshFeatureProcessorInterface* meshFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::MeshFeatureProcessorInterface>();
         for (auto& meshHandle : m_meshHandles)
         {
             meshFeatureProcessor->ReleaseMesh(meshHandle);
@@ -100,19 +98,19 @@ namespace AtomSampleViewer
         {
             if (m_diffuseProbeGrid)
             {
-                AZ::Render::DiffuseProbeGridFeatureProcessorInterface* diffuseProbeGridFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DiffuseProbeGridFeatureProcessorInterface>();
+                AZ::Render::DiffuseProbeGridFeatureProcessorInterface* diffuseProbeGridFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DiffuseProbeGridFeatureProcessorInterface>();
                 diffuseProbeGridFeatureProcessor->RemoveProbeGrid(m_diffuseProbeGrid);
             }
 
             if (m_directionalLightHandle.IsValid())
             {
-                AZ::Render::DirectionalLightFeatureProcessorInterface* directionalLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DirectionalLightFeatureProcessorInterface>();
+                AZ::Render::DirectionalLightFeatureProcessorInterface* directionalLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DirectionalLightFeatureProcessorInterface>();
                 directionalLightFeatureProcessor->ReleaseLight(m_directionalLightHandle);
             }
 
             if (m_pointLightHandle.IsValid())
             {
-                AZ::Render::PointLightFeatureProcessorInterface* pointLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::PointLightFeatureProcessorInterface>();
+                AZ::Render::PointLightFeatureProcessorInterface* pointLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::PointLightFeatureProcessorInterface>();
                 pointLightFeatureProcessor->ReleaseLight(m_pointLightHandle);
             }
         }
@@ -340,8 +338,7 @@ namespace AtomSampleViewer
 
         // point light
         {
-            AZ::RPI::ScenePtr scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-            AZ::Render::PointLightFeatureProcessorInterface* pointLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::PointLightFeatureProcessorInterface>();
+            AZ::Render::PointLightFeatureProcessorInterface* pointLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::PointLightFeatureProcessorInterface>();
             m_pointLightHandle = pointLightFeatureProcessor->AcquireLight();
             pointLightFeatureProcessor->SetPosition(m_pointLightHandle, m_pointLightPos);
             pointLightFeatureProcessor->SetRgbIntensity(m_pointLightHandle, AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Candela>(m_pointLightIntensity * m_pointLightColor));
@@ -351,22 +348,21 @@ namespace AtomSampleViewer
 
         // diffuse probe grid
         {
-            AZ::RPI::ScenePtr scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-            AZ::Render::DiffuseProbeGridFeatureProcessorInterface* diffuseProbeGridFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DiffuseProbeGridFeatureProcessorInterface>();
+            AZ::Render::DiffuseProbeGridFeatureProcessorInterface* diffuseProbeGridFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DiffuseProbeGridFeatureProcessorInterface>();
             AZ::Transform transform = AZ::Transform::CreateIdentity();
 
-            m_origin.Set(0.3f, -0.25f, 0.5f);
+            m_origin.Set(-0.8f, 0.5f, -0.055f);
             transform.SetTranslation(m_origin);
             m_diffuseProbeGrid = diffuseProbeGridFeatureProcessor->AddProbeGrid(transform, AZ::Vector3(12.0f, 12.0f, 12.0f), AZ::Vector3(1.5f, 1.5f, 2.0f));
             diffuseProbeGridFeatureProcessor->SetAmbientMultiplier(m_diffuseProbeGrid, m_ambientMultiplier);
 
-            m_viewBias = 0.7f;
+            m_viewBias = 0.5f;
             diffuseProbeGridFeatureProcessor->SetViewBias(m_diffuseProbeGrid, m_viewBias);
 
             m_normalBias = 0.1f;
             diffuseProbeGridFeatureProcessor->SetNormalBias(m_diffuseProbeGrid, m_normalBias);
 
-            AZ::Render::DiffuseGlobalIlluminationFeatureProcessorInterface* diffuseGlobalIlluminationFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DiffuseGlobalIlluminationFeatureProcessorInterface>();
+            AZ::Render::DiffuseGlobalIlluminationFeatureProcessorInterface* diffuseGlobalIlluminationFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DiffuseGlobalIlluminationFeatureProcessorInterface>();
             diffuseGlobalIlluminationFeatureProcessor->SetQualityLevel(AZ::Render::DiffuseGlobalIlluminationQualityLevel::Medium);
         }
 
@@ -386,12 +382,12 @@ namespace AtomSampleViewer
         m_meshHandles[aznumeric_cast<uint32_t>(SponzaMeshes::Inside)] = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_sponzaModelAsset });
         GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(SponzaMeshes::Inside)], transform);
         
-        m_directionalLightPitch = AZ::DegToRad(-45.0f);
-        m_directionalLightYaw = AZ::DegToRad(62.0f);
+        m_directionalLightPitch = AZ::DegToRad(-65.0f);
+        m_directionalLightYaw = AZ::DegToRad(65.0f);
         m_directionalLightColor = AZ::Color(0.92f, 0.78f, 0.35f, 1.0f);
         m_directionalLightIntensity = 30.0f;
 
-        m_pointLightPos = AZ::Vector3(10.0f, -4.25f, 1.5f);
+        m_pointLightPos = AZ::Vector3(9.2f, -3.7f, 1.0f);
         m_pointLightColor = AZ::Color(1.0f, 0.0f, 0.0f, 1.0f);
         m_pointLightIntensity = 10.0f;
 
@@ -399,8 +395,7 @@ namespace AtomSampleViewer
 
         // directional light
         {
-            AZ::RPI::ScenePtr scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-            AZ::Render::DirectionalLightFeatureProcessorInterface* directionalLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DirectionalLightFeatureProcessorInterface>();
+            AZ::Render::DirectionalLightFeatureProcessorInterface* directionalLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DirectionalLightFeatureProcessorInterface>();
             m_directionalLightHandle = directionalLightFeatureProcessor->AcquireLight();
             const auto lightTransform = AZ::Transform::CreateRotationZ(m_directionalLightYaw) * AZ::Transform::CreateRotationX(m_directionalLightPitch);
             directionalLightFeatureProcessor->SetDirection(m_directionalLightHandle, lightTransform.GetBasis(1));
@@ -409,16 +404,13 @@ namespace AtomSampleViewer
             directionalLightFeatureProcessor->SetShadowmapSize(m_directionalLightHandle, AZ::Render::ShadowmapSize::Size2048);
             directionalLightFeatureProcessor->SetViewFrustumCorrectionEnabled(m_directionalLightHandle, false);
             directionalLightFeatureProcessor->SetShadowFilterMethod(m_directionalLightHandle, AZ::Render::ShadowFilterMethod::EsmPcf);
-            directionalLightFeatureProcessor->SetShadowBoundaryWidth(m_directionalLightHandle, 0.03f);
-            directionalLightFeatureProcessor->SetPredictionSampleCount(m_directionalLightHandle, 4);
             directionalLightFeatureProcessor->SetFilteringSampleCount(m_directionalLightHandle, 16);
             directionalLightFeatureProcessor->SetGroundHeight(m_directionalLightHandle, 0.0f);
         }
 
         // point light
         {
-            AZ::RPI::ScenePtr scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-            AZ::Render::PointLightFeatureProcessorInterface* pointLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::PointLightFeatureProcessorInterface>();
+            AZ::Render::PointLightFeatureProcessorInterface* pointLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::PointLightFeatureProcessorInterface>();
             m_pointLightHandle = pointLightFeatureProcessor->AcquireLight();
             pointLightFeatureProcessor->SetPosition(m_pointLightHandle, m_pointLightPos);
             pointLightFeatureProcessor->SetRgbIntensity(m_pointLightHandle, AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Candela>(m_pointLightIntensity * m_pointLightColor));
@@ -428,11 +420,10 @@ namespace AtomSampleViewer
 
         // diffuse probe grid
         {
-            AZ::RPI::ScenePtr scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-            AZ::Render::DiffuseProbeGridFeatureProcessorInterface* diffuseProbeGridFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DiffuseProbeGridFeatureProcessorInterface>();
+            AZ::Render::DiffuseProbeGridFeatureProcessorInterface* diffuseProbeGridFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DiffuseProbeGridFeatureProcessorInterface>();
             transform = AZ::Transform::CreateIdentity();
         
-            m_origin.Set(1.4f, -1.25f, 5.0f);
+            m_origin.Set(0.0f, -0.275f, 5.0f);
             transform.SetTranslation(m_origin);
             m_diffuseProbeGrid = diffuseProbeGridFeatureProcessor->AddProbeGrid(transform, AZ::Vector3(35.0f, 45.0f, 25.0f), AZ::Vector3(3.0f, 3.0f, 4.0f));
             diffuseProbeGridFeatureProcessor->SetAmbientMultiplier(m_diffuseProbeGrid, m_ambientMultiplier);
@@ -443,7 +434,7 @@ namespace AtomSampleViewer
             m_normalBias = 0.4f;
             diffuseProbeGridFeatureProcessor->SetNormalBias(m_diffuseProbeGrid, m_normalBias);
 
-            AZ::Render::DiffuseGlobalIlluminationFeatureProcessorInterface* diffuseGlobalIlluminationFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DiffuseGlobalIlluminationFeatureProcessorInterface>();
+            AZ::Render::DiffuseGlobalIlluminationFeatureProcessorInterface* diffuseGlobalIlluminationFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DiffuseGlobalIlluminationFeatureProcessorInterface>();
             diffuseGlobalIlluminationFeatureProcessor->SetQualityLevel(AZ::Render::DiffuseGlobalIlluminationQualityLevel::Medium);
         }
 
@@ -467,10 +458,9 @@ namespace AtomSampleViewer
         }
 
         // ImGui sidebar
-        AZ::RPI::ScenePtr scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        AZ::Render::DiffuseProbeGridFeatureProcessorInterface* diffuseProbeGridFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DiffuseProbeGridFeatureProcessorInterface>();
-        AZ::Render::PointLightFeatureProcessorInterface* pointLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::PointLightFeatureProcessorInterface>();
-        AZ::Render::DirectionalLightFeatureProcessorInterface* directionalLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::DirectionalLightFeatureProcessorInterface>();
+        AZ::Render::DiffuseProbeGridFeatureProcessorInterface* diffuseProbeGridFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DiffuseProbeGridFeatureProcessorInterface>();
+        AZ::Render::PointLightFeatureProcessorInterface* pointLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::PointLightFeatureProcessorInterface>();
+        AZ::Render::DirectionalLightFeatureProcessorInterface* directionalLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DirectionalLightFeatureProcessorInterface>();
 
         bool sceneChanged = false;
 
@@ -683,8 +673,6 @@ namespace AtomSampleViewer
 
     void DiffuseGIExampleComponent::DisableGlobalIbl()
     {
-        AZ::RPI::ScenePtr scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-
         // disable Ibl by setting the empty cubemap
         const constexpr char* DiffuseAssetPath = "textures/default/default_iblglobalcm_ibldiffuse.dds.streamingimage";
         const constexpr char* SpecularAssetPath = "textures/default/default_iblglobalcm_iblspecular.dds.streamingimage";
@@ -697,7 +685,7 @@ namespace AtomSampleViewer
             AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::StreamingImageAsset>
             (SpecularAssetPath, assertTraceLevel);
 
-        auto featureProcessor = scene->GetFeatureProcessor<AZ::Render::ImageBasedLightFeatureProcessorInterface>();
+        auto featureProcessor = m_scene->GetFeatureProcessor<AZ::Render::ImageBasedLightFeatureProcessorInterface>();
         AZ_Assert(featureProcessor, "Unable to find ImageBasedLightFeatureProcessorInterface on scene.");
 
         featureProcessor->SetDiffuseImage(diffuseImageAsset);
@@ -706,8 +694,7 @@ namespace AtomSampleViewer
 
     void DiffuseGIExampleComponent::EnableDiffuseIbl()
     {
-        AZ::RPI::ScenePtr scene = AZ::RPI::RPISystemInterface::Get()->GetDefaultScene();
-        AZ::Render::ImageBasedLightFeatureProcessorInterface* imageBaseLightFeatureProcessor = scene->GetFeatureProcessor<AZ::Render::ImageBasedLightFeatureProcessorInterface>();
+        AZ::Render::ImageBasedLightFeatureProcessorInterface* imageBaseLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::ImageBasedLightFeatureProcessorInterface>();
         AZ_Assert(imageBaseLightFeatureProcessor, "Unable to find ImageBasedLightFeatureProcessorInterface on scene.");
 
         imageBaseLightFeatureProcessor->SetDiffuseImage(m_diffuseImageAsset);

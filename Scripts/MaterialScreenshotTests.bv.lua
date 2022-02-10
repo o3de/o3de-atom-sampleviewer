@@ -16,6 +16,8 @@ g_beveledCubeModel = 'materialeditor/viewportmodels/beveledcube.azmodel'
 g_modelWithoutLayerMask = 'objects/bunny.azmodel'
 g_modelWithLayerMask = 'testdata/objects/paintedplane.azmodel'
 g_modelHermanubis = 'materialeditor/viewportmodels/hermanubis.azmodel'
+g_modelTube = 'testdata/objects/tube.azmodel'
+g_modelGrass = 'objects/grass_tile_large.azmodel'
 
 function GenerateMaterialScreenshot(imageComparisonThresholdLevel, materialName, options)
     if options == nil then options = {} end
@@ -81,6 +83,11 @@ end
 OpenSample('RPI/Mesh')
 ResizeViewport(999, 999)
 
+-- This is just quick regression test for a crash that happened when turning on the ground plane with no model
+SetImguiValue('Show Ground Plane', true)
+IdleFrames(1) 
+SetImguiValue('Show Ground Plane', false)
+
 ----------------------------------------------------------------------
 -- StandardPBR Materials...
 
@@ -106,6 +113,7 @@ GenerateMaterialScreenshot('Level F', '009_Opacity_Blended_Alpha_Affects_Specula
 GenerateMaterialScreenshot('Level H', '009_Opacity_Cutout_PackedAlpha_DoubleSided', {lighting="Neutral Urban", model=g_beveledCubeModel})
 GenerateMaterialScreenshot('Level H', '009_Opacity_Cutout_SplitAlpha_DoubleSided', {lighting="Neutral Urban", model=g_beveledCubeModel})
 GenerateMaterialScreenshot('Level G', '009_Opacity_Cutout_SplitAlpha_SingleSided', {lighting="Neutral Urban", model=g_beveledCubeModel})
+GenerateMaterialScreenshot('Level F', '009_Opacity_Opaque_DoubleSided', {lighting="Neutral Urban", model=g_modelTube, cameraDistance=4.0, cameraPitch=45.0})
 GenerateMaterialScreenshot('Level F', '009_Opacity_TintedTransparent', {lighting="Neutral Urban", model=g_beveledCubeModel})
 GenerateMaterialScreenshot('Level H', '010_AmbientOcclusion', {lighting="Palermo Sidewalk (Alt)"})
 GenerateMaterialScreenshot('Level G', '010_SpecularOcclusion', {lighting="Palermo Sidewalk (Alt)"})
@@ -121,6 +129,7 @@ GenerateMaterialScreenshot('Level H', '014_ClearCoat_NormalMap_2ndUv', {lighting
 GenerateMaterialScreenshot('Level F', '014_ClearCoat_RoughnessMap', {lighting="Neutral Urban"})
 GenerateMaterialScreenshot('Level F', '015_SubsurfaceScattering', {lighting="Dark Test Lighting", cameraHeading = 45.0, cameraPitch=30.0, cameraDistance=1.5})
 GenerateMaterialScreenshot('Level D', '015_SubsurfaceScattering_Transmission', {lighting="Dark Test Lighting", cameraHeading = 45.0, cameraPitch=-30.0, cameraDistance=1.5})
+GenerateMaterialScreenshot('Level E', '015_SubsurfaceScattering_Transmission_Thin', {model=g_modelGrass, lighting="Goegap (Alt)", cameraHeading = -150.0, cameraPitch=5.0, cameraDistance=1.5})
 GenerateMaterialScreenshot('Level I', '100_UvTiling_AmbientOcclusion')
 GenerateMaterialScreenshot('Level I', '100_UvTiling_BaseColor')
 GenerateMaterialScreenshot('Level I', '100_UvTiling_Emissive')
@@ -140,7 +149,7 @@ GenerateMaterialScreenshot('Level L', '100_UvTiling_Parallax_B', { uniqueSuffix=
 GenerateMaterialScreenshot('Level H', '100_UvTiling_Roughness')
 GenerateMaterialScreenshot('Level F', '100_UvTiling_SpecularF0')
 
-GenerateMaterialScreenshot('Level E', '101_DetailMaps_LucyBaseNoDetailMaps',    {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
+GenerateMaterialScreenshot('Level E', '101_DetailMaps_BaseNoDetailMaps',        {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
 GenerateMaterialScreenshot('Level H', '102_DetailMaps_All',                     {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
 GenerateMaterialScreenshot('Level F', '103_DetailMaps_BaseColor',               {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
 GenerateMaterialScreenshot('Level F', '103_DetailMaps_BaseColorWithMask',       {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
@@ -180,7 +189,7 @@ g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/Skin/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 -- We should eventually replace this with realistic skin test cases, these are just placeholders for regression testing
-GenerateMaterialScreenshot('Level D', '001_lucy_regression_test',    {model=g_modelHermanubis, cameraHeading=-26.0, cameraPitch=15.0, cameraDistance=2.0, cameraZ=0.7})
+GenerateMaterialScreenshot('Level D', '001_hermanubis_regression_test',    {model=g_modelHermanubis, cameraHeading=-26.0, cameraPitch=15.0, cameraDistance=2.0, cameraZ=0.7})
 GenerateMaterialScreenshot('Level G', '002_wrinkle_regression_test', {model=g_modelWithLayerMask, cameraHeading=0.0, cameraPitch=45.0, cameraDistance=30.0})
 
 ----------------------------------------------------------------------

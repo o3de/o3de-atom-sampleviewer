@@ -15,6 +15,7 @@
 #include <Atom/RHI/RayTracingShaderTable.h>
 #include <Atom/RPI.Public/RPIUtils.h>
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
+#include <Atom/RPI.Public/Shader/Shader.h>
 
 #include <RayTracing/RayTracingFeatureProcessor.h>
 

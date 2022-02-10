@@ -1,7 +1,7 @@
 {
     "description": "This material tests as many material system features as possible in one place. It splits an object into several stacks of slices, with each stack oscillating independently. This is achieved by rendering a separate pass for each stack, demonstrating multi-pass rendering. The stacks/passes can be disabled independently, demonstrating the ShaderCollectionFunctor feature. There is also a light source, which can be moved using angle values, and these values are converted to a direction vector before being sent to the shader, which demonstrates the use of a ShaderInputFunctor.",
+    "version": 1,
     "propertyLayout": {
-        "version": 1,
         "groups": [
             {
                 "id": "stacks",

@@ -221,7 +221,7 @@ namespace AtomSampleViewer
 
             // Find the closest bone that is still below or equal to the current segment in height
             int boneIndexBelow = 0;
-            for (boneIndexBelow; boneIndexBelow < static_cast<int>(m_boneCount - 1); ++boneIndexBelow)
+            for (; boneIndexBelow < static_cast<int>(m_boneCount - 1); ++boneIndexBelow)
             {
                 // If the next bone is higher than the current height, we've found the below/above indices we're looking for
                 if (m_boneHeights[boneIndexBelow + 1] > currentSegmentHeight)
