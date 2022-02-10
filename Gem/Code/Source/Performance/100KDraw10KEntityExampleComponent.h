@@ -13,7 +13,7 @@
 namespace AtomSampleViewer
 {
     /*
-        This test loads a 46x46x46 lattice of entities with randomized meshes and materials. This test is used as a simple cpu performance stress test for Atom.
+        This test loads a 22x22x22 lattice of entities with randomized meshes and materials. This test is used as a simple cpu performance stress test for Atom.
 
         The assets that are applied to the entities are chosen from the 
         "allow-list" of models and materials.
