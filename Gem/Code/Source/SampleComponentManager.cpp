@@ -65,8 +65,8 @@
 #include <RHI/RayTracingExampleComponent.h>
 #include <RHI/MatrixAlignmentTestExampleComponent.h>
 
-#include <Performance/100KEntityExampleComponent.h>
-#include <Performance/100KDraw10KEntityExampleComponent.h>
+#include <Performance/100KDrawable_SingleView_ExampleComponent.h>
+#include <Performance/100KDraw_10KDrawable_MultiView_ExampleComponent.h>
 
 #include <AreaLightExampleComponent.h>
 #include <AssetLoadTestComponent.h>

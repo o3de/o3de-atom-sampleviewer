@@ -6,7 +6,7 @@
  *
  */
 
-#include <Performance/100KEntityExampleComponent.h>
+#include <Performance/100KDrawable_SingleView_ExampleComponent.h>
 #include <SampleComponentManager.h>
 #include <SampleComponentConfig.h>
 

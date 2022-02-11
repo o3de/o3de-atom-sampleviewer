@@ -84,10 +84,10 @@ set(FILES
     Source/RHI/MatrixAlignmentTestExampleComponent.h
     Source/Performance/HighInstanceExampleComponent.cpp
     Source/Performance/HighInstanceExampleComponent.h
-    Source/Performance/100KEntityExampleComponent.cpp
-    Source/Performance/100KEntityExampleComponent.h
-    Source/Performance/100KDraw10KEntityExampleComponent.cpp
-    Source/Performance/100KDraw10KEntityExampleComponent.h
+    Source/Performance/100KDrawable_SingleView_ExampleComponent.cpp
+    Source/Performance/100KDrawable_SingleView_ExampleComponent.h
+    Source/Performance/100KDraw_10KDrawable_MultiView_ExampleComponent.cpp
+    Source/Performance/100KDraw_10KDrawable_MultiView_ExampleComponent.h
     Source/AreaLightExampleComponent.cpp
     Source/AreaLightExampleComponent.h
     Source/AssetLoadTestComponent.cpp
