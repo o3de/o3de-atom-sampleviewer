@@ -23,11 +23,8 @@
 
 namespace AtomSampleViewer
 {
-    /*
-        This class is used as base of a set of simple cpu performance stress test for Atom.
-        This test loads a X*Y*Z lattice of entities with randomized meshes and materials and creates N shadow casting spotlights plus 0-1 Directional lights
-    */
-
+    //! This class is used as base of a set of simple cpu performance stress test for Atom.
+    //! This test loads a X*Y*Z lattice of entities with randomized meshes and materials and creates N shadow casting spotlights plus 0-1 Directional lights
    struct HighInstanceTestParameters
    {
        int m_latticeSize[3] = {22, 22, 22};
