@@ -37,6 +37,7 @@ namespace AtomSampleViewer
         uint32_t GetInstanceCount() const;
         
         //! Returns world space Aabb for the lattice.
+        //! The returned Aabb contains all the entity lattice positions. It does not include the mesh Aabb at each position.
         AZ::Aabb GetLatticeAabb() const;
 
         //! Call this to render ImGui controls for controlling the size of the lattice.
@@ -69,6 +70,7 @@ namespace AtomSampleViewer
         void BuildLattice();
 
     protected:
+        //! Contains the world space Aabb of the lattice positions. Doesn't include the mesh Aabb at each position.
         AZ::Aabb m_worldAabb;
 
     private:

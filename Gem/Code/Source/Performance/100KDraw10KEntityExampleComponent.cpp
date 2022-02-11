@@ -18,18 +18,18 @@ namespace AtomSampleViewer
 {
     using namespace AZ;
 
-    void HundredKDraw10KEntityExampleComponent::Reflect(AZ::ReflectContext* context)
+    void _100KDraw10KDrawableExampleComponent::Reflect(AZ::ReflectContext* context)
     {
         if (AZ::SerializeContext* serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
         {
-            serializeContext->Class<HundredKDraw10KEntityExampleComponent, HighInstanceTestComponent>()
+            serializeContext->Class<_100KDraw10KDrawableExampleComponent, HighInstanceTestComponent>()
                 ->Version(0)
                 ;
         }
     }
 
 
-    HundredKDraw10KEntityExampleComponent::HundredKDraw10KEntityExampleComponent() 
+    _100KDraw10KDrawableExampleComponent::_100KDraw10KDrawableExampleComponent() 
     {
         m_sampleName = "100KDraw10KEntityTest";
 

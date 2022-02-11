@@ -226,9 +226,6 @@ namespace AtomSampleViewer
 
     void HighInstanceTestComponent::OnAllAssetsReadyActivate()
     {
-        m_directionalLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
-        m_diskLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DiskLightFeatureProcessorInterface>();
-
         AZ::Render::MaterialAssignmentMap materials;
         for (ModelInstanceData& instanceData : m_modelInstanceData)
         {
@@ -478,7 +475,6 @@ namespace AtomSampleViewer
 
     AZ::Vector3 HighInstanceTestComponent::GetRandomDirection()
     {
-        // returns a position in the range [-0.5, +0.5]^3.
         return AZ::Vector3(
             m_random.GetRandomFloat() - 0.5f,
             m_random.GetRandomFloat() - 0.5f,

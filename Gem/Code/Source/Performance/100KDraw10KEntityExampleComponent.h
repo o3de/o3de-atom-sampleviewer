@@ -12,25 +12,21 @@
 
 namespace AtomSampleViewer
 {
-    /*
-        This test loads a 22x22x22 lattice of entities with randomized meshes and materials. This test is used as a simple cpu performance stress test for Atom.
-
-        The assets that are applied to the entities are chosen from the 
-        "allow-list" of models and materials.
-    */
-    class HundredKDraw10KEntityExampleComponent
+    //! This test loads a 22x22x22 (~10K) lattice of cubes with a white material, shadowed lights are added to the scene until 100K draws are required. 
+    //! This test benchmarks how well atom scales cpu time with the number of draws. 
+    class _100KDraw10KDrawableExampleComponent
         : public HighInstanceTestComponent
     {
         using Base = HighInstanceTestComponent;
 
     public:
-        AZ_COMPONENT(HundredKDraw10KEntityExampleComponent, "{85C4BEE0-9FBC-4E9A-8425-12555703CC61}", HighInstanceTestComponent);
+        AZ_COMPONENT(_100KDraw10KDrawableExampleComponent, "{85C4BEE0-9FBC-4E9A-8425-12555703CC61}", HighInstanceTestComponent);
 
         static void Reflect(AZ::ReflectContext* context);
 
-        HundredKDraw10KEntityExampleComponent();
+        _100KDraw10KDrawableExampleComponent();
 
     private:
-        AZ_DISABLE_COPY_MOVE(HundredKDraw10KEntityExampleComponent);
+        AZ_DISABLE_COPY_MOVE(_100KDraw10KDrawableExampleComponent);
     };
 } // namespace AtomSampleViewer

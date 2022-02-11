@@ -305,8 +305,8 @@ namespace AtomSampleViewer
             NewFeaturesSample<SSRExampleComponent>("SSR"),
             NewFeaturesSample<TonemappingExampleComponent>("Tonemapping"),
             NewFeaturesSample<TransparencyExampleComponent>("Transparency"),
-            NewPerfSample<HundredKEntityExampleComponent>("100KEntity"),
-            NewPerfSample<HundredKDraw10KEntityExampleComponent>("100KDraw10KEntityTest"),
+            NewPerfSample<_100KDrawableExampleComponent>("100KDrawable_SingleView"),
+            NewPerfSample<_100KDraw10KDrawableExampleComponent>("100KDraw_10KDrawable_MultiView"),
         };
     }
 
