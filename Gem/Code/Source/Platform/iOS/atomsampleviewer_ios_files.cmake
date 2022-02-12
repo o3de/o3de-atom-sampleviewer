@@ -14,7 +14,6 @@ set(FILES
     SceneReloadSoakTestComponent_Traits_Platform.h
     SSRExampleComponent_Traits_Platform.h
     TriangleConstantBufferExampleComponent_Traits_Platform.h
-    HighInstanceTestComponent_Traits_Platform.h
     SampleComponentManager_iOS.cpp
     StreamingImageExampleComponent_iOS.cpp
     Utils_iOS.cpp

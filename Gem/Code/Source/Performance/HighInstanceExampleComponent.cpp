@@ -25,8 +25,6 @@
 
 #include <RHI/BasicRHIComponent.h>
 
-#include <HighInstanceTestComponent_Traits_Platform.h>
-
 AZ_DECLARE_BUDGET(AtomSampleViewer);
 
 namespace AtomSampleViewer
