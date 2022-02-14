@@ -20,6 +20,7 @@ namespace AtomSampleViewer
 
     void _100KDraw10KDrawableExampleComponent::Reflect(AZ::ReflectContext* context)
     {
+        Base::Reflect(context);
         if (AZ::SerializeContext* serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
         {
             serializeContext->Class<_100KDraw10KDrawableExampleComponent, HighInstanceTestComponent>()
