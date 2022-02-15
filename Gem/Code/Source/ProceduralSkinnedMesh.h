@@ -21,6 +21,7 @@ namespace AtomSampleViewer
         int m_verticesPerSegment = 8;
         int m_boneCount = 4;
         int m_influencesPerVertex = 4;
+        int m_subMeshCount = 2;
     };
 
     //! Class for creating SkinnedMeshInputBuffers with arbitrary bone/vertex counts
@@ -32,6 +33,8 @@ namespace AtomSampleViewer
         void UpdateAnimation(float time, bool useOutOfSyncBoneAnimation = false);
 
         uint32_t GetInfluencesPerVertex() const;
+        uint32_t GetSubMeshCount() const;
+        float GetSubMeshYOffset() const;
 
         static const uint32_t MaxInfluencesPerVertex = 4;
 
@@ -64,6 +67,7 @@ namespace AtomSampleViewer
         uint32_t m_verticesPerSegment = 0;
         uint32_t m_segmentCount = 0;
         uint32_t m_influencesPerVertex = 0;
+        uint32_t m_subMeshCount = 0;
         float m_height = 1.0f;
         float m_radius = 0.1f;
     };
