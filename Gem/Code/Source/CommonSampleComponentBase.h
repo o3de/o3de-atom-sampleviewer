@@ -30,7 +30,9 @@ namespace AtomSampleViewer
         , public AZ::EntityBus::MultiHandler
     {
     public:
-        AZ_TYPE_INFO(MaterialHotReloadTestComponent, "{7EECDF09-B774-46C1-AD6E-060CE5717C05}");
+        AZ_TYPE_INFO(CommonSampleComponentBase, "{7EECDF09-B774-46C1-AD6E-060CE5717C05}");
+
+        static void Reflect(AZ::ReflectContext* context);
 
         // AZ::Component overrides...
         bool ReadInConfig(const AZ::ComponentConfig* baseConfig) override;

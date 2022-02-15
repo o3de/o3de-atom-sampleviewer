@@ -65,6 +65,9 @@
 #include <RHI/RayTracingExampleComponent.h>
 #include <RHI/MatrixAlignmentTestExampleComponent.h>
 
+#include <Performance/100KDrawable_SingleView_ExampleComponent.h>
+#include <Performance/100KDraw_10KDrawable_MultiView_ExampleComponent.h>
+
 #include <AreaLightExampleComponent.h>
 #include <AssetLoadTestComponent.h>
 #include <AuxGeomExampleComponent.h>
@@ -100,7 +103,6 @@
 #include <DiffuseGIExampleComponent.h>
 #include <SSRExampleComponent.h>
 #include <ShaderReloadTestComponent.h>
-#include <HighInstanceExampleComponent.h>
 
 #include <Atom/Bootstrap/DefaultWindowBus.h>
 
@@ -209,6 +211,18 @@ namespace AtomSampleViewer
         return NewSample<T>(SamplePipelineType::RPI, "Features", name, isSupportedFunction);
     }
 
+    template <typename T>
+    static SampleEntry NewPerfSample(const AZStd::string& name)
+    {
+        return NewSample<T>(SamplePipelineType::RPI, "Performance", name);
+    }
+
+    template <typename T>
+    static SampleEntry NewPerfSample(const AZStd::string& name, AZStd::function<bool()> isSupportedFunction)
+    {
+        return NewSample<T>(SamplePipelineType::RPI, "Performance", name, isSupportedFunction);
+    }
+
     void SampleComponentManager::Reflect(AZ::ReflectContext* context)
     {
         if (AZ::SerializeContext* serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
@@ -266,7 +280,6 @@ namespace AtomSampleViewer
             NewRPISample<DecalExampleComponent>("Decals"),
             NewRPISample<DynamicDrawExampleComponent>("DynamicDraw"),
             NewRPISample<DynamicMaterialTestComponent>("DynamicMaterialTest"),
-            NewRPISample<HighInstanceTestComponent>("HighInstanceTest"),
             NewRPISample<MaterialHotReloadTestComponent>("MaterialHotReloadTest"),
             NewRPISample<MeshExampleComponent>("Mesh"),
             NewRPISample<MSAA_RPI_ExampleComponent>("MSAA"),
@@ -292,6 +305,8 @@ namespace AtomSampleViewer
             NewFeaturesSample<SSRExampleComponent>("SSR"),
             NewFeaturesSample<TonemappingExampleComponent>("Tonemapping"),
             NewFeaturesSample<TransparencyExampleComponent>("Transparency"),
+            NewPerfSample<_100KDrawableExampleComponent>("100KDrawable_SingleView"),
+            NewPerfSample<_100KDraw10KDrawableExampleComponent>("100KDraw_10KDrawable_MultiView"),
         };
     }
 

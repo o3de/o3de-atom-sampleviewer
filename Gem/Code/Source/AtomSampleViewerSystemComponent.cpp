@@ -59,6 +59,10 @@ namespace AtomSampleViewer
         StacksShaderInputFunctor::Reflect(context);
 
         ImageComparisonConfig::Reflect(context);
+
+        // Abstract base components is used by multiple components and needs to be reflected in a single location.
+        CommonSampleComponentBase::Reflect(context);
+        EntityLatticeTestComponent::Reflect(context);
     }
 
     void AtomSampleViewerSystemComponent::PerfMetrics::Reflect(AZ::ReflectContext* context)
@@ -72,9 +76,6 @@ namespace AtomSampleViewer
                 ->Field("SecondsToRender", &PerfMetrics::m_timeToFirstRenderSeconds)
                 ;
         }
-
-        // Abstract base component is used by multiple components and needs to be reflected in a single location.
-        EntityLatticeTestComponent::Reflect(context);
     }
 
 

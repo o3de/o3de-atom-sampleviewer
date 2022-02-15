@@ -12,6 +12,8 @@
 #include <Utils/Utils.h>
 #include <EntityLatticeTestComponent_Traits_Platform.h>
 
+#include <AzCore/Math/Aabb.h>
+
 struct ImGuiContext;
 
 namespace AtomSampleViewer
@@ -34,6 +36,10 @@ namespace AtomSampleViewer
         //! Returns total number of instances (width * height * depth)
         uint32_t GetInstanceCount() const;
         
+        //! Returns world space Aabb for the lattice.
+        //! The returned Aabb contains all the entity lattice positions. It does not include the mesh Aabb at each position.
+        AZ::Aabb GetLatticeAabb() const;
+
         //! Call this to render ImGui controls for controlling the size of the lattice.
         void RenderImGuiLatticeControls();
         
@@ -41,6 +47,10 @@ namespace AtomSampleViewer
         virtual void RebuildLattice();
 
         void SetLatticeDimensions(uint32_t width, uint32_t depth, uint32_t height);
+        void SetLatticeSpacing(float spaceX, float spaceY, float spaceZ);
+        void SetLatticeEntityScale(float scale);
+
+        void SetIBLExposure(float exposure);
 
     private:
 
@@ -59,10 +69,21 @@ namespace AtomSampleViewer
 
         void BuildLattice();
 
+    protected:
+        //! Contains the world space Aabb of the lattice positions. Doesn't include the mesh Aabb at each position.
+        AZ::Aabb m_worldAabb;
+
+    private:
         // These are signed to avoid casting with imgui controls.
         int32_t m_latticeWidth = ENTITY_LATTICE_TEST_COMPONENT_WIDTH;
         int32_t m_latticeHeight = ENTITY_LATTICE_TEST_COMPONENT_HEIGHT;
         int32_t m_latticeDepth = ENTITY_LATTICE_TEST_COMPONENT_DEPTH;
+
+        float m_spacingX = ENTITY_LATTICE_TEST_COMPONENT_SPACING_X;
+        float m_spacingY = ENTITY_LATTICE_TEST_COMPONENT_SPACING_Y;
+        float m_spacingZ = ENTITY_LATTICE_TEST_COMPONENT_SPACING_Z;
+
+        float m_entityScale = 1.0f;
         
         Utils::DefaultIBL m_defaultIbl;
     };
