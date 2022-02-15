@@ -13,6 +13,7 @@
 #include <Atom/RPI.Reflect/ResourcePoolAssetCreator.h>
 #include <Atom/RPI.Reflect/Model/ModelAssetCreator.h>
 #include <Atom/RPI.Reflect/Model/ModelLodAssetCreator.h>
+#include <Atom/RPI.Reflect/Model/SkinJointIdPadding.h>
 #include <Atom/Feature/SkinnedMesh/SkinnedMeshInputBuffers.h>
 
 namespace
@@ -74,6 +75,17 @@ namespace AtomSampleViewer
         return viewDescriptor;
     }
 
+    template <typename T>
+    static void DuplicateVertices(T& vertices, uint32_t elementsPerSubMesh, uint32_t subMeshCount)
+    {
+        // Increase the size of the vertex buffer, and then copy the original vertex buffer data into the new elements
+        vertices.resize(elementsPerSubMesh * subMeshCount);
+        for (uint32_t i = 1; i < subMeshCount; ++i)
+        {
+            AZStd::copy(vertices.begin(), vertices.begin() + elementsPerSubMesh, vertices.begin() + elementsPerSubMesh * i);
+        }
+    }
+
     AZ::Data::Instance<AZ::RPI::Model> CreateModelFromProceduralSkinnedMesh(ProceduralSkinnedMesh& proceduralMesh)
     {
         using namespace AZ;
@@ -86,37 +98,42 @@ namespace AtomSampleViewer
 
         modelCreator.SetName(AZStd::string("ProceduralSkinnedMesh_" + assetId.m_guid.ToString<AZStd::string>()));
 
-        uint32_t submeshCount = 2;
+        uint32_t submeshCount = proceduralMesh.GetSubMeshCount();
+        uint32_t verticesPerSubmesh = aznumeric_caster(proceduralMesh.m_positions.size());
+        uint32_t totalVertices = verticesPerSubmesh * submeshCount;
 
-        // This is truncated, and the last sub-mesh may contain more vertices/jointIds, but that's okay because we're
-        // only concerned about the offset here, and the last sub-mesh will start with this offset
-        uint32_t jointIdCountPerSubmesh = aznumeric_cast<uint32_t>((proceduralMesh.m_positions.size() * aznumeric_cast<size_t>(proceduralMesh.GetInfluencesPerVertex())) / submeshCount);
-        uint32_t jointIdSizeInBytes = sizeof(uint16_t);
-        uint32_t jointIdBytesPerSubmesh = jointIdCountPerSubmesh * jointIdSizeInBytes;
+        uint32_t jointIdCountPerSubmesh = verticesPerSubmesh * proceduralMesh.GetInfluencesPerVertex();
+        uint32_t extraJointIdCount = AZ::RPI::CalculateJointIdPaddingCount(jointIdCountPerSubmesh);
+        uint32_t extraPackedIdCount = extraJointIdCount / 2;
 
-        // Depending on where the mesh is split, the blend indices might need to be padded
-        // so that every sub-mesh's jointId buffer starts on a 16-byte alignment,
-        // which is required for raw buffer views
-        uint32_t roundUpTo = 16 / jointIdSizeInBytes;
-        // Round up
-        uint32_t paddedJointIdOffset = jointIdCountPerSubmesh;
-        paddedJointIdOffset += roundUpTo - 1;
-        paddedJointIdOffset = paddedJointIdOffset - paddedJointIdOffset % roundUpTo;
-        // Determine how many padding id's we need to add, if any
-        uint32_t extraIdCount = paddedJointIdOffset - jointIdCountPerSubmesh;
-        AZStd::vector<uint32_t> extraIds(extraIdCount / 2, 0);
+        // Copy the original buffer data n-times to create the data for extra sub-meshes
+        DuplicateVertices(proceduralMesh.m_indices, aznumeric_caster(proceduralMesh.m_indices.size()), submeshCount);
+        DuplicateVertices(proceduralMesh.m_positions, verticesPerSubmesh, submeshCount);
+        DuplicateVertices(proceduralMesh.m_normals, verticesPerSubmesh, submeshCount);
+        DuplicateVertices(proceduralMesh.m_tangents, verticesPerSubmesh, submeshCount);
+        DuplicateVertices(proceduralMesh.m_bitangents, verticesPerSubmesh, submeshCount);
+        DuplicateVertices(proceduralMesh.m_uvs, verticesPerSubmesh, submeshCount);
+        DuplicateVertices(proceduralMesh.m_blendWeights, verticesPerSubmesh * proceduralMesh.GetInfluencesPerVertex(), submeshCount);
 
-        for (uint32_t subMeshIndex = 0; subMeshIndex < submeshCount; ++subMeshIndex)
+        // Insert the jointId padding first before duplicating
+        AZStd::vector<uint32_t> extraIds(extraPackedIdCount, 0);
+
+        // Track the count of 32-byte 'elements' (packed) and offsets for creating sub-mesh views
+        uint32_t jointIdElementCountPerSubmesh = aznumeric_caster(proceduralMesh.m_blendIndices.size());
+        uint32_t jointIdOffsetElementsPerSubmesh = jointIdElementCountPerSubmesh + extraPackedIdCount;
+
+        proceduralMesh.m_blendIndices.insert(proceduralMesh.m_blendIndices.end(), extraIds.begin(), extraIds.end());
+        DuplicateVertices(
+            proceduralMesh.m_blendIndices, aznumeric_caster(proceduralMesh.m_blendIndices.size()), submeshCount);
+
+        // Offset duplicate positions in the +y direction, so each sub-mesh ends up in a unique position
+        for (uint32_t subMeshIndex = 1; subMeshIndex < submeshCount; ++subMeshIndex)
         {
-            // Get the count of all the jointIds from the previous submeshes
-            uint32_t insertPoint = (jointIdCountPerSubmesh + extraIdCount) * subMeshIndex;
-            // Add the current mesh's actual jointIdCount
-            insertPoint += jointIdCountPerSubmesh;
-            // Two jointId's per 32-bit uint
-            insertPoint /= 2;
-            auto insertIter = proceduralMesh.m_blendIndices.begin() + insertPoint;
-            // Insert dummy id's at the end of the current submesh
-            proceduralMesh.m_blendIndices.insert(insertIter, extraIds.begin(), extraIds.end());
+            for (uint32_t i = 0; i < verticesPerSubmesh; ++i)
+            {
+                proceduralMesh.m_positions[subMeshIndex*verticesPerSubmesh + i][1] +=
+                    aznumeric_cast<float>(subMeshIndex) * proceduralMesh.GetSubMeshYOffset();
+            }
         }
 
         auto indexBuffer = CreateTypedBufferAsset(proceduralMesh.m_indices.data(), proceduralMesh.m_indices.size(), AZ::RHI::Format::R32_FLOAT);
@@ -163,16 +180,14 @@ namespace AtomSampleViewer
             uint32_t indexCount = meshTriangleCount * 3;
             modelLodCreator.SetMeshIndexBuffer(AZ::RPI::BufferAssetView{ indexBuffer, CreateSubmeshBufferViewDescriptor(indexBuffer, indexCount, indexOffset) });
 
-            RHI::BufferViewDescriptor viewDescriptor = positionBuffer->GetBufferViewDescriptor();
-
             // Get the element count and offset for this sub-mesh
-            uint32_t elementCount = viewDescriptor.m_elementCount / submeshCount;
-            uint32_t elementOffset = (viewDescriptor.m_elementCount / submeshCount) * submeshIndex;
+            uint32_t elementCount = verticesPerSubmesh;
+            uint32_t elementOffset = verticesPerSubmesh * submeshIndex;
 
             // Include any truncated vertices if this is the last mesh
             if (submeshIndex == submeshCount - 1)
             {
-                elementCount += viewDescriptor.m_elementCount % submeshCount;
+                elementCount += totalVertices % verticesPerSubmesh;
             }
 
             modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "POSITION" }, AZ::Name(), AZ::RPI::BufferAssetView{ positionBuffer, CreateSubmeshBufferViewDescriptor(positionBuffer, elementCount, elementOffset) });
@@ -180,15 +195,7 @@ namespace AtomSampleViewer
             modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "TANGENT" }, AZ::Name(), AZ::RPI::BufferAssetView{ tangentBuffer, CreateSubmeshBufferViewDescriptor(tangentBuffer, elementCount, elementOffset) });
             modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "BITANGENT" }, AZ::Name(), AZ::RPI::BufferAssetView{ bitangentBuffer, CreateSubmeshBufferViewDescriptor(bitangentBuffer, elementCount, elementOffset) });
             modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "UV" }, AZ::Name(), AZ::RPI::BufferAssetView{ uvBuffer, CreateSubmeshBufferViewDescriptor(uvBuffer, elementCount, elementOffset) });
-
-            uint32_t jointIdElementCountInBytes = elementCount * proceduralMesh.GetInfluencesPerVertex() * sizeof(uint16_t);
-            // Each element of a raw view is 4 bytes
-            uint32_t jointIdElementCount = jointIdElementCountInBytes / 4;
-
-            uint32_t jointIdOffsetInBytes = (jointIdBytesPerSubmesh + extraIdCount * jointIdSizeInBytes) * submeshIndex;
-            uint32_t jointIdElementOffset = jointIdOffsetInBytes / 4;
-
-            modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "SKIN_JOINTINDICES" }, AZ::Name(), AZ::RPI::BufferAssetView{ skinJointIdBuffer, CreateSubmeshBufferViewDescriptor(skinJointIdBuffer, jointIdElementCount, jointIdElementOffset) });
+            modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "SKIN_JOINTINDICES" }, AZ::Name(), AZ::RPI::BufferAssetView{ skinJointIdBuffer, CreateSubmeshBufferViewDescriptor(skinJointIdBuffer, jointIdElementCountPerSubmesh, jointIdOffsetElementsPerSubmesh * submeshIndex) });
 
             uint32_t jointWeightElementCount = elementCount * proceduralMesh.GetInfluencesPerVertex();
             uint32_t jointWeightOffset = elementOffset * proceduralMesh.GetInfluencesPerVertex();

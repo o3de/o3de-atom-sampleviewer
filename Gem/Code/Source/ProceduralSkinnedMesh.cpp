@@ -21,6 +21,7 @@ namespace AtomSampleViewer
         m_vertexCount = m_segmentCount * m_verticesPerSegment;
         m_boneCount = AZ::GetMax(1u, static_cast<uint32_t>(skinnedMeshConfig.m_boneCount));
         m_influencesPerVertex = AZ::GetMax(0u, AZ::GetMin(static_cast<uint32_t>(skinnedMeshConfig.m_influencesPerVertex), AZ::GetMin(m_boneCount, maxInfluencesPerVertex)));
+        m_subMeshCount = skinnedMeshConfig.m_subMeshCount;
 
         // For now, use a conservative AABB. A better AABB will be added with ATOM-3624
         m_aabb.AddPoint(AZ::Vector3(-m_height - m_radius, -m_height - m_radius, -m_height - m_radius));
@@ -90,6 +91,17 @@ namespace AtomSampleViewer
         return m_influencesPerVertex;
     }
 
+    uint32_t ProceduralSkinnedMesh::GetSubMeshCount() const
+    {
+        return m_subMeshCount;
+    }
+
+    float ProceduralSkinnedMesh::GetSubMeshYOffset() const
+    {
+        constexpr float spaceBetweenSubmeshes = .01f;
+        return m_radius * 2.0f + spaceBetweenSubmeshes;
+    }
+
     void ProceduralSkinnedMesh::CalculateVertexBuffers()
     {
         // There are 6 indices per-side, and one fewer side than vertices per side since the first/last vertex in the segment have the same position (but different uvs)
@@ -151,7 +163,7 @@ namespace AtomSampleViewer
 
             for (size_t i = 0; i < m_influencesPerVertex; ++i)
             {
-                // m_blendIndices has final two id's packed into a single uint32
+                // m_blendIndices has two id's packed into a single uint32
                 size_t packedIndex = vertexIndex * m_influencesPerVertex / 2 + i / 2;
                 // m_blendWeights has an individual weight per influence
                 size_t unpackedIndex = vertexIndex * m_influencesPerVertex + i;
@@ -210,9 +222,10 @@ namespace AtomSampleViewer
     void ProceduralSkinnedMesh::CalculateSegments()
     {
         m_segmentHeights.resize(m_segmentCount);
+        m_segmentHeightOffsets.resize(m_segmentCount);
+        // All vertices in a given segment will share the same skin influences
         m_segmentBlendIndices.resize(m_segmentCount * m_influencesPerVertex);
         m_segmentBlendWeights.resize(m_segmentCount * m_influencesPerVertex);
-        m_segmentHeightOffsets.resize(m_segmentCount);
 
         for (uint32_t segmentIndex = 0; segmentIndex < m_segmentCount; ++segmentIndex)
         {

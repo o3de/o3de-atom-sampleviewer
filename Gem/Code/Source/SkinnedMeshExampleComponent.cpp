@@ -109,6 +109,7 @@ namespace AtomSampleViewer
         configWasModified |= ScriptableImGui::SliderInt("Vertices Per-Segment", &config.m_verticesPerSegment, 4, 2048);
         configWasModified |= ScriptableImGui::SliderInt("Bones Per-Mesh", &config.m_boneCount, 4, 256);
         configWasModified |= ScriptableImGui::SliderInt("Influences Per-Vertex", &config.m_influencesPerVertex, 4, 4);
+        configWasModified |= ScriptableImGui::SliderInt("Sub-mesh count", &config.m_subMeshCount, 1, 128);
 
         if (configWasModified)
         {
