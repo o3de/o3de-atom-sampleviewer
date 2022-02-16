@@ -32,21 +32,29 @@ namespace AtomSampleViewer
     _100KDrawableExampleComponent::_100KDrawableExampleComponent() 
     {
         m_sampleName = "100KEntityTest";
-
-        for (int index = 0; index < 3; ++index)
-        {
-            m_testParameters.m_latticeSize[index] = 46;
-            m_testParameters.m_latticeSpacing[index] = 3.0f;
-        }
-        m_testParameters.m_numShadowCastingSpotLights = 0;
-        m_testParameters.m_activateDirectionalLight = false;
-
-        m_testParameters.m_cameraPosition[0] = -173.0f;
-        m_testParameters.m_cameraPosition[1] = 66.0f;
-        m_testParameters.m_cameraPosition[2] = 68.0f;
-        m_testParameters.m_cameraHeadingDeg = -90.0f;
-        m_testParameters.m_cameraPitchDeg = 0.0f;
-        m_testParameters.m_iblExposure = 0.0f;
+        InitDefaultValues(m_testParameters);
     }
+
+    void _100KDrawableExampleComponent::InitDefaultValues(HighInstanceTestParameters& defaultParameters)
+    {
+        defaultParameters.m_latticeSize[0] = 46;
+        defaultParameters.m_latticeSize[1] = 46;
+        defaultParameters.m_latticeSize[2] = 46;
+
+        defaultParameters.m_latticeSpacing[0] = 3.0f;
+        defaultParameters.m_latticeSpacing[1] = 3.0f;
+        defaultParameters.m_latticeSpacing[2] = 3.0f;
+
+        defaultParameters.m_numShadowCastingSpotLights = 0;
+        defaultParameters.m_activateDirectionalLight = false;
+
+        defaultParameters.m_cameraPosition[0] = -173.0f;
+        defaultParameters.m_cameraPosition[1] = 66.0f;
+        defaultParameters.m_cameraPosition[2] = 68.0f;
+        defaultParameters.m_cameraHeadingDeg = -90.0f;
+        defaultParameters.m_cameraPitchDeg = 0.0f;
+        defaultParameters.m_iblExposure = 0.0f;
+    }
+
     
 } // namespace AtomSampleViewer

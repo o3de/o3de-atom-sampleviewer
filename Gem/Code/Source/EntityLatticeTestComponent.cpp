@@ -27,8 +27,10 @@ namespace AtomSampleViewer
     using namespace RPI;
 
     constexpr int32_t s_latticeSizeMax = ENTITY_LATTEST_TEST_COMPONENT_MAX;
-    constexpr float s_spacingMax = ENTITY_LATTEST_TEST_COMPONENT_SPACING_MAX;
-    constexpr float s_entityScaleMax = ENTITY_LATTEST_TEST_COMPONENT_ENTITY_SCALE_MAX;
+    constexpr float s_spacingMax = 100.0f;
+    constexpr float s_spacingMin = 0.5f;
+    constexpr float s_entityScaleMax = 10.0f;
+    constexpr float s_entityScaleMin = 0.1f;
 
     void EntityLatticeTestComponent::Reflect(ReflectContext* context)
     {
@@ -112,14 +114,14 @@ namespace AtomSampleViewer
 
     void EntityLatticeTestComponent::SetLatticeSpacing( float spaceX, float spaceY, float spaceZ)
     {
-        m_spacingX = AZ::GetClamp<float>(spaceX, 0.0f, s_spacingMax);
-        m_spacingY = AZ::GetClamp<float>(spaceY, 0.0f, s_spacingMax);
-        m_spacingZ = AZ::GetClamp<float>(spaceZ, 0.0f, s_spacingMax);
+        m_spacingX = AZ::GetClamp<float>(spaceX, s_spacingMin, s_spacingMax);
+        m_spacingY = AZ::GetClamp<float>(spaceY, s_spacingMin, s_spacingMax);
+        m_spacingZ = AZ::GetClamp<float>(spaceZ, s_spacingMin, s_spacingMax);
     }
 
     void EntityLatticeTestComponent::SetLatticeEntityScale(float scale)
     {
-        m_entityScale = AZ::GetClamp<float>(scale, 0.0f, s_entityScaleMax);
+        m_entityScale = AZ::GetClamp<float>(scale, s_entityScaleMin, s_entityScaleMax);
     }
 
     void EntityLatticeTestComponent::SetIBLExposure(float exposure)
