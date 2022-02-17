@@ -31,18 +31,21 @@ function TakeScreenshotSeries(filenamePrefix)
     SelectImageComparisonToleranceLevel("Level H")
 
     -- There could be variation in how long prior activities took so reset the clock for each series of screenshots
-    SetImguiValue('Reset Clock', true) 
-    IdleFrames(1) -- Give time for the sample to make any material changes before starting screenshots.
+    SetImguiValue('Reset Clock', true)     
+    IdleFrames(1) -- Consume ImGui changes, to ensure the clock is reset before pausing
 
     -- Note we pause while taking the screenshot so that IO delays won't impact the timing of the sample
 
     SetImguiValue("Pause", true)
+    IdleFrames(1) -- Give extra time to make sure any material changes are applied, especially in case an asset hot-load causes the material to reinitialize itself.
     CaptureScreenshot(g_screenshotOutputFolder .. filenamePrefix .. '_A.png')
     SetImguiValue("Pause", false)
 
+    -- Let the animation run for 1 second
     IdleSeconds(1.0)
 
     SetImguiValue("Pause", true)
+    IdleFrames(1) -- Give extra time to make sure any material changes are applied, especially in case an asset hot-load causes the material to reinitialize itself.
     CaptureScreenshot(g_screenshotOutputFolder .. filenamePrefix .. '_B.png')
     SetImguiValue("Pause", false)
 end
