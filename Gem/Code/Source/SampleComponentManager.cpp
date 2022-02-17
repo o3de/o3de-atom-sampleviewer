@@ -321,7 +321,7 @@ namespace AtomSampleViewer
 
     SampleComponentManager::SampleComponentManager()
         : m_imguiFrameCaptureSaver("@user@/frame_capture.xml")
-        , m_imGuiFrameTimer(FrameTimeLogSize, FrameTimeLogSize)
+        , m_imGuiFrameTimer(FrameTimeLogSize, FrameTimeLogSize, 250.0f)
     {
         m_exampleEntity = aznew AZ::Entity();
 
@@ -522,7 +522,7 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::OnTick(float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint time)
     {
-        m_imGuiFrameTimer.PushValue(deltaTime);
+        m_imGuiFrameTimer.PushValue(deltaTime * 1000.0f);
 
         bool screenshotRequest = false;
 
@@ -876,7 +876,7 @@ namespace AtomSampleViewer
                     Utils::ToggleFullScreenOfDefaultWindow();
                 }
 
-                if (ImGui::MenuItem("Framerate Histogram"))
+                if (ImGui::MenuItem("Frame Time Histogram"))
                 {
                     m_showFramerateHistogram = !m_showFramerateHistogram;
                 }
@@ -1154,12 +1154,12 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::ShowFramerateHistogram(float deltaTime)
     {
-        if (ImGui::Begin("Framerate Histogram", &m_showFramerateHistogram, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings))
+        if (ImGui::Begin("Frame Time Histogram", &m_showFramerateHistogram, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings))
         {
             ImGuiHistogramQueue::WidgetSettings settings;
-            settings.m_reportInverse = true;
-            settings.m_units = "fps";
-            m_imGuiFrameTimer.Tick(deltaTime, settings);
+            settings.m_reportInverse = false;
+            settings.m_units = "ms";
+            m_imGuiFrameTimer.Tick(deltaTime * 1000.0f, settings);
         }
         ImGui::End();
     }
