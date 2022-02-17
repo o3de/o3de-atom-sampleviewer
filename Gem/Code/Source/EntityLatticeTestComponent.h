@@ -79,9 +79,9 @@ namespace AtomSampleViewer
         int32_t m_latticeHeight = ENTITY_LATTICE_TEST_COMPONENT_HEIGHT;
         int32_t m_latticeDepth = ENTITY_LATTICE_TEST_COMPONENT_DEPTH;
 
-        float m_spacingX = ENTITY_LATTICE_TEST_COMPONENT_SPACING_X;
-        float m_spacingY = ENTITY_LATTICE_TEST_COMPONENT_SPACING_Y;
-        float m_spacingZ = ENTITY_LATTICE_TEST_COMPONENT_SPACING_Z;
+        float m_spacingX = 5.0f;
+        float m_spacingY = 5.0f;
+        float m_spacingZ = 5.0f;
 
         float m_entityScale = 1.0f;
         

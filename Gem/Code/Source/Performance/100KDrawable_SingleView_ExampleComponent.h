@@ -27,5 +27,7 @@ namespace AtomSampleViewer
 
     private:
         AZ_DISABLE_COPY_MOVE(_100KDrawableExampleComponent);
+
+        static void InitDefaultValues(HighInstanceTestParameters& defaultParameters);
     };
 } // namespace AtomSampleViewer
