@@ -5,13 +5,7 @@
     "ClassData": {
         "PassTemplate": {
             "Name": "ImGuiOnlyPipeline",
-            "PassClass": "ParentPass",
-            "Slots": [
-                {
-                    "Name": "SwapChainOutput",
-                    "SlotType": "InputOutput"
-                }
-            ],
+            "PassClass": "PipelinePass",
             "PassRequests": [
                 {
                     "Name": "ImGuiNoInputPass",
