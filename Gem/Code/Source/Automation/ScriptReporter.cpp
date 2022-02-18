@@ -1182,7 +1182,7 @@ namespace AtomSampleViewer
         memcpy(buffer.data() + bufferSize, actualScreenshot.GetBuffer().data(), bufferSize);
         memcpy(buffer.data() + bufferSize * 2, diffBuffer.data(), bufferSize);
 
-        PngFile imageDiff = PngFile::Create(RHI::Size(officialBaseline.GetWidth(), officialBaseline.GetHeight() * 3, 1), RHI::Format::R8G8B8A8_UNORM, buffer);
+        PngFile imageDiff = PngFile::Create(AZ::RHI::Size(officialBaseline.GetWidth(), officialBaseline.GetHeight() * 3, 1), AZ::RHI::Format::R8G8B8A8_UNORM, buffer);
         imageDiff.Save(filePath);
     }
 

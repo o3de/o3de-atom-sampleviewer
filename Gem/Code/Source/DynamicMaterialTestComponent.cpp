@@ -302,7 +302,11 @@ namespace AtomSampleViewer
         if (updateMaterials)
         {
             m_materialConfigs[m_currentMaterialConfig].m_updateLatticeMaterials();
-            CompileMaterials();
         }
+
+        // Even if materials weren't changed on this frame, they still might need to be compiled to apply changes
+        // from a previous frame. This could be the result of a material that was just loaded or reinitialized on
+        // the previous frame, possibly caused by a shader variant hot-loading.
+        CompileMaterials();
     }
 } // namespace AtomSampleViewer

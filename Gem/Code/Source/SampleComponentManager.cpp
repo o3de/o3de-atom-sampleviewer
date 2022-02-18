@@ -65,6 +65,9 @@
 #include <RHI/RayTracingExampleComponent.h>
 #include <RHI/MatrixAlignmentTestExampleComponent.h>
 
+#include <Performance/100KDrawable_SingleView_ExampleComponent.h>
+#include <Performance/100KDraw_10KDrawable_MultiView_ExampleComponent.h>
+
 #include <AreaLightExampleComponent.h>
 #include <AssetLoadTestComponent.h>
 #include <AuxGeomExampleComponent.h>
@@ -86,6 +89,7 @@
 #include <MultiRenderPipelineExampleComponent.h>
 #include <MultiSceneExampleComponent.h>
 #include <ParallaxMappingExampleComponent.h>
+#include <RenderTargetTextureExampleComponent.h>
 #include <SceneReloadSoakTestComponent.h>
 #include <ShadowExampleComponent.h>
 #include <ShadowedSponzaExampleComponent.h>
@@ -99,7 +103,6 @@
 #include <DiffuseGIExampleComponent.h>
 #include <SSRExampleComponent.h>
 #include <ShaderReloadTestComponent.h>
-#include <HighInstanceExampleComponent.h>
 
 #include <Atom/Bootstrap/DefaultWindowBus.h>
 
@@ -208,6 +211,18 @@ namespace AtomSampleViewer
         return NewSample<T>(SamplePipelineType::RPI, "Features", name, isSupportedFunction);
     }
 
+    template <typename T>
+    static SampleEntry NewPerfSample(const AZStd::string& name)
+    {
+        return NewSample<T>(SamplePipelineType::RPI, "Performance", name);
+    }
+
+    template <typename T>
+    static SampleEntry NewPerfSample(const AZStd::string& name, AZStd::function<bool()> isSupportedFunction)
+    {
+        return NewSample<T>(SamplePipelineType::RPI, "Performance", name, isSupportedFunction);
+    }
+
     void SampleComponentManager::Reflect(AZ::ReflectContext* context)
     {
         if (AZ::SerializeContext* serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
@@ -265,13 +280,13 @@ namespace AtomSampleViewer
             NewRPISample<DecalExampleComponent>("Decals"),
             NewRPISample<DynamicDrawExampleComponent>("DynamicDraw"),
             NewRPISample<DynamicMaterialTestComponent>("DynamicMaterialTest"),
-            NewRPISample<HighInstanceTestComponent>("HighInstanceTest"),
             NewRPISample<MaterialHotReloadTestComponent>("MaterialHotReloadTest"),
             NewRPISample<MeshExampleComponent>("Mesh"),
             NewRPISample<MSAA_RPI_ExampleComponent>("MSAA"),
             NewRPISample<MultiRenderPipelineExampleComponent>("MultiRenderPipeline"),
             NewRPISample<MultiSceneExampleComponent>("MultiScene"),
             NewRPISample<MultiViewSingleSceneAuxGeomExampleComponent>("MultiViewSingleSceneAuxGeom"),
+            NewRPISample<RenderTargetTextureExampleComponent>("RenderTargetTexture"),
             NewRPISample<RootConstantsExampleComponent>("RootConstants"),
             NewRPISample<SceneReloadSoakTestComponent>("SceneReloadSoakTest"),
             NewRPISample<StreamingImageExampleComponent>("StreamingImage"),
@@ -290,6 +305,8 @@ namespace AtomSampleViewer
             NewFeaturesSample<SSRExampleComponent>("SSR"),
             NewFeaturesSample<TonemappingExampleComponent>("Tonemapping"),
             NewFeaturesSample<TransparencyExampleComponent>("Transparency"),
+            NewPerfSample<_100KDrawableExampleComponent>("100KDrawable_SingleView"),
+            NewPerfSample<_100KDraw10KDrawableExampleComponent>("100KDraw_10KDrawable_MultiView"),
         };
     }
 
@@ -304,7 +321,7 @@ namespace AtomSampleViewer
 
     SampleComponentManager::SampleComponentManager()
         : m_imguiFrameCaptureSaver("@user@/frame_capture.xml")
-        , m_imGuiFrameTimer(FrameTimeLogSize, FrameTimeLogSize)
+        , m_imGuiFrameTimer(FrameTimeLogSize, FrameTimeLogSize, 250.0f)
     {
         m_exampleEntity = aznew AZ::Entity();
 
@@ -505,7 +522,7 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::OnTick(float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint time)
     {
-        m_imGuiFrameTimer.PushValue(deltaTime);
+        m_imGuiFrameTimer.PushValue(deltaTime * 1000.0f);
 
         bool screenshotRequest = false;
 
@@ -859,7 +876,7 @@ namespace AtomSampleViewer
                     Utils::ToggleFullScreenOfDefaultWindow();
                 }
 
-                if (ImGui::MenuItem("Framerate Histogram"))
+                if (ImGui::MenuItem("Frame Time Histogram"))
                 {
                     m_showFramerateHistogram = !m_showFramerateHistogram;
                 }
@@ -1137,12 +1154,12 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::ShowFramerateHistogram(float deltaTime)
     {
-        if (ImGui::Begin("Framerate Histogram", &m_showFramerateHistogram, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings))
+        if (ImGui::Begin("Frame Time Histogram", &m_showFramerateHistogram, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings))
         {
             ImGuiHistogramQueue::WidgetSettings settings;
-            settings.m_reportInverse = true;
-            settings.m_units = "fps";
-            m_imGuiFrameTimer.Tick(deltaTime, settings);
+            settings.m_reportInverse = false;
+            settings.m_units = "ms";
+            m_imGuiFrameTimer.Tick(deltaTime * 1000.0f, settings);
         }
         ImGui::End();
     }

@@ -196,7 +196,7 @@ namespace AtomSampleViewer
 
         int32_t m_selectedSampleIndex = -1;
 
-        static constexpr uint32_t FrameTimeLogSize = 10;
+        static constexpr uint32_t FrameTimeLogSize = 30;
         ImGuiHistogramQueue m_imGuiFrameTimer;
 
         bool m_showImGuiMetrics = false;

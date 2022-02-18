@@ -34,10 +34,12 @@ namespace AtomSampleViewer
         void Tick(float deltaTime, WidgetSettings settings);
 
         float GetDisplayedAverage() const { return m_displayedAverage; }
+        float GetDisplayedMinimum() const { return m_displayedMinimum; }
+        float GetDisplayedMaximum() const { return m_displayedMaximum; }
 
     private:
 
-        float CalculateAverage(AZStd::size_t maxSampleCount);
+        float UpdateDisplayedValues(AZStd::size_t maxSampleCount, float& minValue, float& maxValue);
 
         AZStd::vector<float> m_valueLog;
         AZStd::vector<float> m_averageLog;
@@ -50,6 +52,8 @@ namespace AtomSampleViewer
         int m_samplesSinceLastDisplayUpdate = 0;
 
         float m_displayedAverage = 0.0f;
+        float m_displayedMinimum = 0.0f;
+        float m_displayedMaximum = 0.0f;
     };
 
 } // namespace AtomSampleViewer

@@ -86,9 +86,6 @@ namespace AtomSampleViewer
         static const char* CameraControllerNameTable[CameraControllerCount];
         CameraControllerType m_currentCameraControllerType = CameraControllerType::ArcBall;
 
-        // Not owned by this sample, we look this up
-        AZ::Component* m_cameraControlComponent = nullptr;
-
         AZ::Render::MeshFeatureProcessorInterface::ModelChangedEvent::Handler m_changedHandler;
         
         static constexpr float ArcballRadiusMinModifier = 0.01f;

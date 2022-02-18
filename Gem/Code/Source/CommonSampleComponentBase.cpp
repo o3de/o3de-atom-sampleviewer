@@ -21,6 +21,16 @@ namespace AtomSampleViewer
     using namespace AZ;
     using namespace RPI;
 
+    void CommonSampleComponentBase::Reflect(ReflectContext* context)
+    {
+        if (SerializeContext* serializeContext = azrtti_cast<SerializeContext*>(context))
+        {
+            serializeContext->Class<CommonSampleComponentBase, Component>()
+                ->Version(0)
+                ;
+        }
+    }
+
     bool CommonSampleComponentBase::ReadInConfig(const ComponentConfig* baseConfig)
     {
         m_scene = RPI::RPISystemInterface::Get()->GetSceneByName(AZ::Name("RPI"));

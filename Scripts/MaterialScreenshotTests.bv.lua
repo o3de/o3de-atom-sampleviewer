@@ -204,6 +204,16 @@ GenerateMaterialScreenshot('Level F', 'MinimalPbr_BlueMetal')
 GenerateMaterialScreenshot('Level D', 'MinimalPbr_RedDielectric')
 
 ----------------------------------------------------------------------
+-- MinimalMultilayerPBR Materials...
+-- This test is here only temporarily for regression testing until StandardMultilayerPBR is refactored to use reused nested property groups.
+
+g_testMaterialsFolder = 'materials/types/'
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/MinimalPBR/')
+Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
+
+GenerateMaterialScreenshot('Level D', 'MinimalMultilayerExample')
+
+----------------------------------------------------------------------
 -- AutoBrick Materials...
 
 g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/AutoBrick/')
