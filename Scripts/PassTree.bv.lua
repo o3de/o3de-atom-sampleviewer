@@ -27,7 +27,7 @@ end
 OpenSample('RPI/Mesh')
 ResizeViewport(800, 600)
 
-SelectImageComparisonToleranceLevel("Level F")
+SelectImageComparisonToleranceLevel("Level G")
 
 -- choose model, material and lighting
 SetImguiValue('Models/##Available', 'objects/shaderball_simple.azmodel')
