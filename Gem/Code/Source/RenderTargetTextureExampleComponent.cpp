@@ -86,16 +86,15 @@ namespace AtomSampleViewer
     void RenderTargetTextureExampleComponent::AddRenderTargetPass()
     {
         m_renderTargetPassDrawListTag = AZ::Name("rt_1");
-        Name renderPassTemplateName = Name{ "RenderTargetPassTemplate" };
+        const Name renderPassTemplateName = Name{ "RenderTargetPassTemplate" };
         RHI::ClearValue clearValue = RHI::ClearValue::CreateVector4Float(1, 0, 0, 1);
-        AZStd::shared_ptr<RPI::PassTemplate> rtPassTemplate = RPI::PassSystemInterface::Get()->GetPassTemplate(renderPassTemplateName);
 
         // Create the template if it doesn't exist
-        if (rtPassTemplate == nullptr)
+        if (!RPI::PassSystemInterface::Get()->HasTemplate(renderPassTemplateName))
         {
-            // first add a pass template from code (an alternative way then using .pass asset for a new template)        
-            rtPassTemplate = AZStd::make_shared<RPI::PassTemplate>();
-            rtPassTemplate->m_name = Name{ "RenderTargetPassTemplate" };
+            // first add a pass template from code (an alternative way then using .pass asset for a new template)
+            const AZStd::shared_ptr<RPI::PassTemplate>rtPassTemplate = AZStd::make_shared<RPI::PassTemplate>();
+            rtPassTemplate->m_name = renderPassTemplateName;
             rtPassTemplate->m_passClass = "RasterPass";
 
             // only need one slot for render target output
@@ -115,12 +114,12 @@ namespace AtomSampleViewer
             connection.m_attachmentRef.m_attachment = Name("RenderTarget");
             rtPassTemplate->AddOutputConnection(connection);
 
-            RPI::PassSystemInterface::Get()->AddPassTemplate(Name{ "RenderTargetPassTemplate" }, rtPassTemplate);
+            RPI::PassSystemInterface::Get()->AddPassTemplate(renderPassTemplateName, rtPassTemplate);
         }
 
         // Create pass
         RPI::PassRequest createPassRequest;
-        createPassRequest.m_templateName = Name("RenderTargetPassTemplate");
+        createPassRequest.m_templateName = renderPassTemplateName;
         createPassRequest.m_passName = Name("RenderTargetPass");
 
         // Create AttacmentImage which is used for pass render target 
