@@ -352,7 +352,7 @@ namespace AtomSampleViewer
         {
             // Add attachment preview after pass queued changes processed
             // m_renderTargetPass only has one attachment
-                m_previewPass->PreviewImageAttachmentForPass(m_renderTargetPass.get(), m_renderTargetPass->GetAttachmentBindings()[0].m_attachment.get());
+                m_previewPass->PreviewImageAttachmentForPass(m_renderTargetPass.get(), m_renderTargetPass->GetAttachmentBindings()[0].GetAttachment().get());
         }
         else
         {
