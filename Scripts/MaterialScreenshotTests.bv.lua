@@ -211,7 +211,7 @@ g_testMaterialsFolder = 'materials/types/'
 g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/MinimalPBR/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
-GenerateMaterialScreenshot('Level D', 'MinimalMultilayerExample')
+GenerateMaterialScreenshot('Level G', 'MinimalMultilayerExample')
 
 ----------------------------------------------------------------------
 -- AutoBrick Materials...
