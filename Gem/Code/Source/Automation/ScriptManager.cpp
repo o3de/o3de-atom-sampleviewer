@@ -18,6 +18,7 @@
 #include <Atom/Component/DebugCamera/ArcBallControllerComponent.h>
 #include <Atom/Feature/ImGui/SystemBus.h>
 #include <Atom/RPI.Reflect/Asset/AssetUtils.h>
+#include <Atom/RHI/Factory.h>
 
 #include <AzCore/Component/Entity.h>
 #include <AzCore/Script/ScriptContext.h>
@@ -274,6 +275,10 @@ namespace AtomSampleViewer
         {
             ShowScriptRunnerDialog();
         }
+        if (m_showPrecommitWizard)
+        {
+            ShowPrecommitWizard();
+        }
 
         m_scriptReporter.TickImGui();
 
@@ -447,6 +452,11 @@ namespace AtomSampleViewer
         m_showScriptRunnerDialog = true;
     }
 
+    void ScriptManager::OpenPrecommitWizard()
+    {
+        m_showPrecommitWizard = true;
+    }
+
     void ScriptManager::RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd, int randomSeed)
     {
         m_testSuiteRunConfig.m_automatedRunEnabled = true;
@@ -543,6 +553,208 @@ namespace AtomSampleViewer
         }
 
         m_messageBox.TickPopup();
+
+        ImGui::End();
+    }
+
+    void ScriptManager::ShowPrecommitWizard()
+    {
+        if (ImGui::Begin("Pre-commit Wizard", &m_showPrecommitWizard))
+        {
+            if (ImGui::Button("Start from the Beginning"))
+            {
+                m_wizardSettings = PrecommitWizardSettings();
+            }
+
+            if (m_wizardSettings.m_stage == PrecommitWizardSettings::Stage::INTRO)
+            {
+                ImGui::Separator();
+                ImGui::TextWrapped("Here's what will take place...\n"                                                   \
+                    "1) The standard '_fulltestsuite_' script will be run.\n"                                           \
+                    "2) You'll see a summary of the test results. If any tests failed the automatic checks, "           \
+                        "you are strongly encouraged to address those issues first.\n"                                  \
+                    "3) You will be guided through a series of visual screenshot validations. For each one, "           \
+                        "you'll need to inspect an image comparison and indicate whether you see visual differences.\n" \
+                    "4) The final report will be generated. Copy and paste this into your PR description."              \
+                );
+                ImGui::Separator();
+
+                if (ImGui::Button("Run Full Test Suite"))
+                {
+                    PrepareAndExecuteScript(FullSuiteScriptFilepath);
+                    
+                    m_wizardSettings.m_stage = PrecommitWizardSettings::Stage::REPORT_FULLSUITE_SUMMARY;
+                }
+            }
+            // Show the full suite test results
+            else if (m_wizardSettings.m_stage == PrecommitWizardSettings::Stage::REPORT_FULLSUITE_SUMMARY)
+            {
+
+                m_scriptReporter.DisplayScriptResultsSummary();
+
+                if (ImGui::Button("See Details..."))
+                {
+                    m_scriptReporter.OpenReportDialog();
+                }
+                ImGui::Separator();
+
+                if (ImGui::Button("Back"))
+                {
+                    m_wizardSettings.m_stage = PrecommitWizardSettings::Stage::INTRO;
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Continue"))
+                {
+                    m_wizardSettings.GenerateReportsToInpsect(m_scriptReporter.GetScriptReport());
+
+                    if (!m_wizardSettings.m_reportsOrderedByThresholdToInspect.empty())
+                    {
+                        m_wizardSettings.m_stage = PrecommitWizardSettings::Stage::MANUAL_INSPECTION;
+                    }
+                    else
+                    {
+                        m_wizardSettings.m_stage = PrecommitWizardSettings::Stage::REPORT_FINAL_SUMMARY;
+                    }
+                }
+            }
+            // Go through each error in the full suite test and require users to manually pick from a list
+            // to describe the difference. 
+            else if (m_wizardSettings.m_stage == PrecommitWizardSettings::Stage::MANUAL_INSPECTION)
+            {
+                const AZStd::vector<ScriptReporter::ScriptReport>& scriptReports = m_scriptReporter.GetScriptReport();
+                const PrecommitWizardSettings::ReportIndex currentIndex = m_wizardSettings.m_reportIterator->second;
+
+                auto scriptReport = scriptReports[currentIndex.first];
+                auto screenshotTest = scriptReport.m_screenshotTests[currentIndex.second];
+                ImGui::Text("Script Name: %s", scriptReport.m_scriptAssetPath.c_str());
+                ImGui::Text("Screenshot Name: %s", screenshotTest.m_officialBaselineScreenshotFilePath.c_str());
+
+                ImGui::Separator();
+                ImGui::Text("Diff Score: %f", screenshotTest.m_officialComparisonResult.m_finalDiffScore);
+
+                // TODO: Render screenshots in ImGui.
+                ImGui::Separator();
+                ImGui::Text("Use the 'Export Png' button to inspect the screenshot. Choose from the options below that describe the difference level then click 'Next'");
+                for (int i = 0; i < 4; ++i)
+                {
+                    ImGuiTreeNodeFlags node_flags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | (m_wizardSettings.m_inspectionSelection == i ? ImGuiTreeNodeFlags_Selected : 0);
+                    ImGui::TreeNodeEx((void*)(intptr_t)i, node_flags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, PrecommitWizardSettings::ManualInspectionOptions[i]);
+                    if (ImGui::IsItemClicked())
+                    {
+                        m_wizardSettings.m_inspectionSelection = i;
+                    }
+                }
+
+                if (ImGui::Button("Export Png"))
+                {
+                    m_wizardSettings.m_exportedPngPath = m_scriptReporter.ExportImageDiff(scriptReport, screenshotTest);
+                }
+                if (!m_wizardSettings.m_exportedPngPath.empty())
+                {
+                    ImGui::SameLine();
+                    bool copyPath = ImGui::Button("Copy Path");
+                    
+                    ImGui::Text("Diff Png was exported to:");
+                    ImGui::SameLine();
+                    if (copyPath)
+                    {
+                        ImGui::LogToClipboard();
+                    }
+
+                    ImGui::Text(m_wizardSettings.m_exportedPngPath.c_str());
+
+                    if (copyPath)
+                    {
+                        ImGui::LogFinish();
+                    }
+                }
+
+                ImGui::Separator();
+                if (ImGui::Button("Back"))
+                {
+                    if (m_wizardSettings.m_reportIterator == m_wizardSettings.m_reportsOrderedByThresholdToInspect.begin())
+                    {
+                        m_wizardSettings.m_stage = PrecommitWizardSettings::Stage::REPORT_FULLSUITE_SUMMARY;
+                    }
+                    else
+                    {
+                        --m_wizardSettings.m_reportIterator;
+                    }
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Next"))
+                {
+                    m_wizardSettings.m_reportIndexDifferenceLevelMap[currentIndex] = PrecommitWizardSettings::ImageDifferenceLevel(m_wizardSettings.m_inspectionSelection);
+                    m_wizardSettings.m_exportedPngPath.clear();
+                    ++m_wizardSettings.m_reportIterator;
+
+                    if (m_wizardSettings.m_reportIterator == m_wizardSettings.m_reportsOrderedByThresholdToInspect.end())
+                    {
+                        --m_wizardSettings.m_reportIterator;
+                        m_wizardSettings.m_stage = PrecommitWizardSettings::Stage::REPORT_FINAL_SUMMARY;
+                    }
+                }
+                ImGui::SameLine();
+                ImGui::Text("%d/%d", AZStd::distance(m_wizardSettings.m_reportsOrderedByThresholdToInspect.begin(), m_wizardSettings.m_reportIterator), m_wizardSettings.m_reportsOrderedByThresholdToInspect.size());
+            }
+            // Generate a summary that can be easily copied into the clipboard
+            else if (m_wizardSettings.m_stage == PrecommitWizardSettings::Stage::REPORT_FINAL_SUMMARY)
+            {
+                ImGui::Text("Tests are complete! here is the final report.");
+
+                bool copyToClipboard = ImGui::Button("Copy To Clipboard");
+
+                const ScriptReporter::ScriptResultsSummary resultsSummary = m_scriptReporter.GetScriptResultSummary();
+                const AZStd::vector<ScriptReporter::ScriptReport>& scriptReports = m_scriptReporter.GetScriptReport();
+                AZStd::vector<AZStd::vector<PrecommitWizardSettings::ReportIndex>> imageDifferenceSummary(PrecommitWizardSettings::ImageDifferenceLevel::NUM_DIFFERENCE_LEVELS);
+                for (auto reportDifference : m_wizardSettings.m_reportIndexDifferenceLevelMap)
+                {
+                    imageDifferenceSummary[reportDifference.second].push_back(reportDifference.first);
+                }
+
+                ImGui::Separator();
+
+                if (copyToClipboard)
+                {
+                    ImGui::LogToClipboard();
+                }
+
+                ImGui::Text("RHI API: %s", AZ::RHI::Factory::Get().GetName().GetCStr());
+                ImGui::Text("Test Script Count: %d", scriptReports.size());
+                ImGui::Text("Screenshot Count: %d", resultsSummary.m_totalScreenshotsCount);
+                for (int i = aznumeric_cast<int>(imageDifferenceSummary.size()-1); i >= 0; --i)
+                {
+                    if (!imageDifferenceSummary[i].empty())
+                    {
+                        ImGui::Text("Screenshot interactive check '%s'", PrecommitWizardSettings::ManualInspectionDifferenceLevels[i]);
+                        for (auto reportIndex : imageDifferenceSummary[i])
+                        {
+                            auto scriptReport = scriptReports[reportIndex.first];
+                            auto screenshotTest = scriptReport.m_screenshotTests[reportIndex.second];
+                            ImGui::Text("\t%s %s '%s' %f",
+                                scriptReport.m_scriptAssetPath.c_str(),
+                                screenshotTest.m_screenshotFilePath.c_str(),
+                                screenshotTest.m_toleranceLevel.m_name.c_str(),
+                                screenshotTest.m_officialComparisonResult.m_finalDiffScore
+                            );
+                        }
+                    }
+                }
+
+                if (copyToClipboard)
+                {
+                    ImGui::LogFinish();
+                }
+
+                ImGui::Separator();
+                if (ImGui::Button("Back"))
+                {
+                    m_wizardSettings.m_stage = PrecommitWizardSettings::Stage::MANUAL_INSPECTION;
+                    auto reportIndexToDifference = m_wizardSettings.m_reportIndexDifferenceLevelMap.find(m_wizardSettings.m_reportIterator->second);
+                    m_wizardSettings.m_inspectionSelection = reportIndexToDifference->second;
+                }
+            }
+        }
 
         ImGui::End();
     }
