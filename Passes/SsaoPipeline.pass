@@ -247,13 +247,6 @@
                     "TemplateName": "SsaoParentTemplate",
                     "Connections": [
                         {
-                            "LocalSlot": "LinearDepth",
-                            "AttachmentRef": {
-                                "Pass": "DepthPrePass",
-                                "Attachment": "DepthLinear"
-                            }
-                        },
-                        {
                             "LocalSlot": "Modulate",
                             "AttachmentRef": {
                                 "Pass": "DebugWhiteTexture",
