@@ -5,13 +5,19 @@
     "ClassData": {
         "PassTemplate": {
             "Name": "RHISamplePipelineTemplate",
-            "PassClass": "PipelinePass",
-            "PassRequests": [                     
+            "PassClass": "ParentPass",
+            "Slots": [
+                {
+                    "Name": "SwapChainOutput",
+                    "SlotType": "InputOutput"
+                }
+            ],
+            "PassRequests": [
                 {
                     "Name": "RHISamplePass",
                     "TemplateName": "RHISamplePassTemplate",
                     "Enabled": true
-                },      
+                },
                 {
                     "Name": "ImGuiPass",
                     "TemplateName": "ImGuiPassTemplate",
