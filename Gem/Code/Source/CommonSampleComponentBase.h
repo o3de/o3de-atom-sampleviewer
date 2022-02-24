@@ -106,7 +106,12 @@ namespace AtomSampleViewer
         mutable AZ::Render::MeshFeatureProcessorInterface* m_meshFeatureProcessor = nullptr;
 
         //! All loaded lighting presets.
-        AZStd::vector<AZ::Render::LightingPreset> m_lightingPresets;
+        struct LightingPresetEntry
+        {
+            AZStd::string m_displayName;
+            AZ::Render::LightingPreset m_preset;
+        };
+        AZStd::vector<LightingPresetEntry> m_lightingPresets;
 
         //! Lights created by lighting presets.
         AZStd::vector<AZ::Render::DirectionalLightFeatureProcessorInterface::LightHandle> m_lightHandles;

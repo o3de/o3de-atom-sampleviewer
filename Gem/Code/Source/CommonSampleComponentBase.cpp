@@ -105,10 +105,10 @@ namespace AtomSampleViewer
         static const char* InitialLightingPresetName = "Palermo Sidewalk";
         for (uint32_t index = 0; index < m_lightingPresets.size(); ++index)
         {
-            if (m_lightingPresets[index].m_displayName == InitialLightingPresetName)
+            if (AZ::StringFunc::Contains(m_lightingPresets[index].m_displayName, InitialLightingPresetName))
             {
                 m_currentLightingPresetIndex = index;
-                OnLightingPresetSelected(m_lightingPresets[m_currentLightingPresetIndex], m_useAlternateSkybox);
+                OnLightingPresetSelected(m_lightingPresets[m_currentLightingPresetIndex].m_preset, m_useAlternateSkybox);
                 break;
             }
         }
@@ -155,13 +155,28 @@ namespace AtomSampleViewer
             const AZ::Render::LightingPreset* preset = asset->GetDataAs<AZ::Render::LightingPreset>();
             if (preset)
             {
-                m_lightingPresets.push_back(*preset);
+                AZStd::string displayName;
+                AZ::StringFunc::Path::GetFullFileName(assetPath.c_str(), displayName);
+                AZ::StringFunc::Replace(displayName, ".lightingpreset.azasset", "");
+
+                AZStd::vector<AZStd::string> displayNameParts;
+                AZ::StringFunc::Tokenize(displayName, displayNameParts, "\\/, ()_-");
+                for (auto& displayNamePart : displayNameParts)
+                {
+                    displayNamePart[0] = aznumeric_cast<char>(toupper(displayNamePart[0]));
+                }
+
+                displayName.clear();
+                AZ::StringFunc::Join(displayName, displayNameParts, ' ');
+
+                m_lightingPresets.push_back({ displayName, *preset });
             }
+
             m_lightingPresetsDirty = true;
             if (!m_lightingPresets.empty() && m_currentLightingPresetIndex == InvalidLightingPresetIndex)
             {
                 m_currentLightingPresetIndex = 0;
-                OnLightingPresetSelected(m_lightingPresets[0], m_useAlternateSkybox);
+                OnLightingPresetSelected(m_lightingPresets[0].m_preset, m_useAlternateSkybox);
             }
         }
         else
@@ -218,7 +233,7 @@ namespace AtomSampleViewer
                 {
                     m_currentLightingPresetIndex = i;
                     m_useAlternateSkybox = useThisPresetWithAlternateSkybox;
-                    OnLightingPresetSelected(m_lightingPresets[i], m_useAlternateSkybox);
+                    OnLightingPresetSelected(m_lightingPresets[i].m_preset, m_useAlternateSkybox);
                 }
             }
             ScriptableImGui::EndCombo();
