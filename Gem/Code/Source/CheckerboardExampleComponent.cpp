@@ -107,7 +107,7 @@ namespace AtomSampleViewer
         // add the checker board pipeline
         AZ::RPI::RenderPipelineDescriptor pipelineDesc;
         pipelineDesc.m_mainViewTagName = "MainCamera";
-        pipelineDesc.m_name = "Checkerboard";
+        pipelineDesc.m_name = "CheckerboardPipeline";
         pipelineDesc.m_rootPassTemplate = "CheckerboardPipeline";
         m_cbPipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
         m_scene->AddRenderPipeline(m_cbPipeline);
