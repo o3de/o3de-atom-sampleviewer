@@ -327,8 +327,6 @@ namespace AtomSampleViewer
         AzFramework::StringFunc::Path::GetFileName(screenshotTest.m_screenshotFilePath.c_str(), screenshotFilenameWithouExtension);
         AzFramework::StringFunc::Path::StripExtension(screenshotFilenameWithouExtension);
 
-        AZStd::string timestring = GenerateTimestamp();
-
         AZStd::string imageDiffFilename = "imageDiff_" + scriptFilenameWithouExtension + "_" + screenshotFilenameWithouExtension + "_" + m_uniqueTimestamp + ".png";
         AzFramework::StringFunc::Path::Join(projectPath.c_str(), UserFolder, imageDiffPath);
         AzFramework::StringFunc::Path::Join(imageDiffPath.c_str(), TestResultsFolder, imageDiffPath);

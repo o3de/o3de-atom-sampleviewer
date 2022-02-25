@@ -74,6 +74,7 @@ namespace AtomSampleViewer
 
         void ShowScriptRunnerDialog();
         void ShowPrecommitWizard();
+        void ShowBackToIntroWarning();
 
         // Registers functions in a BehaviorContext so they can be exposed to Lua scripts.
         static void ReflectScriptContext(AZ::BehaviorContext* context);
