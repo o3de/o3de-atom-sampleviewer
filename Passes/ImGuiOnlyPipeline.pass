@@ -12,6 +12,15 @@
                     "SlotType": "InputOutput"
                 }
             ],
+            "PassData": {
+                "$type": "PassData",
+                "PipelineGlobalConnections": [
+                    {
+                        "GlobalName": "SwapChainOutput",
+                        "Slot": "SwapChainOutput"
+                    }
+                ]
+            },
             "PassRequests": [
                 {
                     "Name": "ImGuiNoInputPass",

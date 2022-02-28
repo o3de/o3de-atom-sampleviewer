@@ -9,9 +9,18 @@
             "Slots": [
                 {
                     "Name": "SwapChainOutput",
-                    "SlotType": "Output"
+                    "SlotType": "InputOutput"
                 }
             ],
+            "PassData": {
+                "$type": "PassData",
+                "PipelineGlobalConnections": [
+                    {
+                        "GlobalName": "SwapChainOutput",
+                        "Slot": "SwapChainOutput"
+                    }
+                ]
+            },
             "PassRequests": [
                 {
                     "Name": "MorphTargetPass",
@@ -50,7 +59,7 @@
                 },
                 {
                     "Name": "ProjectedShadowmapsPass",
-                    "TemplateName": "ProjectedLightShadowmapsTemplate",
+                    "TemplateName": "ProjectedShadowmapsTemplate",
                     "PassData": {
                         "$type": "RasterPassData",
                         "DrawListTag": "shadow",
