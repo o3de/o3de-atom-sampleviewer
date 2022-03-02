@@ -2,10 +2,9 @@
     "Source" : "RTAOGeneration.azsl",
     "DrawList" : "RayTracing",
 
-    "CompilerHints":
-    {
-        "DxcAdditionalFreeArguments" : "-fspv-target-env=vulkan1.2"
-    }, 
+    "AddBuildArguments": {
+        "dxc": ["-fspv-target-env=vulkan1.2"]
+    },
 
     "ProgramSettings":
     {
