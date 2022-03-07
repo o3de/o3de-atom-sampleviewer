@@ -80,6 +80,7 @@ namespace AtomSampleViewer
         //! This displays all the collected script reporting data, provides links to tools for analyzing data like
         //! viewing screenshot diffs. It can be left open during processing and will update in real-time.
         void OpenReportDialog();
+        void HideReportDialog();
 
         //! Called every frame to update the ImGui dialog
         void TickImGui();

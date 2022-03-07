@@ -275,12 +275,13 @@ namespace AtomSampleViewer
         {
             ShowScriptRunnerDialog();
         }
+
+        m_scriptReporter.TickImGui();
+
         if (m_showPrecommitWizard)
         {
             ShowPrecommitWizard();
         }
-
-        m_scriptReporter.TickImGui();
 
         if (m_testSuiteRunConfig.m_automatedRunEnabled)
         {
@@ -568,7 +569,7 @@ namespace AtomSampleViewer
                 ImGui::OpenPopup("Return to Intro Window");
             }
 
-            if (m_wizardSettings.m_stage == PrecommitWizardSettings::Stage::INTRO)
+            if (m_wizardSettings.m_stage == PrecommitWizardSettings::Stage::Intro)
             {
                 ImGui::Separator();
                 ImGui::TextWrapped("Here's what will take place...\n"                                                   \
@@ -584,12 +585,21 @@ namespace AtomSampleViewer
                 if (ImGui::Button("Run Full Test Suite"))
                 {
                     PrepareAndExecuteScript(FullSuiteScriptFilepath);
-                    
-                    m_wizardSettings.m_stage = PrecommitWizardSettings::Stage::REPORT_FULLSUITE_SUMMARY;
+                    m_wizardSettings.m_stage = PrecommitWizardSettings::Stage::RunFullsuiteTest;
+                }
+            }
+            else if (m_wizardSettings.m_stage == PrecommitWizardSettings::Stage::RunFullsuiteTest)
+            {
+                ImGui::Text("Running Full Test Suite. Please Wait...");
+
+                if (m_scriptOperations.empty() && !m_doFinalScriptCleanup)
+                {
+                    m_scriptReporter.HideReportDialog();
+                    m_wizardSettings.m_stage = PrecommitWizardSettings::Stage::ReportFullsuiteSummary;
                 }
             }
             // Show the full suite test results
-            else if (m_wizardSettings.m_stage == PrecommitWizardSettings::Stage::REPORT_FULLSUITE_SUMMARY)
+            else if (m_wizardSettings.m_stage == PrecommitWizardSettings::Stage::ReportFullsuiteSummary)
             {
                 m_scriptReporter.DisplayScriptResultsSummary();
 
@@ -611,23 +621,32 @@ namespace AtomSampleViewer
 
                     if (!m_wizardSettings.m_reportsOrderedByThresholdToInspect.empty())
                     {
-                        m_wizardSettings.m_stage = PrecommitWizardSettings::Stage::MANUAL_INSPECTION;
+                        m_wizardSettings.m_stage = PrecommitWizardSettings::Stage::ManualInspection;
                     }
                     else
                     {
-                        m_wizardSettings.m_stage = PrecommitWizardSettings::Stage::REPORT_FINAL_SUMMARY;
+                        m_wizardSettings.m_stage = PrecommitWizardSettings::Stage::ReportFinalSummary;
                     }
                 }
             }
             // Go through each pass in the full suite test and require users to manually pick from a list
             // to describe the difference if it exists. 
-            else if (m_wizardSettings.m_stage == PrecommitWizardSettings::Stage::MANUAL_INSPECTION)
+            else if (m_wizardSettings.m_stage == PrecommitWizardSettings::Stage::ManualInspection)
             {
                 const AZStd::vector<ScriptReporter::ScriptReport>& scriptReports = m_scriptReporter.GetScriptReport();
-                const PrecommitWizardSettings::ReportIndex currentIndex = m_wizardSettings.m_reportIterator->second;
 
+                // Get the script report and screenshot test corresponding to the current index
+                const PrecommitWizardSettings::ReportIndex currentIndex = m_wizardSettings.m_reportIterator->second;
                 const ScriptReporter::ScriptReport& scriptReport = scriptReports[currentIndex.first];
                 const ScriptReporter::ScreenshotTestInfo& screenshotTest = scriptReport.m_screenshotTests[currentIndex.second];
+
+                // Check if the current index's screenshot has been manually validated
+                auto it = m_wizardSettings.m_reportIndexDifferenceLevelMap.find(currentIndex);
+                if (it != m_wizardSettings.m_reportIndexDifferenceLevelMap.end())
+                {
+                    m_wizardSettings.m_inspectionSelection = it->second;
+                }
+
                 ImGui::Text("Script Name: %s", scriptReport.m_scriptAssetPath.c_str());
                 ImGui::Text("Screenshot Name: %s", screenshotTest.m_officialBaselineScreenshotFilePath.c_str());
 
@@ -636,7 +655,9 @@ namespace AtomSampleViewer
 
                 // TODO: Render screenshots in ImGui.
                 ImGui::Separator();
-                ImGui::Text("Use the 'Export Png' button to inspect the screenshot. Choose from the options below that describe the difference level then click 'Next'");
+                ImGui::TextWrapped("Use the 'Export Png' button to inspect the screenshot. Choose from the options below that describe the difference level then click 'Next' to log the results. " \
+                    "Once there are no more noticeable differences as the threshold decreases, click 'Finish' to generate the final report summary. " \
+                    "Note that the remaining screenshots that were not manually inspected will not appear in the final report summary.");
                 for (int i = 0; i < 4; ++i)
                 {
                     ImGui::RadioButton(PrecommitWizardSettings::ManualInspectionOptions[i], &m_wizardSettings.m_inspectionSelection, i);
@@ -688,7 +709,7 @@ namespace AtomSampleViewer
                 {
                     if (m_wizardSettings.m_reportIterator == m_wizardSettings.m_reportsOrderedByThresholdToInspect.begin())
                     {
-                        m_wizardSettings.m_stage = PrecommitWizardSettings::Stage::REPORT_FULLSUITE_SUMMARY;
+                        m_wizardSettings.m_stage = PrecommitWizardSettings::Stage::ReportFullsuiteSummary;
                     }
                     else
                     {
@@ -696,9 +717,16 @@ namespace AtomSampleViewer
                     }
                 }
                 ImGui::SameLine();
-                if (ImGui::Button("Add and Next"))
+                const bool isNextButtonDisabled = m_wizardSettings.m_inspectionSelection == PrecommitWizardSettings::DefaultInspectionSelection ? true : false;
+                if (isNextButtonDisabled)
+                {
+                    ImGui::PushItemFlag(ImGuiItemFlags_Disabled, true);
+                    ImGui::PushStyleVar(ImGuiStyleVar_Alpha, ImGui::GetStyle().Alpha * 0.5f);
+                }
+                if (ImGui::Button("Next"))
                 {
                     m_wizardSettings.m_reportIndexDifferenceLevelMap[currentIndex] = PrecommitWizardSettings::ImageDifferenceLevel::Levels(m_wizardSettings.m_inspectionSelection);
+                    m_wizardSettings.m_inspectionSelection = PrecommitWizardSettings::DefaultInspectionSelection;
                     m_wizardSettings.m_exportedPngPath.clear();
                     ++m_wizardSettings.m_reportIterator;
 
@@ -707,19 +735,24 @@ namespace AtomSampleViewer
                         // Decrement the iterator to make sure it's pointing to the last element in case the user goes
                         // back to the manual inspection page.
                         --m_wizardSettings.m_reportIterator;
-                        m_wizardSettings.m_stage = PrecommitWizardSettings::Stage::REPORT_FINAL_SUMMARY;
+                        m_wizardSettings.m_stage = PrecommitWizardSettings::Stage::ReportFinalSummary;
                     }
+                }
+                if (isNextButtonDisabled)
+                {
+                    ImGui::PopItemFlag();
+                    ImGui::PopStyleVar();
                 }
                 ImGui::SameLine();
                 if (ImGui::Button("Finish Manual Inspection"))
                 {
-                    m_wizardSettings.m_stage = PrecommitWizardSettings::Stage::REPORT_FINAL_SUMMARY;
+                    m_wizardSettings.m_stage = PrecommitWizardSettings::Stage::ReportFinalSummary;
                 }
                 ImGui::SameLine();
-                ImGui::Text("%d/%d", AZStd::distance(m_wizardSettings.m_reportsOrderedByThresholdToInspect.begin(), m_wizardSettings.m_reportIterator), m_wizardSettings.m_reportsOrderedByThresholdToInspect.size());
+                ImGui::Text("%d/%d", AZStd::distance(m_wizardSettings.m_reportsOrderedByThresholdToInspect.begin(), m_wizardSettings.m_reportIterator)+1, m_wizardSettings.m_reportsOrderedByThresholdToInspect.size());
             }
             // Generate a summary that can be easily copied into the clipboard
-            else if (m_wizardSettings.m_stage == PrecommitWizardSettings::Stage::REPORT_FINAL_SUMMARY)
+            else if (m_wizardSettings.m_stage == PrecommitWizardSettings::Stage::ReportFinalSummary)
             {
                 ImGui::Text("Tests are complete! here is the final report.");
 
@@ -727,10 +760,15 @@ namespace AtomSampleViewer
 
                 const ScriptReporter::ScriptResultsSummary resultsSummary = m_scriptReporter.GetScriptResultSummary();
                 const AZStd::vector<ScriptReporter::ScriptReport>& scriptReports = m_scriptReporter.GetScriptReport();
-                AZStd::vector<AZStd::vector<PrecommitWizardSettings::ReportIndex>> imageDifferenceSummary(PrecommitWizardSettings::ImageDifferenceLevel::NUM_DIFFERENCE_LEVELS);
+                AZStd::vector<AZStd::vector<PrecommitWizardSettings::ReportIndex>> imageDifferenceSummary(PrecommitWizardSettings::ImageDifferenceLevel::NumDifferenceLevels);
+                int totalValidatedScreenshots = 0;
                 for (const auto& [reportIndex, differenceLevel] : m_wizardSettings.m_reportIndexDifferenceLevelMap)
                 {
                     imageDifferenceSummary[differenceLevel].push_back(reportIndex);
+                }
+                for (const auto& differenceLevelReports : imageDifferenceSummary)
+                {
+                    totalValidatedScreenshots += aznumeric_cast<int>(differenceLevelReports.size());
                 }
 
                 ImGui::Separator();
@@ -743,7 +781,7 @@ namespace AtomSampleViewer
                 ImGui::Text("RHI API: %s", AZ::RHI::Factory::Get().GetName().GetCStr());
                 ImGui::Text("Test Script Count: %d", scriptReports.size());
                 ImGui::Text("Screenshot Count: %d", resultsSummary.m_totalScreenshotsCount);
-                // Print out errors in the report
+                ImGui::Text("Manually Validated Screenshots: %d/%d", totalValidatedScreenshots, m_wizardSettings.m_reportsOrderedByThresholdToInspect.size());
                 ImGui::Text("Screenshot automatic checks failed: %d", m_wizardSettings.m_failedReports.size());
                 for (const auto& failedReport : m_wizardSettings.m_failedReports)
                 {
@@ -785,9 +823,9 @@ namespace AtomSampleViewer
                 ImGui::Separator();
                 if (ImGui::Button("Back"))
                 {
-                    m_wizardSettings.m_stage = PrecommitWizardSettings::Stage::MANUAL_INSPECTION;
+                    m_wizardSettings.m_stage = PrecommitWizardSettings::Stage::ManualInspection;
                     auto reportIndexToDifference = m_wizardSettings.m_reportIndexDifferenceLevelMap.find(m_wizardSettings.m_reportIterator->second);
-                    m_wizardSettings.m_inspectionSelection = reportIndexToDifference != m_wizardSettings.m_reportIndexDifferenceLevelMap.end() ? reportIndexToDifference->second : 0;
+                    m_wizardSettings.m_inspectionSelection = reportIndexToDifference != m_wizardSettings.m_reportIndexDifferenceLevelMap.end() ? reportIndexToDifference->second : PrecommitWizardSettings::DefaultInspectionSelection;
                 }
             }
         }

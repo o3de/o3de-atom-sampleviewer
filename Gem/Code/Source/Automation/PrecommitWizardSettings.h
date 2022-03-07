@@ -15,25 +15,26 @@ namespace AtomSampleViewer
 {
     struct PrecommitWizardSettings
     {
-        
+        static const int DefaultInspectionSelection = -1;
         enum class Stage
         {
-            INTRO,
-            REPORT_FULLSUITE_SUMMARY,
-            MANUAL_INSPECTION,
-            REPORT_FINAL_SUMMARY
+            Intro,
+            RunFullsuiteTest,
+            ReportFullsuiteSummary,
+            ManualInspection,
+            ReportFinalSummary
         };
 
         struct ImageDifferenceLevel
         {
             enum Levels
             {
-                NO_DIFFERENCE = 0,
-                LOW_DIFFERENCE = 1,
-                MODERATE_DIFFERENCE = 2,
-                HIGH_DIFFERENCE = 3,
+                NoDifference = 0,
+                LowDifference = 1,
+                ModerateDifference = 2,
+                HighDifference = 3,
 
-                NUM_DIFFERENCE_LEVELS = 4
+                NumDifferenceLevels = 4
             };
         };
         static constexpr const char* ManualInspectionDifferenceLevels[] = {
@@ -65,7 +66,7 @@ namespace AtomSampleViewer
                 const AZStd::vector<ScriptReporter::ScreenshotTestInfo>& screenshotTestInfos = scriptReports[i].m_screenshotTests;
                 for (size_t j = 0; j < screenshotTestInfos.size(); ++j)
                 {
-                    // Collect and sort reports that passed by threshold. This will be used to detect false positives
+                    // Collect and sort reports that passed by threshold. This will be used to detect false negatives
                     // e.g. a test is reported to pass by being below the threshold when in fact it's simply because the threshold is too
                     // high
                     if (screenshotTestInfos[j].m_officialComparisonResult.m_resultCode == ScriptReporter::ImageComparisonResult::ResultCode::Pass)
@@ -74,7 +75,7 @@ namespace AtomSampleViewer
                             screenshotTestInfos[j].m_officialComparisonResult.m_finalDiffScore,
                             ReportIndex{ i, j }));
                     }
-                    else if (screenshotTestInfos[j].m_officialComparisonResult.m_resultCode != ScriptReporter::ImageComparisonResult::ResultCode::Pass)
+                    else
                     {
                         m_failedReports.insert(AZStd::pair<float, ReportIndex>(
                             screenshotTestInfos[j].m_officialComparisonResult.m_finalDiffScore,
@@ -86,8 +87,8 @@ namespace AtomSampleViewer
             m_reportIterator = m_reportsOrderedByThresholdToInspect.begin();
         }
 
-        int m_inspectionSelection = 0;
-        Stage m_stage = Stage::INTRO;
+        int m_inspectionSelection = DefaultInspectionSelection;
+        Stage m_stage = Stage::Intro;
         AZStd::string m_exportedPngPath = "";
         AZStd::multimap<float, ReportIndex, AZStd::greater<float>> m_reportsOrderedByThresholdToInspect;
         AZStd::multimap<float, ReportIndex, AZStd::greater<float>> m_failedReports;

@@ -691,6 +691,11 @@ namespace AtomSampleViewer
         m_showReportDialog = true;
     }
 
+    void ScriptReporter::HideReportDialog()
+    {
+        m_showReportDialog = false;
+    }
+
     ScriptReporter::ScriptReport* ScriptReporter::GetCurrentScriptReport()
     {
         if (!m_currentScriptIndexStack.empty())
