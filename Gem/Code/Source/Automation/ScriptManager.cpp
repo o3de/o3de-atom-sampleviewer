@@ -640,22 +640,6 @@ namespace AtomSampleViewer
                 const ScriptReporter::ScriptReport& scriptReport = scriptReports[currentIndex.first];
                 const ScriptReporter::ScreenshotTestInfo& screenshotTest = scriptReport.m_screenshotTests[currentIndex.second];
 
-                // Check if the current index's screenshot has been manually validated and let the user know
-                auto it = m_wizardSettings.m_reportIndexDifferenceLevelMap.find(currentIndex);
-                if (it != m_wizardSettings.m_reportIndexDifferenceLevelMap.end())
-                {
-                    m_wizardSettings.m_inspectionSelection = it->second;
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
-                    ImGui::Text("This report has been added to the summary");
-                    ImGui::PopStyleColor();
-                }
-                else
-                {
-                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
-                    ImGui::Text("This report has not been added to the summary");
-                    ImGui::PopStyleColor();
-                }
-
                 ImGui::Text("Script Name: %s", scriptReport.m_scriptAssetPath.c_str());
                 ImGui::Text("Screenshot Name: %s", screenshotTest.m_officialBaselineScreenshotFilePath.c_str());
 
@@ -664,9 +648,26 @@ namespace AtomSampleViewer
 
                 // TODO: Render screenshots in ImGui.
                 ImGui::Separator();
-                ImGui::TextWrapped("Use the 'Export Png' button to inspect the screenshot. Choose from the options below that describe the difference level then click 'Next' to log the results. " \
-                    "Once there are no more noticeable differences as the threshold decreases, click 'Finish' to generate the final report summary. " \
-                    "Note that the remaining screenshots that were not manually inspected will not appear in the final report summary.");
+                // Check if the current index's screenshot has been manually validated and let the user know
+                auto it = m_wizardSettings.m_reportIndexDifferenceLevelMap.find(currentIndex);
+                if (it != m_wizardSettings.m_reportIndexDifferenceLevelMap.end())
+                {
+                    m_wizardSettings.m_inspectionSelection = it->second;
+                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
+                    ImGui::Text("This inspection has been added to the report summary");
+                    ImGui::PopStyleColor();
+                }
+                else
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+                    ImGui::Text("This inspection has not been added to the report summary");
+                    ImGui::PopStyleColor();
+                }
+
+                ImGui::TextWrapped("Use the 'Export Png' button to inspect the screenshot. Choose from the options below that describe the difference level " \
+                    "then click 'Next' to add it in the report summary. Once there are no more noticeable differences as the threshold decreases, "           \
+                    "click 'Finish' to generate the report summary. Note that the remaining screenshots that were not manually inspected will not appear "    \
+                    "in the report summary.");
                 for (int i = 0; i < 4; ++i)
                 {
                     ImGui::RadioButton(PrecommitWizardSettings::ManualInspectionOptions[i], &m_wizardSettings.m_inspectionSelection, i);
