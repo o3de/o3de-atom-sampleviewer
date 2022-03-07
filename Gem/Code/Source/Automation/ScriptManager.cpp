@@ -640,11 +640,20 @@ namespace AtomSampleViewer
                 const ScriptReporter::ScriptReport& scriptReport = scriptReports[currentIndex.first];
                 const ScriptReporter::ScreenshotTestInfo& screenshotTest = scriptReport.m_screenshotTests[currentIndex.second];
 
-                // Check if the current index's screenshot has been manually validated
+                // Check if the current index's screenshot has been manually validated and let the user know
                 auto it = m_wizardSettings.m_reportIndexDifferenceLevelMap.find(currentIndex);
                 if (it != m_wizardSettings.m_reportIndexDifferenceLevelMap.end())
                 {
                     m_wizardSettings.m_inspectionSelection = it->second;
+                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(0, 255, 0, 255));
+                    ImGui::Text("This report has been added to the summary");
+                    ImGui::PopStyleColor();
+                }
+                else
+                {
+                    ImGui::PushStyleColor(ImGuiCol_Text, IM_COL32(255, 0, 0, 255));
+                    ImGui::Text("This report has not been added to the summary");
+                    ImGui::PopStyleColor();
                 }
 
                 ImGui::Text("Script Name: %s", scriptReport.m_scriptAssetPath.c_str());
