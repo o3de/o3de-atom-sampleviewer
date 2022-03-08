@@ -197,7 +197,7 @@ namespace AtomSampleViewer
         // For exporting test results
         void ExportTestResults();
         void ExportImageDiff(const char* filePath, const ScreenshotTestInfo& screenshotTest);
-        AZStd::string ExportImageDiff(const ScriptReport& scriptReport, const ScreenshotTestInfo& screenshotTestInfo);
+        AZStd::string ExportImageDiff(const ScriptReport& scriptReport, const ScreenshotTestInfo& screenshotTest);
 
     private:
 
