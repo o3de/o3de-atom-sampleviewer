@@ -20,6 +20,7 @@ set(FILES
     Source/Automation/AssetStatusTracker.h
     Source/Automation/ImageComparisonConfig.h
     Source/Automation/ImageComparisonConfig.cpp
+    Source/Automation/PrecommitWizardSettings.h
     Source/Automation/ScriptableImGui.cpp
     Source/Automation/ScriptableImGui.h
     Source/Automation/ScriptManager.cpp

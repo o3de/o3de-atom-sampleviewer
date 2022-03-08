@@ -962,6 +962,10 @@ namespace AtomSampleViewer
                 {
                     m_scriptManager->OpenScriptRunnerDialog();
                 }
+                if (ImGui::MenuItem("Run Precommit Wizard..."))
+                {
+                    m_scriptManager->OpenPrecommitWizard();
+                }
 
                 ImGui::EndMenu();
             }

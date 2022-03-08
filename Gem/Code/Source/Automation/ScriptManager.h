@@ -11,6 +11,7 @@
 #include <Atom/Component/DebugCamera/CameraControllerBus.h>
 #include <Atom/Feature/Utils/FrameCaptureBus.h>
 #include <Atom/Feature/Utils/ProfilingCaptureBus.h>
+#include <Automation/PrecommitWizardSettings.h>
 #include <Automation/ScriptRepeaterBus.h>
 #include <Automation/ScriptRunnerBus.h>
 #include <Automation/AssetStatusTracker.h>
@@ -64,12 +65,27 @@ namespace AtomSampleViewer
         void TickImGui();
 
         void OpenScriptRunnerDialog();
+        void OpenPrecommitWizard();
 
         void RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd, int randomSeed);
 
     private:
+        static constexpr const char* FullSuiteScriptFilepath = "scripts/_fulltestsuite_.bv.luac";
 
         void ShowScriptRunnerDialog();
+
+        // PrecommitWizard Gui
+        void ShowPrecommitWizard();
+        // PrecommitWizard stages
+        void ShowPrecommitWizardIntro();
+        void ShowPrecommitWizardRunFullsuiteTest();
+        void ShowPrecommitWizardReportFullsuiteTest();
+        void ShowPrecomitWizardManualInspection();
+        void ShowPrecommitWizardReportFinalSummary();
+
+        void ShowBackToIntroWarning();
+
+
 
         // Registers functions in a BehaviorContext so they can be exposed to Lua scripts.
         static void ReflectScriptContext(AZ::BehaviorContext* context);
@@ -318,6 +334,9 @@ namespace AtomSampleViewer
             int m_toleranceAdjustment = 0;
 
         } m_imageComparisonOptions;
+
+        bool m_showPrecommitWizard = false;
+        PrecommitWizardSettings m_wizardSettings;
 
         bool m_showScriptRunnerDialog = false;
         bool m_isCapturePending = false;
