@@ -89,7 +89,7 @@ namespace AtomSampleViewer
 
         int m_inspectionSelection = DefaultInspectionSelection;
         Stage m_stage = Stage::Intro;
-        AZStd::string m_exportedPngPath = "";
+        AZStd::string m_exportedPngPath;
         AZStd::multimap<float, ReportIndex, AZStd::greater<float>> m_reportsOrderedByThresholdToInspect;
         AZStd::multimap<float, ReportIndex, AZStd::greater<float>> m_failedReports;
         AZStd::multimap<float, ReportIndex, AZStd::greater<float>>::iterator m_reportIterator;

@@ -1239,4 +1239,13 @@ namespace AtomSampleViewer
         }
     }
 
+    void ScriptReporter::HighlightColorSettings::UpdateColorSettings()
+    {
+        const ImVec4& bgColor = ImGui::GetStyleColorVec4(ImGuiCol_WindowBg);
+        const bool isDarkStyle = bgColor.x < 0.2 && bgColor.y < 0.2 && bgColor.z < 0.2;
+        m_highlightPassed = isDarkStyle ? ImVec4{ 0.5, 1, 0.5, 1 } : ImVec4{ 0, 0.75, 0, 1 };
+        m_highlightFailed = isDarkStyle ? ImVec4{ 1, 0.5, 0.5, 1 } : ImVec4{ 0.75, 0, 0, 1 };
+        m_highlightWarning = isDarkStyle ? ImVec4{ 1, 1, 0.5, 1 } : ImVec4{ 0.5, 0.5, 0, 1 };
+    }
+
 } // namespace AtomSampleViewer

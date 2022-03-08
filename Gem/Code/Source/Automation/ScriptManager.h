@@ -73,8 +73,19 @@ namespace AtomSampleViewer
         static constexpr const char* FullSuiteScriptFilepath = "scripts/_fulltestsuite_.bv.luac";
 
         void ShowScriptRunnerDialog();
+
+        // PrecommitWizard Gui
         void ShowPrecommitWizard();
+        // PrecommitWizard stages
+        void ShowPrecommitWizardIntro();
+        void ShowPrecommitWizardRunFullsuiteTest();
+        void ShowPrecommitWizardReportFullsuiteTest();
+        void ShowPrecomitWizardManualInspection();
+        void ShowPrecommitWizardReportFinalSummary();
+
         void ShowBackToIntroWarning();
+
+
 
         // Registers functions in a BehaviorContext so they can be exposed to Lua scripts.
         static void ReflectScriptContext(AZ::BehaviorContext* context);
