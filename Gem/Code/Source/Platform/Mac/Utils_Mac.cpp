@@ -32,7 +32,7 @@ namespace AtomSampleViewer
             if (childPid == 0)
             {
                 //In child process
-                char* args[] = { const_cast<char*>(executablePath.c_str()), const_cast<char*>(filePathA.c_str()), const_cast<char*>(filePathB.c_str()) };
+                char* args[] = { const_cast<char*>(executablePath.c_str()), const_cast<char*>(filePathA.c_str()), const_cast<char*>(filePathB.c_str()), static_cast<char*>(0)};
                 execv(executablePath.c_str(), args);
                 
                 AZ_TracePrintf("RunDiffTool", "RunDiffTool: Unable to launch Beyond Compare %s : errno = %s . Make sure you have installed Beyond Compare command line tools.", executablePath.c_str(), strerror(errno));
