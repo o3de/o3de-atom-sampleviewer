@@ -14,6 +14,7 @@
 #include <Automation/ImageComparisonConfig.h>
 #include <Utils/ImGuiMessageBox.h>
 #include <Atom/Utils/PngFile.h>
+#include <imgui/imgui.h>
 
 namespace AtomSampleViewer
 {

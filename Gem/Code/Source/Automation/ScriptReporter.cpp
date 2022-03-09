@@ -8,7 +8,6 @@
 
 #include <Automation/ScriptReporter.h>
 #include <Utils/Utils.h>
-#include <imgui/imgui.h>
 #include <Atom/RHI/Factory.h>
 #include <AzFramework/API/ApplicationAPI.h>
 #include <AzFramework/StringFunc/StringFunc.h>
