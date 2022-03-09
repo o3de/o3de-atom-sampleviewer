@@ -807,7 +807,7 @@ namespace AtomSampleViewer
         }
         ImGui::SameLine();
         ImGui::Text(
-            "%ld/%lu", AZStd::distance(m_wizardSettings.m_reportsOrderedByThresholdToInspect.begin(), m_wizardSettings.m_reportIterator) + 1,
+            "%zu/%zu", aznumeric_cast<size_t>(AZStd::distance(m_wizardSettings.m_reportsOrderedByThresholdToInspect.begin(), m_wizardSettings.m_reportIterator) + 1),
             m_wizardSettings.m_reportsOrderedByThresholdToInspect.size());
     }
 
@@ -839,12 +839,12 @@ namespace AtomSampleViewer
         }
 
         ImGui::Text("RHI API: %s", AZ::RHI::Factory::Get().GetName().GetCStr());
-        ImGui::Text("Test Script Count: %lu", scriptReports.size());
+        ImGui::Text("Test Script Count: %zu", scriptReports.size());
         ImGui::Text("Screenshot Count: %d", resultsSummary.m_totalScreenshotsCount);
         ImGui::Text(
-            "Manually Validated Screenshots: %d/%lu", totalValidatedScreenshots,
+            "Manually Validated Screenshots: %d/%zu", totalValidatedScreenshots,
             m_wizardSettings.m_reportsOrderedByThresholdToInspect.size());
-        ImGui::Text("Screenshot automatic checks failed: %lu", m_wizardSettings.m_failedReports.size());
+        ImGui::Text("Screenshot automatic checks failed: %zu", m_wizardSettings.m_failedReports.size());
         for (const auto& failedReport : m_wizardSettings.m_failedReports)
         {
             const PrecommitWizardSettings::ReportIndex& reportIndex = failedReport.second;
