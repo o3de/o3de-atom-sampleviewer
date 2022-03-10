@@ -71,7 +71,7 @@ namespace AtomSampleViewer
         // Readback was completed, we need to update the preview image
         if (m_textureNeedsUpdate)
         {
-            UploadRedbackResult();
+            UploadReadbackResult();
 
             AZ_Error("ReadbackExample", m_resourceWidth == m_readbackStat.m_descriptor.m_size.m_width, "Incorrect resource width read back.");
             AZ_Error("ReadbackExample", m_resourceHeight == m_readbackStat.m_descriptor.m_size.m_height, "Incorrect resource height read back.");
@@ -107,7 +107,7 @@ namespace AtomSampleViewer
         m_originalPipeline = m_scene->GetDefaultRenderPipeline();
         m_scene->AddRenderPipeline(m_readbackPipeline);
         m_scene->RemoveRenderPipeline(m_originalPipeline->GetId());
-        m_scene->SetDefaultRenderPipeline(m_originalPipeline->GetId());
+        m_scene->SetDefaultRenderPipeline(m_readbackPipeline->GetId());
 
         // Create an ImGuiActiveContextScope to ensure the ImGui context on the new pipeline's ImGui pass is activated.
         m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass({ m_readbackPipeline->GetId().GetCStr(), "ImGuiPass" });
@@ -289,7 +289,7 @@ namespace AtomSampleViewer
         m_readbackStat.m_descriptor = result.m_imageDescriptor;
     }
 
-    void ReadbackExampleComponent::UploadRedbackResult() const
+    void ReadbackExampleComponent::UploadReadbackResult() const
     {
         const AZ::RHI::ImageSubresourceRange range(0, 0, 0, 0);
         AZ::RHI::ImageSubresourceLayoutPlaced layout;
@@ -308,7 +308,7 @@ namespace AtomSampleViewer
         if (m_imguiSidebar.Begin())
         {
             ImGui::Text("Readback resource dimensions:");
-            if (ScriptableImGui::SliderInt("Width", reinterpret_cast<int*>(& m_resourceWidth), 1, 2048))
+            if (ScriptableImGui::SliderInt("Width", reinterpret_cast<int*>(&m_resourceWidth), 1, 2048))
             {
                 PassesChanged();
             }

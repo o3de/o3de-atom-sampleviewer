@@ -20,17 +20,15 @@
 
 namespace AtomSampleViewer
 {
-    /*
-    * --- Readback Test ---
-    * 
-    * This test is designed to test the readback capabilities of ATOM
-    * It is built around two custom passes working in tandem. The first
-    * one generate and fill a texture with a pattern. Using the RPI::Pass
-    * readback capabilities (ReadbackAttachment) it then reads that result
-    * back to host memory. Once read back the result is uploaded to device
-    * memory to be used as a texture input in the second pass that will
-    * display it for operator verification.
-    */
+    //! --- Readback Test ---
+    //! 
+    //! This test is designed to test the readback capabilities of ATOM
+    //! It is built around two custom passes working in tandem. The first
+    //! one generate and fill a texture with a pattern. Using the RPI::Pass
+    //! readback capabilities (ReadbackAttachment) it then reads that result
+    //! back to host memory. Once read back the result is uploaded to device
+    //! memory to be used as a texture input in the second pass that will
+    //! display it for operator verification.
 
     class ReadbackExampleComponent final
         : public CommonSampleComponentBase
@@ -72,7 +70,7 @@ namespace AtomSampleViewer
 
         void PerformReadback();
         void ReadbackCallback(const AZ::RPI::AttachmentReadback::ReadbackResult& result);
-        void UploadRedbackResult() const;
+        void UploadReadbackResult() const;
 
         void DrawSidebar();
 
