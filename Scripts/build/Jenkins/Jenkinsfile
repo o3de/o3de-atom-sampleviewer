@@ -858,10 +858,11 @@ try {
             if (IsJobEnabled(branchName, build_job, pipelineName, platform.key)) {   // User can filter jobs, jobs are tagged by pipeline
                 def envVars = GetBuildEnvVars(platform.value.PIPELINE_ENV ?: EMPTY_JSON, build_job.value.PIPELINE_ENV ?: EMPTY_JSON, pipelineName)
                 envVars['JOB_NAME'] = "${branchName}_${platform.key}_${build_job.key}" // backwards compatibility, some scripts rely on this
-                envVars['CMAKE_LY_PROJECTS'] = "../${PROJECT_REPOSITORY_NAME}"
                 def nodeLabel = envVars['NODE_LABEL']
                 someBuildHappened = true
 
+                buildConfigs["${platform.key} [${build_job.key}]"] = CreateBuildJobs(pipelineConfig, platform, build_job, envVars, branchName, pipelineName, repositoryName, projectName)
+                envVars['CMAKE_LY_PROJECTS'] = "../${PROJECT_REPOSITORY_NAME}"
                 buildConfigs["${platform.key} [${build_job.key}]"] = CreateBuildJobs(pipelineConfig, platform, build_job, envVars, branchName, pipelineName, repositoryName, projectName)
             }
         }
