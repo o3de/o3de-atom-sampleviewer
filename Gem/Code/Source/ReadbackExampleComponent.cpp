@@ -274,7 +274,7 @@ namespace AtomSampleViewer
         m_fillerPass->ReadbackAttachment(m_readback, AZ::Name("Output"));
     }
 
-    void ReadbackExampleComponent::ReadbackCallback([[maybe_unused]] const AZ::RPI::AttachmentReadback::ReadbackResult& result)
+    void ReadbackExampleComponent::ReadbackCallback(const AZ::RPI::AttachmentReadback::ReadbackResult& result)
     {
         const AZ::RHI::ImageSubresourceRange range(0, 0, 0, 0);
         AZ::RHI::ImageSubresourceLayoutPlaced layout;
@@ -299,8 +299,7 @@ namespace AtomSampleViewer
         updateRequest.m_sourceSubresourceLayout = layout;
         updateRequest.m_sourceData = m_resultData->begin();
         updateRequest.m_imageSubresourcePixelOffset = AZ::RHI::Origin(0, 0, 0);
-        AZ::Data::Instance<AZ::RPI::AttachmentImagePool> pool = AZ::RPI::ImageSystemInterface::Get()->GetSystemAttachmentPool();
-        pool->GetRHIPool()->UpdateImageContents(updateRequest);
+        m_previewImage->UpdateImageContents(updateRequest);
     }
 
     void ReadbackExampleComponent::DrawSidebar()
