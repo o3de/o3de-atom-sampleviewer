@@ -144,5 +144,14 @@ IdleFrames(1)
 ArcBallCameraController_SetPitch(DegToRad(0))
 IdleFrames(1)
 
+-- Testing a specific camera and light angle that caused almost all geometry to render as black
+OpenSample('Features/Parallax') -- Reset the sample
+SetImguiValue('Lighting/Auto Rotation', false)
+SetImguiValue('Lighting/Direction', 1.18682396)
+ArcBallCameraController_SetHeading(1.95481825)
+ArcBallCameraController_SetPitch(-0.169443831)
+ArcBallCameraController_SetDistance(6.000000)
+IdleFrames(1)
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_11_problematicAngle.png')
 
 OpenSample(nil)
