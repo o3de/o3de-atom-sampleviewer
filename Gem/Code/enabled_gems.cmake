@@ -19,4 +19,7 @@ set(ENABLED_GEMS
     EditorPythonBindings
     ImGui
     Profiler
+    Sponza
+    MaterialEditor
+    UiBasics
 )
