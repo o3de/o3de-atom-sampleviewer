@@ -87,6 +87,8 @@ namespace AtomSampleViewer
         int m_exitCode = 0;
 
         void SetupConsoleHandlerRoutine();
+
+        bool m_isTestMode = false;
     };
 
     int RunGameCommon(int argc, char** argv, AZStd::function<void()> customRunCode = nullptr);

@@ -103,6 +103,16 @@ namespace AtomSampleViewer
     void AtomSampleViewerApplication::OnSampleManagerActivated()
     {
         ReadAutomatedTestOptions();
+
+        // enable native UI for some error messages if it's not test mode
+        if (!m_isTestMode)
+        {
+            if (auto nativeUI = AZ::Interface<AZ::NativeUI::NativeUIRequests>::Get(); nativeUI != nullptr)
+            {
+                nativeUI->SetMode(AZ::NativeUI::Mode::ENABLED);
+            }
+        }
+
     }
 
     void AtomSampleViewerApplication::WriteStartupLog()
@@ -164,6 +174,8 @@ namespace AtomSampleViewer
                 }
 
                 SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequestBus::Events::RunMainTestSuite, testSuitePath, exitOnTestEnd, randomSeed);
+
+                m_isTestMode = true;
             }
         }
     }
