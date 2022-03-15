@@ -46,6 +46,9 @@ namespace AtomSampleViewer
     class ScriptReporter
     {
     public:
+        // currently set to track the ScriptReport index and the ScreenshotTestInfo index.
+        using ReportIndex = AZStd::pair<size_t, size_t>;
+
         static constexpr const char* TestResultsFolder = "TestResults";
         static constexpr const char* UserFolder = "user";
 
@@ -200,7 +203,11 @@ namespace AtomSampleViewer
         void ExportImageDiff(const char* filePath, const ScreenshotTestInfo& screenshotTest);
         AZStd::string ExportImageDiff(const ScriptReport& scriptReport, const ScreenshotTestInfo& screenshotTest);
 
+        void SortScriptReports();
+
     private:
+        static const ImGuiTreeNodeFlags FlagDefaultOpen = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_DefaultOpen;
+        static const ImGuiTreeNodeFlags FlagDefaultClosed = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
         // Reports a script error using standard formatting that matches ScriptManager
         enum class TraceLevel
@@ -254,7 +261,7 @@ namespace AtomSampleViewer
         const ImageComparisonToleranceLevel* FindBestToleranceLevel(float diffScore, bool filterImperceptibleDiffs) const;
 
         void ShowReportDialog();
-
+        void ShowScreenshotTestInfoTreeNode(const AZStd::string& header, ScriptReport& scriptReport, ScreenshotTestInfo& screenshotResult);
         void ShowDiffButton(const char* buttonLabel, const AZStd::string& imagePathA, const AZStd::string& imagePathB);
 
         // Generates a path to the exported test results file.
@@ -282,6 +289,9 @@ namespace AtomSampleViewer
             void UpdateColorSettings();
         };
 
+        AZStd::multimap<float, ReportIndex, AZStd::greater<float>> m_descendingThresholdReports;
+        bool m_showReportsSortedByThreshold = true;
+
         ImGuiMessageBox m_messageBox;
 
         AZStd::vector<ImageComparisonToleranceLevel> m_availableToleranceLevels;
@@ -299,6 +309,10 @@ namespace AtomSampleViewer
         AZStd::string m_uniqueTimestamp;
         HighlightColorSettings m_highlightSettings;
         ScriptResultsSummary m_resultsSummary;
+
+        // Flags set and used by ShowReportDialog()
+        bool m_showAll;
+        bool m_showWarnings;
     };
 
 } // namespace AtomSampleViewer
