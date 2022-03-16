@@ -1635,15 +1635,26 @@ namespace AtomSampleViewer
     AZ::RHI::MultisampleState SampleComponentManager::CreateDefaultMsaaState() const
     {
         AZ_Assert(IsValidNumMSAASamples(m_numMSAASamples), "Invalid MSAA sample setting");
-        const AZ::RHI::SamplePosition Center = { 8, 8 };
-        const AZ::RHI::SamplePosition TopLeft = { 0, 0 };
 
         AZ::RHI::MultisampleState state;
-
         state.m_samples = static_cast<uint16_t>(m_numMSAASamples);
-        state.m_customPositionsCount = 2;
-        state.m_customPositions[0] = Center; 
-        state.m_customPositions[1] = TopLeft;
+        state.m_customPositionsCount = 16;
+        state.m_customPositions[0] = { 8, 8 };  
+        state.m_customPositions[1] = { 0, 0 };  
+        state.m_customPositions[2] = { 15, 0 };
+        state.m_customPositions[3] = { 0, 15 };
+        state.m_customPositions[4] = { 4, 4 };
+        state.m_customPositions[5] = { 8, 4 };
+        state.m_customPositions[6] = { 4, 8 };
+        state.m_customPositions[7] = { 8, 8 };
+        state.m_customPositions[8] = { 2, 2 };
+        state.m_customPositions[9] = { 6, 6 };
+        state.m_customPositions[10] = { 10, 2 };
+        state.m_customPositions[11] = { 14, 6 };
+        state.m_customPositions[12] = { 2, 10 };
+        state.m_customPositions[13] = { 10, 10 };
+        state.m_customPositions[14] = { 6, 14 };
+        state.m_customPositions[15] = { 14, 14 };
 
         return state;
     }
