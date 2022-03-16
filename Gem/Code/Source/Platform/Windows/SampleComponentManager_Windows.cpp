@@ -26,6 +26,6 @@ namespace AtomSampleViewer
 
     int SampleComponentManager::GetDefaultNumMSAASamples()
     {
-        return 4;
+        return 2;
     }
 } // namespace AtomSampleViewer

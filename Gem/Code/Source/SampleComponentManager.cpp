@@ -1564,6 +1564,10 @@ namespace AtomSampleViewer
         // set pipeline MSAA samples
         AZ_Assert(IsValidNumMSAASamples(m_numMSAASamples), "Invalid MSAA sample setting");
         pipelineDesc.m_renderSettings.m_multisampleState.m_samples = static_cast<uint16_t>(m_numMSAASamples);
+        pipelineDesc.m_renderSettings.m_multisampleState.m_customPositionsCount = 2;
+        pipelineDesc.m_renderSettings.m_multisampleState.m_customPositions[0] = { 8, 8 };
+        pipelineDesc.m_renderSettings.m_multisampleState.m_customPositions[1] = { 0, 0 };
+
         bool isNonMsaaPipeline = (pipelineDesc.m_renderSettings.m_multisampleState.m_samples == 1);
         const char* supervariantName = isNonMsaaPipeline ? AZ::RPI::NoMsaaSupervariantName : "";
         AZ::RPI::ShaderSystemInterface::Get()->SetSupervariantName(AZ::Name(supervariantName));
