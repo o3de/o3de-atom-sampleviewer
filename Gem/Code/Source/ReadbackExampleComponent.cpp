@@ -330,9 +330,9 @@ namespace AtomSampleViewer
                 ImGui::Text("Readback statistics");
                 ImGui::NewLine();
                 ImGui::Text("Name: %s", m_readbackStat.m_name.GetCStr());
-                ImGui::Text("Bytes read: %i", m_readbackStat.m_bytesRead);
+                ImGui::Text("Bytes read: %zu", m_readbackStat.m_bytesRead);
                 ImGui::Text("[%i; %i; %i]", m_readbackStat.m_descriptor.m_size.m_width, m_readbackStat.m_descriptor.m_size.m_height, m_readbackStat.m_descriptor.m_size.m_depth);
-                ImGui::Text(AZ::RHI::ToString(m_readbackStat.m_descriptor.m_format));
+                ImGui::Text("%s", AZ::RHI::ToString(m_readbackStat.m_descriptor.m_format));
 
             }
 
