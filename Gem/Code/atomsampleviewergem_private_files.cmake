@@ -20,6 +20,7 @@ set(FILES
     Source/Automation/AssetStatusTracker.h
     Source/Automation/ImageComparisonConfig.h
     Source/Automation/ImageComparisonConfig.cpp
+    Source/Automation/PrecommitWizardSettings.h
     Source/Automation/ScriptableImGui.cpp
     Source/Automation/ScriptableImGui.h
     Source/Automation/ScriptManager.cpp
@@ -149,6 +150,8 @@ set(FILES
     Source/ProceduralSkinnedMesh.h
     Source/ProceduralSkinnedMeshUtils.cpp
     Source/ProceduralSkinnedMeshUtils.h
+    Source/ReadbackExampleComponent.cpp
+    Source/ReadbackExampleComponent.h
     Source/RenderTargetTextureExampleComponent.cpp
     Source/RenderTargetTextureExampleComponent.h
     Source/RootConstantsExampleComponent.h

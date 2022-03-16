@@ -103,6 +103,7 @@
 #include <DiffuseGIExampleComponent.h>
 #include <SSRExampleComponent.h>
 #include <ShaderReloadTestComponent.h>
+#include <ReadbackExampleComponent.h>
 
 #include <Atom/Bootstrap/DefaultWindowBus.h>
 
@@ -286,6 +287,7 @@ namespace AtomSampleViewer
             NewRPISample<MultiRenderPipelineExampleComponent>("MultiRenderPipeline"),
             NewRPISample<MultiSceneExampleComponent>("MultiScene"),
             NewRPISample<MultiViewSingleSceneAuxGeomExampleComponent>("MultiViewSingleSceneAuxGeom"),
+            NewRPISample<ReadbackExampleComponent>("Readback"),
             NewRPISample<RenderTargetTextureExampleComponent>("RenderTargetTexture"),
             NewRPISample<RootConstantsExampleComponent>("RootConstants"),
             NewRPISample<SceneReloadSoakTestComponent>("SceneReloadSoakTest"),
@@ -962,6 +964,10 @@ namespace AtomSampleViewer
                 if (ImGui::MenuItem("Run Script..."))
                 {
                     m_scriptManager->OpenScriptRunnerDialog();
+                }
+                if (ImGui::MenuItem("Run Precommit Wizard..."))
+                {
+                    m_scriptManager->OpenPrecommitWizard();
                 }
 
                 ImGui::EndMenu();

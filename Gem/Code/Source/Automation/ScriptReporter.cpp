@@ -8,7 +8,6 @@
 
 #include <Automation/ScriptReporter.h>
 #include <Utils/Utils.h>
-#include <imgui/imgui.h>
 #include <Atom/RHI/Factory.h>
 #include <AzFramework/API/ApplicationAPI.h>
 #include <AzFramework/StringFunc/StringFunc.h>
@@ -229,6 +228,74 @@ namespace AtomSampleViewer
         return false;
     }
 
+    void ScriptReporter::DisplayScriptResultsSummary()
+    {
+        ImGui::Separator();
+
+        if (HasActiveScript())
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, m_highlightSettings.m_highlightWarning);
+            ImGui::Text("Script is running... (_ _)zzz");
+            ImGui::PopStyleColor();
+        }
+        else if (m_resultsSummary.m_totalErrors > 0 || m_resultsSummary.m_totalAsserts > 0 || m_resultsSummary.m_totalScreenshotsFailed > 0)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, m_highlightSettings.m_highlightFailed);
+            ImGui::Text("(>_<)  FAILED  (>_<)");
+            ImGui::PopStyleColor();
+        }
+        else
+        {
+            if (m_invalidationMessage.empty())
+            {
+                ImGui::PushStyleColor(ImGuiCol_Text, m_highlightSettings.m_highlightPassed);
+                ImGui::Text("\\(^_^)/  PASSED  \\(^_^)/");
+                ImGui::PopStyleColor();
+            }
+            else
+            {
+                ImGui::Text("(-_-) INVALID ... but passed (-_-)");
+            }
+        }
+
+        if (!m_invalidationMessage.empty())
+        {
+            ImGui::Separator();
+            ImGui::PushStyleColor(ImGuiCol_Text, m_highlightSettings.m_highlightFailed);
+            ImGui::Text("(%s)", m_invalidationMessage.c_str());
+            ImGui::PopStyleColor();
+        }
+
+        ImGui::Separator();
+
+        ImGui::Text("Test Script Count: %zu", m_scriptReports.size());
+
+        HighlightTextIf(m_resultsSummary.m_totalAsserts > 0, m_highlightSettings.m_highlightFailed);
+        ImGui::Text("Total Asserts:  %u %s", m_resultsSummary.m_totalAsserts, SeeConsole(m_resultsSummary.m_totalAsserts, "Trace::Assert").c_str());
+
+        HighlightTextIf(m_resultsSummary.m_totalErrors > 0, m_highlightSettings.m_highlightFailed);
+        ImGui::Text("Total Errors:   %u %s", m_resultsSummary.m_totalErrors, SeeConsole(m_resultsSummary.m_totalErrors, "Trace::Error").c_str());
+
+        HighlightTextIf(m_resultsSummary.m_totalWarnings > 0, m_highlightSettings.m_highlightWarning);
+        ImGui::Text("Total Warnings: %u %s", m_resultsSummary.m_totalWarnings, SeeConsole(m_resultsSummary.m_totalWarnings, "Trace::Warning").c_str());
+
+        ResetTextHighlight();
+        ImGui::Text("Total Screenshot Count: %u", m_resultsSummary.m_totalScreenshotsCount);
+
+        HighlightTextIf(m_resultsSummary.m_totalScreenshotsFailed > 0, m_highlightSettings.m_highlightFailed);
+        ImGui::Text("Total Screenshot Failures: %u %s", m_resultsSummary.m_totalScreenshotsFailed, SeeBelow(m_resultsSummary.m_totalScreenshotsFailed).c_str());
+
+        HighlightTextIf(m_resultsSummary.m_totalScreenshotWarnings > 0, m_highlightSettings.m_highlightWarning);
+        ImGui::Text("Total Screenshot Warnings: %u %s", m_resultsSummary.m_totalScreenshotWarnings, SeeBelow(m_resultsSummary.m_totalScreenshotWarnings).c_str());
+
+        ResetTextHighlight();
+    }
+
+    const AtomSampleViewer::ScriptReporter::ScriptResultsSummary& ScriptReporter::GetScriptResultSummary() const
+    {
+        return m_resultsSummary;
+    }
+
     void ScriptReporter::ShowDiffButton(const char* buttonLabel, const AZStd::string& imagePathA, const AZStd::string& imagePathB)
     {
         if (ImGui::Button(buttonLabel))
@@ -245,6 +312,31 @@ namespace AtomSampleViewer
         const AZStd::chrono::system_clock::time_point now = AZStd::chrono::system_clock::now();
         const float timeFloat = AZStd::chrono::duration<float>(now.time_since_epoch()).count();
         return AZStd::string::format("%.4f", timeFloat);
+    }
+
+    AZStd::string ScriptReporter::GenerateAndCreateExportedImageDiffPath(const ScriptReport& scriptReport, const ScreenshotTestInfo& screenshotTest) const
+    {
+        const auto projectPath = AZ::Utils::GetProjectPath();
+        AZStd::string imageDiffPath;
+        AZStd::string scriptFilenameWithouExtension;
+        AzFramework::StringFunc::Path::GetFileName(scriptReport.m_scriptAssetPath.c_str(), scriptFilenameWithouExtension);
+        AzFramework::StringFunc::Path::StripExtension(scriptFilenameWithouExtension);
+
+        AZStd::string screenshotFilenameWithouExtension;
+        AzFramework::StringFunc::Path::GetFileName(screenshotTest.m_screenshotFilePath.c_str(), screenshotFilenameWithouExtension);
+        AzFramework::StringFunc::Path::StripExtension(screenshotFilenameWithouExtension);
+
+        AZStd::string imageDiffFilename = "imageDiff_" + scriptFilenameWithouExtension + "_" + screenshotFilenameWithouExtension + "_" + m_uniqueTimestamp + ".png";
+        AzFramework::StringFunc::Path::Join(projectPath.c_str(), UserFolder, imageDiffPath);
+        AzFramework::StringFunc::Path::Join(imageDiffPath.c_str(), TestResultsFolder, imageDiffPath);
+        AzFramework::StringFunc::Path::Join(imageDiffPath.c_str(), imageDiffFilename.c_str(), imageDiffPath);
+
+        AZStd::string imageDiffFolderPath;
+        AzFramework::StringFunc::Path::GetFolderPath(imageDiffPath.c_str(), imageDiffFolderPath);
+        auto io = AZ::IO::LocalFileIO::GetInstance();
+        io->CreatePath(imageDiffFolderPath.c_str());
+
+        return imageDiffPath;
     }
 
     const ImageComparisonToleranceLevel* ScriptReporter::FindBestToleranceLevel(float diffScore, bool filterImperceptibleDiffs) const
@@ -271,98 +363,23 @@ namespace AtomSampleViewer
     {
         if (ImGui::Begin("Script Results", &m_showReportDialog) && !m_scriptReports.empty())
         {
-            const ImVec4& bgColor = ImGui::GetStyleColorVec4(ImGuiCol_WindowBg);
-            const bool isDarkStyle = bgColor.x < 0.2 && bgColor.y < 0.2 && bgColor.z < 0.2;
-            const ImVec4 HighlightPassed = isDarkStyle ? ImVec4{0.5, 1, 0.5, 1} : ImVec4{0, 0.75, 0, 1};
-            const ImVec4 HighlightFailed = isDarkStyle ? ImVec4{1, 0.5, 0.5, 1} : ImVec4{0.75, 0, 0, 1};
-            const ImVec4 HighlightWarning = isDarkStyle ? ImVec4{1, 1, 0.5, 1} : ImVec4{0.5, 0.5, 0, 1};
+            m_highlightSettings.UpdateColorSettings();
+            m_colorHasBeenSet = false;
 
-            // Local utilities for setting text color
-            bool colorHasBeenSet = false;
-            auto highlightTextIf = [&colorHasBeenSet](bool shouldSet, ImVec4 color)
-            {
-                if (colorHasBeenSet)
-                {
-                    ImGui::PopStyleColor();
-                    colorHasBeenSet = false;
-                }
-
-                if (shouldSet)
-                {
-                    ImGui::PushStyleColor(ImGuiCol_Text, color);
-                    colorHasBeenSet = true;
-                }
-            };
-            auto highlightTextFailedOrWarning = [&](bool isFailed, bool isWarning)
-            {
-                if (colorHasBeenSet)
-                {
-                    ImGui::PopStyleColor();
-                    colorHasBeenSet = false;
-                }
-
-                if (isFailed)
-                {
-                    ImGui::PushStyleColor(ImGuiCol_Text, HighlightFailed);
-                    colorHasBeenSet = true;
-                }
-                else if (isWarning)
-                {
-                    ImGui::PushStyleColor(ImGuiCol_Text, HighlightWarning);
-                    colorHasBeenSet = true;
-                }
-            };
-            auto resetTextHighlight = [&colorHasBeenSet]()
-            {
-                if (colorHasBeenSet)
-                {
-                    ImGui::PopStyleColor();
-                    colorHasBeenSet = false;
-                }
-            };
-
-            auto seeConsole = [](uint32_t issueCount, const char* searchString)
-            {
-                if (issueCount == 0)
-                {
-                    return AZStd::string{};
-                }
-                else
-                {
-                    return AZStd::string::format("(See \"%s\" messages in console output)", searchString);
-                }
-            };
-
-            auto seeBelow = [](uint32_t issueCount)
-            {
-                if (issueCount == 0)
-                {
-                    return AZStd::string{};
-                }
-                else
-                {
-                    return AZStd::string::format("(See below)");
-                }
-            };
-
-            uint32_t totalAsserts = 0;
-            uint32_t totalErrors = 0;
-            uint32_t totalWarnings = 0;
-            uint32_t totalScreenshotsCount = 0;
-            uint32_t totalScreenshotsFailed = 0;
-            uint32_t totalScreenshotWarnings = 0;
+            m_resultsSummary = ScriptResultsSummary();
             for (ScriptReport& scriptReport : m_scriptReports)
             {
-                totalAsserts += scriptReport.m_assertCount;
+                m_resultsSummary.m_totalAsserts += scriptReport.m_assertCount;
 
                 // We don't include screenshot errors and warnings in these totals because those have their own line-items.
-                totalErrors += scriptReport.m_generalErrorCount;
-                totalWarnings += scriptReport.m_generalWarningCount;
+                m_resultsSummary.m_totalErrors += scriptReport.m_generalErrorCount;
+                m_resultsSummary.m_totalWarnings += scriptReport.m_generalWarningCount;
 
-                totalScreenshotWarnings += scriptReport.m_screenshotWarningCount;
-                totalScreenshotsFailed += scriptReport.m_screenshotErrorCount;
+                m_resultsSummary.m_totalScreenshotWarnings += scriptReport.m_screenshotWarningCount;
+                m_resultsSummary.m_totalScreenshotsFailed += scriptReport.m_screenshotErrorCount;
 
                 // This will catch any false-negatives that could occur if the screenshot failure error messages change without also updating ScriptReport::OnPreError()
+                m_resultsSummary.m_totalScreenshotsCount += aznumeric_cast<uint32_t>(scriptReport.m_screenshotTests.size());
                 for (ScreenshotTestInfo& screenshotTest : scriptReport.m_screenshotTests)
                 {
                     if (screenshotTest.m_officialComparisonResult.m_resultCode != ImageComparisonResult::ResultCode::Pass &&
@@ -373,68 +390,9 @@ namespace AtomSampleViewer
                 }
             }
 
-            ImGui::Separator();
-
-            if (HasActiveScript())
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, HighlightWarning);
-                ImGui::Text("Script is running... (_ _)zzz");
-                ImGui::PopStyleColor();
-            }
-            else if (totalErrors > 0 || totalAsserts > 0 || totalScreenshotsFailed > 0)
-            {
-                ImGui::PushStyleColor(ImGuiCol_Text, HighlightFailed);
-                ImGui::Text("(>_<)  FAILED  (>_<)");
-                ImGui::PopStyleColor();
-            }
-            else
-            {
-                if (m_invalidationMessage.empty())
-                {
-                    ImGui::PushStyleColor(ImGuiCol_Text, HighlightPassed);
-                    ImGui::Text("\\(^_^)/  PASSED  \\(^_^)/");
-                    ImGui::PopStyleColor();
-                }
-                else
-                {
-                    ImGui::Text("(-_-) INVALID ... but passed (-_-)");
-                }
-            }
-
-            if (!m_invalidationMessage.empty())
-            {
-                ImGui::Separator();
-                ImGui::PushStyleColor(ImGuiCol_Text, HighlightFailed);
-                ImGui::Text("(%s)", m_invalidationMessage.c_str());
-                ImGui::PopStyleColor();
-            }
-
-            ImGui::Separator();
-
-            ImGui::Text("Test Script Count: %zu", m_scriptReports.size());
-
-            highlightTextIf(totalAsserts > 0, HighlightFailed);
-            ImGui::Text("Total Asserts:  %u %s", totalAsserts, seeConsole(totalAsserts, "Trace::Assert").c_str());
-
-            highlightTextIf(totalErrors > 0, HighlightFailed);
-            ImGui::Text("Total Errors:   %u %s", totalErrors, seeConsole(totalErrors, "Trace::Error").c_str());
-
-            highlightTextIf(totalWarnings > 0, HighlightWarning);
-            ImGui::Text("Total Warnings: %u %s", totalWarnings, seeConsole(totalWarnings, "Trace::Warning").c_str());
-
-            resetTextHighlight();
-            ImGui::Text("Total Screenshot Count: %u", totalScreenshotsCount);
-
-            highlightTextIf(totalScreenshotsFailed > 0, HighlightFailed);
-            ImGui::Text("Total Screenshot Failures: %u %s", totalScreenshotsFailed, seeBelow(totalScreenshotsFailed).c_str());
-
-            highlightTextIf(totalScreenshotWarnings > 0, HighlightWarning);
-            ImGui::Text("Total Screenshot Warnings: %u %s", totalScreenshotWarnings, seeBelow(totalScreenshotWarnings).c_str());
+            DisplayScriptResultsSummary();
 
             ImGui::Text("Exported test results: %s", m_exportedTestResultsPath.c_str());
-
-            resetTextHighlight();
-
             if (ImGui::Button("Update All Local Baseline Images"))
             {
                 m_messageBox.OpenPopupConfirmation(
@@ -495,34 +453,34 @@ namespace AtomSampleViewer
                     scriptReport.m_scriptAssetPath.c_str()
                 );
 
-                highlightTextFailedOrWarning(!scriptPassed, scriptHasWarnings);
+                HighlightTextFailedOrWarning(!scriptPassed, scriptHasWarnings);
 
                 if (ImGui::TreeNodeEx(&scriptReport, scriptNodeFlag, "%s", header.c_str()))
                 {
-                    resetTextHighlight();
+                    ResetTextHighlight();
 
                     // Number of Asserts
-                    highlightTextIf(scriptReport.m_assertCount > 0, HighlightFailed);
+                    HighlightTextIf(scriptReport.m_assertCount > 0, m_highlightSettings.m_highlightFailed);
                     if (showAll || scriptReport.m_assertCount > 0)
                     {
-                        ImGui::Text("Asserts:  %u %s", scriptReport.m_assertCount, seeConsole(scriptReport.m_assertCount, "Trace::Assert").c_str());
+                        ImGui::Text("Asserts:  %u %s", scriptReport.m_assertCount, SeeConsole(scriptReport.m_assertCount, "Trace::Assert").c_str());
                     }
 
                     // Number of Errors
-                    highlightTextIf(scriptReport.m_generalErrorCount > 0, HighlightFailed);
+                    HighlightTextIf(scriptReport.m_generalErrorCount > 0, m_highlightSettings.m_highlightFailed);
                     if (showAll || scriptReport.m_generalErrorCount > 0)
                     {
-                        ImGui::Text("Errors:   %u %s", scriptReport.m_generalErrorCount, seeConsole(scriptReport.m_generalErrorCount, "Trace::Error").c_str());
+                        ImGui::Text("Errors:   %u %s", scriptReport.m_generalErrorCount, SeeConsole(scriptReport.m_generalErrorCount, "Trace::Error").c_str());
                     }
 
                     // Number of Warnings
-                    highlightTextIf(scriptReport.m_generalWarningCount > 0, HighlightWarning);
+                    HighlightTextIf(scriptReport.m_generalWarningCount > 0, m_highlightSettings.m_highlightWarning);
                     if (showAll || (showWarnings && scriptReport.m_generalWarningCount > 0))
                     {
-                        ImGui::Text("Warnings: %u %s", scriptReport.m_generalWarningCount, seeConsole(scriptReport.m_generalWarningCount, "Trace::Warning").c_str());
+                        ImGui::Text("Warnings: %u %s", scriptReport.m_generalWarningCount, SeeConsole(scriptReport.m_generalWarningCount, "Trace::Warning").c_str());
                     }
 
-                    resetTextHighlight();
+                    ResetTextHighlight();
 
                     // Number of screenshots
                     if (showAll || scriptReport.m_screenshotErrorCount > 0 || (showWarnings && scriptReport.m_screenshotWarningCount > 0))
@@ -531,20 +489,20 @@ namespace AtomSampleViewer
                     }
 
                     // Number of screenshot failures
-                    highlightTextIf(scriptReport.m_screenshotErrorCount > 0, HighlightFailed);
+                    HighlightTextIf(scriptReport.m_screenshotErrorCount > 0, m_highlightSettings.m_highlightFailed);
                     if (showAll || scriptReport.m_screenshotErrorCount > 0)
                     {
-                        ImGui::Text("Screenshot Tests Failed: %u %s", scriptReport.m_screenshotErrorCount, seeBelow(scriptReport.m_screenshotErrorCount).c_str());
+                        ImGui::Text("Screenshot Tests Failed: %u %s", scriptReport.m_screenshotErrorCount, SeeBelow(scriptReport.m_screenshotErrorCount).c_str());
                     }
 
                     // Number of screenshot warnings
-                    highlightTextIf(scriptReport.m_screenshotWarningCount > 0, HighlightWarning);
+                    HighlightTextIf(scriptReport.m_screenshotWarningCount > 0, m_highlightSettings.m_highlightWarning);
                     if (showAll || (showWarnings && scriptReport.m_screenshotWarningCount > 0))
                     {
-                        ImGui::Text("Screenshot Warnings:     %u %s", scriptReport.m_screenshotWarningCount, seeBelow(scriptReport.m_screenshotWarningCount).c_str());
+                        ImGui::Text("Screenshot Warnings:     %u %s", scriptReport.m_screenshotWarningCount, SeeBelow(scriptReport.m_screenshotWarningCount).c_str());
                     }
 
-                    resetTextHighlight();
+                    ResetTextHighlight();
 
                     for (ScreenshotTestInfo& screenshotResult : scriptReport.m_screenshotTests)
                     {
@@ -578,16 +536,16 @@ namespace AtomSampleViewer
                         ImGuiTreeNodeFlags screenshotNodeFlag = FlagDefaultClosed;
                         AZStd::string screenshotHeader = AZStd::string::format("%s %s %s", screenshotPassed ? "PASSED" : "FAILED", fileName.c_str(), headerSummary.c_str());
 
-                        highlightTextFailedOrWarning(!screenshotPassed, localBaselineWarning);
+                        HighlightTextFailedOrWarning(!screenshotPassed, localBaselineWarning);
                         if (ImGui::TreeNodeEx(&screenshotResult, screenshotNodeFlag, "%s", screenshotHeader.c_str()))
                         {
-                            resetTextHighlight();
+                            ResetTextHighlight();
 
                             ImGui::Text("Screenshot:        %s", screenshotResult.m_screenshotFilePath.c_str());
 
                             ImGui::Spacing();
 
-                            highlightTextIf(!screenshotPassed, HighlightFailed);
+                            HighlightTextIf(!screenshotPassed, m_highlightSettings.m_highlightFailed);
 
                             ImGui::Text("Official Baseline: %s", screenshotResult.m_officialBaselineScreenshotFilePath.c_str());
 
@@ -622,7 +580,7 @@ namespace AtomSampleViewer
                                     }
                                 }
 
-                                resetTextHighlight();
+                                ResetTextHighlight();
 
                                 ImGui::PushID("Official");
                                 ShowDiffButton("View Diff", screenshotResult.m_officialBaselineScreenshotFilePath, screenshotResult.m_screenshotFilePath);
@@ -630,32 +588,7 @@ namespace AtomSampleViewer
 
                                 if ((m_forceShowExportPngDiffButtons || screenshotResult.m_officialComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::ThresholdExceeded) && ImGui::Button("Export Png Diff"))
                                 {
-                                    const auto projectPath = AZ::Utils::GetProjectPath();
-                                    AZStd::string imageDiffPath;
-                                    AZStd::string scriptFilenameWithouExtension;
-                                    AzFramework::StringFunc::Path::GetFileName(scriptReport.m_scriptAssetPath.c_str(), scriptFilenameWithouExtension);
-                                    AzFramework::StringFunc::Path::StripExtension(scriptFilenameWithouExtension);
-
-                                    AZStd::string screenshotFilenameWithouExtension;
-                                    AzFramework::StringFunc::Path::GetFileName(screenshotResult.m_screenshotFilePath.c_str(), screenshotFilenameWithouExtension);
-                                    AzFramework::StringFunc::Path::StripExtension(screenshotFilenameWithouExtension);
-
-                                    AZStd::string timestring = GenerateTimestamp();
-
-                                    AZStd::string imageDiffFilename = "imageDiff_" +
-                                        scriptFilenameWithouExtension + "_" +
-                                        screenshotFilenameWithouExtension + "_" +
-                                        m_uniqueTimestamp +
-                                        ".png";
-                                    AzFramework::StringFunc::Path::Join(projectPath.c_str(), UserFolder, imageDiffPath);
-                                    AzFramework::StringFunc::Path::Join(imageDiffPath.c_str(), TestResultsFolder, imageDiffPath);
-                                    AzFramework::StringFunc::Path::Join(imageDiffPath.c_str(), imageDiffFilename.c_str(), imageDiffPath);
-
-                                    AZStd::string imageDiffFolderPath;
-                                    AzFramework::StringFunc::Path::GetFolderPath(imageDiffPath.c_str(), imageDiffFolderPath);
-                                    auto io = AZ::IO::LocalFileIO::GetInstance();
-                                    io->CreatePath(imageDiffFolderPath.c_str());
-
+                                    const AZStd::string imageDiffPath = GenerateAndCreateExportedImageDiffPath(scriptReport, screenshotResult);
                                     ExportImageDiff(imageDiffPath.c_str(), screenshotResult);
                                     m_messageBox.OpenPopupMessage("Image Diff Exported Successfully", AZStd::string::format("The image diff file was saved in %s", imageDiffPath.c_str()).c_str());
                                 }
@@ -684,7 +617,7 @@ namespace AtomSampleViewer
 
                             ImGui::Spacing();
 
-                            highlightTextIf(localBaselineWarning, HighlightWarning);
+                            HighlightTextIf(localBaselineWarning, m_highlightSettings.m_highlightWarning);
 
                             ImGui::Text("Local Baseline:    %s", screenshotResult.m_localBaselineScreenshotFilePath.c_str());
 
@@ -693,7 +626,7 @@ namespace AtomSampleViewer
                             {
                                 ImGui::Text("%s", screenshotResult.m_localComparisonResult.GetSummaryString().c_str());
 
-                                resetTextHighlight();
+                                ResetTextHighlight();
 
                                 ImGui::PushID("Local");
                                 ShowDiffButton("View Diff", screenshotResult.m_localBaselineScreenshotFilePath, screenshotResult.m_screenshotFilePath);
@@ -723,7 +656,7 @@ namespace AtomSampleViewer
 
                             ImGui::Spacing();
 
-                            resetTextHighlight();
+                            ResetTextHighlight();
 
                             ImGui::TreePop();
                         }
@@ -732,16 +665,16 @@ namespace AtomSampleViewer
                     ImGui::TreePop();
                 }
 
-                resetTextHighlight();
+                ResetTextHighlight();
             }
 
-            resetTextHighlight();
+            ResetTextHighlight();
 
             // Repeat the m_invalidationMessage at the bottom as well, to make sure the user doesn't miss it.
             if (!m_invalidationMessage.empty())
             {
                 ImGui::Separator();
-                ImGui::PushStyleColor(ImGuiCol_Text, HighlightFailed);
+                ImGui::PushStyleColor(ImGuiCol_Text, m_highlightSettings.m_highlightFailed);
                 ImGui::Text("(%s)", m_invalidationMessage.c_str());
                 ImGui::PopStyleColor();
             }
@@ -757,6 +690,11 @@ namespace AtomSampleViewer
         m_showReportDialog = true;
     }
 
+    void ScriptReporter::HideReportDialog()
+    {
+        m_showReportDialog = false;
+    }
+
     ScriptReporter::ScriptReport* ScriptReporter::GetCurrentScriptReport()
     {
         if (!m_currentScriptIndexStack.empty())
@@ -766,6 +704,74 @@ namespace AtomSampleViewer
         else
         {
             return nullptr;
+        }
+    }
+
+    AZStd::string ScriptReporter::SeeConsole(uint32_t issueCount, const char* searchString)
+    {
+        if (issueCount == 0)
+        {
+            return AZStd::string{};
+        }
+        else
+        {
+            return AZStd::string::format("(See \"%s\" messages in console output)", searchString);
+        }
+    }
+
+    AZStd::string ScriptReporter::SeeBelow(uint32_t issueCount)
+    {
+        if (issueCount == 0)
+        {
+            return AZStd::string{};
+        }
+        else
+        {
+            return AZStd::string::format("(See below)");
+        }
+    }
+
+    void ScriptReporter::HighlightTextIf(bool shouldSet, ImVec4 color)
+    {
+        if (m_colorHasBeenSet)
+        {
+            ImGui::PopStyleColor();
+            m_colorHasBeenSet = false;
+        }
+
+        if (shouldSet)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, color);
+            m_colorHasBeenSet = true;
+        }
+    }
+
+    void ScriptReporter::ResetTextHighlight()
+    {
+        if (m_colorHasBeenSet)
+        {
+            ImGui::PopStyleColor();
+            m_colorHasBeenSet = false;
+        }
+    }
+
+    void ScriptReporter::HighlightTextFailedOrWarning(bool isFailed, bool isWarning)
+    {
+        if (m_colorHasBeenSet)
+        {
+            ImGui::PopStyleColor();
+            m_colorHasBeenSet = false;
+        }
+
+        if (isFailed)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, m_highlightSettings.m_highlightFailed);
+            m_colorHasBeenSet = true;
+        }
+        else if (isWarning)
+        {
+            ImGui::PushStyleColor(ImGuiCol_Text, m_highlightSettings.m_highlightWarning);
+            m_colorHasBeenSet = true;
         }
     }
 
@@ -1186,6 +1192,13 @@ namespace AtomSampleViewer
         imageDiff.Save(filePath);
     }
 
+    AZStd::string ScriptReporter::ExportImageDiff(const ScriptReport& scriptReport, const ScreenshotTestInfo& screenshotTest)
+    {
+        const AZStd::string imageDiffPath = GenerateAndCreateExportedImageDiffPath(scriptReport, screenshotTest);
+        ExportImageDiff(imageDiffPath.c_str(), screenshotTest);
+        return imageDiffPath;
+    }
+
     AZStd::string ScriptReporter::GenerateAndCreateExportedTestResultsPath() const
     {
         // Setup our variables for the exported test results path and .txt file.
@@ -1223,6 +1236,15 @@ namespace AtomSampleViewer
             }
             buffer[i + 3] = 255;
         }
+    }
+
+    void ScriptReporter::HighlightColorSettings::UpdateColorSettings()
+    {
+        const ImVec4& bgColor = ImGui::GetStyleColorVec4(ImGuiCol_WindowBg);
+        const bool isDarkStyle = bgColor.x < 0.2 && bgColor.y < 0.2 && bgColor.z < 0.2;
+        m_highlightPassed = isDarkStyle ? ImVec4{ 0.5, 1, 0.5, 1 } : ImVec4{ 0, 0.75, 0, 1 };
+        m_highlightFailed = isDarkStyle ? ImVec4{ 1, 0.5, 0.5, 1 } : ImVec4{ 0.75, 0, 0, 1 };
+        m_highlightWarning = isDarkStyle ? ImVec4{ 1, 1, 0.5, 1 } : ImVec4{ 0.5, 0.5, 0, 1 };
     }
 
 } // namespace AtomSampleViewer
