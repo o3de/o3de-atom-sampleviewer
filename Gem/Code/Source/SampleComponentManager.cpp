@@ -1645,6 +1645,9 @@ namespace AtomSampleViewer
         // (8,8) is dead center
         // The reason we are setting custom sample positions is because having the first subsample
         // at dead-center has useful properties for various rendering features.
+        // 
+        // Note: we are filling all the possible positions here even though the positions taken into
+        // consideration will be capped by m_customPositionsCount. This is to make it easier when changing MSAA levels.
         state.m_customPositions[0] = { 8, 8 };  
         state.m_customPositions[1] = { 0, 0 };  
         state.m_customPositions[2] = { 15, 0 };
