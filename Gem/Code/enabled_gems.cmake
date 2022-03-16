@@ -13,7 +13,7 @@ set(ENABLED_GEMS
     LyShine
     Camera
     EMotionFX
-    Atom_AtomBridge
+    Atom
     AtomSampleViewer
     SceneProcessing
     EditorPythonBindings
