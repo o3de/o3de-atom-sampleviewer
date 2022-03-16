@@ -1560,7 +1560,7 @@ namespace AtomSampleViewer
         pipelineDesc.m_name = "RPISamplePipeline";
         pipelineDesc.m_rootPassTemplate = GetRootPassTemplateName();
         pipelineDesc.m_mainViewTagName = "MainCamera";
-        pipelineDesc.m_renderSettings.m_multisampleState = GetDefaultMsaaState();
+        pipelineDesc.m_renderSettings.m_multisampleState = CreateDefaultMsaaState();
 
         bool isNonMsaaPipeline = (pipelineDesc.m_renderSettings.m_multisampleState.m_samples == 1);
         const char* supervariantName = isNonMsaaPipeline ? AZ::RPI::NoMsaaSupervariantName : "";
@@ -1632,7 +1632,7 @@ namespace AtomSampleViewer
             });
     }
 
-    AZ::RHI::MultisampleState SampleComponentManager::GetDefaultMsaaState() const
+    AZ::RHI::MultisampleState SampleComponentManager::CreateDefaultMsaaState() const
     {
         AZ_Assert(IsValidNumMSAASamples(m_numMSAASamples), "Invalid MSAA sample setting");
         const AZ::RHI::SamplePosition Center = { 8, 8 };
