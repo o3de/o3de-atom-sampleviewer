@@ -1638,7 +1638,7 @@ namespace AtomSampleViewer
 
         AZ::RHI::MultisampleState state;
         state.m_samples = static_cast<uint16_t>(m_numMSAASamples);
-        state.m_customPositionsCount = 16;
+        state.m_customPositionsCount = m_numMSAASamples;
         state.m_customPositions[0] = { 8, 8 };  
         state.m_customPositions[1] = { 0, 0 };  
         state.m_customPositions[2] = { 15, 0 };
