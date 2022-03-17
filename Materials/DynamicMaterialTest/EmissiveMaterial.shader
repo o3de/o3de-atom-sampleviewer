@@ -38,9 +38,5 @@
         ] 
     },
 
-    "CompilerHints" : { 
-        "DisableOptimizations" : false
-    },
-
     "DrawList" : "forward"
 }
