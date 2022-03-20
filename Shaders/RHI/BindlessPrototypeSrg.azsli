@@ -17,12 +17,17 @@ struct FloatBuffer
 // Listed on update frequency
 ShaderResourceGroupSemantic FrequencyPerScene 
 {
-    FrequencyId = 6;
+    FrequencyId = 0;
 };
 
 ShaderResourceGroupSemantic FloatBufferSemanticId
 {
-    FrequencyId = 7;
+    FrequencyId = 1;
+};
+
+ShaderResourceGroupSemantic IndirectionBufferSemanticId
+{
+    FrequencyId = 2;
 };
 
 ShaderResourceGroup FloatBufferSrg : FloatBufferSemanticId
@@ -30,7 +35,12 @@ ShaderResourceGroup FloatBufferSrg : FloatBufferSemanticId
     StructuredBuffer<FloatBuffer> m_floatBuffer;
 };
 
-ShaderResourceGroup ImageSrg : FrequencyPerScene
+ShaderResourceGroup IndirectionBufferSrg : IndirectionBufferSemanticId
+{
+    ByteAddressBuffer m_indirectionBuffer;
+};
+
+ShaderResourceGroup SamplerSrg : FrequencyPerScene
 {
     Sampler m_sampler
     {
@@ -39,9 +49,6 @@ ShaderResourceGroup ImageSrg : FrequencyPerScene
         AddressV = Wrap;
         AddressW = Wrap;
     };
-
-    // Array of textures
-    Texture2D m_textureArray[];
 }
 
 // Helper functions to read data from the FloatBuffer. The FloatBuffer is accessed with an offset and an index.

@@ -216,6 +216,9 @@ namespace AtomSampleViewer
         // Image array holding all of the StreamImages
         AZStd::vector<AZ::Data::Instance<AZ::RPI::StreamingImage>> m_images;
 
+        // Array of indices used to retrieve image views from the bindless heap
+        AZStd::vector<uint32_t> m_imageIndices;
+
         // Light direction handle
         FloatBufferHandle m_lightDirectionHandle;
 
@@ -238,6 +241,9 @@ namespace AtomSampleViewer
         // BufferPool used to allocate buffers in this example
         AZ::RHI::Ptr<AZ::RHI::BufferPool> m_bufferPool = nullptr;
 
+        // Indirection buffer holding uint indices of texture resources
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_indirectionBuffer = nullptr;
+
         // Pool size in bytes, 1MB
         static constexpr uint32_t m_poolSizeInBytes = 1u << 20u;
 
@@ -246,8 +252,9 @@ namespace AtomSampleViewer
         static constexpr uint32_t m_modelLod = 0u;
 
         AZ::RHI::ScopeId m_scopeId;
-        static constexpr const char* m_imageSrgName = "ImageSrg";
+        static constexpr const char* m_samplerSrgName = "SamplerSrg";
         static constexpr const char* m_floatBufferSrgName = "FloatBufferSrg";
+        static constexpr const char* m_indirectionBufferSrgName = "IndirectionBufferSrg";
 
         // Material count
         static constexpr uint32_t m_materialCount = 1024u;
