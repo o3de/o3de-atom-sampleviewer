@@ -175,6 +175,7 @@ namespace AtomSampleViewer
         void AdjustImGuiFontScale();
         const char* GetRootPassTemplateName();
         int GetDefaultNumMSAASamples();
+        AZ::RHI::MultisampleState CreateDefaultMsaaState() const;
 
         // ---------- variables -----------------
 

@@ -26,7 +26,7 @@
     [
       {
         "Name" : "float2",
-        "PlusArguments" : "-DNUM_FLOATS_AFTER_MATRIX=2"
+        "Definitions": ["NUM_FLOATS_AFTER_MATRIX=2"]
       }
     ]
     

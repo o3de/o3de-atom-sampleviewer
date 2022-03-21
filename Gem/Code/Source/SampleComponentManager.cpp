@@ -1560,10 +1560,8 @@ namespace AtomSampleViewer
         pipelineDesc.m_name = "RPISamplePipeline";
         pipelineDesc.m_rootPassTemplate = GetRootPassTemplateName();
         pipelineDesc.m_mainViewTagName = "MainCamera";
+        pipelineDesc.m_renderSettings.m_multisampleState = CreateDefaultMsaaState();
 
-        // set pipeline MSAA samples
-        AZ_Assert(IsValidNumMSAASamples(m_numMSAASamples), "Invalid MSAA sample setting");
-        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = static_cast<uint16_t>(m_numMSAASamples);
         bool isNonMsaaPipeline = (pipelineDesc.m_renderSettings.m_multisampleState.m_samples == 1);
         const char* supervariantName = isNonMsaaPipeline ? AZ::RPI::NoMsaaSupervariantName : "";
         AZ::RPI::ShaderSystemInterface::Get()->SetSupervariantName(AZ::Name(supervariantName));
@@ -1632,6 +1630,42 @@ namespace AtomSampleViewer
             {
                 ActivateInternal();
             });
+    }
+
+    AZ::RHI::MultisampleState SampleComponentManager::CreateDefaultMsaaState() const
+    {
+        AZ_Assert(IsValidNumMSAASamples(m_numMSAASamples), "Invalid MSAA sample setting");
+
+        AZ::RHI::MultisampleState state;
+        state.m_samples = static_cast<uint16_t>(m_numMSAASamples);
+        state.m_customPositionsCount = m_numMSAASamples;
+
+        // In Atom: (0,0) is top left subsample position
+        // (15,15) is bottom right (non-inclusive, it is part of the bottom right pixel)
+        // (8,8) is dead center
+        // The reason we are setting custom sample positions is because having the first subsample
+        // at dead-center has useful properties for various rendering features.
+        // 
+        // Note: we are filling all the possible positions here even though the positions taken into
+        // consideration will be capped by m_customPositionsCount. This is to make it easier when changing MSAA levels.
+        state.m_customPositions[0] = { 8, 8 };  
+        state.m_customPositions[1] = { 0, 0 };  
+        state.m_customPositions[2] = { 15, 0 };
+        state.m_customPositions[3] = { 0, 15 };
+        state.m_customPositions[4] = { 4, 4 };
+        state.m_customPositions[5] = { 8, 4 };
+        state.m_customPositions[6] = { 4, 8 };
+        state.m_customPositions[7] = { 8, 8 };
+        state.m_customPositions[8] = { 2, 2 };
+        state.m_customPositions[9] = { 6, 6 };
+        state.m_customPositions[10] = { 10, 2 };
+        state.m_customPositions[11] = { 14, 6 };
+        state.m_customPositions[12] = { 2, 10 };
+        state.m_customPositions[13] = { 10, 10 };
+        state.m_customPositions[14] = { 6, 14 };
+        state.m_customPositions[15] = { 14, 14 };
+
+        return state;
     }
 
 } // namespace AtomSampleViewer
