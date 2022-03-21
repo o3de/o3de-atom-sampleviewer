@@ -407,7 +407,7 @@ namespace AtomSampleViewer
                 "Size",
                 &m_directionalLightShadowmapSizeIndex,
                 s_directionalLightShadowmapSizeLabels,
-                AZ_ARRAY_SIZE(s_directionalLightShadowmapSizeLabels)))
+                aznumeric_cast<int>(AZStd::size(s_directionalLightShadowmapSizeLabels))))
             {
                 m_directionalLightFeatureProcessor->SetShadowmapSize(
                     m_directionalLightHandle,
@@ -469,7 +469,7 @@ namespace AtomSampleViewer
                 "Filter Method##Directional",
                 &m_shadowFilterMethodIndexDirectional,
                 s_shadowFilterMethodLabels,
-                AZ_ARRAY_SIZE(s_shadowFilterMethodLabels)))
+                aznumeric_cast<int>(AZStd::size(s_shadowFilterMethodLabels))))
             {
                 m_directionalLightFeatureProcessor->SetShadowFilterMethod(
                     m_directionalLightHandle,
@@ -550,7 +550,7 @@ namespace AtomSampleViewer
                 "Filter Method##Spot",
                 &m_shadowFilterMethodIndexDisk,
                 s_shadowFilterMethodLabels,
-                AZ_ARRAY_SIZE(s_shadowFilterMethodLabels)))
+                aznumeric_cast<int>(AZStd::size(s_shadowFilterMethodLabels))))
             {
                 for (int index = 0; index < m_diskLightCount; ++index)
                 {
