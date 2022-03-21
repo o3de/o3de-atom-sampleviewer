@@ -507,8 +507,8 @@ namespace AtomSampleViewer
 
             ImGui::Text("Shadowmap Size");
             if (ScriptableImGui::Combo(
-                    "Size##Directional", &m_directionalLightImageSizeIndex, s_shadowmapImageSizeLabels,
-                    AZ_ARRAY_SIZE(s_shadowmapImageSizeLabels)))
+                "Size##Directional", &m_directionalLightImageSizeIndex, s_shadowmapImageSizeLabels,
+                aznumeric_cast<int>(AZStd::size(s_shadowmapImageSizeLabels))))
             {
                 m_directionalLightFeatureProcessor->SetShadowmapSize(
                     m_directionalLightHandle, s_shadowmapImageSizes[m_directionalLightImageSizeIndex]);
@@ -564,8 +564,8 @@ namespace AtomSampleViewer
 
             ImGui::Text("Filtering");
             if (ScriptableImGui::Combo(
-                    "Filter Method##Directional", &m_shadowFilterMethodIndexDirectional, s_shadowFilterMethodLabels,
-                    AZ_ARRAY_SIZE(s_shadowFilterMethodLabels)))
+                "Filter Method##Directional", &m_shadowFilterMethodIndexDirectional, s_shadowFilterMethodLabels,
+                aznumeric_cast<int>(AZStd::size(s_shadowFilterMethodLabels))))
             {
                 m_directionalLightFeatureProcessor->SetShadowFilterMethod(
                     m_directionalLightHandle, s_shadowFilterMethods[m_shadowFilterMethodIndexDirectional]);
@@ -656,7 +656,7 @@ namespace AtomSampleViewer
             ImGui::Text("Shadowmap Size");
             shadowmapSizeChanged = shadowmapSizeChanged ||
                 ScriptableImGui::Combo("Size##Positional", &m_positionalLightImageSizeIndices[index], s_shadowmapImageSizeLabels,
-                                       AZ_ARRAY_SIZE(s_shadowmapImageSizeLabels));
+                    aznumeric_cast<int>(AZStd::size(s_shadowmapImageSizeLabels)));
             if (shadowmapSizeChanged)
             {
                 // Reset shadow parameters when shadow is disabled.
@@ -672,8 +672,8 @@ namespace AtomSampleViewer
 
             ImGui::Text("Filtering");
             if (ScriptableImGui::Combo(
-                    "Filter Method##Positional", &m_shadowFilterMethodIndicesPositional[index], s_shadowFilterMethodLabels,
-                    AZ_ARRAY_SIZE(s_shadowFilterMethodLabels)))
+                "Filter Method##Positional", &m_shadowFilterMethodIndicesPositional[index], s_shadowFilterMethodLabels,
+                aznumeric_cast<int>(AZStd::size(s_shadowFilterMethodLabels))))
             {
                 settingsChanged = true;
             }
