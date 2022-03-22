@@ -140,7 +140,7 @@ namespace AtomSampleViewer
         // For now, there is a 1-1 match of input meshes to instances
         SkinnedMesh& skinnedMesh = m_skinnedMeshes[i];
         RenderData& renderData = m_skinnedMeshInstances[i];
-        if (renderData.m_skinnedMeshRenderProxy.IsValid())
+        if (renderData.m_skinnedMeshHandle.IsValid())
         {
             return;
         }
@@ -184,13 +184,9 @@ namespace AtomSampleViewer
             }
             // If render proxies already exist, they will be auto-freed
             AZ::Render::SkinnedMeshShaderOptions defaultShaderOptions;
-            AZ::Render::SkinnedMeshFeatureProcessorInterface::SkinnedMeshRenderProxyDesc desc{ skinnedMesh.m_skinnedMeshInputBuffers, renderData.m_skinnedMeshInstance, renderData.m_meshHandle, renderData.m_boneTransformBuffer, defaultShaderOptions };
+            AZ::Render::SkinnedMeshFeatureProcessorInterface::SkinnedMeshHandleDescriptor desc{ skinnedMesh.m_skinnedMeshInputBuffers, renderData.m_skinnedMeshInstance, renderData.m_meshHandle, renderData.m_boneTransformBuffer, defaultShaderOptions };
 
-            renderData.m_skinnedMeshRenderProxy = m_skinnedMeshFeatureProcessor->AcquireRenderProxyInterface(desc);
-            if (renderData.m_skinnedMeshRenderProxy.IsValid())
-            {
-                renderData.m_skinnedMeshRenderProxy->SetTransform(renderData.m_rootTransform);
-            }
+            renderData.m_skinnedMeshHandle = m_skinnedMeshFeatureProcessor->AcquireSkinnedMesh(desc);
         }
         else
         {
@@ -226,15 +222,8 @@ namespace AtomSampleViewer
 
         // Release the per-instance data
         RenderData& renderData = m_skinnedMeshInstances[i];
-
-        if (renderData.m_skinnedMeshRenderProxy.IsValid())
-        {
-            m_skinnedMeshFeatureProcessor->ReleaseRenderProxyInterface(renderData.m_skinnedMeshRenderProxy);
-        }
-        if (renderData.m_meshHandle)
-        {
-            m_meshFeatureProcessor->ReleaseMesh(*renderData.m_meshHandle);
-        }
+        m_skinnedMeshFeatureProcessor->ReleaseSkinnedMesh(renderData.m_skinnedMeshHandle);
+        m_meshFeatureProcessor->ReleaseMesh(*renderData.m_meshHandle);
 
         renderData.m_skinnedMeshInstance.reset();
         renderData.m_boneTransformBuffer.reset();
