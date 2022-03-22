@@ -6,6 +6,7 @@
  *
  */
 
+#include <sstream>
 #include <Automation/ScriptReporter.h>
 #include <Utils/Utils.h>
 #include <Atom/RHI/Factory.h>
@@ -437,11 +438,10 @@ namespace AtomSampleViewer
                     const bool scriptPassed = scriptReport.m_assertCount == 0 && scriptReport.m_generalErrorCount == 0 && scriptReport.m_screenshotErrorCount == 0;
                     const bool scriptHasWarnings = scriptReport.m_generalWarningCount > 0 || scriptReport.m_screenshotWarningCount > 0;
 
-                    // Skip if tests passed without warnings and we don't want to show successes
-                    bool skipReport = (scriptPassed && !scriptHasWarnings && !m_showAll);
-
-                    // Skip if we only have warnings only and we don't want to show warnings
-                    skipReport = skipReport || (scriptPassed && scriptHasWarnings && !m_showWarnings);
+                    // Skip if tests passed and
+                    //         1). have no warnings and we don't want to show successes OR
+                    //         2). only have warnings and we don't want to show warnings
+                    bool skipReport = scriptPassed && ((!scriptHasWarnings && !m_showAll) || (scriptHasWarnings && !m_showWarnings));
 
                     if (skipReport)
                     {
@@ -514,20 +514,20 @@ namespace AtomSampleViewer
                             AZStd::string fileName;
                             AzFramework::StringFunc::Path::GetFullFileName(screenshotResult.m_screenshotFilePath.c_str(), fileName);
 
-                            AZStd::string headerSummary;
+                            std::stringstream headerSummary;
                             if (!screenshotPassed)
                             {
-                                headerSummary = "(" + screenshotResult.m_officialComparisonResult.GetSummaryString() + ") ";
+                                headerSummary << "(" << screenshotResult.m_officialComparisonResult.GetSummaryString().c_str() << ") ";
                             }
                             if (localBaselineWarning)
                             {
-                                headerSummary += "(Local Baseline Warning)";
+                                headerSummary << "(Local Baseline Warning)";
                             }
 
                             AZStd::string screenshotHeader = AZStd::string::format("%s %s %s",
                                 screenshotPassed ? "PASSED" : "FAILED",
                                 fileName.c_str(),
-                                headerSummary.c_str());
+                                headerSummary.str().c_str());
 
                             ShowScreenshotTestInfoTreeNode(screenshotHeader, scriptReport, screenshotResult);
                         }
