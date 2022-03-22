@@ -1639,12 +1639,6 @@ namespace AtomSampleViewer
         AZ::RHI::MultisampleState state;
         state.m_samples = static_cast<uint16_t>(m_numMSAASamples);
         state.m_customPositionsCount = m_numMSAASamples;
-
-        // In Atom: (0,0) is top left subsample position
-        // (15,15) is bottom right (non-inclusive, it is part of the bottom right pixel)
-        // (8,8) is dead center
-        // The reason we are setting custom sample positions is because having the first subsample
-        // at dead-center has useful properties for various rendering features.
         state.m_customPositions[0] = { 8, 8 };  
         state.m_customPositions[1] = { 0, 0 };  
         state.m_customPositions[2] = { 15, 0 };
