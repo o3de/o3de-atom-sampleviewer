@@ -87,11 +87,8 @@ namespace AtomSampleViewer
             colorMultiplier.StoreToFloat4(&trianglesData[triangleIdx].m_colorMultiplier[0]);
         }
 
-        // Calculate the alignment
-        const uint32_t alignment = RHI::AlignUp(static_cast<uint32_t>(sizeof(InstanceInfo)), m_constantBufferAlighment);
-
         // All triangles data will be uploaded in one go to the constant buffer once per frame.
-        UploadDataToConstantBuffer(trianglesData, alignment, s_numberOfTrianglesTotal);
+        UploadDataToConstantBuffer(trianglesData, static_cast<uint32_t>(sizeof(InstanceInfo)), s_numberOfTrianglesTotal);
         
         BasicRHIComponent::OnFramePrepare(frameGraphBuilder);
     }
@@ -115,9 +112,6 @@ namespace AtomSampleViewer
         using namespace AZ;
 
         RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
-
-        // Cache the alignment
-        m_constantBufferAlighment = device->GetLimits().m_minConstantBufferViewOffset;
 
         AZ::RHI::PipelineStateDescriptorForDraw pipelineStateDescriptor;
 
