@@ -850,7 +850,7 @@ try {
     def someBuildHappened = false
 
     // Build and Post-Build Testing Stage
-    def buildConfigs = [:]
+    def enginebuildConfigs = [:]
     def platformBuildConfigs =[:]
 
     // Platform Builds run on EC2
@@ -862,7 +862,7 @@ try {
                 def nodeLabel = envVars['NODE_LABEL']
                 someBuildHappened = true
 
-                buildConfigs["${platform.key} [${build_job.key}]"] = CreateBuildJobs(pipelineConfig, platform, build_job, envVars, branchName, pipelineName, repositoryName, projectName)
+                enginebuildConfigs["${platform.key} [${build_job.key}]"] = CreateBuildJobs(pipelineConfig, platform, build_job, envVars, branchName, pipelineName, repositoryName, projectName)
             }
         }
     }
@@ -884,9 +884,9 @@ try {
 
     timestamps {
 
-        stage('O3DE Build') {
+        stage("${ENGINE_REPOSITORY_NAME} Build") {
             catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                parallel buildConfigs // Run parallel builds
+                parallel enginebuildConfigs // Run parallel builds
             }
         }
         
