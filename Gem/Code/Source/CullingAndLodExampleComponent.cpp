@@ -341,7 +341,7 @@ namespace AtomSampleViewer
             ImGui::Separator();
 
             ImGui::Text("Shadowmap Size");
-            if (ImGui::Combo( "Size", &m_directionalLightShadowmapSizeIndex, s_directionalLightShadowmapSizeLabels, AZ_ARRAY_SIZE(s_directionalLightShadowmapSizeLabels)))
+            if (ImGui::Combo( "Size", &m_directionalLightShadowmapSizeIndex, s_directionalLightShadowmapSizeLabels, aznumeric_cast<int>(AZStd::size(s_directionalLightShadowmapSizeLabels))))
             {
                 m_directionalLightFeatureProcessor->SetShadowmapSize(m_directionalLightHandle, s_shadowmapSizes[m_directionalLightShadowmapSizeIndex]);
             }
@@ -391,7 +391,7 @@ namespace AtomSampleViewer
             ImGui::Spacing();
 
             ImGui::Text("Filtering");
-            if (ImGui::Combo("Filter Method", &m_shadowFilterMethodIndex, s_shadowFilterMethodLabels, AZ_ARRAY_SIZE(s_shadowFilterMethodLabels)))
+            if (ImGui::Combo("Filter Method", &m_shadowFilterMethodIndex, s_shadowFilterMethodLabels, aznumeric_cast<int>(AZStd::size(s_shadowFilterMethodLabels))))
             {
                 m_directionalLightFeatureProcessor->SetShadowFilterMethod(m_directionalLightHandle, s_shadowFilterMethods[m_shadowFilterMethodIndex]);
             }
