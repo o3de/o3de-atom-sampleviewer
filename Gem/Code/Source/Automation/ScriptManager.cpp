@@ -413,6 +413,7 @@ namespace AtomSampleViewer
                 // In case scripts were aborted while ImGui was temporarily hidden, show it again.
                 SetShowImGui(true);
 
+                m_scriptReporter.SortScriptReports();
                 m_scriptReporter.OpenReportDialog();
 
                 m_shouldPopScript = false;
@@ -680,7 +681,7 @@ namespace AtomSampleViewer
         const AZStd::vector<ScriptReporter::ScriptReport>& scriptReports = m_scriptReporter.GetScriptReport();
 
         // Get the script report and screenshot test corresponding to the current index
-        const PrecommitWizardSettings::ReportIndex currentIndex = m_wizardSettings.m_reportIterator->second;
+        const ScriptReporter::ReportIndex currentIndex = m_wizardSettings.m_reportIterator->second;
         const ScriptReporter::ScriptReport& scriptReport = scriptReports[currentIndex.first];
         const ScriptReporter::ScreenshotTestInfo& screenshotTest = scriptReport.m_screenshotTests[currentIndex.second];
 
@@ -819,7 +820,7 @@ namespace AtomSampleViewer
 
         const ScriptReporter::ScriptResultsSummary resultsSummary = m_scriptReporter.GetScriptResultSummary();
         const AZStd::vector<ScriptReporter::ScriptReport>& scriptReports = m_scriptReporter.GetScriptReport();
-        AZStd::vector<AZStd::vector<PrecommitWizardSettings::ReportIndex>> imageDifferenceSummary(
+        AZStd::vector<AZStd::vector<ScriptReporter::ReportIndex>> imageDifferenceSummary(
             PrecommitWizardSettings::ImageDifferenceLevel::NumDifferenceLevels);
         int totalValidatedScreenshots = 0;
         for (const auto& [reportIndex, differenceLevel] : m_wizardSettings.m_reportIndexDifferenceLevelMap)
@@ -847,7 +848,7 @@ namespace AtomSampleViewer
         ImGui::Text("Screenshot automatic checks failed: %zu", m_wizardSettings.m_failedReports.size());
         for (const auto& failedReport : m_wizardSettings.m_failedReports)
         {
-            const PrecommitWizardSettings::ReportIndex& reportIndex = failedReport.second;
+            const ScriptReporter::ReportIndex& reportIndex = failedReport.second;
             const ScriptReporter::ScriptReport& scriptReport = scriptReports[reportIndex.first];
             const ScriptReporter::ScreenshotTestInfo& screenshotTest = scriptReport.m_screenshotTests[reportIndex.second];
             ImGui::Text(
