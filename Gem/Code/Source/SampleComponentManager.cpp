@@ -111,6 +111,7 @@
 #include <AzCore/Component/Entity.h>
 #include <AzCore/Debug/Profiler.h>
 #include <AzCore/Debug/ProfilerBus.h>
+#include <AzCore/IO/IStreamerProfiler.h>
 #include <AzCore/Serialization/SerializeContext.h>
 #include <AzCore/Settings/SettingsRegistryMergeUtils.h>
 #include <AzCore/std/smart_ptr/make_shared.h>
@@ -142,10 +143,11 @@ namespace AtomSampleViewer
 {
     namespace
     {
-        const char* PassTreeToolName = "PassTree";
-        const char* CpuProfilerToolName = "CPU Profiler";
-        const char* GpuProfilerToolName = "GPU Profiler";
-        const char* TransientAttachmentProfilerToolName = "Transient Attachment Profiler";
+        constexpr const char* PassTreeToolName = "PassTree";
+        constexpr const char* CpuProfilerToolName = "CPU Profiler";
+        constexpr const char* GpuProfilerToolName = "GPU Profiler";
+        constexpr const char* FileIoProfilerToolName = "File IO Profiler";
+        constexpr const char* TransientAttachmentProfilerToolName = "Transient Attachment Profiler";
     }
 
     bool IsValidNumMSAASamples(int numSamples)
@@ -830,6 +832,11 @@ namespace AtomSampleViewer
             ShowGpuProfilerWindow();
         }
 
+        if (m_showFileIoProfiler)
+        {
+            ShowFileIoProfilerWindow();
+        }
+
         if (m_showTransientAttachmentProfiler)
         {
             ShowTransientAttachmentProfilerWindow();
@@ -1007,6 +1014,16 @@ namespace AtomSampleViewer
                     Utils::ReportScriptableAction("ShowTool('%s', %s)", CpuProfilerToolName, m_showCpuProfiler ? "true" : "false");
                 }
 
+                if (AZ::IO::StreamerProfiler::Get() != nullptr)
+                {
+                    if (ImGui::MenuItem(FileIoProfilerToolName))
+                    {
+                        m_showFileIoProfiler = !m_showFileIoProfiler;
+                        Utils::ReportScriptableAction(
+                            "ShowTool('%s', %s)", FileIoProfilerToolName, m_showFileIoProfiler ? "true" : "false");
+                    }
+                }
+
                 if (ImGui::MenuItem(GpuProfilerToolName))
                 {
                     m_showGpuProfiler = !m_showGpuProfiler;
@@ -1098,6 +1115,14 @@ namespace AtomSampleViewer
         if (auto profilerImGui = Profiler::ProfilerImGuiInterface::Get(); profilerImGui)
         {
             profilerImGui->ShowCpuProfilerWindow(m_showCpuProfiler);
+        }
+    }
+
+    void SampleComponentManager::ShowFileIoProfilerWindow()
+    {
+        if (auto profilerImGui = AZ::IO::StreamerProfiler::Get(); profilerImGui)
+        {
+            profilerImGui->DrawStatistics(m_showFileIoProfiler);
         }
     }
 
@@ -1412,6 +1437,11 @@ namespace AtomSampleViewer
         else if (toolName == CpuProfilerToolName)
         {
             m_showCpuProfiler = enable;
+            return true;
+        }
+        else if (toolName == FileIoProfilerToolName)
+        {
+            m_showFileIoProfiler = enable;
             return true;
         }
         else if (toolName == GpuProfilerToolName)

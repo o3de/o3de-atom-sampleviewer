@@ -137,6 +137,7 @@ namespace AtomSampleViewer
         void ShowFrameGraphVisualizerWindow();
         void ShowCpuProfilerWindow();
         void ShowGpuProfilerWindow();
+        void ShowFileIoProfilerWindow();
         void ShowShaderMetricsWindow();
         void ShowTransientAttachmentProfilerWindow();
 
@@ -210,6 +211,7 @@ namespace AtomSampleViewer
         bool m_showCullingDebugWindow = false;
         bool m_showCpuProfiler = false;
         bool m_showGpuProfiler = false;
+        bool m_showFileIoProfiler = false;
         bool m_showTransientAttachmentProfiler = false;
         bool m_showShaderMetrics = false;
 
