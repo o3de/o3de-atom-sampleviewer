@@ -127,6 +127,8 @@ set(FILES
     Source/EntityUtilityFunctions.h
     Source/ExposureExampleComponent.cpp
     Source/ExposureExampleComponent.h
+    Source/EyeMaterialExampleComponent.h
+    Source/EyeMaterialExampleComponent.cpp
     Source/LightCullingExampleComponent.cpp
     Source/LightCullingExampleComponent.h
     Source/MaterialHotReloadTestComponent.cpp
