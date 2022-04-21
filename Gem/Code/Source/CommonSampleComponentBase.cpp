@@ -259,8 +259,6 @@ namespace AtomSampleViewer
             directionalLightFeatureProcessor,
             cameraConfig,
             m_lightHandles,
-            nullptr,
-            AZ::RPI::MaterialPropertyIndex{},
             useAlternateSkybox);
     }
 

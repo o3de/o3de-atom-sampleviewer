@@ -50,9 +50,6 @@ namespace AtomSampleViewer
             "This looks like a problem"
         };
 
-        // currently set to track the ScriptReport index and the ScreenshotTestInfo index.
-        using ReportIndex = AZStd::pair<size_t, size_t>;
-
         // This function does the following:
         // 1. Collect passing screenshot tests and sorts them by decreasing diff score.
         // 2. Collect failed screenshot tests and sorts them by decreasing diff score. 
@@ -71,15 +68,15 @@ namespace AtomSampleViewer
                     // high
                     if (screenshotTestInfos[j].m_officialComparisonResult.m_resultCode == ScriptReporter::ImageComparisonResult::ResultCode::Pass)
                     {
-                        m_reportsOrderedByThresholdToInspect.insert(AZStd::pair<float, ReportIndex>(
+                        m_reportsOrderedByThresholdToInspect.insert(AZStd::pair<float, ScriptReporter::ReportIndex>(
                             screenshotTestInfos[j].m_officialComparisonResult.m_finalDiffScore,
-                            ReportIndex{ i, j }));
+                            ScriptReporter::ReportIndex{ i, j }));
                     }
                     else
                     {
-                        m_failedReports.insert(AZStd::pair<float, ReportIndex>(
+                        m_failedReports.insert(AZStd::pair<float, ScriptReporter::ReportIndex>(
                             screenshotTestInfos[j].m_officialComparisonResult.m_finalDiffScore,
-                            ReportIndex{ i, j }));
+                            ScriptReporter::ReportIndex{ i, j }));
                     }
                 }
             }
@@ -90,9 +87,9 @@ namespace AtomSampleViewer
         int m_inspectionSelection = DefaultInspectionSelection;
         Stage m_stage = Stage::Intro;
         AZStd::string m_exportedPngPath;
-        AZStd::multimap<float, ReportIndex, AZStd::greater<float>> m_reportsOrderedByThresholdToInspect;
-        AZStd::multimap<float, ReportIndex, AZStd::greater<float>> m_failedReports;
-        AZStd::multimap<float, ReportIndex, AZStd::greater<float>>::iterator m_reportIterator;
-        AZStd::unordered_map<ReportIndex, ImageDifferenceLevel::Levels> m_reportIndexDifferenceLevelMap;
+        AZStd::multimap<float, ScriptReporter::ReportIndex, AZStd::greater<float>> m_reportsOrderedByThresholdToInspect;
+        AZStd::multimap<float, ScriptReporter::ReportIndex, AZStd::greater<float>> m_failedReports;
+        AZStd::multimap<float, ScriptReporter::ReportIndex, AZStd::greater<float>>::iterator m_reportIterator;
+        AZStd::unordered_map<ScriptReporter::ReportIndex, ImageDifferenceLevel::Levels> m_reportIndexDifferenceLevelMap;
     };
 } // namespace AtomSampleViewer
