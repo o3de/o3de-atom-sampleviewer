@@ -27,7 +27,6 @@
 #include <AzCore/Settings/SettingsRegistryMergeUtils.h>
 #include <AzCore/Utils/Utils.h>
 #include <AzGameFramework/Application/GameApplication.h>
-#include <GridMate/GridMate.h>
 
 namespace AtomSampleViewer
 {
