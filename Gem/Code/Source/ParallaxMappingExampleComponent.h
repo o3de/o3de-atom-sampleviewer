@@ -66,7 +66,14 @@ namespace AtomSampleViewer
 
         float m_lightRotationAngle = 0.f; // in radian
         bool m_lightAutoRotate = true;
-        int m_lightType = 0; // 0: diectionalLight, 1: diskLight
+
+        enum class LightSelection : int
+        {
+            None,
+            Directional,
+            Spot
+        };
+        int m_lightType = static_cast<int>(LightSelection::Directional);
 
         //Assets
         AZ::Data::Asset<AZ::RPI::ModelAsset> m_planeAsset;
