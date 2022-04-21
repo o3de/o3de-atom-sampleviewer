@@ -342,14 +342,7 @@ namespace AtomSampleViewer
             customRunCode();
         }
 
-        //GridMate allocator is created in StartCommon
-        const GridMate::GridMateDesc desc;
-        GridMate::IGridMate* gridMate = GridMate::GridMateCreate(desc);
-        AZ_Assert(gridMate, "Failed to create gridmate!");
-
         app.RunMainLoop();
-
-        GridMate::GridMateDestroy(gridMate);
 
         app.Stop();
 
