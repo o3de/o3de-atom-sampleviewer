@@ -10,9 +10,6 @@
 
 #include <AzGameFramework/Application/GameApplication.h>
 
-#include <GridMate/GridMate.h>
-#include <GridMate/Session/LANSession.h>
-
 #include "MacO3DEApplication.h"
 #include <mach-o/dyld.h>
 #include <libgen.h>

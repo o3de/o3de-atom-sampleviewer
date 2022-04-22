@@ -15,7 +15,7 @@ namespace AtomSampleViewer
     {
         bool SupportsResizeClientArea()
         {
-            return false;
+            return true;
         }
 
         bool RunDiffTool(const AZStd::string& filePathA, const AZStd::string& filePathB)

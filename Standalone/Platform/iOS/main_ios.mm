@@ -10,9 +10,6 @@
 
 #include <AzGameFramework/Application/GameApplication.h>
 
-#include <GridMate/GridMate.h>
-#include <GridMate/Session/LANSession.h>
-
 #import <Foundation/Foundation.h>
 #include <UIKit/UIKit.h>
 
