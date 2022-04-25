@@ -149,10 +149,10 @@ GenerateMaterialScreenshot('Level L', '100_UvTiling_Parallax_B', { uniqueSuffix=
 GenerateMaterialScreenshot('Level H', '100_UvTiling_Roughness')
 GenerateMaterialScreenshot('Level F', '100_UvTiling_SpecularF0')
 
-GenerateMaterialScreenshot('Level E', '101_DetailMaps_BaseNoDetailMaps',        {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
+GenerateMaterialScreenshot('Level F', '101_DetailMaps_BaseNoDetailMaps',        {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
 GenerateMaterialScreenshot('Level H', '102_DetailMaps_All',                     {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
-GenerateMaterialScreenshot('Level F', '103_DetailMaps_BaseColor',               {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
-GenerateMaterialScreenshot('Level F', '103_DetailMaps_BaseColorWithMask',       {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
+GenerateMaterialScreenshot('Level G', '103_DetailMaps_BaseColor',               {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
+GenerateMaterialScreenshot('Level G', '103_DetailMaps_BaseColorWithMask',       {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
 GenerateMaterialScreenshot('Level H', '104_DetailMaps_Normal',                  {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
 GenerateMaterialScreenshot('Level H', '104_DetailMaps_NormalWithMask',          {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
 GenerateMaterialScreenshot('Level H', '105_DetailMaps_BlendMaskUsingDetailUVs', {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
