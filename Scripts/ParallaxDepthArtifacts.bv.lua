@@ -15,7 +15,7 @@ Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 OpenSample('Features/Parallax')
 ResizeViewport(512, 512)
 
--- Several times there have bugs that appeared, related to inconsistent depth calculations causing unwanted clipping of pixels on parallax surfaces.
+-- There have been several bugs related to inconsistent depth calculations causing unwanted clipping of pixels on parallax surfaces.
 -- We attempt to detect this by putting the camera at several angles that have been observed to reveal these artifacts in the past.
 -- All lights are turned off to avoid the sensitive platform differences we are used to seeing on parallax materials, which allows us to use a much
 -- tighter tolerance level than other parallax test cases, so that even small amounts of artifacts will be detected and fail the test. These 
