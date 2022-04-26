@@ -77,11 +77,6 @@ namespace AtomSampleViewer
         skyboxFeatureProcessor->SetSkyboxMode(AZ::Render::SkyBoxMode::Cubemap);
         skyboxFeatureProcessor->Enable(true);
 
-        // We don't necessarily need an entity but PostProcessFeatureProcessorInterface needs an ID to retrieve ExposureControlSettingsInterface.
-        AzFramework::EntityContextRequestBus::EventResult(m_postProcessEntity, m_entityContextId, &AzFramework::EntityContextRequestBus::Events::CreateEntity, "postProcessEntity");
-        AZ_Assert(m_postProcessEntity != nullptr, "Failed to create post process entity.");
-        m_postProcessEntity->Activate();
-
         if (loadDefaultLightingPresets)
         {
             AZStd::list<AZ::Data::AssetInfo> lightingAssetInfoList;
@@ -114,7 +109,6 @@ namespace AtomSampleViewer
         }
 
         AZ::TransformNotificationBus::MultiHandler::BusConnect(m_cameraEntityId);
-        AZ::EntityBus::MultiHandler::BusConnect(m_postProcessEntity->GetId());
     }
 
     void CommonSampleComponentBase::ShutdownLightingPresets()
@@ -128,12 +122,10 @@ namespace AtomSampleViewer
         }
         m_lightHandles.clear();
 
-        ClearLightingPresets();
+        AZ::Render::PostProcessFeatureProcessorInterface* postProcessFeatureProcessor = AZ::RPI::Scene::GetFeatureProcessorForEntityContextId<AZ::Render::PostProcessFeatureProcessorInterface>(m_entityContextId);
+        postProcessFeatureProcessor->RemoveSettingsInterface(GetEntityId());
 
-        if (m_postProcessEntity)
-        {
-            DestroyEntity(m_postProcessEntity, GetEntityContextId());
-        }
+        ClearLightingPresets();
 
         skyboxFeatureProcessor->Enable(false);
 
@@ -247,7 +239,7 @@ namespace AtomSampleViewer
         AZ::Render::ImageBasedLightFeatureProcessorInterface* iblFeatureProcessor = AZ::RPI::Scene::GetFeatureProcessorForEntityContextId<AZ::Render::ImageBasedLightFeatureProcessorInterface>(m_entityContextId);
         AZ::Render::DirectionalLightFeatureProcessorInterface* directionalLightFeatureProcessor = AZ::RPI::Scene::GetFeatureProcessorForEntityContextId<AZ::Render::DirectionalLightFeatureProcessorInterface>(m_entityContextId);
 
-        AZ::Render::ExposureControlSettingsInterface* exposureControlSettingInterface = postProcessFeatureProcessor->GetOrCreateSettingsInterface(m_postProcessEntity->GetId())->GetOrCreateExposureControlSettingsInterface();
+        AZ::Render::ExposureControlSettingsInterface* exposureControlSettingInterface = postProcessFeatureProcessor->GetOrCreateSettingsInterface(GetEntityId())->GetOrCreateExposureControlSettingsInterface();
 
         Camera::Configuration cameraConfig;
         Camera::CameraRequestBus::EventResult(cameraConfig, m_cameraEntityId, &Camera::CameraRequestBus::Events::GetCameraConfiguration);
@@ -277,14 +269,6 @@ namespace AtomSampleViewer
             {
                 directionalLightFeatureProcessor->SetCameraTransform(handle, transform);
             }
-        }
-    }
-
-    void CommonSampleComponentBase::OnLightingPresetEntityShutdown(const AZ::EntityId& entityId)
-    {
-        if (m_postProcessEntity && m_postProcessEntity->GetId() == entityId)
-        {
-            m_postProcessEntity = nullptr;
         }
     }
 
