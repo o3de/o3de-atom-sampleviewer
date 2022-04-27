@@ -858,7 +858,6 @@ namespace AtomSampleViewer
                 if (ImGui::MenuItem("Exit", "Ctrl-Q"))
                 {
                     RequestExit();
-                    return;
                 }
                 if (ImGui::MenuItem("Capture Frame...", "Ctrl-P"))
                 {
