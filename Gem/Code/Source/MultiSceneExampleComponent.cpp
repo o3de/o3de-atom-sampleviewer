@@ -263,8 +263,8 @@ namespace AtomSampleViewer
         {
             const Vector3 probePosition{ -5.0f, 0.0f, 1.5f };
             const Transform probeTransform = Transform::CreateTranslation(probePosition);
-            m_reflectionProbeHandle = m_reflectionProbeFeatureProcessor->AddProbe(probeTransform, true);
-            m_reflectionProbeFeatureProcessor->ShowProbeVisualization(m_reflectionProbeHandle, true);
+            m_reflectionProbeHandle = m_reflectionProbeFeatureProcessor->AddReflectionProbe(probeTransform, true);
+            m_reflectionProbeFeatureProcessor->ShowVisualization(m_reflectionProbeHandle, true);
         }
 
         // Enable Depth of Field
@@ -311,7 +311,7 @@ namespace AtomSampleViewer
         m_directionalLightFeatureProcessor->ReleaseLight(m_directionalLightHandle);
 
         // Release the probe
-        m_reflectionProbeFeatureProcessor->RemoveProbe(m_reflectionProbeHandle);
+        m_reflectionProbeFeatureProcessor->RemoveReflectionProbe(m_reflectionProbeHandle);
         m_reflectionProbeHandle = nullptr;
 
         // Release all meshes
