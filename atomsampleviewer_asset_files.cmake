@@ -28,6 +28,7 @@ set(FILES
     Scripts/AreaLightTest.bv.lua
     Scripts/CheckerboardTest.bv.lua
     Scripts/CullingAndLod.bv.lua
+    Scripts/EyeMaterialTest.bv.lua
     Scripts/Decals.bv.lua
     Scripts/DiffuseGITest.bv.lua
     Scripts/DynamicDraw.bv.lua
