@@ -52,6 +52,11 @@ namespace AtomSampleViewer
         TickBus::Handler::BusConnect();
         m_imguiSidebar.Activate();
         InitMaterialConfigs();
+        
+        // This was the original max before some changes that increased ENTITY_LATTEST_TEST_COMPONENT_MAX to 100.
+        // DynamicMaterialTest was crashing (out of descriptors) at 50x50x9 so we put the limit back to 25^3 until that's addressed.
+        Base::SetLatticeMaxDimension(25);
+
         Base::Activate();
 
         m_currentTime = 0.0f;

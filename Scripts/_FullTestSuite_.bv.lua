@@ -55,6 +55,7 @@ tests= {
     RunScriptWrapper('scripts/transparenttest.bv.luac'),
     RunScriptWrapper('scripts/streamingimagetest.bv.luac'),
     RunScriptWrapper('scripts/parallaxtest.bv.luac'),
+    RunScriptWrapper('scripts/parallaxdepthartifacts.bv.luac'),
     RunScriptWrapper('scripts/checkerboardtest.bv.luac'),
     RunScriptWrapper('scripts/scenereloadsoaktest.bv.luac'),
     RunScriptWrapper('scripts/diffusegitest.bv.luac'),
