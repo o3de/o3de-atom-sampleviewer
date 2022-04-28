@@ -180,6 +180,9 @@ namespace AtomSampleViewer
         // Create the BufferPol
         void CreateBufferPool();
 
+        //Recreate objects
+        void Recreate();
+        
         // ImGui sidebar
         ImGuiSidebar m_imguiSidebar;
 
@@ -216,9 +219,6 @@ namespace AtomSampleViewer
         // Image array holding all of the StreamImages
         AZStd::vector<AZ::Data::Instance<AZ::RPI::StreamingImage>> m_images;
 
-        // Array of indices used to retrieve image views from the bindless heap
-        AZStd::vector<uint32_t> m_imageIndices;
-
         // Light direction handle
         FloatBufferHandle m_lightDirectionHandle;
 
@@ -244,6 +244,9 @@ namespace AtomSampleViewer
         // Indirection buffer holding uint indices of texture resources
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_indirectionBuffer = nullptr;
 
+        // View associated with the indirection buffer
+        AZ::RHI::Ptr<AZ::RHI::BufferView> m_indirectionBufferView = nullptr;
+        
         // Pool size in bytes, 1MB
         static constexpr uint32_t m_poolSizeInBytes = 1u << 20u;
 
