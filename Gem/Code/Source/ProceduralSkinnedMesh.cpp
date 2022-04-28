@@ -21,6 +21,7 @@ namespace AtomSampleViewer
         m_vertexCount = m_segmentCount * m_verticesPerSegment;
         m_boneCount = AZ::GetMax(1u, static_cast<uint32_t>(skinnedMeshConfig.m_boneCount));
         m_influencesPerVertex = AZ::GetMax(0u, AZ::GetMin(static_cast<uint32_t>(skinnedMeshConfig.m_influencesPerVertex), AZ::GetMin(m_boneCount, maxInfluencesPerVertex)));
+        m_subMeshCount = skinnedMeshConfig.m_subMeshCount;
 
         // For now, use a conservative AABB. A better AABB will be added with ATOM-3624
         m_aabb.AddPoint(AZ::Vector3(-m_height - m_radius, -m_height - m_radius, -m_height - m_radius));
@@ -85,6 +86,22 @@ namespace AtomSampleViewer
         }
     }
 
+    uint32_t ProceduralSkinnedMesh::GetInfluencesPerVertex() const
+    {
+        return m_influencesPerVertex;
+    }
+
+    uint32_t ProceduralSkinnedMesh::GetSubMeshCount() const
+    {
+        return m_subMeshCount;
+    }
+
+    float ProceduralSkinnedMesh::GetSubMeshYOffset() const
+    {
+        constexpr float spaceBetweenSubmeshes = .01f;
+        return m_radius * 2.0f + spaceBetweenSubmeshes;
+    }
+
     void ProceduralSkinnedMesh::CalculateVertexBuffers()
     {
         // There are 6 indices per-side, and one fewer side than vertices per side since the first/last vertex in the segment have the same position (but different uvs)
@@ -117,8 +134,9 @@ namespace AtomSampleViewer
         m_normals.resize(m_vertexCount);
         m_tangents.resize(m_vertexCount);
         m_bitangents.resize(m_vertexCount);
-        m_blendIndices.resize(m_vertexCount);
-        m_blendWeights.resize(m_vertexCount);
+        // We pack 16 bit joint id's into 32 bit uints, so use half the number of joints for the uint count
+        m_blendIndices.resize(m_vertexCount * m_influencesPerVertex / 2);
+        m_blendWeights.resize(m_vertexCount * m_influencesPerVertex);
         m_uvs.resize(m_vertexCount);
 
         for (uint32_t vertexIndex = 0; vertexIndex < m_vertexCount; ++vertexIndex)
@@ -143,9 +161,31 @@ namespace AtomSampleViewer
             m_bitangents[vertexIndex][1] = 0.0f;
             m_bitangents[vertexIndex][2] = -1.0f;
 
-            // Blend indices/weights are the same for each vertex in the segment
-            m_blendIndices[vertexIndex] = m_segmentBlendIndices[segmentIndex];
-            m_blendWeights[vertexIndex] = m_segmentBlendWeights[segmentIndex];
+            for (size_t i = 0; i < m_influencesPerVertex; ++i)
+            {
+                // m_blendIndices has two id's packed into a single uint32
+                size_t packedIndex = vertexIndex * m_influencesPerVertex / 2 + i / 2;
+                // m_blendWeights has an individual weight per influence
+                size_t unpackedIndex = vertexIndex * m_influencesPerVertex + i;
+                // Blend indices/weights are the same for each vertex in the segment,
+                // so copy the source data from the segment. Both id's and weights are unpacked
+                size_t sourceIndex = segmentIndex * m_influencesPerVertex + i;
+                
+                // Pack the segment blend indices, two per 32-bit uint
+                if (i % 2 == 0)
+                {
+                    // Put the first/even ids in the most significant bits
+                    m_blendIndices[packedIndex] = m_segmentBlendIndices[sourceIndex] << 16;
+                }
+                else
+                {
+                    // Put the next/odd ids in the least significant bits
+                    m_blendIndices[packedIndex] |= m_segmentBlendIndices[sourceIndex];
+                }
+
+                // Copy the weights
+                m_blendWeights[unpackedIndex] = m_segmentBlendWeights[sourceIndex];
+            }
 
             // The uvs wrap around the cylinder exactly once
             m_uvs[vertexIndex][0] = static_cast<float>(indexWithinTheCurrentSegment) / static_cast<float>(m_verticesPerSegment - 1);
@@ -182,9 +222,10 @@ namespace AtomSampleViewer
     void ProceduralSkinnedMesh::CalculateSegments()
     {
         m_segmentHeights.resize(m_segmentCount);
-        m_segmentBlendIndices.resize(m_segmentCount);
-        m_segmentBlendWeights.resize(m_segmentCount);
         m_segmentHeightOffsets.resize(m_segmentCount);
+        // All vertices in a given segment will share the same skin influences
+        m_segmentBlendIndices.resize(m_segmentCount * m_influencesPerVertex);
+        m_segmentBlendWeights.resize(m_segmentCount * m_influencesPerVertex);
 
         for (uint32_t segmentIndex = 0; segmentIndex < m_segmentCount; ++segmentIndex)
         {
@@ -285,8 +326,14 @@ namespace AtomSampleViewer
                 }
             }
 
-            m_segmentBlendIndices[segmentIndex] = currentBlendIndices;
-            m_segmentBlendWeights[segmentIndex] = currentBlendWeights;
+            // Now copy the resulting influences into the larger buffer
+            for (size_t i = 0; i < m_influencesPerVertex; ++i)
+            {
+                size_t destinationIndex = segmentIndex * m_influencesPerVertex + i;
+                m_segmentBlendIndices[destinationIndex] = currentBlendIndices[i];
+                m_segmentBlendWeights[destinationIndex] = currentBlendWeights[i];
+            }
+
             m_segmentHeightOffsets[segmentIndex] = currentSegmentHeight - heightOffset;
         }
     }

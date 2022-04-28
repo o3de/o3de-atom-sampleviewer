@@ -28,6 +28,7 @@ set(FILES
     Scripts/AreaLightTest.bv.lua
     Scripts/CheckerboardTest.bv.lua
     Scripts/CullingAndLod.bv.lua
+    Scripts/EyeMaterialTest.bv.lua
     Scripts/Decals.bv.lua
     Scripts/DiffuseGITest.bv.lua
     Scripts/DynamicDraw.bv.lua
@@ -45,7 +46,6 @@ set(FILES
     Scripts/ShadowTest.bv.lua
     Scripts/StreamingImageTest.bv.lua
     Scripts/TransparentTest.bv.lua
-    Scripts/_AutomatedReviewWARPTestSuite_.bv.lua
     Scripts/_FullTestSuite_.bv.lua
     Shaders/DebugVertexNormals.azsl
     Shaders/DebugVertexNormals.materialtype
