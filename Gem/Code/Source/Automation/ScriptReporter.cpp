@@ -6,6 +6,7 @@
  *
  */
 
+#include <sstream>
 #include <Automation/ScriptReporter.h>
 #include <Utils/Utils.h>
 #include <Atom/RHI/Factory.h>
@@ -147,9 +148,11 @@ namespace AtomSampleViewer
     void ScriptReporter::Reset()
     {
         m_scriptReports.clear();
+        m_descendingThresholdReports.clear();
         m_currentScriptIndexStack.clear();
         m_invalidationMessage.clear();
-        m_uniqueTimestamp = GenerateTimestamp();     
+        m_uniqueTimestamp = GenerateTimestamp();
+
     }
 
     void ScriptReporter::SetInvalidationMessage(const AZStd::string& message)
@@ -419,255 +422,144 @@ namespace AtomSampleViewer
             ImGui::Combo("Display", &displayOption, DiplayOptions, AZ_ARRAY_SIZE(DiplayOptions));
             m_displayOption = (DisplayOption)displayOption;
 
+            ImGui::Checkbox("Show Script Reports Sorted By Threshold", &m_showReportsSortedByThreshold);
             ImGui::Checkbox("Force Show 'Update' Buttons", &m_forceShowUpdateButtons);
             ImGui::Checkbox("Force Show 'Export Png Diff' Buttons", &m_forceShowExportPngDiffButtons);
 
-            bool showWarnings = (m_displayOption == DisplayOption::AllResults) || (m_displayOption == DisplayOption::WarningsAndErrors);
-            bool showAll = (m_displayOption == DisplayOption::AllResults);
+            m_showWarnings = (m_displayOption == DisplayOption::AllResults) || (m_displayOption == DisplayOption::WarningsAndErrors);
+            m_showAll = (m_displayOption == DisplayOption::AllResults);
 
             ImGui::Separator();
 
-            const ImGuiTreeNodeFlags FlagDefaultOpen = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_DefaultOpen;
-            const ImGuiTreeNodeFlags FlagDefaultClosed = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
-
-            for (ScriptReport& scriptReport : m_scriptReports)
+            if (!m_showReportsSortedByThreshold)
             {
-                const bool scriptPassed = scriptReport.m_assertCount == 0 && scriptReport.m_generalErrorCount == 0 && scriptReport.m_screenshotErrorCount == 0;
-                const bool scriptHasWarnings = scriptReport.m_generalWarningCount > 0 || scriptReport.m_screenshotWarningCount > 0;
-
-                // Skip if tests passed without warnings and we don't want to show successes
-                bool skipReport = (scriptPassed && !scriptHasWarnings && !showAll);
-
-                // Skip if we only have warnings only and we don't want to show warnings
-                skipReport = skipReport || (scriptPassed && scriptHasWarnings && !showWarnings);
-
-                if (skipReport)
+                for (ScriptReport& scriptReport : m_scriptReports)
                 {
-                    continue;
-                }
+                    const bool scriptPassed = scriptReport.m_assertCount == 0 && scriptReport.m_generalErrorCount == 0 && scriptReport.m_screenshotErrorCount == 0;
+                    const bool scriptHasWarnings = scriptReport.m_generalWarningCount > 0 || scriptReport.m_screenshotWarningCount > 0;
 
-                ImGuiTreeNodeFlags scriptNodeFlag = scriptPassed ? FlagDefaultClosed : FlagDefaultOpen;
+                    // Skip if tests passed and
+                    //         1). have no warnings and we don't want to show successes OR
+                    //         2). only have warnings and we don't want to show warnings
+                    bool skipReport = scriptPassed && ((!scriptHasWarnings && !m_showAll) || (scriptHasWarnings && !m_showWarnings));
 
-                AZStd::string header = AZStd::string::format("%s %s",
-                    scriptPassed ? "PASSED" : "FAILED",
-                    scriptReport.m_scriptAssetPath.c_str()
-                );
-
-                HighlightTextFailedOrWarning(!scriptPassed, scriptHasWarnings);
-
-                if (ImGui::TreeNodeEx(&scriptReport, scriptNodeFlag, "%s", header.c_str()))
-                {
-                    ResetTextHighlight();
-
-                    // Number of Asserts
-                    HighlightTextIf(scriptReport.m_assertCount > 0, m_highlightSettings.m_highlightFailed);
-                    if (showAll || scriptReport.m_assertCount > 0)
+                    if (skipReport)
                     {
-                        ImGui::Text("Asserts:  %u %s", scriptReport.m_assertCount, SeeConsole(scriptReport.m_assertCount, "Trace::Assert").c_str());
+                        continue;
                     }
 
-                    // Number of Errors
-                    HighlightTextIf(scriptReport.m_generalErrorCount > 0, m_highlightSettings.m_highlightFailed);
-                    if (showAll || scriptReport.m_generalErrorCount > 0)
+                    ImGuiTreeNodeFlags scriptNodeFlag = scriptPassed ? FlagDefaultClosed : FlagDefaultOpen;
+
+                    AZStd::string header = AZStd::string::format("%s %s",
+                        scriptPassed ? "PASSED" : "FAILED",
+                        scriptReport.m_scriptAssetPath.c_str()
+                    );
+
+                    HighlightTextFailedOrWarning(!scriptPassed, scriptHasWarnings);
+
+                    if (ImGui::TreeNodeEx(&scriptReport, scriptNodeFlag, "%s", header.c_str()))
                     {
-                        ImGui::Text("Errors:   %u %s", scriptReport.m_generalErrorCount, SeeConsole(scriptReport.m_generalErrorCount, "Trace::Error").c_str());
-                    }
+                        ResetTextHighlight();
 
-                    // Number of Warnings
-                    HighlightTextIf(scriptReport.m_generalWarningCount > 0, m_highlightSettings.m_highlightWarning);
-                    if (showAll || (showWarnings && scriptReport.m_generalWarningCount > 0))
-                    {
-                        ImGui::Text("Warnings: %u %s", scriptReport.m_generalWarningCount, SeeConsole(scriptReport.m_generalWarningCount, "Trace::Warning").c_str());
-                    }
-
-                    ResetTextHighlight();
-
-                    // Number of screenshots
-                    if (showAll || scriptReport.m_screenshotErrorCount > 0 || (showWarnings && scriptReport.m_screenshotWarningCount > 0))
-                    {
-                        ImGui::Text("Screenshot Test Count: %zu", scriptReport.m_screenshotTests.size());
-                    }
-
-                    // Number of screenshot failures
-                    HighlightTextIf(scriptReport.m_screenshotErrorCount > 0, m_highlightSettings.m_highlightFailed);
-                    if (showAll || scriptReport.m_screenshotErrorCount > 0)
-                    {
-                        ImGui::Text("Screenshot Tests Failed: %u %s", scriptReport.m_screenshotErrorCount, SeeBelow(scriptReport.m_screenshotErrorCount).c_str());
-                    }
-
-                    // Number of screenshot warnings
-                    HighlightTextIf(scriptReport.m_screenshotWarningCount > 0, m_highlightSettings.m_highlightWarning);
-                    if (showAll || (showWarnings && scriptReport.m_screenshotWarningCount > 0))
-                    {
-                        ImGui::Text("Screenshot Warnings:     %u %s", scriptReport.m_screenshotWarningCount, SeeBelow(scriptReport.m_screenshotWarningCount).c_str());
-                    }
-
-                    ResetTextHighlight();
-
-                    for (ScreenshotTestInfo& screenshotResult : scriptReport.m_screenshotTests)
-                    {
-                        const bool screenshotPassed = screenshotResult.m_officialComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::Pass;
-                        const bool localBaselineWarning = screenshotResult.m_localComparisonResult.m_resultCode != ImageComparisonResult::ResultCode::Pass;
-
-                        // Skip if tests passed without warnings and we don't want to show successes
-                        bool skipScreenshot = (screenshotPassed && !localBaselineWarning && !showAll);
-
-                        // Skip if we only have warnings only and we don't want to show warnings
-                        skipScreenshot = skipScreenshot || (screenshotPassed && localBaselineWarning && !showWarnings);
-
-                        if (skipScreenshot)
+                        // Number of Asserts
+                        HighlightTextIf(scriptReport.m_assertCount > 0, m_highlightSettings.m_highlightFailed);
+                        if (m_showAll || scriptReport.m_assertCount > 0)
                         {
-                            continue;
+                            ImGui::Text("Asserts:  %u %s", scriptReport.m_assertCount, SeeConsole(scriptReport.m_assertCount, "Trace::Assert").c_str());
                         }
 
-                        AZStd::string fileName;
-                        AzFramework::StringFunc::Path::GetFullFileName(screenshotResult.m_screenshotFilePath.c_str(), fileName);
-
-                        AZStd::string headerSummary;
-                        if (!screenshotPassed)
+                        // Number of Errors
+                        HighlightTextIf(scriptReport.m_generalErrorCount > 0, m_highlightSettings.m_highlightFailed);
+                        if (m_showAll || scriptReport.m_generalErrorCount > 0)
                         {
-                            headerSummary = "(" + screenshotResult.m_officialComparisonResult.GetSummaryString() + ") ";
-                        }
-                        if (localBaselineWarning)
-                        {
-                            headerSummary += "(Local Baseline Warning)";
+                            ImGui::Text("Errors:   %u %s", scriptReport.m_generalErrorCount, SeeConsole(scriptReport.m_generalErrorCount, "Trace::Error").c_str());
                         }
 
-                        ImGuiTreeNodeFlags screenshotNodeFlag = FlagDefaultClosed;
-                        AZStd::string screenshotHeader = AZStd::string::format("%s %s %s", screenshotPassed ? "PASSED" : "FAILED", fileName.c_str(), headerSummary.c_str());
-
-                        HighlightTextFailedOrWarning(!screenshotPassed, localBaselineWarning);
-                        if (ImGui::TreeNodeEx(&screenshotResult, screenshotNodeFlag, "%s", screenshotHeader.c_str()))
+                        // Number of Warnings
+                        HighlightTextIf(scriptReport.m_generalWarningCount > 0, m_highlightSettings.m_highlightWarning);
+                        if (m_showAll || (m_showWarnings && scriptReport.m_generalWarningCount > 0))
                         {
-                            ResetTextHighlight();
+                            ImGui::Text("Warnings: %u %s", scriptReport.m_generalWarningCount, SeeConsole(scriptReport.m_generalWarningCount, "Trace::Warning").c_str());
+                        }
 
-                            ImGui::Text("Screenshot:        %s", screenshotResult.m_screenshotFilePath.c_str());
+                        ResetTextHighlight();
 
-                            ImGui::Spacing();
+                        // Number of screenshots
+                        if (m_showAll || scriptReport.m_screenshotErrorCount > 0 || (m_showWarnings && scriptReport.m_screenshotWarningCount > 0))
+                        {
+                            ImGui::Text("Screenshot Test Count: %zu", scriptReport.m_screenshotTests.size());
+                        }
 
-                            HighlightTextIf(!screenshotPassed, m_highlightSettings.m_highlightFailed);
+                        // Number of screenshot failures
+                        HighlightTextIf(scriptReport.m_screenshotErrorCount > 0, m_highlightSettings.m_highlightFailed);
+                        if (m_showAll || scriptReport.m_screenshotErrorCount > 0)
+                        {
+                            ImGui::Text("Screenshot Tests Failed: %u %s", scriptReport.m_screenshotErrorCount, SeeBelow(scriptReport.m_screenshotErrorCount).c_str());
+                        }
 
-                            ImGui::Text("Official Baseline: %s", screenshotResult.m_officialBaselineScreenshotFilePath.c_str());
+                        // Number of screenshot warnings
+                        HighlightTextIf(scriptReport.m_screenshotWarningCount > 0, m_highlightSettings.m_highlightWarning);
+                        if (m_showAll || (m_showWarnings && scriptReport.m_screenshotWarningCount > 0))
+                        {
+                            ImGui::Text("Screenshot Warnings:     %u %s", scriptReport.m_screenshotWarningCount, SeeBelow(scriptReport.m_screenshotWarningCount).c_str());
+                        }
 
-                            // Official Baseline Result
-                            ImGui::Indent();
+                        ResetTextHighlight();
+
+                        for (ScreenshotTestInfo& screenshotResult : scriptReport.m_screenshotTests)
+                        {
+                            const bool screenshotPassed = screenshotResult.m_officialComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::Pass;
+                            const bool localBaselineWarning = screenshotResult.m_localComparisonResult.m_resultCode != ImageComparisonResult::ResultCode::Pass;
+
+                            AZStd::string fileName;
+                            AzFramework::StringFunc::Path::GetFullFileName(screenshotResult.m_screenshotFilePath.c_str(), fileName);
+
+                            std::stringstream headerSummary;
+                            if (!screenshotPassed)
                             {
-                                ImGui::Text("%s", screenshotResult.m_officialComparisonResult.GetSummaryString().c_str());
-
-                                if (screenshotResult.m_officialComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::ThresholdExceeded ||
-                                    screenshotResult.m_officialComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::Pass)
-                                {
-                                    ImGui::Text("Used Tolerance: %s", screenshotResult.m_toleranceLevel.ToString().c_str());
-
-                                    const ImageComparisonToleranceLevel* suggestedTolerance = ScriptReporter::FindBestToleranceLevel(
-                                        screenshotResult.m_officialComparisonResult.m_finalDiffScore,
-                                        screenshotResult.m_toleranceLevel.m_filterImperceptibleDiffs);
-
-                                    if(suggestedTolerance)
-                                    {
-                                        ImGui::Text("Suggested Tolerance: %s", suggestedTolerance->ToString().c_str());
-                                    }
-
-                                    if (screenshotResult.m_toleranceLevel.m_filterImperceptibleDiffs)
-                                    {
-                                        // This gives an idea of what the tolerance level would be if the imperceptible diffs were not filtered out.
-                                        const ImageComparisonToleranceLevel* unfilteredTolerance = ScriptReporter::FindBestToleranceLevel(
-                                            screenshotResult.m_officialComparisonResult.m_standardDiffScore, false);
-
-                                        ImGui::Text("(Unfiltered Diff Score: %f%s)",
-                                            screenshotResult.m_officialComparisonResult.m_standardDiffScore,
-                                            unfilteredTolerance ? AZStd::string::format(" ~ '%s'", unfilteredTolerance->m_name.c_str()).c_str() : "");
-                                    }
-                                }
-
-                                ResetTextHighlight();
-
-                                ImGui::PushID("Official");
-                                ShowDiffButton("View Diff", screenshotResult.m_officialBaselineScreenshotFilePath, screenshotResult.m_screenshotFilePath);
-                                ImGui::PopID();
-
-                                if ((m_forceShowExportPngDiffButtons || screenshotResult.m_officialComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::ThresholdExceeded) && ImGui::Button("Export Png Diff"))
-                                {
-                                    const AZStd::string imageDiffPath = GenerateAndCreateExportedImageDiffPath(scriptReport, screenshotResult);
-                                    ExportImageDiff(imageDiffPath.c_str(), screenshotResult);
-                                    m_messageBox.OpenPopupMessage("Image Diff Exported Successfully", AZStd::string::format("The image diff file was saved in %s", imageDiffPath.c_str()).c_str());
-                                }
-
-                                if ((!screenshotPassed || m_forceShowUpdateButtons) && ImGui::Button("Update##Official"))
-                                {
-                                    if (screenshotResult.m_localComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::FileNotFound)
-                                    {
-                                        UpdateSourceBaselineImage(screenshotResult, true);
-                                    }
-                                    else
-                                    {
-                                        m_messageBox.OpenPopupConfirmation(
-                                            "Update Official Baseline Image",
-                                            "This will replace the official baseline image \n"
-                                            "with the image captured during this test run. \n"
-                                            "Are you sure?",
-                                            // It's important to bind screenshotResult by reference because UpdateOfficialBaselineImage will update it
-                                            [this, &screenshotResult]() {
-                                                UpdateSourceBaselineImage(screenshotResult, true);
-                                            });
-                                    }
-                                }
+                                headerSummary << "(" << screenshotResult.m_officialComparisonResult.GetSummaryString().c_str() << ") ";
                             }
-                            ImGui::Unindent();
-
-                            ImGui::Spacing();
-
-                            HighlightTextIf(localBaselineWarning, m_highlightSettings.m_highlightWarning);
-
-                            ImGui::Text("Local Baseline:    %s", screenshotResult.m_localBaselineScreenshotFilePath.c_str());
-
-                            // Local Baseline Result
-                            ImGui::Indent();
+                            if (localBaselineWarning)
                             {
-                                ImGui::Text("%s", screenshotResult.m_localComparisonResult.GetSummaryString().c_str());
-
-                                ResetTextHighlight();
-
-                                ImGui::PushID("Local");
-                                ShowDiffButton("View Diff", screenshotResult.m_localBaselineScreenshotFilePath, screenshotResult.m_screenshotFilePath);
-                                ImGui::PopID();
-
-                                if ((localBaselineWarning || m_forceShowUpdateButtons) && ImGui::Button("Update##Local"))
-                                {
-                                    if (screenshotResult.m_localComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::FileNotFound)
-                                    {
-                                        UpdateLocalBaselineImage(screenshotResult, true);
-                                    }
-                                    else
-                                    {
-                                        m_messageBox.OpenPopupConfirmation(
-                                            "Update Local Baseline Image",
-                                            "This will replace the local baseline image \n"
-                                            "with the image captured during this test run. \n"
-                                            "Are you sure?",
-                                            // It's important to bind screenshotResult by reference because UpdateLocalBaselineImage will update it
-                                            [this, &screenshotResult]() {
-                                                UpdateLocalBaselineImage(screenshotResult, true);
-                                            });
-                                    }
-                                }
+                                headerSummary << "(Local Baseline Warning)";
                             }
-                            ImGui::Unindent();
 
-                            ImGui::Spacing();
+                            AZStd::string screenshotHeader = AZStd::string::format("%s %s %s",
+                                screenshotPassed ? "PASSED" : "FAILED",
+                                fileName.c_str(),
+                                headerSummary.str().c_str());
 
-                            ResetTextHighlight();
-
-                            ImGui::TreePop();
+                            ShowScreenshotTestInfoTreeNode(screenshotHeader, scriptReport, screenshotResult);
                         }
+
+                        ImGui::TreePop();
                     }
 
-                    ImGui::TreePop();
+                    ResetTextHighlight();
                 }
-
-                ResetTextHighlight();
             }
+            else
+            {
+                for (const auto& [threshold, reportIndex] : m_descendingThresholdReports)
+                {
+                    ScriptReport& scriptReport = m_scriptReports[reportIndex.first];
+                    ScreenshotTestInfo& screenshotResult = scriptReport.m_screenshotTests[reportIndex.second];
 
+                    const bool screenshotPassed = screenshotResult.m_officialComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::Pass;
+
+                    AZStd::string fileName;
+                    AzFramework::StringFunc::Path::GetFullFileName(screenshotResult.m_screenshotFilePath.c_str(), fileName);
+
+                    AZStd::string header = AZStd::string::format("%s %s %s '%s' %f",
+                        screenshotPassed ? "PASSED" : "FAILED",
+                        scriptReport.m_scriptAssetPath.c_str(),
+                        fileName.c_str(),
+                        screenshotResult.m_toleranceLevel.m_name.c_str(),
+                        screenshotResult.m_officialComparisonResult.m_finalDiffScore);
+
+                    ShowScreenshotTestInfoTreeNode(header, scriptReport, screenshotResult);
+                }
+            }
             ResetTextHighlight();
 
             // Repeat the m_invalidationMessage at the bottom as well, to make sure the user doesn't miss it.
@@ -683,6 +575,154 @@ namespace AtomSampleViewer
         m_messageBox.TickPopup();
 
         ImGui::End();
+    }
+
+    void ScriptReporter::ShowScreenshotTestInfoTreeNode(const AZStd::string& header,  ScriptReport& scriptReport, ScreenshotTestInfo& screenshotResult)
+    {
+        const bool screenshotPassed = screenshotResult.m_officialComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::Pass;
+        const bool localBaselineWarning = screenshotResult.m_localComparisonResult.m_resultCode != ImageComparisonResult::ResultCode::Pass;
+
+        // Skip if tests passed without warnings and we don't want to show successes
+        bool skipScreenshot = (screenshotPassed && !localBaselineWarning && !m_showAll);
+
+        // Skip if we only have warnings only and we don't want to show warnings
+        skipScreenshot = skipScreenshot || (screenshotPassed && localBaselineWarning && !m_showWarnings);
+
+        if (skipScreenshot)
+        {
+            return;
+        }
+        ImGuiTreeNodeFlags screenshotNodeFlag = FlagDefaultClosed;
+        HighlightTextFailedOrWarning(!screenshotPassed, localBaselineWarning);
+        if (ImGui::TreeNodeEx(&screenshotResult, screenshotNodeFlag, "%s", header.c_str()))
+        {
+            ResetTextHighlight();
+
+            ImGui::Text("Screenshot:        %s", screenshotResult.m_screenshotFilePath.c_str());
+
+            ImGui::Spacing();
+
+            HighlightTextIf(!screenshotPassed, m_highlightSettings.m_highlightFailed);
+
+            ImGui::Text("Official Baseline: %s", screenshotResult.m_officialBaselineScreenshotFilePath.c_str());
+
+            // Official Baseline Result
+            ImGui::Indent();
+            {
+                ImGui::Text("%s", screenshotResult.m_officialComparisonResult.GetSummaryString().c_str());
+
+                if (screenshotResult.m_officialComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::ThresholdExceeded ||
+                    screenshotResult.m_officialComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::Pass)
+                {
+                    ImGui::Text("Used Tolerance: %s", screenshotResult.m_toleranceLevel.ToString().c_str());
+
+                    const ImageComparisonToleranceLevel* suggestedTolerance = ScriptReporter::FindBestToleranceLevel(
+                        screenshotResult.m_officialComparisonResult.m_finalDiffScore,
+                        screenshotResult.m_toleranceLevel.m_filterImperceptibleDiffs);
+
+                    if (suggestedTolerance)
+                    {
+                        ImGui::Text("Suggested Tolerance: %s", suggestedTolerance->ToString().c_str());
+                    }
+
+                    if (screenshotResult.m_toleranceLevel.m_filterImperceptibleDiffs)
+                    {
+                        // This gives an idea of what the tolerance level would be if the imperceptible diffs were not filtered out.
+                        const ImageComparisonToleranceLevel* unfilteredTolerance =
+                            ScriptReporter::FindBestToleranceLevel(screenshotResult.m_officialComparisonResult.m_standardDiffScore, false);
+
+                        ImGui::Text(
+                            "(Unfiltered Diff Score: %f%s)", screenshotResult.m_officialComparisonResult.m_standardDiffScore,
+                            unfilteredTolerance ? AZStd::string::format(" ~ '%s'", unfilteredTolerance->m_name.c_str()).c_str() : "");
+                    }
+                }
+
+                ResetTextHighlight();
+
+                ImGui::PushID("Official");
+                ShowDiffButton("View Diff", screenshotResult.m_officialBaselineScreenshotFilePath, screenshotResult.m_screenshotFilePath);
+                ImGui::PopID();
+
+                if ((m_forceShowExportPngDiffButtons ||
+                     screenshotResult.m_officialComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::ThresholdExceeded) &&
+                    ImGui::Button("Export Png Diff"))
+                {
+                    const AZStd::string imageDiffPath = GenerateAndCreateExportedImageDiffPath(scriptReport, screenshotResult);
+                    ExportImageDiff(imageDiffPath.c_str(), screenshotResult);
+                    m_messageBox.OpenPopupMessage(
+                        "Image Diff Exported Successfully",
+                        AZStd::string::format("The image diff file was saved in %s", imageDiffPath.c_str()).c_str());
+                }
+
+                if ((!screenshotPassed || m_forceShowUpdateButtons) && ImGui::Button("Update##Official"))
+                {
+                    if (screenshotResult.m_localComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::FileNotFound)
+                    {
+                        UpdateSourceBaselineImage(screenshotResult, true);
+                    }
+                    else
+                    {
+                        m_messageBox.OpenPopupConfirmation(
+                            "Update Official Baseline Image",
+                            "This will replace the official baseline image \n"
+                            "with the image captured during this test run. \n"
+                            "Are you sure?",
+                            // It's important to bind screenshotResult by reference because UpdateOfficialBaselineImage will update it
+                            [this, &screenshotResult]()
+                            {
+                                UpdateSourceBaselineImage(screenshotResult, true);
+                            });
+                    }
+                }
+            }
+            ImGui::Unindent();
+
+            ImGui::Spacing();
+
+            HighlightTextIf(localBaselineWarning, m_highlightSettings.m_highlightWarning);
+
+            ImGui::Text("Local Baseline:    %s", screenshotResult.m_localBaselineScreenshotFilePath.c_str());
+
+            // Local Baseline Result
+            ImGui::Indent();
+            {
+                ImGui::Text("%s", screenshotResult.m_localComparisonResult.GetSummaryString().c_str());
+
+                ResetTextHighlight();
+
+                ImGui::PushID("Local");
+                ShowDiffButton("View Diff", screenshotResult.m_localBaselineScreenshotFilePath, screenshotResult.m_screenshotFilePath);
+                ImGui::PopID();
+
+                if ((localBaselineWarning || m_forceShowUpdateButtons) && ImGui::Button("Update##Local"))
+                {
+                    if (screenshotResult.m_localComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::FileNotFound)
+                    {
+                        UpdateLocalBaselineImage(screenshotResult, true);
+                    }
+                    else
+                    {
+                        m_messageBox.OpenPopupConfirmation(
+                            "Update Local Baseline Image",
+                            "This will replace the local baseline image \n"
+                            "with the image captured during this test run. \n"
+                            "Are you sure?",
+                            // It's important to bind screenshotResult by reference because UpdateLocalBaselineImage will update it
+                            [this, &screenshotResult]()
+                            {
+                                UpdateLocalBaselineImage(screenshotResult, true);
+                            });
+                    }
+                }
+            }
+            ImGui::Unindent();
+
+            ImGui::Spacing();
+
+            ResetTextHighlight();
+
+            ImGui::TreePop();
+        }
     }
 
     void ScriptReporter::OpenReportDialog()
@@ -772,6 +812,20 @@ namespace AtomSampleViewer
         {
             ImGui::PushStyleColor(ImGuiCol_Text, m_highlightSettings.m_highlightWarning);
             m_colorHasBeenSet = true;
+        }
+    }
+
+    void ScriptReporter::SortScriptReports()
+    {
+        for (size_t i = 0; i < m_scriptReports.size(); ++i)
+        {
+            const AZStd::vector<ScriptReporter::ScreenshotTestInfo>& screenshotTestInfos = m_scriptReports[i].m_screenshotTests;
+            for (size_t j = 0; j < screenshotTestInfos.size(); ++j)
+            {
+                m_descendingThresholdReports.insert(AZStd::pair<float, ReportIndex>(
+                    screenshotTestInfos[j].m_officialComparisonResult.m_finalDiffScore,
+                    ReportIndex{ i, j }));
+            }
         }
     }
 

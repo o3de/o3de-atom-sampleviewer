@@ -1,0 +1,20 @@
+{
+    "materialType": "Materials/Types/Eye.materialtype",
+    "materialTypeVersion": 1,
+    "propertyValues": {
+        "eye.innerEyeIOR": 1.2000000476837158,
+        "eye.irisDepth": 0.46000000834465027,
+        "iris.baseColor.color": [
+            0.503395140171051,
+            0.7551079392433167,
+            0.7341268062591553,
+            1.0
+        ],
+        "iris.baseColor.textureMap": "Materials/Eye/Textures/eyeIrisBW.png",
+        "iris.roughness.factor": 0.05999999865889549,
+        "sclera.baseColor.textureMap": "Materials/Eye/Textures/eyeSclera.png",
+        "sclera.normal.factor": 0.2800000011920929,
+        "sclera.normal.textureMap": "Materials/Eye/Textures/proceduralBump.png",
+        "sclera.roughness.factor": 0.17000000178813934
+    }
+}
