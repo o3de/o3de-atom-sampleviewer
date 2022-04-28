@@ -176,22 +176,15 @@ namespace AtomSampleViewer
 
             m_imguiSidebar.End();
 
-            static const auto recreate = [this]()
-            {
-                ClearObjects();
-                CreateObjects();
-            };
-
             // Recreate the objects when the quantity changed
             if (latticeChanged && enableDynamicUpdates)
             {
-                recreate();
+                Recreate();
             }
-
             // If the dynamic update is toggled
             else if (enableDynamicUpdates != previousEnableDynamicUpdates && enableDynamicUpdates == true)
             {
-                recreate();
+                Recreate();
             }
 
             if (randomizeMaterials)
@@ -199,6 +192,12 @@ namespace AtomSampleViewer
                 CreateMaterials();
             }
         }
+    }
+
+    void BindlessPrototypeExampleComponent::Recreate()
+    {
+        ClearObjects();
+        CreateObjects();
     }
 
     void BindlessPrototypeExampleComponent::CreateBufferPool()
@@ -458,33 +457,18 @@ namespace AtomSampleViewer
             [[maybe_unused]] RHI::ResultCode resultCode = m_bufferPool->InitBuffer(bufferRequest);
             AZ_Assert(resultCode == RHI::ResultCode::Success, "Failed to create Indirection Buffer");
 
-            RHI::BufferMapRequest mapRequest{ *m_indirectionBuffer, 0, bufferRequest.m_descriptor.m_byteCount };
-            RHI::BufferMapResponse mapResponse;
-            m_bufferPool->MapBuffer(mapRequest, mapResponse);
-
             // Compile the image SRG
             Data::Instance<AZ::RPI::ShaderResourceGroup> indirectionBufferSrg = m_bindlessSrg->GetSrg(m_indirectionBufferSrgName);
 
-            AZStd::vector<const RHI::ImageView*> views;
-            for (uint32_t textureIdx = 0u; textureIdx < InternalBP::ImageCount; textureIdx++)
+			for (uint32_t textureIdx = 0u; textureIdx < InternalBP::ImageCount; textureIdx++)
             {
                 AZ::Data::Instance<AZ::RPI::StreamingImage> image = LoadStreamingImage(InternalBP::Images[textureIdx], InternalBP::SampleName);
                 m_images.push_back(image);
-
-                views.push_back(image->GetImageView());
             }
 
-            auto indirectionBufferIndex = indirectionBufferSrg->FindShaderInputBufferIndex(AZ::Name{ "m_indirectionBuffer" });
             RHI::BufferViewDescriptor viewDesc =
                 RHI::BufferViewDescriptor::CreateRaw(0, aznumeric_cast<uint32_t>(bufferRequest.m_descriptor.m_byteCount));
-            auto indirectionBufferView = m_indirectionBuffer->GetBufferView(viewDesc);
-            indirectionBufferSrg->GetBindless().SetViews(
-                indirectionBufferIndex, indirectionBufferView.get(),
-                views, static_cast<uint32_t*>(mapResponse.m_data),
-                true, 0);
-
-            indirectionBufferSrg->Compile();
-            m_bufferPool->UnmapBuffer(*m_indirectionBuffer);
+            m_indirectionBufferView = m_indirectionBuffer->GetBufferView(viewDesc);
         }
 
         // Create and allocate the materials in the FloatBuffer
@@ -538,6 +522,9 @@ namespace AtomSampleViewer
 
             const auto compileFunction = [this]([[maybe_unused]] const AZ::RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
             {
+                Data::Instance<AZ::RPI::ShaderResourceGroup> indirectionBufferSrg = m_bindlessSrg->GetSrg(m_indirectionBufferSrgName);
+                indirectionBufferSrg->Compile();
+                
                 // Set the handles for the individual SRGs per sub mesh 
                 for (const ObjectInterval& objectInterval : m_objectIntervalArray)
                 {
@@ -691,6 +678,28 @@ namespace AtomSampleViewer
                                               static_cast<void *>(&m_lightDir),
                                               static_cast<uint32_t>(sizeof(Vector3)));
 
+        Data::Instance<AZ::RPI::ShaderResourceGroup> indirectionBufferSrg = m_bindlessSrg->GetSrg(m_indirectionBufferSrgName);
+
+        RHI::BufferMapRequest mapRequest{ *m_indirectionBuffer, 0, sizeof(uint32_t) * InternalBP::ImageCount };
+        RHI::BufferMapResponse mapResponse;
+        m_bufferPool->MapBuffer(mapRequest, mapResponse);
+
+        AZStd::vector<const RHI::ImageView*> views;
+        for(AZ::Data::Instance<AZ::RPI::StreamingImage> image : m_images)
+        {
+            views.push_back(image->GetImageView());
+        }
+        
+        bool readOnlyTexture = true;
+        uint32_t arrayIndex = 0;
+        auto indirectionBufferIndex = indirectionBufferSrg->FindShaderInputBufferIndex(AZ::Name{ "m_indirectionBuffer" });
+        indirectionBufferSrg->SetBindlessViews(
+            indirectionBufferIndex, m_indirectionBufferView.get(),
+            views, static_cast<uint32_t*>(mapResponse.m_data),
+            readOnlyTexture, arrayIndex);
+
+        m_bufferPool->UnmapBuffer(*m_indirectionBuffer);
+        
         BasicRHIComponent::OnFramePrepare(frameGraphBuilder);
     }
 
