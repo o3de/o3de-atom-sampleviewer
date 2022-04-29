@@ -114,9 +114,6 @@ namespace AtomSampleViewer
         //! Lights created by lighting presets.
         AZStd::vector<AZ::Render::DirectionalLightFeatureProcessorInterface::LightHandle> m_lightHandles;
 
-        //! Post process entity to handle ExposureControlSettings.
-        AZ::Entity* m_postProcessEntity = nullptr;
-
         //! Dirty flag is set to true when m_lightingPresets is modified.
         bool m_lightingPresetsDirty = true;
 
