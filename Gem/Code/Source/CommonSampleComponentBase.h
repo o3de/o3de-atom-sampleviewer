@@ -75,8 +75,6 @@ namespace AtomSampleViewer
 
         AZ::Render::MeshFeatureProcessorInterface* GetMeshFeatureProcessor() const;
 
-        void OnLightingPresetEntityShutdown(const AZ::EntityId& entityId);
-
         // Preload assets 
         void PreloadAssets(const AZStd::vector<AZ::AssetCollectionAsyncLoader::AssetToLoadInfo>& assetList);
 
@@ -126,7 +124,6 @@ namespace AtomSampleViewer
         constexpr static int32_t InvalidLightingPresetIndex = -1;
         int32_t m_currentLightingPresetIndex = InvalidLightingPresetIndex;
         bool m_useAlternateSkybox = false; //!< LightingPresets have an alternate skybox that can be used, when this is true. This is usually a blurred version of the primary skybox.
-
     };
 
 } // namespace AtomSampleViewer
