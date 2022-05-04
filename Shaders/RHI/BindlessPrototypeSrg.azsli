@@ -30,6 +30,11 @@ ShaderResourceGroupSemantic IndirectionBufferSemanticId
     FrequencyId = 2;
 };
 
+ShaderResourceGroupSemantic NonBindlessTextureSemanticId
+{
+    FrequencyId = 3;
+};
+
 ShaderResourceGroup FloatBufferSrg : FloatBufferSemanticId
 {
     StructuredBuffer<FloatBuffer> m_floatBuffer;
@@ -38,7 +43,7 @@ ShaderResourceGroup FloatBufferSrg : FloatBufferSemanticId
 ShaderResourceGroup IndirectionBufferSrg : IndirectionBufferSemanticId
 {
     ByteAddressBuffer m_indirectionBuffer;
-};
+}; 
 
 ShaderResourceGroup SamplerSrg : FrequencyPerScene
 {
@@ -49,7 +54,13 @@ ShaderResourceGroup SamplerSrg : FrequencyPerScene
         AddressV = Wrap;
         AddressW = Wrap;
     };
-}
+};
+
+ShaderResourceGroup ImageSrg : NonBindlessTextureSemanticId
+{
+    // Array of textures
+    Texture2D m_textureArray[];
+};
 
 // Helper functions to read data from the FloatBuffer. The FloatBuffer is accessed with an offset and an index.
 // The offset holds the initial offset within the FloatBuffer, and the index is a sub-index, which increments with each property that is being read.

@@ -219,6 +219,8 @@ namespace AtomSampleViewer
         // Image array holding all of the StreamImages
         AZStd::vector<AZ::Data::Instance<AZ::RPI::StreamingImage>> m_images;
 
+        AZStd::vector<const AZ::RHI::ImageView*> m_imageViews;
+
         // Light direction handle
         FloatBufferHandle m_lightDirectionHandle;
 
@@ -258,6 +260,7 @@ namespace AtomSampleViewer
         static constexpr const char* m_samplerSrgName = "SamplerSrg";
         static constexpr const char* m_floatBufferSrgName = "FloatBufferSrg";
         static constexpr const char* m_indirectionBufferSrgName = "IndirectionBufferSrg";
+        static constexpr const char* m_imageSrgName = "ImageSrg";
 
         // Material count
         static constexpr uint32_t m_materialCount = 1024u;
