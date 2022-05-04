@@ -45,7 +45,7 @@ struct PerObject
 
 ShaderResourceGroupSemantic PerSubMesh
 {
-    FrequencyId = 3;
+    FrequencyId = 4;
 };
 
 // [TODO ATOM-2769] When the inline feature is complete, use InlineConstant instead of sending the data
@@ -132,15 +132,19 @@ PixelOutput MainPS(VertexOutput psInput)
         BindlessMaterial1 bindlessMaterial1; 
         ReadFromFloatBuffer(bindlessMaterial1.m_diffuseColor, HandleSrg::m_materialHandle, offset);
         ReadFromFloatBuffer(bindlessMaterial1.m_diffuseTextureIndex, HandleSrg::m_materialHandle, offset);
-
+        
+#if UB_DIRECTBINDING_NOTSUPPPORTED 
         Texture2D texture = Bindless::GetTexture2D(
             IndirectionBufferSrg::m_indirectionBuffer.Load(bindlessMaterial1.m_diffuseTextureIndex * 4));
-
+#else   
+        // % 8 for wrap-around texture index as specified in ImageSrg.m_textureArray
+        Texture2D texture = ImageSrg::m_textureArray[bindlessMaterial1.m_diffuseTextureIndex % 8]; 
+#endif
         OUT.m_color = texture.Sample(SamplerSrg::m_sampler, psInput.m_uv);
     }
     else if(materialIndex.x == 2) // Shaded material
     {
-        float4 color;
+        float4 color; 
         BindlessMaterial2 bindlessMaterial2; 
         ReadFromFloatBuffer(bindlessMaterial2.m_diffuseColor, HandleSrg::m_materialHandle, offset);
         ReadFromFloatBuffer(bindlessMaterial2.m_diffuseTextureIndex, HandleSrg::m_materialHandle, offset);
