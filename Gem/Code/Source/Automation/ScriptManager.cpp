@@ -51,10 +51,12 @@ namespace AtomSampleViewer
 
         ScriptableImGui::Create();
 
-        m_scriptContext = AZStd::make_unique<AZ::ScriptContext>();
-        m_sriptBehaviorContext = AZStd::make_unique<AZ::BehaviorContext>();
-        ReflectScriptContext(m_sriptBehaviorContext.get());
-        m_scriptContext->BindTo(m_sriptBehaviorContext.get());
+        constexpr AZ::ScriptContextId asvScriptContextId = 12321;
+        AZ::ScriptSystemRequestBus::BroadcastResult(
+            m_scriptContext, &AZ::ScriptSystemRequestBus::Events::AddContextWithId, asvScriptContextId);
+        AZ_Assert(m_scriptContext, "Failed to add the ASV ScriptContext to the ScriptSystem.");
+
+        ReflectScriptContext(m_scriptContext->GetBoundContext());
 
         m_scriptBrowser.SetFilter([](const AZ::Data::AssetInfo& assetInfo)
         {
@@ -73,7 +75,6 @@ namespace AtomSampleViewer
     {
         s_instance = nullptr;
         m_scriptContext = nullptr;
-        m_sriptBehaviorContext = nullptr;
         m_scriptBrowser.Deactivate();
         ScriptableImGui::Destory();
         m_imageComparisonOptions.Deactivate();
@@ -1060,8 +1061,6 @@ namespace AtomSampleViewer
 
     void ScriptManager::ReflectScriptContext(AZ::BehaviorContext* behaviorContext)
     {
-        AZ::MathReflect(behaviorContext);
-
         // Utilities...
         behaviorContext->Method("RunScript", &Script_RunScript);
         behaviorContext->Method("Error", &Script_Error);

@@ -260,8 +260,7 @@ namespace AtomSampleViewer
         float m_assetTrackingTimeout = 0.0f;
         AssetStatusTracker m_assetStatusTracker;
 
-        AZStd::unique_ptr<AZ::ScriptContext> m_scriptContext; //< Provides the lua scripting system
-        AZStd::unique_ptr<AZ::BehaviorContext> m_sriptBehaviorContext; //< Used to bind script callback functions to lua
+        AZ::ScriptContext* m_scriptContext; //< Provides the lua scripting system
 
         bool m_shouldRestoreViewportSize = false;
         int m_savedViewportWidth = 0;
