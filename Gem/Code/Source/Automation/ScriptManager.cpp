@@ -966,11 +966,8 @@ namespace AtomSampleViewer
 
         s_instance->m_executingScripts.insert(scriptAsset.GetId());
 
-        bool executeSuccess = false;
-        AZ::ScriptSystemRequestBus::BroadcastResult(
-            executeSuccess, &AZ::ScriptSystemRequestBus::Events::Load, scriptAsset, AZ::k_scriptLoadBinaryOrText,
-            s_instance->m_scriptContext->GetId());
-        if (!executeSuccess)
+        auto& scriptData = scriptAsset->m_data;
+        if (!s_instance->m_scriptContext->Execute(scriptData.GetScriptBuffer().data(), scriptFilePath.c_str(), scriptData.GetScriptBuffer().size()))
         {
             // Push an error operation on the back of the queue instead of reporting it immediately so it doesn't get lost
             // in front of a bunch of queued m_scriptOperations.
