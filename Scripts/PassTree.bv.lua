@@ -24,10 +24,21 @@ function TestAttachment(attachmentName, screenshotFileName)
 end
 
 -- Test PassTree tool with shading sample 
-OpenSample('RPI/Shading')
+OpenSample('RPI/Mesh')
 ResizeViewport(800, 600)
 
-SelectImageComparisonToleranceLevel("Level F")
+SelectImageComparisonToleranceLevel("Level G")
+
+-- choose model, material and lighting
+SetImguiValue('Models/##Available', 'objects/shaderball_simple.azmodel')
+SetImguiValue('Enable Material Override', true)
+SetImguiValue('Materials/##Available', 'materials/defaultpbr.azmaterial')
+SetImguiValue('Lighting Preset##SampleBase/Thumbnail', true)
+
+-- set camera transform
+ArcBallCameraController_SetHeading(DegToRad(144.671860))
+ArcBallCameraController_SetPitch(DegToRad(-17.029560))
+ArcBallCameraController_SetDistance(6.590300)
 
 -- Show the tool and enable preview image attachment
 ShowTool('PassTree', true)

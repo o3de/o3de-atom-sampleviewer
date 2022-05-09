@@ -16,6 +16,7 @@
 #include <AzCore/Asset/AssetCommon.h>
 #include <AzCore/Component/TickBus.h>
 
+#include <AzFramework/Scene/Scene.h>
 #include <AzFramework/Windowing/WindowBus.h>
 #include <AzFramework/Windowing/NativeWindow.h>
 
@@ -23,7 +24,6 @@
 #include <Atom/Feature/CoreLights/DiskLightFeatureProcessorInterface.h>
 #include <Atom/Feature/CoreLights/DirectionalLightFeatureProcessorInterface.h>
 #include <Atom/Feature/ReflectionProbe/ReflectionProbeFeatureProcessorInterface.h>
-#include <Atom/Feature/ReflectionProbe/ReflectionProbeFeatureProcessor.h>
 
 #include <Utils/Utils.h>
 

@@ -16,10 +16,11 @@
 
 #include <Automation/ScriptRunnerBus.h>
 
-#include <AzCore/Debug/EventTrace.h>
 #include <AzCore/Serialization/SerializeContext.h>
 
 #include <RHI/BasicRHIComponent.h>
+
+AZ_DECLARE_BUDGET(AtomSampleViewer);
 
 namespace AtomSampleViewer
 {
@@ -57,9 +58,7 @@ namespace AtomSampleViewer
         {
             "materials/defaultpbr.azmaterial",
             "materials/presets/pbr/metal_aluminum_polished.azmaterial",
-            "shaders/staticmesh_colorr.azmaterial",
-            "shaders/staticmesh_colorg.azmaterial",
-            "shaders/staticmesh_colorb.azmaterial"
+            "materials/basic_grey.azmaterial"
         };
         m_materialBrowser.SetDefaultPinnedAssets(defaultMaterialAllowlist);
 
@@ -241,7 +240,7 @@ namespace AtomSampleViewer
 
     void AssetLoadTestComponent::OnTick([[maybe_unused]] float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint scriptTime)
     {
-        AZ_TRACE_METHOD();
+        AZ_PROFILE_FUNCTION(AtomSampleViewer);
 
         const float timeSeconds = static_cast<float>(scriptTime.GetSeconds());
 

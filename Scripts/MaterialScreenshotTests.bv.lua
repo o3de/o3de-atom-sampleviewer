@@ -83,6 +83,11 @@ end
 OpenSample('RPI/Mesh')
 ResizeViewport(999, 999)
 
+-- This is just quick regression test for a crash that happened when turning on the ground plane with no model
+SetImguiValue('Show Ground Plane', true)
+IdleFrames(1) 
+SetImguiValue('Show Ground Plane', false)
+
 ----------------------------------------------------------------------
 -- StandardPBR Materials...
 
@@ -90,7 +95,7 @@ g_testMaterialsFolder = 'testdata/materials/standardpbrtestcases/'
 g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/StandardPBR/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
-GenerateMaterialScreenshot('Level B', '001_DefaultWhite')
+GenerateMaterialScreenshot('Level C', '001_DefaultWhite')
 GenerateMaterialScreenshot('Level G', '002_BaseColorLerp')
 GenerateMaterialScreenshot('Level H', '002_BaseColorLinearLight')
 GenerateMaterialScreenshot('Level G', '002_BaseColorMultiply')
@@ -99,8 +104,8 @@ GenerateMaterialScreenshot('Level F', '003_MetalPolished')
 GenerateMaterialScreenshot('Level E', '004_MetalMap')
 GenerateMaterialScreenshot('Level E', '005_RoughnessMap')
 GenerateMaterialScreenshot('Level E', '006_SpecularF0Map')
-GenerateMaterialScreenshot('Level C', '007_MultiscatteringCompensationOff')
-GenerateMaterialScreenshot('Level C', '007_MultiscatteringCompensationOn')
+GenerateMaterialScreenshot('Level D', '007_MultiscatteringCompensationOff')
+GenerateMaterialScreenshot('Level D', '007_MultiscatteringCompensationOn')
 GenerateMaterialScreenshot('Level H', '008_NormalMap')
 GenerateMaterialScreenshot('Level E', '008_NormalMap_Bevels')
 GenerateMaterialScreenshot('Level F', '009_Opacity_Blended', {lighting="Neutral Urban", model=g_beveledCubeModel})
@@ -116,26 +121,26 @@ GenerateMaterialScreenshot('Level G', '010_BothOcclusion', {lighting="Palermo Si
 GenerateMaterialScreenshot('Level G', '011_Emissive')
 GenerateMaterialScreenshot('Level I', '012_Parallax_POM', {model=g_cubeModel, cameraHeading=-35.0, cameraPitch=35.0})
 GenerateMaterialScreenshot('Level I', '012_Parallax_POM_Cutout', {model=g_cubeModel, cameraHeading=-130.0, cameraPitch=35.0, cameraDistance=3.5, lighting="Goegap (Alt)", showGroundPlane=true})
-GenerateMaterialScreenshot('Level I', '013_SpecularAA_Off', {lighting="Dark Test Lighting"})
-GenerateMaterialScreenshot('Level J', '013_SpecularAA_On', {lighting="Dark Test Lighting"})
+GenerateMaterialScreenshot('Level I', '013_SpecularAA_Off', {lighting="Test"})
+GenerateMaterialScreenshot('Level J', '013_SpecularAA_On', {lighting="Test"})
 GenerateMaterialScreenshot('Level G', '014_ClearCoat', {lighting="Neutral Urban"})
 GenerateMaterialScreenshot('Level H', '014_ClearCoat_NormalMap', {lighting="Neutral Urban"})
 GenerateMaterialScreenshot('Level H', '014_ClearCoat_NormalMap_2ndUv', {lighting="Neutral Urban"})
 GenerateMaterialScreenshot('Level F', '014_ClearCoat_RoughnessMap', {lighting="Neutral Urban"})
-GenerateMaterialScreenshot('Level F', '015_SubsurfaceScattering', {lighting="Dark Test Lighting", cameraHeading = 45.0, cameraPitch=30.0, cameraDistance=1.5})
-GenerateMaterialScreenshot('Level D', '015_SubsurfaceScattering_Transmission', {lighting="Dark Test Lighting", cameraHeading = 45.0, cameraPitch=-30.0, cameraDistance=1.5})
+GenerateMaterialScreenshot('Level F', '015_SubsurfaceScattering', {lighting="Test", cameraHeading = 45.0, cameraPitch=30.0, cameraDistance=1.5})
+GenerateMaterialScreenshot('Level D', '015_SubsurfaceScattering_Transmission', {lighting="Test", cameraHeading = 45.0, cameraPitch=-30.0, cameraDistance=1.5})
 GenerateMaterialScreenshot('Level E', '015_SubsurfaceScattering_Transmission_Thin', {model=g_modelGrass, lighting="Goegap (Alt)", cameraHeading = -150.0, cameraPitch=5.0, cameraDistance=1.5})
 GenerateMaterialScreenshot('Level I', '100_UvTiling_AmbientOcclusion')
 GenerateMaterialScreenshot('Level I', '100_UvTiling_BaseColor')
 GenerateMaterialScreenshot('Level I', '100_UvTiling_Emissive')
 GenerateMaterialScreenshot('Level H', '100_UvTiling_Metallic')
 GenerateMaterialScreenshot('Level I', '100_UvTiling_Normal')
-GenerateMaterialScreenshot('Level G', '100_UvTiling_Normal_Dome_Rotate20',      {model=g_cubeModel, lighting="Dark Test Lighting", cameraHeading=225.0})
-GenerateMaterialScreenshot('Level G', '100_UvTiling_Normal_Dome_Rotate90',      {model=g_cubeModel, lighting="Dark Test Lighting", cameraHeading=225.0})
-GenerateMaterialScreenshot('Level G', '100_UvTiling_Normal_Dome_ScaleOnlyU',    {model=g_cubeModel, lighting="Dark Test Lighting", cameraHeading=225.0})
-GenerateMaterialScreenshot('Level G', '100_UvTiling_Normal_Dome_ScaleOnlyV',    {model=g_cubeModel, lighting="Dark Test Lighting", cameraHeading=225.0})
-GenerateMaterialScreenshot('Level G', '100_UvTiling_Normal_Dome_ScaleUniform',  {model=g_cubeModel, lighting="Dark Test Lighting", cameraHeading=225.0})
-GenerateMaterialScreenshot('Level G', '100_UvTiling_Normal_Dome_TransformAll',  {model=g_cubeModel, lighting="Dark Test Lighting", cameraHeading=225.0})
+GenerateMaterialScreenshot('Level G', '100_UvTiling_Normal_Dome_Rotate20',      {model=g_cubeModel, lighting="Test", cameraHeading=225.0})
+GenerateMaterialScreenshot('Level G', '100_UvTiling_Normal_Dome_Rotate90',      {model=g_cubeModel, lighting="Test", cameraHeading=225.0})
+GenerateMaterialScreenshot('Level G', '100_UvTiling_Normal_Dome_ScaleOnlyU',    {model=g_cubeModel, lighting="Test", cameraHeading=225.0})
+GenerateMaterialScreenshot('Level G', '100_UvTiling_Normal_Dome_ScaleOnlyV',    {model=g_cubeModel, lighting="Test", cameraHeading=225.0})
+GenerateMaterialScreenshot('Level G', '100_UvTiling_Normal_Dome_ScaleUniform',  {model=g_cubeModel, lighting="Test", cameraHeading=225.0})
+GenerateMaterialScreenshot('Level G', '100_UvTiling_Normal_Dome_TransformAll',  {model=g_cubeModel, lighting="Test", cameraHeading=225.0})
 GenerateMaterialScreenshot('Level M', '100_UvTiling_Opacity',    { lighting="Neutral Urban" })
 GenerateMaterialScreenshot('Level L', '100_UvTiling_Parallax_A', { uniqueSuffix="Angle1", model=g_cubeModel, cameraHeading=35.0, cameraPitch=35.0 })
 GenerateMaterialScreenshot('Level M', '100_UvTiling_Parallax_A', { uniqueSuffix="Angle2", model=g_cubeModel, cameraHeading=125.0, cameraPitch=35.0 })
@@ -144,10 +149,10 @@ GenerateMaterialScreenshot('Level L', '100_UvTiling_Parallax_B', { uniqueSuffix=
 GenerateMaterialScreenshot('Level H', '100_UvTiling_Roughness')
 GenerateMaterialScreenshot('Level F', '100_UvTiling_SpecularF0')
 
-GenerateMaterialScreenshot('Level E', '101_DetailMaps_LucyBaseNoDetailMaps',    {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
+GenerateMaterialScreenshot('Level F', '101_DetailMaps_BaseNoDetailMaps',        {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
 GenerateMaterialScreenshot('Level H', '102_DetailMaps_All',                     {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
-GenerateMaterialScreenshot('Level F', '103_DetailMaps_BaseColor',               {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
-GenerateMaterialScreenshot('Level F', '103_DetailMaps_BaseColorWithMask',       {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
+GenerateMaterialScreenshot('Level G', '103_DetailMaps_BaseColor',               {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
+GenerateMaterialScreenshot('Level G', '103_DetailMaps_BaseColorWithMask',       {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
 GenerateMaterialScreenshot('Level H', '104_DetailMaps_Normal',                  {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
 GenerateMaterialScreenshot('Level H', '104_DetailMaps_NormalWithMask',          {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
 GenerateMaterialScreenshot('Level H', '105_DetailMaps_BlendMaskUsingDetailUVs', {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
@@ -184,7 +189,7 @@ g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/Skin/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 -- We should eventually replace this with realistic skin test cases, these are just placeholders for regression testing
-GenerateMaterialScreenshot('Level D', '001_lucy_regression_test',    {model=g_modelHermanubis, cameraHeading=-26.0, cameraPitch=15.0, cameraDistance=2.0, cameraZ=0.7})
+GenerateMaterialScreenshot('Level D', '001_hermanubis_regression_test',    {model=g_modelHermanubis, cameraHeading=-26.0, cameraPitch=15.0, cameraDistance=2.0, cameraZ=0.7})
 GenerateMaterialScreenshot('Level G', '002_wrinkle_regression_test', {model=g_modelWithLayerMask, cameraHeading=0.0, cameraPitch=45.0, cameraDistance=30.0})
 
 ----------------------------------------------------------------------
@@ -197,6 +202,16 @@ Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 GenerateMaterialScreenshot('Level B', 'MinimalPbr_Default')
 GenerateMaterialScreenshot('Level F', 'MinimalPbr_BlueMetal')
 GenerateMaterialScreenshot('Level D', 'MinimalPbr_RedDielectric')
+
+----------------------------------------------------------------------
+-- MinimalMultilayerPBR Materials...
+-- This test is here only temporarily for regression testing until StandardMultilayerPBR is refactored to use reused nested property groups.
+
+g_testMaterialsFolder = 'materials/types/'
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/MinimalPBR/')
+Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
+
+GenerateMaterialScreenshot('Level G', 'MinimalMultilayerExample')
 
 ----------------------------------------------------------------------
 -- AutoBrick Materials...

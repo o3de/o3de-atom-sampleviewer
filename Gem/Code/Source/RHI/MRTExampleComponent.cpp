@@ -324,12 +324,10 @@ namespace AtomSampleViewer
 
         const auto prepareFunctionScreen = [this](RHI::FrameGraphInterface frameGraph, [[maybe_unused]] ScopeData& scopeData)
         {
-            // Binds the swap chain as a color attachment. Clears it to white.
+            // Binds the swap chain as a color attachment.
             {
                 RHI::ImageScopeAttachmentDescriptor descriptor;
                 descriptor.m_attachmentId = m_outputAttachmentId;
-                descriptor.m_loadStoreAction.m_clearValue = RHI::ClearValue::CreateVector4Float(1.0f, 1.0, 1.0, 0.0);
-                descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Clear;
                 frameGraph.UseColorAttachment(descriptor);
             }
 

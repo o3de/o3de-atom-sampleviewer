@@ -77,10 +77,9 @@ namespace AtomSampleViewer
 
         // statue
         {
-            AZ::Data::Asset<AZ::RPI::MaterialAsset> materialAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::MaterialAsset>("objects/lucy/lucy_stone.azmaterial", AZ::RPI::AssetUtils::TraceLevel::Assert);
-            AZ::Data::Asset<AZ::RPI::ModelAsset> modelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>(ATOMSAMPLEVIEWER_TRAIT_SSR_SAMPLE_LUCY_MODEL_NAME, AZ::RPI::AssetUtils::TraceLevel::Assert);
+            AZ::Data::Asset<AZ::RPI::MaterialAsset> materialAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::MaterialAsset>("objects/hermanubis/hermanubis_stone.azmaterial", AZ::RPI::AssetUtils::TraceLevel::Assert);
+            AZ::Data::Asset<AZ::RPI::ModelAsset> modelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>(ATOMSAMPLEVIEWER_TRAIT_SSR_SAMPLE_HERMANUBIS_MODEL_NAME, AZ::RPI::AssetUtils::TraceLevel::Assert);
             AZ::Transform transform = AZ::Transform::CreateIdentity();
-            transform *= AZ::Transform::CreateRotationZ(AZ::Constants::Pi);
             transform.SetTranslation(0.0f, 0.0f, -0.05f);
 
             m_statueMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ modelAsset }, AZ::RPI::Material::FindOrCreate(materialAsset));

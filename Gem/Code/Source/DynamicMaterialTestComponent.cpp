@@ -18,11 +18,12 @@
 #include <Atom/RPI.Reflect/Asset/AssetUtils.h>
 
 #include <AzCore/Component/Entity.h>
-#include <AzCore/Debug/EventTrace.h>
 #include <AzCore/Debug/Timer.h>
 #include <AzCore/Math/Random.h>
 
 #include <RHI/BasicRHIComponent.h>
+
+AZ_DECLARE_BUDGET(AtomSampleViewer);
 
 namespace AtomSampleViewer
 {
@@ -229,7 +230,7 @@ namespace AtomSampleViewer
 
     void DynamicMaterialTestComponent::OnTick(float deltaTime, ScriptTimePoint /*scriptTime*/)
     {
-        AZ_TRACE_METHOD();
+        AZ_PROFILE_FUNCTION(AtomSampleViewer);
 
         if (m_waitingForMeshes)
         {
@@ -301,7 +302,11 @@ namespace AtomSampleViewer
         if (updateMaterials)
         {
             m_materialConfigs[m_currentMaterialConfig].m_updateLatticeMaterials();
-            CompileMaterials();
         }
+
+        // Even if materials weren't changed on this frame, they still might need to be compiled to apply changes
+        // from a previous frame. This could be the result of a material that was just loaded or reinitialized on
+        // the previous frame, possibly caused by a shader variant hot-loading.
+        CompileMaterials();
     }
 } // namespace AtomSampleViewer

@@ -30,7 +30,9 @@ namespace AtomSampleViewer
         , public AZ::EntityBus::MultiHandler
     {
     public:
-        AZ_TYPE_INFO(MaterialHotReloadTestComponent, "{7EECDF09-B774-46C1-AD6E-060CE5717C05}");
+        AZ_TYPE_INFO(CommonSampleComponentBase, "{7EECDF09-B774-46C1-AD6E-060CE5717C05}");
+
+        static void Reflect(AZ::ReflectContext* context);
 
         // AZ::Component overrides...
         bool ReadInConfig(const AZ::ComponentConfig* baseConfig) override;
@@ -73,8 +75,6 @@ namespace AtomSampleViewer
 
         AZ::Render::MeshFeatureProcessorInterface* GetMeshFeatureProcessor() const;
 
-        void OnLightingPresetEntityShutdown(const AZ::EntityId& entityId);
-
         // Preload assets 
         void PreloadAssets(const AZStd::vector<AZ::AssetCollectionAsyncLoader::AssetToLoadInfo>& assetList);
 
@@ -104,13 +104,15 @@ namespace AtomSampleViewer
         mutable AZ::Render::MeshFeatureProcessorInterface* m_meshFeatureProcessor = nullptr;
 
         //! All loaded lighting presets.
-        AZStd::vector<AZ::Render::LightingPreset> m_lightingPresets;
+        struct LightingPresetEntry
+        {
+            AZStd::string m_displayName;
+            AZ::Render::LightingPreset m_preset;
+        };
+        AZStd::vector<LightingPresetEntry> m_lightingPresets;
 
         //! Lights created by lighting presets.
         AZStd::vector<AZ::Render::DirectionalLightFeatureProcessorInterface::LightHandle> m_lightHandles;
-
-        //! Post process entity to handle ExposureControlSettings.
-        AZ::Entity* m_postProcessEntity = nullptr;
 
         //! Dirty flag is set to true when m_lightingPresets is modified.
         bool m_lightingPresetsDirty = true;
@@ -119,7 +121,6 @@ namespace AtomSampleViewer
         constexpr static int32_t InvalidLightingPresetIndex = -1;
         int32_t m_currentLightingPresetIndex = InvalidLightingPresetIndex;
         bool m_useAlternateSkybox = false; //!< LightingPresets have an alternate skybox that can be used, when this is true. This is usually a blurred version of the primary skybox.
-
     };
 
 } // namespace AtomSampleViewer

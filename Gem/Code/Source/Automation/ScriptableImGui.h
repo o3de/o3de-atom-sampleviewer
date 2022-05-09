@@ -12,6 +12,7 @@
 #include <AzCore/std/string/string.h>
 #include <AzCore/std/containers/unordered_map.h>
 #include <AzCore/Math/Vector3.h>
+#include <AzCore/Memory/SystemAllocator.h>
 #include <imgui/imgui.h>
 
 #define SCRIPTABLE_IMGUI

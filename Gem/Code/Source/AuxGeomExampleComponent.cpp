@@ -71,6 +71,7 @@ namespace AtomSampleViewer
     
     void AuxGeomExampleComponent::OnTick([[maybe_unused]] float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint time)
     {
+        AZ_PROFILE_SCOPE(AzRender, "AuxGeomExampleComponent: OnTick");
         if (m_imguiSidebar.Begin())
         {
             ImGui::Text("Draw Options");

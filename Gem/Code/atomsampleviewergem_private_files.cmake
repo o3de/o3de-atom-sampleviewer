@@ -20,6 +20,7 @@ set(FILES
     Source/Automation/AssetStatusTracker.h
     Source/Automation/ImageComparisonConfig.h
     Source/Automation/ImageComparisonConfig.cpp
+    Source/Automation/PrecommitWizardSettings.h
     Source/Automation/ScriptableImGui.cpp
     Source/Automation/ScriptableImGui.h
     Source/Automation/ScriptManager.cpp
@@ -82,6 +83,12 @@ set(FILES
     Source/RHI/RayTracingExampleComponent.h
     Source/RHI/MatrixAlignmentTestExampleComponent.cpp
     Source/RHI/MatrixAlignmentTestExampleComponent.h
+    Source/Performance/HighInstanceExampleComponent.cpp
+    Source/Performance/HighInstanceExampleComponent.h
+    Source/Performance/100KDrawable_SingleView_ExampleComponent.cpp
+    Source/Performance/100KDrawable_SingleView_ExampleComponent.h
+    Source/Performance/100KDraw_10KDrawable_MultiView_ExampleComponent.cpp
+    Source/Performance/100KDraw_10KDrawable_MultiView_ExampleComponent.h
     Source/AreaLightExampleComponent.cpp
     Source/AreaLightExampleComponent.h
     Source/AssetLoadTestComponent.cpp
@@ -143,12 +150,14 @@ set(FILES
     Source/ProceduralSkinnedMesh.h
     Source/ProceduralSkinnedMeshUtils.cpp
     Source/ProceduralSkinnedMeshUtils.h
+    Source/ReadbackExampleComponent.cpp
+    Source/ReadbackExampleComponent.h
+    Source/RenderTargetTextureExampleComponent.cpp
+    Source/RenderTargetTextureExampleComponent.h
     Source/RootConstantsExampleComponent.h
     Source/RootConstantsExampleComponent.cpp
     Source/SceneReloadSoakTestComponent.cpp
     Source/SceneReloadSoakTestComponent.h
-    Source/ShadingExampleComponent.cpp
-    Source/ShadingExampleComponent.h
     Source/ShadowExampleComponent.cpp
     Source/ShadowExampleComponent.h
     Source/ShadowedSponzaExampleComponent.cpp
@@ -169,8 +178,6 @@ set(FILES
     Source/TransparencyExampleComponent.h
     Source/ShaderReloadTestComponent.cpp
     Source/ShaderReloadTestComponent.h
-    Source/Utils/FileIOErrorHandler.cpp
-    Source/Utils/FileIOErrorHandler.h
     Source/Utils/ImGuiAssetBrowser.cpp
     Source/Utils/ImGuiAssetBrowser.h
     Source/Utils/ImGuiHistogramQueue.cpp

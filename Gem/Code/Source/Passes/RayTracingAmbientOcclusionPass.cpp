@@ -217,7 +217,7 @@ namespace AZ
                 return;
             }
 
-            RPI::PassAttachment* outputAttachment = GetOutputBinding(0).m_attachment.get();
+            RPI::PassAttachment* outputAttachment = GetOutputBinding(0).GetAttachment().get();
             RHI::Size targetImageSize = outputAttachment->m_descriptor.m_image.m_size;
 
             const RHI::ShaderResourceGroup* shaderResourceGroups[] =

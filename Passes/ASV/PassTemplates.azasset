@@ -49,10 +49,6 @@
                 "Path": "Passes/ColorInvertCS.pass"
             },
             {
-                "Name": "LuxCoreTexturePassTemplate",
-                "Path": "Passes/LuxCoreTexture.pass"
-            },
-            {
                 "Name": "RenderTextureTemplate",
                 "Path": "Passes/RenderTexture.pass"
             },
@@ -83,6 +79,18 @@
             {
                 "Name": "FullscreenPipeline",
                 "Path": "Passes/FullscreenPipeline.pass"
+            },
+            {
+                "Name": "ReadbackFillerPassTemplate",
+                "Path": "Passes/ReadbackFiller.pass"
+            },
+            {
+                "Name": "ReadbackPreviewPassTemplate",
+                "Path": "Passes/ReadbackPreview.pass"
+            },
+            {
+                "Name": "ReadbackPipelineTemplate",
+                "Path": "Passes/ReadbackPipeline.pass"
             }
         ]
     }

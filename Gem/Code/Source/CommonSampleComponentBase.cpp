@@ -21,6 +21,16 @@ namespace AtomSampleViewer
     using namespace AZ;
     using namespace RPI;
 
+    void CommonSampleComponentBase::Reflect(ReflectContext* context)
+    {
+        if (SerializeContext* serializeContext = azrtti_cast<SerializeContext*>(context))
+        {
+            serializeContext->Class<CommonSampleComponentBase, Component>()
+                ->Version(0)
+                ;
+        }
+    }
+
     bool CommonSampleComponentBase::ReadInConfig(const ComponentConfig* baseConfig)
     {
         m_scene = RPI::RPISystemInterface::Get()->GetSceneByName(AZ::Name("RPI"));
@@ -67,11 +77,6 @@ namespace AtomSampleViewer
         skyboxFeatureProcessor->SetSkyboxMode(AZ::Render::SkyBoxMode::Cubemap);
         skyboxFeatureProcessor->Enable(true);
 
-        // We don't necessarily need an entity but PostProcessFeatureProcessorInterface needs an ID to retrieve ExposureControlSettingsInterface.
-        AzFramework::EntityContextRequestBus::EventResult(m_postProcessEntity, m_entityContextId, &AzFramework::EntityContextRequestBus::Events::CreateEntity, "postProcessEntity");
-        AZ_Assert(m_postProcessEntity != nullptr, "Failed to create post process entity.");
-        m_postProcessEntity->Activate();
-
         if (loadDefaultLightingPresets)
         {
             AZStd::list<AZ::Data::AssetInfo> lightingAssetInfoList;
@@ -95,16 +100,15 @@ namespace AtomSampleViewer
         static const char* InitialLightingPresetName = "Palermo Sidewalk";
         for (uint32_t index = 0; index < m_lightingPresets.size(); ++index)
         {
-            if (m_lightingPresets[index].m_displayName == InitialLightingPresetName)
+            if (AZ::StringFunc::Contains(m_lightingPresets[index].m_displayName, InitialLightingPresetName))
             {
                 m_currentLightingPresetIndex = index;
-                OnLightingPresetSelected(m_lightingPresets[m_currentLightingPresetIndex], m_useAlternateSkybox);
+                OnLightingPresetSelected(m_lightingPresets[m_currentLightingPresetIndex].m_preset, m_useAlternateSkybox);
                 break;
             }
         }
 
         AZ::TransformNotificationBus::MultiHandler::BusConnect(m_cameraEntityId);
-        AZ::EntityBus::MultiHandler::BusConnect(m_postProcessEntity->GetId());
     }
 
     void CommonSampleComponentBase::ShutdownLightingPresets()
@@ -118,12 +122,10 @@ namespace AtomSampleViewer
         }
         m_lightHandles.clear();
 
-        ClearLightingPresets();
+        AZ::Render::PostProcessFeatureProcessorInterface* postProcessFeatureProcessor = AZ::RPI::Scene::GetFeatureProcessorForEntityContextId<AZ::Render::PostProcessFeatureProcessorInterface>(m_entityContextId);
+        postProcessFeatureProcessor->RemoveSettingsInterface(GetEntityId());
 
-        if (m_postProcessEntity)
-        {
-            DestroyEntity(m_postProcessEntity, GetEntityContextId());
-        }
+        ClearLightingPresets();
 
         skyboxFeatureProcessor->Enable(false);
 
@@ -145,13 +147,28 @@ namespace AtomSampleViewer
             const AZ::Render::LightingPreset* preset = asset->GetDataAs<AZ::Render::LightingPreset>();
             if (preset)
             {
-                m_lightingPresets.push_back(*preset);
+                AZStd::string displayName;
+                AZ::StringFunc::Path::GetFullFileName(assetPath.c_str(), displayName);
+                AZ::StringFunc::Replace(displayName, ".lightingpreset.azasset", "");
+
+                AZStd::vector<AZStd::string> displayNameParts;
+                AZ::StringFunc::Tokenize(displayName, displayNameParts, "\\/, ()_-");
+                for (auto& displayNamePart : displayNameParts)
+                {
+                    displayNamePart[0] = aznumeric_cast<char>(toupper(displayNamePart[0]));
+                }
+
+                displayName.clear();
+                AZ::StringFunc::Join(displayName, displayNameParts, ' ');
+
+                m_lightingPresets.push_back({ displayName, *preset });
             }
+
             m_lightingPresetsDirty = true;
             if (!m_lightingPresets.empty() && m_currentLightingPresetIndex == InvalidLightingPresetIndex)
             {
                 m_currentLightingPresetIndex = 0;
-                OnLightingPresetSelected(m_lightingPresets[0], m_useAlternateSkybox);
+                OnLightingPresetSelected(m_lightingPresets[0].m_preset, m_useAlternateSkybox);
             }
         }
         else
@@ -208,7 +225,7 @@ namespace AtomSampleViewer
                 {
                     m_currentLightingPresetIndex = i;
                     m_useAlternateSkybox = useThisPresetWithAlternateSkybox;
-                    OnLightingPresetSelected(m_lightingPresets[i], m_useAlternateSkybox);
+                    OnLightingPresetSelected(m_lightingPresets[i].m_preset, m_useAlternateSkybox);
                 }
             }
             ScriptableImGui::EndCombo();
@@ -222,7 +239,7 @@ namespace AtomSampleViewer
         AZ::Render::ImageBasedLightFeatureProcessorInterface* iblFeatureProcessor = AZ::RPI::Scene::GetFeatureProcessorForEntityContextId<AZ::Render::ImageBasedLightFeatureProcessorInterface>(m_entityContextId);
         AZ::Render::DirectionalLightFeatureProcessorInterface* directionalLightFeatureProcessor = AZ::RPI::Scene::GetFeatureProcessorForEntityContextId<AZ::Render::DirectionalLightFeatureProcessorInterface>(m_entityContextId);
 
-        AZ::Render::ExposureControlSettingsInterface* exposureControlSettingInterface = postProcessFeatureProcessor->GetOrCreateSettingsInterface(m_postProcessEntity->GetId())->GetOrCreateExposureControlSettingsInterface();
+        AZ::Render::ExposureControlSettingsInterface* exposureControlSettingInterface = postProcessFeatureProcessor->GetOrCreateSettingsInterface(GetEntityId())->GetOrCreateExposureControlSettingsInterface();
 
         Camera::Configuration cameraConfig;
         Camera::CameraRequestBus::EventResult(cameraConfig, m_cameraEntityId, &Camera::CameraRequestBus::Events::GetCameraConfiguration);
@@ -234,8 +251,6 @@ namespace AtomSampleViewer
             directionalLightFeatureProcessor,
             cameraConfig,
             m_lightHandles,
-            nullptr,
-            AZ::RPI::MaterialPropertyIndex{},
             useAlternateSkybox);
     }
 
@@ -254,14 +269,6 @@ namespace AtomSampleViewer
             {
                 directionalLightFeatureProcessor->SetCameraTransform(handle, transform);
             }
-        }
-    }
-
-    void CommonSampleComponentBase::OnLightingPresetEntityShutdown(const AZ::EntityId& entityId)
-    {
-        if (m_postProcessEntity && m_postProcessEntity->GetId() == entityId)
-        {
-            m_postProcessEntity = nullptr;
         }
     }
 

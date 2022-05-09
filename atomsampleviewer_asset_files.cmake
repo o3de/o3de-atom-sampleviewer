@@ -18,7 +18,6 @@ set(FILES
     Passes/ComplexPipeline.pass
     Passes/ImGuiNoInput.pass
     Passes/ImGuiOnlyPipeline.pass
-    Passes/LuxCoreTexture.pass
     Passes/Monochrome.pass
     Passes/RayTracingAmbientOcclusion.pass
     Passes/RenderTexture.pass
@@ -66,8 +65,6 @@ set(FILES
     Shaders/PostProcessing/ColorInvertCS.shader
     Shaders/PostProcessing/Monochrome.azsl
     Shaders/PostProcessing/Monochrome.shader
-    Shaders/PostProcessing/MSAAResolveDepth.azsl
-    Shaders/PostProcessing/MSAAResolveDepth.shader
     Shaders/RayTracing/RTAOClosestHit.azsl
     Shaders/RayTracing/RTAOClosestHit.shader
     Shaders/RayTracing/RTAODefines.azsli

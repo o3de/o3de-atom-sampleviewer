@@ -11,13 +11,14 @@
 #include <Atom/Component/DebugCamera/CameraControllerBus.h>
 #include <Atom/Feature/Utils/FrameCaptureBus.h>
 #include <Atom/Feature/Utils/ProfilingCaptureBus.h>
+#include <Automation/PrecommitWizardSettings.h>
 #include <Automation/ScriptRepeaterBus.h>
 #include <Automation/ScriptRunnerBus.h>
 #include <Automation/AssetStatusTracker.h>
 #include <Automation/ScriptReporter.h>
 #include <Automation/ImageComparisonConfig.h>
 #include <Utils/ImGuiAssetBrowser.h>
-#include <Profiler/ProfilerBus.h>
+#include <AzCore/Debug/ProfilerBus.h>
 
 namespace AZ
 {
@@ -50,7 +51,7 @@ namespace AtomSampleViewer
         , public AZ::Debug::CameraControllerNotificationBus::Handler
         , public AZ::Render::FrameCaptureNotificationBus::Handler
         , public AZ::Render::ProfilingCaptureNotificationBus::Handler
-        , public Profiler::ProfilerNotificationBus::Handler
+        , public AZ::Debug::ProfilerNotificationBus::Handler
     {
     public:
         ScriptManager();
@@ -64,12 +65,27 @@ namespace AtomSampleViewer
         void TickImGui();
 
         void OpenScriptRunnerDialog();
+        void OpenPrecommitWizard();
 
         void RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd, int randomSeed);
 
     private:
+        static constexpr const char* FullSuiteScriptFilepath = "scripts/_fulltestsuite_.bv.luac";
 
         void ShowScriptRunnerDialog();
+
+        // PrecommitWizard Gui
+        void ShowPrecommitWizard();
+        // PrecommitWizard stages
+        void ShowPrecommitWizardIntro();
+        void ShowPrecommitWizardRunFullsuiteTest();
+        void ShowPrecommitWizardReportFullsuiteTest();
+        void ShowPrecomitWizardManualInspection();
+        void ShowPrecommitWizardReportFinalSummary();
+
+        void ShowBackToIntroWarning();
+
+
 
         // Registers functions in a BehaviorContext so they can be exposed to Lua scripts.
         static void ReflectScriptContext(AZ::BehaviorContext* context);
@@ -210,7 +226,7 @@ namespace AtomSampleViewer
         void OnCaptureBenchmarkMetadataFinished(bool result, const AZStd::string& info) override;
 
         // ProfilerNotificationBus overrides...
-        void OnCaptureCpuProfilingStatisticsFinished(bool result, const AZStd::string& info) override;
+        void OnCaptureFinished(bool result, const AZStd::string& info) override;
 
         void AbortScripts(const AZStd::string& reason);
 
@@ -318,6 +334,9 @@ namespace AtomSampleViewer
             int m_toleranceAdjustment = 0;
 
         } m_imageComparisonOptions;
+
+        bool m_showPrecommitWizard = false;
+        PrecommitWizardSettings m_wizardSettings;
 
         bool m_showScriptRunnerDialog = false;
         bool m_isCapturePending = false;

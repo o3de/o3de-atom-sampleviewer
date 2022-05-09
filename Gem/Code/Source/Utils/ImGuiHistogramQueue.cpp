@@ -27,17 +27,23 @@ namespace AtomSampleViewer
         m_averageLog.reserve(m_maxSamples);
     }
 
-    float ImGuiHistogramQueue::CalculateAverage(AZStd::size_t maxSampleCount)
+    float ImGuiHistogramQueue::UpdateDisplayedValues(AZStd::size_t maxSampleCount, float& minValue, float& maxValue)
     {
         size_t sampleCount = AZStd::min<size_t>(maxSampleCount, m_valueLog.size());
-
-        float average = 0.0f;
-        for (size_t i = 0; i < sampleCount; ++i)
+        float average = 0.f;
+        if (sampleCount > 0)
         {
-            average += m_valueLog.at(i);
+            average = m_valueLog.at(0);
+            minValue = maxValue = average;
+            for (size_t i = 1; i < sampleCount; ++i)
+            {
+                float curValue = m_valueLog.at(i);
+                average += curValue;
+                minValue = minValue > curValue ? curValue : minValue;
+                maxValue = maxValue < curValue ? curValue : maxValue;
+            }
+            average /= sampleCount;
         }
-        average /= sampleCount;
-
         return average;
     }
 
@@ -57,12 +63,13 @@ namespace AtomSampleViewer
         {
             m_averageLog.pop_back();
         }
-        m_averageLog.insert(m_averageLog.begin(), CalculateAverage(m_runningAverageSamples));
+        [[maybe_unused]] float minValue, maxValue; // unused required call parameters
+        m_averageLog.insert(m_averageLog.begin(), UpdateDisplayedValues(m_runningAverageSamples, minValue, maxValue));
 
         // Calculate average for numeric display
         if (m_timeSinceLastDisplayUpdate >= m_numericDisplayDelay || m_samplesSinceLastDisplayUpdate >= m_maxSamples)
         {
-            m_displayedAverage = CalculateAverage(m_samplesSinceLastDisplayUpdate);
+            m_displayedAverage = UpdateDisplayedValues(m_samplesSinceLastDisplayUpdate, m_displayedMinimum, m_displayedMaximum);
 
             m_timeSinceLastDisplayUpdate = 0.0f;
             m_samplesSinceLastDisplayUpdate = 0;
@@ -87,18 +94,18 @@ namespace AtomSampleViewer
         }
         else
         {
-            valueString = AZStd::string::format("%4.2f %s", m_displayedAverage, settings.m_units);
+            valueString = AZStd::string::format("avg:%4.2f %s | min:%4.2f %s | max:%4.2f %s ", m_displayedAverage, settings.m_units, m_displayedMinimum, settings.m_units, m_displayedMaximum, settings.m_units);
         }
 
         // Draw moving average of values first
         ImGui::PushStyleColor(ImGuiCol_PlotLines, ImVec4(0.6, 0.8, 0.9, 1.0));
-        ImGui::PlotLines("##Average", &m_averageLog[0], int32_t(m_averageLog.size()), 0, nullptr, 0.0f, m_displayedAverage * 2.0f, ImVec2(300, 50));
+        ImGui::PlotLines("##Average", &m_averageLog[0], int32_t(m_averageLog.size()), 0, nullptr, 0.0f, m_displayedAverage * 2.0f, ImVec2(400, 50));
         ImGui::PopStyleColor();
 
         // Draw individual value bars on top of it (with no background).
         ImGui::SetCursorPos(pos);
         ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0, 0, 0, 0));
-        ImGui::PlotHistogram("##Value", &m_valueLog[0], int32_t(m_valueLog.size()), 0, valueString.c_str(), 0.0f, m_displayedAverage * 2.0f, ImVec2(300, 50));
+        ImGui::PlotHistogram("##Value", &m_valueLog[0], int32_t(m_valueLog.size()), 0, valueString.c_str(), 0.0f, m_displayedAverage * 2.0f, ImVec2(400, 50));
         ImGui::PopStyleColor();
     }
 
