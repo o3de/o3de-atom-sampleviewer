@@ -121,6 +121,7 @@ namespace AtomSampleViewer
     {
         AZ::Render::SkyBoxFeatureProcessorInterface* skyboxFeatureProcessor = AZ::RPI::Scene::GetFeatureProcessorForEntityContextId<AZ::Render::SkyBoxFeatureProcessorInterface>(m_entityContextId);
         AZ::Render::DirectionalLightFeatureProcessorInterface* directionalLightFeatureProcessor = AZ::RPI::Scene::GetFeatureProcessorForEntityContextId<AZ::Render::DirectionalLightFeatureProcessorInterface>(m_entityContextId);
+        AZ::Render::ImageBasedLightFeatureProcessorInterface* iblFeatureProcessor = AZ::RPI::Scene::GetFeatureProcessorForEntityContextId<AZ::Render::ImageBasedLightFeatureProcessorInterface>(m_entityContextId);
 
         for (AZ::Render::DirectionalLightFeatureProcessorInterface::LightHandle& handle : m_lightHandles)
         {
@@ -136,6 +137,8 @@ namespace AtomSampleViewer
         }
 
         skyboxFeatureProcessor->Enable(false);
+
+        iblFeatureProcessor->Reset();
 
         AZ::TransformNotificationBus::MultiHandler::BusDisconnect();
         AZ::EntityBus::MultiHandler::BusDisconnect();

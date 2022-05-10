@@ -205,24 +205,34 @@ namespace AtomSampleViewer
         auto transform = AZ::Transform::CreateLookAt(
             location,
             AZ::Vector3::CreateZero());
+        
+        using Lux = AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Lux>;
+        using Candela = AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Candela>;
 
-        if (m_lightType)
-        {
-            AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Lux> directionalLightColor(AZ::Color::CreateZero());
-            AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Candela> diskLightColor(AZ::Color::CreateOne() * 500.f);
-            m_directionalLightFeatureProcessor->SetRgbIntensity(m_directionalLightHandle, directionalLightColor);
-            m_diskLightFeatureProcessor->SetRgbIntensity(m_diskLightHandle, diskLightColor);
-        }
-        else
-        {
-            AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Lux> directionalLightColor(AZ::Color::CreateOne() * 5.f);
-            AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Candela> diskLightColor(AZ::Color::CreateZero());
-            m_directionalLightFeatureProcessor->SetRgbIntensity(m_directionalLightHandle, directionalLightColor);
-            m_diskLightFeatureProcessor->SetRgbIntensity(m_diskLightHandle, diskLightColor);
-        }
+        Lux directionalLightColor{AZ::Color::CreateZero()};
+        Candela diskLightColor{AZ::Color::CreateZero()};
 
+        switch (static_cast<LightSelection>(m_lightType))
+        {
+        case LightSelection::Directional:
+            directionalLightColor = Lux{AZ::Color::CreateOne() * 5.f};
+            break;
+        case LightSelection::Spot:
+            diskLightColor = Candela{AZ::Color::CreateOne() * 500.f};
+            break;
+        case LightSelection::None:
+            // Keep initial 0 values
+            break;
+        default:
+            AZ_Assert(false, "Unhandled case");
+            break;
+        }
+        
+        m_diskLightFeatureProcessor->SetRgbIntensity(m_diskLightHandle, diskLightColor);
         m_diskLightFeatureProcessor->SetPosition(m_diskLightHandle, location);
         m_diskLightFeatureProcessor->SetDirection(m_diskLightHandle, transform.GetBasis(1));
+
+        m_directionalLightFeatureProcessor->SetRgbIntensity(m_directionalLightHandle, directionalLightColor);
         m_directionalLightFeatureProcessor->SetDirection(m_directionalLightHandle, transform.GetBasis(1));
 
         // Camera Configuration
@@ -305,8 +315,9 @@ namespace AtomSampleViewer
                 ImGui::Text("Lighting");
                 ImGui::Indent();
                 {
-                    ScriptableImGui::RadioButton("Directional Light", &m_lightType, 0);
-                    ScriptableImGui::RadioButton("Spot Light", &m_lightType, 1);
+                    ScriptableImGui::RadioButton("No Light", &m_lightType, 0);
+                    ScriptableImGui::RadioButton("Directional Light", &m_lightType, 1);
+                    ScriptableImGui::RadioButton("Spot Light", &m_lightType, 2);
                     ScriptableImGui::Checkbox("Auto Rotation", &m_lightAutoRotate);
                     ScriptableImGui::SliderAngle("Direction", &m_lightRotationAngle, 0, 360);
                 }

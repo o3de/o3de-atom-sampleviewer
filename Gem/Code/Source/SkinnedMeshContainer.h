@@ -39,7 +39,7 @@ namespace AtomSampleViewer
         struct RenderData
         {
             AZ::Transform m_rootTransform = AZ::Transform::CreateIdentity();
-            AZ::Render::SkinnedMeshRenderProxyInterfaceHandle m_skinnedMeshRenderProxy;
+            AZ::Render::SkinnedMeshFeatureProcessorInterface::SkinnedMeshHandle m_skinnedMeshHandle;
             AZStd::intrusive_ptr<AZ::Render::SkinnedMeshInstance> m_skinnedMeshInstance = nullptr;
             AZ::Data::Instance<AZ::RPI::Buffer> m_boneTransformBuffer = nullptr;
             AZStd::shared_ptr<AZ::Render::MeshFeatureProcessorInterface::MeshHandle> m_meshHandle;

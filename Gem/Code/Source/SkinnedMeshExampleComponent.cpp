@@ -46,7 +46,6 @@ namespace AtomSampleViewer
 
         AZ::TickBus::Handler::BusConnect();
         m_imguiSidebar.Activate();
-        CreatePlaneObject();
         ConfigureCamera();
         AddImageBasedLight();
     }
@@ -108,8 +107,9 @@ namespace AtomSampleViewer
         float segmentCountFloat = static_cast<float>(config.m_segmentCount);
         configWasModified |= ScriptableImGui::SliderFloat("Segments Per-Mesh", &segmentCountFloat, 2.0f, 2048.0f, "%.0f", ImGuiSliderFlags_Logarithmic);
         configWasModified |= ScriptableImGui::SliderInt("Vertices Per-Segment", &config.m_verticesPerSegment, 4, 2048);
-        configWasModified |= ScriptableImGui::SliderInt("Bones Per-Mesh", &config.m_boneCount, 2, 256);
-        configWasModified |= ScriptableImGui::SliderInt("Influences Per-Vertex", &config.m_influencesPerVertex, 1, 4);
+        configWasModified |= ScriptableImGui::SliderInt("Bones Per-Mesh", &config.m_boneCount, 4, 256);
+        configWasModified |= ScriptableImGui::SliderInt("Influences Per-Vertex", &config.m_influencesPerVertex, 4, 4);
+        configWasModified |= ScriptableImGui::SliderInt("Sub-mesh count", &config.m_subMeshCount, 1, 128);
 
         if (configWasModified)
         {
@@ -141,8 +141,8 @@ namespace AtomSampleViewer
         SkinnedMeshConfig config;
         config.m_segmentCount = 10;
         config.m_verticesPerSegment = 7;
-        config.m_boneCount = 5;
-        config.m_influencesPerVertex = 3;
+        config.m_boneCount = 4;
+        config.m_influencesPerVertex = 4;
         m_skinnedMeshContainer = AZStd::make_unique<SkinnedMeshContainer>(skinnedMeshFeatureProcessor, meshFeatureProcessor, config);
     }
 }

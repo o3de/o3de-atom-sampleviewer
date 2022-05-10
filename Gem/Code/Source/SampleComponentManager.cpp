@@ -82,6 +82,7 @@
 #include <DynamicMaterialTestComponent.h>
 #include <MaterialHotReloadTestComponent.h>
 #include <ExposureExampleComponent.h>
+#include <EyeMaterialExampleComponent.h>
 #include <SceneReloadSoakTestComponent.h>
 #include <LightCullingExampleComponent.h>
 #include <MeshExampleComponent.h>
@@ -299,10 +300,12 @@ namespace AtomSampleViewer
             NewFeaturesSample<DepthOfFieldExampleComponent>("DepthOfField"),
             NewFeaturesSample<DiffuseGIExampleComponent>("DiffuseGI", []() {return Utils::GetRHIDevice()->GetFeatures().m_rayTracing; }),
             NewFeaturesSample<ExposureExampleComponent>("Exposure"),
+            NewFeaturesSample<EyeMaterialExampleComponent>("EyeMaterial"),
             NewFeaturesSample<LightCullingExampleComponent>("LightCulling"),
             NewFeaturesSample<ParallaxMappingExampleComponent>("Parallax"),
             NewFeaturesSample<ShadowExampleComponent>("Shadow"),
             NewFeaturesSample<ShadowedSponzaExampleComponent>("ShadowedSponza"),
+            NewFeaturesSample<SkinnedMeshExampleComponent>("SkinnedMesh"),
             NewFeaturesSample<SsaoExampleComponent>("SSAO"),
             NewFeaturesSample<SSRExampleComponent>("SSR"),
             NewFeaturesSample<TonemappingExampleComponent>("Tonemapping"),
