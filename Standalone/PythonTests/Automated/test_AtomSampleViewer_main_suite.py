@@ -37,7 +37,7 @@ class TestAutomationMainSuite:
                            'AtomSampleViewerStandalone.exe '
                            f'--project-path={workspace.paths.project()} '
                            f'--rhi {rhi} '
-                           f'--runtestsuite scripts/{test_script} '
+                           f'--runtestsuite scripts/{test_script}c '
                            '--exitontestend')
 
         def teardown():

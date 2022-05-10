@@ -37,7 +37,7 @@ class TestPerformanceBenchmarksPeriodicSuite:
                            'AtomSampleViewerStandalone.exe '
                            f'--project-path={workspace.paths.project()} '
                            f'--rhi {rhi} '
-                           f'--runtestsuite scripts/{benchmark_script} '
+                           f'--runtestsuite scripts/{benchmark_script}c '
                            '--exitontestend')
 
         def teardown():
@@ -48,7 +48,7 @@ class TestPerformanceBenchmarksPeriodicSuite:
         process_utils.safe_check_call(cmd, stderr=subprocess.STDOUT, encoding='UTF-8', shell=True)
         try:
             expected_lines = ["Script: Capturing complete."]
-            atomsampleviewer_log_monitor.monitor_log_for_lines(expected_lines, timeout=180)
+            atomsampleviewer_log_monitor.monitor_log_for_lines(expected_lines, timeout=210)
 
             aggregator = BenchmarkDataAggregator(workspace, logger, 'periodic')
             aggregator.upload_metrics(rhi)
