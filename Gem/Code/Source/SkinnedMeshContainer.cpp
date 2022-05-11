@@ -27,7 +27,7 @@
 
 namespace
 {
-    static const char* const SkinnedMeshMaterial = "shaders/debugvertexnormals.azmaterial";
+    static const char* const SkinnedMeshMaterial = "materials/special/debugvertexstreams.azmaterial";
 }
 
 namespace AtomSampleViewer
@@ -223,7 +223,10 @@ namespace AtomSampleViewer
         // Release the per-instance data
         RenderData& renderData = m_skinnedMeshInstances[i];
         m_skinnedMeshFeatureProcessor->ReleaseSkinnedMesh(renderData.m_skinnedMeshHandle);
-        m_meshFeatureProcessor->ReleaseMesh(*renderData.m_meshHandle);
+        if (renderData.m_meshHandle)
+        {
+            m_meshFeatureProcessor->ReleaseMesh(*renderData.m_meshHandle);
+        }
 
         renderData.m_skinnedMeshInstance.reset();
         renderData.m_boneTransformBuffer.reset();
