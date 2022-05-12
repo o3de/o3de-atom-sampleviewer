@@ -95,7 +95,9 @@ namespace AtomSampleViewer
 
                 if (m_skinnedMeshInstances[i].m_boneTransformBuffer)
                 {
-                    AZ::Render::WriteToBuffer(m_skinnedMeshInstances[i].m_boneTransformBuffer->GetRHIBuffer(), m_skinnedMeshes[i].m_proceduralSkinnedMesh.m_boneMatrices);
+                    m_skinnedMeshInstances[i].m_boneTransformBuffer->UpdateData(
+                        m_skinnedMeshes[i].m_proceduralSkinnedMesh.m_boneMatrices.data(),
+                        m_skinnedMeshes[i].m_proceduralSkinnedMesh.m_boneMatrices.size() * sizeof(AZ::Matrix3x4));
                 }
             }
         }

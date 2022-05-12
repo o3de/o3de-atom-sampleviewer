@@ -103,9 +103,6 @@ namespace AtomSampleViewer
 
         AZ::RHI::Ptr<AZ::RHI::BufferView> m_constantBufferView;
 
-        // Cached Constant Buffer alignment queued from the device
-        uint32_t m_constantBufferAlighment = 0u;
-
         // --------------------------------------------------------
         // Pipeline state and SRG to be constructed from the shader
         // --------------------------------------------------------
