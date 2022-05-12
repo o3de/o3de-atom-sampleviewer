@@ -1,0 +1,61 @@
+{
+    "description": "This material type is for testing features realated to the 'Remixable Material Types' RFC. It is only here temporarily until we get StandardMultilayerPBR factored out using the new features. At that time, we can remove this material type.",
+    "version": 1,
+    "propertyLayout": {
+        "propertyGroups": [
+            {
+                "name": "blend",
+                "displayName": "Blend",
+                "description": "Controls how the layers blend together.",
+                "properties": [
+                    {
+                        "name": "texture",
+                        "displayName": "Blend Mask Texture",
+                        "description": "Grayscale image where black is layer 1 and white is layer 2.",
+                        "type": "Image",
+                        "defaultValue": "Textures/DefaultBlendMask_layers.png",
+                        "connection": {
+                            "type": "ShaderInput",
+                            "name": "m_blendMaskTexture"
+                        }
+                    }
+                ]
+            },
+            { 
+                "$import": { 
+                    "filename": "MinimalMultilayerPBR_LayerProperties.json", 
+                    "patch": {
+                        "name": "layer1",
+                        "displayName": "Layer 1",
+                        "shaderInputsPrefix":  "m_layer1_",
+                        "shaderOptionsPrefix":  "o_layer1_"
+                    }
+                }
+            },
+            { 
+                "$import": { 
+                    "filename": "MinimalMultilayerPBR_LayerProperties.json", 
+                    "patch": {
+                        "name": "layer2",
+                        "displayName": "Layer 2",
+                        "shaderInputsPrefix":  "m_layer2_",
+                        "shaderOptionsPrefix":  "o_layer2_"
+                    }
+                }
+            }
+        ]
+    },
+    "shaders": [
+        {
+            "file": "./MinimalMultilayerPBR_ForwardPass.shader"
+        },
+        {
+            "file": "Shaders/Shadow/Shadowmap.shader"
+        },
+        {
+            "file": "Shaders/Depth/DepthPass.shader"
+        }
+    ],
+    "functors": [
+    ]
+}

@@ -20,7 +20,6 @@
 #include <AzCore/Math/MatrixUtils.h>
 
 #include <AzCore/Component/Entity.h>
-#include <AzCore/Debug/EventTrace.h>
 
 #include <AzFramework/Components/CameraBus.h>
 
@@ -287,7 +286,7 @@ namespace AtomSampleViewer
             {
                 for (int32_t heightIdx = 0; heightIdx < m_objectCountDepth; heightIdx++)
                 {
-                    const int32_t objectCount = widthIdx * depthIdx * heightIdx;
+                    [[maybe_unused]] const int32_t objectCount = widthIdx * depthIdx * heightIdx;
                     AZ_Assert(static_cast<uint32_t>(objectCount) < m_objectCount, "Spawning too many objects");
 
                     // Calculate the object position

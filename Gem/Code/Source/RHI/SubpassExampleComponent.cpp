@@ -186,7 +186,7 @@ namespace AtomSampleViewer
             ModelType_Suzanne,
         };
 
-        auto setModelType = [](AZStd::array_view<ModelType> types, AZStd::vector<ModelData>& modelDataList)
+        auto setModelType = [](AZStd::span<const ModelType> types, AZStd::vector<ModelData>& modelDataList)
         {
             modelDataList.resize(types.size());
             for (uint32_t i = 0; i < modelDataList.size(); ++i)
@@ -195,7 +195,7 @@ namespace AtomSampleViewer
             }
         };
 
-        setModelType(AZStd::array_view<ModelType>(&opaqueModels[0], AZ_ARRAY_SIZE(opaqueModels)), m_opaqueModelsData);
+        setModelType(AZStd::span<const ModelType>(&opaqueModels[0], AZ_ARRAY_SIZE(opaqueModels)), m_opaqueModelsData);
     }
 
     void SubpassExampleComponent::LoadShaders()

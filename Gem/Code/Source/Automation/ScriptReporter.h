@@ -13,7 +13,8 @@
 #include <Atom/Utils/ImageComparison.h>
 #include <Automation/ImageComparisonConfig.h>
 #include <Utils/ImGuiMessageBox.h>
-#include <Utils/FileIOErrorHandler.h>
+#include <Atom/Utils/PngFile.h>
+#include <imgui/imgui.h>
 
 namespace AtomSampleViewer
 {
@@ -45,6 +46,11 @@ namespace AtomSampleViewer
     class ScriptReporter
     {
     public:
+        // currently set to track the ScriptReport index and the ScreenshotTestInfo index.
+        using ReportIndex = AZStd::pair<size_t, size_t>;
+
+        static constexpr const char* TestResultsFolder = "TestResults";
+        static constexpr const char* UserFolder = "user";
 
         //! Set the list of available tolerance levels, so the report can suggest an alternate level that matches the actual results.
         void SetAvailableToleranceLevels(const AZStd::vector<ImageComparisonToleranceLevel>& toleranceLevels);
@@ -78,6 +84,7 @@ namespace AtomSampleViewer
         //! This displays all the collected script reporting data, provides links to tools for analyzing data like
         //! viewing screenshot diffs. It can be left open during processing and will update in real-time.
         void OpenReportDialog();
+        void HideReportDialog();
 
         //! Called every frame to update the ImGui dialog
         void TickImGui();
@@ -85,8 +92,21 @@ namespace AtomSampleViewer
         //! Returns true if there are any errors or asserts in the script report
         bool HasErrorsAssertsInReport() const;
 
-        // For exporting test results
-        void ExportTestResults();
+        struct ScriptResultsSummary
+        {
+            uint32_t m_totalAsserts = 0;
+            uint32_t m_totalErrors = 0;
+            uint32_t m_totalWarnings = 0;
+            uint32_t m_totalScreenshotsCount = 0;
+            uint32_t m_totalScreenshotsFailed = 0;
+            uint32_t m_totalScreenshotWarnings = 0;
+        };
+
+        //! Displays the script results summary in ImGui.
+        void DisplayScriptResultsSummary();
+
+        //! Retrieves the current script result summary.
+        const ScriptResultsSummary& GetScriptResultSummary() const;
 
         struct ImageComparisonResult
         {
@@ -175,10 +195,19 @@ namespace AtomSampleViewer
 
             AZStd::vector<ScreenshotTestInfo> m_screenshotTests;
         };
-        
+
         const AZStd::vector<ScriptReport>& GetScriptReport() const { return m_scriptReports; }
 
+        // For exporting test results
+        void ExportTestResults();
+        void ExportImageDiff(const char* filePath, const ScreenshotTestInfo& screenshotTest);
+        AZStd::string ExportImageDiff(const ScriptReport& scriptReport, const ScreenshotTestInfo& screenshotTest);
+
+        void SortScriptReports();
+
     private:
+        static const ImGuiTreeNodeFlags FlagDefaultOpen = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_DefaultOpen;
+        static const ImGuiTreeNodeFlags FlagDefaultClosed = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
         // Reports a script error using standard formatting that matches ScriptManager
         enum class TraceLevel
@@ -232,16 +261,38 @@ namespace AtomSampleViewer
         const ImageComparisonToleranceLevel* FindBestToleranceLevel(float diffScore, bool filterImperceptibleDiffs) const;
 
         void ShowReportDialog();
-
+        void ShowScreenshotTestInfoTreeNode(const AZStd::string& header, ScriptReport& scriptReport, ScreenshotTestInfo& screenshotResult);
         void ShowDiffButton(const char* buttonLabel, const AZStd::string& imagePathA, const AZStd::string& imagePathB);
 
         // Generates a path to the exported test results file.
+        AZStd::string GenerateTimestamp() const;
+        AZStd::string GenerateAndCreateExportedImageDiffPath(const ScriptReport& scriptReport, const ScreenshotTestInfo& screenshotTest) const;
         AZStd::string GenerateAndCreateExportedTestResultsPath() const;
+
+        // Generates a diff between two images of the same size.
+        void GenerateImageDiff(AZStd::span<const uint8_t> img1, AZStd::span<const uint8_t> img2, AZStd::vector<uint8_t>& buffer);
 
         ScriptReport* GetCurrentScriptReport();
 
+        AZStd::string SeeConsole(uint32_t issueCount, const char* searchString);
+        AZStd::string SeeBelow(uint32_t issueCount);
+        void HighlightTextIf(bool shouldSet, ImVec4 color);
+        void ResetTextHighlight();
+        void HighlightTextFailedOrWarning(bool isFailed, bool isWarning);
+
+        struct HighlightColorSettings
+        {
+            ImVec4 m_highlightPassed;
+            ImVec4 m_highlightFailed;
+            ImVec4 m_highlightWarning;
+
+            void UpdateColorSettings();
+        };
+
+        AZStd::multimap<float, ReportIndex, AZStd::greater<float>> m_descendingThresholdReports;
+        bool m_showReportsSortedByThreshold = true;
+
         ImGuiMessageBox m_messageBox;
-        FileIOErrorHandler m_fileIoErrorHandler;
 
         AZStd::vector<ImageComparisonToleranceLevel> m_availableToleranceLevels;
         AZStd::string m_invalidationMessage;
@@ -249,10 +300,19 @@ namespace AtomSampleViewer
         AZStd::vector<ScriptReport> m_scriptReports; //< Tracks errors for the current active script
         AZStd::vector<size_t> m_currentScriptIndexStack; //< Tracks which of the scripts in m_scriptReports is currently active
         bool m_showReportDialog = false;
+        bool m_colorHasBeenSet = false;
         DisplayOption m_displayOption = DisplayOption::AllResults;
         bool m_forceShowUpdateButtons = false; //< By default, the "Update" buttons are visible only for failed screenshots. This forces them to be visible.
+        bool m_forceShowExportPngDiffButtons = false; //< By default, "Export Png Diff" buttons are visible only for failed screenshots. This forces them to be visible.
         AZStd::string m_officialBaselineSourceFolder; //< Used for updating official baseline screenshots
         AZStd::string m_exportedTestResultsPath = "Click the 'Export Test Results' button."; //< Path to exported test results file (if exported).
+        AZStd::string m_uniqueTimestamp;
+        HighlightColorSettings m_highlightSettings;
+        ScriptResultsSummary m_resultsSummary;
+
+        // Flags set and used by ShowReportDialog()
+        bool m_showAll;
+        bool m_showWarnings;
     };
 
 } // namespace AtomSampleViewer

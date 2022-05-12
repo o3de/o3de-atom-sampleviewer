@@ -20,7 +20,7 @@ ENGINE_ORGANIZATION_NAME = 'o3de'
 ENGINE_BRANCH_DEFAULT = "${env.BRANCH_DEFAULT}" ?: "${env.BRANCH_NAME}"
 
 // Branches with build snapshots
-BUILD_SNAPSHOTS = ['development', 'stabilization/2110']
+BUILD_SNAPSHOTS = ['development', 'stabilization/2205']
 
 // Build snapshots with empty snapshot (for use with 'SNAPSHOT' pipeline parameter)
 BUILD_SNAPSHOTS_WITH_EMPTY = BUILD_SNAPSHOTS + ''
@@ -850,7 +850,8 @@ try {
     def someBuildHappened = false
 
     // Build and Post-Build Testing Stage
-    def buildConfigs = [:]
+    def enginebuildConfigs = [:]
+    def platformBuildConfigs =[:]
 
     // Platform Builds run on EC2
     pipelineConfig.platforms.each { platform ->
@@ -858,19 +859,41 @@ try {
             if (IsJobEnabled(branchName, build_job, pipelineName, platform.key)) {   // User can filter jobs, jobs are tagged by pipeline
                 def envVars = GetBuildEnvVars(platform.value.PIPELINE_ENV ?: EMPTY_JSON, build_job.value.PIPELINE_ENV ?: EMPTY_JSON, pipelineName)
                 envVars['JOB_NAME'] = "${branchName}_${platform.key}_${build_job.key}" // backwards compatibility, some scripts rely on this
-                envVars['CMAKE_LY_PROJECTS'] = "../${PROJECT_REPOSITORY_NAME}"
                 def nodeLabel = envVars['NODE_LABEL']
                 someBuildHappened = true
 
-                buildConfigs["${platform.key} [${build_job.key}]"] = CreateBuildJobs(pipelineConfig, platform, build_job, envVars, branchName, pipelineName, repositoryName, projectName)
+                enginebuildConfigs["${platform.key} [${build_job.key}]"] = CreateBuildJobs(pipelineConfig, platform, build_job, envVars, branchName, pipelineName, repositoryName, projectName)
+            }
+        }
+    }
+
+    // Project Platform Builds run on EC2
+    pipelineConfig.platforms.each { platform ->
+        platform.value.build_types.each { build_job ->
+            if (IsJobEnabled(branchName, build_job, pipelineName, platform.key)) {   // User can filter jobs, jobs are tagged by pipeline
+                def envVars = GetBuildEnvVars(platform.value.PIPELINE_ENV ?: EMPTY_JSON, build_job.value.PIPELINE_ENV ?: EMPTY_JSON, pipelineName)
+                envVars['JOB_NAME'] = "${branchName}_${platform.key}_${build_job.key}" // backwards compatibility, some scripts rely on this
+                def nodeLabel = envVars['NODE_LABEL']
+                someBuildHappened = true
+
+                envVars['CMAKE_LY_PROJECTS'] = "../${PROJECT_REPOSITORY_NAME}"
+                platformBuildConfigs["${platform.key} [${build_job.key}]"] = CreateBuildJobs(pipelineConfig, platform, build_job, envVars, branchName, pipelineName, repositoryName, projectName)
             }
         }
     }
 
     timestamps {
 
-        stage('Build') {
-            parallel buildConfigs // Run parallel builds
+        stage("${ENGINE_REPOSITORY_NAME} Build") {
+            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                parallel enginebuildConfigs // Run parallel builds
+            }
+        }
+        
+        stage("${PROJECT_REPOSITORY_NAME} Build") {
+            catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                parallel platformBuildConfigs // Run parallel builds
+            }
         }
 
         echo 'All builds successful'

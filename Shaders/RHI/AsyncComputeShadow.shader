@@ -5,9 +5,8 @@
         "Depth" : { "Enable" : true, "CompareFunc" : "LessEqual" }
     },
 
-    "CompilerHints":
-    {
-        "DxcGenerateDebugInfo" : "True" 
+    "AddBuildArguments": {
+        "debug": true
     },
 
     "ProgramSettings":

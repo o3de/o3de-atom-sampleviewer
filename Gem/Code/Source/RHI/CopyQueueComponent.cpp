@@ -210,8 +210,6 @@ namespace AtomSampleViewer
                 {
                     RHI::ImageScopeAttachmentDescriptor desc;
                     desc.m_attachmentId = m_outputAttachmentId;
-                    desc.m_loadStoreAction.m_clearValue = RHI::ClearValue::CreateVector4Float(0.0f, 0.0, 0.0, 0.0);
-                    desc.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Clear;
                     frameGraph.UseColorAttachment(desc);
                 }
 

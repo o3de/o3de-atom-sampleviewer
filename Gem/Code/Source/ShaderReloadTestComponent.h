@@ -21,7 +21,6 @@
 
 #include <Utils/ImGuiSidebar.h>
 #include <Utils/Utils.h>
-#include <Utils/FileIOErrorHandler.h>
 
 namespace AtomSampleViewer
 {
@@ -87,8 +86,6 @@ namespace AtomSampleViewer
         // Validates if the given color is the expected color, and prepares for another
         // render output capture and validation.
         void ValidatePixelColor(uint32_t color);
-
-        FileIOErrorHandler m_fileIoErrorHandler;
 
         //! Async asset load. Used to guarantee that "Fullscreen.azshader" exists before
         //! instantiating the FullscreenTriangle.pass.

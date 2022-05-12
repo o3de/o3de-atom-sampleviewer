@@ -59,11 +59,6 @@ namespace AtomSampleViewer
         // shader ball model
         AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_meshHandle;
 
-        // Not owned by this sample, we look this up based on the config from the
-        // SampleComponentManager
-        AZ::EntityId m_cameraEntityId;
-        AzFramework::EntityContextId m_entityContextId;
-
         AZ::Render::MeshFeatureProcessorInterface* m_meshFeatureProcessor = nullptr;
         Utils::DefaultIBL m_defaultIbl;
 

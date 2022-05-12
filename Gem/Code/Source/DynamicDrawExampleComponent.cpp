@@ -93,7 +93,7 @@ namespace AtomSampleViewer
 
         AZ_Assert(m_dynamicDraw->IsVertexSizeValid(sizeof(ExampleVertex)), "Invalid vertex format");
 
-        // Dynamic draw for pass        
+        // Dynamic draw for pass
         m_dynamicDraw1ForPass = RPI::DynamicDrawInterface::Get()->CreateDynamicDrawContext();
         m_dynamicDraw2ForPass = RPI::DynamicDrawInterface::Get()->CreateDynamicDrawContext();
 
@@ -111,7 +111,7 @@ namespace AtomSampleViewer
         m_dynamicDraw1ForPass->SetOutputScope(auxGeomPass);
         m_dynamicDraw1ForPass->EndInit();
 
-        m_dynamicDraw2ForPass->InitShader(shaderAsset);        
+        m_dynamicDraw2ForPass->InitShader(shaderAsset);
         m_dynamicDraw2ForPass->InitVertexFormat(vertexChannels);
         m_dynamicDraw2ForPass->AddDrawStateOptions(RPI::DynamicDrawContext::DrawStateOptions::BlendMode
             | RPI::DynamicDrawContext::DrawStateOptions::DepthState);
@@ -371,7 +371,7 @@ namespace AtomSampleViewer
             blendState.m_enable = false;
             m_dynamicDraw->SetTarget0BlendState(blendState);
             m_dynamicDraw1ForPass->SetTarget0BlendState(blendState);
-            m_dynamicDraw2ForPass->SetTarget0BlendState(blendState);                        
+            m_dynamicDraw2ForPass->SetTarget0BlendState(blendState);
 
             // draw two red quads via view
             drawSrg = m_dynamicDraw->NewDrawSrg();

@@ -381,15 +381,18 @@ namespace AtomSampleViewer
         {
             AZ::Transform groundPlaneTransform = AZ::Transform::CreateIdentity();
 
-            AZ::Vector3 modelCenter;
-            float modelRadius;
-            m_modelAsset->GetAabb().GetAsSphere(modelCenter, modelRadius);
+            if (m_modelAsset)
+            {
+                AZ::Vector3 modelCenter;
+                float modelRadius;
+                m_modelAsset->GetAabb().GetAsSphere(modelCenter, modelRadius);
 
-            static const float GroundPlaneRelativeScale = 4.0f;
-            static const float GroundPlaneOffset = 0.01f;
+                static const float GroundPlaneRelativeScale = 4.0f;
+                static const float GroundPlaneOffset = 0.01f;
 
-            groundPlaneTransform.SetUniformScale(GroundPlaneRelativeScale * modelRadius);
-            groundPlaneTransform.SetTranslation(AZ::Vector3(0.0f, 0.0f, m_modelAsset->GetAabb().GetMin().GetZ() - GroundPlaneOffset));
+                groundPlaneTransform.SetUniformScale(GroundPlaneRelativeScale * modelRadius);
+                groundPlaneTransform.SetTranslation(AZ::Vector3(0.0f, 0.0f, m_modelAsset->GetAabb().GetMin().GetZ() - GroundPlaneOffset));
+            }
 
             GetMeshFeatureProcessor()->SetTransform(m_groundPlandMeshHandle, groundPlaneTransform);
         }
@@ -402,7 +405,6 @@ namespace AtomSampleViewer
 
     void MeshExampleComponent::OnEntityDestruction(const AZ::EntityId& entityId)
     {
-        OnLightingPresetEntityShutdown(entityId);
         AZ::EntityBus::MultiHandler::BusDisconnect(entityId);
     }
 

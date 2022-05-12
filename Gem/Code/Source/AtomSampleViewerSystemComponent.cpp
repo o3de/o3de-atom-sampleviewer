@@ -17,10 +17,12 @@
 #include <AzCore/Asset/AssetManager.h>
 #include <AzCore/Serialization/SerializeContext.h>
 #include <AzCore/Component/Entity.h>
+#include <AzCore/IO/Path/Path.h>
 #include <AzCore/IO/SystemFile.h>
 
 #include <AzFramework/Input/Buses/Requests/InputSystemCursorRequestBus.h>
 #include <AzFramework/Input/Devices/Mouse/InputDeviceMouse.h>
+#include <AzFramework/IO/LocalFileIO.h>
 
 #include <Atom/Bootstrap/DefaultWindowBus.h>
 
@@ -35,6 +37,8 @@
 #include <Utils/ImGuiSidebar.h>
 #include <Utils/ImGuiSaveFilePath.h>
 #include <Utils/Utils.h>
+
+AZ_DEFINE_BUDGET(AtomSampleViewer);
 
 namespace AtomSampleViewer
 {
@@ -55,6 +59,10 @@ namespace AtomSampleViewer
         StacksShaderInputFunctor::Reflect(context);
 
         ImageComparisonConfig::Reflect(context);
+
+        // Abstract base components is used by multiple components and needs to be reflected in a single location.
+        CommonSampleComponentBase::Reflect(context);
+        EntityLatticeTestComponent::Reflect(context);
     }
 
     void AtomSampleViewerSystemComponent::PerfMetrics::Reflect(AZ::ReflectContext* context)
@@ -68,9 +76,6 @@ namespace AtomSampleViewer
                 ->Field("SecondsToRender", &PerfMetrics::m_timeToFirstRenderSeconds)
                 ;
         }
-
-        // Abstract base component is used by multiple components and needs to be reflected in a single location.
-        EntityLatticeTestComponent::Reflect(context);
     }
 
 
@@ -224,6 +229,8 @@ namespace AtomSampleViewer
 
     void AtomSampleViewerSystemComponent::LogPerfMetrics() const
     {
-        AZ::Utils::SaveObjectToFile("metrics.xml", AZ::DataStream::ST_XML, &m_perfMetrics);
+        AZ::IO::FixedMaxPath resolvedPath;
+        AZ::IO::LocalFileIO::GetInstance()->ResolvePath(resolvedPath, "@user@/PerformanceMetrics.xml");
+        AZ::Utils::SaveObjectToFile(resolvedPath.String(), AZ::DataStream::ST_XML, &m_perfMetrics);
     }
 } // namespace AtomSampleViewer

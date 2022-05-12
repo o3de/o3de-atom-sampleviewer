@@ -56,7 +56,7 @@ namespace AtomSampleViewer
         m_meshHandle = m_meshFeatureProcessor->AcquireMesh(AZ::Render::MeshHandleDescriptor{ meshAsset }, materials);
         m_meshFeatureProcessor->SetTransform(m_meshHandle, AZ::Transform::CreateIdentity());
         
-        AZ::Debug::CameraControllerRequestBus::Event(m_cameraEntityId, &AZ::Debug::CameraControllerRequestBus::Events::Enable,
+        AZ::Debug::CameraControllerRequestBus::Event(GetCameraEntityId(), &AZ::Debug::CameraControllerRequestBus::Events::Enable,
             azrtti_typeid<AZ::Debug::ArcBallControllerComponent>());
 
         // Add an Image based light.
@@ -107,7 +107,7 @@ namespace AtomSampleViewer
         // add the checker board pipeline
         AZ::RPI::RenderPipelineDescriptor pipelineDesc;
         pipelineDesc.m_mainViewTagName = "MainCamera";
-        pipelineDesc.m_name = "Checkerboard";
+        pipelineDesc.m_name = "CheckerboardPipeline";
         pipelineDesc.m_rootPassTemplate = "CheckerboardPipeline";
         m_cbPipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
         m_scene->AddRenderPipeline(m_cbPipeline);
