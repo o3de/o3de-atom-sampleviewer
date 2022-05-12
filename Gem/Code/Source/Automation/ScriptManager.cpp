@@ -1141,14 +1141,16 @@ namespace AtomSampleViewer
         s_instance->m_scriptOperations.push(AZStd::move(func));
     }
 
-    void ScriptManager::Script_Print(const AZStd::string& message)
+    void ScriptManager::Script_Print(const AZStd::string& message [[maybe_unused]])
     {
+#ifndef RELEASE // AZ_TracePrintf is a no-op in release builds
         auto func = [message]()
         {
             AZ_TracePrintf("Automation", "Script: %s\n", message.c_str());
         };
 
         s_instance->m_scriptOperations.push(AZStd::move(func));
+#endif
     }
 
     AZStd::string ScriptManager::Script_ResolvePath(const AZStd::string& path)
