@@ -1371,7 +1371,7 @@ namespace AtomSampleViewer
     {
         auto operation = [command]()
         {
-            AzFramework::ConsoleRequestBus::Broadcast(&AzFramework::ConsoleRequests::ExecuteConsoleCommand, command.c_str());
+            AZ::Interface<AZ::IConsole>::Get()->PerformCommand(command.c_str());
         };
 
         s_instance->m_scriptOperations.push(AZStd::move(operation));
