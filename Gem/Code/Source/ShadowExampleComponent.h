@@ -20,7 +20,6 @@
 #include <AzCore/Component/TickBus.h>
 
 #include <Utils/ImGuiSidebar.h>
-#include <Utils/ImGuiMaterialDetails.h>
 #include <Utils/Utils.h>
 
 namespace AtomSampleViewer
@@ -175,7 +174,7 @@ namespace AtomSampleViewer
         int m_filteringSampleCountsPositional[PositionalLightCount] = { 32, 32, 32 };
 
         ImGuiSidebar m_imguiSidebar;
-        ImGuiMaterialDetails m_imguiMaterialDetails;
+        AZ::Render::ImGuiMaterialDetails m_imguiMaterialDetails;
 
         // original camera configuration
         float m_originalFarClipDistance = 0.f;

@@ -15,7 +15,6 @@
 #include <CommonSampleComponentBase.h>
 #include <Utils/ImGuiSidebar.h>
 #include <Utils/ImGuiAssetBrowser.h>
-#include <Utils/ImGuiMaterialDetails.h>
 #include <Utils/ImGuiHistogramQueue.h>
 
 namespace AtomSampleViewer
@@ -52,7 +51,7 @@ namespace AtomSampleViewer
         static constexpr uint32_t FrameTimeLogSize = 50;
         static constexpr uint32_t PassTimeLogSize = 50;
         ImGuiSidebar m_imguiSidebar;
-        ImGuiMaterialDetails m_imguiMaterialDetails;
+        AZ::Render::ImGuiMaterialDetails m_imguiMaterialDetails;
         ImGuiAssetBrowser m_materialBrowser;
         ImGuiHistogramQueue m_imGuiFrameTimer;
         ImGuiHistogramQueue m_imGuiForwardPassTimer;

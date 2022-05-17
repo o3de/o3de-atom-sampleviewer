@@ -13,7 +13,6 @@
 #include <Utils/Utils.h>
 
 #include <Utils/ImGuiSidebar.h>
-#include <Utils/ImGuiMaterialDetails.h>
 
 namespace AtomSampleViewer
 {
@@ -101,7 +100,7 @@ namespace AtomSampleViewer
         float m_rotationEuler[3];
 
         ImGuiSidebar m_imguiSidebar;
-        ImGuiMaterialDetails m_imguiMaterialDetails;
+        AZ::Render::ImGuiMaterialDetails m_imguiMaterialDetails;
         
     };
 } // namespace AtomSampleViewer
