@@ -64,6 +64,7 @@ tests= {
     RunScriptWrapper('scripts/multiscene.bv.luac'),
     RunScriptWrapper('scripts/shadowtest.bv.luac'),
     RunScriptWrapper('scripts/shadowedsponzatest.bv.luac'),
+    RunScriptWrapper('scripts/skinnedmesh.bv.luac'),
     RunScriptWrapper('scripts/RenderTargetTexture.bv.luac'),
     RunScriptWrapper('scripts/PassTree.bv.luac'),
     RunScriptWrapper('scripts/ReadbackTest.bv.luac'),
