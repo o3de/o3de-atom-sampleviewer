@@ -19,6 +19,10 @@ ResizeViewport(500, 500)
 
 SelectImageComparisonToleranceLevel("Level E")
 
+-- The default ShaderVariantAsyncLoader service loop delay is too long and would require this
+-- test script to use too long in IdleSeconds()
+ExecuteConsoleCommand("r_ShaderVariantAsyncLoader_ServiceLoopDelayOverride_ms 10")
+
 function SetColorRed()
     AssetTracking_Start()
     AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.material")
@@ -33,7 +37,7 @@ function SetBlendingOn()
     AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.materialtype")
     AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.shader")
     AssetTracking_IdleUntilExpectedAssetsFinish(10)
-    IdleSeconds(1) -- Idle for a bit to give time for the assets to reload
+    IdleSeconds(0.25) -- Idle for a bit to give time for the assets to reload
 end
 
 function SetBlendingOff()
@@ -42,7 +46,7 @@ function SetBlendingOff()
     AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.materialtype")
     AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.shader")
     AssetTracking_IdleUntilExpectedAssetsFinish(10)
-    IdleSeconds(1) -- Idle for a bit to give time for the assets to reload
+    IdleSeconds(0.25) -- Idle for a bit to give time for the assets to reload
 end
 
 CaptureScreenshot(g_screenshotOutputFolder .. '/01_Default.png')
@@ -76,7 +80,7 @@ SetImguiValue('Vertical Pattern', true)
 AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.materialtype")
 AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.shader")
 AssetTracking_IdleUntilExpectedAssetsFinish(10)
-IdleSeconds(1) -- Idle for a bit to give time for the assets to reload
+IdleSeconds(0.25) -- Idle for a bit to give time for the assets to reload
 CaptureScreenshot(g_screenshotOutputFolder .. '/06_VerticalPattern.png')
 
 SetBlendingOn()
@@ -87,7 +91,7 @@ AssetTracking_Start()
 SetImguiValue('ShaderVariantList/All', true)
 AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.shadervariantlist", 3) -- Waiting for 3 products, the list asset and two variant assets
 AssetTracking_IdleUntilExpectedAssetsFinish(10)
-IdleSeconds(1) -- Idle for a bit to give time for the assets to reload
+IdleSeconds(0.25) -- Idle for a bit to give time for the assets to reload
 CaptureScreenshot(g_screenshotOutputFolder .. '/08_Variants_All.png')
 
 -- This will switch to showing the "Shader Variant: Root" message
@@ -125,22 +129,17 @@ AssetTracking_Start()
 SetImguiValue('ShaderVariantList/All', true)
 AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.shadervariantlist", 3) -- Waiting for 3 products, the list asset and two variant assets
 AssetTracking_IdleUntilExpectedAssetsFinish(10)
-IdleSeconds(1) -- Idle for a bit to give time for the assets to reload
+IdleSeconds(0.25) -- Idle for a bit to give time for the assets to reload
 CaptureScreenshot(g_screenshotOutputFolder .. '/13_Variants_All.png')
 -- Now that the material is using a fully-baked variant, modify the .azsl file to force *everything* to rebuild. In the failure case, the runtime
 -- holds onto the old fully-baked variant even though a new root variant is available. In the correct case, the root variant should take priority
 -- over the fully-baked variant because it is more recent.
 AssetTracking_Start()
 SetImguiValue('Horizontal Pattern', true)
--- Note that here we explicitly do NOT wait for HotReloadTest.shadervariantlist even though the ShaderVariantAssets will be rebuild here too; 
--- part of this test is to ensure the updated shader code is used as soon as the root variant is available.
 AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.materialtype")
 AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.shader")
+AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.shadervariantlist", 3) -- Waiting for 3 products, the list asset and two variant assets
 AssetTracking_IdleUntilExpectedAssetsFinish(10)
--- We want this idle to be short enough that the ShaderVariantAssets don't have time to finish building before we take the screenshot, as part
--- of the validation that the root variant gets applied asap. But it also needs to be long enough to account for some delay between the
--- AssetTracking utility and the asset system triggering the reload. We should avoid increasing this if possible (but maybe we'll have no 
--- choice ... we'll see)
 IdleSeconds(0.25) -- Idle for a bit to give time for the assets to reload
 CaptureScreenshot(g_screenshotOutputFolder .. '/14_HorizontalPattern.png')
 
@@ -150,3 +149,5 @@ SetBlendingOff()
 SetColorRed()
 CaptureScreenshot(g_screenshotOutputFolder .. '/15_Red_AfterShaderReload.png')
 
+-- Clear the service loop override back to the default delay
+ExecuteConsoleCommand("r_ShaderVariantAsyncLoader_ServiceLoopDelayOverride_ms 0")

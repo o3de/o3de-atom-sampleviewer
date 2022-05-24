@@ -334,19 +334,32 @@ namespace AtomSampleViewer
 
         if (m_material)
         {
-            const ShaderVariantId variantId = m_material->GetShaderCollection()[0].GetShaderVariantId();
-            auto searchResult = m_material->GetShaderCollection()[0].GetShaderAsset()->FindVariantStableId(variantId);
-            if (searchResult.IsFullyBaked())
+            const Render::MeshDrawPacketLods& drawPackets = GetMeshFeatureProcessor()->GetDrawPackets(m_meshHandle);
+            if (!drawPackets.empty())
             {
-                shaderVariantStatus = ShaderVariantStatus::FullyBaked;
-            }
-            else if (searchResult.IsRoot())
-            {
-                shaderVariantStatus = ShaderVariantStatus::Root;
-            }
-            else
-            {
-                shaderVariantStatus = ShaderVariantStatus::PartiallyBaked;
+                AZ_Assert(drawPackets.size() == 1, "Expected exactly 1 LOD");
+                AZ_Assert(drawPackets[0].size() == 1, "Expected exactly 1 mesh");
+                AZ_Assert(drawPackets[0][0].GetMaterial() == m_material, "MeshDrawPacket didn't have the expected material.");
+
+                const RPI::MeshDrawPacket::ShaderList& activeShaderList = drawPackets[0][0].GetActiveShaderList();
+
+                AZ_Assert(activeShaderList.size() == 1, "Expected exactly 1 active shader");
+
+                const ShaderVariantId activeVariantId = activeShaderList[0].m_activeShaderVariantId;
+                ShaderOptionGroup activeShaderOptions{activeShaderList[0].m_shader->GetAsset()->GetShaderOptionGroupLayout(), activeVariantId};
+
+                if (activeShaderOptions.IsFullySpecified())
+                {
+                    shaderVariantStatus = ShaderVariantStatus::FullyBaked;
+                }
+                else if (activeVariantId == activeShaderList[0].m_shader->GetVariant(RootShaderVariantStableId).GetShaderVariantId())
+                {
+                    shaderVariantStatus = ShaderVariantStatus::Root;
+                }
+                else
+                {
+                    shaderVariantStatus = ShaderVariantStatus::PartiallyBaked;
+                }
             }
         }
 
