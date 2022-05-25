@@ -47,7 +47,12 @@ namespace AtomSampleViewer
                                 {
                                     AZ::RPI::ShaderVariantId requestedVariantId = shaderItem.GetShaderVariantId();
                                     AZ::Data::Asset<AZ::RPI::ShaderVariantAsset> selectedVariantAsset =
-                                        shaderItem.GetShaderAsset()->GetVariant(requestedVariantId);
+                                        shaderItem.GetShaderAsset()->GetVariantAsset(requestedVariantId);
+
+                                    if (!selectedVariantAsset)
+                                    {
+                                        selectedVariantAsset = shaderItem.GetShaderAsset()->GetRootVariantAsset();
+                                    }
 
                                     if (selectedVariantAsset)
                                     {
