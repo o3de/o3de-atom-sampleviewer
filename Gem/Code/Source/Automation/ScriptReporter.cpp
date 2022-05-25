@@ -23,6 +23,11 @@ namespace AtomSampleViewer
     {
         "All Results", "Warnings & Errors", "Errors Only",
     };
+    
+    static const char* SortOptions[] =
+    {
+        "Sort by Script", "Sort by Official Baseline Diff Score", "Sort by Local Baseline Diff Score",
+    };
 
     namespace ScreenshotPaths
     {
@@ -148,7 +153,8 @@ namespace AtomSampleViewer
     void ScriptReporter::Reset()
     {
         m_scriptReports.clear();
-        m_descendingThresholdReports.clear();
+        m_reportsSortedByOfficialBaslineScore.clear();
+        m_reportsSortedByLocaBaslineScore.clear();
         m_currentScriptIndexStack.clear();
         m_invalidationMessage.clear();
         m_uniqueTimestamp = GenerateTimestamp();
@@ -422,7 +428,10 @@ namespace AtomSampleViewer
             ImGui::Combo("Display", &displayOption, DiplayOptions, AZ_ARRAY_SIZE(DiplayOptions));
             m_displayOption = (DisplayOption)displayOption;
 
-            ImGui::Checkbox("Show Script Reports Sorted By Threshold", &m_showReportsSortedByThreshold);
+            int sortOption = m_currentSortOption;
+            ImGui::Combo("Sort Results", &sortOption, SortOptions, AZ_ARRAY_SIZE(SortOptions));
+            m_currentSortOption = (SortOption)sortOption;
+
             ImGui::Checkbox("Force Show 'Update' Buttons", &m_forceShowUpdateButtons);
             ImGui::Checkbox("Force Show 'Export Png Diff' Buttons", &m_forceShowExportPngDiffButtons);
 
@@ -431,7 +440,7 @@ namespace AtomSampleViewer
 
             ImGui::Separator();
 
-            if (!m_showReportsSortedByThreshold)
+            if (m_currentSortOption == SortOption::Unsorted)
             {
                 for (ScriptReport& scriptReport : m_scriptReports)
                 {
@@ -540,24 +549,49 @@ namespace AtomSampleViewer
             }
             else
             {
-                for (const auto& [threshold, reportIndex] : m_descendingThresholdReports)
+                const SortedReportIndexMap* sortedReportMap = nullptr;
+                if (m_currentSortOption == SortOption::OfficialBaselineDiffScore)
                 {
-                    ScriptReport& scriptReport = m_scriptReports[reportIndex.first];
-                    ScreenshotTestInfo& screenshotResult = scriptReport.m_screenshotTests[reportIndex.second];
+                    sortedReportMap = &m_reportsSortedByOfficialBaslineScore;
+                }
+                else if (m_currentSortOption == SortOption::LocalBaselineDiffScore)
+                {
+                    sortedReportMap = &m_reportsSortedByLocaBaslineScore;
+                }
 
-                    const bool screenshotPassed = screenshotResult.m_officialComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::Pass;
+                AZ_Assert(sortedReportMap, "Unhandled m_currentSortOption");
 
-                    AZStd::string fileName;
-                    AzFramework::StringFunc::Path::GetFullFileName(screenshotResult.m_screenshotFilePath.c_str(), fileName);
+                if (sortedReportMap)
+                {
+                    for (const auto& [threshold, reportIndex] : *sortedReportMap)
+                    {
+                        ScriptReport& scriptReport = m_scriptReports[reportIndex.first];
+                        ScreenshotTestInfo& screenshotResult = scriptReport.m_screenshotTests[reportIndex.second];
 
-                    AZStd::string header = AZStd::string::format("%s %s %s '%s' %f",
-                        screenshotPassed ? "PASSED" : "FAILED",
-                        scriptReport.m_scriptAssetPath.c_str(),
-                        fileName.c_str(),
-                        screenshotResult.m_toleranceLevel.m_name.c_str(),
-                        screenshotResult.m_officialComparisonResult.m_finalDiffScore);
+                        float diffScore = 0.0f;
+                        if (m_currentSortOption == SortOption::OfficialBaselineDiffScore)
+                        {
+                            diffScore = screenshotResult.m_officialComparisonResult.m_standardDiffScore;
+                        }
+                        else if (m_currentSortOption == SortOption::LocalBaselineDiffScore)
+                        {
+                            diffScore = screenshotResult.m_localComparisonResult.m_standardDiffScore;
+                        }
 
-                    ShowScreenshotTestInfoTreeNode(header, scriptReport, screenshotResult);
+                        const bool screenshotPassed = screenshotResult.m_officialComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::Pass;
+
+                        AZStd::string fileName;
+                        AzFramework::StringFunc::Path::GetFullFileName(screenshotResult.m_screenshotFilePath.c_str(), fileName);
+
+                        AZStd::string header = AZStd::string::format("%f %s %s %s '%s'",
+                            diffScore,
+                            screenshotPassed ? "PASSED" : "FAILED",
+                            scriptReport.m_scriptAssetPath.c_str(),
+                            fileName.c_str(),
+                            screenshotResult.m_toleranceLevel.m_name.c_str());
+
+                        ShowScreenshotTestInfoTreeNode(header, scriptReport, screenshotResult);
+                    }
                 }
             }
             ResetTextHighlight();
@@ -822,8 +856,12 @@ namespace AtomSampleViewer
             const AZStd::vector<ScriptReporter::ScreenshotTestInfo>& screenshotTestInfos = m_scriptReports[i].m_screenshotTests;
             for (size_t j = 0; j < screenshotTestInfos.size(); ++j)
             {
-                m_descendingThresholdReports.insert(AZStd::pair<float, ReportIndex>(
-                    screenshotTestInfos[j].m_officialComparisonResult.m_finalDiffScore,
+                m_reportsSortedByOfficialBaslineScore.insert(AZStd::pair<float, ReportIndex>(
+                    screenshotTestInfos[j].m_officialComparisonResult.m_standardDiffScore,
+                    ReportIndex{ i, j }));
+
+                m_reportsSortedByLocaBaslineScore.insert(AZStd::pair<float, ReportIndex>(
+                    screenshotTestInfos[j].m_localComparisonResult.m_standardDiffScore,
                     ReportIndex{ i, j }));
             }
         }

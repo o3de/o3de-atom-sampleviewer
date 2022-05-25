@@ -966,7 +966,8 @@ namespace AtomSampleViewer
 
         s_instance->m_executingScripts.insert(scriptAsset.GetId());
 
-        if (!s_instance->m_scriptContext->Execute(scriptAsset->GetScriptBuffer().data(), scriptFilePath.c_str(), scriptAsset->GetScriptBuffer().size()))
+        auto& scriptData = scriptAsset->m_data;
+        if (!s_instance->m_scriptContext->Execute(scriptData.GetScriptBuffer().data(), scriptFilePath.c_str(), scriptData.GetScriptBuffer().size()))
         {
             // Push an error operation on the back of the queue instead of reporting it immediately so it doesn't get lost
             // in front of a bunch of queued m_scriptOperations.
@@ -1140,14 +1141,16 @@ namespace AtomSampleViewer
         s_instance->m_scriptOperations.push(AZStd::move(func));
     }
 
-    void ScriptManager::Script_Print(const AZStd::string& message)
+    void ScriptManager::Script_Print(const AZStd::string& message [[maybe_unused]])
     {
+#ifndef RELEASE // AZ_TracePrintf is a no-op in release builds
         auto func = [message]()
         {
             AZ_TracePrintf("Automation", "Script: %s\n", message.c_str());
         };
 
         s_instance->m_scriptOperations.push(AZStd::move(func));
+#endif
     }
 
     AZStd::string ScriptManager::Script_ResolvePath(const AZStd::string& path)
@@ -1370,7 +1373,7 @@ namespace AtomSampleViewer
     {
         auto operation = [command]()
         {
-            AzFramework::ConsoleRequestBus::Broadcast(&AzFramework::ConsoleRequests::ExecuteConsoleCommand, command.c_str());
+            AZ::Interface<AZ::IConsole>::Get()->PerformCommand(command.c_str());
         };
 
         s_instance->m_scriptOperations.push(AZStd::move(operation));

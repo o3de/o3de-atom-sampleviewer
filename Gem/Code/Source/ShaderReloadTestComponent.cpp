@@ -318,7 +318,7 @@ namespace AtomSampleViewer
     uint32_t ShaderReloadTestComponent::ReadPixel(const uint8_t* rawRGBAPixelData, const AZ::RHI::ImageDescriptor& imageDescriptor, uint32_t x, uint32_t y) const
     {
         const auto width = imageDescriptor.m_size.m_width;
-        const auto height = imageDescriptor.m_size.m_height;
+        [[maybe_unused]] const auto height = imageDescriptor.m_size.m_height;
         AZ_Assert((x < width) && (y < height), "Invalid read pixel location (x, y)=(%u, %u) for width=%u, height=%u", x, y, width, height);
         auto tmp = reinterpret_cast<const uint32_t *>(rawRGBAPixelData);
         const uint32_t pixelColor = tmp[ (width * y) + x];

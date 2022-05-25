@@ -224,6 +224,15 @@ namespace AtomSampleViewer
             WarningsAndErrors,
             ErrorsOnly
         };
+        
+        // Controls how screenshot reports are sorted
+        // Must match static const char* DiplayOptions in .cpp file
+        enum SortOption : int
+        {
+            Unsorted,
+            OfficialBaselineDiffScore,
+            LocalBaselineDiffScore
+        };
 
         static void ReportScriptError(const AZStd::string& message);
         static void ReportScriptWarning(const AZStd::string& message);
@@ -289,8 +298,11 @@ namespace AtomSampleViewer
             void UpdateColorSettings();
         };
 
-        AZStd::multimap<float, ReportIndex, AZStd::greater<float>> m_descendingThresholdReports;
-        bool m_showReportsSortedByThreshold = true;
+        using SortedReportIndexMap = AZStd::multimap<float, ReportIndex, AZStd::greater<float>>;
+
+        SortedReportIndexMap m_reportsSortedByOfficialBaslineScore;
+        SortedReportIndexMap m_reportsSortedByLocaBaslineScore;
+        SortOption m_currentSortOption = SortOption::OfficialBaselineDiffScore;
 
         ImGuiMessageBox m_messageBox;
 

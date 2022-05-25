@@ -37,7 +37,7 @@ class TestAutomationMainSuite:
                            'AtomSampleViewerStandalone.exe '
                            f'--project-path={workspace.paths.project()} '
                            f'--rhi {rhi} '
-                           f'--runtestsuite scripts/{test_script} '
+                           f'--runtestsuite scripts/{test_script}c '
                            '--exitontestend')
 
         def teardown():
@@ -52,7 +52,7 @@ class TestAutomationMainSuite:
                                 "Trace::Assert",
                                 "Traceback (most recent call last):"]
             atomsampleviewer_log_monitor.monitor_log_for_lines(
-                unexpected_lines=unexpected_lines, halt_on_unexpected=True, timeout=240)
+                unexpected_lines=unexpected_lines, halt_on_unexpected=True, timeout=400)
         except ly_test_tools.log.log_monitor.LogMonitorException as e:
             expected_screenshots_path = os.path.join(
                 workspace.paths.project(), "Scripts", "ExpectedScreenshots")

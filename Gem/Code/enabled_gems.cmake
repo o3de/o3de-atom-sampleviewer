@@ -22,4 +22,5 @@ set(ENABLED_GEMS
     Sponza
     MaterialEditor
     UiBasics
+    StreamerProfiler
 )
