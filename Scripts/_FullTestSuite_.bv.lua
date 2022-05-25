@@ -57,7 +57,8 @@ tests= {
     RunScriptWrapper('scripts/streamingimagetest.bv.luac'),
     RunScriptWrapper('scripts/parallaxtest.bv.luac'),
     RunScriptWrapper('scripts/parallaxdepthartifacts.bv.luac'),
-    RunScriptWrapper('scripts/checkerboardtest.bv.luac'),
+    -- Disable checkerboard pipeline as it's quite out of date and currently a maintenance burden
+    -- RunScriptWrapper('scripts/checkerboardtest.bv.luac'),
     RunScriptWrapper('scripts/scenereloadsoaktest.bv.luac'),
     RunScriptWrapper('scripts/diffusegitest.bv.luac'),
     RunScriptWrapper('scripts/arealighttest.bv.luac'),
@@ -66,7 +67,8 @@ tests= {
     RunScriptWrapper('scripts/shadowedsponzatest.bv.luac'),
     RunScriptWrapper('scripts/RenderTargetTexture.bv.luac'),
     RunScriptWrapper('scripts/PassTree.bv.luac'),
-    RunScriptWrapper('scripts/ReadbackTest.bv.luac'),
+    -- Seems to cause GPU Device Lost, requires further investigation.
+    -- RunScriptWrapper('scripts/ReadbackTest.bv.luac'),
     RunScriptWrapper('scripts/depthoffieldtest.bv.luac'),
 
     --Fast checking for the samples which don't have a test. Samples should be removed from this list once they have their own tests

@@ -57,7 +57,7 @@
                         {
                             "LocalSlot": "SwapChainOutput",
                             "AttachmentRef": {
-                                "Pass": "Parent",
+                                "Pass": "PipelineGlobal",
                                 "Attachment": "SwapChainOutput"
                             }
                         }
@@ -104,8 +104,15 @@
                         {
                             "LocalSlot": "SwapChainOutput",
                             "AttachmentRef": {
-                                "Pass": "Parent",
+                                "Pass": "PipelineGlobal",
                                 "Attachment": "SwapChainOutput"
+                            }
+                        },
+                        {
+                            "LocalSlot": "Depth",
+                            "AttachmentRef": {
+                                "Pass": "DepthPrePass",
+                                "Attachment": "DepthMSAA"
                             }
                         }
                     ]
