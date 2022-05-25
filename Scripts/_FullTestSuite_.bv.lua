@@ -69,6 +69,7 @@ tests= {
     RunScriptWrapper('scripts/PassTree.bv.luac'),
     RunScriptWrapper('scripts/ReadbackTest.bv.luac'),
     RunScriptWrapper('scripts/depthoffieldtest.bv.luac'),
+    RunScriptWrapper('scripts/exposuretest.bv.luac'),
 
     --Fast checking for the samples which don't have a test. Samples should be removed from this list once they have their own tests
 
@@ -103,7 +104,6 @@ tests= {
     FastCheckSample('RPI/RootConstants'),
 
     FastCheckSample('Features/Bloom'),
-    FastCheckSample('Features/Exposure'),
     FastCheckSample('Features/SkinnedMesh'),
     FastCheckSample('Features/SSAO'),
     FastCheckSample('Features/SSR'),
