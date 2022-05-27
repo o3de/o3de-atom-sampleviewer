@@ -58,6 +58,7 @@ tests= {
     RunScriptWrapper('scripts/parallaxtest.bv.luac'),
     RunScriptWrapper('scripts/parallaxdepthartifacts.bv.luac'),
     -- Disable checkerboard pipeline as it's quite out of date and currently a maintenance burden
+    -- https://github.com/o3de/o3de-atom-sampleviewer/issues/456
     -- RunScriptWrapper('scripts/checkerboardtest.bv.luac'),
     RunScriptWrapper('scripts/scenereloadsoaktest.bv.luac'),
     RunScriptWrapper('scripts/diffusegitest.bv.luac'),
@@ -68,7 +69,8 @@ tests= {
     RunScriptWrapper('scripts/skinnedmesh.bv.luac'),
     RunScriptWrapper('scripts/RenderTargetTexture.bv.luac'),
     RunScriptWrapper('scripts/PassTree.bv.luac'),
-    -- Seems to cause GPU Device Lost, requires further investigation.
+    -- ReadbackTest seems to increase frequency of GPU Device Lost to almost every run of full test suite, requires further investigation:
+    -- https://github.com/o3de/o3de-atom-sampleviewer/issues/455
     -- RunScriptWrapper('scripts/ReadbackTest.bv.luac'),
     RunScriptWrapper('scripts/depthoffieldtest.bv.luac'),
 
