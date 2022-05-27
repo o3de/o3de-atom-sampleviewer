@@ -93,9 +93,6 @@ ForwardPassOutput MainPS(VSOutput IN)
     lightingData.tileIterator.Init(IN.m_position, PassSrg::m_lightListRemapped, PassSrg::m_tileLightData);
     lightingData.Init(surface.position, surface.normal, surface.roughnessLinear);
 
-    // Shadow, Occlusion
-    lightingData.shadowCoords = IN.m_shadowCoords;
-
     // Emissive
     float3 emissive = MaterialSrg::m_emissiveColor.rgb * MaterialSrg::m_emissiveIntensity;
     if (o_emissive_useTexture)
@@ -117,7 +114,7 @@ ForwardPassOutput MainPS(VSOutput IN)
     ApplyDecals(lightingData.tileIterator, surface);
 
     // Apply Direct Lighting
-    ApplyDirectLighting(surface, lightingData);
+    ApplyDirectLighting(surface, lightingData, IN.m_position);
 
     // Apply Image Based Lighting (IBL)
     ApplyIBL(surface, lightingData);

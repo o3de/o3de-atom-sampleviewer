@@ -70,10 +70,16 @@ function TestDirectionalLight()
     SetImguiValue('Cascade Position Correction', true)
     IdleFrames(1)
     CaptureScreenshot(g_screenshotOutputFolder .. '/directional_cascade_correction.png')
+    SetImguiValue('Cascade Position Correction', false)
+
+    -- Directional Light Cascade Position Correction
+    SetImguiValue('Use Fullscreen Blur', true)
+    IdleFrames(1)
+    CaptureScreenshot(g_screenshotOutputFolder .. '/directional_fullscreen_blur.png')
+    SetImguiValue('Use Fullscreen Blur', false)
 
     -- Directional Light PCF low
     SetImguiValue('Debug Coloring', false)
-    SetImguiValue('Cascade Position Correction', false)
     SetImguiValue('Filter Method##Directional', 'PCF')
     SetImguiValue('Filtering # ##Directional', 4)
     IdleFrames(1)

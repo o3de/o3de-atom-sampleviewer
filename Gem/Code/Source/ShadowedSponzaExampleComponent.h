@@ -141,6 +141,7 @@ namespace AtomSampleViewer
         int m_filteringSampleCountDirectional = 16;
         int m_filteringSampleCountDisk = 16;
 
+        bool m_useFullscreenBlur = false;
         bool m_isCascadeCorrectionEnabled = false;
         bool m_isDebugColoringEnabled = false;
         bool m_isDebugBoundingBoxEnabled = false;
