@@ -416,6 +416,7 @@ namespace AtomSampleViewer
         featureProcessor->SetShadowFilterMethod(handle, s_shadowFilterMethods[m_shadowFilterMethodIndexDirectional]);
         featureProcessor->SetFilteringSampleCount(handle, static_cast<uint16_t>(m_filteringSampleCountDirectional));
         featureProcessor->SetGroundHeight(handle, 0.f);
+        featureProcessor->SetFullscreenBlurEnabled(handle, m_useFullscreenBlur);
 
         m_directionalLightHandle = handle;
         SetupDebugFlags();
@@ -597,6 +598,11 @@ namespace AtomSampleViewer
             if (ScriptableImGui::Checkbox("Cascade Position Correction", &m_isCascadeCorrectionEnabled))
             {
                 m_directionalLightFeatureProcessor->SetViewFrustumCorrectionEnabled(m_directionalLightHandle, m_isCascadeCorrectionEnabled);
+            }
+
+            if (ScriptableImGui::Checkbox("Use Fullscreen Blur", &m_useFullscreenBlur))
+            {
+                m_directionalLightFeatureProcessor->SetFullscreenBlurEnabled(m_directionalLightHandle, m_useFullscreenBlur);
             }
         }
         ImGui::Unindent();
