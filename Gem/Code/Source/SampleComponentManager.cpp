@@ -1559,10 +1559,8 @@ namespace AtomSampleViewer
     void SampleComponentManager::SwitchSceneForRHISample()
     {
         ReleaseRPIScene();
-        if (!m_rhiScene)
-        {
-            CreateSceneForRHISample();
-        }
+        ReleaseRHIScene();
+        CreateSceneForRHISample();
     }
 
     void SampleComponentManager::CreateSceneForRPISample()
@@ -1651,10 +1649,8 @@ namespace AtomSampleViewer
     void SampleComponentManager::SwitchSceneForRPISample()
     {
         ReleaseRHIScene();
-        if (!m_rpiScene)
-        {
-            CreateSceneForRPISample();
-        }
+        ReleaseRPIScene();
+        CreateSceneForRPISample();
     }
 
     // AzFramework::AssetCatalogEventBus::Handler overrides ...
