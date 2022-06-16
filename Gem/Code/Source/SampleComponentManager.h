@@ -148,6 +148,9 @@ namespace AtomSampleViewer
         void SampleChange();
         void CameraReset();
         void ShutdownActiveSample();
+        void SetRHISamplePass(BasicRHIComponent* sampleComponent);
+        void DisableXrPipelines();
+        void EnableXrPipelines();
 
         // SampleComponentManagerRequestBus overrides...
         void Reset() override;
@@ -192,7 +195,7 @@ namespace AtomSampleViewer
         // Entity to hold only example component. It doesn't need an entity context.
         AZ::Entity* m_exampleEntity = nullptr;
 
-        AZ::Component* m_activeSample = nullptr;
+        AZStd::vector<AZ::Component*> m_activeSamples;;
 
         AZ::Entity* m_cameraEntity = nullptr;
 
@@ -260,12 +263,16 @@ namespace AtomSampleViewer
 
         // Scene and some variables for RHI samples
         AZ::RPI::ScenePtr m_rhiScene;
-        AZ::RPI::Ptr<RHISamplePass> m_rhiSamplePass = nullptr;
+        AZStd::vector<AZ::RPI::Ptr<RHISamplePass>> m_rhiSamplePasses;
 
         // Scene and some variables for RPI samples
         AZ::RPI::ScenePtr m_rpiScene;
 
         // number of MSAA samples, initialized in Activate() and can vary by platform
         int m_numMSAASamples = 0;
+
+        // Cache PC and XR pipelines
+        AZ::RPI::RenderPipelinePtr m_renderPipeline = nullptr;
+        AZStd::vector<AZ::RPI::RenderPipelinePtr> m_xrPipelines;
     };
 } // namespace AtomSampleViewer

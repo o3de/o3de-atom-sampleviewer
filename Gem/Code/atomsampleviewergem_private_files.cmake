@@ -85,6 +85,8 @@ set(FILES
     Source/RHI/RayTracingExampleComponent.h
     Source/RHI/MatrixAlignmentTestExampleComponent.cpp
     Source/RHI/MatrixAlignmentTestExampleComponent.h
+    Source/RHI/XRExampleComponent.cpp
+    Source/RHI/XRExampleComponent.h
     Source/Performance/HighInstanceExampleComponent.cpp
     Source/Performance/HighInstanceExampleComponent.h
     Source/Performance/100KDrawable_SingleView_ExampleComponent.cpp
