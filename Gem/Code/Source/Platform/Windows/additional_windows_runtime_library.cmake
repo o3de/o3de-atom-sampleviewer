@@ -5,8 +5,3 @@
 # SPDX-License-Identifier: Apache-2.0 OR MIT
 #
 #
-
-set(LY_RUNTIME_DEPENDENCIES
-    Gem::XR
-    Gem::OpenXRVk
-)

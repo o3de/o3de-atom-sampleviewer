@@ -57,7 +57,7 @@ namespace AtomSampleViewer
         // The RHISamplePass template should have one owned image attachment which is the render target
         m_outputAttachment = m_ownedAttachments[0];
 
-        // Force update pass attachment to get correct size and save it to local variables
+        // Force udpate pass attachment to get currect size and save it to local variables
         m_outputAttachment->Update();
 
         // update output info for the rhi sample
@@ -88,16 +88,6 @@ namespace AtomSampleViewer
                 frameGraphBuilder->ImportScopeProducer(*producer);
             }
         }
-    }
-
-    uint32_t RHISamplePass::GetViewIndex() const
-    {
-        return m_viewIndex;
-    }
-
-    void RHISamplePass::SetViewIndex(const uint32_t viewIndex)
-    {
-        m_viewIndex = viewIndex;
     }
 
     bool BasicRHIComponent::ReadInConfig(const AZ::ComponentConfig* baseConfig)
@@ -619,10 +609,5 @@ namespace AtomSampleViewer
     float BasicRHIComponent::GetViewportHeight()
     {
         return m_viewport.m_maxY - m_viewport.m_minY;
-    }
-
-    void BasicRHIComponent::SetViewIndex(const uint32_t viewIndex)
-    {
-        m_viewIndex = viewIndex;
     }
 }

@@ -66,10 +66,6 @@ namespace AtomSampleViewer
         // Pass overrides
         const AZ::RPI::PipelineViewTag& GetPipelineViewTag() const override;
 
-        // Return the view index of the pass
-        uint32_t GetViewIndex() const;
-        void SetViewIndex(const uint32_t viewIndex);
-
     protected:
         explicit RHISamplePass(const AZ::RPI::PassDescriptor& descriptor);
 
@@ -82,9 +78,6 @@ namespace AtomSampleViewer
         AZ::RPI::Ptr<AZ::RPI::PassAttachment> m_outputAttachment;
 
         AZ::RPI::PipelineViewTag m_pipelineViewTag;
-
-        // Used to determine view index for XR sample
-        uint32_t m_viewIndex = 0;
     };
 
     class BasicRHIComponent
@@ -110,8 +103,6 @@ namespace AtomSampleViewer
         
         float GetViewportHeight();
         
-        void SetViewIndex(const uint32_t viewIndex);
-       
     protected:
         AZ_DISABLE_COPY(BasicRHIComponent);
 
@@ -246,8 +237,5 @@ namespace AtomSampleViewer
 
         // whether this sample supports RHI sample render pipeline or not
         bool m_supportRHISamplePipeline = false;
-        
-        // view index. Used by XR related samples
-        uint32_t m_viewIndex = 0;
     };
 } // namespace AtomSampleViewer

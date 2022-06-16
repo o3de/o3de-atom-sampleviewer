@@ -24,6 +24,4 @@ set(ENABLED_GEMS
     UiBasics
     StreamerProfiler
     DiffuseProbeGrid
-    XR #added via call to enable-gem
-    OpenXRVk #added via call to enable-gem
 )
