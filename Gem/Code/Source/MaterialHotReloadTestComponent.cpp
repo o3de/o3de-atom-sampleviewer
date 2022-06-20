@@ -352,7 +352,7 @@ namespace AtomSampleViewer
                 {
                     shaderVariantStatus = ShaderVariantStatus::FullyBaked;
                 }
-                else if (activeVariantId == activeShaderList[0].m_shader->GetVariant(RootShaderVariantStableId).GetShaderVariantId())
+                else if (activeVariantId.IsEmpty())
                 {
                     shaderVariantStatus = ShaderVariantStatus::Root;
                 }
