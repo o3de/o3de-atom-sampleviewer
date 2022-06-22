@@ -1,9 +1,8 @@
 # 
-# Copyright (c) Contributors to the Open 3D Engine Project.
-# For complete copyright and license terms please see the LICENSE at the root of this distribution.
-#
-# SPDX-License-Identifier: Apache-2.0 OR MIT
-#
+# Copyright (c) Contributors to the Open 3D Engine Project. 
+# For complete copyright and license terms please see the LICENSE at the root of this distribution. 
+# 
+# SPDX-License-Identifier: Apache-2.0 OR MIT 
 # 
 
 set(FILES
@@ -12,46 +11,64 @@ set(FILES
     Materials/DynamicMaterialTest/EmissiveMaterial.shader
     Materials/DynamicMaterialTest/EmissiveWithCppFunctors.materialtype
     Materials/DynamicMaterialTest/EmissiveWithLuaFunctors.materialtype
+    Materials/Types/MinimalMultilayerPBR.materialtype
+    Materials/Types/MinimalMultilayerPBR_ForwardPass.azsl
+    Materials/Types/MinimalMultilayerPBR_ForwardPass.shader
     Passes/CheckerboardPipeline.pass
     Passes/ColorblindnessSimulation.pass
     Passes/ColorInvertCS.pass
     Passes/ComplexPipeline.pass
+    Passes/Fullscreen.pass
+    Passes/FullscreenPipeline.pass
     Passes/ImGuiNoInput.pass
     Passes/ImGuiOnlyPipeline.pass
     Passes/Monochrome.pass
     Passes/RayTracingAmbientOcclusion.pass
+    Passes/ReadbackFiller.pass
+    Passes/ReadbackPipeline.pass
+    Passes/ReadbackPreview.pass
     Passes/RenderTexture.pass
     Passes/RHISamplePass.pass
     Passes/RHISamplePipeline.pass
     Passes/SelectorPass.pass
     Passes/SsaoPipeline.pass
     Scripts/AreaLightTest.bv.lua
+    Scripts/AuxGeom.bv.lua
     Scripts/CheckerboardTest.bv.lua
     Scripts/CullingAndLod.bv.lua
-    Scripts/EyeMaterialTest.bv.lua
     Scripts/Decals.bv.lua
+    Scripts/DepthOfFieldTest.bv.lua
     Scripts/DiffuseGITest.bv.lua
     Scripts/DynamicDraw.bv.lua
     Scripts/DynamicMaterialTest.bv.lua
+    Scripts/ExposureTest.bv.lua
+    Scripts/EyeMaterialTest.bv.lua
     Scripts/LightCulling.bv.lua
     Scripts/MaterialHotReloadTest.bv.lua
     Scripts/MaterialScreenshotTests.bv.lua
     Scripts/MSAA_RPI_Test.bv.lua
     Scripts/MultiRenderPipeline.bv.lua
     Scripts/MultiScene.bv.lua
+    Scripts/ParallaxDepthArtifacts.bv.lua
     Scripts/ParallaxTest.bv.lua
     Scripts/PassTree.bv.lua
+    Scripts/ReadbackTest.bv.lua
+    Scripts/RenderTargetTexture.bv.lua
     Scripts/SceneReloadSoakTest.bv.lua
+    Scripts/ShaderReloadSoakTest.bv.lua
     Scripts/ShadowedSponzaTest.bv.lua
     Scripts/ShadowTest.bv.lua
+    Scripts/SkinnedMesh.bv.lua
     Scripts/StreamingImageTest.bv.lua
     Scripts/TransparentTest.bv.lua
+    Scripts/_AutomatedPeriodicBenchmarkSuite_.bv.lua
     Scripts/_FullTestSuite_.bv.lua
     Shaders/DebugVertexNormals.azsl
     Shaders/DebugVertexNormals.materialtype
     Shaders/DebugVertexNormals.shader
     Shaders/Instanced.azsl
-    Shaders/MaterialEditorTest.materialtype    
+    Shaders/MaterialEditorTest.materialtype
+    Shaders/StaticMesh.azsl
     Shaders/ComprehensiveTestMaterial/Comprehensive.materialtype
     Shaders/ComprehensiveTestMaterial/Stacks.azsl
     Shaders/ComprehensiveTestMaterial/Stacks.shader
@@ -72,6 +89,10 @@ set(FILES
     Shaders/RayTracing/RTAOGeneration.shader
     Shaders/RayTracing/RTAOMiss.azsl
     Shaders/RayTracing/RTAOMiss.shader
+    Shaders/Readback/Filler.azsl
+    Shaders/Readback/Filler.shader
+    Shaders/Readback/Preview.azsl
+    Shaders/Readback/Preview.shader
     Shaders/RHI/AsyncComputeLuminanceMap.azsl
     Shaders/RHI/AsyncComputeLuminanceMap.shader
     Shaders/RHI/AsyncComputeLuminanceReduce.azsl
@@ -82,6 +103,7 @@ set(FILES
     Shaders/RHI/AsyncComputeTonemapping.shader
     Shaders/RHI/BindlessPrototype.azsl
     Shaders/RHI/BindlessPrototype.shader
+    Shaders/RHI/BindlessPrototypeSrg.azsli
     Shaders/RHI/ColorMesh.azsl
     Shaders/RHI/ColorMesh.shader
     Shaders/RHI/Compute.azsli
@@ -102,6 +124,8 @@ set(FILES
     Shaders/RHI/InputAssemblyCompute.shader
     Shaders/RHI/InputAssemblyDraw.azsl
     Shaders/RHI/InputAssemblyDraw.shader
+    Shaders/RHI/MatrixAlignmentTest.azsl
+    Shaders/RHI/MatrixAlignmentTest.shader
     Shaders/RHI/MRTScreen.azsl
     Shaders/RHI/MRTScreen.shader
     Shaders/RHI/MRTTarget.azsl
