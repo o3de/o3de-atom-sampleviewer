@@ -69,9 +69,7 @@ tests= {
     RunScriptWrapper('scripts/skinnedmesh.bv.luac'),
     RunScriptWrapper('scripts/RenderTargetTexture.bv.luac'),
     RunScriptWrapper('scripts/PassTree.bv.luac'),
-    -- ReadbackTest seems to increase frequency of GPU Device Lost to almost every run of full test suite, requires further investigation:
-    -- https://github.com/o3de/o3de-atom-sampleviewer/issues/455
-    -- RunScriptWrapper('scripts/ReadbackTest.bv.luac'),
+    RunScriptWrapper('scripts/ReadbackTest.bv.luac'),
     RunScriptWrapper('scripts/depthoffieldtest.bv.luac'),
     RunScriptWrapper('scripts/exposuretest.bv.luac'),
 
