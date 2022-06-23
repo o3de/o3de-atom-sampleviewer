@@ -37,6 +37,14 @@
                 "Path": "Passes/RHISamplePipeline.pass"
             },
             {
+                "Name": "RHISamplePipelineXRLeftTemplate",
+                "Path": "Passes/RHISamplePipelineXRLeft.pass"
+            },
+            {
+                "Name": "RHISamplePipelineXRRightTemplate",
+                "Path": "Passes/RHISamplePipelineXRRight.pass"
+            },
+            {
                 "Name": "SsaoPipeline",
                 "Path": "Passes/SsaoPipeline.pass"
             },
