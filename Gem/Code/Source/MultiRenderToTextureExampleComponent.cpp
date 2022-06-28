@@ -292,8 +292,8 @@ namespace AtomSampleViewer
     
     void MultiRenderToTextureExampleComponent::AddRenderToTextureCamera()
     {
-        const uint32_t width = 320;
-        const uint32_t height = 240;
+        const uint32_t width = 640;
+        const uint32_t height = 480;
         uint32_t renderIndex = aznumeric_cast<uint32_t>(m_renderToTextureContexts.size());
         RenderToTextureContext rttc;
         AZStd::string pipelineName = AZStd::string::format("RenderToTexture_pipeline%d", renderIndex+1);
@@ -302,12 +302,13 @@ namespace AtomSampleViewer
         rttc.m_view = AZ::RPI::View::CreateView(viewName, AZ::RPI::View::UsageCamera);
         float aspectRatio = static_cast<float>(width)/static_cast<float>(height);
 
+        AZ::Vector3 camPos = AZ::Matrix4x4::CreateRotationZ(AZ::DegToRad(19.0f * static_cast<float>(renderIndex))) * Vector3(-2.15f, -5.25f, 1.6f);
+        AZ::Matrix3x4 cameraLookat = Matrix3x4::CreateLookAt(camPos, Vector3(0.f, 0.f, 0.f));
+        rttc.m_view->SetCameraTransform(cameraLookat);
+
         AZ::Matrix4x4 viewToClipMatrix;
         AZ::MakePerspectiveFovMatrixRH(viewToClipMatrix, AZ::DegToRad(90.0f), aspectRatio, 0.1f, 100.0f, true);
         rttc.m_view->SetViewToClipMatrix(viewToClipMatrix);
-
-        AZ::Matrix4x4 localToWorldMat = AZ::Matrix4x4::CreateTranslation(Vector3(2.75f, 5.25f, 1.49f)) * AZ::Matrix4x4::CreateRotationZ(AZ::DegToRad(19.0f * static_cast<float>(renderIndex)));
-        rttc.m_view->SetWorldToViewMatrix(localToWorldMat.GetInverseFast());
 
         AZ::RPI::RenderPipelineDescriptor pipelineDesc;
         pipelineDesc.m_mainViewTagName = "MainCamera";
