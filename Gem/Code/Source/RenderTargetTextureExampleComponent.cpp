@@ -165,7 +165,7 @@ namespace AtomSampleViewer
 
         // we need process queued changes to build the pass properly 
         // which Scene::RebuildPipelineStatesLookup() requires 
-        AZ::RPI::PassSystemInterface::Get()->ProcessQueuedChanges();
+        renderPipeline->ProcessQueuedPassChanges();
         m_scene->RebuildPipelineStatesLookup();
     }
 
