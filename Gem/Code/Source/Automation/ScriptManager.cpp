@@ -320,18 +320,16 @@ namespace AtomSampleViewer
 
             if (m_scriptPaused)
             {
-                // Remove while debugging script screencaps
-
-                //m_scriptPauseTimeout -= deltaTime;
-                //if (m_scriptPauseTimeout < 0)
-                //{
-                //    AZ_Error("Automation", false, "Script pause timed out. Continuing...");
-                //    m_scriptPaused = false;
-                //}
-                //else
-                //{
+                m_scriptPauseTimeout -= deltaTime;
+                if (m_scriptPauseTimeout < 0)
+                {
+                    AZ_Error("Automation", false, "Script pause timed out. Continuing...");
+                    m_scriptPaused = false;
+                }
+                else
+                {
                     break;
-                //}
+                }
             }
 
             if (m_waitForAssetTracker)
