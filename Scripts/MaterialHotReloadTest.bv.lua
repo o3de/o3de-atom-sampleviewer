@@ -28,7 +28,7 @@ function IdleForReload()
     IdleSeconds(0.25)
     -- Just in case the above IdleSeconds were consumed by one long frame, idle for a couple more frames, since the full reload
     -- process can often span multiple frames.
-    IdleFrames(2)
+    IdleFrames(3)
 end
 
 function SetColorRed()
@@ -123,6 +123,7 @@ CaptureScreenshot(g_screenshotOutputFolder .. '/10_Variants_OnlyWavyLines.png')
 AssetTracking_Start()
 SetImguiValue('ShaderVariantList/None', true)
 IdleSeconds(1.0) -- Idle for a bit to give time for the assets to disappear
+IdleForReload()
 CaptureScreenshot(g_screenshotOutputFolder .. '/11_Variants_None.png')
 
 -- Now, changing the .shader file will force the shader to reload and will not find
@@ -137,6 +138,7 @@ AssetTracking_Start()
 SetImguiValue('ShaderVariantList/All', true)
 AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.shadervariantlist", 3) -- Waiting for 3 products, the list asset and two variant assets
 AssetTracking_IdleUntilExpectedAssetsFinish(10)
+IdleSeconds(3.0)
 IdleForReload()
 CaptureScreenshot(g_screenshotOutputFolder .. '/13_Variants_All.png')
 -- Now that the material is using a fully-baked variant, modify the .azsl file to force *everything* to rebuild. In the failure case, the runtime
@@ -148,6 +150,7 @@ AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.materialtype")
 AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.shader")
 AssetTracking_ExpectAsset(g_assetFolder .. "HotReloadTest.shadervariantlist", 3) -- Waiting for 3 products, the list asset and two variant assets
 AssetTracking_IdleUntilExpectedAssetsFinish(10)
+IdleSeconds(4.0)
 IdleForReload()
 CaptureScreenshot(g_screenshotOutputFolder .. '/14_HorizontalPattern.png')
 
@@ -155,6 +158,8 @@ CaptureScreenshot(g_screenshotOutputFolder .. '/14_HorizontalPattern.png')
 SetBlendingOn()
 SetBlendingOff()
 SetColorRed()
+IdleSeconds(4.0)
+IdleForReload()
 CaptureScreenshot(g_screenshotOutputFolder .. '/15_Red_AfterShaderReload.png')
 
 -- Clear the service loop override back to the default delay
