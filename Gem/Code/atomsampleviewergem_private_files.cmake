@@ -139,8 +139,6 @@ set(FILES
     Source/MSAA_RPI_ExampleComponent.h
     Source/MultiRenderPipelineExampleComponent.cpp
     Source/MultiRenderPipelineExampleComponent.h
-    Source/MultiRenderToTextureExampleComponent.cpp
-    Source/MultiRenderToTextureExampleComponent.h
     Source/MultiSceneExampleComponent.cpp
     Source/MultiSceneExampleComponent.h
     Source/MultiViewSingleSceneAuxGeomExampleComponent.cpp

@@ -88,7 +88,6 @@
 #include <MeshExampleComponent.h>
 #include <MSAA_RPI_ExampleComponent.h>
 #include <MultiRenderPipelineExampleComponent.h>
-#include <MultiRenderToTextureExampleComponent.h>
 #include <MultiSceneExampleComponent.h>
 #include <ParallaxMappingExampleComponent.h>
 #include <RenderTargetTextureExampleComponent.h>
@@ -289,7 +288,6 @@ namespace AtomSampleViewer
             NewRPISample<MeshExampleComponent>("Mesh"),
             NewRPISample<MSAA_RPI_ExampleComponent>("MSAA"),
             NewRPISample<MultiRenderPipelineExampleComponent>("MultiRenderPipeline"),
-            NewRPISample<MultiRenderToTextureExampleComponent>("MultiRenderToTexture"),
             NewRPISample<MultiSceneExampleComponent>("MultiScene"),
             NewRPISample<MultiViewSingleSceneAuxGeomExampleComponent>("MultiViewSingleSceneAuxGeom"),
             NewRPISample<ReadbackExampleComponent>("Readback"),
