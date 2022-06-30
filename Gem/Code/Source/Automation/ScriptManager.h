@@ -217,7 +217,7 @@ namespace AtomSampleViewer
         void OnCameraMoveEnded(AZ::TypeId controllerTypeId, uint32_t channels) override;
 
         // FrameCaptureNotificationBus overrides...
-        void OnCaptureFinished(AZ::Render::FrameCaptureResult result, const AZStd::string& info) override;
+        void OnCaptureFinished(uint32_t frameCaptureId, AZ::Render::FrameCaptureResult result, const AZStd::string& info) override;
 
         // ProfilingCaptureNotificationBus overrides...
         void OnCaptureQueryTimestampFinished(bool result, const AZStd::string& info) override;
@@ -338,6 +338,7 @@ namespace AtomSampleViewer
         bool m_showPrecommitWizard = false;
         PrecommitWizardSettings m_wizardSettings;
 
+        uint32_t m_frameCaptureId = AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId;
         bool m_showScriptRunnerDialog = false;
         bool m_isCapturePending = false;
         bool m_frameTimeIsLocked = false;

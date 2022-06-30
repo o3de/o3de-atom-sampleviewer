@@ -271,7 +271,7 @@ namespace AtomSampleViewer
             m_readback->SetCallback(AZStd::bind(&ReadbackExampleComponent::ReadbackCallback, this, AZStd::placeholders::_1));
         }
 
-        m_fillerPass->ReadbackAttachment(m_readback, AZ::Name("Output"));
+        m_fillerPass->ReadbackAttachment(m_readback, 0, AZ::Name("Output"));
     }
 
     void ReadbackExampleComponent::ReadbackCallback(const AZ::RPI::AttachmentReadback::ReadbackResult& result)
