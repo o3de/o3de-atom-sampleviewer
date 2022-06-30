@@ -8,7 +8,7 @@
             "PassClass": "ParentPass",
             "Slots": [
                 {
-                    "Name": "SwapChainOutput",
+                    "Name": "PipelineOutput",
                     "SlotType": "InputOutput"
                 }
             ],
@@ -16,8 +16,8 @@
                 "$type": "PassData",
                 "PipelineGlobalConnections": [
                     {
-                        "GlobalName": "SwapChainOutput",
-                        "Slot": "SwapChainOutput"
+                        "GlobalName": "PipelineOutput",
+                        "Slot": "PipelineOutput"
                     }
                 ]
             },
@@ -30,7 +30,7 @@
                             "LocalSlot": "Output",
                             "AttachmentRef": {
                                 "Pass": "Parent",
-                                "Attachment": "SwapChainOutput"
+                                "Attachment": "PipelineOutput"
                             }
                         }
                     ],

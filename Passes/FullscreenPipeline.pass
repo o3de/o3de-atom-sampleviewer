@@ -8,7 +8,7 @@
             "PassClass": "ParentPass",
             "Slots": [
                 {
-                    "Name": "SwapChainOutput",
+                    "Name": "PipelineOutput",
                     "SlotType": "InputOutput",
                     "ScopeAttachmentUsage": "RenderTarget"
                 }
@@ -59,7 +59,7 @@
                             "LocalSlot": "Output",
                             "AttachmentRef": {
                                 "Pass": "Parent",
-                                "Attachment": "SwapChainOutput"
+                                "Attachment": "PipelineOutput"
                             }
                         }
                     ]
