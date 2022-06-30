@@ -219,7 +219,7 @@ namespace AtomSampleViewer
         createPassRequest.m_passData = AZStd::move(passData);
 
         // Create the connection for the output slot
-        AZ::RPI::PassConnection outputConnection = { AZ::Name("Output"), {AZ::Name("Parent"), AZ::Name("SwapChainOutput")} };
+        AZ::RPI::PassConnection outputConnection = { AZ::Name("Output"), {AZ::Name("Parent"), AZ::Name("PipelineOutput")} };
         createPassRequest.m_connections.push_back(outputConnection);
         AZ::RPI::PassConnection inputConnection = { AZ::Name("Input"), {AZ::Name("This"), AZ::Name(s_previewImageName)} };
         createPassRequest.m_connections.push_back(inputConnection);
