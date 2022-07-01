@@ -505,10 +505,12 @@ namespace AtomSampleViewer
                 }
 
                 // Draw occluding quad
+                drawItem.m_submitIndex++;
                 shaderResourceGroups[0] = m_shaderResourceGroups[1]->GetRHIShaderResourceGroup();
                 commandList->Submit(drawItem);
 
                 // Draw quad to use for the oclussion query
+                drawItem.m_submitIndex++;
                 drawItem.m_pipelineState = m_boudingBoxPipelineState.get();
                 shaderResourceGroups[0] = m_shaderResourceGroups[2]->GetRHIShaderResourceGroup();
                 auto& queryEntry = m_occlusionQueries[m_currentOcclusionQueryIndex];

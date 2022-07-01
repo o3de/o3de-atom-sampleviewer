@@ -101,6 +101,7 @@ namespace AtomSampleViewer
 
         AZStd::array<AZ::Data::Instance<AZ::RPI::Model>, ModelType_Count> m_models;
         AZStd::vector<ModelData> m_opaqueModelsData;
+        uint32_t m_meshCount = 0;
 
         AZStd::vector<AZ::Data::Instance<AZ::RPI::Shader>> m_shaders;
 
