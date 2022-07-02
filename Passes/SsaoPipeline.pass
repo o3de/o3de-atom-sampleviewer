@@ -45,7 +45,7 @@
                 },
                 {
                     "Name": "DepthPrePass",
-                    "TemplateName": "DepthMSAAParentTemplate",
+                    "TemplateName": "DepthParentTemplate",
                     "Connections": [
                         {
                             "LocalSlot": "SkinnedMeshes",
@@ -118,8 +118,8 @@
                     ]
                 },
                 {
-                    "Name": "ForwardMSAAPass",
-                    "TemplateName": "ForwardMSAAPassTemplate",
+                    "Name": "Forward",
+                    "TemplateName": "ForwardPassTemplate",
                     "Connections": [
                         // Inputs...
                         {
@@ -189,14 +189,14 @@
                         {
                             "LocalSlot": "InputDepth",
                             "AttachmentRef": {
-                                "Pass": "ForwardMSAAPass",
+                                "Pass": "Forward",
                                 "Attachment": "DepthStencilInputOutput"
                             }
                         },
                         {
                             "LocalSlot": "WorldNormal",
                             "AttachmentRef": {
-                                "Pass": "ForwardMSAAPass",
+                                "Pass": "Forward",
                                 "Attachment": "NormalOutput"
                             }
                         }
