@@ -186,21 +186,6 @@ namespace AtomSampleViewer
             ModelType_Suzanne,
         };
 
-        //auto setModelType = [](AZStd::span<const ModelType> types, AZStd::vector<ModelData>& modelDataList)
-        //{
-        //    modelDataList.resize(types.size());
-        //
-        //    uint32_t meshCount = 0;
-        //    for (uint32_t i = 0; i < modelDataList.size(); ++i)
-        //    {
-        //        modelDataList[i].m_modelType = types[i];
-        //        meshCount += m_models[modelDataList[i].m_modelType]->GetLods()[0]->GetMeshes().size();
-        //    }
-        //};
-        //
-        //setModelType(AZStd::span<const ModelType>(&opaqueModels[0], AZ_ARRAY_SIZE(opaqueModels)), m_opaqueModelsData);
-
-
         AZStd::span<const ModelType> types(&opaqueModels[0], AZ_ARRAY_SIZE(opaqueModels));
         m_opaqueModelsData.resize(types.size());
 
