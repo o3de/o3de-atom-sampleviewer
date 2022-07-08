@@ -636,10 +636,11 @@ namespace AtomSampleViewer
             }
             else if (m_countdownForFrameCapture == 0)
             {
-                AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect();
                 AZ::Render::FrameCaptureRequestBus::BroadcastResult(m_frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, m_frameCaptureFilePath);
-                if (m_frameCaptureId != AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId ) // if unsuccessfull leave state to attempt again next tick
+                if (m_frameCaptureId != AZ::Render::InvalidFrameCaptureId ) // if unsuccessfull leave state to attempt again next tick
                 {
+                    AZ::Render::FrameCaptureNotificationBus::MultiHandler::BusConnect(m_frameCaptureId);
+
                     m_countdownForFrameCapture = -1; // Don't call CaptureScreenshot again
                 }
             }
@@ -1204,7 +1205,7 @@ namespace AtomSampleViewer
     void SampleComponentManager::RequestFrameCapture(const AZStd::string& filePath, bool hideImGui)
     {
         AZ_Assert(false == m_isFrameCapturePending, "Frame capture already in progress");
-        AZ_Assert(AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId == m_frameCaptureId, "Unfinished frame capture detected");
+        AZ_Assert(AZ::Render::InvalidFrameCaptureId == m_frameCaptureId, "Unfinished frame capture detected");
         m_isFrameCapturePending = true;
         m_hideImGuiDuringFrameCapture = hideImGui;
         m_frameCaptureFilePath = filePath;
@@ -1228,13 +1229,9 @@ namespace AtomSampleViewer
         }
     }
 
-    void SampleComponentManager::OnCaptureFinished(uint32_t captureId, AZ::Render::FrameCaptureResult /*result*/, const AZStd::string& /*info*/)
+    void SampleComponentManager::OnFrameCaptureFinished(AZ::Render::FrameCaptureId captureId [[maybe_unused]], AZ::Render::FrameCaptureResult /*result*/, const AZStd::string& /*info*/)
     {
-        if (captureId != m_frameCaptureId) // ignore captures from other systems
-        {
-            return;
-        }
-        AZ::Render::FrameCaptureNotificationBus::Handler::BusDisconnect();
+        AZ::Render::FrameCaptureNotificationBus::MultiHandler::BusDisconnect(captureId);
 
         if (m_hideImGuiDuringFrameCapture)
         {
@@ -1246,7 +1243,6 @@ namespace AtomSampleViewer
 
         ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::ResumeScript);
         m_isFrameCapturePending = false;
-        m_frameCaptureId = AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId;
     }
 
     bool SampleComponentManager::IsFrameCapturePending()

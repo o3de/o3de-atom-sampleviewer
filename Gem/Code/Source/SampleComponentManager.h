@@ -82,7 +82,7 @@ namespace AtomSampleViewer
         , public SampleComponentManagerRequestBus::Handler
         , public AZ::TickBus::Handler
         , public AzFramework::InputChannelEventListener
-        , public AZ::Render::FrameCaptureNotificationBus::Handler
+        , public AZ::Render::FrameCaptureNotificationBus::MultiHandler
         , public AzFramework::AssetCatalogEventBus::Handler
         , public AZ::Render::ImGuiSystemNotificationBus::Handler
 
@@ -161,7 +161,7 @@ namespace AtomSampleViewer
         void ClearRPIScene() override;
 
         // FrameCaptureNotificationBus overrides...
-        void OnCaptureFinished(uint32_t frameCaptureId, AZ::Render::FrameCaptureResult result, const AZStd::string& info) override;
+        void OnFrameCaptureFinished(AZ::Render::FrameCaptureId frameCaptureId, AZ::Render::FrameCaptureResult result, const AZStd::string& info) override;
 
         // AzFramework::AssetCatalogEventBus::Handler overrides ...
         void OnCatalogLoaded(const char* catalogFile) override;
@@ -247,7 +247,7 @@ namespace AtomSampleViewer
         bool m_isFrameCapturePending = false;
         bool m_hideImGuiDuringFrameCapture = true;
         int m_countdownForFrameCapture = 0;
-        uint32_t m_frameCaptureId = AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId;
+        AZ::Render::FrameCaptureId m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
         AZStd::string m_frameCaptureFilePath;
 
         AZStd::unique_ptr<ScriptManager> m_scriptManager;
