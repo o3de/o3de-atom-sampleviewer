@@ -13,14 +13,6 @@
                 "Path": "Passes/ImGuiNoInput.pass"
             },
             {
-                "Name": "ColorBlindPassTemplate",
-                "Path": "Passes/ColorblindnessSimulation.pass"
-            },
-            {
-                "Name": "ComplexPipeline",
-                "Path": "Passes/ComplexPipeline.pass"
-            },
-            {
                 "Name": "CheckerboardResolveColorTemplate",
                 "Path": "Passes/CheckerboardResolveColor.pass"
             },
@@ -39,14 +31,6 @@
             {
                 "Name": "CheckerboardPipeline",
                 "Path": "Passes/CheckerboardPipeline.pass"
-            },
-            {
-                "Name": "MonochromeTemplate",
-                "Path": "Passes/Monochrome.pass"
-            },
-            {
-                "Name": "ColorInvertCS",
-                "Path": "Passes/ColorInvertCS.pass"
             },
             {
                 "Name": "RenderTextureTemplate",

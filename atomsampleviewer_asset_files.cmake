@@ -15,14 +15,10 @@ set(FILES
     Materials/Types/MinimalMultilayerPBR_ForwardPass.azsl
     Materials/Types/MinimalMultilayerPBR_ForwardPass.shader
     Passes/CheckerboardPipeline.pass
-    Passes/ColorblindnessSimulation.pass
-    Passes/ColorInvertCS.pass
-    Passes/ComplexPipeline.pass
     Passes/Fullscreen.pass
     Passes/FullscreenPipeline.pass
     Passes/ImGuiNoInput.pass
     Passes/ImGuiOnlyPipeline.pass
-    Passes/Monochrome.pass
     Passes/RayTracingAmbientOcclusion.pass
     Passes/ReadbackFiller.pass
     Passes/ReadbackPipeline.pass
@@ -76,12 +72,8 @@ set(FILES
     Shaders/DynamicDraw/DynamicDrawExample.shader
     Shaders/OptimizationTests/DummyTransformColor.azsl
     Shaders/OptimizationTests/DummyTransformColor.shader
-    Shaders/PostProcessing/ColorblindnessSimulation.azsl
-    Shaders/PostProcessing/ColorblindnessSimulation.shader
     Shaders/PostProcessing/ColorInvertCS.azsl
     Shaders/PostProcessing/ColorInvertCS.shader
-    Shaders/PostProcessing/Monochrome.azsl
-    Shaders/PostProcessing/Monochrome.shader
     Shaders/RayTracing/RTAOClosestHit.azsl
     Shaders/RayTracing/RTAOClosestHit.shader
     Shaders/RayTracing/RTAODefines.azsli
