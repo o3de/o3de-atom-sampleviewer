@@ -18,6 +18,8 @@ namespace AtomSampleViewer
         , public AZ::TickBus::Handler
     {
     public:
+        static constexpr const char* ContentWarning = CommonPhotosensitiveWarning;
+
         AZ_COMPONENT(SwapchainExampleComponent, "{F8A990AD-63C0-43D8-AE9B-FB9D84CB58E2}", AZ::Component);
 
         static void Reflect(AZ::ReflectContext* context);

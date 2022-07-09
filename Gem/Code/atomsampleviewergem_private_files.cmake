@@ -7,6 +7,8 @@
 #
 
 set(FILES
+    Source/AtomSampleComponent.cpp
+    Source/AtomSampleComponent.h
     Source/AtomSampleViewerOptions.h
     Source/AtomSampleViewerSystemComponent.cpp
     Source/AtomSampleViewerSystemComponent.h
