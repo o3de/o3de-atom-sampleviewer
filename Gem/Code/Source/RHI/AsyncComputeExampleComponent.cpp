@@ -867,41 +867,46 @@ namespace AtomSampleViewer
             commandList->SetViewports(&viewport, 1);
             commandList->SetScissors(&scissor, 1);
 
+            for(uint32_t i = context.GetSubmitRange().m_startIndex; i < context.GetSubmitRange().m_endIndex; ++i)
             {
-                // Terrain
-                RHI::DrawIndexed drawIndexed;
-                drawIndexed.m_indexCount = 6;
-                drawIndexed.m_instanceCount = 1;
-
-                const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[ShadowScope][0]->GetRHIShaderResourceGroup() };
-
-                RHI::DrawItem drawItem;
-                drawItem.m_arguments = drawIndexed;
-                drawItem.m_pipelineState = m_terrainPipelineStates[ShadowScope].get();
-                drawItem.m_indexBufferView = &m_quadIndexBufferView;
-                drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
-                drawItem.m_shaderResourceGroups = shaderResourceGroups;
-                drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_quadStreamBufferViews[ShadowScope].size());
-                drawItem.m_streamBufferViews = m_quadStreamBufferViews[ShadowScope].data();
-                commandList->Submit(drawItem);
-            }
-
-            for(size_t i = 1; i < m_shaderResourceGroups[ShadowScope].size(); ++i)
-            {
-                // Models
-                const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[ShadowScope][i]->GetRHIShaderResourceGroup() };
-                for (const auto& mesh : m_model->GetLods()[0]->GetMeshes())
+                if (i == 0)
                 {
+                    // Terrain
+                    RHI::DrawIndexed drawIndexed;
+                    drawIndexed.m_indexCount = 6;
+                    drawIndexed.m_instanceCount = 1;
+
+                    const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[ShadowScope][0]->GetRHIShaderResourceGroup() };
+
                     RHI::DrawItem drawItem;
-                    drawItem.m_arguments = mesh.m_drawArguments;
-                    drawItem.m_pipelineState = m_modelPipelineStates[ShadowScope].get();
-                    drawItem.m_indexBufferView = &mesh.m_indexBufferView;
+                    drawItem.m_submitIndex = i;
+                    drawItem.m_arguments = drawIndexed;
+                    drawItem.m_pipelineState = m_terrainPipelineStates[ShadowScope].get();
+                    drawItem.m_indexBufferView = &m_quadIndexBufferView;
                     drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                     drawItem.m_shaderResourceGroups = shaderResourceGroups;
-                    drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_modelStreamBufferViews[ShadowScope].size());
-                    drawItem.m_streamBufferViews = m_modelStreamBufferViews[ShadowScope].data();
-
+                    drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_quadStreamBufferViews[ShadowScope].size());
+                    drawItem.m_streamBufferViews = m_quadStreamBufferViews[ShadowScope].data();
                     commandList->Submit(drawItem);
+                }
+                else
+                {
+                    // Models
+                    const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[ShadowScope][i]->GetRHIShaderResourceGroup() };
+                    for (const auto& mesh : m_model->GetLods()[0]->GetMeshes())
+                    {
+                        RHI::DrawItem drawItem;
+                        drawItem.m_submitIndex = i;
+                        drawItem.m_arguments = mesh.m_drawArguments;
+                        drawItem.m_pipelineState = m_modelPipelineStates[ShadowScope].get();
+                        drawItem.m_indexBufferView = &mesh.m_indexBufferView;
+                        drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
+                        drawItem.m_shaderResourceGroups = shaderResourceGroups;
+                        drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_modelStreamBufferViews[ShadowScope].size());
+                        drawItem.m_streamBufferViews = m_modelStreamBufferViews[ShadowScope].data();
+
+                        commandList->Submit(drawItem);
+                    }
                 }
             }
         };
@@ -978,52 +983,57 @@ namespace AtomSampleViewer
             commandList->SetViewports(&viewport, 1);
             commandList->SetScissors(&scissor, 1);
 
+            for (uint32_t i = context.GetSubmitRange().m_startIndex; i < context.GetSubmitRange().m_endIndex; ++i)
             {
-                // Terrain
-                const RHI::ShaderResourceGroup* shaderResourceGroups[] =
+                if (i == 0)
                 {
-                    m_shaderResourceGroups[ForwardScope][0]->GetRHIShaderResourceGroup(),
-                    m_viewShaderResourceGroup->GetRHIShaderResourceGroup()
-                };
+                    // Terrain
+                    const RHI::ShaderResourceGroup* shaderResourceGroups[] =
+                    {
+                        m_shaderResourceGroups[ForwardScope][0]->GetRHIShaderResourceGroup(),
+                        m_viewShaderResourceGroup->GetRHIShaderResourceGroup()
+                    };
 
-                RHI::DrawIndexed drawIndexed;
-                drawIndexed.m_indexCount = 6;
-                drawIndexed.m_instanceCount = 1;
+                    RHI::DrawIndexed drawIndexed;
+                    drawIndexed.m_indexCount = 6;
+                    drawIndexed.m_instanceCount = 1;
 
-                RHI::DrawItem drawItem;
-                drawItem.m_arguments = drawIndexed;
-                drawItem.m_pipelineState = m_terrainPipelineStates[ForwardScope].get();
-                drawItem.m_indexBufferView = &m_quadIndexBufferView;
-                drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
-                drawItem.m_shaderResourceGroups = shaderResourceGroups;
-                drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_quadStreamBufferViews[ForwardScope].size());
-                drawItem.m_streamBufferViews = m_quadStreamBufferViews[ForwardScope].data();
-
-                commandList->Submit(drawItem);
-            }
-
-            for (size_t i = 1; i < m_shaderResourceGroups[ShadowScope].size(); ++i)
-            {
-                // Model
-                const RHI::ShaderResourceGroup* shaderResourceGroups[] =
-                {
-                    m_shaderResourceGroups[ForwardScope][i]->GetRHIShaderResourceGroup(),
-                    m_viewShaderResourceGroup->GetRHIShaderResourceGroup()
-                };
-
-                for (const auto& mesh : m_model->GetLods()[0]->GetMeshes())
-                {
                     RHI::DrawItem drawItem;
-                    drawItem.m_arguments = mesh.m_drawArguments;
-                    drawItem.m_pipelineState = m_modelPipelineStates[ForwardScope].get();
-                    drawItem.m_indexBufferView = &mesh.m_indexBufferView;
+                    drawItem.m_submitIndex = i;
+                    drawItem.m_arguments = drawIndexed;
+                    drawItem.m_pipelineState = m_terrainPipelineStates[ForwardScope].get();
+                    drawItem.m_indexBufferView = &m_quadIndexBufferView;
                     drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                     drawItem.m_shaderResourceGroups = shaderResourceGroups;
-                    drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_modelStreamBufferViews[ForwardScope].size());
-                    drawItem.m_streamBufferViews = m_modelStreamBufferViews[ForwardScope].data();
+                    drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_quadStreamBufferViews[ForwardScope].size());
+                    drawItem.m_streamBufferViews = m_quadStreamBufferViews[ForwardScope].data();
 
                     commandList->Submit(drawItem);
-                }              
+                }
+                else
+                {
+                    // Model
+                    const RHI::ShaderResourceGroup* shaderResourceGroups[] =
+                    {
+                        m_shaderResourceGroups[ForwardScope][i]->GetRHIShaderResourceGroup(),
+                        m_viewShaderResourceGroup->GetRHIShaderResourceGroup()
+                    };
+
+                    for (const auto& mesh : m_model->GetLods()[0]->GetMeshes())
+                    {
+                        RHI::DrawItem drawItem;
+                        drawItem.m_submitIndex = i;
+                        drawItem.m_arguments = mesh.m_drawArguments;
+                        drawItem.m_pipelineState = m_modelPipelineStates[ForwardScope].get();
+                        drawItem.m_indexBufferView = &mesh.m_indexBufferView;
+                        drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
+                        drawItem.m_shaderResourceGroups = shaderResourceGroups;
+                        drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_modelStreamBufferViews[ForwardScope].size());
+                        drawItem.m_streamBufferViews = m_modelStreamBufferViews[ForwardScope].data();
+
+                        commandList->Submit(drawItem);
+                    }
+                }
             }
        };
 
