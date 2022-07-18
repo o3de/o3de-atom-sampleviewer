@@ -8,7 +8,7 @@
             "PassClass": "ParentPass",
             "Slots": [
                 {
-                    "Name": "SwapChainOutput",
+                    "Name": "PipelineOutput",
                     "SlotType": "InputOutput"
                 }
             ],
@@ -16,8 +16,8 @@
                 "$type": "PassData",
                 "PipelineGlobalConnections": [
                     {
-                        "GlobalName": "SwapChainOutput",
-                        "Slot": "SwapChainOutput"
+                        "GlobalName": "PipelineOutput",
+                        "Slot": "PipelineOutput"
                     }
                 ]
             },
@@ -25,10 +25,7 @@
                 {
                     "Name": "RHISamplePass",
                     "TemplateName": "RHISamplePassTemplate",
-                    "Enabled": true,
-                    "ExecuteAfter": [
-                        "BeginXRPass"
-                    ]
+                    "Enabled": true
                 },
                 {
                     "Name": "ImGuiPass",
@@ -63,7 +60,7 @@
                             "LocalSlot": "Output",
                             "AttachmentRef": {
                                 "Pass": "Parent",
-                                "Attachment": "SwapChainOutput"
+                                "Attachment": "PipelineOutput"
                             }
                         }
                     ]
