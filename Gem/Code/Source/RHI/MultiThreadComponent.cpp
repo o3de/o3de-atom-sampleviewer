@@ -316,27 +316,20 @@ namespace AtomSampleViewer
             drawIndexed.m_indexCount = s_geometryIndexCount;
             drawIndexed.m_instanceCount = 1;
 
-            // Dividing s_numberOfCubes by context.GetCommandListCount() to balance to number 
-            // of draw call equally between each thread.
-            uint32_t numberOfCubesPerCommandList = s_numberOfCubes / context.GetCommandListCount();
-            uint32_t indexStart = context.GetCommandListIndex() * numberOfCubesPerCommandList;
-            uint32_t indexEnd = indexStart + numberOfCubesPerCommandList;
-
             if (context.GetCommandListIndex() == context.GetCommandListCount() - 1)
             {
-                indexEnd = s_numberOfCubes;
-
 #if defined(AZ_DEBUG_BUILD)
                 AZ_Printf("MultiThread", "Draw Calls: %d \n", s_numberOfCubes);
                 AZ_Printf("MultiThread", "Num CommandLists: %d \n", context.GetCommandListCount());
 #endif
             }
             
-            for (uint32_t i = indexStart; i < indexEnd; ++i)
+            for (uint32_t i = context.GetSubmitRange().m_startIndex; i < context.GetSubmitRange().m_endIndex; ++i)
             {
                 const AZ::RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[i]->GetRHIShaderResourceGroup() };
 
                 AZ::RHI::DrawItem drawItem;
+                drawItem.m_submitIndex = i;
                 drawItem.m_arguments = drawIndexed;
                 drawItem.m_pipelineState = m_pipelineState.get();
                 drawItem.m_indexBufferView = &m_indexBufferView;

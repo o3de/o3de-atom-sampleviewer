@@ -212,29 +212,39 @@ namespace AtomSampleViewer
                 };
 
                 RHI::DrawIndexed drawIndexed;
-                drawIndexed.m_indexCount = s_numberOfVertices / 2;
                 drawIndexed.m_instanceCount = 1;
 
-                // Draw color triangles
                 RHI::DrawItem drawItem;
-                drawItem.m_arguments = drawIndexed;
-                drawItem.m_pipelineState = m_pipelineStateBasePass.get();
                 drawItem.m_indexBufferView = &indexBufferView;
                 drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
                 drawItem.m_streamBufferViews = m_streamBufferViews.data();
-                commandList->Submit(drawItem);
 
-                // Draw white triangles
-                drawIndexed.m_indexOffset = s_numberOfVertices / 2;
-                drawIndexed.m_indexCount = 3;
-                drawItem.m_stencilRef = 1;
-                for (int i = 0; i < m_pipelineStateStencil.size(); ++i)
+                for (uint32_t i = context.GetSubmitRange().m_startIndex; i < context.GetSubmitRange().m_endIndex; ++i)
                 {
-                    drawItem.m_arguments = drawIndexed;
-                    drawItem.m_pipelineState = m_pipelineStateStencil[i].get();
-                    commandList->Submit(drawItem);
+                    drawItem.m_submitIndex = i;
 
-                    drawIndexed.m_indexOffset += 3;
+                    if (i == 0)
+                    {
+                        drawIndexed.m_indexCount = s_numberOfVertices / 2;
+
+                        // Draw color triangles
+                        drawItem.m_arguments = drawIndexed;
+                        drawItem.m_pipelineState = m_pipelineStateBasePass.get();
+                        commandList->Submit(drawItem);
+                    }
+                    else
+                    {
+                        // Draw white triangles
+                        drawIndexed.m_indexOffset = s_numberOfVertices / 2;
+                        drawIndexed.m_indexCount = 3;
+                        drawItem.m_stencilRef = 1;
+
+                        drawItem.m_arguments = drawIndexed;
+                        drawItem.m_pipelineState = m_pipelineStateStencil[i-1].get();
+                        commandList->Submit(drawItem);
+
+                        drawIndexed.m_indexOffset += 3;
+                    }
                 }
             };
 

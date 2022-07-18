@@ -558,13 +558,8 @@ namespace AtomSampleViewer
                 commandList->SetViewports(&m_viewport, 1u);
                 commandList->SetScissors(&m_scissor, 1u);
 
-                // Split the drawcommands depending on the CommandList index.
-                const uint32_t drawInstancePerContext = (static_cast<uint32_t>(m_subMeshInstanceArray.size()) + 1) / context.GetCommandListCount();
-                const uint32_t drawInstanceStart = context.GetCommandListIndex() * drawInstancePerContext;
-                const uint32_t drawInstanceCount = AZStd::min(drawInstanceStart + drawInstancePerContext, static_cast<uint32_t>(m_subMeshInstanceArray.size()));
-
                 // Submit the drawcommands to the CommandList.
-                for (uint32_t instanceIdx = drawInstanceStart; instanceIdx < drawInstanceCount; instanceIdx++)
+                for (uint32_t instanceIdx = context.GetSubmitRange().m_startIndex; instanceIdx < context.GetSubmitRange().m_endIndex; instanceIdx++)
                 {
                     const SubMeshInstance& subMesh = m_subMeshInstanceArray[instanceIdx];
 
@@ -574,6 +569,7 @@ namespace AtomSampleViewer
                         m_bindlessSrg->GetSrg(m_floatBufferSrgName)->GetRHIShaderResourceGroup(),
                     };
                     RHI::DrawItem drawItem;
+                    drawItem.m_submitIndex = instanceIdx;
                     drawItem.m_arguments = subMesh.m_mesh->m_drawArguments;
                     drawItem.m_pipelineState = m_pipelineState.get();
                     drawItem.m_indexBufferView = &subMesh.m_mesh->m_indexBufferView;

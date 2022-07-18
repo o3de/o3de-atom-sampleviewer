@@ -820,7 +820,6 @@ namespace AtomSampleViewer
 
         const auto executeFunction = [this, maxIndirectDrawCount](const RHI::FrameGraphExecuteContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
-
             RHI::CommandList* commandList = context.GetCommandList();
 
             // Set persistent viewport and scissor state.
