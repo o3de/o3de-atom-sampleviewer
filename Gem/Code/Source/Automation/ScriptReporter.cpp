@@ -911,6 +911,12 @@ namespace AtomSampleViewer
         AZ::RHI::Format actualImageFormat;
         if (!LoadPngData(imageComparisonResult, actualImageFilePath, actualImageBuffer, actualImageSize, actualImageFormat, traceLevel))
         {
+            // Even though LoadPngData might have reported an error, we need to report our own here with the "Screenshot check failed" string
+            // because the error handler in ScriptReporter::ScriptReport is looking for that.
+            ReportScreenshotComparisonIssue("Screenshot check failed. 'Actual' file not loaded.",
+                expectedImageFilePath,
+                actualImageFilePath,
+                traceLevel);
             return false;
         }
 
@@ -919,6 +925,12 @@ namespace AtomSampleViewer
         AZ::RHI::Format expectedImageFormat;
         if (!LoadPngData(imageComparisonResult, expectedImageFilePath, expectedImageBuffer, expectedImageSize, expectedImageFormat, traceLevel))
         {
+            // Even though LoadPngData might have reported an error, we need to report our own here with the "Screenshot check failed" string
+            // because the error handler in ScriptReporter::ScriptReport is looking for that.
+            ReportScreenshotComparisonIssue("Screenshot check failed. 'Expected' file not loaded.",
+                expectedImageFilePath,
+                actualImageFilePath,
+                traceLevel);
             return false;
         }
 
