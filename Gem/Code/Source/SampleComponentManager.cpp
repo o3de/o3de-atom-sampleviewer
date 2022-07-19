@@ -461,9 +461,23 @@ namespace AtomSampleViewer
                 {
                     if (m_isSampleSupported[i])
                     {
+                        if (m_availableSamples[i].m_contentWarning.empty())
+                        {
+                            m_selectedSampleIndex = i;
+                            m_sampleChangeRequest = true;
+                        }
+                        else
+                        {
+                            m_contentWarningDialog.OpenPopupConfirmation(
+                                "Sample Content Warning",
+                                m_availableSamples[i].m_contentWarning,
+                                [this, i]() {
+                                    m_selectedSampleIndex = i;
+                                    m_sampleChangeRequest = true;
+                                });
+                        }
+
                         targetSampleFound = true;
-                        m_selectedSampleIndex = i;
-                        m_sampleChangeRequest = true;
                     }
 
                     break;
@@ -922,11 +936,7 @@ namespace AtomSampleViewer
                                             m_selectedSampleIndex = index;
                                         });
                                 }
-
                             }
-
-
-
                         }
 
                         ImGui::EndMenu();
