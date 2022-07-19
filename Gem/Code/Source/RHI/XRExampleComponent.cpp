@@ -35,7 +35,7 @@ namespace AtomSampleViewer
 
     void XRExampleComponent::Activate()
     {
-        m_depthStencilID = AZ::RHI::AttachmentId{ AZStd::string::format("DepthStencilID_% u", GetId()) };
+        m_depthStencilID = AZ::RHI::AttachmentId{ AZStd::string::format("DepthStencilID_%llu", GetId()) };
         CreateCubeInputAssemblyBuffer();
         CreateCubePipeline();
         CreateScope();
@@ -51,7 +51,6 @@ namespace AtomSampleViewer
     void XRExampleComponent::OnFramePrepare(AZ::RHI::FrameGraphBuilder& frameGraphBuilder)
     {
         AZ::Matrix4x4 projection = AZ::Matrix4x4::CreateIdentity();
-        AZ::Matrix4x4 vpMat = AZ::Matrix4x4::CreateIdentity();
 
         AZ::RPI::XRRenderingInterface* xrSystem = AZ::RPI::RPISystemInterface::Get()->GetXRSystem();
         if (xrSystem && xrSystem->ShouldRender())
@@ -373,7 +372,7 @@ namespace AtomSampleViewer
             decltype(prepareFunction),
             decltype(compileFunction),
             decltype(executeFunction)>(
-                AZ::RHI::ScopeId{ AZStd::string::format("XRSample_Id_% u", GetId()) },
+                AZ::RHI::ScopeId{ AZStd::string::format("XRSample_Id_%llu", GetId()) },
                 ScopeData{},
                 prepareFunction,
                 compileFunction,
