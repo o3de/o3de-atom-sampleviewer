@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <AzCore/Component/Component.h>
+#include <AtomSampleComponent.h>
 #include <AzCore/Component/TransformBus.h>
 #include <AzCore/Component/EntityBus.h>
 #include <AzFramework/Entity/EntityContextBus.h>
@@ -25,12 +25,12 @@
 namespace AtomSampleViewer
 {
     class CommonSampleComponentBase
-        : public AZ::Component
+        : public AtomSampleComponent
         , public AZ::TransformNotificationBus::MultiHandler
         , public AZ::EntityBus::MultiHandler
     {
     public:
-        AZ_TYPE_INFO(CommonSampleComponentBase, "{7EECDF09-B774-46C1-AD6E-060CE5717C05}");
+        AZ_RTTI(CommonSampleComponentBase, "{7EECDF09-B774-46C1-AD6E-060CE5717C05}", AtomSampleComponent);
 
         static void Reflect(AZ::ReflectContext* context);
 

@@ -7,7 +7,7 @@
  */
 
 #pragma once
-#include <AzCore/Component/Component.h>
+#include <AtomSampleComponent.h>
 #include <AzCore/std/smart_ptr/shared_ptr.h>
 
 #include <Atom/RPI.Public/Image/StreamingImage.h>
@@ -81,13 +81,13 @@ namespace AtomSampleViewer
     };
 
     class BasicRHIComponent
-        : public AZ::Component
+        : public AtomSampleComponent
         , public AZ::RHI::RHISystemNotificationBus::Handler
     {
         friend class RHISamplePass;
 
     public:
-        AZ_RTTI(BasicRHIComponent, "{FAB340E4-2D91-48CD-A7BC-81ED25721415}", AZ::Component);
+        AZ_RTTI(BasicRHIComponent, "{FAB340E4-2D91-48CD-A7BC-81ED25721415}", AtomSampleComponent);
 
         BasicRHIComponent() = default;
         ~BasicRHIComponent() override = default;
