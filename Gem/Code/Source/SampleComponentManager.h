@@ -69,6 +69,7 @@ namespace AtomSampleViewer
         SamplePipelineType m_pipelineType = SamplePipelineType::RHI;
         AZ::ComponentDescriptor* m_componentDescriptor;
         AZStd::string m_contentWarning;
+        AZStd::string m_contentWarningTitle;
 
         bool operator==(const SampleEntry& other)
         {

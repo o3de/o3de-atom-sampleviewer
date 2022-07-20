@@ -24,8 +24,13 @@ namespace AtomSampleViewer
         // Redefine this string in the sample component subclass to provide a sample-specific warning message.
         // Any non-empty string will automatically cause a warning message to be displayed before opening the sample.
         static constexpr const char* ContentWarning = "";
+
+        // If the above ContentWarning is overridden with a non-empty value, this string will be used as the message box's title.
+        // Redefine this string in the sample component subclass to provide a custom title.
+        static constexpr const char* ContentWarningTitle = "Content Warning";
         
         // This is a common photosensitive/seizure warning that could be used for the above ContentWarning in specific samples as needed.
         static constexpr const char CommonPhotosensitiveWarning[] = "This sample includes flashing images that could cause seizures or other adverse effects in photosensitive individuals.";
+        static constexpr const char CommonPhotosensitiveWarningTitle[] = "Photosensitive Seizure Warning";
     };
 } // namespace AtomSampleViewer

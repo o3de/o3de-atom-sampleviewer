@@ -166,6 +166,7 @@ namespace AtomSampleViewer
         entry.m_parentMenuName = menuName;
         entry.m_fullName = entry.m_parentMenuName + '/' + entry.m_sampleName;
         entry.m_contentWarning = T::ContentWarning;
+        entry.m_contentWarningTitle = T::ContentWarningTitle;
 
         return entry;
     }
@@ -469,7 +470,7 @@ namespace AtomSampleViewer
                         else
                         {
                             m_contentWarningDialog.OpenPopupConfirmation(
-                                "Sample Content Warning",
+                                m_availableSamples[i].m_contentWarningTitle,
                                 m_availableSamples[i].m_contentWarning,
                                 [this, i]() {
                                     m_selectedSampleIndex = i;
@@ -929,7 +930,7 @@ namespace AtomSampleViewer
                                 else
                                 {
                                     m_contentWarningDialog.OpenPopupConfirmation(
-                                        "Sample Content Warning",
+                                        sample.m_contentWarningTitle,
                                         sample.m_contentWarning,
                                         [this, index]() {
                                             m_sampleChangeRequest = true;
@@ -958,7 +959,7 @@ namespace AtomSampleViewer
 
             if (ImGui::BeginMenu("Automation"))
             {
-                const char* AutomationContentWarningTitle = "Sample Content Warning";
+                const char* AutomationContentWarningTitle = AtomSampleComponent::CommonPhotosensitiveWarningTitle;
                 const char* AutomationContentWarning = "Running automated scripts will trigger flashing images that could cause seizures or other adverse effects in photosensitive individuals.";
 
                 if (ImGui::MenuItem("Run Script..."))

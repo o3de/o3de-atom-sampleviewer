@@ -30,7 +30,8 @@ namespace AtomSampleViewer
 
         // Instead of using the CommonPhotosensitiveWarning, I used a custom message here that specifically calls out headaches and nausea
         // as I've personally experienced those while looking at this sample, even though I don't otherwise consider myself to be photosensitive.
-        static constexpr const char ContentWarning[] = "This sample has lots of flashing, may cause headaches and nausea, or may cause seizures for people with certain photosensitivity.";
+        static constexpr const char* ContentWarning = "This sample has lots of flashing, may cause headaches and nausea, or may cause seizures for people with certain photosensitivity.";
+        static constexpr const char* ContentWarningTitle = CommonPhotosensitiveWarningTitle;
 
         SceneReloadSoakTestComponent() = default;
 
