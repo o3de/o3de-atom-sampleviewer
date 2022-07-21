@@ -7,7 +7,7 @@
  */
 
 
-#include <Atom/RHI/ImagePool.h>
+#include <Atom/RHI/DeviceImagePool.h>
 
 #include <Atom/RHI.Reflect/InputStreamLayoutBuilder.h>
 #include <Atom/RHI.Reflect/RenderAttachmentLayoutBuilder.h>
@@ -515,9 +515,9 @@ namespace AtomSampleViewer
             drawIndexed.m_indexCount = 6;
             drawIndexed.m_instanceCount = 1;
 
-            const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_targetSRGs[target]->GetRHIShaderResourceGroup() };
+            const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = { m_targetSRGs[target]->GetRHIShaderResourceGroup() };
 
-            RHI::DrawItem drawItem;
+            RHI::DeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;
             drawItem.m_pipelineState = m_targetPipelineStates[target].get();
             drawItem.m_indexBufferView = &m_bufferViews[RenderTargetIndex::BufferViewIndex].m_indexBufferView;
@@ -574,7 +574,7 @@ namespace AtomSampleViewer
 
         const auto compileFunction = [this, target](const AZ::RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
-            const AZ::RHI::ImageView* imageView = context.GetImageView(m_attachmentID[target]);
+            const AZ::RHI::DeviceImageView* imageView = context.GetImageView(m_attachmentID[target]);
 
             m_screenSRGs[target]->SetImageView(m_shaderInputImageIndices[target], imageView);
             m_screenSRGs[target]->Compile();
@@ -592,9 +592,9 @@ namespace AtomSampleViewer
             drawIndexed.m_indexCount = m_bufferViews[target].m_indexBufferView.GetByteCount() / sizeof(uint16_t);
             drawIndexed.m_instanceCount = 1;
 
-            const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_screenSRGs[target]->GetRHIShaderResourceGroup() };
+            const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = { m_screenSRGs[target]->GetRHIShaderResourceGroup() };
 
-            RHI::DrawItem drawItem;
+            RHI::DeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;
             drawItem.m_pipelineState = m_screenPipelineStates[target].get();
             drawItem.m_indexBufferView = &m_bufferViews[target].m_indexBufferView;
@@ -769,7 +769,7 @@ namespace AtomSampleViewer
     {
         m_positionBuffer[target] = AZ::RHI::Factory::Get().CreateBuffer();
         AZ::RHI::ResultCode result = AZ::RHI::ResultCode::Success;
-        AZ::RHI::BufferInitRequest request;
+        AZ::RHI::DeviceBufferInitRequest request;
         request.m_buffer = m_positionBuffer[target].get();
         request.m_descriptor = AZ::RHI::BufferDescriptor{ AZ::RHI::BufferBindFlags::InputAssembly, posSize };
         request.m_initialData = posData;

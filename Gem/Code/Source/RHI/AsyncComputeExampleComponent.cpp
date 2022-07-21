@@ -10,8 +10,8 @@
 #include <Atom/RHI/CommandList.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/Image.h>
-#include <Atom/RHI/ImagePool.h>
+#include <Atom/RHI/DeviceImage.h>
+#include <Atom/RHI/DeviceImagePool.h>
 #include <Atom/RHI/ScopeProducerFunction.h>
 #include <Atom/RHI.Reflect/InputStreamLayoutBuilder.h>
 
@@ -154,7 +154,7 @@ namespace AtomSampleViewer
         for (auto& image : m_sceneImages)
         {
             image = RHI::Factory::Get().CreateImage();
-            RHI::ImageInitRequest initImageRequest;
+            RHI::DeviceImageInitRequest initImageRequest;
             RHI::ClearValue clearValue = RHI::ClearValue::CreateVector4Float(0, 0, 0, 0);
             initImageRequest.m_image = image.get();
             initImageRequest.m_descriptor = RHI::ImageDescriptor::Create2D(
@@ -195,7 +195,7 @@ namespace AtomSampleViewer
 
         m_quadInputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
         RHI::ResultCode result = RHI::ResultCode::Success;
-        RHI::BufferInitRequest request;
+        RHI::DeviceBufferInitRequest request;
 
         request.m_buffer = m_quadInputAssemblyBuffer.get();
         request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, sizeof(bufferData) };
@@ -207,7 +207,7 @@ namespace AtomSampleViewer
             return;
         }
 
-        AZ::RHI::StreamBufferView positionsBufferView =
+        AZ::RHI::DeviceStreamBufferView positionsBufferView =
         {
             *m_quadInputAssemblyBuffer,
             offsetof(BufferData, m_positions),
@@ -215,7 +215,7 @@ namespace AtomSampleViewer
             sizeof(VertexPosition)
         };
 
-        AZ::RHI::StreamBufferView normalsBufferView =
+        AZ::RHI::DeviceStreamBufferView normalsBufferView =
         {
             *m_quadInputAssemblyBuffer,
             offsetof(BufferData, m_normals),
@@ -223,7 +223,7 @@ namespace AtomSampleViewer
             sizeof(VertexNormal)
         };
 
-        AZ::RHI::StreamBufferView uvsBufferView =
+        AZ::RHI::DeviceStreamBufferView uvsBufferView =
         {
             *m_quadInputAssemblyBuffer,
             offsetof(BufferData, m_uvs),
@@ -600,7 +600,7 @@ namespace AtomSampleViewer
 
         m_quadBufferPool = nullptr;
         m_quadInputAssemblyBuffer = nullptr;
-        m_quadStreamBufferViews.fill(AZStd::vector<AZ::RHI::StreamBufferView>());
+        m_quadStreamBufferViews.fill(AZStd::vector<AZ::RHI::DeviceStreamBufferView>());
         m_terrainPipelineStates.fill(nullptr);
         m_modelStreamBufferViews.fill(AZ::RPI::ModelLod::StreamBufferViewList());
         m_modelPipelineStates.fill(nullptr);
@@ -791,7 +791,7 @@ namespace AtomSampleViewer
             auto& source = m_sceneIds[m_previousSceneImageIndex];
             auto& shaderResourceGroup = m_shaderResourceGroups[CopyTextureScope].front();
 
-            const RHI::ImageView* imageView = context.GetImageView(source);
+            const RHI::DeviceImageView* imageView = context.GetImageView(source);
             shaderResourceGroup->SetImageView(m_copyTextureShaderInputImageIndex, imageView);
             shaderResourceGroup->Compile();
         };
@@ -808,9 +808,9 @@ namespace AtomSampleViewer
                 drawIndexed.m_indexCount = 6;
                 drawIndexed.m_instanceCount = 1;
 
-                const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[CopyTextureScope].front()->GetRHIShaderResourceGroup() };
+                const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[CopyTextureScope].front()->GetRHIShaderResourceGroup() };
 
-                RHI::DrawItem drawItem;
+                RHI::DeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
                 drawItem.m_pipelineState = m_copyTexturePipelineState.get();
                 drawItem.m_indexBufferView = &m_quadIndexBufferView;
@@ -876,9 +876,9 @@ namespace AtomSampleViewer
                     drawIndexed.m_indexCount = 6;
                     drawIndexed.m_instanceCount = 1;
 
-                    const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[ShadowScope][0]->GetRHIShaderResourceGroup() };
+                    const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[ShadowScope][0]->GetRHIShaderResourceGroup() };
 
-                    RHI::DrawItem drawItem;
+                    RHI::DeviceDrawItem drawItem;
                     drawItem.m_arguments = drawIndexed;
                     drawItem.m_pipelineState = m_terrainPipelineStates[ShadowScope].get();
                     drawItem.m_indexBufferView = &m_quadIndexBufferView;
@@ -891,10 +891,10 @@ namespace AtomSampleViewer
                 else
                 {
                     // Models
-                    const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[ShadowScope][i]->GetRHIShaderResourceGroup() };
+                    const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[ShadowScope][i]->GetRHIShaderResourceGroup() };
                     for (const auto& mesh : m_model->GetLods()[0]->GetMeshes())
                     {
-                        RHI::DrawItem drawItem;
+                        RHI::DeviceDrawItem drawItem;
                         drawItem.m_arguments = mesh.m_drawArguments;
                         drawItem.m_pipelineState = m_modelPipelineStates[ShadowScope].get();
                         drawItem.m_indexBufferView = &mesh.m_indexBufferView;
@@ -958,7 +958,7 @@ namespace AtomSampleViewer
 
         const auto compileFunction = [this](const RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
-            const RHI::ImageView* imageView = context.GetImageView(m_shadowAttachmentId);
+            const RHI::DeviceImageView* imageView = context.GetImageView(m_shadowAttachmentId);
 
             for (const auto& shaderResourceGroup : m_shaderResourceGroups[ForwardScope])
             {
@@ -986,7 +986,7 @@ namespace AtomSampleViewer
                 if (i == 0)
                 {
                     // Terrain
-                    const RHI::ShaderResourceGroup* shaderResourceGroups[] =
+                    const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] =
                     {
                         m_shaderResourceGroups[ForwardScope][0]->GetRHIShaderResourceGroup(),
                         m_viewShaderResourceGroup->GetRHIShaderResourceGroup()
@@ -996,7 +996,7 @@ namespace AtomSampleViewer
                     drawIndexed.m_indexCount = 6;
                     drawIndexed.m_instanceCount = 1;
 
-                    RHI::DrawItem drawItem;
+                    RHI::DeviceDrawItem drawItem;
                     drawItem.m_arguments = drawIndexed;
                     drawItem.m_pipelineState = m_terrainPipelineStates[ForwardScope].get();
                     drawItem.m_indexBufferView = &m_quadIndexBufferView;
@@ -1010,7 +1010,7 @@ namespace AtomSampleViewer
                 else
                 {
                     // Model
-                    const RHI::ShaderResourceGroup* shaderResourceGroups[] =
+                    const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] =
                     {
                         m_shaderResourceGroups[ForwardScope][i]->GetRHIShaderResourceGroup(),
                         m_viewShaderResourceGroup->GetRHIShaderResourceGroup()
@@ -1018,7 +1018,7 @@ namespace AtomSampleViewer
 
                     for (const auto& mesh : m_model->GetLods()[0]->GetMeshes())
                     {
-                        RHI::DrawItem drawItem;
+                        RHI::DeviceDrawItem drawItem;
                         drawItem.m_arguments = mesh.m_drawArguments;
                         drawItem.m_pipelineState = m_modelPipelineStates[ForwardScope].get();
                         drawItem.m_indexBufferView = &mesh.m_indexBufferView;
@@ -1069,8 +1069,8 @@ namespace AtomSampleViewer
 
         const auto compileFunction = [this](const RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
-            const RHI::ImageView* hdrSceneView = context.GetImageView(m_sceneIds[m_previousSceneImageIndex]);
-            const RHI::ImageView* luminanceView = context.GetImageView(m_averageLuminanceAttachmentId);
+            const RHI::DeviceImageView* hdrSceneView = context.GetImageView(m_sceneIds[m_previousSceneImageIndex]);
+            const RHI::DeviceImageView* luminanceView = context.GetImageView(m_averageLuminanceAttachmentId);
 
             for (const auto& shaderResourceGroup : m_shaderResourceGroups[TonemappingScope])
             {
@@ -1084,7 +1084,7 @@ namespace AtomSampleViewer
         {
             RHI::CommandList* commandList = context.GetCommandList();
 
-            RHI::DispatchItem dispatchItem;
+            RHI::DeviceDispatchItem dispatchItem;
             decltype(dispatchItem.m_shaderResourceGroups) shaderResourceGroups = { { m_shaderResourceGroups[TonemappingScope][0]->GetRHIShaderResourceGroup() } };
 
             RHI::DispatchDirect dispatchArgs;
@@ -1143,7 +1143,7 @@ namespace AtomSampleViewer
 
         const auto compileFunction = [this](const RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
-            const RHI::ImageView* imageView = context.GetImageView(m_sceneIds[m_previousSceneImageIndex]);
+            const RHI::DeviceImageView* imageView = context.GetImageView(m_sceneIds[m_previousSceneImageIndex]);
 
             for (const auto& shaderResourceGroup : m_shaderResourceGroups[LuminanceMapScope])
             {
@@ -1167,9 +1167,9 @@ namespace AtomSampleViewer
                 drawIndexed.m_indexCount = 6;
                 drawIndexed.m_instanceCount = 1;
 
-                const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[LuminanceMapScope][0]->GetRHIShaderResourceGroup() };
+                const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[LuminanceMapScope][0]->GetRHIShaderResourceGroup() };
 
-                RHI::DrawItem drawItem;
+                RHI::DeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
                 drawItem.m_pipelineState = m_luminancePipelineState.get();
                 drawItem.m_indexBufferView = &m_quadIndexBufferView;
@@ -1239,8 +1239,8 @@ namespace AtomSampleViewer
 
             const auto compileFunction = [this, inputAttachmentId, outputAttachmentId, i](const RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
             {
-                const RHI::ImageView* inputView = context.GetImageView(inputAttachmentId);
-                const RHI::ImageView* outputView = context.GetImageView(outputAttachmentId);
+                const RHI::DeviceImageView* inputView = context.GetImageView(inputAttachmentId);
+                const RHI::DeviceImageView* outputView = context.GetImageView(outputAttachmentId);
 
                 const auto& shaderResourceGroup = m_shaderResourceGroups[LuminanceReduceScope][i];
                 shaderResourceGroup->SetImageView(m_luminanceReduceShaderInputImageIndex, inputView);
@@ -1252,7 +1252,7 @@ namespace AtomSampleViewer
             {
                 RHI::CommandList* commandList = context.GetCommandList();
 
-                RHI::DispatchItem dispatchItem;
+                RHI::DeviceDispatchItem dispatchItem;
                 decltype(dispatchItem.m_shaderResourceGroups) shaderResourceGroups = { { m_shaderResourceGroups[LuminanceReduceScope][i]->GetRHIShaderResourceGroup() } };
 
                 RHI::DispatchDirect dispatchArgs;

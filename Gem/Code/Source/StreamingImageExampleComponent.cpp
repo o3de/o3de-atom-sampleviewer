@@ -53,7 +53,7 @@ namespace AtomSampleViewer
             const char* srgName,
             Data::Asset<AZ::RPI::ShaderAsset>& shaderAsset,
             RHI::Ptr<AZ::RHI::ShaderResourceGroupLayout>& srgLayout,
-            RHI::ConstPtr<RHI::PipelineState>& pipelineState,
+            RHI::ConstPtr<RHI::DevicePipelineState>& pipelineState,
             RHI::DrawListTag& drawListTag,
             RPI::Scene* scene)
         {

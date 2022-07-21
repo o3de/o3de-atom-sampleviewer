@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include <Atom/RHI/BufferPool.h>
-#include <Atom/RHI/DrawItem.h>
+#include <Atom/RHI/DeviceBufferPool.h>
+#include <Atom/RHI/DeviceDrawItem.h>
 #include <Atom/RHI/ScopeProducer.h>
 
 #include <Atom/RPI.Public/Image/AttachmentImage.h>
@@ -57,13 +57,13 @@ namespace AtomSampleViewer
         void ReadRenderTargetShader();
         void ReadScreenShader();
         
-        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_bufferPool;
-        AZ::RHI::Ptr<AZ::RHI::Buffer> m_inputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::DeviceBufferPool> m_bufferPool;
+        AZ::RHI::Ptr<AZ::RHI::DeviceBuffer> m_inputAssemblyBuffer;
 
         AZStd::array<AZ::RHI::TransientImageDescriptor, 3> m_renderTargetImageDescriptors;
 
         AZ::RHI::InputStreamLayout m_inputStreamLayout;
-        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::PipelineState>,2> m_pipelineStates;
+        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::DevicePipelineState>,2> m_pipelineStates;
         AZStd::array<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, 2> m_shaderResourceGroups;
 
         AZStd::array<AZ::RHI::ShaderInputConstantIndex, 3> m_shaderInputConstantIndices;
@@ -80,10 +80,10 @@ namespace AtomSampleViewer
             AZStd::array<VertexUV, 4> m_uvs;
             AZStd::array<uint16_t, 6> m_indices;
         };
-        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
-        AZ::RHI::IndexBufferView m_indexBufferView;
+        AZStd::array<AZ::RHI::DeviceStreamBufferView, 2> m_streamBufferViews;
+        AZ::RHI::DeviceIndexBufferView m_indexBufferView;
 
-        AZ::RHI::DrawItem m_drawItem;
+        AZ::RHI::DeviceDrawItem m_drawItem;
         AZStd::array<AZ::RHI::AttachmentId, 3> m_attachmentID;
         AZ::RHI::ClearValue m_clearValue;
         float m_time;

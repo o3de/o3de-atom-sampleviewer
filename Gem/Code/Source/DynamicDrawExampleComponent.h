@@ -16,9 +16,9 @@
 #include <Atom/RPI.Public/DynamicDraw/DynamicDrawContext.h>
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 
-#include <Atom/RHI/StreamBufferView.h>
-#include <Atom/RHI/IndexBufferView.h>
-#include <Atom/RHI/PipelineState.h>
+#include <Atom/RHI/DeviceStreamBufferView.h>
+#include <Atom/RHI/DeviceIndexBufferView.h>
+#include <Atom/RHI/DevicePipelineState.h>
 #include <Atom/RHI/DrawList.h>
 
 #include <Utils/ImGuiSidebar.h>

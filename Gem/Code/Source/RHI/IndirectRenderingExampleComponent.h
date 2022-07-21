@@ -13,28 +13,28 @@
 #include <AzCore/Math/Color.h>
 #include <AzCore/std/containers/array.h>
 
-#include <AzFramework/Windowing/WindowBus.h>
 #include <AzFramework/Windowing/NativeWindow.h>
+#include <AzFramework/Windowing/WindowBus.h>
 
-#include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 #include <Atom/RPI.Public/Shader/ShaderReloadNotificationBus.h>
+#include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 
-#include <Atom/RHI/BufferPool.h>
-#include <Atom/RHI/DrawItem.h>
 #include <Atom/RHI/Device.h>
+#include <Atom/RHI/DeviceBufferPool.h>
+#include <Atom/RHI/DeviceCopyItem.h>
+#include <Atom/RHI/DeviceDrawItem.h>
+#include <Atom/RHI/DeviceIndirectBufferSignature.h>
+#include <Atom/RHI/DeviceIndirectBufferWriter.h>
+#include <Atom/RHI/DevicePipelineState.h>
 #include <Atom/RHI/Factory.h>
-#include <Atom/RHI/CopyItem.h>
 #include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/IndirectBufferSignature.h>
-#include <Atom/RHI/IndirectBufferWriter.h>
-#include <Atom/RHI/PipelineState.h>
 
 #include <Atom/RHI.Reflect/IndirectBufferLayout.h>
 
-#include <RHI/BasicRHIComponent.h>
-#include <Utils/ImGuiSidebar.h>
-#include <Utils/ImGuiProgressList.h>
 #include <Atom/Utils/AssetCollectionAsyncLoader.h>
+#include <RHI/BasicRHIComponent.h>
+#include <Utils/ImGuiProgressList.h>
+#include <Utils/ImGuiSidebar.h>
 
 namespace AtomSampleViewer
 {
@@ -105,15 +105,15 @@ namespace AtomSampleViewer
 
         struct ScopeData
         {
-            //UserDataParam - Empty for this samples
+            // UserDataParam - Empty for this samples
         };
 
         /// The indirect commands that the indirect buffer will contain.
-        enum class SequenceType: uint8_t
+        enum class SequenceType : uint8_t
         {
-            DrawOnly = 0,           // The buffer will contain only a draw indexed command.
-            IARootConstantsDraw,   // The buffer will contain a set vertex buffer, set index buffer, set
-                                    // root constants and a draw indexed command.
+            DrawOnly = 0, // The buffer will contain only a draw indexed command.
+            IARootConstantsDraw, // The buffer will contain a set vertex buffer, set index buffer, set
+                                 // root constants and a draw indexed command.
             Count
         };
 
@@ -152,37 +152,37 @@ namespace AtomSampleViewer
 
         AZ::RHI::InputStreamLayout m_inputStreamLayout;
 
-        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_inputAssemblyBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_shaderBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_instancesBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_copyBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::DeviceBufferPool> m_inputAssemblyBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::DeviceBufferPool> m_shaderBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::DeviceBufferPool> m_instancesBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::DeviceBufferPool> m_copyBufferPool;
 
-        AZ::RHI::Ptr<AZ::RHI::Buffer> m_inputAssemblyBuffer;
-        AZ::RHI::Ptr<AZ::RHI::Buffer> m_sourceIndirectBuffer;
-        AZ::RHI::Ptr<AZ::RHI::Buffer> m_instancesDataBuffer;
-        AZ::RHI::Ptr<AZ::RHI::Buffer> m_resetCounterBuffer;
-        AZ::RHI::Ptr<AZ::RHI::Buffer> m_indirectDispatchBuffer;
+        AZ::RHI::Ptr<AZ::RHI::DeviceBuffer> m_inputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::DeviceBuffer> m_sourceIndirectBuffer;
+        AZ::RHI::Ptr<AZ::RHI::DeviceBuffer> m_instancesDataBuffer;
+        AZ::RHI::Ptr<AZ::RHI::DeviceBuffer> m_resetCounterBuffer;
+        AZ::RHI::Ptr<AZ::RHI::DeviceBuffer> m_indirectDispatchBuffer;
 
-        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_drawPipelineState;
-        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_cullPipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::DevicePipelineState> m_drawPipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::DevicePipelineState> m_cullPipelineState;
 
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_sceneShaderResourceGroup;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_cullShaderResourceGroup;
 
         AZStd::array<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, NumSequencesType> m_indirectCommandsShaderResourceGroups;
 
-        AZStd::array<AZ::RHI::StreamBufferView, 3> m_streamBufferViews;
-        AZStd::array<AZ::RHI::IndexBufferView, 2> m_indexBufferViews;
-        AZ::RHI::IndirectBufferView m_indirectDrawBufferView;
-        AZ::RHI::IndirectBufferView m_indirectDispatchBufferView;
+        AZStd::array<AZ::RHI::DeviceStreamBufferView, 3> m_streamBufferViews;
+        AZStd::array<AZ::RHI::DeviceIndexBufferView, 2> m_indexBufferViews;
+        AZ::RHI::DeviceIndirectBufferView m_indirectDrawBufferView;
+        AZ::RHI::DeviceIndirectBufferView m_indirectDispatchBufferView;
 
-        AZ::RHI::Ptr<AZ::RHI::BufferView> m_sourceIndirectBufferView;
-        AZ::RHI::Ptr<AZ::RHI::BufferView> m_instancesDataBufferView;
+        AZ::RHI::Ptr<AZ::RHI::DeviceBufferView> m_sourceIndirectBufferView;
+        AZ::RHI::Ptr<AZ::RHI::DeviceBufferView> m_instancesDataBufferView;
 
         AZ::RHI::IndirectBufferLayout m_indirectDrawBufferLayout;
         AZ::RHI::IndirectBufferLayout m_indirectDispatchBufferLayout;
-        AZ::RHI::Ptr<AZ::RHI::IndirectBufferSignature> m_indirectDrawBufferSignature;
-        AZ::RHI::Ptr<AZ::RHI::IndirectBufferSignature> m_indirectDispatchBufferSignature;
+        AZ::RHI::Ptr<AZ::RHI::DeviceIndirectBufferSignature> m_indirectDrawBufferSignature;
+        AZ::RHI::Ptr<AZ::RHI::DeviceIndirectBufferSignature> m_indirectDispatchBufferSignature;
 
         AZ::RHI::ShaderInputBufferIndex m_sceneInstancesDataBufferIndex;
         AZ::RHI::ShaderInputConstantIndex m_sceneMatrixInputIndex;
@@ -194,10 +194,10 @@ namespace AtomSampleViewer
         AZStd::array<AZ::RHI::ShaderInputBufferIndex, NumSequencesType> m_cullingInputIndirectBufferIndices;
         AZStd::array<AZ::RHI::ShaderInputBufferIndex, NumSequencesType> m_cullingOutputIndirectBufferIndices;
 
-        AZ::RHI::Ptr<AZ::RHI::IndirectBufferWriter> m_indirectDispatchWriter;
+        AZ::RHI::Ptr<AZ::RHI::DeviceIndirectBufferWriter> m_indirectDispatchWriter;
 
-        AZ::RHI::DrawIndirect m_drawIndirect;
-        AZ::RHI::CopyBufferDescriptor m_copyDescriptor;
+        AZ::RHI::DeviceDrawIndirect m_drawIndirect;
+        AZ::RHI::DeviceCopyBufferDescriptor m_copyDescriptor;
 
         ImGuiSidebar m_imguiSidebar;
         float m_cullOffset = 1.0f;

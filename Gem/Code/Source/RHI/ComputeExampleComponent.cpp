@@ -9,8 +9,8 @@
 #include <Atom/RHI/CommandList.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/Image.h>
-#include <Atom/RHI/ImagePool.h>
+#include <Atom/RHI/DeviceImage.h>
+#include <Atom/RHI/DeviceImagePool.h>
 #include <Atom/RHI/ScopeProducerFunction.h>
 #include <Atom/RHI.Reflect/InputStreamLayoutBuilder.h>
 #include <Atom/RHI.Reflect/RenderAttachmentLayoutBuilder.h>
@@ -115,7 +115,7 @@ namespace AtomSampleViewer
 
         m_inputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
 
-        RHI::BufferInitRequest request;
+        RHI::DeviceBufferInitRequest request;
         request.m_buffer = m_inputAssemblyBuffer.get();
         request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, sizeof(bufferData) };
         request.m_initialData = &bufferData;
@@ -248,7 +248,7 @@ namespace AtomSampleViewer
         m_computeBuffer = RHI::Factory::Get().CreateBuffer();
         uint32_t bufferSize = m_bufferWidth * m_bufferHeight * RHI::GetFormatSize(RHI::Format::R32G32B32A32_FLOAT);
 
-        RHI::BufferInitRequest request;
+        RHI::DeviceBufferInitRequest request;
         request.m_buffer = m_computeBuffer.get();
         request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::ShaderReadWrite, bufferSize };
         result = m_computeBufferPool->InitBuffer(request);
@@ -309,11 +309,11 @@ namespace AtomSampleViewer
             commandList->SetViewports(&m_viewport, 1);
             commandList->SetScissors(&m_scissor, 1);
 
-            AZStd::array <const RHI::ShaderResourceGroup*, 8> shaderResourceGroups;
+            AZStd::array <const RHI::DeviceShaderResourceGroup*, 8> shaderResourceGroups;
             shaderResourceGroups[0] = m_dispatchSRGs[0]->GetRHIShaderResourceGroup();
             shaderResourceGroups[1] = m_dispatchSRGs[1]->GetRHIShaderResourceGroup();
             
-            RHI::DispatchItem dispatchItem;
+            RHI::DeviceDispatchItem dispatchItem;
             RHI::DispatchDirect dispatchArgs;
 
             dispatchArgs.m_threadsPerGroupX = aznumeric_cast<uint16_t>(m_numThreadsX);
@@ -398,9 +398,9 @@ namespace AtomSampleViewer
             drawIndexed.m_indexCount = 6;
             drawIndexed.m_instanceCount = 1;
 
-            const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_drawSRGs[0]->GetRHIShaderResourceGroup(), m_drawSRGs[1]->GetRHIShaderResourceGroup() };
+            const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = { m_drawSRGs[0]->GetRHIShaderResourceGroup(), m_drawSRGs[1]->GetRHIShaderResourceGroup() };
 
-            RHI::DrawItem drawItem;
+            RHI::DeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;
             drawItem.m_pipelineState = m_drawPipelineState.get();
             drawItem.m_indexBufferView = &m_indexBufferView;

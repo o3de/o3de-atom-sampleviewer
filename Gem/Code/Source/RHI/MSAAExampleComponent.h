@@ -18,11 +18,11 @@
 #include <Atom/RHI.Reflect/ShaderResourceGroupLayoutDescriptor.h>
 #include <Atom/RHI.Reflect/ScopeId.h>
 
-#include <Atom/RHI/Buffer.h>
-#include <Atom/RHI/BufferPool.h>
-#include <Atom/RHI/DrawItem.h>
-#include <Atom/RHI/PipelineState.h>
-#include <Atom/RHI/StreamBufferView.h>
+#include <Atom/RHI/DeviceBuffer.h>
+#include <Atom/RHI/DeviceBufferPool.h>
+#include <Atom/RHI/DeviceDrawItem.h>
+#include <Atom/RHI/DevicePipelineState.h>
+#include <Atom/RHI/DeviceStreamBufferView.h>
 
 #include <RHI/BasicRHIComponent.h>
 
@@ -103,12 +103,12 @@ namespace AtomSampleViewer
         void CreateCustomMSAAResolveScope();
 
 
-        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_inputAssemblyBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::Buffer> m_triangleInputAssemblyBuffer;
-        AZ::RHI::Ptr<AZ::RHI::Buffer> m_quadInputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::DeviceBufferPool> m_inputAssemblyBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::DeviceBuffer> m_triangleInputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::DeviceBuffer> m_quadInputAssemblyBuffer;
         
-        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::PipelineState>, s_numMSAAExamples> m_pipelineStates;
-        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_customResolveMSAAPipelineState;
+        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::DevicePipelineState>, s_numMSAAExamples> m_pipelineStates;
+        AZ::RHI::ConstPtr<AZ::RHI::DevicePipelineState> m_customResolveMSAAPipelineState;
 
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_triangleShaderResourceGroup;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_customMSAAResolveShaderResourceGroup;
@@ -133,8 +133,8 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 6> m_indices;
         };
 
-        AZStd::array<AZ::RHI::StreamBufferView, 2> m_triangleStreamBufferViews;
-        AZStd::array<AZ::RHI::StreamBufferView, 2> m_quadStreamBufferViews;
+        AZStd::array<AZ::RHI::DeviceStreamBufferView, 2> m_triangleStreamBufferViews;
+        AZStd::array<AZ::RHI::DeviceStreamBufferView, 2> m_quadStreamBufferViews;
         AZ::RHI::InputStreamLayout m_triangleInputStreamLayout;
         AZ::RHI::InputStreamLayout m_quadInputStreamLayout;
 

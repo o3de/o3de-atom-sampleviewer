@@ -9,8 +9,8 @@
 #include <Atom/RHI/CommandList.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/Image.h>
-#include <Atom/RHI/ImagePool.h>
+#include <Atom/RHI/DeviceImage.h>
+#include <Atom/RHI/DeviceImagePool.h>
 #include <Atom/RHI/ScopeProducerFunction.h>
 #include <Atom/RHI.Reflect/InputStreamLayoutBuilder.h>
 #include <Atom/RHI.Reflect/RenderAttachmentLayoutBuilder.h>
@@ -183,7 +183,7 @@ namespace AtomSampleViewer
 
         m_inputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
         RHI::ResultCode result = RHI::ResultCode::Success;
-        RHI::BufferInitRequest request;
+        RHI::DeviceBufferInitRequest request;
 
         request.m_buffer = m_inputAssemblyBuffer.get();
         request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, sizeof(bufferData) };
@@ -292,9 +292,9 @@ namespace AtomSampleViewer
             drawIndexed.m_indexCount = 6;
             drawIndexed.m_instanceCount = 1;
 
-            const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[0]->GetRHIShaderResourceGroup() };
+            const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[0]->GetRHIShaderResourceGroup() };
 
-            RHI::DrawItem drawItem;
+            RHI::DeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;
             drawItem.m_pipelineState = m_pipelineStates[0].get();
             drawItem.m_indexBufferView = &m_indexBufferView;
@@ -344,9 +344,9 @@ namespace AtomSampleViewer
 
         const auto compileFunctionScreen = [this](const AZ::RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
-            const AZ::RHI::ImageView* imageViewR = context.GetImageView(m_attachmentID[0]);
-            const AZ::RHI::ImageView* imageViewG = context.GetImageView(m_attachmentID[1]);
-            const AZ::RHI::ImageView* imageViewB = context.GetImageView(m_attachmentID[2]);
+            const AZ::RHI::DeviceImageView* imageViewR = context.GetImageView(m_attachmentID[0]);
+            const AZ::RHI::DeviceImageView* imageViewG = context.GetImageView(m_attachmentID[1]);
+            const AZ::RHI::DeviceImageView* imageViewB = context.GetImageView(m_attachmentID[2]);
 
             m_shaderResourceGroups[1]->SetImageView(m_shaderInputImageIndices[0], imageViewR);
             m_shaderResourceGroups[1]->SetImageView(m_shaderInputImageIndices[1], imageViewG);
@@ -366,9 +366,9 @@ namespace AtomSampleViewer
             drawIndexed.m_indexCount = 6;
             drawIndexed.m_instanceCount = 1;
 
-            const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[1]->GetRHIShaderResourceGroup() };
+            const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[1]->GetRHIShaderResourceGroup() };
 
-            RHI::DrawItem drawItem;
+            RHI::DeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;
             drawItem.m_pipelineState = m_pipelineStates[1].get();
             drawItem.m_indexBufferView = &m_indexBufferView;

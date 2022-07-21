@@ -138,7 +138,7 @@ namespace AtomSampleViewer
 
         m_triangleInputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
 
-        RHI::BufferInitRequest request;
+        RHI::DeviceBufferInitRequest request;
         request.m_buffer = m_triangleInputAssemblyBuffer.get();
         request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, sizeof(bufferData) };
         request.m_initialData = &bufferData;
@@ -192,7 +192,7 @@ namespace AtomSampleViewer
         m_quadInputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
 
         RHI::ResultCode result = RHI::ResultCode::Success;
-        RHI::BufferInitRequest request;
+        RHI::DeviceBufferInitRequest request;
 
         request.m_buffer = m_quadInputAssemblyBuffer.get();
         request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, sizeof(bufferData) };
@@ -339,7 +339,7 @@ namespace AtomSampleViewer
             commandList->SetViewports(&m_viewport, 1);
             commandList->SetScissors(&m_scissor, 1);
 
-            const RHI::IndexBufferView indexBufferView =
+            const RHI::DeviceIndexBufferView indexBufferView =
             {
                 *m_triangleInputAssemblyBuffer,
                 offsetof(TriangleBufferData, m_indices),
@@ -351,9 +351,9 @@ namespace AtomSampleViewer
             drawIndexed.m_indexCount = 3;
             drawIndexed.m_instanceCount = 1;
 
-            const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_triangleShaderResourceGroup->GetRHIShaderResourceGroup() };
+            const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = { m_triangleShaderResourceGroup->GetRHIShaderResourceGroup() };
 
-            RHI::DrawItem drawItem;
+            RHI::DeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;
             drawItem.m_pipelineState = m_pipelineStates[msaaTypeIndex].get();
             drawItem.m_indexBufferView = &indexBufferView;
@@ -439,7 +439,7 @@ namespace AtomSampleViewer
 
         const auto compileFunction = [this](const AZ::RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
-            const AZ::RHI::ImageView* imageView = context.GetImageView(m_sampleProperties[static_cast<uint32_t>(MSAAType::MSAA4X_Custom_Resolve)].m_attachmentId);
+            const AZ::RHI::DeviceImageView* imageView = context.GetImageView(m_sampleProperties[static_cast<uint32_t>(MSAAType::MSAA4X_Custom_Resolve)].m_attachmentId);
             m_customMSAAResolveShaderResourceGroup->SetImageView(m_customMSAAResolveTextureInputIndex, imageView);
             m_customMSAAResolveShaderResourceGroup->Compile();
         };
@@ -452,7 +452,7 @@ namespace AtomSampleViewer
             commandList->SetViewports(&m_viewport, 1);
             commandList->SetScissors(&m_scissor, 1);
 
-            const RHI::IndexBufferView indexBufferView =
+            const RHI::DeviceIndexBufferView indexBufferView =
             {
                 *m_quadInputAssemblyBuffer,
                 offsetof(QuadBufferData, m_indices),
@@ -464,9 +464,9 @@ namespace AtomSampleViewer
             drawIndexed.m_indexCount = 6;
             drawIndexed.m_instanceCount = 1;
 
-            const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_customMSAAResolveShaderResourceGroup->GetRHIShaderResourceGroup() };
+            const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = { m_customMSAAResolveShaderResourceGroup->GetRHIShaderResourceGroup() };
 
-            RHI::DrawItem drawItem;
+            RHI::DeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;
             drawItem.m_pipelineState = m_customResolveMSAAPipelineState.get();
             drawItem.m_indexBufferView = &indexBufferView;

@@ -9,17 +9,16 @@
 
 #include <AzCore/Math/MatrixUtils.h>
 
-#include <Atom/RHI/BufferPool.h>
-#include <Atom/RHI/Factory.h>
-#include <Atom/RHI/FrameAttachment.h>
 #include <Atom/RHI.Reflect/InputStreamLayoutBuilder.h>
 #include <Atom/RHI.Reflect/RenderAttachmentLayoutBuilder.h>
+#include <Atom/RHI/DeviceBufferPool.h>
+#include <Atom/RHI/Factory.h>
+#include <Atom/RHI/FrameAttachment.h>
 #include <Atom/RPI.Public/Image/AttachmentImagePool.h>
 #include <Atom/RPI.Public/Shader/Shader.h>
 #include <Atom/RPI.Reflect/ResourcePoolAssetCreator.h>
 #include <SampleComponentManager.h>
 #include <Utils/Utils.h>
-
 
 namespace AtomSampleViewer
 {
@@ -245,7 +244,7 @@ namespace AtomSampleViewer
 
         m_inputAssemblyBuffer = AZ::RHI::Factory::Get().CreateBuffer();
         AZ::RHI::ResultCode result = AZ::RHI::ResultCode::Success;
-        AZ::RHI::BufferInitRequest request;
+        AZ::RHI::DeviceBufferInitRequest request;
 
         request.m_buffer = m_inputAssemblyBuffer.get();
         request.m_descriptor = AZ::RHI::BufferDescriptor{ AZ::RHI::BufferBindFlags::InputAssembly, sizeof(bufferData) };
@@ -420,9 +419,9 @@ namespace AtomSampleViewer
             drawIndexed.m_indexCount = geometryIndexCount;
             drawIndexed.m_instanceCount = 1;
 
-            const AZ::RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[0]->GetRHIShaderResourceGroup() };
+            const AZ::RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[0]->GetRHIShaderResourceGroup() };
 
-            AZ::RHI::DrawItem drawItem;
+            AZ::RHI::DeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;
             drawItem.m_pipelineState = m_pipelineStates[0].get();
             drawItem.m_indexBufferView = &m_indexBufferView;
@@ -491,7 +490,7 @@ namespace AtomSampleViewer
 
         const auto compileFunctionMainView = [this](const AZ::RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
-            const AZ::RHI::ImageView* imageView = context.GetImageView(m_transientImageDescriptor.m_attachmentId);
+            const AZ::RHI::DeviceImageView* imageView = context.GetImageView(m_transientImageDescriptor.m_attachmentId);
 
             m_shaderResourceGroups[1]->SetImageView(m_shaderInputImageIndex, imageView);
             m_shaderResourceGroups[1]->Compile();
@@ -509,9 +508,9 @@ namespace AtomSampleViewer
             drawIndexed.m_indexCount = geometryIndexCount;
             drawIndexed.m_instanceCount = 1;
 
-            const AZ::RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[1]->GetRHIShaderResourceGroup() };
+            const AZ::RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[1]->GetRHIShaderResourceGroup() };
 
-            AZ::RHI::DrawItem drawItem;
+            AZ::RHI::DeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;
             drawItem.m_pipelineState = m_pipelineStates[1].get();
             drawItem.m_indexBufferView = &m_indexBufferView;

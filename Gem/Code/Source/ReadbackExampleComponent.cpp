@@ -277,7 +277,7 @@ namespace AtomSampleViewer
     void ReadbackExampleComponent::ReadbackCallback(const AZ::RPI::AttachmentReadback::ReadbackResult& result)
     {
         const AZ::RHI::ImageSubresourceRange range(0, 0, 0, 0);
-        AZ::RHI::ImageSubresourceLayoutPlaced layout;
+        AZ::RHI::DeviceImageSubresourceLayoutPlaced layout;
         m_previewImage->GetRHIImage()->GetSubresourceLayouts(range, &layout, nullptr);
 
         m_textureNeedsUpdate = true;
@@ -292,9 +292,9 @@ namespace AtomSampleViewer
     void ReadbackExampleComponent::UploadReadbackResult() const
     {
         const AZ::RHI::ImageSubresourceRange range(0, 0, 0, 0);
-        AZ::RHI::ImageSubresourceLayoutPlaced layout;
+        AZ::RHI::DeviceImageSubresourceLayoutPlaced layout;
         m_previewImage->GetRHIImage()->GetSubresourceLayouts(range, &layout, nullptr);
-        AZ::RHI::ImageUpdateRequest updateRequest;
+        AZ::RHI::DeviceImageUpdateRequest updateRequest;
         updateRequest.m_image = m_previewImage->GetRHIImage();
         updateRequest.m_sourceSubresourceLayout = layout;
         updateRequest.m_sourceData = m_resultData->begin();

@@ -107,7 +107,7 @@ namespace AtomSampleViewer
             m_uvBuffer = RHI::Factory::Get().CreateBuffer();
 
             RHI::ResultCode result = RHI::ResultCode::Success;
-            RHI::BufferInitRequest request;
+            RHI::DeviceBufferInitRequest request;
 
             request.m_buffer = m_positionBuffer.get();
             request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, positionBufSize };
@@ -309,7 +309,7 @@ namespace AtomSampleViewer
                 // Bind ViewSrg
                 commandList->SetShaderResourceGroupForDraw(*m_viewShaderResourceGroup->GetRHIShaderResourceGroup());
 
-                const RHI::IndexBufferView indexBufferView =
+                const RHI::DeviceIndexBufferView indexBufferView =
                 {
                     *m_indexBuffer,
                     0,
@@ -321,14 +321,14 @@ namespace AtomSampleViewer
                 drawIndexed.m_indexCount = 6;
                 drawIndexed.m_instanceCount = 1;
 
-                const RHI::ShaderResourceGroup* shaderResourceGroups[] = {
+                const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
                     (m_mode ? m_demoShaderResourceGroup->GetRHIShaderResourceGroup() :
                               m_renderShaderResourceGroup->GetRHIShaderResourceGroup()
                     ),
                     m_viewShaderResourceGroup->GetRHIShaderResourceGroup()
                 };
 
-                RHI::DrawItem drawItem;
+                RHI::DeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
                 drawItem.m_pipelineState = m_mode ? m_demoPipelineState.get() : m_renderPipelineState.get();
                 drawItem.m_indexBufferView = &indexBufferView;

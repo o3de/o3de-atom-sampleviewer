@@ -13,10 +13,9 @@
 #include <SampleComponentConfig.h>
 
 #include <Atom/Component/DebugCamera/ArcBallControllerComponent.h>
-#include <Atom/RHI/CommandList.h>
-#include <Atom/RHI/IndirectBufferWriter.h>
 #include <Atom/RHI.Reflect/InputStreamLayoutBuilder.h>
 #include <Atom/RHI.Reflect/RenderAttachmentLayoutBuilder.h>
+#include <Atom/RHI/CommandList.h>
 #include <Atom/RPI.Public/Shader/Shader.h>
 #include <Atom/RPI.Public/View.h>
 #include <Atom/RPI.Public/ViewProviderBus.h>
@@ -399,14 +398,14 @@ namespace AtomSampleViewer
             {
                 // Model
                 const auto& modelData = m_opaqueModelsData[i];
-                const RHI::ShaderResourceGroup* shaderResourceGroups[] =
+                const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] =
                 {
                     modelData.m_shaderResourceGroup->GetRHIShaderResourceGroup()
                 };
 
                 for (const auto& mesh : m_models[modelData.m_modelType]->GetLods()[0]->GetMeshes())
                 {
-                    RHI::DrawItem drawItem;
+                    RHI::DeviceDrawItem drawItem;
                     drawItem.m_arguments = mesh.m_drawArguments;
                     drawItem.m_pipelineState = modelData.m_pipelineState.get();
                     drawItem.m_indexBufferView = &mesh.m_indexBufferView;
@@ -487,9 +486,9 @@ namespace AtomSampleViewer
 
         const auto compileFunction = [this](const RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
-            const AZ::RHI::ImageView* positionImageView = context.GetImageView(m_positionAttachmentId);
-            const AZ::RHI::ImageView* normalImageView = context.GetImageView(m_normalAttachmentId);
-            const AZ::RHI::ImageView* albedoImageView = context.GetImageView(m_albedoAttachmentId);
+            const AZ::RHI::DeviceImageView* positionImageView = context.GetImageView(m_positionAttachmentId);
+            const AZ::RHI::DeviceImageView* normalImageView = context.GetImageView(m_normalAttachmentId);
+            const AZ::RHI::DeviceImageView* albedoImageView = context.GetImageView(m_albedoAttachmentId);
 
             m_compositionSubpassInputsSRG->SetImageView(m_subpassInputPosition, positionImageView);
             m_compositionSubpassInputsSRG->SetImageView(m_subpassInputNormal, normalImageView);
@@ -508,7 +507,7 @@ namespace AtomSampleViewer
             commandList->SetViewports(&m_viewport, 1);
             commandList->SetScissors(&m_scissor, 1);
 
-            const RHI::ShaderResourceGroup* shaderResourceGroups[] =
+            const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] =
             {
                 m_compositionSubpassInputsSRG->GetRHIShaderResourceGroup(),
                 m_sceneShaderResourceGroup->GetRHIShaderResourceGroup(),
@@ -520,8 +519,8 @@ namespace AtomSampleViewer
             drawArguments.m_vertexCount = 4;
             drawArguments.m_vertexOffset = 0;
 
-            RHI::DrawItem drawItem;
-            drawItem.m_arguments = RHI::DrawArguments(drawArguments);
+            RHI::DeviceDrawItem drawItem;
+            drawItem.m_arguments = RHI::DeviceDrawArguments(drawArguments);
             drawItem.m_pipelineState = m_compositionPipeline.get();
             drawItem.m_indexBufferView = nullptr;
             drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
