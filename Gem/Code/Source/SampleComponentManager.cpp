@@ -330,7 +330,6 @@ namespace AtomSampleViewer
 
     SampleComponentManager::SampleComponentManager()
         : m_imguiFrameCaptureSaver("@user@/frame_capture.xml")
-        , m_imGuiFrameTimer(FrameTimeLogSize, FrameTimeLogSize, 250.0f)
     {
         m_exampleEntity = aznew AZ::Entity();
 
@@ -486,6 +485,20 @@ namespace AtomSampleViewer
             }
             AZ_Warning("SampleComponentManager", targetSampleFound, "Failed find target sample %s", targetSampleName.c_str());
         }
+        if (commandLine->HasSwitch("timingSamples"))
+        {
+                AZStd::string timingSamplesStr = commandLine->GetSwitchValue("timingSamples", 0);
+                int timingSamplesCount = atoi(timingSamplesStr.c_str());
+                if (timingSamplesCount <= 0 || timingSamplesCount > 1000000)
+                {
+                    timingSamplesCount = static_cast<int>(FrameTimeLogSize);
+                }
+                m_imGuiFrameTimer = AZStd::make_unique<ImGuiHistogramQueue>(timingSamplesCount, timingSamplesCount, 250.0f);
+        }
+        else
+        {
+            m_imGuiFrameTimer = AZStd::make_unique<ImGuiHistogramQueue>(FrameTimeLogSize, FrameTimeLogSize, 250.0f);
+        }
 
         // Set default screenshot folder to relative path 'Screenshots'
         AZ::IO::Path screenshotFolder = "Screenshots";
@@ -543,7 +556,7 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::OnTick(float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint time)
     {
-        m_imGuiFrameTimer.PushValue(deltaTime * 1000.0f);
+        m_imGuiFrameTimer->PushValue(deltaTime * 1000.0f);
 
         bool screenshotRequest = false;
 
@@ -1196,7 +1209,7 @@ namespace AtomSampleViewer
             ImGuiHistogramQueue::WidgetSettings settings;
             settings.m_reportInverse = false;
             settings.m_units = "ms";
-            m_imGuiFrameTimer.Tick(deltaTime * 1000.0f, settings);
+            m_imGuiFrameTimer->Tick(deltaTime * 1000.0f, settings);
         }
         ImGui::End();
     }
