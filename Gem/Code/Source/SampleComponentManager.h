@@ -33,6 +33,7 @@
 #include <AzCore/std/containers/vector.h>
 #include <AzCore/std/containers/map.h>
 #include <AzCore/std/smart_ptr/shared_ptr.h>
+#include <AzCore/std/smart_ptr/unique_ptr.h>
 
 #include <AzFramework/Input/Events/InputChannelEventListener.h>
 #include <AzFramework/Entity/EntityContextBus.h>
@@ -200,8 +201,10 @@ namespace AtomSampleViewer
 
         int32_t m_selectedSampleIndex = -1;
 
-        static constexpr uint32_t FrameTimeLogSize = 30;
-        ImGuiHistogramQueue m_imGuiFrameTimer;
+        static constexpr uint32_t FrameTimeDefaultLogSize = 100;
+        static constexpr uint32_t FrameTimeMinLogSize = FrameTimeDefaultLogSize;
+        static constexpr uint32_t FrameTimeMaxLogSize = 1000000; // 1M
+        AZStd::unique_ptr<ImGuiHistogramQueue> m_imGuiFrameTimer;
 
         ImGuiMessageBox m_contentWarningDialog;
 

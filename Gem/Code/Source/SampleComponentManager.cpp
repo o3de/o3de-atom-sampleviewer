@@ -330,8 +330,9 @@ namespace AtomSampleViewer
 
     SampleComponentManager::SampleComponentManager()
         : m_imguiFrameCaptureSaver("@user@/frame_capture.xml")
-        , m_imGuiFrameTimer(FrameTimeLogSize, FrameTimeLogSize, 250.0f)
     {
+        m_imGuiFrameTimer = AZStd::make_unique<ImGuiHistogramQueue>(FrameTimeDefaultLogSize, FrameTimeDefaultLogSize, 250.0f);
+
         m_exampleEntity = aznew AZ::Entity();
 
         m_entityContextId = AzFramework::EntityContextId::CreateNull();
@@ -486,6 +487,16 @@ namespace AtomSampleViewer
             }
             AZ_Warning("SampleComponentManager", targetSampleFound, "Failed find target sample %s", targetSampleName.c_str());
         }
+        if (commandLine->HasSwitch("timingSamples"))
+        {
+                AZStd::string timingSamplesStr = commandLine->GetSwitchValue("timingSamples", 0);
+                int timingSamplesCount = 0;
+                if (AZ::StringFunc::LooksLikeInt(timingSamplesStr.c_str(), &timingSamplesCount))
+                {
+                    timingSamplesCount = AZStd::clamp<int>(timingSamplesCount, FrameTimeMinLogSize, FrameTimeMaxLogSize);
+                    m_imGuiFrameTimer = AZStd::make_unique<ImGuiHistogramQueue>(timingSamplesCount, timingSamplesCount, 250.0f);
+                }
+        }
 
         // Set default screenshot folder to relative path 'Screenshots'
         AZ::IO::Path screenshotFolder = "Screenshots";
@@ -543,7 +554,10 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::OnTick(float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint time)
     {
-        m_imGuiFrameTimer.PushValue(deltaTime * 1000.0f);
+        if (m_imGuiFrameTimer)
+        {
+            m_imGuiFrameTimer->PushValue(deltaTime * 1000.0f);
+        }
 
         bool screenshotRequest = false;
 
@@ -1191,12 +1205,12 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::ShowFramerateHistogram(float deltaTime)
     {
-        if (ImGui::Begin("Frame Time Histogram", &m_showFramerateHistogram, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings))
+        if (m_imGuiFrameTimer && ImGui::Begin("Frame Time Histogram", &m_showFramerateHistogram, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings))
         {
             ImGuiHistogramQueue::WidgetSettings settings;
             settings.m_reportInverse = false;
             settings.m_units = "ms";
-            m_imGuiFrameTimer.Tick(deltaTime * 1000.0f, settings);
+            m_imGuiFrameTimer->Tick(deltaTime * 1000.0f, settings);
         }
         ImGui::End();
     }
