@@ -54,6 +54,7 @@ namespace AtomSampleViewer
         static constexpr uint32_t RED_COLOR =   0xFF0000FF;
         static constexpr uint32_t GREEN_COLOR = 0xFF00FF00;
         static constexpr uint32_t BLUE_COLOR =  0xFFFF0000;
+        static constexpr uint32_t WHITE_COLOR =  0xFFFFFFFF;
 
         void InitTestDataFolders();
         void CopyTestFile(const char * originalName, const char * newName, bool replaceIfExists = true);

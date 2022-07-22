@@ -21,5 +21,9 @@ PSOutput MainPS(VSOutput IN)
 
     OUT.m_color = float4(0, 0, 1, 1);
 
+#ifdef WHITE
+    OUT.m_color = float4(1, 1, 1, 1);
+#endif
+
     return OUT;
 }
