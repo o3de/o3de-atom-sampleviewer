@@ -667,8 +667,11 @@ namespace AtomSampleViewer
 
         // Update the worldToClipMatrix 
         Matrix4x4 worldToClipMatrix = m_viewToClipMatrix * worldToViewMatrix;
-        bool set = m_floatBuffer->AllocateOrUpdateBuffer(m_worldToClipHandle, static_cast<void*>(&worldToClipMatrix), static_cast<uint32_t>(sizeof(Matrix4x4)));
-        
+        [[maybe_unused]] bool set
+            = m_floatBuffer->AllocateOrUpdateBuffer(m_worldToClipHandle,
+                                                    static_cast<void *>(&worldToClipMatrix),
+                                                    static_cast<uint32_t>(sizeof(Matrix4x4)));
+
         // Update the light direction
         set = m_floatBuffer->AllocateOrUpdateBuffer(m_lightDirectionHandle, static_cast<void*>(&m_lightDir), static_cast<uint32_t>(sizeof(Vector3)));
        
