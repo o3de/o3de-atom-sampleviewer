@@ -7,6 +7,9 @@
 
     "DrawList" : "forward",
 
+    "AddBuildArguments"
+        : { "dxc" : ["-fspv-target-env=vulkan1.2"] },
+
     "ProgramSettings":
     {
       "EntryPoints":
@@ -20,6 +23,5 @@
           "type": "Fragment"
         }
       ]
-    },
-    "DisabledRHIBackends": ["metal"]
+    }
 }
