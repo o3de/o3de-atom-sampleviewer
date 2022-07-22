@@ -178,8 +178,7 @@ namespace AtomSampleViewer
         }
 
         m_currentScriptIndexStack.push_back(m_scriptReports.size());
-        m_scriptReports.push_back();
-        m_scriptReports.back().m_scriptAssetPath = scriptAssetPath;
+        m_scriptReports.emplace_back().m_scriptAssetPath = scriptAssetPath;
         m_scriptReports.back().BusConnect();
     }
 
