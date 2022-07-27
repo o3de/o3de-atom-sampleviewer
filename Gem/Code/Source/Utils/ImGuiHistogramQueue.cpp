@@ -69,7 +69,7 @@ namespace AtomSampleViewer
         // Calculate average for numeric display
         if (m_timeSinceLastDisplayUpdate >= m_numericDisplayDelay || m_samplesSinceLastDisplayUpdate >= m_maxSamples)
         {
-            m_displayedAverage = UpdateDisplayedValues(m_samplesSinceLastDisplayUpdate, m_displayedMinimum, m_displayedMaximum);
+            m_displayedAverage = UpdateDisplayedValues(m_maxSamples, m_displayedMinimum, m_displayedMaximum);
 
             m_timeSinceLastDisplayUpdate = 0.0f;
             m_samplesSinceLastDisplayUpdate = 0;

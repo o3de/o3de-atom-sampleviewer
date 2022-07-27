@@ -165,6 +165,8 @@ namespace AtomSampleViewer
         entry.m_componentDescriptor = T::CreateDescriptor();
         entry.m_parentMenuName = menuName;
         entry.m_fullName = entry.m_parentMenuName + '/' + entry.m_sampleName;
+        entry.m_contentWarning = T::ContentWarning;
+        entry.m_contentWarningTitle = T::ContentWarningTitle;
 
         return entry;
     }
@@ -328,13 +330,12 @@ namespace AtomSampleViewer
 
     SampleComponentManager::SampleComponentManager()
         : m_imguiFrameCaptureSaver("@user@/frame_capture.xml")
-        , m_imGuiFrameTimer(FrameTimeLogSize, FrameTimeLogSize, 250.0f)
     {
+        m_imGuiFrameTimer = AZStd::make_unique<ImGuiHistogramQueue>(FrameTimeDefaultLogSize, FrameTimeDefaultLogSize, 250.0f);
+
         m_exampleEntity = aznew AZ::Entity();
 
         m_entityContextId = AzFramework::EntityContextId::CreateNull();
-
-        memset(m_alphanumericNumbersDown, 0, s_alphanumericCount);
     }
 
     SampleComponentManager::~SampleComponentManager()
@@ -462,15 +463,39 @@ namespace AtomSampleViewer
                 {
                     if (m_isSampleSupported[i])
                     {
+                        if (m_availableSamples[i].m_contentWarning.empty())
+                        {
+                            m_selectedSampleIndex = i;
+                            m_sampleChangeRequest = true;
+                        }
+                        else
+                        {
+                            m_contentWarningDialog.OpenPopupConfirmation(
+                                m_availableSamples[i].m_contentWarningTitle,
+                                m_availableSamples[i].m_contentWarning,
+                                [this, i]() {
+                                    m_selectedSampleIndex = i;
+                                    m_sampleChangeRequest = true;
+                                });
+                        }
+
                         targetSampleFound = true;
-                        m_selectedSampleIndex = i;
-                        m_sampleChangeRequest = true;
                     }
 
                     break;
                 }
             }
             AZ_Warning("SampleComponentManager", targetSampleFound, "Failed find target sample %s", targetSampleName.c_str());
+        }
+        if (commandLine->HasSwitch("timingSamples"))
+        {
+                AZStd::string timingSamplesStr = commandLine->GetSwitchValue("timingSamples", 0);
+                int timingSamplesCount = 0;
+                if (AZ::StringFunc::LooksLikeInt(timingSamplesStr.c_str(), &timingSamplesCount))
+                {
+                    timingSamplesCount = AZStd::clamp<int>(timingSamplesCount, FrameTimeMinLogSize, FrameTimeMaxLogSize);
+                    m_imGuiFrameTimer = AZStd::make_unique<ImGuiHistogramQueue>(timingSamplesCount, timingSamplesCount, 250.0f);
+                }
         }
 
         // Set default screenshot folder to relative path 'Screenshots'
@@ -529,7 +554,10 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::OnTick(float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint time)
     {
-        m_imGuiFrameTimer.PushValue(deltaTime * 1000.0f);
+        if (m_imGuiFrameTimer)
+        {
+            m_imGuiFrameTimer->PushValue(deltaTime * 1000.0f);
+        }
 
         bool screenshotRequest = false;
 
@@ -555,16 +583,6 @@ namespace AtomSampleViewer
             if (m_alphanumericPDown)
             {
                 screenshotRequest = true;
-            }
-
-            for (size_t i = 0; i < m_availableSamples.size(); ++i)
-            {
-                if (m_alphanumericNumbersDown[i] && i < s_alphanumericCount && m_isSampleSupported[i])
-                {
-                    m_sampleChangeRequest = true;
-                    m_selectedSampleIndex = static_cast<int32_t>(i);
-                    break;
-                }
             }
         }
 
@@ -705,14 +723,6 @@ namespace AtomSampleViewer
                 m_escapeDown = true;
             }
 
-            for (size_t i = 0; i < samplesAvailableCount; ++i)
-            {
-                if ((i < s_alphanumericCount) && (inputChannelId == sampleInputMapping[i]))
-                {
-                    m_alphanumericNumbersDown[i] = true;
-                }
-            }
-
             break;
         }
         case AzFramework::InputChannel::State::Ended:
@@ -740,14 +750,6 @@ namespace AtomSampleViewer
             else if (inputChannelId == AzFramework::InputDeviceKeyboard::Key::Escape)
             {
                 m_escapeDown = false;
-            }
-
-            for (size_t i = 0; i < samplesAvailableCount; ++i)
-            {
-                if ((i < s_alphanumericCount) && (inputChannelId == sampleInputMapping[i]))
-                {
-                    m_alphanumericNumbersDown[i] = false;
-                }
             }
 
             break;
@@ -852,6 +854,7 @@ namespace AtomSampleViewer
 
         m_scriptManager->TickImGui();
 
+        m_contentWarningDialog.TickPopup();
     }
 
     void SampleComponentManager::ShowMenuBar()
@@ -928,33 +931,31 @@ namespace AtomSampleViewer
                             SampleEntry& sample = m_availableSamples[index];
                             const char* sampleName = sample.m_sampleName.c_str();
                             bool enabled = m_isSampleSupported[index];
-                            if (index < s_alphanumericCount)
-                            {
-                                const AZStd::string hotkeyName = AZStd::string::format("Ctrl-%d: ", (index + 1) % 10);
 
-                                if (ImGui::MenuItem(sampleName, hotkeyName.c_str(), false, enabled))
-                                {
-                                    m_selectedSampleIndex = index;
-                                    m_sampleChangeRequest = true;
-                                }
-                            }
-                            else
+                            if (ImGui::MenuItem(sampleName, nullptr, false, enabled))
                             {
-                                if (ImGui::MenuItem(sampleName, nullptr, false, enabled))
+                                Utils::ReportScriptableAction("OpenSample('%s')", sample.m_sampleName.c_str());
+
+                                if (sample.m_contentWarning.empty())
                                 {
-                                    m_selectedSampleIndex = index;
                                     m_sampleChangeRequest = true;
+                                    m_selectedSampleIndex = index;
+                                }
+                                else
+                                {
+                                    m_contentWarningDialog.OpenPopupConfirmation(
+                                        sample.m_contentWarningTitle,
+                                        sample.m_contentWarning,
+                                        [this, index]() {
+                                            m_sampleChangeRequest = true;
+                                            m_selectedSampleIndex = index;
+                                        });
                                 }
                             }
                         }
 
                         ImGui::EndMenu();
                     }
-                }
-
-                if (m_sampleChangeRequest)
-                {
-                    Utils::ReportScriptableAction("OpenSample('%s')", m_availableSamples[m_selectedSampleIndex].m_sampleName.c_str());
                 }
 
                 ImGui::EndMenu();
@@ -972,13 +973,27 @@ namespace AtomSampleViewer
 
             if (ImGui::BeginMenu("Automation"))
             {
+                const char* AutomationContentWarningTitle = AtomSampleComponent::CommonPhotosensitiveWarningTitle;
+                const char* AutomationContentWarning = "Running automated scripts will trigger flashing images that could cause seizures or other adverse effects in photosensitive individuals.";
+
                 if (ImGui::MenuItem("Run Script..."))
                 {
-                    m_scriptManager->OpenScriptRunnerDialog();
+                    m_contentWarningDialog.OpenPopupConfirmation(
+                        AutomationContentWarningTitle,
+                        AutomationContentWarning,
+                        [this]() {
+                            m_scriptManager->OpenScriptRunnerDialog();
+                        });
+
                 }
                 if (ImGui::MenuItem("Run Precommit Wizard..."))
                 {
-                    m_scriptManager->OpenPrecommitWizard();
+                    m_contentWarningDialog.OpenPopupConfirmation(
+                        AutomationContentWarningTitle,
+                        AutomationContentWarning,
+                        [this]() {
+                            m_scriptManager->OpenPrecommitWizard();
+                        });
                 }
 
                 ImGui::EndMenu();
@@ -1190,12 +1205,12 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::ShowFramerateHistogram(float deltaTime)
     {
-        if (ImGui::Begin("Frame Time Histogram", &m_showFramerateHistogram, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings))
+        if (m_imGuiFrameTimer && ImGui::Begin("Frame Time Histogram", &m_showFramerateHistogram, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings))
         {
             ImGuiHistogramQueue::WidgetSettings settings;
             settings.m_reportInverse = false;
             settings.m_units = "ms";
-            m_imGuiFrameTimer.Tick(deltaTime * 1000.0f, settings);
+            m_imGuiFrameTimer->Tick(deltaTime * 1000.0f, settings);
         }
         ImGui::End();
     }

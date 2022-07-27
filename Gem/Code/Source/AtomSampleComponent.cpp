@@ -6,4 +6,9 @@
  *
  */
 
-#define ATOMSAMPLEVIEWER_TRAIT_BAKED_SHADERVARIANT_SAMPLE_PASS_NAME     "Forward"
+#include <AtomSampleComponent.h>
+
+namespace AtomSampleViewer
+{
+
+}

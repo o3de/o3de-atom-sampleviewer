@@ -33,6 +33,7 @@
 #include <AzCore/std/containers/vector.h>
 #include <AzCore/std/containers/map.h>
 #include <AzCore/std/smart_ptr/shared_ptr.h>
+#include <AzCore/std/smart_ptr/unique_ptr.h>
 
 #include <AzFramework/Input/Events/InputChannelEventListener.h>
 #include <AzFramework/Entity/EntityContextBus.h>
@@ -40,6 +41,7 @@
 
 #include <Utils/ImGuiSaveFilePath.h>
 #include <Utils/ImGuiHistogramQueue.h>
+#include <Utils/ImGuiMessageBox.h>
 
 namespace AZ
 {
@@ -67,6 +69,8 @@ namespace AtomSampleViewer
         AZStd::function<bool()> m_isSupportedFunc;
         SamplePipelineType m_pipelineType = SamplePipelineType::RHI;
         AZ::ComponentDescriptor* m_componentDescriptor;
+        AZStd::string m_contentWarning;
+        AZStd::string m_contentWarningTitle;
 
         bool operator==(const SampleEntry& other)
         {
@@ -197,8 +201,12 @@ namespace AtomSampleViewer
 
         int32_t m_selectedSampleIndex = -1;
 
-        static constexpr uint32_t FrameTimeLogSize = 30;
-        ImGuiHistogramQueue m_imGuiFrameTimer;
+        static constexpr uint32_t FrameTimeDefaultLogSize = 100;
+        static constexpr uint32_t FrameTimeMinLogSize = FrameTimeDefaultLogSize;
+        static constexpr uint32_t FrameTimeMaxLogSize = 1000000; // 1M
+        AZStd::unique_ptr<ImGuiHistogramQueue> m_imGuiFrameTimer;
+
+        ImGuiMessageBox m_contentWarningDialog;
 
         bool m_showImGuiMetrics = false;
         bool m_showSampleHelper = false;
@@ -227,10 +235,6 @@ namespace AtomSampleViewer
         bool m_sampleChangeRequest = false;
         bool m_canSwitchSample = true;
         bool m_canCaptureRADTM = true;
-
-        // 10 number keys 0-9
-        static constexpr size_t s_alphanumericCount = 10;
-        bool m_alphanumericNumbersDown[s_alphanumericCount];
 
         bool m_exitRequested = false;
 
