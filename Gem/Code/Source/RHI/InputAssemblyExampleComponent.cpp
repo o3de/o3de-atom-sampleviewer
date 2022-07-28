@@ -301,9 +301,8 @@ namespace AtomSampleViewer
 
             for (uint32_t index = context.GetSubmitRange().m_startIndex; index < context.GetSubmitRange().m_endIndex; ++index)
             {
-                dispatchItem.m_submitIndex = index;
                 dispatchItem.m_shaderResourceGroups[0] = m_dispatchSRG[index]->GetRHIShaderResourceGroup();
-                commandList->Submit(dispatchItem);
+                commandList->Submit(dispatchItem, index);
             }
         };
 
@@ -408,13 +407,12 @@ namespace AtomSampleViewer
 
             for (uint32_t index = context.GetSubmitRange().m_startIndex; index < context.GetSubmitRange().m_endIndex; ++index)
             {
-                drawItem.m_submitIndex = index;
                 drawItem.m_streamBufferViews = &m_streamBufferView[index];
 
                 RHI::ShaderResourceGroup* rhiSRGS[] = { m_drawSRG[index]->GetRHIShaderResourceGroup() };
                 drawItem.m_shaderResourceGroups = rhiSRGS;
 
-                commandList->Submit(drawItem);
+                commandList->Submit(drawItem, index);
             }
         };
 

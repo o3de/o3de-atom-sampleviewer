@@ -879,7 +879,6 @@ namespace AtomSampleViewer
                     const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[ShadowScope][0]->GetRHIShaderResourceGroup() };
 
                     RHI::DrawItem drawItem;
-                    drawItem.m_submitIndex = i;
                     drawItem.m_arguments = drawIndexed;
                     drawItem.m_pipelineState = m_terrainPipelineStates[ShadowScope].get();
                     drawItem.m_indexBufferView = &m_quadIndexBufferView;
@@ -887,7 +886,7 @@ namespace AtomSampleViewer
                     drawItem.m_shaderResourceGroups = shaderResourceGroups;
                     drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_quadStreamBufferViews[ShadowScope].size());
                     drawItem.m_streamBufferViews = m_quadStreamBufferViews[ShadowScope].data();
-                    commandList->Submit(drawItem);
+                    commandList->Submit(drawItem, i);
                 }
                 else
                 {
@@ -896,7 +895,6 @@ namespace AtomSampleViewer
                     for (const auto& mesh : m_model->GetLods()[0]->GetMeshes())
                     {
                         RHI::DrawItem drawItem;
-                        drawItem.m_submitIndex = i;
                         drawItem.m_arguments = mesh.m_drawArguments;
                         drawItem.m_pipelineState = m_modelPipelineStates[ShadowScope].get();
                         drawItem.m_indexBufferView = &mesh.m_indexBufferView;
@@ -905,7 +903,7 @@ namespace AtomSampleViewer
                         drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_modelStreamBufferViews[ShadowScope].size());
                         drawItem.m_streamBufferViews = m_modelStreamBufferViews[ShadowScope].data();
 
-                        commandList->Submit(drawItem);
+                        commandList->Submit(drawItem, i);
                     }
                 }
             }
@@ -999,7 +997,6 @@ namespace AtomSampleViewer
                     drawIndexed.m_instanceCount = 1;
 
                     RHI::DrawItem drawItem;
-                    drawItem.m_submitIndex = i;
                     drawItem.m_arguments = drawIndexed;
                     drawItem.m_pipelineState = m_terrainPipelineStates[ForwardScope].get();
                     drawItem.m_indexBufferView = &m_quadIndexBufferView;
@@ -1008,7 +1005,7 @@ namespace AtomSampleViewer
                     drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_quadStreamBufferViews[ForwardScope].size());
                     drawItem.m_streamBufferViews = m_quadStreamBufferViews[ForwardScope].data();
 
-                    commandList->Submit(drawItem);
+                    commandList->Submit(drawItem, i);
                 }
                 else
                 {
@@ -1022,7 +1019,6 @@ namespace AtomSampleViewer
                     for (const auto& mesh : m_model->GetLods()[0]->GetMeshes())
                     {
                         RHI::DrawItem drawItem;
-                        drawItem.m_submitIndex = i;
                         drawItem.m_arguments = mesh.m_drawArguments;
                         drawItem.m_pipelineState = m_modelPipelineStates[ForwardScope].get();
                         drawItem.m_indexBufferView = &mesh.m_indexBufferView;
@@ -1031,7 +1027,7 @@ namespace AtomSampleViewer
                         drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_modelStreamBufferViews[ForwardScope].size());
                         drawItem.m_streamBufferViews = m_modelStreamBufferViews[ForwardScope].data();
 
-                        commandList->Submit(drawItem);
+                        commandList->Submit(drawItem, i);
                     }
                 }
             }

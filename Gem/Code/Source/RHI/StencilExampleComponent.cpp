@@ -221,8 +221,6 @@ namespace AtomSampleViewer
 
                 for (uint32_t i = context.GetSubmitRange().m_startIndex; i < context.GetSubmitRange().m_endIndex; ++i)
                 {
-                    drawItem.m_submitIndex = i;
-
                     if (i == 0)
                     {
                         drawIndexed.m_indexCount = s_numberOfVertices / 2;
@@ -230,7 +228,7 @@ namespace AtomSampleViewer
                         // Draw color triangles
                         drawItem.m_arguments = drawIndexed;
                         drawItem.m_pipelineState = m_pipelineStateBasePass.get();
-                        commandList->Submit(drawItem);
+                        commandList->Submit(drawItem, i);
                     }
                     else
                     {
@@ -241,7 +239,7 @@ namespace AtomSampleViewer
 
                         drawItem.m_arguments = drawIndexed;
                         drawItem.m_pipelineState = m_pipelineStateStencil[i-1].get();
-                        commandList->Submit(drawItem);
+                        commandList->Submit(drawItem, i);
 
                         drawIndexed.m_indexOffset += 3;
                     }

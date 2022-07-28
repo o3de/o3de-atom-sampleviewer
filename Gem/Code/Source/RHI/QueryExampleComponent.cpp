@@ -478,14 +478,14 @@ namespace AtomSampleViewer
 
                         if (occlusionResults)
                         {
-                            commandList->Submit(drawItem);
+                            commandList->Submit(drawItem, 0);
                         }
                         break;
                     }
                     case QueryType::Predication:
                     {
                         commandList->BeginPredication(*m_predicationBuffer, 0, RHI::PredicationOp::EqualZero);
-                        commandList->Submit(drawItem);
+                        commandList->Submit(drawItem, 0);
                         commandList->EndPredication();
                         break;
                     }
@@ -505,17 +505,15 @@ namespace AtomSampleViewer
                 }
 
                 // Draw occluding quad
-                drawItem.m_submitIndex++;
                 shaderResourceGroups[0] = m_shaderResourceGroups[1]->GetRHIShaderResourceGroup();
-                commandList->Submit(drawItem);
+                commandList->Submit(drawItem, 1);
 
                 // Draw quad to use for the oclussion query
-                drawItem.m_submitIndex++;
                 drawItem.m_pipelineState = m_boudingBoxPipelineState.get();
                 shaderResourceGroups[0] = m_shaderResourceGroups[2]->GetRHIShaderResourceGroup();
                 auto& queryEntry = m_occlusionQueries[m_currentOcclusionQueryIndex];
                 queryEntry.m_query->Begin(*commandList, m_precisionOcclusionEnabled ? RHI::QueryControlFlags::PreciseOcclusion : RHI::QueryControlFlags::None);
-                commandList->Submit(drawItem);
+                commandList->Submit(drawItem, 2);
                 queryEntry.m_query->End(*commandList);
                 queryEntry.m_isValid = true;
             }
