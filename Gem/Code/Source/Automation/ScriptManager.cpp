@@ -21,6 +21,7 @@
 #include <Atom/RHI/Factory.h>
 
 #include <AzCore/Component/Entity.h>
+#include <AzCore/Settings/SettingsRegistryScriptUtils.h>
 #include <AzCore/Script/ScriptContext.h>
 #include <AzCore/Script/ScriptSystemBus.h>
 #include <AzCore/Script/ScriptAsset.h>
@@ -34,6 +35,9 @@
 
 #include <AtomSampleViewerRequestBus.h>
 #include <Utils/Utils.h>
+
+#pragma optimize("", off)
+#pragma inline_depth(0)
 
 namespace AtomSampleViewer
 {
@@ -1058,6 +1062,7 @@ namespace AtomSampleViewer
     void ScriptManager::ReflectScriptContext(AZ::BehaviorContext* behaviorContext)
     {
         AZ::MathReflect(behaviorContext);
+        AZ::SettingsRegistryScriptUtils::ReflectSettingsRegistryToBehaviorContext(*behaviorContext);
 
         // Utilities...
         behaviorContext->Method("RunScript", &Script_RunScript);
@@ -2024,3 +2029,5 @@ namespace AtomSampleViewer
         s_instance->m_scriptOperations.push(AZStd::move(operation));
     }
 } // namespace AtomSampleViewer
+#pragma optimize("", on)
+
