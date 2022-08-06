@@ -1,6 +1,6 @@
 {
     "materialType": "Materials/Types/StandardPBR.materialtype",
-    "materialTypeVersion": 3,
+    "materialTypeVersion": 5,
     "propertyValues": {
         "baseColor.color": [
             0.0,
@@ -17,6 +17,6 @@
         "emissive.enable": true,
         "emissive.intensity": 3.0,
         "emissive.textureMap": "Materials/HotReloadTest/TestData/VariantSelection_FullyBaked.png",
-        "opacity.doubleSided": true
+        "general.doubleSided": true
     }
 }
