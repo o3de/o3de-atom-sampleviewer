@@ -569,7 +569,6 @@ namespace AtomSampleViewer
                         m_bindlessSrg->GetSrg(m_floatBufferSrgName)->GetRHIShaderResourceGroup(),
                     };
                     RHI::DrawItem drawItem;
-                    drawItem.m_submitIndex = instanceIdx;
                     drawItem.m_arguments = subMesh.m_mesh->m_drawArguments;
                     drawItem.m_pipelineState = m_pipelineState.get();
                     drawItem.m_indexBufferView = &subMesh.m_mesh->m_indexBufferView;
@@ -579,7 +578,7 @@ namespace AtomSampleViewer
                     drawItem.m_streamBufferViews = subMesh.bufferStreamViewArray.data();
 
                     // Submit the triangle draw item.
-                    commandList->Submit(drawItem);
+                    commandList->Submit(drawItem, instanceIdx);
                 }
             };
 
