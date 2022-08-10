@@ -82,7 +82,7 @@ namespace AtomSampleViewer
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::PointLightFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::PostProcessFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::QuadLightFeatureProcessor");
-        sceneDesc.m_featureProcessorNames.push_back("ReflectionProbeFeatureProcessor");
+        sceneDesc.m_featureProcessorNames.push_back("AZ::Render::ReflectionProbeFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::SkyBoxFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::TransformServiceFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::ProjectedShadowFeatureProcessor");
