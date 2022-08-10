@@ -307,6 +307,7 @@ namespace AtomSampleViewer
     void CommonSampleComponentBase::ResetScene()
     {
         m_meshFeatureProcessor = nullptr;
+        m_scene = RPI::RPISystemInterface::Get()->GetSceneByName(AZ::Name("RPI"));
     }
 
 } // namespace AtomSampleViewer
