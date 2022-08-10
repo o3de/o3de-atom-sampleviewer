@@ -36,9 +36,6 @@
 #include <AtomSampleViewerRequestBus.h>
 #include <Utils/Utils.h>
 
-#pragma optimize("", off)
-#pragma inline_depth(0)
-
 namespace AtomSampleViewer
 {
     ScriptManager* ScriptManager::s_instance = nullptr;
@@ -2029,5 +2026,3 @@ namespace AtomSampleViewer
         s_instance->m_scriptOperations.push(AZStd::move(operation));
     }
 } // namespace AtomSampleViewer
-#pragma optimize("", on)
-
