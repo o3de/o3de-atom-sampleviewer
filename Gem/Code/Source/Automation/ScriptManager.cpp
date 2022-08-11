@@ -21,6 +21,7 @@
 #include <Atom/RHI/Factory.h>
 
 #include <AzCore/Component/Entity.h>
+#include <AzCore/Settings/SettingsRegistryScriptUtils.h>
 #include <AzCore/Script/ScriptContext.h>
 #include <AzCore/Script/ScriptSystemBus.h>
 #include <AzCore/Script/ScriptAsset.h>
@@ -1058,6 +1059,7 @@ namespace AtomSampleViewer
     void ScriptManager::ReflectScriptContext(AZ::BehaviorContext* behaviorContext)
     {
         AZ::MathReflect(behaviorContext);
+        AZ::SettingsRegistryScriptUtils::ReflectSettingsRegistryToBehaviorContext(*behaviorContext);
 
         // Utilities...
         behaviorContext->Method("RunScript", &Script_RunScript);
