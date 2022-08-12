@@ -639,7 +639,7 @@ namespace AtomSampleViewer
                 AZ::Render::FrameCaptureRequestBus::BroadcastResult(m_frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, m_frameCaptureFilePath);
                 if (m_frameCaptureId != AZ::Render::InvalidFrameCaptureId ) // if unsuccessfull leave state to attempt again next tick
                 {
-                    AZ::Render::FrameCaptureNotificationBus::MultiHandler::BusConnect(m_frameCaptureId);
+                    AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect(m_frameCaptureId);
 
                     m_countdownForFrameCapture = -1; // Don't call CaptureScreenshot again
                 }
@@ -1229,9 +1229,9 @@ namespace AtomSampleViewer
         }
     }
 
-    void SampleComponentManager::OnFrameCaptureFinished(AZ::Render::FrameCaptureId captureId [[maybe_unused]], AZ::Render::FrameCaptureResult /*result*/, const AZStd::string& /*info*/)
+    void SampleComponentManager::OnFrameCaptureFinished(AZ::Render::FrameCaptureResult /*result*/, const AZStd::string& /*info*/)
     {
-        AZ::Render::FrameCaptureNotificationBus::MultiHandler::BusDisconnect(captureId);
+        AZ::Render::FrameCaptureNotificationBus::Handler::BusDisconnect();
 
         if (m_hideImGuiDuringFrameCapture)
         {

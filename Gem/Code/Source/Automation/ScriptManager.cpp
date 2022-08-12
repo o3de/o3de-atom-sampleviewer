@@ -1462,7 +1462,7 @@ namespace AtomSampleViewer
                 AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, filePath);
                 if (frameCaptureId != AZ::Render::InvalidFrameCaptureId)
                 {
-                    s_instance->AZ::Render::FrameCaptureNotificationBus::MultiHandler::BusConnect(frameCaptureId);
+                    s_instance->AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect(frameCaptureId);
                     s_instance->m_frameCaptureId = frameCaptureId;
                 }
             }
@@ -1496,7 +1496,7 @@ namespace AtomSampleViewer
                 AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, filePath);
                 if (frameCaptureId != AZ::Render::InvalidFrameCaptureId)
                 {
-                    s_instance->AZ::Render::FrameCaptureNotificationBus::MultiHandler::BusConnect(frameCaptureId);
+                    s_instance->AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect(frameCaptureId);
                     s_instance->m_frameCaptureId = frameCaptureId;
                 }
             }
@@ -1527,7 +1527,7 @@ namespace AtomSampleViewer
                 AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshotWithPreview, filePath);
                 if (frameCaptureId != AZ::Render::InvalidFrameCaptureId)
                 {
-                    s_instance->AZ::Render::FrameCaptureNotificationBus::MultiHandler::BusConnect(frameCaptureId);
+                    s_instance->AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect(frameCaptureId);
                     s_instance->m_frameCaptureId = frameCaptureId;
                 }
             }
@@ -1625,7 +1625,7 @@ namespace AtomSampleViewer
                 AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachment, passHierarchy, slot, outputFilePath, readbackOption);
                 if (frameCaptureId != AZ::Render::InvalidFrameCaptureId)
                 {
-                    s_instance->AZ::Render::FrameCaptureNotificationBus::MultiHandler::BusConnect(frameCaptureId);
+                    s_instance->AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect(frameCaptureId);
                     s_instance->m_frameCaptureId = frameCaptureId;
                 }
             }
@@ -1638,11 +1638,11 @@ namespace AtomSampleViewer
             });
     }
 
-    void ScriptManager::OnFrameCaptureFinished(AZ::Render::FrameCaptureId frameCaptureId, AZ::Render::FrameCaptureResult result, const AZStd::string &info)
+    void ScriptManager::OnFrameCaptureFinished(AZ::Render::FrameCaptureResult result, const AZStd::string &info)
     {
         m_isCapturePending = false;
         m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
-        AZ::Render::FrameCaptureNotificationBus::MultiHandler::BusDisconnect(frameCaptureId);
+        AZ::Render::FrameCaptureNotificationBus::Handler::BusDisconnect();
         ResumeScript();
 
         // This is checking for the exact scenario that results from an HDR setup. The goal is to add a very specific and prominent message that will

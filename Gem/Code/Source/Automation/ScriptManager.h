@@ -49,7 +49,7 @@ namespace AtomSampleViewer
         : public ScriptRepeaterRequestBus::Handler
         , public ScriptRunnerRequestBus::Handler
         , public AZ::Debug::CameraControllerNotificationBus::Handler
-        , public AZ::Render::FrameCaptureNotificationBus::MultiHandler
+        , public AZ::Render::FrameCaptureNotificationBus::Handler
         , public AZ::Render::ProfilingCaptureNotificationBus::Handler
         , public AZ::Debug::ProfilerNotificationBus::Handler
     {
@@ -219,7 +219,7 @@ namespace AtomSampleViewer
         void OnCameraMoveEnded(AZ::TypeId controllerTypeId, uint32_t channels) override;
 
         // FrameCaptureNotificationBus overrides...
-        void OnFrameCaptureFinished(AZ::Render::FrameCaptureId frameCaptureId, AZ::Render::FrameCaptureResult result, const AZStd::string& info) override;
+        void OnFrameCaptureFinished(AZ::Render::FrameCaptureResult result, const AZStd::string& info) override;
 
         // ProfilingCaptureNotificationBus overrides...
         void OnCaptureQueryTimestampFinished(bool result, const AZStd::string& info) override;
