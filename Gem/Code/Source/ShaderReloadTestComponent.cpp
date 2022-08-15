@@ -200,7 +200,7 @@ namespace AtomSampleViewer
         m_scene->RemoveRenderPipeline(m_originalPipeline->GetId());
 
         // add the checker board pipeline
-        const AZStd::string pipelineName("Fullscreen");
+        const AZStd::string pipelineName("FullscreenPipeline");
         AZ::RPI::RenderPipelineDescriptor pipelineDesc;
         pipelineDesc.m_mainViewTagName = "MainCamera";
         pipelineDesc.m_name = pipelineName;
