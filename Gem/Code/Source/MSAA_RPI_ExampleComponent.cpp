@@ -101,6 +101,8 @@ namespace AtomSampleViewer
             SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequests::SetNumMSAASamples, m_numSamples);
             SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequests::ResetRPIScene);
 
+            m_scene = AZ::RPI::RPISystemInterface::Get()->GetSceneByName(AZ::Name("RPI"));
+
             // reset internal sample scene related data
             ResetScene();
 
@@ -111,7 +113,7 @@ namespace AtomSampleViewer
             // scene IBL is cleared after the reset, re-activate it
             ActivateIbl();
 
-            m_isNonMsaaPipeline = isNonMsaaPipeline;          
+            m_isNonMsaaPipeline = isNonMsaaPipeline;
         }
         
         // create the new sample pipeline

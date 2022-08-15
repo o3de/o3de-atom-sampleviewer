@@ -1546,7 +1546,7 @@ namespace AtomSampleViewer
         // Create and register the rhi scene with only feature processors required for AtomShimRenderer (only for AtomSampleViewerLauncher)
         RPI::SceneDescriptor sceneDesc;
         sceneDesc.m_nameId = AZ::Name("RHI");
-        sceneDesc.m_featureProcessorNames.push_back("AuxGeomFeatureProcessor");
+        sceneDesc.m_featureProcessorNames.push_back("AZ::Render::AuxGeomFeatureProcessor");
         m_rhiScene = RPI::Scene::CreateScene(sceneDesc);
         m_rhiScene->Activate();
 
