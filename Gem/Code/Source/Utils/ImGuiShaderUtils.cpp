@@ -29,7 +29,7 @@ namespace AtomSampleViewer
             }
 
             AZStd::string header = AZStd::string::format("%-*s |  Bits | Requested | Selected", longestOptionNameLength, "Option Name");
-            AZStd::string divider{header.size(), '-'};
+            AZStd::string divider(header.size(), '-');
 
             ImGui::Text("%s", header.c_str());
             ImGui::Text("%s", divider.c_str());
