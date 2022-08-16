@@ -142,7 +142,6 @@ namespace AtomSampleViewer
         void ShowCpuProfilerWindow();
         void ShowGpuProfilerWindow();
         void ShowFileIoProfilerWindow();
-        void ShowShaderMetricsWindow();
         void ShowTransientAttachmentProfilerWindow();
 
         void RequestExit();
@@ -221,7 +220,6 @@ namespace AtomSampleViewer
         bool m_showGpuProfiler = false;
         bool m_showFileIoProfiler = false;
         bool m_showTransientAttachmentProfiler = false;
-        bool m_showShaderMetrics = false;
 
         bool m_ctrlModifierLDown = false;
         bool m_ctrlModifierRDown = false;
@@ -245,7 +243,6 @@ namespace AtomSampleViewer
         AZ::Render::ImGuiFrameVisualizer m_imguiFrameGraphVisualizer;
         AZ::Render::ImGuiGpuProfiler m_imguiGpuProfiler;
         AZ::Render::ImGuiTransientAttachmentProfiler m_imguiTransientAttachmentProfiler;
-        AZ::Render::ImGuiShaderMetrics m_imguiShaderMetrics;
 
         ImGuiSaveFilePath m_imguiFrameCaptureSaver;
         bool m_isFrameCapturePending = false;
