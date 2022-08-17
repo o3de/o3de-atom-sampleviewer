@@ -28,7 +28,6 @@
 
 #include <Atom/RHI/Factory.h>
 #include <Atom/RPI.Public/RPISystemInterface.h>
-#include <Atom/RPI.Public/Shader/Metrics/ShaderMetricsSystem.h>
 
 #include <ISystem.h>
 #include <IConsole.h>

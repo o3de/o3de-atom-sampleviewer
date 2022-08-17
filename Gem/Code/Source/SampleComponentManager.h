@@ -26,7 +26,6 @@
 #include <Atom/Utils/ImGuiPassTree.h>
 #include <Atom/Utils/ImGuiFrameVisualizer.h>
 #include <Atom/Utils/ImGuiTransientAttachmentProfiler.h>
-#include <Atom/Utils/ImGuiShaderMetrics.h>
 
 #include <AzCore/Component/Component.h>
 #include <AzCore/Component/TickBus.h>
