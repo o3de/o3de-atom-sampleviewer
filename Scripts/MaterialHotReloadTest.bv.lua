@@ -156,9 +156,10 @@ CaptureScreenshot(g_screenshotOutputFolder .. '/14_HorizontalPattern.png')
 
 -- Test a specific scenario that was failing, where color changes fail to reload after making a shader change.
 SetBlendingOn()
+IdleForReload()
 SetBlendingOff()
+IdleForReload()
 SetColorRed()
-IdleSeconds(4.0)
 IdleForReload()
 CaptureScreenshot(g_screenshotOutputFolder .. '/15_Red_AfterShaderReload.png')
 
