@@ -11,8 +11,8 @@
 #include <AzCore/Component/TickBus.h>
 #include <CommonSampleComponentBase.h>
 #include <Utils/Utils.h>
-
 #include <Utils/ImGuiSidebar.h>
+#include <Atom/Utils/ImGuiMaterialDetails.h>
 
 namespace AtomSampleViewer
 {

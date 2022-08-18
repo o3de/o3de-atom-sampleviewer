@@ -13,11 +13,9 @@
 #include <Atom/Feature/CoreLights/DirectionalLightFeatureProcessorInterface.h>
 #include <Atom/Feature/CoreLights/ShadowConstants.h>
 #include <Atom/Feature/CoreLights/DiskLightFeatureProcessorInterface.h>
-
 #include <Atom/Feature/CoreLights/PointLightFeatureProcessorInterface.h>
-
-
 #include <AzCore/Component/TickBus.h>
+#include <Atom/Utils/ImGuiMaterialDetails.h>
 
 #include <Utils/ImGuiSidebar.h>
 #include <Utils/Utils.h>

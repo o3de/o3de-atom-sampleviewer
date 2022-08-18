@@ -16,6 +16,7 @@
 #include <Utils/ImGuiSidebar.h>
 #include <Utils/ImGuiAssetBrowser.h>
 #include <Utils/ImGuiHistogramQueue.h>
+#include <Atom/Utils/ImGuiMaterialDetails.h>
 
 namespace AtomSampleViewer
 {

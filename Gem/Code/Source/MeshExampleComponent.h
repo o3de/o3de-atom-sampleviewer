@@ -21,6 +21,7 @@
 #include <Atom/Bootstrap/DefaultWindowBus.h>
 #include <Atom/Feature/ImGui/ImGuiUtils.h>
 #include <Atom/Feature/SkyBox/SkyBoxFeatureProcessorInterface.h>
+#include <Atom/Utils/ImGuiMaterialDetails.h>
 
 namespace AtomSampleViewer
 {
