@@ -334,7 +334,7 @@ namespace AtomSampleViewer
 
         if (m_material)
         {
-            const Render::MeshDrawPacketLods& drawPackets = GetMeshFeatureProcessor()->GetDrawPackets(m_meshHandle);
+            const AZ::RPI::MeshDrawPacketLods& drawPackets = GetMeshFeatureProcessor()->GetDrawPackets(m_meshHandle);
             if (!drawPackets.empty())
             {
                 AZ_Assert(drawPackets.size() == 1, "Expected exactly 1 LOD");
