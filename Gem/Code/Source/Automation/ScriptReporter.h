@@ -75,7 +75,7 @@ namespace AtomSampleViewer
         bool HasActiveScript() const;
 
         //! Indicates that a new screenshot is about to be captured.
-        bool AddScreenshotTest(const AZStd::string& path);
+        bool AddScreenshotTest(const AZStd::string& path, const AZStd::string& filePathWithSuffix);
 
         //! Check the latest screenshot using default thresholds.
         void CheckLatestScreenshot(const ImageComparisonToleranceLevel* comparisonPreset);

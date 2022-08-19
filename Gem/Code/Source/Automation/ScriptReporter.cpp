@@ -204,12 +204,14 @@ namespace AtomSampleViewer
         return !m_currentScriptIndexStack.empty();
     }
 
-    bool ScriptReporter::AddScreenshotTest(const AZStd::string& path)
+    bool ScriptReporter::AddScreenshotTest(const AZStd::string& path, const AZStd::string& filePathWithSuffix)
     {
         AZ_Assert(GetCurrentScriptReport(), "There is no active script");
 
         ScreenshotTestInfo screenshotTestInfo;
-        screenshotTestInfo.m_screenshotFilePath = path;
+        screenshotTestInfo.m_screenshotFilePath = filePathWithSuffix;
+        screenshotTestInfo.m_officialBaselineScreenshotFilePath = ScreenshotPaths::GetOfficialBaseline(path);
+        screenshotTestInfo.m_localBaselineScreenshotFilePath = ScreenshotPaths::GetLocalBaseline(path);
         GetCurrentScriptReport()->m_screenshotTests.push_back(AZStd::move(screenshotTestInfo));
 
         return true;
@@ -1160,7 +1162,6 @@ namespace AtomSampleViewer
 
         screenshotTestInfo.m_toleranceLevel = *toleranceLevel;
 
-        screenshotTestInfo.m_officialBaselineScreenshotFilePath = ScreenshotPaths::GetOfficialBaseline(screenshotTestInfo.m_screenshotFilePath);
         if (screenshotTestInfo.m_officialBaselineScreenshotFilePath.empty())
         {
             ReportScriptError(AZStd::string::format("Screenshot check failed. Could not determine expected screenshot path for '%s'", screenshotTestInfo.m_screenshotFilePath.c_str()));
@@ -1199,7 +1200,6 @@ namespace AtomSampleViewer
             }
         }
 
-        screenshotTestInfo.m_localBaselineScreenshotFilePath = ScreenshotPaths::GetLocalBaseline(screenshotTestInfo.m_screenshotFilePath);
         if (screenshotTestInfo.m_localBaselineScreenshotFilePath.empty())
         {
             ReportScriptWarning(AZStd::string::format("Screenshot check failed. Could not determine local baseline screenshot path for '%s'", screenshotTestInfo.m_screenshotFilePath.c_str()));

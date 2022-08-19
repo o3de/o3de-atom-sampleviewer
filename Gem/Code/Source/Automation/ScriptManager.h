@@ -136,8 +136,10 @@ namespace AtomSampleViewer
         // but with "Screenshots" replaced with "ExpectedScreenshots". For example, the expected file for
         // "Scripts/Screenshots/StandardPbr/test.ppm" should be at "Scripts/ExpectedScreenshots/StandardPbr/test.ppm".
 
-        static void Script_CaptureScreenshot(const AZStd::string& filePath);
-        static void Script_CaptureScreenshotWithImGui(const AZStd::string& filePath);
+        static void Script_CaptureScreenshot(const AZStd::string& filePath, const AZStd::string& suffix);
+        static void Script_CaptureScreenshotWithImGui(const AZStd::string& filePath, const AZStd::string& suffix);
+
+        static AZStd::string Script_QueryRenderBackend();
 
         // Capture a pass attachment and save it to a file (*.ppm or *.dds for image, *.buffer for buffer)
         // The order of input parameters in ScriptDataContext would be
@@ -148,7 +150,7 @@ namespace AtomSampleViewer
         static void Script_CapturePassAttachment(AZ::ScriptDataContext& dc);
 
         // Capture a screentshot with pass image attachment preview when the preview enabled.
-        static void Script_CaptureScreenshotWithPreview(const AZStd::string& filePath);
+        static void Script_CaptureScreenshotWithPreview(const AZStd::string& filePath, const AZStd::string& suffix);
 
         // Profiling statistics data...
         static void Script_CapturePassTimestamp(AZ::ScriptDataContext& dc);
@@ -233,7 +235,7 @@ namespace AtomSampleViewer
         // Validates the ScriptDataContext for ProfilingCapture script requests
         static bool ValidateProfilingCaptureScripContexts(AZ::ScriptDataContext& dc, AZStd::string& outputFilePath);
 
-        static bool PrepareForScreenCapture(const AZStd::string& path);
+        static bool PrepareForScreenCapture(const AZStd::string& path, const AZStd::string& suffix);
 
         // show/hide imgui
         void SetShowImGui(bool show);
