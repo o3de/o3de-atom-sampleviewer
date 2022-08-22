@@ -9,18 +9,20 @@
 --
 ----------------------------------------------------------------------------------------------------
 
+RunScript("scripts/TestEnvironment.luac")
+
 g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/MultiRenderPipeline/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 function TakeScreenShotForWindow1(fileName)
     IdleFrames(1) 
-    CaptureScreenshot(g_screenshotOutputFolder .. fileName)
+    CaptureScreenshot(g_screenshotOutputFolder .. fileName, g_envSuffix)
 end
 
 function TakeScreenShotForWindow2(fileName)
     IdleFrames(1) 
     SetShowImGui(false)
-    CapturePassAttachment({"SecondPipeline", "CopyToSwapChain"}, "Output", g_screenshotOutputFolder .. fileName)
+    CapturePassAttachment({"SecondPipeline", "CopyToSwapChain"}, "Output", g_screenshotOutputFolder .. fileName, g_envSuffix)
     SetShowImGui(true)
 end
 

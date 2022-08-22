@@ -9,6 +9,7 @@
 --
 ----------------------------------------------------------------------------------------------------
 
+RunScript("scripts/TestEnvironment.luac")
 
 g_shaderballModel = 'materialeditor/viewportmodels/shaderball.azmodel'
 g_cubeModel = 'materialeditor/viewportmodels/cube.azmodel'
@@ -77,7 +78,7 @@ function GenerateMaterialScreenshot(imageComparisonThresholdLevel, materialName,
     end
     
     SelectImageComparisonToleranceLevel(imageComparisonThresholdLevel)
-    CaptureScreenshot(filename)
+    CaptureScreenshot(filename, g_envSuffix)
 end
 
 OpenSample('RPI/Mesh')

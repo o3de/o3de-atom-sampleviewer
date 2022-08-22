@@ -9,6 +9,8 @@
 --
 ----------------------------------------------------------------------------------------------------
 
+RunScript("scripts/TestEnvironment.luac")
+
 g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/PassTree/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
@@ -17,7 +19,7 @@ Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 function TestAttachment(attachmentName, screenshotFileName)
     SetImguiValue(attachmentName, true)
     IdleFrames(2)
-    CaptureScreenshotWithPreview(g_screenshotOutputFolder .. screenshotFileName)
+    CaptureScreenshotWithPreview(g_screenshotOutputFolder .. screenshotFileName, g_envSuffix)
     IdleFrames(1)
     SetImguiValue('Save Attachment', true)
     IdleFrames(3)

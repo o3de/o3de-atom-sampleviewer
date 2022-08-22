@@ -9,6 +9,8 @@
 --
 ----------------------------------------------------------------------------------------------------
 
+RunScript("scripts/TestEnvironment.luac")
+
 g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/SkinnedMesh/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
@@ -27,6 +29,6 @@ SetImguiValue('Draw bones', false)
 NoClipCameraController_SetPosition(Vector3(-0.125466, -2.129441, 1.728536))
 NoClipCameraController_SetHeading(DegToRad(-8.116900))
 NoClipCameraController_SetPitch(DegToRad(-31.035244))
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_skinnedmesh.png')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_skinnedmesh.png', g_envSuffix)
 
 OpenSample(nil)

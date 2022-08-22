@@ -9,6 +9,8 @@
 --
 ----------------------------------------------------------------------------------------------------
 
+RunScript("scripts/TestEnvironment.luac")
+
 g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/ExposureTest/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
@@ -19,6 +21,6 @@ SelectImageComparisonToleranceLevel("Level E")
 -- eye adaptation has a default speed. we are waiting 9 seconds for the sample to reach stable state
 IdleSeconds(9)
 
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_exposure.png')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_exposure.png', g_envSuffix)
 
 OpenSample(nil)

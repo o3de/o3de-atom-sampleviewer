@@ -9,6 +9,8 @@
 --
 ----------------------------------------------------------------------------------------------------
 
+RunScript("scripts/TestEnvironment.luac")
+
 g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/DynamicDraw/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
@@ -18,6 +20,6 @@ ResizeViewport(800, 500)
 -- Vulkan's line width is different than dx12's 
 SelectImageComparisonToleranceLevel("Level F") 
 
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_1.png')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_1.png', g_envSuffix)
 
 OpenSample(nil)

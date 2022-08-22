@@ -9,6 +9,8 @@
 --
 ----------------------------------------------------------------------------------------------------
 
+RunScript("scripts/TestEnvironment.luac")
+
 g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/StreamingImage/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
@@ -18,18 +20,18 @@ ResizeViewport(900, 900)
 SelectImageComparisonToleranceLevel("Level H")
 
 -- capture screenshot with all 2d images
-CaptureScreenshot(g_screenshotOutputFolder .. 'Streaming2dImages.png')
+CaptureScreenshot(g_screenshotOutputFolder .. 'Streaming2dImages.png', g_envSuffix)
 
 -- capture screenshot for hot loading
 SetImguiValue('Switch texture', true)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. 'HotReloading.png')
+CaptureScreenshot(g_screenshotOutputFolder .. 'HotReloading.png', g_envSuffix)
 
 
 -- capture screenshot for 3d images
 SetImguiValue('View 3D Images', true)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. 'Streaming3dImage.png')
+CaptureScreenshot(g_screenshotOutputFolder .. 'Streaming3dImage.png', g_envSuffix)
 
 
 OpenSample(nil)

@@ -9,8 +9,10 @@
 --
 ----------------------------------------------------------------------------------------------------
 
+RunScript("scripts/TestEnvironment.luac")
+
 function TakeScreenshots()
-    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_decals.png')
+    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_decals.png', g_envSuffix)
 end
 
 g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/Decals/')

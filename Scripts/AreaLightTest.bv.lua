@@ -9,6 +9,8 @@
 --
 ----------------------------------------------------------------------------------------------------
 
+RunScript("scripts/TestEnvironment.luac")
+
 function SetupPointLights()
     SetImguiValue('AreaLightSample/LightType/Point', true)
     SetImguiValue('AreaLightSample/Position Offset', Vector3(0.0, 0.0, 0.0))
@@ -152,7 +154,7 @@ do
         materialSetupFunction()
         
         IdleFrames(1) 
-        CaptureScreenshot(g_screenshotOutputFolder .. '/' .. lightName .. '_' .. materialName ..'.png')
+        CaptureScreenshot(g_screenshotOutputFolder .. '/' .. lightName .. '_' .. materialName ..'.png', g_envSuffix)
     end
 end
 

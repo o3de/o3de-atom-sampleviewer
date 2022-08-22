@@ -9,6 +9,8 @@
 --
 ----------------------------------------------------------------------------------------------------
 
+RunScript("scripts/TestEnvironment.luac")
+
 function TakeScreenShotBoxes()
 
     NoClipCameraController_SetFov(DegToRad(70))
@@ -16,7 +18,7 @@ function TakeScreenShotBoxes()
     NoClipCameraController_SetPitch(DegToRad(20))
 
     IdleFrames(1) 
-    CaptureScreenshot(g_screenshotOutputFolder .. '/auxgeom_boxes.png')
+    CaptureScreenshot(g_screenshotOutputFolder .. '/auxgeom_boxes.png', g_envSuffix)
 end
 
 function TakeScreenShotShapes()
@@ -26,7 +28,7 @@ function TakeScreenShotShapes()
     NoClipCameraController_SetPitch(DegToRad(30))
 
     IdleFrames(1) 
-    CaptureScreenshot(g_screenshotOutputFolder .. '/auxgeom_shapes.png')
+    CaptureScreenshot(g_screenshotOutputFolder .. '/auxgeom_shapes.png', g_envSuffix)
 end
 
 g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/AuxGeom/')

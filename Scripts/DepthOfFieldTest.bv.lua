@@ -9,6 +9,8 @@
 --
 ----------------------------------------------------------------------------------------------------
 
+RunScript("scripts/TestEnvironment.luac")
+
 g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/DepthOfFieldTest/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
@@ -18,6 +20,6 @@ SelectImageComparisonToleranceLevel("Level D")
 
 IdleSeconds(5)
 
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_depth_of_field.png')
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_depth_of_field.png', g_envSuffix)
 
 OpenSample(nil)

@@ -9,6 +9,8 @@
 --
 ----------------------------------------------------------------------------------------------------
 
+RunScript("scripts/TestEnvironment.luac")
+
 if GetRenderApiName() == "vulkan" or GetRenderApiName() == "metal" then
     Warning("Vulkan or metal is not supported by this test.")
 else
@@ -21,7 +23,7 @@ else
 
     IdleSeconds(5)
 
-    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_cornellbox.png')
+    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_cornellbox.png', g_envSuffix)
 end
 
 OpenSample(nil)

@@ -75,7 +75,7 @@ namespace AtomSampleViewer
         bool HasActiveScript() const;
 
         //! Indicates that a new screenshot is about to be captured.
-        bool AddScreenshotTest(const AZStd::string& path, const AZStd::string& filePathWithSuffix);
+        bool AddScreenshotTest(const AZStd::string& filePathWithoutSuffix, const AZStd::string& filePathWithSuffix);
 
         //! Check the latest screenshot using default thresholds.
         void CheckLatestScreenshot(const ImageComparisonToleranceLevel* comparisonPreset);
@@ -133,7 +133,8 @@ namespace AtomSampleViewer
         //! Records all the information about a screenshot comparison test.
         struct ScreenshotTestInfo
         {
-            AZStd::string m_screenshotFilePath;
+            AZStd::string m_screenshotFilePathWithSuffix;       //!< The file path is appended with additional info, such as GPU info, render API
+            AZStd::string m_screenshotFilePathWithoutSuffix;    //!< The file path without additional info
             AZStd::string m_officialBaselineScreenshotFilePath; //!< The path to the official baseline image that is checked into source control
             AZStd::string m_localBaselineScreenshotFilePath;    //!< The path to a local baseline image that was established by the user
             ImageComparisonToleranceLevel m_toleranceLevel;     //!< Tolerance for checking against the official baseline image
