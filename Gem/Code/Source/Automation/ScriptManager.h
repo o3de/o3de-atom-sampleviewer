@@ -139,7 +139,7 @@ namespace AtomSampleViewer
         static void Script_CaptureScreenshot(const AZStd::string& filePath, const AZStd::string& suffix);
         static void Script_CaptureScreenshotWithImGui(const AZStd::string& filePath, const AZStd::string& suffix);
 
-        static AZStd::string Script_QueryRenderBackend();
+        static AZStd::string Script_GetRenderApiName();
 
         // Capture a pass attachment and save it to a file (*.ppm or *.dds for image, *.buffer for buffer)
         // The order of input parameters in ScriptDataContext would be

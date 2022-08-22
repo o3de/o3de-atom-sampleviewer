@@ -1,3 +1,3 @@
-g_renderBackend = QueryRenderBackend()
+g_renderApiName = GetRenderApiName()
 
-g_envSuffix = "+" .. g_renderBackend;
+g_envSuffix = "+" .. g_renderApiName;

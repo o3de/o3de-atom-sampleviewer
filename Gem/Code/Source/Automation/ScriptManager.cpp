@@ -1094,7 +1094,6 @@ namespace AtomSampleViewer
         behaviorContext->Method("CaptureScreenshotWithImGui", &Script_CaptureScreenshotWithImGui);
         behaviorContext->Method("CaptureScreenshotWithPreview", &Script_CaptureScreenshotWithPreview);
         behaviorContext->Method("CapturePassAttachment", &Script_CapturePassAttachment);
-        behaviorContext->Method("QueryRenderBackend", &Script_QueryRenderBackend);
 
         // Profiling data...
         behaviorContext->Method("CapturePassTimestamp", &Script_CapturePassTimestamp);
@@ -1527,7 +1526,7 @@ namespace AtomSampleViewer
             });
     }
 
-    AZStd::string ScriptManager::Script_QueryRenderBackend()
+    AZStd::string ScriptManager::Script_GetRenderApiName()
     {
         AZ::Name renderApi = AZ::RPI::RPISystemInterface::Get()->GetRenderApiName();
         return AZStd::string(renderApi.GetCStr());
