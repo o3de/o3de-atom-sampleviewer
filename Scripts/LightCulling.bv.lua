@@ -9,6 +9,8 @@
 --
 ----------------------------------------------------------------------------------------------------
 
+RunScript("scripts/TestEnvironment.luac")
+
 function ResetEntityCounts()
     SetImguiValue('Point Lights/Point light count', 0)
     SetImguiValue('Decals/Decal count', 0)
@@ -103,7 +105,7 @@ function EnableOnlyTestHeatmap()
     SetImguiValue('Heatmap/Opacity', 1.0)
 end
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/LightCulling/')
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/LightCulling/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 SelectImageComparisonToleranceLevel("Level E")
 

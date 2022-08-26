@@ -9,7 +9,9 @@
 --
 ----------------------------------------------------------------------------------------------------
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/SceneReloadSoakTest/')
+RunScript("scripts/TestEnvironment.luac")
+
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/SceneReloadSoakTest/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 -- First we capture a screenshot to make sure everything is rendering correctly...

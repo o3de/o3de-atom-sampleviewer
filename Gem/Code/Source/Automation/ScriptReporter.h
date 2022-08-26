@@ -38,7 +38,7 @@ namespace AtomSampleViewer
         AZStd::string GetLocalBaseline(const AZStd::string& forScreenshotFile);
 
         //! Returns the path to the official baseline image that corresponds to @forScreenshotFile
-        AZStd::string GetOfficialBaseline(const AZStd::string& forScreenshotFile);
+        AZStd::string GetOfficialBaseline(const AZStd::string& forScreenshotFile, const AZStd::string& envPath);
     }
 
     //! Collects data about each script run by the ScriptManager.
@@ -75,7 +75,7 @@ namespace AtomSampleViewer
         bool HasActiveScript() const;
 
         //! Indicates that a new screenshot is about to be captured.
-        bool AddScreenshotTest(const AZStd::string& path);
+        bool AddScreenshotTest(const AZStd::string& path, const AZStd::string& envPath);
 
         //! Check the latest screenshot using default thresholds.
         void CheckLatestScreenshot(const ImageComparisonToleranceLevel* comparisonPreset);
@@ -139,6 +139,8 @@ namespace AtomSampleViewer
             ImageComparisonToleranceLevel m_toleranceLevel;     //!< Tolerance for checking against the official baseline image
             ImageComparisonResult m_officialComparisonResult;   //!< Result of comparing against the official baseline image, for reporting test failure
             ImageComparisonResult m_localComparisonResult;      //!< Result of comparing against a local baseline, for reporting warnings
+
+            ScreenshotTestInfo(const AZStd::string& screenshotFilePath, const AZStd::string& envPath);
         };
 
         //! Records all the information about a single test script.

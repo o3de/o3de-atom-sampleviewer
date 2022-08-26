@@ -9,7 +9,9 @@
 --
 ----------------------------------------------------------------------------------------------------
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/DepthOfFieldTest/')
+RunScript("scripts/TestEnvironment.luac")
+
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/DepthOfFieldTest/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 OpenSample('Features/DepthOfField')

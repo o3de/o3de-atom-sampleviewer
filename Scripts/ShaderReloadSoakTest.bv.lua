@@ -12,6 +12,8 @@
 -- WARNING: This is a soak test, do not add this test to the fully automated
 -- test suites.
 
+RunScript("scripts/TestEnvironment.luac")
+
 OpenSample('RPI/ShaderReloadTest')
 ResizeViewport(500, 500)
 

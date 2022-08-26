@@ -124,6 +124,8 @@ namespace AtomSampleViewer
         static void Script_ShowTool(const AZStd::string& toolName, bool enable);
 
         // Screenshots...
+        // Store the test environment path of the screenshots. It will be used to figure out the baseline path.
+        static void Script_SetTestEnvPath(const AZStd::string& envPath);
 
         // Call this function before capturing screenshots to indicate which comparison tolerance level should be used.
         // The list of available tolerance levels can be found in "AtomSampleViewer/Config/ImageComparisonToleranceLevels.azasset".
@@ -233,7 +235,7 @@ namespace AtomSampleViewer
         // Validates the ScriptDataContext for ProfilingCapture script requests
         static bool ValidateProfilingCaptureScripContexts(AZ::ScriptDataContext& dc, AZStd::string& outputFilePath);
 
-        static bool PrepareForScreenCapture(const AZStd::string& path);
+        static bool PrepareForScreenCapture(const AZStd::string& path, const AZStd::string& envPath);
 
         // show/hide imgui
         void SetShowImGui(bool show);
@@ -248,6 +250,8 @@ namespace AtomSampleViewer
         };
 
         TestSuiteExecutionConfig m_testSuiteRunConfig;
+
+        AZStd::string m_envPath = "";
 
         static constexpr float DefaultPauseTimeout = 5.0f;
 

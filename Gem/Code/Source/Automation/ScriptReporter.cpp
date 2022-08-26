@@ -45,7 +45,7 @@ namespace AtomSampleViewer
 
         AZStd::string GetLocalBaselineFolder(bool resolvePath)
         {
-            AZStd::string path = AZStd::string::format("@user@/scripts/screenshotslocalbaseline/%s", AZ::RHI::Factory::Get().GetName().GetCStr());
+            AZStd::string path = AZStd::string::format("@user@/scripts/screenshotslocalbaseline/");
 
             if (resolvePath)
             {
@@ -76,10 +76,10 @@ namespace AtomSampleViewer
             {
                 newPath = "";
             }
-            return newPath;
+            return Utils::ResolvePath(newPath);
         }
 
-        AZStd::string GetOfficialBaseline(const AZStd::string& forScreenshotFile)
+        AZStd::string GetOfficialBaseline(const AZStd::string& forScreenshotFile, const AZStd::string& envPath)
         {
             AZStd::string path = forScreenshotFile;
             const AZStd::string userPath = Utils::ResolvePath("@user@");
@@ -96,6 +96,10 @@ namespace AtomSampleViewer
                 return "";
             }
 
+            if (!AzFramework::StringFunc::Replace(path, envPath.c_str(), ""))
+            {
+                return "";
+            }
             // Turn it back into a full path
             path = Utils::ResolvePath("@projectroot@/" + path);
 
@@ -204,12 +208,18 @@ namespace AtomSampleViewer
         return !m_currentScriptIndexStack.empty();
     }
 
-    bool ScriptReporter::AddScreenshotTest(const AZStd::string& path)
+    ScriptReporter::ScreenshotTestInfo::ScreenshotTestInfo(const AZStd::string& screenshotFilePath, const AZStd::string& envPath)
+        : m_screenshotFilePath(Utils::ResolvePath(screenshotFilePath))
+    {
+        m_officialBaselineScreenshotFilePath = ScreenshotPaths::GetOfficialBaseline(m_screenshotFilePath, envPath);
+        m_localBaselineScreenshotFilePath = ScreenshotPaths::GetLocalBaseline(m_screenshotFilePath);
+    }
+
+    bool ScriptReporter::AddScreenshotTest(const AZStd::string& path, const AZStd::string& envPath)
     {
         AZ_Assert(GetCurrentScriptReport(), "There is no active script");
 
-        ScreenshotTestInfo screenshotTestInfo;
-        screenshotTestInfo.m_screenshotFilePath = path;
+        ScreenshotTestInfo screenshotTestInfo(path, envPath);
         GetCurrentScriptReport()->m_screenshotTests.push_back(AZStd::move(screenshotTestInfo));
 
         return true;
@@ -1000,7 +1010,7 @@ namespace AtomSampleViewer
     
     bool ScriptReporter::UpdateLocalBaselineImage(ScreenshotTestInfo& screenshotTest, bool showResultDialog)
     {
-        const AZStd::string destinationFile = ScreenshotPaths::GetLocalBaseline(screenshotTest.m_screenshotFilePath);
+        const AZStd::string destinationFile = screenshotTest.m_localBaselineScreenshotFilePath;
 
         AZStd::string destinationFolder = destinationFile;
         AzFramework::StringFunc::Path::StripFullName(destinationFolder);
@@ -1055,7 +1065,7 @@ namespace AtomSampleViewer
         }
 
         // Get official cache baseline file
-        const AZStd::string cacheFilePath = ScreenshotPaths::GetOfficialBaseline(screenshotTest.m_screenshotFilePath);
+        const AZStd::string cacheFilePath = screenshotTest.m_officialBaselineScreenshotFilePath;
 
         // Divide cache file path into components to we can access the file name and the parent folder
         AZStd::fixed_vector<AZ::IO::FixedMaxPathString, 16> reversePathComponents;
@@ -1160,7 +1170,6 @@ namespace AtomSampleViewer
 
         screenshotTestInfo.m_toleranceLevel = *toleranceLevel;
 
-        screenshotTestInfo.m_officialBaselineScreenshotFilePath = ScreenshotPaths::GetOfficialBaseline(screenshotTestInfo.m_screenshotFilePath);
         if (screenshotTestInfo.m_officialBaselineScreenshotFilePath.empty())
         {
             ReportScriptError(AZStd::string::format("Screenshot check failed. Could not determine expected screenshot path for '%s'", screenshotTestInfo.m_screenshotFilePath.c_str()));
@@ -1199,7 +1208,6 @@ namespace AtomSampleViewer
             }
         }
 
-        screenshotTestInfo.m_localBaselineScreenshotFilePath = ScreenshotPaths::GetLocalBaseline(screenshotTestInfo.m_screenshotFilePath);
         if (screenshotTestInfo.m_localBaselineScreenshotFilePath.empty())
         {
             ReportScriptWarning(AZStd::string::format("Screenshot check failed. Could not determine local baseline screenshot path for '%s'", screenshotTestInfo.m_screenshotFilePath.c_str()));

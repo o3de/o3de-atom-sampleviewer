@@ -9,6 +9,7 @@
 --
 ----------------------------------------------------------------------------------------------------
 
+RunScript("scripts/TestEnvironment.luac")
 
 g_shaderballModel = 'materialeditor/viewportmodels/shaderball.azmodel'
 g_cubeModel = 'materialeditor/viewportmodels/cube.azmodel'
@@ -92,7 +93,7 @@ SetImguiValue('Show Ground Plane', false)
 -- StandardPBR Materials...
 
 g_testMaterialsFolder = 'testdata/materials/standardpbrtestcases/'
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/StandardPBR/')
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/StandardPBR/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 GenerateMaterialScreenshot('Level C', '001_DefaultWhite')
@@ -161,7 +162,7 @@ GenerateMaterialScreenshot('Level H', '105_DetailMaps_BlendMaskUsingDetailUVs', 
 -- StandardMultilayerPBR Materials...
 
 g_testMaterialsFolder = 'testdata/materials/standardmultilayerpbrtestcases/'
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/StandardMultilayerPBR/')
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/StandardMultilayerPBR/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 GenerateMaterialScreenshot('Level I', '001_ManyFeatures', {model=g_cubeModel, cameraHeading=-125.0, cameraPitch=-16.0, cameraZ=0.12})
@@ -185,7 +186,7 @@ GenerateMaterialScreenshot('Level I', '005_UseDisplacement_With_BlendMaskTexture
 -- Skin Materials...
 
 g_testMaterialsFolder = 'testdata/materials/skintestcases/'
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/Skin/')
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/Skin/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 -- We should eventually replace this with realistic skin test cases, these are just placeholders for regression testing
@@ -196,7 +197,7 @@ GenerateMaterialScreenshot('Level G', '002_wrinkle_regression_test', {model=g_mo
 -- MinimalPBR Materials...
 
 g_testMaterialsFolder = 'materials/minimalpbr/'
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/MinimalPBR/')
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/MinimalPBR/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 GenerateMaterialScreenshot('Level B', 'MinimalPbr_Default')
@@ -208,7 +209,7 @@ GenerateMaterialScreenshot('Level D', 'MinimalPbr_RedDielectric')
 -- This test is here only temporarily for regression testing until StandardMultilayerPBR is refactored to use reused nested property groups.
 
 g_testMaterialsFolder = 'materials/types/'
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/MinimalPBR/')
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/MinimalPBR/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 GenerateMaterialScreenshot('Level G', 'MinimalMultilayerExample')
@@ -216,7 +217,7 @@ GenerateMaterialScreenshot('Level G', 'MinimalMultilayerExample')
 ----------------------------------------------------------------------
 -- AutoBrick Materials...
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/AutoBrick/')
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/AutoBrick/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 g_testMaterialsFolder = 'testdata/materials/autobrick/'

@@ -9,6 +9,8 @@
 --
 ----------------------------------------------------------------------------------------------------
 
+RunScript("scripts/TestEnvironment.luac")
+
 function TakeScreenShot4xCylinder()
 
     SetImguiValue('Mode/MSAA 4x', true)
@@ -18,7 +20,7 @@ function TakeScreenShot4xCylinder()
     CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_msaa4x_cylinder.png')
 end
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/MSAA_RPI/')
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/MSAA_RPI/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 OpenSample('RPI/MSAA')

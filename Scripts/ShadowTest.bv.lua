@@ -9,6 +9,8 @@
 --
 ----------------------------------------------------------------------------------------------------
 
+RunScript("scripts/TestEnvironment.luac")
+
 function EnablePositionalLights()
     SetImguiValue('Red', true)
     SetImguiValue('Intensity##Positional', 500.0)
@@ -98,7 +100,7 @@ function TestDirectionalLight()
     -- Directional Light ESM+PCF
     SetImguiValue('Filter Method##Directional', 'ESM+PCF')
     IdleFrames(1)
-    CaptureScreenshot(g_screenshotOutputFolder .. '/directional_esm_pcf.png')    
+    CaptureScreenshot(g_screenshotOutputFolder .. '/directional_esm_pcf.png')
 end
 
 function TestDiskLights()
@@ -161,7 +163,7 @@ function TestPointLights()
     CaptureScreenshot(g_screenshotOutputFolder .. '/point_lights.png')
 end
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/Shadow/')
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/Shadow/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 OpenSample('Features/Shadow')
