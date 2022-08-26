@@ -722,7 +722,7 @@ namespace AtomSampleViewer
 
         if (ImGui::Button("View Diff"))
         {
-            if (!Utils::RunDiffTool(screenshotTest.m_officialBaselineScreenshotFilePath, screenshotTest.m_screenshotFilePathWithSuffix))
+            if (!Utils::RunDiffTool(screenshotTest.m_officialBaselineScreenshotFilePath, screenshotTest.m_screenshotFilePath))
             {
                 ImGui::OpenPopup("Cannot open diff tool");
             }
@@ -853,7 +853,7 @@ namespace AtomSampleViewer
             const ScriptReporter::ScriptReport& scriptReport = scriptReports[reportIndex.first];
             const ScriptReporter::ScreenshotTestInfo& screenshotTest = scriptReport.m_screenshotTests[reportIndex.second];
             ImGui::Text(
-                "\t%s %s '%s' %f", scriptReport.m_scriptAssetPath.c_str(), screenshotTest.m_screenshotFilePathWithSuffix.c_str(),
+                "\t%s %s '%s' %f", scriptReport.m_scriptAssetPath.c_str(), screenshotTest.m_screenshotFilePath.c_str(),
                 screenshotTest.m_toleranceLevel.m_name.c_str(), screenshotTest.m_officialComparisonResult.m_finalDiffScore);
         }
         // Present the information by printing highest differences first. See enum class ImageDifferenceLevel
@@ -867,7 +867,7 @@ namespace AtomSampleViewer
                     const ScriptReporter::ScriptReport& scriptReport = scriptReports[reportIndex.first];
                     const ScriptReporter::ScreenshotTestInfo& screenshotTest = scriptReport.m_screenshotTests[reportIndex.second];
                     ImGui::Text(
-                        "\t%s %s '%s' %f", scriptReport.m_scriptAssetPath.c_str(), screenshotTest.m_screenshotFilePathWithSuffix.c_str(),
+                        "\t%s %s '%s' %f", scriptReport.m_scriptAssetPath.c_str(), screenshotTest.m_screenshotFilePath.c_str(),
                         screenshotTest.m_toleranceLevel.m_name.c_str(), screenshotTest.m_officialComparisonResult.m_finalDiffScore);
                 }
             }
@@ -1089,6 +1089,7 @@ namespace AtomSampleViewer
         behaviorContext->Method("ShowTool", &Script_ShowTool);
 
         // Screenshots...
+        behaviorContext->Method("SetTestEnvPath", &Script_SetTestEnvPath);
         behaviorContext->Method("SelectImageComparisonToleranceLevel", &Script_SelectImageComparisonToleranceLevel);
         behaviorContext->Method("CaptureScreenshot", &Script_CaptureScreenshot);
         behaviorContext->Method("CaptureScreenshotWithImGui", &Script_CaptureScreenshotWithImGui);
@@ -1405,7 +1406,7 @@ namespace AtomSampleViewer
         s_instance->m_scriptOperations.push(AZStd::move(operation));
     }
 
-    bool ScriptManager::PrepareForScreenCapture(const AZStd::string& path, const AZStd::string& suffix)
+    bool ScriptManager::PrepareForScreenCapture(const AZStd::string& path, const AZStd::string& envPath)
     {
         if (!Utils::IsFileUnderFolder(Utils::ResolvePath(path), ScreenshotPaths::GetScreenshotsFolder(true)))
         {
@@ -1424,13 +1425,18 @@ namespace AtomSampleViewer
             return false;
         }
 
-        s_instance->m_scriptReporter.AddScreenshotTest(path, suffix);
+        s_instance->m_scriptReporter.AddScreenshotTest(path, envPath);
 
         s_instance->m_isCapturePending = true;
         s_instance->AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect();
         s_instance->PauseScript();
 
         return true;
+    }
+
+    void ScriptManager::Script_SetTestEnvPath(const AZStd::string& envPath)
+    {
+        s_instance->m_envPath = envPath;
     }
 
     void ScriptManager::Script_SelectImageComparisonToleranceLevel(const AZStd::string& presetName)
@@ -1443,34 +1449,19 @@ namespace AtomSampleViewer
         s_instance->m_scriptOperations.push(AZStd::move(operation));
     }
 
-    AZStd::string ConstructFilePathWithSuffix(const AZStd::string& filePath, const AZStd::string& suffix)
-    {
-        size_t extensionPos = filePath.find_last_of('.');
-        if (extensionPos == AZStd::string::npos)
-        {
-            AZ_Error("Automation", false, "File path of the screenshot is not valid. File path: %s.", filePath.c_str());
-            return filePath;
-        }
-
-        AZStd::string filePathWithSuffix = filePath.substr(0, extensionPos) + suffix + filePath.substr(extensionPos, filePath.length() - extensionPos);
-        filePathWithSuffix = Utils::ResolvePath(filePathWithSuffix);
-        return filePathWithSuffix;
-    }
-
-    void ScriptManager::Script_CaptureScreenshot(const AZStd::string& filePath, const AZStd::string& suffix)
+    void ScriptManager::Script_CaptureScreenshot(const AZStd::string& filePath)
     {
         Script_SetShowImGui(false);
 
-        AZStd::string filePathWithSuffix = ConstructFilePathWithSuffix(filePath, suffix);
-
-        auto operation = [filePath, filePathWithSuffix]()
+        const AZStd::string& envPath = s_instance->m_envPath;
+        auto operation = [filePath, envPath]()
         {
             // Note this will pause the script until the capture is complete
-            if (PrepareForScreenCapture(filePath, filePathWithSuffix))
+            if (PrepareForScreenCapture(filePath, envPath))
             {
                 AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
                 uint32_t frameCaptureId = AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId;
-                AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, filePathWithSuffix);
+                AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, filePath);
                 if (frameCaptureId != AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId)
                 {
                     s_instance->m_frameCaptureId = frameCaptureId;
@@ -1492,20 +1483,19 @@ namespace AtomSampleViewer
 
     }
 
-    void ScriptManager::Script_CaptureScreenshotWithImGui(const AZStd::string& filePath, const AZStd::string& suffix)
+    void ScriptManager::Script_CaptureScreenshotWithImGui(const AZStd::string& filePath)
     {
         Script_SetShowImGui(true);
 
-        AZStd::string filePathWithSuffix = ConstructFilePathWithSuffix(filePath, suffix);
-
-        auto operation = [filePath, filePathWithSuffix]()
+        const AZStd::string& envPath = s_instance->m_envPath;
+        auto operation = [filePath, envPath]()
         {
             // Note this will pause the script until the capture is complete
-            if (PrepareForScreenCapture(filePath, filePathWithSuffix))
+            if (PrepareForScreenCapture(filePath, envPath))
             {
                 AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
                 uint32_t frameCaptureId = AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId;
-                AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, filePathWithSuffix);
+                AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, filePath);
                 if (frameCaptureId != AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId)
                 {
                     s_instance->m_frameCaptureId = frameCaptureId;
@@ -1526,24 +1516,17 @@ namespace AtomSampleViewer
             });
     }
 
-    AZStd::string ScriptManager::Script_GetRenderApiName()
+    void ScriptManager::Script_CaptureScreenshotWithPreview(const AZStd::string& filePath)
     {
-        AZ::Name renderApi = AZ::RPI::RPISystemInterface::Get()->GetRenderApiName();
-        return AZStd::string(renderApi.GetCStr());
-    }
-
-    void ScriptManager::Script_CaptureScreenshotWithPreview(const AZStd::string& filePath, const AZStd::string& suffix)
-    {
-        AZStd::string filePathWithSuffix = ConstructFilePathWithSuffix(filePath, suffix);
-
-        auto operation = [filePath, filePathWithSuffix]()
+        const AZStd::string& envPath = s_instance->m_envPath;
+        auto operation = [filePath, envPath]()
         {
             // Note this will pause the script until the capture is complete
-            if (PrepareForScreenCapture(filePath, filePathWithSuffix))
+            if (PrepareForScreenCapture(filePath, envPath))
             {
                 AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
                 uint32_t frameCaptureId = AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId;
-                AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshotWithPreview, filePathWithSuffix);
+                AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshotWithPreview, filePath);
                 if (frameCaptureId != AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId)
                 {
                     s_instance->m_frameCaptureId = frameCaptureId;
@@ -1560,9 +1543,9 @@ namespace AtomSampleViewer
 
     void ScriptManager::Script_CapturePassAttachment(AZ::ScriptDataContext& dc)
     {
-        if (dc.GetNumArguments() != 4 && dc.GetNumArguments() != 5)
+        if (dc.GetNumArguments() != 3 && dc.GetNumArguments() != 4)
         {
-            ReportScriptError("CapturePassAttachment needs four or five arguments");
+            ReportScriptError("CapturePassAttachment needs three or four arguments");
             return;
         }
 
@@ -1572,13 +1555,13 @@ namespace AtomSampleViewer
             return;
         }
 
-        if (!dc.IsString(1) || !dc.IsString(2) || !dc.IsString(3))
+        if (!dc.IsString(1) || !dc.IsString(2))
         {
-            ReportScriptError("CapturePassAttachment's second, third and fourth argument must be strings");
+            ReportScriptError("CapturePassAttachment's second and third argument must be strings");
             return;
         }
 
-        if (dc.GetNumArguments() == 5 && !dc.IsString(4))
+        if (dc.GetNumArguments() == 4 && !dc.IsString(3))
         {
             ReportScriptError("CapturePassAttachment's forth argument must be a string 'Input' or 'Output'");
             return;
@@ -1589,17 +1572,12 @@ namespace AtomSampleViewer
         AZStd::vector<AZStd::string> passHierarchy;
         AZStd::string slot;
         AZStd::string outputFilePath;
-        AZStd::string filePathSuffix;
 
         // read slot name and output file path
         dc.ReadArg(1, stringValue);
         slot = AZStd::string(stringValue);
         dc.ReadArg(2, stringValue);
         outputFilePath = AZStd::string(stringValue);
-        dc.ReadArg(3, stringValue);
-        filePathSuffix = AZStd::string(stringValue);
-
-        AZStd::string filePathWithSuffix = ConstructFilePathWithSuffix(outputFilePath, filePathSuffix);
 
         AZ::RPI::PassAttachmentReadbackOption readbackOption = AZ::RPI::PassAttachmentReadbackOption::Output;
         if (dc.GetNumArguments() == 4)
@@ -1638,14 +1616,15 @@ namespace AtomSampleViewer
             }
         }
 
-        auto operation = [passHierarchy, slot, outputFilePath, filePathWithSuffix, readbackOption]()
+        const AZStd::string& envPath = s_instance->m_envPath;
+        auto operation = [passHierarchy, slot, outputFilePath, envPath, readbackOption]()
         {
             // Note this will pause the script until the capture is complete
-            if (PrepareForScreenCapture(outputFilePath, filePathWithSuffix))
+            if (PrepareForScreenCapture(outputFilePath, envPath))
             {
                 AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
                 uint32_t frameCaptureId = AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId;
-                AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachment, passHierarchy, slot, filePathWithSuffix, readbackOption);
+                AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachment, passHierarchy, slot, outputFilePath, readbackOption);
                 if (frameCaptureId != AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId)
                 {
                     s_instance->m_frameCaptureId = frameCaptureId;

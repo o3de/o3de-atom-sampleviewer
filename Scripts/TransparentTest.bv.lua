@@ -11,7 +11,7 @@
 
 RunScript("scripts/TestEnvironment.luac")
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/TransparentTest/')
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/TransparentTest/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 OpenSample('Features/Transparency')
@@ -22,10 +22,10 @@ ArcBallCameraController_SetDistance(2.0)
 ArcBallCameraController_SetHeading(DegToRad(45))
 ArcBallCameraController_SetPitch(DegToRad(-35))
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_front.png', g_envSuffix)
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_front.png')
 
 ArcBallCameraController_SetHeading(DegToRad(135))
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_back.png', g_envSuffix)
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_back.png')
 
 OpenSample(nil)

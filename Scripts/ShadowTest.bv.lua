@@ -47,7 +47,7 @@ function TestDirectionalLight()
     SetImguiValue('Size##Directional', '2048')
     SetImguiValue('4', true) -- cascade count
     IdleFrames(1)
-    CaptureScreenshot(g_screenshotOutputFolder .. '/directional_initial.png', g_envSuffix)
+    CaptureScreenshot(g_screenshotOutputFolder .. '/directional_initial.png')
 
     -- Directional Light Manual Cascade Split
     SetImguiValue('Debug Coloring', true)
@@ -59,25 +59,25 @@ function TestDirectionalLight()
     IdleFrames(1)
     SetImguiValue('FarDepth 2', 6.0)
     IdleFrames(1)
-    CaptureScreenshot(g_screenshotOutputFolder .. '/directional_manual_cascade.png', g_envSuffix)
+    CaptureScreenshot(g_screenshotOutputFolder .. '/directional_manual_cascade.png')
 
     -- Directional Light Automatic Cascade Split
     SetImguiValue('Automatic Cascade Split', true)
     IdleFrames(1)
     SetImguiValue('Ratio', 0.25)
     IdleFrames(1)
-    CaptureScreenshot(g_screenshotOutputFolder .. '/directional_auto_cascade.png', g_envSuffix)
+    CaptureScreenshot(g_screenshotOutputFolder .. '/directional_auto_cascade.png')
 
     -- Directional Light Cascade Position Correction
     SetImguiValue('Cascade Position Correction', true)
     IdleFrames(1)
-    CaptureScreenshot(g_screenshotOutputFolder .. '/directional_cascade_correction.png', g_envSuffix)
+    CaptureScreenshot(g_screenshotOutputFolder .. '/directional_cascade_correction.png')
     SetImguiValue('Cascade Position Correction', false)
 
     -- Directional Light Cascade Position Correction
     SetImguiValue('Use Fullscreen Blur', true)
     IdleFrames(1)
-    CaptureScreenshot(g_screenshotOutputFolder .. '/directional_fullscreen_blur.png', g_envSuffix)
+    CaptureScreenshot(g_screenshotOutputFolder .. '/directional_fullscreen_blur.png')
     SetImguiValue('Use Fullscreen Blur', false)
 
     -- Directional Light PCF low
@@ -85,22 +85,22 @@ function TestDirectionalLight()
     SetImguiValue('Filter Method##Directional', 'PCF')
     SetImguiValue('Filtering # ##Directional', 4)
     IdleFrames(1)
-    CaptureScreenshot(g_screenshotOutputFolder .. '/directional_pcf_low.png', g_envSuffix)
+    CaptureScreenshot(g_screenshotOutputFolder .. '/directional_pcf_low.png')
 
     -- Directional Light PCF high
     SetImguiValue('Filtering # ##Directional', 64)
     IdleFrames(1)
-    CaptureScreenshot(g_screenshotOutputFolder .. '/directional_pcf_high.png', g_envSuffix)
+    CaptureScreenshot(g_screenshotOutputFolder .. '/directional_pcf_high.png')
 
     -- Directional Light ESM
     SetImguiValue('Filter Method##Directional', 'ESM')
     IdleFrames(1)
-    CaptureScreenshot(g_screenshotOutputFolder .. '/directional_esm.png', g_envSuffix)
+    CaptureScreenshot(g_screenshotOutputFolder .. '/directional_esm.png')
 
     -- Directional Light ESM+PCF
     SetImguiValue('Filter Method##Directional', 'ESM+PCF')
     IdleFrames(1)
-    CaptureScreenshot(g_screenshotOutputFolder .. '/directional_esm_pcf.png', g_envSuffix)
+    CaptureScreenshot(g_screenshotOutputFolder .. '/directional_esm_pcf.png')
 end
 
 function TestDiskLights()
@@ -111,13 +111,13 @@ function TestDiskLights()
     -- Disabling directional light
     SetImguiValue('Intensity##Directional', 0.0)
     EnablePositionalLights()
-    CaptureScreenshot(g_screenshotOutputFolder .. '/spot_initial.png', g_envSuffix)
+    CaptureScreenshot(g_screenshotOutputFolder .. '/spot_initial.png')
 
     -- Positional Light Disabling Shadow for Red
     SetImguiValue('Red', true)
     SetImguiValue('Enable Shadow', false)
     IdleFrames(1)
-    CaptureScreenshot(g_screenshotOutputFolder .. '/spot_no_red_shadow.png', g_envSuffix)
+    CaptureScreenshot(g_screenshotOutputFolder .. '/spot_no_red_shadow.png')
 
     -- Positional Light Various Shadowmap Sizes
     SetImguiValue('Red', true)
@@ -131,7 +131,7 @@ function TestDiskLights()
     SetImguiValue('Blue', true)
     SetImguiValue('Size##Positional', '512')
     IdleFrames(1)
-    CaptureScreenshot(g_screenshotOutputFolder .. '/spot_shadowmap_size.png', g_envSuffix)
+    CaptureScreenshot(g_screenshotOutputFolder .. '/spot_shadowmap_size.png')
 
     -- Positional Light Various Filter Methods
     SetImguiValue('Red', true)
@@ -148,7 +148,7 @@ function TestDiskLights()
     IdleFrames(1)
     SetImguiValue('Filtering # ##Positional', 64)
     IdleFrames(1)
-    CaptureScreenshot(g_screenshotOutputFolder .. '/spot_filter_method.png', g_envSuffix)
+    CaptureScreenshot(g_screenshotOutputFolder .. '/spot_filter_method.png')
 end
 
 function TestPointLights()
@@ -160,10 +160,10 @@ function TestPointLights()
 
     EnablePositionalLights()
 
-    CaptureScreenshot(g_screenshotOutputFolder .. '/point_lights.png', g_envSuffix)
+    CaptureScreenshot(g_screenshotOutputFolder .. '/point_lights.png')
 end
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/Shadow/')
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/Shadow/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 OpenSample('Features/Shadow')
@@ -177,7 +177,7 @@ SetImguiValue('Auto Rotation##Positional', false)
 SetImguiValue('Direction##Directional', 0.0)
 SetImguiValue('Base Direction##Positional', 0.0)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/initial.png', g_envSuffix)
+CaptureScreenshot(g_screenshotOutputFolder .. '/initial.png')
 
 TestDirectionalLight()
 TestPointLights()

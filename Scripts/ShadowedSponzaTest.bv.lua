@@ -11,7 +11,7 @@
 
 RunScript("scripts/TestEnvironment.luac")
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/ShadowedSponza/')
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/ShadowedSponza/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 
@@ -57,7 +57,7 @@ SelectImageComparisonToleranceLevel("Level H")
 
 -- Initial
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/initial.png', g_envSuffix)
+CaptureScreenshot(g_screenshotOutputFolder .. '/initial.png')
 
 SetNumSpotlightsActive(0)
 SetDirectionalLightOrientation(-45, 95)
@@ -65,12 +65,12 @@ SetDirectionalLightOrientation(-45, 95)
 -- Directional Light None-filtering 
 SetDirectionalNoneFiltering()
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/directional_nofilter.png', g_envSuffix)
+CaptureScreenshot(g_screenshotOutputFolder .. '/directional_nofilter.png')
 
 -- Directional Light Filtering 
 SetDirectionalFiltering()
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/directional_filter.png', g_envSuffix)
+CaptureScreenshot(g_screenshotOutputFolder .. '/directional_filter.png')
 
 SetNumSpotlightsActive(17)
 
@@ -78,11 +78,11 @@ SetNumSpotlightsActive(17)
 SetSpotNoneFiltering()
 SetImguiValue('Intensity##directional', 0.0)
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/spot_nofilter.png', g_envSuffix)
+CaptureScreenshot(g_screenshotOutputFolder .. '/spot_nofilter.png')
 
 -- Spot Light Filtering 
 SetSpotFiltering()
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/spot_filter.png', g_envSuffix)
+CaptureScreenshot(g_screenshotOutputFolder .. '/spot_filter.png')
 
 OpenSample(nil)

@@ -11,7 +11,7 @@
 
 RunScript("scripts/TestEnvironment.luac")
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/Readback')
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/Readback')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 OpenSample('RPI/Readback')
@@ -26,7 +26,7 @@ SetImguiValue('Height', 512)
 IdleFrames(1)
 SetImguiValue('Readback', true)
 IdleFrames(5)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_1.png', g_envSuffix)
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_1.png')
 IdleFrames(1)
 
 -- Then at 1024x1024
@@ -36,7 +36,7 @@ SetImguiValue('Height', 1024)
 IdleFrames(1)
 SetImguiValue('Readback', true)
 IdleFrames(5)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_2.png', g_envSuffix)
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_2.png')
 IdleFrames(1)
 
 

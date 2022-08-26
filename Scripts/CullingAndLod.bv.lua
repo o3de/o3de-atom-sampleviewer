@@ -11,7 +11,7 @@
 
 RunScript("scripts/TestEnvironment.luac")
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/CullingAndLod/')
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/CullingAndLod/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 OpenSample('RPI/CullingAndLod')
@@ -21,7 +21,7 @@ SelectImageComparisonToleranceLevel("Level G")
 
 SetImguiValue("Begin Verification", true)
 IdleFrames(5)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_1.png', g_envSuffix)
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_1.png')
 IdleFrames(1)
 SetImguiValue("End Verification", true)
 IdleFrames(1) -- make sure all outstanding imgui comamnds are processed before closing sample.

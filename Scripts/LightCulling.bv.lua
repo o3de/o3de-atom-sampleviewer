@@ -33,7 +33,7 @@ function TakeScreenshotPointLights()
 
     IdleFrames(1) 
 
-    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_pointlights.png', g_envSuffix)
+    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_pointlights.png')
 end
 
 function TakeScreenshotDiskLights()
@@ -44,7 +44,7 @@ function TakeScreenshotDiskLights()
     SetImguiValue('Disk Lights/Disk light count', 200)
     
     IdleFrames(1) 
-    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_disklights.png', g_envSuffix)
+    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_disklights.png')
 end
 
 function TakeScreenshotCapsuleLights()
@@ -55,7 +55,7 @@ function TakeScreenshotCapsuleLights()
     SetImguiValue('Capsule Lights/Capsule light count', 200)
     
     IdleFrames(1) 
-    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_capsulelights.png', g_envSuffix)
+    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_capsulelights.png')
 end
 
 function TakeScreenshotQuadLights()
@@ -69,7 +69,7 @@ function TakeScreenshotQuadLights()
     SetImguiValue('Quad Lights/Quad light height', 5)
     
     IdleFrames(1) 
-    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_quadlights.png', g_envSuffix)
+    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_quadlights.png')
 end
 
 
@@ -81,7 +81,7 @@ function TakeScreenshotDecals()
     SetImguiValue('Decals/Decal count', 200)
     
     IdleFrames(1) 
-    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_decals.png', g_envSuffix)
+    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_decals.png')
 end
 
 function TakeScreenShotLookingStraightDown()
@@ -96,7 +96,7 @@ function TakeScreenShotLookingStraightDown()
     SetImguiValue('Point Lights/Point Intensity', 200)
 
     IdleFrames(1) 
-    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_lookingdown.png', g_envSuffix)
+    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_lookingdown.png')
 end
 
 function EnableOnlyTestHeatmap()
@@ -105,7 +105,7 @@ function EnableOnlyTestHeatmap()
     SetImguiValue('Heatmap/Opacity', 1.0)
 end
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/LightCulling/')
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/LightCulling/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 SelectImageComparisonToleranceLevel("Level E")
 

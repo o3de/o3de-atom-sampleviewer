@@ -12,10 +12,10 @@
 RunScript("scripts/TestEnvironment.luac")
 
 function TakeScreenshots()
-    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_decals.png', g_envSuffix)
+    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_decals.png')
 end
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/Decals/')
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/Decals/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 OpenSample('RPI/Decals')

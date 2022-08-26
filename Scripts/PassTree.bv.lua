@@ -11,7 +11,7 @@
 
 RunScript("scripts/TestEnvironment.luac")
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/PassTree/')
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/PassTree/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 -- Select an attachment; take a screenshot with preview output (used for screenshot comparison); capture and save the attachment.
@@ -19,7 +19,7 @@ Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 function TestAttachment(attachmentName, screenshotFileName)
     SetImguiValue(attachmentName, true)
     IdleFrames(2)
-    CaptureScreenshotWithPreview(g_screenshotOutputFolder .. screenshotFileName, g_envSuffix)
+    CaptureScreenshotWithPreview(g_screenshotOutputFolder .. screenshotFileName)
     IdleFrames(1)
     SetImguiValue('Save Attachment', true)
     IdleFrames(3)

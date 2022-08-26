@@ -11,7 +11,7 @@
 
 RunScript("scripts/TestEnvironment.luac")
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/ParallaxDepthArtifacts/')
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/ParallaxDepthArtifacts/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 OpenSample('Features/Parallax')
@@ -37,31 +37,31 @@ ArcBallCameraController_SetDistance(3.000000)
 ArcBallCameraController_SetHeading(DegToRad(-38.356312))
 ArcBallCameraController_SetPitch(DegToRad(-2.705635))
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_1.png', g_envSuffix)
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_1.png')
 
 ArcBallCameraController_SetHeading(DegToRad(-66.861877))
 ArcBallCameraController_SetPitch(DegToRad(-4.933800))
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_2.png', g_envSuffix)
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_2.png')
 
 ArcBallCameraController_SetHeading(DegToRad(30.230936))
 ArcBallCameraController_SetPitch(DegToRad(-3.819724))
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_3.png', g_envSuffix)
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_3.png')
 
 ArcBallCameraController_SetHeading(DegToRad(-140.709763))
 ArcBallCameraController_SetPitch(DegToRad(-3.501410))
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_4.png', g_envSuffix)
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_4.png')
 
 ArcBallCameraController_SetHeading(DegToRad(135.264740))
 ArcBallCameraController_SetPitch(DegToRad(-2.387333))
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_5.png', g_envSuffix)
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_5.png')
 
 ArcBallCameraController_SetHeading(DegToRad(20.355005))
 ArcBallCameraController_SetPitch(DegToRad(-4.456343))
 IdleFrames(1)
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_6.png', g_envSuffix)
+CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_6.png')
 
 OpenSample(nil)

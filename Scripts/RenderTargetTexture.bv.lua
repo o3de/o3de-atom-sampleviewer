@@ -11,7 +11,7 @@
 
 RunScript("scripts/TestEnvironment.luac")
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/RenderTargetTexture/')
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/RenderTargetTexture/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 OpenSample('RPI/RenderTargetTexture')
@@ -30,11 +30,11 @@ SetShowImGui(false)
 SetImguiValue('Show Preview', true)
 SetImguiValue('Next Frame', true)
 IdleFrames(1) 
-CaptureScreenshotWithPreview(g_screenshotOutputFolder .. '/screenshot_1.png', g_envSuffix)
+CaptureScreenshotWithPreview(g_screenshotOutputFolder .. '/screenshot_1.png')
 
 SetImguiValue('Next Frame', true)
 IdleFrames(2) 
-CaptureScreenshotWithPreview(g_screenshotOutputFolder .. '/screenshot_2.png', g_envSuffix)
+CaptureScreenshotWithPreview(g_screenshotOutputFolder .. '/screenshot_2.png')
 
 SetShowImGui(false)
 

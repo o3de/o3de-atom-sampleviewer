@@ -38,7 +38,7 @@ namespace AtomSampleViewer
         AZStd::string GetLocalBaseline(const AZStd::string& forScreenshotFile);
 
         //! Returns the path to the official baseline image that corresponds to @forScreenshotFile
-        AZStd::string GetOfficialBaseline(const AZStd::string& forScreenshotFile);
+        AZStd::string GetOfficialBaseline(const AZStd::string& forScreenshotFile, const AZStd::string& envPath);
     }
 
     //! Collects data about each script run by the ScriptManager.
@@ -75,7 +75,7 @@ namespace AtomSampleViewer
         bool HasActiveScript() const;
 
         //! Indicates that a new screenshot is about to be captured.
-        bool AddScreenshotTest(const AZStd::string& filePathWithoutSuffix, const AZStd::string& filePathWithSuffix);
+        bool AddScreenshotTest(const AZStd::string& path, const AZStd::string& envPath);
 
         //! Check the latest screenshot using default thresholds.
         void CheckLatestScreenshot(const ImageComparisonToleranceLevel* comparisonPreset);
@@ -133,13 +133,14 @@ namespace AtomSampleViewer
         //! Records all the information about a screenshot comparison test.
         struct ScreenshotTestInfo
         {
-            AZStd::string m_screenshotFilePathWithSuffix;       //!< The file path is appended with additional info, such as GPU info, render API
-            AZStd::string m_screenshotFilePathWithoutSuffix;    //!< The file path without additional info
+            AZStd::string m_screenshotFilePath;
             AZStd::string m_officialBaselineScreenshotFilePath; //!< The path to the official baseline image that is checked into source control
             AZStd::string m_localBaselineScreenshotFilePath;    //!< The path to a local baseline image that was established by the user
             ImageComparisonToleranceLevel m_toleranceLevel;     //!< Tolerance for checking against the official baseline image
             ImageComparisonResult m_officialComparisonResult;   //!< Result of comparing against the official baseline image, for reporting test failure
             ImageComparisonResult m_localComparisonResult;      //!< Result of comparing against a local baseline, for reporting warnings
+
+            ScreenshotTestInfo(const AZStd::string& screenshotFilePath, const AZStd::string& envPath);
         };
 
         //! Records all the information about a single test script.

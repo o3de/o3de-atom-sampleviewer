@@ -11,7 +11,7 @@
 
 RunScript("scripts/TestEnvironment.luac")
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/Checkerboard/')
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/Checkerboard/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 OpenSample('Features/Checkerboard')
@@ -21,6 +21,6 @@ SelectImageComparisonToleranceLevel("Level F")
 
 IdleFrames(10) 
 
-CaptureScreenshot(g_screenshotOutputFolder .. 'frame1.png', g_envSuffix)
+CaptureScreenshot(g_screenshotOutputFolder .. 'frame1.png')
 
 OpenSample(nil)

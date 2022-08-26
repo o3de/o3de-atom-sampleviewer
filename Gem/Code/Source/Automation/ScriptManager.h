@@ -124,6 +124,8 @@ namespace AtomSampleViewer
         static void Script_ShowTool(const AZStd::string& toolName, bool enable);
 
         // Screenshots...
+        // Store the test environment path of the screenshots. It will be used to figure out the baseline path.
+        static void Script_SetTestEnvPath(const AZStd::string& envPath);
 
         // Call this function before capturing screenshots to indicate which comparison tolerance level should be used.
         // The list of available tolerance levels can be found in "AtomSampleViewer/Config/ImageComparisonToleranceLevels.azasset".
@@ -136,10 +138,8 @@ namespace AtomSampleViewer
         // but with "Screenshots" replaced with "ExpectedScreenshots". For example, the expected file for
         // "Scripts/Screenshots/StandardPbr/test.ppm" should be at "Scripts/ExpectedScreenshots/StandardPbr/test.ppm".
 
-        static void Script_CaptureScreenshot(const AZStd::string& filePath, const AZStd::string& suffix);
-        static void Script_CaptureScreenshotWithImGui(const AZStd::string& filePath, const AZStd::string& suffix);
-
-        static AZStd::string Script_GetRenderApiName();
+        static void Script_CaptureScreenshot(const AZStd::string& filePath);
+        static void Script_CaptureScreenshotWithImGui(const AZStd::string& filePath);
 
         // Capture a pass attachment and save it to a file (*.ppm or *.dds for image, *.buffer for buffer)
         // The order of input parameters in ScriptDataContext would be
@@ -150,7 +150,7 @@ namespace AtomSampleViewer
         static void Script_CapturePassAttachment(AZ::ScriptDataContext& dc);
 
         // Capture a screentshot with pass image attachment preview when the preview enabled.
-        static void Script_CaptureScreenshotWithPreview(const AZStd::string& filePath, const AZStd::string& suffix);
+        static void Script_CaptureScreenshotWithPreview(const AZStd::string& filePath);
 
         // Profiling statistics data...
         static void Script_CapturePassTimestamp(AZ::ScriptDataContext& dc);
@@ -235,7 +235,7 @@ namespace AtomSampleViewer
         // Validates the ScriptDataContext for ProfilingCapture script requests
         static bool ValidateProfilingCaptureScripContexts(AZ::ScriptDataContext& dc, AZStd::string& outputFilePath);
 
-        static bool PrepareForScreenCapture(const AZStd::string& path, const AZStd::string& suffix);
+        static bool PrepareForScreenCapture(const AZStd::string& path, const AZStd::string& envPath);
 
         // show/hide imgui
         void SetShowImGui(bool show);
@@ -250,6 +250,8 @@ namespace AtomSampleViewer
         };
 
         TestSuiteExecutionConfig m_testSuiteRunConfig;
+
+        AZStd::string m_envPath = "";
 
         static constexpr float DefaultPauseTimeout = 5.0f;
 

@@ -18,7 +18,7 @@ function TakeScreenShotBoxes()
     NoClipCameraController_SetPitch(DegToRad(20))
 
     IdleFrames(1) 
-    CaptureScreenshot(g_screenshotOutputFolder .. '/auxgeom_boxes.png', g_envSuffix)
+    CaptureScreenshot(g_screenshotOutputFolder .. '/auxgeom_boxes.png')
 end
 
 function TakeScreenShotShapes()
@@ -28,10 +28,10 @@ function TakeScreenShotShapes()
     NoClipCameraController_SetPitch(DegToRad(30))
 
     IdleFrames(1) 
-    CaptureScreenshot(g_screenshotOutputFolder .. '/auxgeom_shapes.png', g_envSuffix)
+    CaptureScreenshot(g_screenshotOutputFolder .. '/auxgeom_shapes.png')
 end
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/AuxGeom/')
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/AuxGeom/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 OpenSample('RPI/AuxGeom')
