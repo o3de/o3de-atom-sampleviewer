@@ -1453,11 +1453,10 @@ namespace AtomSampleViewer
     {
         Script_SetShowImGui(false);
 
-        const AZStd::string& envPath = s_instance->m_envPath;
-        auto operation = [filePath, envPath]()
+        auto operation = [filePath]()
         {
             // Note this will pause the script until the capture is complete
-            if (PrepareForScreenCapture(filePath, envPath))
+            if (PrepareForScreenCapture(filePath, s_instance->m_envPath))
             {
                 AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
                 uint32_t frameCaptureId = AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId;
@@ -1487,11 +1486,10 @@ namespace AtomSampleViewer
     {
         Script_SetShowImGui(true);
 
-        const AZStd::string& envPath = s_instance->m_envPath;
-        auto operation = [filePath, envPath]()
+        auto operation = [filePath]()
         {
             // Note this will pause the script until the capture is complete
-            if (PrepareForScreenCapture(filePath, envPath))
+            if (PrepareForScreenCapture(filePath, s_instance->m_envPath))
             {
                 AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
                 uint32_t frameCaptureId = AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId;
@@ -1518,11 +1516,10 @@ namespace AtomSampleViewer
 
     void ScriptManager::Script_CaptureScreenshotWithPreview(const AZStd::string& filePath)
     {
-        const AZStd::string& envPath = s_instance->m_envPath;
-        auto operation = [filePath, envPath]()
+        auto operation = [filePath]()
         {
             // Note this will pause the script until the capture is complete
-            if (PrepareForScreenCapture(filePath, envPath))
+            if (PrepareForScreenCapture(filePath, s_instance->m_envPath))
             {
                 AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
                 uint32_t frameCaptureId = AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId;
@@ -1616,11 +1613,10 @@ namespace AtomSampleViewer
             }
         }
 
-        const AZStd::string& envPath = s_instance->m_envPath;
-        auto operation = [passHierarchy, slot, outputFilePath, envPath, readbackOption]()
+        auto operation = [passHierarchy, slot, outputFilePath, readbackOption]()
         {
             // Note this will pause the script until the capture is complete
-            if (PrepareForScreenCapture(outputFilePath, envPath))
+            if (PrepareForScreenCapture(outputFilePath, s_instance->m_envPath))
             {
                 AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
                 uint32_t frameCaptureId = AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId;
