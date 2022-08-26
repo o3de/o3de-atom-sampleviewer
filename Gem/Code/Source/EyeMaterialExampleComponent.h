@@ -14,6 +14,8 @@
 #include <Utils/ImGuiSidebar.h>
 #include <Atom/Utils/ImGuiMaterialDetails.h>
 
+#include <Atom/Utils/ImGuiMaterialDetails.h>
+
 namespace AtomSampleViewer
 {
     //! Test sample for the Eye material type
