@@ -10,6 +10,7 @@
 
 #include <AzCore/Debug/TraceMessageBus.h>
 #include <AzFramework/StringFunc/StringFunc.h>
+#include <Atom/Feature/Utils/FrameCaptureBus.h>
 #include <Atom/Utils/ImageComparison.h>
 #include <Automation/ImageComparisonConfig.h>
 #include <Utils/ImGuiMessageBox.h>
@@ -19,27 +20,6 @@
 namespace AtomSampleViewer
 {
     struct ImageComparisonToleranceLevel;
-
-    namespace ScreenshotPaths
-    {
-        //! Returns the path to the screenshots capture folder.
-        //! @resolvePath indicates whether to call ResolvePath() which will produce a full path, or keep the shorter asset folder path.
-        AZStd::string GetScreenshotsFolder(bool resolvePath);
-
-        //! Returns the path to the local baseline folder, which stores copies of screenshots previously taken on this machine.
-        //! @resolvePath indicates whether to call ResolvePath() which will produce a full path, or keep the shorter asset folder path.
-        AZStd::string GetLocalBaselineFolder(bool resolvePath);
-
-        //! Returns the path to the official baseline folder, which stores copies of expected screenshots saved in source control.
-        //! @resolvePath indicates whether to call ResolvePath() which will produce a full path, or keep the shorter asset folder path.
-        AZStd::string GetOfficialBaselineFolder(bool resolvePath);
-
-        //! Returns the path to the local baseline image that corresponds to @forScreenshotFile
-        AZStd::string GetLocalBaseline(const AZStd::string& forScreenshotFile);
-
-        //! Returns the path to the official baseline image that corresponds to @forScreenshotFile
-        AZStd::string GetOfficialBaseline(const AZStd::string& forScreenshotFile, const AZStd::string& envPath);
-    }
 
     //! Collects data about each script run by the ScriptManager.
     //! This includes counting errors, checking screenshots, and providing a final report dialog.
@@ -75,7 +55,7 @@ namespace AtomSampleViewer
         bool HasActiveScript() const;
 
         //! Indicates that a new screenshot is about to be captured.
-        bool AddScreenshotTest(const AZStd::string& path, const AZStd::string& envPath);
+        bool AddScreenshotTest(const AZStd::string& imageName);
 
         //! Check the latest screenshot using default thresholds.
         void CheckLatestScreenshot(const ImageComparisonToleranceLevel* comparisonPreset);
@@ -133,14 +113,14 @@ namespace AtomSampleViewer
         //! Records all the information about a screenshot comparison test.
         struct ScreenshotTestInfo
         {
-            AZStd::string m_screenshotFilePath;
-            AZStd::string m_officialBaselineScreenshotFilePath; //!< The path to the official baseline image that is checked into source control
-            AZStd::string m_localBaselineScreenshotFilePath;    //!< The path to a local baseline image that was established by the user
+            AZStd::string m_screenshotFilePath;                 //!< The full path where the screenshot will be generated.
+            AZStd::string m_officialBaselineScreenshotFilePath; //!< The full path to the official baseline image that is checked into source control
+            AZStd::string m_localBaselineScreenshotFilePath;    //!< The full path to a local baseline image that was established by the user
             ImageComparisonToleranceLevel m_toleranceLevel;     //!< Tolerance for checking against the official baseline image
             ImageComparisonResult m_officialComparisonResult;   //!< Result of comparing against the official baseline image, for reporting test failure
             ImageComparisonResult m_localComparisonResult;      //!< Result of comparing against a local baseline, for reporting warnings
 
-            ScreenshotTestInfo(const AZStd::string& screenshotFilePath, const AZStd::string& envPath);
+            ScreenshotTestInfo(const AZStd::string& m_screenshotName);
         };
 
         //! Records all the information about a single test script.

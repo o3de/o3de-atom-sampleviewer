@@ -1089,7 +1089,10 @@ namespace AtomSampleViewer
         behaviorContext->Method("ShowTool", &Script_ShowTool);
 
         // Screenshots...
+        behaviorContext->Method("SetScreenshotFolder", &Script_SetScreenshotFolder);
         behaviorContext->Method("SetTestEnvPath", &Script_SetTestEnvPath);
+        behaviorContext->Method("SetOfficialBaselineImageFolder", &Script_SetOfficialBaselineImageFolder);
+        behaviorContext->Method("SetLocalBaselineImageFolder", &Script_SetLocalBaselineImageFolder);
         behaviorContext->Method("SelectImageComparisonToleranceLevel", &Script_SelectImageComparisonToleranceLevel);
         behaviorContext->Method("CaptureScreenshot", &Script_CaptureScreenshot);
         behaviorContext->Method("CaptureScreenshotWithImGui", &Script_CaptureScreenshotWithImGui);
@@ -1406,26 +1409,22 @@ namespace AtomSampleViewer
         s_instance->m_scriptOperations.push(AZStd::move(operation));
     }
 
-    bool ScriptManager::PrepareForScreenCapture(const AZStd::string& path, const AZStd::string& envPath)
+    bool ScriptManager::PrepareForScreenCapture(const AZStd::string& imageName)
     {
-        if (!Utils::IsFileUnderFolder(Utils::ResolvePath(path), ScreenshotPaths::GetScreenshotsFolder(true)))
-        {
-            // The main reason we require screenshots to be in a specific folder is to ensure we don't delete or replace some other important file.
-            ReportScriptError(AZStd::string::format(
-                "Screenshots must be captured under the '%s' folder. Attempted to save screenshot to '%s'.",
-                ScreenshotPaths::GetScreenshotsFolder(false).c_str(), path.c_str()));
-
-            return false;
-        }
+        AZStd::string fullFilePath;
+        AZ::Render::FrameCaptureRequestBus::BroadcastResult(
+            fullFilePath,
+            &AZ::Render::FrameCaptureRequestBus::Events::BuildScreenshotFilePath,
+            imageName);
 
         // Delete the file if it already exists because if the screen capture fails, we don't want to do a screenshot comparison test using an old screenshot.
-        if (AZ::IO::LocalFileIO::GetInstance()->Exists(path.c_str()) && !AZ::IO::LocalFileIO::GetInstance()->Remove(path.c_str()))
+        if (AZ::IO::LocalFileIO::GetInstance()->Exists(fullFilePath.c_str()) && !AZ::IO::LocalFileIO::GetInstance()->Remove(fullFilePath.c_str()))
         {
-            ReportScriptError(AZStd::string::format("Failed to delete existing screenshot file '%s'.", path.c_str()));
+            ReportScriptError(AZStd::string::format("Failed to delete existing screenshot file '%s'.", fullFilePath.c_str()));
             return false;
         }
 
-        s_instance->m_scriptReporter.AddScreenshotTest(path, envPath);
+        s_instance->m_scriptReporter.AddScreenshotTest(imageName);
 
         s_instance->m_isCapturePending = true;
         s_instance->AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect();
@@ -1434,9 +1433,44 @@ namespace AtomSampleViewer
         return true;
     }
 
+    void ScriptManager::Script_SetScreenshotFolder(const AZStd::string& screenshotFolder)
+    {
+        auto operation = [screenshotFolder]()
+        {
+            AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::SetScreenshotFolder, screenshotFolder);
+        };
+
+        s_instance->m_scriptOperations.push(AZStd::move(operation));
+    }
+
     void ScriptManager::Script_SetTestEnvPath(const AZStd::string& envPath)
     {
-        s_instance->m_envPath = envPath;
+        auto operation = [envPath]()
+        {
+            AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::SetTestEnvPath, envPath);
+        };
+
+        s_instance->m_scriptOperations.push(AZStd::move(operation));
+    }
+
+    void ScriptManager::Script_SetOfficialBaselineImageFolder(const AZStd::string& baselineFolder)
+    {
+        auto operation = [baselineFolder]()
+        {
+            AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::SetOfficialBaselineImageFolder, baselineFolder);
+        };
+
+        s_instance->m_scriptOperations.push(AZStd::move(operation));
+    }
+
+    void ScriptManager::Script_SetLocalBaselineImageFolder(const AZStd::string& baselineFolder)
+    {
+        auto operation = [baselineFolder]()
+        {
+            AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::SetLocalBaselineImageFolder, baselineFolder);
+        };
+
+        s_instance->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_SelectImageComparisonToleranceLevel(const AZStd::string& presetName)
@@ -1449,18 +1483,24 @@ namespace AtomSampleViewer
         s_instance->m_scriptOperations.push(AZStd::move(operation));
     }
 
-    void ScriptManager::Script_CaptureScreenshot(const AZStd::string& filePath)
+    void ScriptManager::Script_CaptureScreenshot(const AZStd::string& imageName)
     {
         Script_SetShowImGui(false);
 
-        auto operation = [filePath]()
+        auto operation = [imageName]()
         {
             // Note this will pause the script until the capture is complete
-            if (PrepareForScreenCapture(filePath, s_instance->m_envPath))
+            if (PrepareForScreenCapture(imageName))
             {
+                AZStd::string screenshotFilePath;
+                AZ::Render::FrameCaptureRequestBus::BroadcastResult(
+                    screenshotFilePath,
+                    &AZ::Render::FrameCaptureRequestBus::Events::BuildScreenshotFilePath,
+                    imageName);
+
                 AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
                 uint32_t frameCaptureId = AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId;
-                AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, filePath);
+                AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, screenshotFilePath);
                 if (frameCaptureId != AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId)
                 {
                     s_instance->m_frameCaptureId = frameCaptureId;
@@ -1482,18 +1522,24 @@ namespace AtomSampleViewer
 
     }
 
-    void ScriptManager::Script_CaptureScreenshotWithImGui(const AZStd::string& filePath)
+    void ScriptManager::Script_CaptureScreenshotWithImGui(const AZStd::string& imageName)
     {
         Script_SetShowImGui(true);
 
-        auto operation = [filePath]()
+        auto operation = [imageName]()
         {
             // Note this will pause the script until the capture is complete
-            if (PrepareForScreenCapture(filePath, s_instance->m_envPath))
+            if (PrepareForScreenCapture(imageName))
             {
+                AZStd::string screenshotFilePath;
+                AZ::Render::FrameCaptureRequestBus::BroadcastResult(
+                    screenshotFilePath,
+                    &AZ::Render::FrameCaptureRequestBus::Events::BuildScreenshotFilePath,
+                    imageName);
+
                 AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
                 uint32_t frameCaptureId = AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId;
-                AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, filePath);
+                AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, screenshotFilePath);
                 if (frameCaptureId != AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId)
                 {
                     s_instance->m_frameCaptureId = frameCaptureId;
@@ -1514,16 +1560,22 @@ namespace AtomSampleViewer
             });
     }
 
-    void ScriptManager::Script_CaptureScreenshotWithPreview(const AZStd::string& filePath)
+    void ScriptManager::Script_CaptureScreenshotWithPreview(const AZStd::string& imageName)
     {
-        auto operation = [filePath]()
+        auto operation = [imageName]()
         {
             // Note this will pause the script until the capture is complete
-            if (PrepareForScreenCapture(filePath, s_instance->m_envPath))
+            if (PrepareForScreenCapture(imageName))
             {
+                AZStd::string screenshotFilePath;
+                AZ::Render::FrameCaptureRequestBus::BroadcastResult(
+                    screenshotFilePath,
+                    &AZ::Render::FrameCaptureRequestBus::Events::BuildScreenshotFilePath,
+                    imageName);
+
                 AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
                 uint32_t frameCaptureId = AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId;
-                AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshotWithPreview, filePath);
+                AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshotWithPreview, screenshotFilePath);
                 if (frameCaptureId != AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId)
                 {
                     s_instance->m_frameCaptureId = frameCaptureId;
@@ -1568,13 +1620,13 @@ namespace AtomSampleViewer
 
         AZStd::vector<AZStd::string> passHierarchy;
         AZStd::string slot;
-        AZStd::string outputFilePath;
+        AZStd::string imageName;
 
         // read slot name and output file path
         dc.ReadArg(1, stringValue);
         slot = AZStd::string(stringValue);
         dc.ReadArg(2, stringValue);
-        outputFilePath = AZStd::string(stringValue);
+        imageName = AZStd::string(stringValue);
 
         AZ::RPI::PassAttachmentReadbackOption readbackOption = AZ::RPI::PassAttachmentReadbackOption::Output;
         if (dc.GetNumArguments() == 4)
@@ -1613,14 +1665,20 @@ namespace AtomSampleViewer
             }
         }
 
-        auto operation = [passHierarchy, slot, outputFilePath, readbackOption]()
+        auto operation = [passHierarchy, slot, imageName, readbackOption]()
         {
             // Note this will pause the script until the capture is complete
-            if (PrepareForScreenCapture(outputFilePath, s_instance->m_envPath))
+            if (PrepareForScreenCapture(imageName))
             {
+                AZStd::string screenshotFilePath;
+                AZ::Render::FrameCaptureRequestBus::BroadcastResult(
+                    screenshotFilePath,
+                    &AZ::Render::FrameCaptureRequestBus::Events::BuildScreenshotFilePath,
+                    imageName);
+
                 AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
                 uint32_t frameCaptureId = AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId;
-                AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachment, passHierarchy, slot, outputFilePath, readbackOption);
+                AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachment, passHierarchy, slot, screenshotFilePath, readbackOption);
                 if (frameCaptureId != AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId)
                 {
                     s_instance->m_frameCaptureId = frameCaptureId;

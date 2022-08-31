@@ -11,8 +11,8 @@
 
 RunScript("scripts/TestEnvironment.luac")
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/SceneReloadSoakTest/')
-Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
+g_testCaseFolder = 'SceneReloadSoakTest'
+Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder .. g_testCaseFolder))
 
 -- First we capture a screenshot to make sure everything is rendering correctly...
 LockFrameTime(1/30) -- frame lock on to get a consistent result
@@ -21,7 +21,7 @@ ResizeViewport(500, 500)
 NoClipCameraController_SetFov(DegToRad(90))
 IdleSeconds(1.0)
 SelectImageComparisonToleranceLevel("Level G")
-CaptureScreenshot(g_screenshotOutputFolder .. 'screenshot.png')
+CaptureScreenshot(g_testCaseFolder .. '/screenshot.png')
 
 -- Unlock the frame time now that we have our screen capture, so the actual "soaking" can happen at a natural rate
 UnlockFrameTime()

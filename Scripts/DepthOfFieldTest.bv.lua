@@ -11,8 +11,8 @@
 
 RunScript("scripts/TestEnvironment.luac")
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/DepthOfFieldTest/')
-Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
+g_testCaseFolder = 'DepthOfFieldTest'
+Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder .. g_testCaseFolder))
 
 OpenSample('Features/DepthOfField')
 ResizeViewport(800, 600)
@@ -20,6 +20,6 @@ SelectImageComparisonToleranceLevel("Level D")
 
 IdleSeconds(5)
 
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_depth_of_field.png')
+CaptureScreenshot(g_testCaseFolder .. '/screenshot_depth_of_field.png')
 
 OpenSample(nil)

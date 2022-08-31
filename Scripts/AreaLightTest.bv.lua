@@ -111,8 +111,8 @@ function VaryMetallicOnly()
     SetImguiValue('AreaLightSample/Min Max Metallic', Vector2(0.0, 1.0))
 end
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/AreaLights/')
-Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
+g_testCaseFolder = 'AreaLights'
+Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder .. g_testCaseFolder))
 SelectImageComparisonToleranceLevel("Level E")
 
 OpenSample('Features/AreaLight')
@@ -154,7 +154,7 @@ do
         materialSetupFunction()
         
         IdleFrames(1) 
-        CaptureScreenshot(g_screenshotOutputFolder .. '/' .. lightName .. '_' .. materialName ..'.png')
+        CaptureScreenshot(g_testCaseFolder .. '/' .. lightName .. '_' .. materialName ..'.png')
     end
 end
 
