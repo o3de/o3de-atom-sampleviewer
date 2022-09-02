@@ -134,19 +134,19 @@ namespace AtomSampleViewer
     {   
         AZ_Assert(!screenshotName.empty(), "The screenshot file name shouldn't be empty.");
 
-        AZ::Render::FrameCaptureRequestBus::BroadcastResult(
+        AZ::Render::FrameCapturePathManagementRequestBus::BroadcastResult(
             m_screenshotFilePath,
-            &AZ::Render::FrameCaptureRequestBus::Events::BuildScreenshotFilePath,
+            &AZ::Render::FrameCapturePathManagementRequestBus::Events::BuildScreenshotFilePath,
             screenshotName);
 
-        AZ::Render::FrameCaptureRequestBus::BroadcastResult(
+        AZ::Render::FrameCapturePathManagementRequestBus::BroadcastResult(
             m_officialBaselineScreenshotFilePath,
-            &AZ::Render::FrameCaptureRequestBus::Events::BuildOfficialBaselineFilePath,
+            &AZ::Render::FrameCapturePathManagementRequestBus::Events::BuildOfficialBaselineFilePath,
             screenshotName);
 
-        AZ::Render::FrameCaptureRequestBus::BroadcastResult(
+        AZ::Render::FrameCapturePathManagementRequestBus::BroadcastResult(
             m_localBaselineScreenshotFilePath,
-            &AZ::Render::FrameCaptureRequestBus::Events::BuildLocalBaselineFilePath,
+            &AZ::Render::FrameCapturePathManagementRequestBus::Events::BuildLocalBaselineFilePath,
             screenshotName);
     }
 
@@ -1070,9 +1070,9 @@ namespace AtomSampleViewer
         else
         {
             AZStd::string localBaselineFolder;
-            AZ::Render::FrameCaptureRequestBus::BroadcastResult(
+            AZ::Render::FrameCapturePathManagementRequestBus::BroadcastResult(
                 localBaselineFolder,
-                &AZ::Render::FrameCaptureRequestBus::Events::BuildScreenshotFilePath,
+                &AZ::Render::FrameCapturePathManagementRequestBus::Events::BuildScreenshotFilePath,
                 "");
             message = "Destination: " + localBaselineFolder + "\n";
 

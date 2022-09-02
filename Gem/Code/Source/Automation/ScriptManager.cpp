@@ -1412,9 +1412,9 @@ namespace AtomSampleViewer
     bool ScriptManager::PrepareForScreenCapture(const AZStd::string& imageName)
     {
         AZStd::string fullFilePath;
-        AZ::Render::FrameCaptureRequestBus::BroadcastResult(
+        AZ::Render::FrameCapturePathManagementRequestBus::BroadcastResult(
             fullFilePath,
-            &AZ::Render::FrameCaptureRequestBus::Events::BuildScreenshotFilePath,
+            &AZ::Render::FrameCapturePathManagementRequestBus::Events::BuildScreenshotFilePath,
             imageName);
 
         // Delete the file if it already exists because if the screen capture fails, we don't want to do a screenshot comparison test using an old screenshot.
@@ -1437,7 +1437,8 @@ namespace AtomSampleViewer
     {
         auto operation = [screenshotFolder]()
         {
-            AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::SetScreenshotFolder, screenshotFolder);
+            AZ::Render::FrameCapturePathManagementRequestBus::Broadcast(
+                &AZ::Render::FrameCapturePathManagementRequestBus::Events::SetScreenshotFolder, screenshotFolder);
         };
 
         s_instance->m_scriptOperations.push(AZStd::move(operation));
@@ -1447,7 +1448,8 @@ namespace AtomSampleViewer
     {
         auto operation = [envPath]()
         {
-            AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::SetTestEnvPath, envPath);
+            AZ::Render::FrameCapturePathManagementRequestBus::Broadcast(
+                &AZ::Render::FrameCapturePathManagementRequestBus::Events::SetTestEnvPath, envPath);
         };
 
         s_instance->m_scriptOperations.push(AZStd::move(operation));
@@ -1457,7 +1459,8 @@ namespace AtomSampleViewer
     {
         auto operation = [baselineFolder]()
         {
-            AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::SetOfficialBaselineImageFolder, baselineFolder);
+            AZ::Render::FrameCapturePathManagementRequestBus::Broadcast(
+                &AZ::Render::FrameCapturePathManagementRequestBus::Events::SetOfficialBaselineImageFolder, baselineFolder);
         };
 
         s_instance->m_scriptOperations.push(AZStd::move(operation));
@@ -1467,7 +1470,8 @@ namespace AtomSampleViewer
     {
         auto operation = [baselineFolder]()
         {
-            AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::SetLocalBaselineImageFolder, baselineFolder);
+            AZ::Render::FrameCapturePathManagementRequestBus::Broadcast(
+                &AZ::Render::FrameCapturePathManagementRequestBus::Events::SetLocalBaselineImageFolder, baselineFolder);
         };
 
         s_instance->m_scriptOperations.push(AZStd::move(operation));
@@ -1493,9 +1497,9 @@ namespace AtomSampleViewer
             if (PrepareForScreenCapture(imageName))
             {
                 AZStd::string screenshotFilePath;
-                AZ::Render::FrameCaptureRequestBus::BroadcastResult(
+                AZ::Render::FrameCapturePathManagementRequestBus::BroadcastResult(
                     screenshotFilePath,
-                    &AZ::Render::FrameCaptureRequestBus::Events::BuildScreenshotFilePath,
+                    &AZ::Render::FrameCapturePathManagementRequestBus::Events::BuildScreenshotFilePath,
                     imageName);
 
                 AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
@@ -1532,9 +1536,9 @@ namespace AtomSampleViewer
             if (PrepareForScreenCapture(imageName))
             {
                 AZStd::string screenshotFilePath;
-                AZ::Render::FrameCaptureRequestBus::BroadcastResult(
+                AZ::Render::FrameCapturePathManagementRequestBus::BroadcastResult(
                     screenshotFilePath,
-                    &AZ::Render::FrameCaptureRequestBus::Events::BuildScreenshotFilePath,
+                    &AZ::Render::FrameCapturePathManagementRequestBus::Events::BuildScreenshotFilePath,
                     imageName);
 
                 AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
@@ -1568,9 +1572,9 @@ namespace AtomSampleViewer
             if (PrepareForScreenCapture(imageName))
             {
                 AZStd::string screenshotFilePath;
-                AZ::Render::FrameCaptureRequestBus::BroadcastResult(
+                AZ::Render::FrameCapturePathManagementRequestBus::BroadcastResult(
                     screenshotFilePath,
-                    &AZ::Render::FrameCaptureRequestBus::Events::BuildScreenshotFilePath,
+                    &AZ::Render::FrameCapturePathManagementRequestBus::Events::BuildScreenshotFilePath,
                     imageName);
 
                 AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
@@ -1671,9 +1675,9 @@ namespace AtomSampleViewer
             if (PrepareForScreenCapture(imageName))
             {
                 AZStd::string screenshotFilePath;
-                AZ::Render::FrameCaptureRequestBus::BroadcastResult(
+                AZ::Render::FrameCapturePathManagementRequestBus::BroadcastResult(
                     screenshotFilePath,
-                    &AZ::Render::FrameCaptureRequestBus::Events::BuildScreenshotFilePath,
+                    &AZ::Render::FrameCapturePathManagementRequestBus::Events::BuildScreenshotFilePath,
                     imageName);
 
                 AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
