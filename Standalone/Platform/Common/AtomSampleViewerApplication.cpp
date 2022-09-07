@@ -331,6 +331,7 @@ namespace AtomSampleViewer
 
     int RunGameCommon(int argc, char** argv, AZStd::function<void()> customRunCode)
     {
+        const AZ::Debug::Trace tracer;
         AtomSampleViewer::AtomSampleViewerApplication app(&argc, &argv);
 
         const AzGameFramework::GameApplication::StartupParameters gameAppParams;
