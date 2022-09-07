@@ -146,6 +146,11 @@ namespace AtomSampleViewer
         //! Records all the information about a single test script.
         struct ScriptReport : public AZ::Debug::TraceMessageBus::Handler
         {
+            ScriptReport()
+            {
+                AZ::Debug::TraceMessageBus::Handler::BusConnect();
+            }
+
             ~ScriptReport()
             {
                 AZ::Debug::TraceMessageBus::Handler::BusDisconnect();
