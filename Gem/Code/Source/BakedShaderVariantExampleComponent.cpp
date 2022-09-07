@@ -176,14 +176,13 @@ namespace AtomSampleViewer
 
             if (m_material && ImGui::Button("Material Details..."))
             {
-                m_imguiMaterialDetails.SetMaterial(m_material);
                 m_imguiMaterialDetails.OpenDialog();
             }
 
             m_imguiSidebar.End();
         }
 
-        m_imguiMaterialDetails.Tick();
+        m_imguiMaterialDetails.Tick(&m_meshFeatureProcessor->GetDrawPackets(m_meshHandle));
 
         if (materialNeedsUpdate)
         {

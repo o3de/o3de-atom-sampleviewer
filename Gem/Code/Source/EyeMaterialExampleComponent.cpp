@@ -174,13 +174,12 @@ namespace AtomSampleViewer
 
             if (ScriptableImGui::Button("Material Details..."))
             {
-                m_imguiMaterialDetails.SetMaterial(m_materialInstance);
                 m_imguiMaterialDetails.OpenDialog();
             }
 
             m_imguiSidebar.End();
         }
-        m_imguiMaterialDetails.Tick();
+        m_imguiMaterialDetails.Tick(&GetMeshFeatureProcessor()->GetDrawPackets(m_meshHandle), "Eye Mesh");
     }
     
     void EyeMaterialExampleComponent::DrawSidebarMaterialProperties()

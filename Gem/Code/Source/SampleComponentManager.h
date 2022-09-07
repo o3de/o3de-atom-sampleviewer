@@ -23,6 +23,7 @@
 
 #include <Atom/Utils/ImGuiCullingDebug.h>
 #include <Atom/Utils/ImGuiGpuProfiler.h>
+#include <Atom/Utils/ImGuiMaterialDetails.h>
 #include <Atom/Utils/ImGuiPassTree.h>
 #include <Atom/Utils/ImGuiFrameVisualizer.h>
 #include <Atom/Utils/ImGuiTransientAttachmentProfiler.h>
