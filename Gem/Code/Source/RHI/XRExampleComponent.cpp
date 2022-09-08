@@ -55,35 +55,39 @@ namespace AtomSampleViewer
         AZ::RPI::XRRenderingInterface* xrSystem = AZ::RPI::RPISystemInterface::Get()->GetXRSystem();
         if (xrSystem && xrSystem->ShouldRender())
         {
-            const AZ::RPI::FovData fovData = xrSystem->GetViewFov(m_viewIndex);
-            const AZ::RPI::PoseData poseData = xrSystem->GetViewPose(m_viewIndex);
+            AZ::RPI::FovData fovData;
+            AZ::RPI::PoseData poseData, frontViewPoseData;
+            [[maybe_unused]] AZ::RHI::ResultCode resultCode = xrSystem->GetViewFov(m_viewIndex, fovData);
+            resultCode = xrSystem->GetViewPose(m_viewIndex, poseData);
                 
             static const float clip_near = 0.05f;
             static const float clip_far = 100.0f;
+            bool reverseDepth = false;
             projection = xrSystem->CreateProjectionOffset(fovData.m_angleLeft, fovData.m_angleRight, 
                                                           fovData.m_angleDown, fovData.m_angleUp, 
-                                                          clip_near, clip_far);
+                                                          clip_near, clip_far, reverseDepth);
 
-            AZ::Quaternion poseOrientation = poseData.orientation; 
+            AZ::Quaternion poseOrientation = poseData.m_orientation; 
             poseOrientation.InvertFast(); 
-            AZ::Matrix4x4 viewMat = AZ::Matrix4x4::CreateFromQuaternionAndTranslation(poseOrientation, -poseData.position);
+            AZ::Matrix4x4 viewMat = AZ::Matrix4x4::CreateFromQuaternionAndTranslation(poseOrientation, -poseData.m_position);
             m_viewProjMatrix = projection * viewMat;
  
             const AZ::Matrix4x4 initialScaleMat = AZ::Matrix4x4::CreateScale(AZ::Vector3(0.1f, 0.1f, 0.1f));
 
             //Model matrix for the cube related to the front view
-            AZ::RPI::PoseData frontViewPoseData = xrSystem->GetViewFrontPose();
-            m_modelMatrices[0] = AZ::Matrix4x4::CreateFromQuaternionAndTranslation(frontViewPoseData.orientation, frontViewPoseData.position) * initialScaleMat;
+            resultCode = xrSystem->GetViewFrontPose(frontViewPoseData);
+            m_modelMatrices[0] = AZ::Matrix4x4::CreateFromQuaternionAndTranslation(frontViewPoseData.m_orientation, frontViewPoseData.m_position) * initialScaleMat;
                       
             //Model matrix for the cube related to the left controller
-            AZ::RPI::PoseData controllerLeftPose = xrSystem->GetControllerPose(0);
+            AZ::RPI::PoseData controllerLeftPose, controllerRightPose;
+            resultCode = xrSystem->GetControllerPose(0, controllerLeftPose);
             AZ::Matrix4x4 leftScaleMat = initialScaleMat * AZ::Matrix4x4::CreateScale(AZ::Vector3(xrSystem->GetControllerScale(0)));
-            m_modelMatrices[1] = AZ::Matrix4x4::CreateFromQuaternionAndTranslation(controllerLeftPose.orientation, controllerLeftPose.position) * leftScaleMat;
+            m_modelMatrices[1] = AZ::Matrix4x4::CreateFromQuaternionAndTranslation(controllerLeftPose.m_orientation, controllerLeftPose.m_position) * leftScaleMat;
 
             //Model matrix for the cube related to the right controller
             AZ::Matrix4x4 rightScaleMat = initialScaleMat * AZ::Matrix4x4::CreateScale(AZ::Vector3(xrSystem->GetControllerScale(1)));
-            AZ::RPI::PoseData controllerRightPose = xrSystem->GetControllerPose(1);
-            m_modelMatrices[2] = AZ::Matrix4x4::CreateFromQuaternionAndTranslation(controllerRightPose.orientation, controllerRightPose.position) * rightScaleMat;
+            resultCode = xrSystem->GetControllerPose(1, controllerRightPose);
+            m_modelMatrices[2] = AZ::Matrix4x4::CreateFromQuaternionAndTranslation(controllerRightPose.m_orientation, controllerRightPose.m_position) * rightScaleMat;
         }      
         
         for (int i = 0; i < NumberOfCubes; ++i)

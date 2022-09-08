@@ -196,4 +196,6 @@ set(FILES
     Source/Utils/Utils.h
     Source/Utils/ImGuiProgressList.cpp
     Source/Utils/ImGuiProgressList.h
+    Source/XRRPIExampleComponent.cpp
+    Source/XRRPIExampleComponent.h
 )

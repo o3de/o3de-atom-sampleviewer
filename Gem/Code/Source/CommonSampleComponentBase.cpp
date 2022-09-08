@@ -235,6 +235,12 @@ namespace AtomSampleViewer
         }
     }
 
+    void CommonSampleComponentBase::IterateToNextLightingPreset()
+    {
+        m_currentLightingPresetIndex = (m_currentLightingPresetIndex + 1) % m_lightingPresets.size();
+        OnLightingPresetSelected(m_lightingPresets[m_currentLightingPresetIndex].m_preset, m_useAlternateSkybox);
+    }
+
     void CommonSampleComponentBase::OnLightingPresetSelected(const AZ::Render::LightingPreset& preset, bool useAlternateSkybox)
     {
         AZ::Render::SkyBoxFeatureProcessorInterface* skyboxFeatureProcessor = AZ::RPI::Scene::GetFeatureProcessorForEntityContextId<AZ::Render::SkyBoxFeatureProcessorInterface>(m_entityContextId);
