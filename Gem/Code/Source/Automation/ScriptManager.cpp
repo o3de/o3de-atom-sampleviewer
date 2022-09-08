@@ -1428,7 +1428,6 @@ namespace AtomSampleViewer
         s_instance->m_scriptReporter.AddScreenshotTest(path, envPath);
 
         s_instance->m_isCapturePending = true;
-        s_instance->AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect();
         s_instance->PauseScript();
 
         return true;
@@ -1458,12 +1457,20 @@ namespace AtomSampleViewer
             // Note this will pause the script until the capture is complete
             if (PrepareForScreenCapture(filePath, s_instance->m_envPath))
             {
-                AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
-                uint32_t frameCaptureId = AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId;
+                AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
+                AZ::Render::FrameCaptureId frameCaptureId = AZ::Render::InvalidFrameCaptureId;
                 AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, filePath);
-                if (frameCaptureId != AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId)
+                if (frameCaptureId != AZ::Render::InvalidFrameCaptureId)
                 {
+                    s_instance->AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect(frameCaptureId);
                     s_instance->m_frameCaptureId = frameCaptureId;
+                }
+                else
+                {
+                    AZ_Error("Automation", false, "Failed to initiate frame capture for '%s'", filePath.c_str());
+                    s_instance->m_isCapturePending = false;
+                    s_instance->m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
+                    s_instance->ResumeScript();
                 }
             }
         };
@@ -1491,12 +1498,20 @@ namespace AtomSampleViewer
             // Note this will pause the script until the capture is complete
             if (PrepareForScreenCapture(filePath, s_instance->m_envPath))
             {
-                AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
-                uint32_t frameCaptureId = AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId;
+                AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
+                uint32_t frameCaptureId = AZ::Render::InvalidFrameCaptureId;
                 AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, filePath);
-                if (frameCaptureId != AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId)
+                if (frameCaptureId != AZ::Render::InvalidFrameCaptureId)
                 {
+                    s_instance->AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect(frameCaptureId);
                     s_instance->m_frameCaptureId = frameCaptureId;
+                }
+                else
+                {
+                    AZ_Error("Automation", false, "Failed to initiate frame capture for '%s'", filePath.c_str());
+                    s_instance->m_isCapturePending = false;
+                    s_instance->m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
+                    s_instance->ResumeScript();
                 }
             }
         };
@@ -1521,12 +1536,20 @@ namespace AtomSampleViewer
             // Note this will pause the script until the capture is complete
             if (PrepareForScreenCapture(filePath, s_instance->m_envPath))
             {
-                AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
-                uint32_t frameCaptureId = AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId;
+                AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
+                uint32_t frameCaptureId = AZ::Render::InvalidFrameCaptureId;
                 AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshotWithPreview, filePath);
-                if (frameCaptureId != AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId)
+                if (frameCaptureId != AZ::Render::InvalidFrameCaptureId)
                 {
+                    s_instance->AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect(frameCaptureId);
                     s_instance->m_frameCaptureId = frameCaptureId;
+                }
+                else
+                {
+                    AZ_Error("Automation", false, "Failed to initiate frame capture for '%s'", filePath.c_str());
+                    s_instance->m_isCapturePending = false;
+                    s_instance->m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
+                    s_instance->ResumeScript();
                 }
             }
         };
@@ -1618,12 +1641,20 @@ namespace AtomSampleViewer
             // Note this will pause the script until the capture is complete
             if (PrepareForScreenCapture(outputFilePath, s_instance->m_envPath))
             {
-                AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
-                uint32_t frameCaptureId = AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId;
+                AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
+                uint32_t frameCaptureId = AZ::Render::InvalidFrameCaptureId;
                 AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachment, passHierarchy, slot, outputFilePath, readbackOption);
-                if (frameCaptureId != AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId)
+                if (frameCaptureId != AZ::Render::InvalidFrameCaptureId)
                 {
+                    s_instance->AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect(frameCaptureId);
                     s_instance->m_frameCaptureId = frameCaptureId;
+                }
+                else
+                {
+                    AZ_Error("Automation", false, "Failed to initiate frame capture for '%s'", outputFilePath.c_str());
+                    s_instance->m_isCapturePending = false;
+                    s_instance->m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
+                    s_instance->ResumeScript();
                 }
             }
         };
@@ -1635,15 +1666,10 @@ namespace AtomSampleViewer
             });
     }
 
-    void ScriptManager::OnCaptureFinished(uint32_t frameCaptureId, AZ::Render::FrameCaptureResult result, const AZStd::string &info)
+    void ScriptManager::OnFrameCaptureFinished(AZ::Render::FrameCaptureResult result, const AZStd::string &info)
     {
-         // ignore captures that are not triggered by the script manager
-        if (m_frameCaptureId == AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId || frameCaptureId != m_frameCaptureId)
-        {
-            return;
-        }
         m_isCapturePending = false;
-        m_frameCaptureId = AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId;
+        m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
         AZ::Render::FrameCaptureNotificationBus::Handler::BusDisconnect();
         ResumeScript();
 
