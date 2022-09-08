@@ -1465,6 +1465,13 @@ namespace AtomSampleViewer
                     s_instance->AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect(frameCaptureId);
                     s_instance->m_frameCaptureId = frameCaptureId;
                 }
+                else
+                {
+                    AZ_Error("Automation", false, "Failed to initiate frame capture for '%s'", filePath.c_str());
+                    s_instance->m_isCapturePending = false;
+                    s_instance->m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
+                    s_instance->ResumeScript();
+                }
             }
         };
 
@@ -1499,6 +1506,13 @@ namespace AtomSampleViewer
                     s_instance->AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect(frameCaptureId);
                     s_instance->m_frameCaptureId = frameCaptureId;
                 }
+                else
+                {
+                    AZ_Error("Automation", false, "Failed to initiate frame capture for '%s'", filePath.c_str());
+                    s_instance->m_isCapturePending = false;
+                    s_instance->m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
+                    s_instance->ResumeScript();
+                }
             }
         };
 
@@ -1529,6 +1543,13 @@ namespace AtomSampleViewer
                 {
                     s_instance->AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect(frameCaptureId);
                     s_instance->m_frameCaptureId = frameCaptureId;
+                }
+                else
+                {
+                    AZ_Error("Automation", false, "Failed to initiate frame capture for '%s'", filePath.c_str());
+                    s_instance->m_isCapturePending = false;
+                    s_instance->m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
+                    s_instance->ResumeScript();
                 }
             }
         };
@@ -1627,6 +1648,13 @@ namespace AtomSampleViewer
                 {
                     s_instance->AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect(frameCaptureId);
                     s_instance->m_frameCaptureId = frameCaptureId;
+                }
+                else
+                {
+                    AZ_Error("Automation", false, "Failed to initiate frame capture for '%s'", outputFilePath.c_str());
+                    s_instance->m_isCapturePending = false;
+                    s_instance->m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
+                    s_instance->ResumeScript();
                 }
             }
         };
