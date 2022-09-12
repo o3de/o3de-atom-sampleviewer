@@ -75,7 +75,7 @@ namespace AtomSampleViewer
 
         Data::AssetId modelAssetId;
         Data::AssetCatalogRequestBus::BroadcastResult(
-            modelAssetId, &Data::AssetCatalogRequestBus::Events::GetAssetIdByPath, Products::ModelFilePath, nullptr, false);
+            modelAssetId, &Data::AssetCatalogRequestBus::Events::GetAssetIdByPath, Products::ModelFilePath, AZ::Uuid::CreateNull(), false);
         AZ_Assert(modelAssetId.IsValid(), "Failed to get model asset id: %s", Products::ModelFilePath);
         m_modelAsset.Create(modelAssetId);
 
