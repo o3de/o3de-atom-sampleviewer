@@ -312,7 +312,7 @@ namespace AtomSampleViewer
 
         // Release the probe
         m_reflectionProbeFeatureProcessor->RemoveReflectionProbe(m_reflectionProbeHandle);
-        m_reflectionProbeHandle = nullptr;
+        m_reflectionProbeHandle = {};
 
         // Release all meshes
         for (auto& shaderBallMeshHandle : m_shaderBallMeshHandles)

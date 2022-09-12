@@ -39,7 +39,7 @@ namespace AtomSampleViewer
         using PointLightHandle = AZ::Render::PointLightFeatureProcessorInterface::LightHandle;
         using DiskLightHandle = AZ::Render::DiskLightFeatureProcessorInterface::LightHandle;
         using DirectionalLightHandle = AZ::Render::DirectionalLightFeatureProcessorInterface::LightHandle;
-        using ReflectinoProbeHandle = AZ::Render::ReflectionProbeHandle;
+        using ReflectionProbeHandle = AZ::Render::ReflectionProbeHandle;
 
         static constexpr uint32_t ShaderBallCount = 12u;
 
@@ -93,7 +93,7 @@ namespace AtomSampleViewer
         PointLightHandle m_pointLightHandle;
         DiskLightHandle m_diskLightHandle;
         DirectionalLightHandle m_directionalLightHandle;
-        ReflectinoProbeHandle m_reflectionProbeHandle;
+        ReflectionProbeHandle m_reflectionProbeHandle;
 
         MultiSceneExampleComponent* m_parent = nullptr;
         const AZ::Vector3 m_cameraOffset{ 0.0f, -4.0f, 2.0f };
