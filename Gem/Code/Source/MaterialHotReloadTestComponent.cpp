@@ -164,7 +164,7 @@ namespace AtomSampleViewer
         ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::PauseScriptWithTimeout, LongTimeout);
 
         Data::AssetId modelAssetId;
-        Data::AssetCatalogRequestBus::BroadcastResult(modelAssetId, &Data::AssetCatalogRequestBus::Events::GetAssetIdByPath, Products::ModelFilePath, nullptr, false);
+        Data::AssetCatalogRequestBus::BroadcastResult(modelAssetId, &Data::AssetCatalogRequestBus::Events::GetAssetIdByPath, Products::ModelFilePath, AZ::Uuid::CreateNull(), false);
         AZ_Assert(modelAssetId.IsValid(), "Failed to get model asset id: %s", Products::ModelFilePath);
         m_modelAsset.Create(modelAssetId);
 
@@ -290,7 +290,7 @@ namespace AtomSampleViewer
     Data::AssetId MaterialHotReloadTestComponent::GetAssetId(const char* productFilePath)
     {
         Data::AssetId assetId;
-        Data::AssetCatalogRequestBus::BroadcastResult(assetId, &Data::AssetCatalogRequestBus::Events::GetAssetIdByPath, productFilePath, nullptr, false);
+        Data::AssetCatalogRequestBus::BroadcastResult(assetId, &Data::AssetCatalogRequestBus::Events::GetAssetIdByPath, productFilePath, AZ::Uuid::CreateNull(), false);
         return assetId;
     }
 
