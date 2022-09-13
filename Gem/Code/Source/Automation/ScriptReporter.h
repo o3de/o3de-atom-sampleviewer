@@ -11,7 +11,7 @@
 #include <AzCore/Debug/TraceMessageBus.h>
 #include <AzFramework/StringFunc/StringFunc.h>
 #include <Atom/Feature/Utils/FrameCaptureBus.h>
-#include <Atom/Feature/Utils/FrameCapturePathManagementBus.h>
+#include <Atom/Feature/Utils/FrameCaptureTestBus.h>
 #include <Atom/Utils/ImageComparison.h>
 #include <Automation/ImageComparisonConfig.h>
 #include <Utils/ImGuiMessageBox.h>

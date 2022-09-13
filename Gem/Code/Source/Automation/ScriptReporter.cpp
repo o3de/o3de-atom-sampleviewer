@@ -134,20 +134,20 @@ namespace AtomSampleViewer
     {   
         AZ_Assert(!screenshotName.empty(), "The screenshot file name shouldn't be empty.");
 
-        AZ::Render::FrameCapturePathManagementRequestBus::BroadcastResult(
+        AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
             m_screenshotFilePath,
-            &AZ::Render::FrameCapturePathManagementRequestBus::Events::BuildScreenshotFilePath,
-            screenshotName);
+            &AZ::Render::FrameCaptureTestRequestBus::Events::BuildScreenshotFilePath,
+            screenshotName, true);
 
-        AZ::Render::FrameCapturePathManagementRequestBus::BroadcastResult(
+        AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
             m_officialBaselineScreenshotFilePath,
-            &AZ::Render::FrameCapturePathManagementRequestBus::Events::BuildOfficialBaselineFilePath,
-            screenshotName);
+            &AZ::Render::FrameCaptureTestRequestBus::Events::BuildOfficialBaselineFilePath,
+            screenshotName, false);
 
-        AZ::Render::FrameCapturePathManagementRequestBus::BroadcastResult(
+        AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
             m_localBaselineScreenshotFilePath,
-            &AZ::Render::FrameCapturePathManagementRequestBus::Events::BuildLocalBaselineFilePath,
-            screenshotName);
+            &AZ::Render::FrameCaptureTestRequestBus::Events::BuildLocalBaselineFilePath,
+            screenshotName, true);
     }
 
     bool ScriptReporter::AddScreenshotTest(const AZStd::string& imageName)
@@ -1070,10 +1070,10 @@ namespace AtomSampleViewer
         else
         {
             AZStd::string localBaselineFolder;
-            AZ::Render::FrameCapturePathManagementRequestBus::BroadcastResult(
+            AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
                 localBaselineFolder,
-                &AZ::Render::FrameCapturePathManagementRequestBus::Events::BuildScreenshotFilePath,
-                "");
+                &AZ::Render::FrameCaptureTestRequestBus::Events::BuildScreenshotFilePath,
+                "", true);
             message = "Destination: " + localBaselineFolder + "\n";
 
             if (successCount > 0)
@@ -1121,15 +1121,16 @@ namespace AtomSampleViewer
         else
         {
             bool imagesWereCompared = false;
-            AZ::Render::FrameCaptureRequestBus::BroadcastResult(
+            AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
                 imagesWereCompared,
-                &AZ::Render::FrameCaptureRequestBus::Events::CompareScreenshots,
+                &AZ::Render::FrameCaptureTestRequestBus::Events::CompareScreenshots,
                 screenshotTestInfo.m_screenshotFilePath,
                 screenshotTestInfo.m_officialBaselineScreenshotFilePath,
                 &screenshotTestInfo.m_officialComparisonResult.m_standardDiffScore,
                 &screenshotTestInfo.m_officialComparisonResult.m_filteredDiffScore,
                 ImperceptibleDiffFilter
             );
+            // Set the final score to the standard score just in case the filtered one is ignored
             screenshotTestInfo.m_officialComparisonResult.m_finalDiffScore = screenshotTestInfo.m_officialComparisonResult.m_standardDiffScore;
 
             if (imagesWereCompared)
@@ -1168,9 +1169,9 @@ namespace AtomSampleViewer
             // Local screenshots should be expected match 100% every time, otherwise warnings are reported. This will help developers track and investigate changes,
             // for example if they make local changes that impact some unrelated AtomSampleViewer sample in an unexpected way, they will see a warning about this.
             bool imagesWereCompared = false;
-            AZ::Render::FrameCaptureRequestBus::BroadcastResult(
+            AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
                 imagesWereCompared,
-                &AZ::Render::FrameCaptureRequestBus::Events::CompareScreenshots,
+                &AZ::Render::FrameCaptureTestRequestBus::Events::CompareScreenshots,
                 screenshotTestInfo.m_screenshotFilePath,
                 screenshotTestInfo.m_localBaselineScreenshotFilePath,
                 &screenshotTestInfo.m_localComparisonResult.m_standardDiffScore,
