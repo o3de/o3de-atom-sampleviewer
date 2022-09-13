@@ -11,8 +11,8 @@
 
 RunScript("scripts/TestEnvironment.luac")
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/DynamicMaterialTest/')
-Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
+g_testCaseFolder = 'DynamicMaterialTest'
+Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder .. g_testCaseFolder))
 
 OpenSample('RPI/DynamicMaterialTest')
 ResizeViewport(1024, 768)
@@ -40,7 +40,7 @@ function TakeScreenshotSeries(filenamePrefix)
 
     SetImguiValue("Pause", true)
     IdleFrames(1) -- Give extra time to make sure any material changes are applied, especially in case an asset hot-load causes the material to reinitialize itself.
-    CaptureScreenshot(g_screenshotOutputFolder .. filenamePrefix .. '_A.png')
+    CaptureScreenshot(g_testCaseFolder .. '/' .. filenamePrefix .. '_A.png')
     SetImguiValue("Pause", false)
 
     -- Let the animation run for 1 second
@@ -48,7 +48,7 @@ function TakeScreenshotSeries(filenamePrefix)
 
     SetImguiValue("Pause", true)
     IdleFrames(1) -- Give extra time to make sure any material changes are applied, especially in case an asset hot-load causes the material to reinitialize itself.
-    CaptureScreenshot(g_screenshotOutputFolder .. filenamePrefix .. '_B.png')
+    CaptureScreenshot(g_testCaseFolder .. '/' .. filenamePrefix .. '_B.png')
     SetImguiValue("Pause", false)
 end
 

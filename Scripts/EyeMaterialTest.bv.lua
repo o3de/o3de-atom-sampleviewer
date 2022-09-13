@@ -11,12 +11,12 @@
 
 RunScript("scripts/TestEnvironment.luac")
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/EyeMaterial/')
-Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
+g_testCaseFolder = 'EyeMaterial'
+Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder .. g_testCaseFolder))
 
 OpenSample('Features/EyeMaterial')
 ResizeViewport(1600, 900)
 SelectImageComparisonToleranceLevel("Level F")
 
 -- Test with default values
-CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_eye.png')
+CaptureScreenshot(g_testCaseFolder .. '/screenshot_eye.png')

@@ -12,11 +12,11 @@
 RunScript("scripts/TestEnvironment.luac")
 
 function TakeScreenshots()
-    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_decals.png')
+    CaptureScreenshot(g_testCaseFolder .. '/screenshot_decals.png')
 end
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/Decals/')
-Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
+g_testCaseFolder = 'Decals';
+Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder .. g_testCaseFolder))
 
 OpenSample('RPI/Decals')
 ResizeViewport(1600, 900)
