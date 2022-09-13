@@ -2119,5 +2119,3 @@ namespace AtomSampleViewer
         s_instance->m_scriptOperations.push(AZStd::move(operation));
     }
 } // namespace AtomSampleViewer
-
-#pragma optimize("", on)
