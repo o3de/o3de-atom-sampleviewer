@@ -598,9 +598,9 @@ namespace AtomSampleViewer
             };
 
             RHI::DispatchRaysItem dispatchRaysItem;
-            dispatchRaysItem.m_width = m_imageWidth;
-            dispatchRaysItem.m_height = m_imageHeight;
-            dispatchRaysItem.m_depth = 1;
+            dispatchRaysItem.m_arguments.m_direct.m_width = m_imageWidth;
+            dispatchRaysItem.m_arguments.m_direct.m_height = m_imageHeight;
+            dispatchRaysItem.m_arguments.m_direct.m_depth = 1;
             dispatchRaysItem.m_rayTracingPipelineState = m_rayTracingPipelineState.get();
             dispatchRaysItem.m_rayTracingShaderTable = m_rayTracingShaderTable.get();
             dispatchRaysItem.m_shaderResourceGroupCount = RHI::ArraySize(shaderResourceGroups);
