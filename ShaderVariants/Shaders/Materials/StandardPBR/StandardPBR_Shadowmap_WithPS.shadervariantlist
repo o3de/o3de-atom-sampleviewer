@@ -1,5 +1,5 @@
 {
-    "Shader": "Materials/Types/StandardPBR_Shadowmap_WithPS.shader",
+    "Shader": "Shaders/Materials/StandardPBR/StandardPBR_Shadowmap_WithPS.shader",
     "Variants": [
         {
             "StableId": 1,
