@@ -569,7 +569,6 @@ namespace AtomSampleViewer
                         m_bindlessSrg->GetSrg(m_floatBufferSrgName)->GetRHIShaderResourceGroup(),
                     };
                     RHI::DrawItem drawItem;
-                    drawItem.m_submitIndex = instanceIdx;
                     drawItem.m_arguments = subMesh.m_mesh->m_drawArguments;
                     drawItem.m_pipelineState = m_pipelineState.get();
                     drawItem.m_indexBufferView = &subMesh.m_mesh->m_indexBufferView;
@@ -579,7 +578,7 @@ namespace AtomSampleViewer
                     drawItem.m_streamBufferViews = subMesh.bufferStreamViewArray.data();
 
                     // Submit the triangle draw item.
-                    commandList->Submit(drawItem);
+                    commandList->Submit(drawItem, instanceIdx);
                 }
             };
 
@@ -667,11 +666,15 @@ namespace AtomSampleViewer
 
         // Update the worldToClipMatrix 
         Matrix4x4 worldToClipMatrix = m_viewToClipMatrix * worldToViewMatrix;
-        bool set = m_floatBuffer->AllocateOrUpdateBuffer(m_worldToClipHandle, static_cast<void*>(&worldToClipMatrix), static_cast<uint32_t>(sizeof(Matrix4x4)));
-        
+        m_floatBuffer->AllocateOrUpdateBuffer(m_worldToClipHandle,
+                                              static_cast<void *>(&worldToClipMatrix),
+                                              static_cast<uint32_t>(sizeof(Matrix4x4)));
+
         // Update the light direction
-        set = m_floatBuffer->AllocateOrUpdateBuffer(m_lightDirectionHandle, static_cast<void*>(&m_lightDir), static_cast<uint32_t>(sizeof(Vector3)));
-       
+        m_floatBuffer->AllocateOrUpdateBuffer(m_lightDirectionHandle,
+                                              static_cast<void *>(&m_lightDir),
+                                              static_cast<uint32_t>(sizeof(Vector3)));
+
         BasicRHIComponent::OnFramePrepare(frameGraphBuilder);
     }
 

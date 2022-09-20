@@ -23,10 +23,10 @@
 
 #include <Atom/Utils/ImGuiCullingDebug.h>
 #include <Atom/Utils/ImGuiGpuProfiler.h>
+#include <Atom/Utils/ImGuiMaterialDetails.h>
 #include <Atom/Utils/ImGuiPassTree.h>
 #include <Atom/Utils/ImGuiFrameVisualizer.h>
 #include <Atom/Utils/ImGuiTransientAttachmentProfiler.h>
-#include <Atom/Utils/ImGuiShaderMetrics.h>
 
 #include <AzCore/Component/Component.h>
 #include <AzCore/Component/TickBus.h>
@@ -142,7 +142,6 @@ namespace AtomSampleViewer
         void ShowCpuProfilerWindow();
         void ShowGpuProfilerWindow();
         void ShowFileIoProfilerWindow();
-        void ShowShaderMetricsWindow();
         void ShowTransientAttachmentProfilerWindow();
 
         void RequestExit();
@@ -163,7 +162,7 @@ namespace AtomSampleViewer
         void ClearRPIScene() override;
 
         // FrameCaptureNotificationBus overrides...
-        void OnCaptureFinished(uint32_t frameCaptureId, AZ::Render::FrameCaptureResult result, const AZStd::string& info) override;
+        void OnFrameCaptureFinished(AZ::Render::FrameCaptureResult result, const AZStd::string& info) override;
 
         // AzFramework::AssetCatalogEventBus::Handler overrides ...
         void OnCatalogLoaded(const char* catalogFile) override;
@@ -221,7 +220,6 @@ namespace AtomSampleViewer
         bool m_showGpuProfiler = false;
         bool m_showFileIoProfiler = false;
         bool m_showTransientAttachmentProfiler = false;
-        bool m_showShaderMetrics = false;
 
         bool m_ctrlModifierLDown = false;
         bool m_ctrlModifierRDown = false;
@@ -245,13 +243,12 @@ namespace AtomSampleViewer
         AZ::Render::ImGuiFrameVisualizer m_imguiFrameGraphVisualizer;
         AZ::Render::ImGuiGpuProfiler m_imguiGpuProfiler;
         AZ::Render::ImGuiTransientAttachmentProfiler m_imguiTransientAttachmentProfiler;
-        AZ::Render::ImGuiShaderMetrics m_imguiShaderMetrics;
 
         ImGuiSaveFilePath m_imguiFrameCaptureSaver;
         bool m_isFrameCapturePending = false;
         bool m_hideImGuiDuringFrameCapture = true;
         int m_countdownForFrameCapture = 0;
-        uint32_t m_frameCaptureId = AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId;
+        AZ::Render::FrameCaptureId m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
         AZStd::string m_frameCaptureFilePath;
 
         AZStd::unique_ptr<ScriptManager> m_scriptManager;

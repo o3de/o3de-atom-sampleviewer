@@ -9,8 +9,10 @@
 --
 ----------------------------------------------------------------------------------------------------
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/Checkerboard/')
-Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
+RunScript("scripts/TestEnvironment.luac")
+
+g_testCaseFolder = 'Checkerboard'
+Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder .. g_testCaseFolder))
 
 OpenSample('Features/Checkerboard')
 ResizeViewport(600, 600)
@@ -19,6 +21,6 @@ SelectImageComparisonToleranceLevel("Level F")
 
 IdleFrames(10) 
 
-CaptureScreenshot(g_screenshotOutputFolder .. 'frame1.png')
+CaptureScreenshot(g_testCaseFolder .. 'frame1.png')
 
 OpenSample(nil)

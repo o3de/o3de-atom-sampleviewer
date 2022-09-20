@@ -9,15 +9,17 @@
 --
 ----------------------------------------------------------------------------------------------------
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/PassTree/')
-Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
+RunScript("scripts/TestEnvironment.luac")
+
+g_testCaseFolder = 'PassTree'
+Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder .. g_testCaseFolder))
 
 -- Select an attachment; take a screenshot with preview output (used for screenshot comparison); capture and save the attachment.
 -- Note: each imgui value need 1 frame to apply the value. 
 function TestAttachment(attachmentName, screenshotFileName)
     SetImguiValue(attachmentName, true)
     IdleFrames(2)
-    CaptureScreenshotWithPreview(g_screenshotOutputFolder .. screenshotFileName)
+    CaptureScreenshotWithPreview(g_testCaseFolder .. '/' .. screenshotFileName)
     IdleFrames(1)
     SetImguiValue('Save Attachment', true)
     IdleFrames(3)

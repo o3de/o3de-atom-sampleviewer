@@ -9,11 +9,13 @@
 --
 ----------------------------------------------------------------------------------------------------
 
+RunScript("scripts/TestEnvironment.luac")
+
 if GetRenderApiName() == "vulkan" or GetRenderApiName() == "metal" then
     Warning("Vulkan or metal is not supported by this test.")
 else
-    g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/DiffuseGITest/')
-    Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
+    g_testCaseFolder = 'DiffuseGITest'
+    Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder .. g_testCaseFolder))
 
     OpenSample('Features/DiffuseGI')
     ResizeViewport(800, 600)
@@ -21,7 +23,7 @@ else
 
     IdleSeconds(5)
 
-    CaptureScreenshot(g_screenshotOutputFolder .. '/screenshot_cornellbox.png')
+    CaptureScreenshot(g_testCaseFolder .. '/screenshot_cornellbox.png')
 end
 
 OpenSample(nil)

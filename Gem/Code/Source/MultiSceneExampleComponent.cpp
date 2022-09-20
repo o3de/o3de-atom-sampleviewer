@@ -82,7 +82,7 @@ namespace AtomSampleViewer
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::PointLightFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::PostProcessFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::QuadLightFeatureProcessor");
-        sceneDesc.m_featureProcessorNames.push_back("ReflectionProbeFeatureProcessor");
+        sceneDesc.m_featureProcessorNames.push_back("AZ::Render::ReflectionProbeFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::SkyBoxFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::TransformServiceFeatureProcessor");
         sceneDesc.m_featureProcessorNames.push_back("AZ::Render::ProjectedShadowFeatureProcessor");
@@ -312,7 +312,7 @@ namespace AtomSampleViewer
 
         // Release the probe
         m_reflectionProbeFeatureProcessor->RemoveReflectionProbe(m_reflectionProbeHandle);
-        m_reflectionProbeHandle = nullptr;
+        m_reflectionProbeHandle = {};
 
         // Release all meshes
         for (auto& shaderBallMeshHandle : m_shaderBallMeshHandles)

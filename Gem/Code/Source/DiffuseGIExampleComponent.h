@@ -14,14 +14,13 @@
 #include <AzCore/Component/TickBus.h>
 #include <Utils/Utils.h>
 #include <Utils/ImGuiSidebar.h>
-#include <Utils/ImGuiMaterialDetails.h>
 #include <Utils/ImGuiAssetBrowser.h>
 #include <Atom/RPI.Public/WindowContext.h>
 #include <Atom/Feature/Mesh/MeshFeatureProcessorInterface.h>
 #include <Atom/Feature/CoreLights/PointLightFeatureProcessorInterface.h>
 #include <Atom/Feature/CoreLights/DirectionalLightFeatureProcessorInterface.h>
-#include <Atom/Feature/DiffuseGlobalIllumination/DiffuseProbeGridFeatureProcessorInterface.h>
-#include <Atom/Feature/DiffuseGlobalIllumination/DiffuseGlobalIlluminationFeatureProcessorInterface.h>
+#include <DiffuseProbeGrid/DiffuseProbeGridFeatureProcessorInterface.h>
+#include <DiffuseProbeGrid/DiffuseGlobalIlluminationFeatureProcessorInterface.h>
 
 namespace AtomSampleViewer
 {
@@ -164,7 +163,7 @@ namespace AtomSampleViewer
         // diffuse IBL (Sponza only)
         bool m_useDiffuseIbl = true;
         AZ::Data::Asset<AZ::RPI::StreamingImageAsset> m_diffuseImageAsset;
-        float m_diffuseIblExposure = 2.0f;
+        float m_diffuseIblExposure = 1.0f;
 
         // shadow settings
         static const AZ::Render::ShadowmapSize s_shadowmapSizes[];

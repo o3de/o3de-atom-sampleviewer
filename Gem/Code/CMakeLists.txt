@@ -6,7 +6,7 @@
 #
 #
 
-ly_get_list_relative_pal_filename(pal_dir ${CMAKE_CURRENT_LIST_DIR}/Source/Platform/${PAL_PLATFORM_NAME})
+o3de_pal_dir(pal_dir ${CMAKE_CURRENT_LIST_DIR}/Source/Platform/${PAL_PLATFORM_NAME} "${gem_restricted_path}" "${gem_path}")
 
 ly_add_target(
     NAME AtomSampleViewer.Lib.Static STATIC
@@ -45,6 +45,7 @@ ly_add_target(
             Gem::Atom_Component_DebugCamera.Static
             Gem::AtomSampleViewer.Lib.Static
             Gem::Profiler.Static
+            Gem::DiffuseProbeGrid.Static
 )
 
 ly_add_target(

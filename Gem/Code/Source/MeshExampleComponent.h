@@ -16,12 +16,12 @@
 
 #include <Utils/Utils.h>
 #include <Utils/ImGuiSidebar.h>
-#include <Utils/ImGuiMaterialDetails.h>
 #include <Utils/ImGuiAssetBrowser.h>
 
 #include <Atom/Bootstrap/DefaultWindowBus.h>
 #include <Atom/Feature/ImGui/ImGuiUtils.h>
 #include <Atom/Feature/SkyBox/SkyBoxFeatureProcessorInterface.h>
+#include <Atom/Utils/ImGuiMaterialDetails.h>
 
 namespace AtomSampleViewer
 {
@@ -117,7 +117,7 @@ namespace AtomSampleViewer
         AZ::Data::Instance<AZ::RPI::Material> m_groundPlaneMaterial;
 
         ImGuiSidebar m_imguiSidebar;
-        ImGuiMaterialDetails m_imguiMaterialDetails;
+        AZ::Render::ImGuiMaterialDetails m_imguiMaterialDetails;
         ImGuiAssetBrowser m_materialBrowser;
         ImGuiAssetBrowser m_modelBrowser;
     };

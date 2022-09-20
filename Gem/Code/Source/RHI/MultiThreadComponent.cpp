@@ -329,7 +329,6 @@ namespace AtomSampleViewer
                 const AZ::RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[i]->GetRHIShaderResourceGroup() };
 
                 AZ::RHI::DrawItem drawItem;
-                drawItem.m_submitIndex = i;
                 drawItem.m_arguments = drawIndexed;
                 drawItem.m_pipelineState = m_pipelineState.get();
                 drawItem.m_indexBufferView = &m_indexBufferView;
@@ -338,7 +337,7 @@ namespace AtomSampleViewer
                 drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
                 drawItem.m_streamBufferViews = m_streamBufferViews.data();
 
-                commandList->Submit(drawItem);
+                commandList->Submit(drawItem, i);
             }
         };
 

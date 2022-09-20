@@ -56,6 +56,7 @@ set(FILES
     Scripts/ShadowTest.bv.lua
     Scripts/SkinnedMesh.bv.lua
     Scripts/StreamingImageTest.bv.lua
+    Scripts/TestEnvironment.lua
     Scripts/TransparentTest.bv.lua
     Scripts/_AutomatedPeriodicBenchmarkSuite_.bv.lua
     Scripts/_FullTestSuite_.bv.lua

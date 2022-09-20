@@ -11,7 +11,7 @@
         "DepthClipEnable" : false
     },
 
-    "BlendState" : {
+    "GlobalTargetBlendState" : {
         "Enable" : false
     },
 
