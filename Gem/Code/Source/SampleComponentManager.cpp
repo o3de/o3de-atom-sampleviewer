@@ -117,6 +117,7 @@
 #include <AzCore/Settings/SettingsRegistryMergeUtils.h>
 #include <AzCore/std/smart_ptr/make_shared.h>
 #include <AzCore/std/algorithm.h>
+#include <AzCore/Console/IConsole.h>
 
 #include <AzFramework/API/ApplicationAPI.h>
 #include <AzFramework/Components/ConsoleBus.h>
@@ -142,6 +143,9 @@ namespace Platform
 
 namespace AtomSampleViewer
 {
+    AZ_CVAR(bool, r_EnableDefaultRenderPipelineOnXR, false, nullptr, AZ::ConsoleFunctorFlags::Null,
+        "When an XR system is present this will enable the regular render pipeline on host PC as well (false by default).");
+
     namespace
     {
         constexpr const char* PassTreeToolName = "PassTree";
@@ -1623,6 +1627,12 @@ namespace AtomSampleViewer
             m_xrPipelines.push_back(renderPipelineLeft);
             m_xrPipelines.push_back(renderPipelineRight);
 
+            // Disable default pipeline
+            if (!r_EnableDefaultRenderPipelineOnXR)
+            {
+                m_renderPipeline->RemoveFromRenderTick();
+            }
+
             //Disable XR pipelines by default
             DisableXrPipelines();
         }
@@ -1688,10 +1698,10 @@ namespace AtomSampleViewer
         const char* supervariantName = isNonMsaaPipeline ? AZ::RPI::NoMsaaSupervariantName : "";
         AZ::RPI::ShaderSystemInterface::Get()->SetSupervariantName(AZ::Name(supervariantName));
 
-        RPI::RenderPipelinePtr renderPipeline = RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext.get());
-        m_rpiScene->AddRenderPipeline(renderPipeline);
+        m_renderPipeline = RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext.get());
+        m_rpiScene->AddRenderPipeline(m_renderPipeline);
 
-        renderPipeline->SetDefaultViewFromEntity(m_cameraEntity->GetId());
+        m_renderPipeline->SetDefaultViewFromEntity(m_cameraEntity->GetId());
 
         AZ::RPI::RPISystemInterface* rpiSystem = AZ::RPI::RPISystemInterface::Get();
         if (rpiSystem->GetXRSystem())
@@ -1716,6 +1726,12 @@ namespace AtomSampleViewer
             //Cache the pipelines in case we want to enable/disable them
             m_xrPipelines.push_back(renderPipelineLeft);
             m_xrPipelines.push_back(renderPipelineRight);
+
+            // Disable default pipeline
+            if (!r_EnableDefaultRenderPipelineOnXR)
+            {
+                m_renderPipeline->RemoveFromRenderTick();
+            }
 
             // Disable XR pipelines by default
             DisableXrPipelines();
