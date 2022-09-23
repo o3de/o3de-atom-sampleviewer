@@ -124,6 +124,13 @@ namespace AtomSampleViewer
         static void Script_ShowTool(const AZStd::string& toolName, bool enable);
 
         // Screenshots...
+        // Set the path and folder that are used to find screenshots and baseline images.
+        // The full path of the screenshot consists of: screenshotFolder + envPath + imageName/testcaseName.
+        // The full path of the baseline folder consists of: baselineFolder + imageName/testcaseName.
+        static void Script_SetScreenshotFolder(const AZStd::string& screenshotFolder);
+        static void Script_SetTestEnvPath(const AZStd::string& envPath);
+        static void Script_SetOfficialBaselineImageFolder(const AZStd::string& baselineFolder);
+        static void Script_SetLocalBaselineImageFolder(const AZStd::string& baselineFolder);
 
         // Call this function before capturing screenshots to indicate which comparison tolerance level should be used.
         // The list of available tolerance levels can be found in "AtomSampleViewer/Config/ImageComparisonToleranceLevels.azasset".
@@ -136,8 +143,8 @@ namespace AtomSampleViewer
         // but with "Screenshots" replaced with "ExpectedScreenshots". For example, the expected file for
         // "Scripts/Screenshots/StandardPbr/test.ppm" should be at "Scripts/ExpectedScreenshots/StandardPbr/test.ppm".
 
-        static void Script_CaptureScreenshot(const AZStd::string& filePath);
-        static void Script_CaptureScreenshotWithImGui(const AZStd::string& filePath);
+        static void Script_CaptureScreenshot(const AZStd::string& imageName);
+        static void Script_CaptureScreenshotWithImGui(const AZStd::string& imageName);
 
         // Capture a pass attachment and save it to a file (*.ppm or *.dds for image, *.buffer for buffer)
         // The order of input parameters in ScriptDataContext would be
@@ -148,7 +155,7 @@ namespace AtomSampleViewer
         static void Script_CapturePassAttachment(AZ::ScriptDataContext& dc);
 
         // Capture a screentshot with pass image attachment preview when the preview enabled.
-        static void Script_CaptureScreenshotWithPreview(const AZStd::string& filePath);
+        static void Script_CaptureScreenshotWithPreview(const AZStd::string& imageName);
 
         // Profiling statistics data...
         static void Script_CapturePassTimestamp(AZ::ScriptDataContext& dc);
@@ -217,7 +224,7 @@ namespace AtomSampleViewer
         void OnCameraMoveEnded(AZ::TypeId controllerTypeId, uint32_t channels) override;
 
         // FrameCaptureNotificationBus overrides...
-        void OnCaptureFinished(uint32_t frameCaptureId, AZ::Render::FrameCaptureResult result, const AZStd::string& info) override;
+        void OnFrameCaptureFinished(AZ::Render::FrameCaptureResult result, const AZStd::string& info) override;
 
         // ProfilingCaptureNotificationBus overrides...
         void OnCaptureQueryTimestampFinished(bool result, const AZStd::string& info) override;
@@ -233,7 +240,7 @@ namespace AtomSampleViewer
         // Validates the ScriptDataContext for ProfilingCapture script requests
         static bool ValidateProfilingCaptureScripContexts(AZ::ScriptDataContext& dc, AZStd::string& outputFilePath);
 
-        static bool PrepareForScreenCapture(const AZStd::string& path);
+        static bool PrepareForScreenCapture(const AZStd::string& imageName);
 
         // show/hide imgui
         void SetShowImGui(bool show);
@@ -338,7 +345,7 @@ namespace AtomSampleViewer
         bool m_showPrecommitWizard = false;
         PrecommitWizardSettings m_wizardSettings;
 
-        uint32_t m_frameCaptureId = AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId;
+        AZ::Render::FrameCaptureId m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
         bool m_showScriptRunnerDialog = false;
         bool m_isCapturePending = false;
         bool m_frameTimeIsLocked = false;

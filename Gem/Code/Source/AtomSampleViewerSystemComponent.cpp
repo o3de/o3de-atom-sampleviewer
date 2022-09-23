@@ -28,7 +28,6 @@
 
 #include <Atom/RHI/Factory.h>
 #include <Atom/RPI.Public/RPISystemInterface.h>
-#include <Atom/RPI.Public/Shader/Metrics/ShaderMetricsSystem.h>
 
 #include <ISystem.h>
 #include <IConsole.h>
@@ -111,7 +110,7 @@ namespace AtomSampleViewer
         AZ::ComponentApplicationBus::Broadcast(&AZ::ComponentApplicationBus::Events::QueryApplicationType, appType);
         if (appType.IsValid() && !appType.IsEditor())
         {
-            // AtomSampleViewer SampleComponentManager creates and manages its own scene and render pipelines. 
+            // AtomSampleViewer SampleComponentManager creates and manages its own scene and render pipelines.
             // We disable the creation of default scene in BootStrapSystemComponent
             AZ::Render::Bootstrap::DefaultWindowBus::Broadcast(&AZ::Render::Bootstrap::DefaultWindowBus::Events::SetCreateDefaultScene, false);
         }
@@ -208,7 +207,7 @@ namespace AtomSampleViewer
 
         if (!m_testsLogged)
         {
-            AZStd::chrono::duration<float> elapsedTime = HighResTimer::now() - m_timestamp;
+            auto elapsedTime = AZStd::chrono::duration_cast<AZStd::chrono::duration<float>>(HighResTimer::now() - m_timestamp);
 
             if (m_frameCount == 1)
             {

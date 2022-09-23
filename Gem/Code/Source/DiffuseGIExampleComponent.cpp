@@ -384,8 +384,8 @@ namespace AtomSampleViewer
         
         m_directionalLightPitch = AZ::DegToRad(-65.0f);
         m_directionalLightYaw = AZ::DegToRad(65.0f);
-        m_directionalLightColor = AZ::Color(0.92f, 0.78f, 0.35f, 1.0f);
-        m_directionalLightIntensity = 30.0f;
+        m_directionalLightColor = AZ::Color(1.0f, 0.9f, 0.6f, 1.0f);
+        m_directionalLightIntensity = 20.0f;
 
         m_pointLightPos = AZ::Vector3(9.2f, -3.7f, 1.0f);
         m_pointLightColor = AZ::Color(1.0f, 0.0f, 0.0f, 1.0f);

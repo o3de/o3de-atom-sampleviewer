@@ -9,17 +9,19 @@
 --
 ----------------------------------------------------------------------------------------------------
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/MultiScene/')
-Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
+RunScript("scripts/TestEnvironment.luac")
+
+g_testCaseFolder = 'MultiScene'
+Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder .. g_testCaseFolder))
 
 function TakeScreenShotFromPrimaryWindow(fileName)
     IdleFrames(1) 
-    CaptureScreenshot(g_screenshotOutputFolder .. fileName)
+    CaptureScreenshot(g_testCaseFolder .. '/' .. fileName)
 end
 
 function TakeScreenShotFromSecondaryWindow(fileName)
     IdleFrames(1) 
-    CapturePassAttachment({"SecondPipeline", "CopyToSwapChain"}, "Output", g_screenshotOutputFolder .. fileName)
+    CapturePassAttachment({"SecondPipeline", "CopyToSwapChain"}, "Output", g_testCaseFolder .. '/' .. fileName)
 end
 
 function WaitForDepthOfFieldFocus()

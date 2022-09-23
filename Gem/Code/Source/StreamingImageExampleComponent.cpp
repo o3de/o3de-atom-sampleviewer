@@ -24,6 +24,7 @@
 #include <AzCore/Asset/AssetManagerBus.h>
 #include <AzCore/IO/FileIO.h>
 #include <AzCore/IO/SystemFile.h>
+#include <AzCore/std/time.h>
 #include <AzCore/Utils/Utils.h>
 
 #include <AzFramework/API/ApplicationAPI.h>
@@ -53,7 +54,7 @@ namespace AtomSampleViewer
             Data::Asset<AZ::RPI::ShaderAsset>& shaderAsset,
             RHI::Ptr<AZ::RHI::ShaderResourceGroupLayout>& srgLayout,
             RHI::ConstPtr<RHI::PipelineState>& pipelineState,
-            RHI::DrawListTag& drawListTag, 
+            RHI::DrawListTag& drawListTag,
             RPI::Scene* scene)
         {
             // Since the shader is using SV_VertexID and SV_InstanceID as VS input, we won't need to have vertex buffer.

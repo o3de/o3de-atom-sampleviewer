@@ -13,14 +13,11 @@
 #include <Atom/Feature/CoreLights/DirectionalLightFeatureProcessorInterface.h>
 #include <Atom/Feature/CoreLights/ShadowConstants.h>
 #include <Atom/Feature/CoreLights/DiskLightFeatureProcessorInterface.h>
-
 #include <Atom/Feature/CoreLights/PointLightFeatureProcessorInterface.h>
-
-
 #include <AzCore/Component/TickBus.h>
+#include <Atom/Utils/ImGuiMaterialDetails.h>
 
 #include <Utils/ImGuiSidebar.h>
-#include <Utils/ImGuiMaterialDetails.h>
 #include <Utils/Utils.h>
 
 namespace AtomSampleViewer
@@ -175,7 +172,7 @@ namespace AtomSampleViewer
         int m_filteringSampleCountsPositional[PositionalLightCount] = { 32, 32, 32 };
 
         ImGuiSidebar m_imguiSidebar;
-        ImGuiMaterialDetails m_imguiMaterialDetails;
+        AZ::Render::ImGuiMaterialDetails m_imguiMaterialDetails;
 
         // original camera configuration
         float m_originalFarClipDistance = 0.f;

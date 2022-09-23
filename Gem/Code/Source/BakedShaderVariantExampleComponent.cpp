@@ -75,7 +75,7 @@ namespace AtomSampleViewer
 
         Data::AssetId modelAssetId;
         Data::AssetCatalogRequestBus::BroadcastResult(
-            modelAssetId, &Data::AssetCatalogRequestBus::Events::GetAssetIdByPath, Products::ModelFilePath, nullptr, false);
+            modelAssetId, &Data::AssetCatalogRequestBus::Events::GetAssetIdByPath, Products::ModelFilePath, AZ::Uuid::CreateNull(), false);
         AZ_Assert(modelAssetId.IsValid(), "Failed to get model asset id: %s", Products::ModelFilePath);
         m_modelAsset.Create(modelAssetId);
 
@@ -176,14 +176,13 @@ namespace AtomSampleViewer
 
             if (m_material && ImGui::Button("Material Details..."))
             {
-                m_imguiMaterialDetails.SetMaterial(m_material);
                 m_imguiMaterialDetails.OpenDialog();
             }
 
             m_imguiSidebar.End();
         }
 
-        m_imguiMaterialDetails.Tick();
+        m_imguiMaterialDetails.Tick(&m_meshFeatureProcessor->GetDrawPackets(m_meshHandle));
 
         if (materialNeedsUpdate)
         {
