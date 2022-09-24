@@ -101,6 +101,7 @@ namespace AtomSampleViewer
     void MeshExampleComponent::ActivateLowEndPipeline()
     {
         m_originalPipeline = m_scene->GetDefaultRenderPipeline();
+        m_lowEndPipeline->GetRootPass()->SetEnabled(true); // PassSystem::RemoveRenderPipeline was calling SetEnabled(false)
         m_scene->AddRenderPipeline(m_lowEndPipeline);
         m_lowEndPipeline->SetDefaultView(m_originalPipeline->GetDefaultView());
         m_scene->RemoveRenderPipeline(m_originalPipeline->GetId());
@@ -112,6 +113,7 @@ namespace AtomSampleViewer
     {
         m_imguiScope = {}; // restores previous ImGui context.
 
+        m_originalPipeline->GetRootPass()->SetEnabled(true); // PassSystem::RemoveRenderPipeline was calling SetEnabled(false)
         m_scene->AddRenderPipeline(m_originalPipeline);
         m_scene->RemoveRenderPipeline(m_lowEndPipeline->GetId());
     }
