@@ -224,3 +224,24 @@ g_testMaterialsFolder = 'testdata/materials/autobrick/'
 
 GenerateMaterialScreenshot('Level C', 'Brick', {model=g_cubeModel})
 GenerateMaterialScreenshot('Level E', 'Tile', {model=g_cubeModel})
+
+----------------------------------------------------------------------
+-- Low End Pipeline...
+
+SetImguiValue('Use Low End Pipeline', true)
+
+-- Toggle a couple extra times to test a specific issue where the render pipelines would become disabled.
+IdleFrames(2) 
+SetImguiValue('Use Low End Pipeline', false)
+IdleFrames(2) 
+SetImguiValue('Use Low End Pipeline', true)
+IdleFrames(2) 
+
+g_testMaterialsFolder = 'testdata/materials/standardpbrtestcases/'
+g_testCaseFolder = 'LowEndPipeline'
+Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder .. g_testCaseFolder))
+
+-- We're not really getting full coverage here, but just some cursory regression tests to make sure the low-end pipeline doesn't break.
+GenerateMaterialScreenshot('Level E', '004_MetalMap')
+GenerateMaterialScreenshot('Level F', '009_Opacity_Blended', {lighting="Neutral Urban", model=g_beveledCubeModel})
+
