@@ -149,8 +149,6 @@ namespace AtomSampleViewer
         void CameraReset();
         void ShutdownActiveSample();
         void SetRHISamplePass(BasicRHIComponent* sampleComponent);
-        void DisableXrPipelines();
-        void EnableXrPipelines();
 
         // SampleComponentManagerRequestBus overrides...
         void Reset() override;
@@ -163,6 +161,8 @@ namespace AtomSampleViewer
         void ResetNumMSAASamples() override;
         void ResetRPIScene() override;
         void ClearRPIScene() override;
+        void EnableRenderPipeline(bool value) override;
+        void EnableXrPipelines(bool value) override;
 
         // FrameCaptureNotificationBus overrides...
         void OnFrameCaptureFinished(AZ::Render::FrameCaptureResult result, const AZStd::string& info) override;
