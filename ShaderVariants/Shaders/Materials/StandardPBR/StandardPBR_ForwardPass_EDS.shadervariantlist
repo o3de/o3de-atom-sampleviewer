@@ -1,25 +1,8 @@
 {
-    "Shader": "Materials/Types/StandardPBR_ForwardPass.shader",
+    "Shader": "Shaders/Materials/StandardPBR/StandardPBR_ForwardPass_EDS.shader",
     "Variants": [
         {
             "StableId": 1,
-            "Options": {
-                "o_applySpecularAA": "true",
-                "o_emissiveEnabled": "false",
-                "o_enableAreaLights": "false",
-                "o_enableDirectionalLights": "false",
-                "o_enableIBL": "true",
-                "o_enablePunctualLights": "false",
-                "o_enableShadows": "false",
-                "o_opacity_mode": "OpacityMode::Opaque",
-                "o_opacity_source": "OpacitySource::Packed",
-                "o_parallax_algorithm": "ParallaxAlgorithm::Basic",
-                "o_parallax_quality": "ParallaxQuality::Low",
-                "o_specularF0_enableMultiScatterCompensation": "false"
-            }
-        },
-        {
-            "StableId": 2,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -55,7 +38,7 @@
             }
         },
         {
-            "StableId": 3,
+            "StableId": 2,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -91,7 +74,7 @@
             }
         },
         {
-            "StableId": 4,
+            "StableId": 3,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -120,6 +103,42 @@
                 "o_parallax_highlightClipping": "false",
                 "o_parallax_quality": "ParallaxQuality::Low",
                 "o_roughness_useTexture": "false",
+                "o_specularF0_enableMultiScatterCompensation": "false",
+                "o_specularF0_useTexture": "false",
+                "o_specularOcclusion_useTexture": "false",
+                "o_useHeightmap": "false"
+            }
+        },
+        {
+            "StableId": 4,
+            "Options": {
+                "o_applySpecularAA": "true",
+                "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
+                "o_baseColor_useTexture": "true",
+                "o_clearCoat_enabled": "false",
+                "o_clearCoat_factor_useTexture": "false",
+                "o_clearCoat_feature_enabled": "false",
+                "o_clearCoat_normal_useTexture": "false",
+                "o_clearCoat_roughness_useTexture": "false",
+                "o_diffuseOcclusion_useTexture": "true",
+                "o_emissiveEnabled": "false",
+                "o_emissive_useTexture": "false",
+                "o_enableAreaLights": "true",
+                "o_enableDirectionalLights": "true",
+                "o_enableIBL": "true",
+                "o_enablePunctualLights": "true",
+                "o_enableShadows": "true",
+                "o_materialUseForwardPassIBLSpecular": "false",
+                "o_metallic_useTexture": "false",
+                "o_normal_useTexture": "true",
+                "o_opacity_mode": "OpacityMode::Opaque",
+                "o_opacity_source": "OpacitySource::Packed",
+                "o_parallax_algorithm": "ParallaxAlgorithm::POM",
+                "o_parallax_enablePixelDepthOffset": "true",
+                "o_parallax_feature_enabled": "false",
+                "o_parallax_highlightClipping": "false",
+                "o_parallax_quality": "ParallaxQuality::High",
+                "o_roughness_useTexture": "true",
                 "o_specularF0_enableMultiScatterCompensation": "false",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
@@ -156,42 +175,6 @@
                 "o_parallax_highlightClipping": "false",
                 "o_parallax_quality": "ParallaxQuality::High",
                 "o_roughness_useTexture": "true",
-                "o_specularF0_enableMultiScatterCompensation": "false",
-                "o_specularF0_useTexture": "false",
-                "o_specularOcclusion_useTexture": "false",
-                "o_useHeightmap": "false"
-            }
-        },
-        {
-            "StableId": 6,
-            "Options": {
-                "o_applySpecularAA": "true",
-                "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
-                "o_baseColor_useTexture": "true",
-                "o_clearCoat_enabled": "false",
-                "o_clearCoat_factor_useTexture": "false",
-                "o_clearCoat_feature_enabled": "false",
-                "o_clearCoat_normal_useTexture": "false",
-                "o_clearCoat_roughness_useTexture": "false",
-                "o_diffuseOcclusion_useTexture": "true",
-                "o_emissiveEnabled": "false",
-                "o_emissive_useTexture": "false",
-                "o_enableAreaLights": "true",
-                "o_enableDirectionalLights": "true",
-                "o_enableIBL": "true",
-                "o_enablePunctualLights": "true",
-                "o_enableShadows": "true",
-                "o_materialUseForwardPassIBLSpecular": "false",
-                "o_metallic_useTexture": "false",
-                "o_normal_useTexture": "true",
-                "o_opacity_mode": "OpacityMode::Opaque",
-                "o_opacity_source": "OpacitySource::Packed",
-                "o_parallax_algorithm": "ParallaxAlgorithm::POM",
-                "o_parallax_enablePixelDepthOffset": "true",
-                "o_parallax_feature_enabled": "false",
-                "o_parallax_highlightClipping": "false",
-                "o_parallax_quality": "ParallaxQuality::High",
-                "o_roughness_useTexture": "true",
                 "o_specularF0_enableMultiScatterCompensation": "true",
                 "o_specularF0_useTexture": "false",
                 "o_specularOcclusion_useTexture": "false",
@@ -199,7 +182,7 @@
             }
         },
         {
-            "StableId": 7,
+            "StableId": 6,
             "Options": {
                 "o_applySpecularAA": "true",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -235,7 +218,7 @@
             }
         },
         {
-            "StableId": 8,
+            "StableId": 7,
             "Options": {
                 "o_applySpecularAA": "true",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -271,7 +254,7 @@
             }
         },
         {
-            "StableId": 9,
+            "StableId": 8,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -307,7 +290,7 @@
             }
         },
         {
-            "StableId": 10,
+            "StableId": 9,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -343,7 +326,7 @@
             }
         },
         {
-            "StableId": 11,
+            "StableId": 10,
             "Options": {
                 "o_applySpecularAA": "true",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -379,7 +362,7 @@
             }
         },
         {
-            "StableId": 12,
+            "StableId": 11,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Lerp",
@@ -415,7 +398,7 @@
             }
         },
         {
-            "StableId": 13,
+            "StableId": 12,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Lerp",
@@ -451,7 +434,7 @@
             }
         },
         {
-            "StableId": 14,
+            "StableId": 13,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -487,7 +470,7 @@
             }
         },
         {
-            "StableId": 15,
+            "StableId": 14,
             "Options": {
                 "o_applySpecularAA": "true",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -523,7 +506,7 @@
             }
         },
         {
-            "StableId": 16,
+            "StableId": 15,
             "Options": {
                 "o_applySpecularAA": "true",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -559,7 +542,7 @@
             }
         },
         {
-            "StableId": 17,
+            "StableId": 16,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -595,7 +578,7 @@
             }
         },
         {
-            "StableId": 18,
+            "StableId": 17,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -631,7 +614,7 @@
             }
         },
         {
-            "StableId": 19,
+            "StableId": 18,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -667,7 +650,7 @@
             }
         },
         {
-            "StableId": 20,
+            "StableId": 19,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -703,7 +686,7 @@
             }
         },
         {
-            "StableId": 21,
+            "StableId": 20,
             "Options": {
                 "o_applySpecularAA": "true",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -739,7 +722,7 @@
             }
         },
         {
-            "StableId": 22,
+            "StableId": 21,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -775,7 +758,7 @@
             }
         },
         {
-            "StableId": 23,
+            "StableId": 22,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::LinearLight",
@@ -811,7 +794,7 @@
             }
         },
         {
-            "StableId": 24,
+            "StableId": 23,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -847,7 +830,7 @@
             }
         },
         {
-            "StableId": 25,
+            "StableId": 24,
             "Options": {
                 "o_applySpecularAA": "true",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -883,7 +866,7 @@
             }
         },
         {
-            "StableId": 26,
+            "StableId": 25,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -919,7 +902,7 @@
             }
         },
         {
-            "StableId": 27,
+            "StableId": 26,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -955,7 +938,7 @@
             }
         },
         {
-            "StableId": 28,
+            "StableId": 27,
             "Options": {
                 "o_applySpecularAA": "true",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -991,7 +974,7 @@
             }
         },
         {
-            "StableId": 29,
+            "StableId": 28,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -1027,7 +1010,7 @@
             }
         },
         {
-            "StableId": 30,
+            "StableId": 29,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -1063,7 +1046,7 @@
             }
         },
         {
-            "StableId": 31,
+            "StableId": 30,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -1099,7 +1082,7 @@
             }
         },
         {
-            "StableId": 32,
+            "StableId": 31,
             "Options": {
                 "o_applySpecularAA": "true",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -1135,7 +1118,7 @@
             }
         },
         {
-            "StableId": 33,
+            "StableId": 32,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -1171,7 +1154,7 @@
             }
         },
         {
-            "StableId": 34,
+            "StableId": 33,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -1207,7 +1190,7 @@
             }
         },
         {
-            "StableId": 35,
+            "StableId": 34,
             "Options": {
                 "o_applySpecularAA": "true",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Lerp",
@@ -1243,7 +1226,7 @@
             }
         },
         {
-            "StableId": 36,
+            "StableId": 35,
             "Options": {
                 "o_applySpecularAA": "true",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -1279,7 +1262,7 @@
             }
         },
         {
-            "StableId": 37,
+            "StableId": 36,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -1315,7 +1298,7 @@
             }
         },
         {
-            "StableId": 38,
+            "StableId": 37,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -1351,7 +1334,7 @@
             }
         },
         {
-            "StableId": 39,
+            "StableId": 38,
             "Options": {
                 "o_applySpecularAA": "true",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -1387,7 +1370,7 @@
             }
         },
         {
-            "StableId": 40,
+            "StableId": 39,
             "Options": {
                 "o_applySpecularAA": "true",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -1423,7 +1406,7 @@
             }
         },
         {
-            "StableId": 41,
+            "StableId": 40,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -1459,7 +1442,7 @@
             }
         },
         {
-            "StableId": 42,
+            "StableId": 41,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -1495,7 +1478,7 @@
             }
         },
         {
-            "StableId": 43,
+            "StableId": 42,
             "Options": {
                 "o_applySpecularAA": "true",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -1531,7 +1514,7 @@
             }
         },
         {
-            "StableId": 44,
+            "StableId": 43,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -1567,7 +1550,7 @@
             }
         },
         {
-            "StableId": 45,
+            "StableId": 44,
             "Options": {
                 "o_applySpecularAA": "true",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Lerp",
@@ -1603,7 +1586,7 @@
             }
         },
         {
-            "StableId": 46,
+            "StableId": 45,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -1639,7 +1622,7 @@
             }
         },
         {
-            "StableId": 47,
+            "StableId": 46,
             "Options": {
                 "o_applySpecularAA": "true",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -1675,7 +1658,7 @@
             }
         },
         {
-            "StableId": 48,
+            "StableId": 47,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -1711,7 +1694,7 @@
             }
         },
         {
-            "StableId": 49,
+            "StableId": 48,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -1747,7 +1730,7 @@
             }
         },
         {
-            "StableId": 50,
+            "StableId": 49,
             "Options": {
                 "o_applySpecularAA": "true",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Lerp",
@@ -1783,7 +1766,7 @@
             }
         },
         {
-            "StableId": 51,
+            "StableId": 50,
             "Options": {
                 "o_applySpecularAA": "true",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Lerp",
@@ -1819,10 +1802,46 @@
             }
         },
         {
-            "StableId": 52,
+            "StableId": 51,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
+                "o_baseColor_useTexture": "true",
+                "o_clearCoat_enabled": "false",
+                "o_clearCoat_factor_useTexture": "false",
+                "o_clearCoat_feature_enabled": "false",
+                "o_clearCoat_normal_useTexture": "false",
+                "o_clearCoat_roughness_useTexture": "false",
+                "o_diffuseOcclusion_useTexture": "false",
+                "o_emissiveEnabled": "false",
+                "o_emissive_useTexture": "false",
+                "o_enableAreaLights": "true",
+                "o_enableDirectionalLights": "true",
+                "o_enableIBL": "true",
+                "o_enablePunctualLights": "true",
+                "o_enableShadows": "true",
+                "o_materialUseForwardPassIBLSpecular": "false",
+                "o_metallic_useTexture": "false",
+                "o_normal_useTexture": "false",
+                "o_opacity_mode": "OpacityMode::Opaque",
+                "o_opacity_source": "OpacitySource::Packed",
+                "o_parallax_algorithm": "ParallaxAlgorithm::POM",
+                "o_parallax_enablePixelDepthOffset": "false",
+                "o_parallax_feature_enabled": "false",
+                "o_parallax_highlightClipping": "false",
+                "o_parallax_quality": "ParallaxQuality::Low",
+                "o_roughness_useTexture": "false",
+                "o_specularF0_enableMultiScatterCompensation": "true",
+                "o_specularF0_useTexture": "false",
+                "o_specularOcclusion_useTexture": "false",
+                "o_useHeightmap": "false"
+            }
+        },
+        {
+            "StableId": 52,
+            "Options": {
+                "o_applySpecularAA": "false",
+                "o_baseColorTextureBlendMode": "TextureBlendMode::Lerp",
                 "o_baseColor_useTexture": "true",
                 "o_clearCoat_enabled": "false",
                 "o_clearCoat_factor_useTexture": "false",
@@ -1858,42 +1877,6 @@
             "StableId": 53,
             "Options": {
                 "o_applySpecularAA": "false",
-                "o_baseColorTextureBlendMode": "TextureBlendMode::Lerp",
-                "o_baseColor_useTexture": "true",
-                "o_clearCoat_enabled": "false",
-                "o_clearCoat_factor_useTexture": "false",
-                "o_clearCoat_feature_enabled": "false",
-                "o_clearCoat_normal_useTexture": "false",
-                "o_clearCoat_roughness_useTexture": "false",
-                "o_diffuseOcclusion_useTexture": "false",
-                "o_emissiveEnabled": "false",
-                "o_emissive_useTexture": "false",
-                "o_enableAreaLights": "true",
-                "o_enableDirectionalLights": "true",
-                "o_enableIBL": "true",
-                "o_enablePunctualLights": "true",
-                "o_enableShadows": "true",
-                "o_materialUseForwardPassIBLSpecular": "false",
-                "o_metallic_useTexture": "false",
-                "o_normal_useTexture": "false",
-                "o_opacity_mode": "OpacityMode::Opaque",
-                "o_opacity_source": "OpacitySource::Packed",
-                "o_parallax_algorithm": "ParallaxAlgorithm::POM",
-                "o_parallax_enablePixelDepthOffset": "false",
-                "o_parallax_feature_enabled": "false",
-                "o_parallax_highlightClipping": "false",
-                "o_parallax_quality": "ParallaxQuality::Low",
-                "o_roughness_useTexture": "false",
-                "o_specularF0_enableMultiScatterCompensation": "true",
-                "o_specularF0_useTexture": "false",
-                "o_specularOcclusion_useTexture": "false",
-                "o_useHeightmap": "false"
-            }
-        },
-        {
-            "StableId": 54,
-            "Options": {
-                "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
                 "o_baseColor_useTexture": "true",
                 "o_clearCoat_enabled": "false",
@@ -1927,7 +1910,7 @@
             }
         },
         {
-            "StableId": 55,
+            "StableId": 54,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -1963,7 +1946,7 @@
             }
         },
         {
-            "StableId": 56,
+            "StableId": 55,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -1999,7 +1982,7 @@
             }
         },
         {
-            "StableId": 57,
+            "StableId": 56,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -2035,7 +2018,7 @@
             }
         },
         {
-            "StableId": 58,
+            "StableId": 57,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -2071,7 +2054,7 @@
             }
         },
         {
-            "StableId": 59,
+            "StableId": 58,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Multiply",
@@ -2107,7 +2090,7 @@
             }
         },
         {
-            "StableId": 60,
+            "StableId": 59,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Lerp",
@@ -2143,7 +2126,7 @@
             }
         },
         {
-            "StableId": 61,
+            "StableId": 60,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Lerp",
@@ -2179,7 +2162,7 @@
             }
         },
         {
-            "StableId": 62,
+            "StableId": 61,
             "Options": {
                 "o_applySpecularAA": "false",
                 "o_baseColorTextureBlendMode": "TextureBlendMode::Lerp",

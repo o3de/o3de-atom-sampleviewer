@@ -223,4 +223,4 @@ Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder .. g_te
 g_testMaterialsFolder = 'testdata/materials/autobrick/'
 
 GenerateMaterialScreenshot('Level C', 'Brick', {model=g_cubeModel})
-GenerateMaterialScreenshot('Level D', 'Tile', {model=g_cubeModel})
+GenerateMaterialScreenshot('Level E', 'Tile', {model=g_cubeModel})

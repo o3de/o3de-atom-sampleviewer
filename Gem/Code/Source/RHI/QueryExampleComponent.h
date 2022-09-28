@@ -11,7 +11,6 @@
 #include <AzCore/Component/Component.h>
 #include <AzCore/Component/TickBus.h>
 #include <AzCore/std/containers/array.h>
-#include <AzCore/std/chrono/clocks.h>
 
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 #include <Atom/RHI.Reflect/ShaderResourceGroupLayoutDescriptor.h>
@@ -92,7 +91,7 @@ namespace AtomSampleViewer
 
         void SetQueryType(QueryType type);
         void DrawSampleSettings();
-        
+
         AZ::RHI::Ptr<AZ::RHI::BufferPool> m_inputAssemblyBufferPool;
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_quadInputAssemblyBuffer;
 
