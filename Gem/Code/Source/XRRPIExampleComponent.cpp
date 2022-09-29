@@ -134,16 +134,16 @@ namespace AtomSampleViewer
         switch (m_groundPlaneMaterial)
         {
         case 0:
-            materialName = AZStd::string::format("materials/ssrexample/groundplanechrome.azmaterial");
+            materialName = "materials/ssrexample/groundplanechrome.azmaterial";
             break;
         case 1:
-            materialName = AZStd::string::format("materials/ssrexample/groundplanealuminum.azmaterial");
+            materialName = "materials/ssrexample/groundplanealuminum.azmaterial";
             break;
         case 2:
-            materialName = AZStd::string::format("materials/presets/pbr/default_grid.azmaterial");
+            materialName = "materials/presets/pbr/default_grid.azmaterial";
             break;
         default:
-            materialName = AZStd::string::format("materials/ssrexample/groundplanemirror.azmaterial");
+            materialName = "materials/ssrexample/groundplanemirror.azmaterial";
             break;
         }
 
@@ -222,13 +222,13 @@ namespace AtomSampleViewer
             AZ::Debug::NoClipControllerRequestBus::Event(GetCameraEntityId(), &AZ::Debug::NoClipControllerRequests::SetCameraStateDown, xButtonState);
 
             // Switch to updating the view using right joystick controller if the Trigger button on the right controller is pressed
-            m_xrSystem->GetTriggerState(1) > 0.1f ? m_rightTriggerButtonPressed = true : m_rightTriggerButtonPressed = false;
+            m_rightTriggerButtonPressed = (m_xrSystem->GetTriggerState(1) > 0.1f);
             if (m_rightTriggerButtonPressed)
             { 
                 //Update Camera view based on right JoyStick controller
                 float m_xRightJoyStickValue = m_xrSystem->GetXJoyStickState(1);
                 float m_yRightJoyStickValue = m_xrSystem->GetYJoyStickState(1);
-                float heading, pitch = 0.0;
+                float heading, pitch = 0.0f;
                 AZ::Debug::NoClipControllerRequestBus::EventResult(heading, GetCameraEntityId(), &AZ::Debug::NoClipControllerRequests::GetHeading);
                 AZ::Debug::NoClipControllerRequestBus::EventResult(pitch, GetCameraEntityId(), &AZ::Debug::NoClipControllerRequests::GetPitch);
                 heading -= m_xRightJoyStickValue * PixelToDegree * ViewOrientationScale;
@@ -240,13 +240,13 @@ namespace AtomSampleViewer
             }
             else
             {
+                //Convert to O3de's coordinate system and update the camera orientation for the correct eye view
+                AZ::Quaternion viewLocalPoseOrientation = frontPoseData.m_orientation;
+                viewLocalPoseOrientation.SetX(-frontPoseData.m_orientation.GetX());
+                viewLocalPoseOrientation.SetY(frontPoseData.m_orientation.GetZ());
+                viewLocalPoseOrientation.SetZ(-frontPoseData.m_orientation.GetY());
                 for (AZ::u32 i = 0; i < m_numXrViews; i++)
                 {
-                    //Convert to O3de's coordinate system and update the camera orientation for the correct eye view
-                    AZ::Quaternion viewLocalPoseOrientation = frontPoseData.m_orientation;
-                    viewLocalPoseOrientation.SetX(-frontPoseData.m_orientation.GetX());
-                    viewLocalPoseOrientation.SetY(frontPoseData.m_orientation.GetZ());
-                    viewLocalPoseOrientation.SetZ(-frontPoseData.m_orientation.GetY());
                     Camera::CameraRequestBus::Event(GetCameraEntityId(), &Camera::CameraRequestBus::Events::SetXRViewQuaternion, viewLocalPoseOrientation, i);
                 }
             }

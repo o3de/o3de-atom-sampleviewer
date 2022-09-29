@@ -63,7 +63,7 @@ namespace AtomSampleViewer
             static const float clip_near = 0.05f;
             static const float clip_far = 100.0f;
             bool reverseDepth = false;
-            projection = xrSystem->CreateProjectionOffset(fovData.m_angleLeft, fovData.m_angleRight, 
+            projection = xrSystem->CreateStereoscopicProjection(fovData.m_angleLeft, fovData.m_angleRight,
                                                           fovData.m_angleDown, fovData.m_angleUp, 
                                                           clip_near, clip_far, reverseDepth);
 
