@@ -153,8 +153,8 @@ namespace AtomSampleViewer
         }
     }
 
-    AZ_CVAR(bool, r_EnableHostRenderPipelineOnXR, false, CVar_EnableHostRenderPipelineOnXR, AZ::ConsoleFunctorFlags::Null,
-        "When an XR system is present in a host platform, this will enable the regular render pipeline on the host PC as well (false by default).");
+    AZ_CVAR(bool, r_EnableHostRenderPipelineOnXR, true, CVar_EnableHostRenderPipelineOnXR, AZ::ConsoleFunctorFlags::Null,
+        "When an XR system is present in a host platform, this will enable the regular render pipeline on the host PC as well (true by default).");
 #endif
 
     namespace
