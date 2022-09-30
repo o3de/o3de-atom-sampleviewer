@@ -44,6 +44,7 @@ function GenerateMaterialScreenshot(imageComparisonThresholdLevel, materialName,
         options.showGroundPlane = false
     end
 
+    Print("Generating material screenshot for " .. materialName)
     Print("MODEL: " .. options.model)
 
     materialName = string.lower(materialName)

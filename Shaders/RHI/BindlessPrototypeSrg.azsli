@@ -59,7 +59,7 @@ ShaderResourceGroup SamplerSrg : FrequencyPerScene
 ShaderResourceGroup ImageSrg : NonBindlessTextureSemanticId
 {
     // Array of textures
-    Texture2D m_textureArray[];
+    Texture2D m_textureArray[UNBOUNDED_SIZE];
 };
 
 // Helper functions to read data from the FloatBuffer. The FloatBuffer is accessed with an offset and an index.

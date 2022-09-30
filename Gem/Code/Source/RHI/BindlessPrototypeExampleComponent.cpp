@@ -333,8 +333,10 @@ namespace AtomSampleViewer
     {
         // FloatBuffer ID
         const char* floatBufferId = "m_floatBuffer";
+#if ATOMSAMPLEVIEWER_TRAIT_BINDLESS_PROTOTYPE_SUPPORTS_UNBOUNDED_ARRAY
         // TextureArray ID
         const char* textureArrayId = "m_textureArray";
+#endif
 
         m_scopeId = RHI::ScopeId("BindlessPrototype");
 
@@ -385,7 +387,15 @@ namespace AtomSampleViewer
 
         // Set up the SRGs
          m_bindlessSrg = std::make_unique<BindlessSrg>(
-            BindlessSrg(m_shader, { m_samplerSrgName, m_floatBufferSrgName, m_indirectionBufferSrgName, m_imageSrgName }));
+            BindlessSrg(m_shader, 
+                        { 
+                            m_samplerSrgName, 
+                            m_floatBufferSrgName, 
+                            m_indirectionBufferSrgName, 
+#if ATOMSAMPLEVIEWER_TRAIT_BINDLESS_PROTOTYPE_SUPPORTS_DIRECT_BOUND_UNBOUNDED_ARRAY
+                            m_imageSrgName
+#endif
+                         }));
 
         // Create the BufferPool
         CreateBufferPool();
@@ -473,18 +483,20 @@ namespace AtomSampleViewer
             m_indirectionBufferView = m_indirectionBuffer->GetBufferView(viewDesc);
         }
         
-        // Set the images
-        {
-            Data::Instance<AZ::RPI::ShaderResourceGroup> imageSrg = m_bindlessSrg->GetSrg(m_imageSrgName);
-            AZ::RHI::ShaderInputImageUnboundedArrayIndex imageIndex =
-                imageSrg->FindShaderInputImageUnboundedArrayIndex(AZ::Name(textureArrayId));
+#if ATOMSAMPLEVIEWER_TRAIT_BINDLESS_PROTOTYPE_SUPPORTS_DIRECT_BOUND_UNBOUNDED_ARRAY
+       // Set the images
+       {
+           Data::Instance<AZ::RPI::ShaderResourceGroup> imageSrg = m_bindlessSrg->GetSrg(m_imageSrgName);
+           AZ::RHI::ShaderInputImageUnboundedArrayIndex imageIndex =
+               imageSrg->FindShaderInputImageUnboundedArrayIndex(AZ::Name(textureArrayId));
 
-            [[maybe_unused]] bool result = imageSrg->SetImageViewUnboundedArray(imageIndex, m_imageViews);
-            AZ_Assert(result, "Failed to set image view unbounded array into shader resource group.");
+           [[maybe_unused]] bool result = imageSrg->SetImageViewUnboundedArray(imageIndex, m_imageViews);
+           AZ_Assert(result, "Failed to set image view unbounded array into shader resource group.");
 
-            // Compile the image SRG
-            imageSrg->Compile();
-        }
+           // Compile the image SRG
+           imageSrg->Compile();
+       }
+#endif
         
         // Create and allocate the materials in the FloatBufferimageSrg
         {
@@ -581,7 +593,9 @@ namespace AtomSampleViewer
                         m_bindlessSrg->GetSrg(m_samplerSrgName)->GetRHIShaderResourceGroup(),
                         subMesh.m_perSubMeshSrg->GetRHIShaderResourceGroup(),
                         m_bindlessSrg->GetSrg(m_floatBufferSrgName)->GetRHIShaderResourceGroup(),
+#if ATOMSAMPLEVIEWER_TRAIT_BINDLESS_PROTOTYPE_SUPPORTS_DIRECT_BOUND_UNBOUNDED_ARRAY
                         m_bindlessSrg->GetSrg(m_imageSrgName)->GetRHIShaderResourceGroup(),
+#endif
                         m_bindlessSrg->GetSrg(m_indirectionBufferSrgName)->GetRHIShaderResourceGroup(),
                     };
                     RHI::DrawItem drawItem;

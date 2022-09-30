@@ -133,7 +133,7 @@ PixelOutput MainPS(VertexOutput psInput)
         ReadFromFloatBuffer(bindlessMaterial1.m_diffuseColor, HandleSrg::m_materialHandle, offset);
         ReadFromFloatBuffer(bindlessMaterial1.m_diffuseTextureIndex, HandleSrg::m_materialHandle, offset);
         
-#if UB_DIRECTBINDING_NOTSUPPPORTED 
+#ifdef UB_DIRECTBINDING_NOTSUPPPORTED 
         Texture2D texture = Bindless::GetTexture2D(
             IndirectionBufferSrg::m_indirectionBuffer.Load(bindlessMaterial1.m_diffuseTextureIndex * 4));
 #else   

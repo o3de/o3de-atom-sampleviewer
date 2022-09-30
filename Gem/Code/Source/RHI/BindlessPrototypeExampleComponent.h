@@ -22,6 +22,8 @@
 
 #include <Utils/ImGuiSidebar.h>
 
+#include <BindlessPrototype_Traits_Platform.h>
+
 namespace AZ
 {
     namespace RHI
@@ -260,7 +262,9 @@ namespace AtomSampleViewer
         static constexpr const char* m_samplerSrgName = "SamplerSrg";
         static constexpr const char* m_floatBufferSrgName = "FloatBufferSrg";
         static constexpr const char* m_indirectionBufferSrgName = "IndirectionBufferSrg";
+#if ATOMSAMPLEVIEWER_TRAIT_BINDLESS_PROTOTYPE_SUPPORTS_DIRECT_BOUND_UNBOUNDED_ARRAY
         static constexpr const char* m_imageSrgName = "ImageSrg";
+#endif
 
         // Material count
         static constexpr uint32_t m_materialCount = 1024u;
