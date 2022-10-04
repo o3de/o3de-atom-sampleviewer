@@ -75,6 +75,22 @@
             {
                 "Name": "ReadbackPipelineTemplate",
                 "Path": "Passes/ReadbackPipeline.pass"
+            },
+            {
+                "Name": "DeferredPipelineTemplate",
+                "Path": "Passes/PrototypeDeferredPipeline/DeferredPipeline.pass"
+            },
+            {
+                "Name": "DeferredOpaqueParentTemplate",
+                "Path": "Passes/PrototypeDeferredPipeline/DeferredOpaqueParent.pass"
+            },
+            {
+                "Name": "DeferredMaterialPassTemplate",
+                "Path": "Passes/PrototypeDeferredPipeline/DeferredMaterial.pass"
+            },
+            {
+                "Name": "DeferredLightingPassTemplate",
+                "Path": "Passes/PrototypeDeferredPipeline/DeferredLighting.pass"
             }
         ]
     }
