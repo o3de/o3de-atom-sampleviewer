@@ -200,7 +200,7 @@ g_testMaterialsFolder = 'materials/minimalpbr/'
 g_testCaseFolder = 'MinimalPBR'
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder .. g_testCaseFolder))
 
-GenerateMaterialScreenshot('Level B', 'MinimalPbr_Default')
+GenerateMaterialScreenshot('Level C', 'MinimalPbr_Default')
 GenerateMaterialScreenshot('Level F', 'MinimalPbr_BlueMetal')
 GenerateMaterialScreenshot('Level D', 'MinimalPbr_RedDielectric')
 
