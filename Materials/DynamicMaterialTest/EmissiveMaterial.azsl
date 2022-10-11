@@ -7,6 +7,7 @@
  */
 
 #include <viewsrg.srgi>
+#include <Atom/RPI/ShaderResourceGroups/DefaultDrawSrg.azsli>
 #include <Atom/Features/PBR/AlphaUtils.azsli>
 #include <Atom/Features/PBR/DefaultObjectSrg.azsli>
 #include <Atom/Features/Pipeline/Forward/ForwardPassSrg.azsli>
@@ -36,8 +37,7 @@ struct VSInput
 {
     float3 m_position : POSITION;
     float3 m_normal : NORMAL;
-    float4 m_tangent : TANGENT; 
-    float3 m_bitangent : BITANGENT; 
+    float4 m_tangent : TANGENT;
     float2 m_uv : UV0;
 };
 
@@ -45,8 +45,7 @@ struct VSOutput
 {
     precise float4 m_position : SV_Position;
     float3 m_normal: NORMAL;
-    float3 m_tangent : TANGENT; 
-    float3 m_bitangent : BITANGENT; 
+    float4 m_tangent : TANGENT;
     float3 m_worldPosition : UV0;
     float2 m_uv : UV1;
     float3 m_shadowCoords[ViewSrg::MaxCascadeCount] : UV3;
@@ -59,20 +58,29 @@ VSOutput MainVS(VSInput IN)
 {
     VSOutput OUT;
     float3 worldPosition = mul(ObjectSrg::GetWorldMatrix(), float4(IN.m_position, 1.0)).xyz;
-    VertexHelper(IN, OUT, worldPosition);
+    OUT.m_worldPosition = worldPosition;
+    OUT.m_position = mul(ViewSrg::m_viewProjectionMatrix, float4(OUT.m_worldPosition, 1.0));
+    OUT.m_normal = IN.m_normal;
+    OUT.m_tangent = IN.m_tangent;
     OUT.m_uv = IN.m_uv;
     return OUT;
 }
 
 ForwardPassOutput MainPS(VSOutput IN)
 {
+    float4x4 objectToWorld = ObjectSrg::GetWorldMatrix();
+    float3x3 objectToWorldIT = ObjectSrg::GetWorldMatrixInverseTranspose();
+
+    float3 vertexNormal, vertexTangent, vertexBitangent;
+    ConstructTBN(IN.m_normal, IN.m_tangent, objectToWorld, objectToWorldIT, vertexNormal, vertexTangent, vertexBitangent);
+
     // ------- Surface -------
 
     Surface surface;
     
     // Position, Normal, Roughness
     surface.position = IN.m_worldPosition.xyz;
-    surface.normal = surface.vertexNormal = normalize(IN.m_normal);
+    surface.normal = surface.vertexNormal = vertexNormal;
     surface.roughnessLinear = 1.0f;
     surface.CalculateRoughnessA();
 

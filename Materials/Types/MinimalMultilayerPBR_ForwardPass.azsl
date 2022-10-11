@@ -7,6 +7,7 @@
  */
 
 #include <viewsrg.srgi>
+#include <Atom/RPI/ShaderResourceGroups/DefaultDrawSrg.azsli>
 #include <Atom/Features/PBR/DefaultObjectSrg.azsli>
 #include <Atom/Features/Pipeline/Forward/ForwardPassSrg.azsli>
 #include <Atom/Features/Pipeline/Forward/ForwardPassOutput.azsli>
@@ -50,8 +51,7 @@ struct VSInput
 {
     float3 m_position : POSITION;
     float3 m_normal : NORMAL;
-    float4 m_tangent : TANGENT; 
-    float3 m_bitangent : BITANGENT; 
+    float4 m_tangent : TANGENT;
     float2 m_uv : UV0;
 };
 
@@ -59,14 +59,11 @@ struct VSOutput
 {
     precise linear centroid float4 m_position : SV_Position;
     float3 m_normal: NORMAL;
-    float3 m_tangent : TANGENT; 
-    float3 m_bitangent : BITANGENT; 
+    float4 m_tangent : TANGENT;
     float2 m_uv : UV0;
     float3 m_worldPosition : UV1;
     float3 m_shadowCoords[ViewSrg::MaxCascadeCount] : UV2;
 };
-
-#include <Atom/Features/Vertex/VertexHelper.azsli>
 
 VSOutput MinimalMultilayerPBR_MainPassVS(VSInput IN)
 {
@@ -76,7 +73,10 @@ VSOutput MinimalMultilayerPBR_MainPassVS(VSInput IN)
  
     OUT.m_uv = IN.m_uv;
 
-    VertexHelper(IN, OUT, worldPosition);
+    OUT.m_worldPosition = worldPosition;
+    OUT.m_position = mul(ViewSrg::m_viewProjectionMatrix, float4(OUT.m_worldPosition, 1.0));
+    OUT.m_normal = IN.m_normal;
+    OUT.m_tangent = IN.m_tangent;
 
     return OUT;
 }
@@ -85,6 +85,12 @@ VSOutput MinimalMultilayerPBR_MainPassVS(VSInput IN)
 
 ForwardPassOutput MinimalMultilayerPBR_MainPassPS(VSOutput IN)
 {
+    float4x4 objectToWorld = ObjectSrg::GetWorldMatrix();
+    float3x3 objectToWorldIT = ObjectSrg::GetWorldMatrixInverseTranspose();
+
+    float3 vertexNormal, vertexTangent, vertexBitangent;
+    ConstructTBN(IN.m_normal, IN.m_tangent, objectToWorld, objectToWorldIT, vertexNormal, vertexTangent, vertexBitangent);
+
     float3 baseColor1 = GetBaseColorInput(MaterialSrg::m_layer1_baseColorTexture, MaterialSrg::m_sampler, IN.m_uv, MaterialSrg::m_layer1_baseColor, o_layer1_useBaseColorTexture);
     float3 baseColor2 = GetBaseColorInput(MaterialSrg::m_layer2_baseColorTexture, MaterialSrg::m_sampler, IN.m_uv, MaterialSrg::m_layer2_baseColor, o_layer2_useBaseColorTexture);
     
@@ -102,8 +108,8 @@ ForwardPassOutput MinimalMultilayerPBR_MainPassPS(VSOutput IN)
     
     // Position, Normal, Roughness
     surface.position = IN.m_worldPosition.xyz;
-    surface.normal = normalize(IN.m_normal);
-    surface.vertexNormal = normalize(IN.m_normal);
+    surface.normal = vertexNormal;
+    surface.vertexNormal = vertexNormal;
     surface.roughnessLinear = roughness;
     surface.CalculateRoughnessA();
 
