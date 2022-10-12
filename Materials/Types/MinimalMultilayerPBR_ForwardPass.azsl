@@ -15,6 +15,7 @@
 #include <Atom/Features/SrgSemantics.azsli>
 #include <Atom/Features/ColorManagement/TransformColor.azsli>
 #include <Atom/Features/PBR/Lighting/StandardLighting.azsli>
+#include <Atom/Features/PBR/Lights/IblForward.azsli>
 #include <Atom/Features/PBR/Decals.azsli>
 
 #include <Atom/Feature/Common/Assets/Shaders/Materials/MaterialInputs/BaseColorInput.azsli>
@@ -143,7 +144,7 @@ ForwardPassOutput MinimalMultilayerPBR_MainPassPS(VSOutput IN)
     ApplyDirectLighting(surface, lightingData, IN.m_position);
 
     // Apply Image Based Lighting (IBL)
-    ApplyIBL(surface, lightingData);
+    ApplyIblForward(surface, lightingData);
 
     // Finalize Lighting
     lightingData.FinalizeLighting();
