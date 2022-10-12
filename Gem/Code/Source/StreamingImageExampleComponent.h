@@ -63,7 +63,6 @@ namespace AtomSampleViewer
             AZ::Data::Asset<AZ::RPI::StreamingImageAsset> m_asset;
             AZ::Data::Instance<AZ::RPI::StreamingImage> m_image;
             AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_srg;
-            bool m_wasStreamed = false;
 
             void Reset()
             {
@@ -71,7 +70,6 @@ namespace AtomSampleViewer
                 m_asset.Reset();
                 m_image.reset();
                 m_srg.reset();
-                m_wasStreamed = false;
             }
         };
 
@@ -158,10 +156,14 @@ namespace AtomSampleViewer
         // profile data
         AZ::u64 m_loadImageStart = 0;
         AZ::u64 m_loadImageEnd = 0;
+        // The total time of create all the images (include upload their tail mipmaps to device)
         AZ::u64 m_createImageTime = 0;
+        // The first time when all image were streamed to their target mip
         AZ::u64 m_streamingImageEnd = 0;
-        AZ::u64 m_initialImageMemory = 0;
-        AZ::u64 m_imageMemory = 0;
+        // The total size of all the .streamingimage assets
+        AZ::u64 m_initialImageAssetSize = 0;
+        // The total size of all the streaming image assets as well as their mipchain assets
+        AZ::u64 m_imageAssetSize = 0;
         
         ImGuiSidebar m_imguiSidebar;
 
@@ -191,5 +193,9 @@ namespace AtomSampleViewer
 
         // for pause or resume script automation
         bool m_automationPaused = false;
+
+        // save previous settings which need to be recovered when exit the sample.
+        size_t m_cachedPoolBudget = 0;
+        int16_t m_cachedMipBias = 0;
     };
 } // namespace AtomSampleViewer

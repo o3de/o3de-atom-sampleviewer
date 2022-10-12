@@ -10,10 +10,12 @@
 #include <Atom/RHI/DrawPacketBuilder.h>
 #include <Atom/RHI.Reflect/InputStreamLayoutBuilder.h>
 
+#include <Atom/RPI.Public/Image/ImageSystemInterface.h>
+#include <Atom/RPI.Public/Image/StreamingImagePool.h>
+#include <Atom/RPI.Public/Image/StreamingImageController.h>
 #include <Atom/RPI.Public/RPISystemInterface.h>
 #include <Atom/RPI.Public/Scene.h>
 #include <Atom/RPI.Public/Shader/Shader.h>
-#include <Atom/RPI.Public/Image/ImageSystemInterface.h>
 
 #include <Atom/RPI.Reflect/Asset/AssetUtils.h>
 #include <Atom/RPI.Reflect/Image/StreamingImageAssetHandler.h>
@@ -108,11 +110,16 @@ namespace AtomSampleViewer
             CreatePipeline("Shaders/streamingimageexample/image3d.azshader", "ImageSrg", m_image3dShaderAsset, m_image3dSrgLayout, m_image3dPipelineState,
                 m_image3dDrawListTag, m_scene);
         }
-
     }
 
     void StreamingImageExampleComponent::Activate()
     {
+        // Save the streaming image pool's budget and streaming image pool controller's mip bias 
+        // These would be recovered when exist the example
+        Data::Instance<RPI::StreamingImagePool> streamingImagePool = RPI::ImageSystemInterface::Get()->GetSystemStreamingPool();
+        m_cachedPoolBudget = streamingImagePool->GetMemoryBudget();
+        m_cachedMipBias = streamingImagePool->GetMipBias();
+
         m_enableHotReloadTest = IsHotReloadTestSupported();
 
         m_dynamicDraw = RPI::GetDynamicDraw();
@@ -151,7 +158,7 @@ namespace AtomSampleViewer
         }
 
         // Pause lua script (automation) until all the images loaded
-        // Use a 10 seconds timeout intead of default one incase of longer loading time
+        // Use a 10 seconds timeout instead of default one in case of longer loading time
         ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::PauseScriptWithTimeout, 10.0f);
         m_automationPaused = true;
     }
@@ -159,7 +166,7 @@ namespace AtomSampleViewer
     void StreamingImageExampleComponent::OnAssetReady(AZ::Data::Asset<AZ::Data::AssetData> asset)
     {
         // Skip processing if the asset is the asset for hot reloading test
-        // The orgianal asset was already processed.
+        // The original asset was already processed.
         if (m_reloadingAsset == asset.GetId())
         {
             return;
@@ -208,7 +215,7 @@ namespace AtomSampleViewer
 
         AZ::Data::AssetInfo info;
         AZ::Data::AssetCatalogRequestBus::BroadcastResult(info, &AZ::Data::AssetCatalogRequests::GetAssetInfoById, imageToDraw->m_image->GetAssetId());
-        m_initialImageMemory += info.m_sizeBytes;
+        m_initialImageAssetSize += info.m_sizeBytes;
 
         imageToDraw->m_srg->SetImage(m_imageInputIndex, imageToDraw->m_image);
 
@@ -233,14 +240,8 @@ namespace AtomSampleViewer
 
         imageToDraw->m_srg->SetConstant(m_positionInputIndex, position);
         imageToDraw->m_srg->SetConstant(m_sizeInputIndex, mipSize);
-
-        imageToDraw->m_wasStreamed = imageToDraw->m_image->GetResidentMipLevel() == 0;
-
-        if (imageToDraw->m_wasStreamed)
-        {
-            imageToDraw->m_srg->SetConstant<int>(m_residentMipInputIndex, imageToDraw->m_image->GetResidentMipLevel());
-            imageToDraw->m_srg->Compile();
-        }
+        imageToDraw->m_srg->SetConstant<int>(m_residentMipInputIndex, imageToDraw->m_image->GetResidentMipLevel());
+        imageToDraw->m_srg->Compile();
 
         m_numImageCreated++;
 
@@ -257,8 +258,6 @@ namespace AtomSampleViewer
         {
             m_reloadingAsset.SetInvalid();
             AZ::Data::AssetBus::MultiHandler::BusDisconnect(asset.GetId());
-            m_imageHotReload.m_wasStreamed = false;
-
         }
     }
 
@@ -320,60 +319,93 @@ namespace AtomSampleViewer
         m_image3dSrgLayout = nullptr;
         m_image3dPipelineState = nullptr;
         m_image3dDrawListTag.Reset();
+
+        // Recover pool budget and mip bias
+        Data::Instance<RPI::StreamingImagePool> streamingImagePool = RPI::ImageSystemInterface::Get()->GetSystemStreamingPool();
+        streamingImagePool->SetMemoryBudget(m_cachedPoolBudget);
+        streamingImagePool->SetMipBias(m_cachedMipBias);
     }
 
     void StreamingImageExampleComponent::OnTick([[maybe_unused]] float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint timePoint)
     {
         // update image streaming states
-        if (m_numImageStreamed < m_numImageCreated)
+        uint32_t numStreamed = 0;
+        for (auto& imageInfo : m_images)
         {
-            m_numImageStreamed = 0;
+            if (imageInfo.m_image)
+            {
+                imageInfo.m_srg->SetConstant<int>(m_residentMipInputIndex, imageInfo.m_image->GetResidentMipLevel());
+                imageInfo.m_srg->Compile();
+                if (imageInfo.m_image->IsStreamed())
+                {
+                    numStreamed ++;
+                }
+            }
+        }
+
+        // only need to set the image the first time all images were streamed
+        if (m_streamingImageEnd == 0 && numStreamed == m_numImageCreated && m_numImageCreated > 0)
+        {
+            m_streamingImageEnd = AZStd::GetTimeUTCMilliSecond();
             for (auto& imageInfo : m_images)
             {
-                if (imageInfo.m_image && !imageInfo.m_wasStreamed)
-                {
-                    imageInfo.m_wasStreamed = imageInfo.m_image->GetResidentMipLevel() == 0;
-
-                    imageInfo.m_srg->SetConstant<int>(m_residentMipInputIndex, imageInfo.m_image->GetResidentMipLevel());
-                    imageInfo.m_srg->Compile();
-
-                    if (imageInfo.m_wasStreamed)
-                    {
-                        m_imageMemory += GetImageAssetSize(imageInfo.m_image.get());
-                    }
-                }
-                m_numImageStreamed += imageInfo.m_wasStreamed ? 1 : 0;
-            }
-
-            if (m_numImageStreamed == m_numImageCreated)
-            {
-                m_streamingImageEnd = AZStd::GetTimeUTCMilliSecond();
+                m_imageAssetSize += GetImageAssetSize(imageInfo.m_image.get());
             }
         }
 
-        if (m_imageHotReload.m_image && !m_imageHotReload.m_wasStreamed && !m_imageHotReload.m_srg->GetRHIShaderResourceGroup()->IsQueuedForCompile())
+        if (m_imageHotReload.m_image && !m_imageHotReload.m_srg->GetRHIShaderResourceGroup()->IsQueuedForCompile())
         {
-            m_imageHotReload.m_wasStreamed = m_imageHotReload.m_image->GetResidentMipLevel() == 0;
-
             m_imageHotReload.m_srg->SetConstant<int>(m_residentMipInputIndex, m_imageHotReload.m_image->GetResidentMipLevel());
             m_imageHotReload.m_srg->Compile();
-
         }
 
-        bool streamingFinished = m_numImageCreated > 0 && m_numImageStreamed == m_numImageCreated;
+        bool streamingFinished = m_streamingImageEnd > 0;
 
         // Resume automation when all image streamed and hot reload finished
-        if (m_automationPaused && streamingFinished && m_imageHotReload.m_wasStreamed && !m_reloadingAsset.IsValid())
+        if (m_automationPaused && streamingFinished && m_imageHotReload.m_image && m_imageHotReload.m_image->IsStreamed() && !m_reloadingAsset.IsValid())
         {
             ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::ResumeScript);
             m_automationPaused = false;
-
         }
 
-        // Draw menus and info when streaming is finished
-        if (streamingFinished)
+        if (m_imguiSidebar.Begin())
         {
-            if (m_imguiSidebar.Begin())
+            Data::Instance<RPI::StreamingImagePool> streamingImagePool = RPI::ImageSystemInterface::Get()->GetSystemStreamingPool();
+            const RHI::StreamingImagePool* rhiPool = streamingImagePool->GetRHIPool();
+            const RHI::HeapMemoryUsage& memoryUsage = rhiPool->GetHeapMemoryUsage(RHI::HeapMemoryLevel::Device);
+
+            const size_t MB = 1024*1024;
+            // streaming image pool info
+            ImGui::BeginGroup();
+            ImGui::Text("Streaming image pool");
+            ImGui::Indent();
+            ImGui::Text("Image count: %u", streamingImagePool->GetImageCount());
+            ImGui::Text("Streamable image count: %u", streamingImagePool->GetStreamableImageCount());
+            // Add m_totalResidentInBytes and m_reservedInBytes together before ATOM-17037 is done
+            size_t totalResident = memoryUsage.m_totalResidentInBytes.load() + memoryUsage.m_reservedInBytes;
+            ImGui::Text("Allocated GPU memory: %d MB (%u)", totalResident/MB, totalResident);
+            size_t usedResident = memoryUsage.m_usedResidentInBytes.load() + memoryUsage.m_reservedInBytes;;
+            ImGui::Text("Used GPU memory: %d MB (%u)", usedResident/MB, usedResident);
+            
+            size_t budgetInBytes = memoryUsage.m_budgetInBytes;
+            int budgetInMB = aznumeric_cast<int>(budgetInBytes/MB);
+            ImGui::Text("GPU memory budget: %d MB", budgetInMB);
+            if (ScriptableImGui::SliderInt("MB", &budgetInMB, RHI::StreamingImagePool::ImagePoolMininumSizeInBytes/MB, 512))
+            {
+                streamingImagePool->SetMemoryBudget(budgetInMB * (1024*1024));
+            }
+
+            int mipBias = streamingImagePool->GetMipBias();
+            ImGui::Text("Mip bias");
+            if (ScriptableImGui::SliderInt("", &mipBias, -aznumeric_cast<int>(RHI::Limits::Image::MipCountMax), RHI::Limits::Image::MipCountMax))
+            {
+                streamingImagePool->SetMipBias(aznumeric_cast<int16_t>(mipBias));
+            }
+            ImGui::Unindent();
+            ImGui::EndGroup();
+
+            // Draw menus and info when streaming is finished
+            if (streamingFinished)
             {
                 // For switching rendering content between streamed images or 3d images
                 ImGui::Text("Image type view");
@@ -392,7 +424,7 @@ namespace AtomSampleViewer
                 ImGui::Text("Hot Reload Test");
 
                 ImGui::Indent();
-                if (m_enableHotReloadTest && m_imageHotReload.m_wasStreamed)
+                if (m_enableHotReloadTest && m_imageHotReload.m_image && m_imageHotReload.m_image->IsStreamed())
                 {
                     if (ScriptableImGui::Button("Switch texture"))
                     {
@@ -411,9 +443,9 @@ namespace AtomSampleViewer
                 ImGui::Separator();
                 ImGui::NewLine();
                 DisplayStreamingProfileData();
-
-                m_imguiSidebar.End();
             }
+
+            m_imguiSidebar.End();
         }
 
         if (m_viewStreamedImages)
@@ -502,8 +534,8 @@ namespace AtomSampleViewer
         ImGui::Text("Load and Create Images: %llu ms", m_loadImageEnd - m_loadImageStart);
         ImGui::Text("Create Images: %llu ms", m_createImageTime);
         ImGui::Text("Streaming Image Mips: %llu ms", m_streamingImageEnd - m_loadImageEnd);
-        ImGui::Text("Initial Image Memory: %.3f MB", m_initialImageMemory / (1024 * 1024.0f));
-        ImGui::Text("Final Image Memory: %.3f MB", m_imageMemory / (1024 * 1024.0f));
+        ImGui::Text("Initial image asset size: %.3f MB", m_initialImageAssetSize / (1024 * 1024.0f));
+        ImGui::Text("Total image asset size: %.3f MB", m_imageAssetSize / (1024 * 1024.0f));
         ImGui::Unindent();
         ImGui::EndGroup();
     }
