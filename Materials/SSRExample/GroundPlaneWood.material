@@ -1,6 +1,6 @@
 {
     "materialType": "Materials\\Types\\StandardPBR.materialtype",
-    "materialTypeVersion": 3,
+    "materialTypeVersion": 5,
     "propertyValues": {
         "baseColor.textureMap": "Materials/SSRExample/wood_planks_512_diff.tif",
         "metallic.factor": 0.0,

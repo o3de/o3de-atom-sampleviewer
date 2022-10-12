@@ -8,10 +8,10 @@
 
 #pragma once
 
+#include <AtomSampleComponent.h>
 #include <Atom/Bootstrap/DefaultWindowBus.h>
 #include <Atom/Feature/ImGui/ImGuiUtils.h>
 
-#include <AzCore/Component/Component.h>
 #include <AzCore/Component/EntityBus.h>
 #include <AzCore/Component/TickBus.h>
 
@@ -28,7 +28,7 @@ namespace AtomSampleViewer
     // to render a FullscreenTrianglePass, with the purpose on validating that the
     // shader reload notification events work properly.
     class ShaderReloadTestComponent final
-        : public AZ::Component
+        : public AtomSampleComponent
         , public AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler
         , public AZ::TickBus::Handler
     {

@@ -9,7 +9,9 @@
 --
 ----------------------------------------------------------------------------------------------------
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/DynamicDraw/')
+RunScript("scripts/TestEnvironment.luac")
+
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/DynamicDraw/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 OpenSample('RPI/DynamicDraw')

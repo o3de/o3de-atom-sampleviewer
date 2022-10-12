@@ -9,6 +9,8 @@
 --
 ----------------------------------------------------------------------------------------------------
 
+RunScript("scripts/TestEnvironment.luac")
+
 function EnablePositionalLights()
     SetImguiValue('Red', true)
     SetImguiValue('Intensity##Positional', 500.0)
@@ -70,10 +72,16 @@ function TestDirectionalLight()
     SetImguiValue('Cascade Position Correction', true)
     IdleFrames(1)
     CaptureScreenshot(g_screenshotOutputFolder .. '/directional_cascade_correction.png')
+    SetImguiValue('Cascade Position Correction', false)
+
+    -- Directional Light Cascade Position Correction
+    SetImguiValue('Use Fullscreen Blur', true)
+    IdleFrames(1)
+    CaptureScreenshot(g_screenshotOutputFolder .. '/directional_fullscreen_blur.png')
+    SetImguiValue('Use Fullscreen Blur', false)
 
     -- Directional Light PCF low
     SetImguiValue('Debug Coloring', false)
-    SetImguiValue('Cascade Position Correction', false)
     SetImguiValue('Filter Method##Directional', 'PCF')
     SetImguiValue('Filtering # ##Directional', 4)
     IdleFrames(1)
@@ -92,7 +100,7 @@ function TestDirectionalLight()
     -- Directional Light ESM+PCF
     SetImguiValue('Filter Method##Directional', 'ESM+PCF')
     IdleFrames(1)
-    CaptureScreenshot(g_screenshotOutputFolder .. '/directional_esm_pcf.png')    
+    CaptureScreenshot(g_screenshotOutputFolder .. '/directional_esm_pcf.png')
 end
 
 function TestDiskLights()
@@ -155,7 +163,7 @@ function TestPointLights()
     CaptureScreenshot(g_screenshotOutputFolder .. '/point_lights.png')
 end
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/Shadow/')
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/Shadow/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 OpenSample('Features/Shadow')

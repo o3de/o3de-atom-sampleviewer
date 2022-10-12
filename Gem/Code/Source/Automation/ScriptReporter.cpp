@@ -23,6 +23,11 @@ namespace AtomSampleViewer
     {
         "All Results", "Warnings & Errors", "Errors Only",
     };
+    
+    static const char* SortOptions[] =
+    {
+        "Sort by Script", "Sort by Official Baseline Diff Score", "Sort by Local Baseline Diff Score",
+    };
 
     namespace ScreenshotPaths
     {
@@ -40,7 +45,7 @@ namespace AtomSampleViewer
 
         AZStd::string GetLocalBaselineFolder(bool resolvePath)
         {
-            AZStd::string path = AZStd::string::format("@user@/scripts/screenshotslocalbaseline/%s", AZ::RHI::Factory::Get().GetName().GetCStr());
+            AZStd::string path = AZStd::string::format("@user@/scripts/screenshotslocalbaseline/");
 
             if (resolvePath)
             {
@@ -71,10 +76,10 @@ namespace AtomSampleViewer
             {
                 newPath = "";
             }
-            return newPath;
+            return Utils::ResolvePath(newPath);
         }
 
-        AZStd::string GetOfficialBaseline(const AZStd::string& forScreenshotFile)
+        AZStd::string GetOfficialBaseline(const AZStd::string& forScreenshotFile, const AZStd::string& envPath)
         {
             AZStd::string path = forScreenshotFile;
             const AZStd::string userPath = Utils::ResolvePath("@user@");
@@ -91,6 +96,10 @@ namespace AtomSampleViewer
                 return "";
             }
 
+            if (!AzFramework::StringFunc::Replace(path, envPath.c_str(), ""))
+            {
+                return "";
+            }
             // Turn it back into a full path
             path = Utils::ResolvePath("@projectroot@/" + path);
 
@@ -148,7 +157,8 @@ namespace AtomSampleViewer
     void ScriptReporter::Reset()
     {
         m_scriptReports.clear();
-        m_descendingThresholdReports.clear();
+        m_reportsSortedByOfficialBaslineScore.clear();
+        m_reportsSortedByLocaBaslineScore.clear();
         m_currentScriptIndexStack.clear();
         m_invalidationMessage.clear();
         m_uniqueTimestamp = GenerateTimestamp();
@@ -172,8 +182,7 @@ namespace AtomSampleViewer
         }
 
         m_currentScriptIndexStack.push_back(m_scriptReports.size());
-        m_scriptReports.push_back();
-        m_scriptReports.back().m_scriptAssetPath = scriptAssetPath;
+        m_scriptReports.emplace_back().m_scriptAssetPath = scriptAssetPath;
         m_scriptReports.back().BusConnect();
     }
 
@@ -199,12 +208,18 @@ namespace AtomSampleViewer
         return !m_currentScriptIndexStack.empty();
     }
 
-    bool ScriptReporter::AddScreenshotTest(const AZStd::string& path)
+    ScriptReporter::ScreenshotTestInfo::ScreenshotTestInfo(const AZStd::string& screenshotFilePath, const AZStd::string& envPath)
+        : m_screenshotFilePath(Utils::ResolvePath(screenshotFilePath))
+    {
+        m_officialBaselineScreenshotFilePath = ScreenshotPaths::GetOfficialBaseline(m_screenshotFilePath, envPath);
+        m_localBaselineScreenshotFilePath = ScreenshotPaths::GetLocalBaseline(m_screenshotFilePath);
+    }
+
+    bool ScriptReporter::AddScreenshotTest(const AZStd::string& path, const AZStd::string& envPath)
     {
         AZ_Assert(GetCurrentScriptReport(), "There is no active script");
 
-        ScreenshotTestInfo screenshotTestInfo;
-        screenshotTestInfo.m_screenshotFilePath = path;
+        ScreenshotTestInfo screenshotTestInfo(path, envPath);
         GetCurrentScriptReport()->m_screenshotTests.push_back(AZStd::move(screenshotTestInfo));
 
         return true;
@@ -422,7 +437,10 @@ namespace AtomSampleViewer
             ImGui::Combo("Display", &displayOption, DiplayOptions, AZ_ARRAY_SIZE(DiplayOptions));
             m_displayOption = (DisplayOption)displayOption;
 
-            ImGui::Checkbox("Show Script Reports Sorted By Threshold", &m_showReportsSortedByThreshold);
+            int sortOption = m_currentSortOption;
+            ImGui::Combo("Sort Results", &sortOption, SortOptions, AZ_ARRAY_SIZE(SortOptions));
+            m_currentSortOption = (SortOption)sortOption;
+
             ImGui::Checkbox("Force Show 'Update' Buttons", &m_forceShowUpdateButtons);
             ImGui::Checkbox("Force Show 'Export Png Diff' Buttons", &m_forceShowExportPngDiffButtons);
 
@@ -431,7 +449,7 @@ namespace AtomSampleViewer
 
             ImGui::Separator();
 
-            if (!m_showReportsSortedByThreshold)
+            if (m_currentSortOption == SortOption::Unsorted)
             {
                 for (ScriptReport& scriptReport : m_scriptReports)
                 {
@@ -540,24 +558,49 @@ namespace AtomSampleViewer
             }
             else
             {
-                for (const auto& [threshold, reportIndex] : m_descendingThresholdReports)
+                const SortedReportIndexMap* sortedReportMap = nullptr;
+                if (m_currentSortOption == SortOption::OfficialBaselineDiffScore)
                 {
-                    ScriptReport& scriptReport = m_scriptReports[reportIndex.first];
-                    ScreenshotTestInfo& screenshotResult = scriptReport.m_screenshotTests[reportIndex.second];
+                    sortedReportMap = &m_reportsSortedByOfficialBaslineScore;
+                }
+                else if (m_currentSortOption == SortOption::LocalBaselineDiffScore)
+                {
+                    sortedReportMap = &m_reportsSortedByLocaBaslineScore;
+                }
 
-                    const bool screenshotPassed = screenshotResult.m_officialComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::Pass;
+                AZ_Assert(sortedReportMap, "Unhandled m_currentSortOption");
 
-                    AZStd::string fileName;
-                    AzFramework::StringFunc::Path::GetFullFileName(screenshotResult.m_screenshotFilePath.c_str(), fileName);
+                if (sortedReportMap)
+                {
+                    for (const auto& [threshold, reportIndex] : *sortedReportMap)
+                    {
+                        ScriptReport& scriptReport = m_scriptReports[reportIndex.first];
+                        ScreenshotTestInfo& screenshotResult = scriptReport.m_screenshotTests[reportIndex.second];
 
-                    AZStd::string header = AZStd::string::format("%s %s %s '%s' %f",
-                        screenshotPassed ? "PASSED" : "FAILED",
-                        scriptReport.m_scriptAssetPath.c_str(),
-                        fileName.c_str(),
-                        screenshotResult.m_toleranceLevel.m_name.c_str(),
-                        screenshotResult.m_officialComparisonResult.m_finalDiffScore);
+                        float diffScore = 0.0f;
+                        if (m_currentSortOption == SortOption::OfficialBaselineDiffScore)
+                        {
+                            diffScore = screenshotResult.m_officialComparisonResult.m_standardDiffScore;
+                        }
+                        else if (m_currentSortOption == SortOption::LocalBaselineDiffScore)
+                        {
+                            diffScore = screenshotResult.m_localComparisonResult.m_standardDiffScore;
+                        }
 
-                    ShowScreenshotTestInfoTreeNode(header, scriptReport, screenshotResult);
+                        const bool screenshotPassed = screenshotResult.m_officialComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::Pass;
+
+                        AZStd::string fileName;
+                        AzFramework::StringFunc::Path::GetFullFileName(screenshotResult.m_screenshotFilePath.c_str(), fileName);
+
+                        AZStd::string header = AZStd::string::format("%f %s %s %s '%s'",
+                            diffScore,
+                            screenshotPassed ? "PASSED" : "FAILED",
+                            scriptReport.m_scriptAssetPath.c_str(),
+                            fileName.c_str(),
+                            screenshotResult.m_toleranceLevel.m_name.c_str());
+
+                        ShowScreenshotTestInfoTreeNode(header, scriptReport, screenshotResult);
+                    }
                 }
             }
             ResetTextHighlight();
@@ -822,8 +865,12 @@ namespace AtomSampleViewer
             const AZStd::vector<ScriptReporter::ScreenshotTestInfo>& screenshotTestInfos = m_scriptReports[i].m_screenshotTests;
             for (size_t j = 0; j < screenshotTestInfos.size(); ++j)
             {
-                m_descendingThresholdReports.insert(AZStd::pair<float, ReportIndex>(
-                    screenshotTestInfos[j].m_officialComparisonResult.m_finalDiffScore,
+                m_reportsSortedByOfficialBaslineScore.insert(AZStd::pair<float, ReportIndex>(
+                    screenshotTestInfos[j].m_officialComparisonResult.m_standardDiffScore,
+                    ReportIndex{ i, j }));
+
+                m_reportsSortedByLocaBaslineScore.insert(AZStd::pair<float, ReportIndex>(
+                    screenshotTestInfos[j].m_localComparisonResult.m_standardDiffScore,
                     ReportIndex{ i, j }));
             }
         }
@@ -873,6 +920,12 @@ namespace AtomSampleViewer
         AZ::RHI::Format actualImageFormat;
         if (!LoadPngData(imageComparisonResult, actualImageFilePath, actualImageBuffer, actualImageSize, actualImageFormat, traceLevel))
         {
+            // Even though LoadPngData might have reported an error, we need to report our own here with the "Screenshot check failed" string
+            // because the error handler in ScriptReporter::ScriptReport is looking for that.
+            ReportScreenshotComparisonIssue("Screenshot check failed. 'Actual' file not loaded.",
+                expectedImageFilePath,
+                actualImageFilePath,
+                traceLevel);
             return false;
         }
 
@@ -881,6 +934,12 @@ namespace AtomSampleViewer
         AZ::RHI::Format expectedImageFormat;
         if (!LoadPngData(imageComparisonResult, expectedImageFilePath, expectedImageBuffer, expectedImageSize, expectedImageFormat, traceLevel))
         {
+            // Even though LoadPngData might have reported an error, we need to report our own here with the "Screenshot check failed" string
+            // because the error handler in ScriptReporter::ScriptReport is looking for that.
+            ReportScreenshotComparisonIssue("Screenshot check failed. 'Expected' file not loaded.",
+                expectedImageFilePath,
+                actualImageFilePath,
+                traceLevel);
             return false;
         }
 
@@ -951,7 +1010,7 @@ namespace AtomSampleViewer
     
     bool ScriptReporter::UpdateLocalBaselineImage(ScreenshotTestInfo& screenshotTest, bool showResultDialog)
     {
-        const AZStd::string destinationFile = ScreenshotPaths::GetLocalBaseline(screenshotTest.m_screenshotFilePath);
+        const AZStd::string destinationFile = screenshotTest.m_localBaselineScreenshotFilePath;
 
         AZStd::string destinationFolder = destinationFile;
         AzFramework::StringFunc::Path::StripFullName(destinationFolder);
@@ -1006,7 +1065,7 @@ namespace AtomSampleViewer
         }
 
         // Get official cache baseline file
-        const AZStd::string cacheFilePath = ScreenshotPaths::GetOfficialBaseline(screenshotTest.m_screenshotFilePath);
+        const AZStd::string cacheFilePath = screenshotTest.m_officialBaselineScreenshotFilePath;
 
         // Divide cache file path into components to we can access the file name and the parent folder
         AZStd::fixed_vector<AZ::IO::FixedMaxPathString, 16> reversePathComponents;
@@ -1111,7 +1170,6 @@ namespace AtomSampleViewer
 
         screenshotTestInfo.m_toleranceLevel = *toleranceLevel;
 
-        screenshotTestInfo.m_officialBaselineScreenshotFilePath = ScreenshotPaths::GetOfficialBaseline(screenshotTestInfo.m_screenshotFilePath);
         if (screenshotTestInfo.m_officialBaselineScreenshotFilePath.empty())
         {
             ReportScriptError(AZStd::string::format("Screenshot check failed. Could not determine expected screenshot path for '%s'", screenshotTestInfo.m_screenshotFilePath.c_str()));
@@ -1150,7 +1208,6 @@ namespace AtomSampleViewer
             }
         }
 
-        screenshotTestInfo.m_localBaselineScreenshotFilePath = ScreenshotPaths::GetLocalBaseline(screenshotTestInfo.m_screenshotFilePath);
         if (screenshotTestInfo.m_localBaselineScreenshotFilePath.empty())
         {
             ReportScriptWarning(AZStd::string::format("Screenshot check failed. Could not determine local baseline screenshot path for '%s'", screenshotTestInfo.m_screenshotFilePath.c_str()));

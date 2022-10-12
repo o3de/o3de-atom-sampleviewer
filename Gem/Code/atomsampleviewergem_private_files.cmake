@@ -7,6 +7,8 @@
 #
 
 set(FILES
+    Source/AtomSampleComponent.cpp
+    Source/AtomSampleComponent.h
     Source/AtomSampleViewerOptions.h
     Source/AtomSampleViewerSystemComponent.cpp
     Source/AtomSampleViewerSystemComponent.h
@@ -127,6 +129,8 @@ set(FILES
     Source/EntityUtilityFunctions.h
     Source/ExposureExampleComponent.cpp
     Source/ExposureExampleComponent.h
+    Source/EyeMaterialExampleComponent.h
+    Source/EyeMaterialExampleComponent.cpp
     Source/LightCullingExampleComponent.cpp
     Source/LightCullingExampleComponent.h
     Source/MaterialHotReloadTestComponent.cpp

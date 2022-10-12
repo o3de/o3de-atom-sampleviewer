@@ -13,6 +13,7 @@
 #include <Atom/RPI.Reflect/ResourcePoolAssetCreator.h>
 #include <Atom/RPI.Reflect/Model/ModelAssetCreator.h>
 #include <Atom/RPI.Reflect/Model/ModelLodAssetCreator.h>
+#include <Atom/RPI.Reflect/Model/SkinJointIdPadding.h>
 #include <Atom/Feature/SkinnedMesh/SkinnedMeshInputBuffers.h>
 
 namespace
@@ -23,16 +24,13 @@ namespace
 namespace AtomSampleViewer
 {
     static AZ::Data::Asset<AZ::RPI::BufferAsset> CreateBufferAsset(
-        const void* data, const size_t elementCount, AZ::RHI::Format format)
+        const void* data, const AZ::RHI::BufferViewDescriptor& bufferViewDescriptor)
     {
         AZ::RPI::BufferAssetCreator creator;
 
         AZ::Data::AssetId assetId;
         assetId.m_guid = AZ::Uuid::CreateRandom();
         creator.Begin(assetId);
-
-        AZ::RHI::BufferViewDescriptor bufferViewDescriptor =
-            AZ::RHI::BufferViewDescriptor::CreateTyped(0, static_cast<uint32_t>(elementCount), format);
 
         AZ::RHI::BufferDescriptor bufferDescriptor;
         bufferDescriptor.m_bindFlags = AZ::RHI::BufferBindFlags::InputAssembly | AZ::RHI::BufferBindFlags::ShaderRead;
@@ -50,7 +48,45 @@ namespace AtomSampleViewer
         return bufferAsset;
     }
 
-    AZ::Data::Instance<AZ::RPI::Model> CreateModelFromProceduralSkinnedMesh(const ProceduralSkinnedMesh& proceduralMesh)
+    static AZ::Data::Asset<AZ::RPI::BufferAsset> CreateTypedBufferAsset(
+        const void* data, const size_t elementCount, AZ::RHI::Format format)
+    {
+        AZ::RHI::BufferViewDescriptor bufferViewDescriptor =
+            AZ::RHI::BufferViewDescriptor::CreateTyped(0, static_cast<uint32_t>(elementCount), format);
+
+        return CreateBufferAsset(data, bufferViewDescriptor);
+    }
+
+    static AZ::Data::Asset<AZ::RPI::BufferAsset> CreateRawBufferAsset(
+        const void* data, size_t elementCount, size_t elementSizeInBytes)
+    {
+        AZ::RHI::BufferViewDescriptor bufferViewDescriptor =
+            AZ::RHI::BufferViewDescriptor::CreateRaw(0, static_cast<uint32_t>(elementCount * elementSizeInBytes));
+
+        return CreateBufferAsset(data, bufferViewDescriptor);
+    }
+
+    // Create a buffer view descriptor based on the properties of the lod buffer, but using the sub-mesh's element count and offset
+    static AZ::RHI::BufferViewDescriptor CreateSubmeshBufferViewDescriptor(const AZ::Data::Asset<AZ::RPI::BufferAsset>& lodBufferAsset, uint32_t elementCount, uint32_t elementOffset)
+    {
+        AZ::RHI::BufferViewDescriptor viewDescriptor = lodBufferAsset->GetBufferViewDescriptor();
+        viewDescriptor.m_elementCount = elementCount;
+        viewDescriptor.m_elementOffset = elementOffset;
+        return viewDescriptor;
+    }
+
+    template <typename T>
+    static void DuplicateVertices(T& vertices, uint32_t elementsPerSubMesh, uint32_t subMeshCount)
+    {
+        // Increase the size of the vertex buffer, and then copy the original vertex buffer data into the new elements
+        vertices.resize(elementsPerSubMesh * subMeshCount);
+        for (uint32_t i = 1; i < subMeshCount; ++i)
+        {
+            AZStd::copy(vertices.begin(), vertices.begin() + elementsPerSubMesh, vertices.begin() + elementsPerSubMesh * i);
+        }
+    }
+
+    AZ::Data::Instance<AZ::RPI::Model> CreateModelFromProceduralSkinnedMesh(ProceduralSkinnedMesh& proceduralMesh)
     {
         using namespace AZ;
         Data::AssetId assetId;
@@ -62,12 +98,52 @@ namespace AtomSampleViewer
 
         modelCreator.SetName(AZStd::string("ProceduralSkinnedMesh_" + assetId.m_guid.ToString<AZStd::string>()));
 
-        auto indexBuffer = CreateBufferAsset(proceduralMesh.m_indices.data(), proceduralMesh.m_indices.size(), AZ::RHI::Format::R32_FLOAT);
-        auto positionBuffer = CreateBufferAsset(proceduralMesh.m_positions.data(), proceduralMesh.m_positions.size(), AZ::RHI::Format::R32G32B32_FLOAT);
-        auto normalBuffer = CreateBufferAsset(proceduralMesh.m_normals.data(), proceduralMesh.m_normals.size(), AZ::RHI::Format::R32G32B32_FLOAT);
-        auto tangentBuffer = CreateBufferAsset(proceduralMesh.m_tangents.data(), proceduralMesh.m_tangents.size(), AZ::RHI::Format::R32G32B32A32_FLOAT);
-        auto bitangentBuffer = CreateBufferAsset(proceduralMesh.m_bitangents.data(), proceduralMesh.m_bitangents.size(), AZ::RHI::Format::R32G32B32_FLOAT);
-        auto uvBuffer = CreateBufferAsset(proceduralMesh.m_uvs.data(), proceduralMesh.m_uvs.size(), AZ::RHI::Format::R32G32_FLOAT);
+        uint32_t submeshCount = proceduralMesh.GetSubMeshCount();
+        uint32_t verticesPerSubmesh = aznumeric_caster(proceduralMesh.m_positions.size());
+        uint32_t totalVertices = verticesPerSubmesh * submeshCount;
+
+        uint32_t jointIdCountPerSubmesh = verticesPerSubmesh * proceduralMesh.GetInfluencesPerVertex();
+        uint32_t extraJointIdCount = AZ::RPI::CalculateJointIdPaddingCount(jointIdCountPerSubmesh);
+        uint32_t extraPackedIdCount = extraJointIdCount / 2;
+
+        // Copy the original buffer data n-times to create the data for extra sub-meshes
+        DuplicateVertices(proceduralMesh.m_indices, aznumeric_caster(proceduralMesh.m_indices.size()), submeshCount);
+        DuplicateVertices(proceduralMesh.m_positions, verticesPerSubmesh, submeshCount);
+        DuplicateVertices(proceduralMesh.m_normals, verticesPerSubmesh, submeshCount);
+        DuplicateVertices(proceduralMesh.m_tangents, verticesPerSubmesh, submeshCount);
+        DuplicateVertices(proceduralMesh.m_bitangents, verticesPerSubmesh, submeshCount);
+        DuplicateVertices(proceduralMesh.m_uvs, verticesPerSubmesh, submeshCount);
+        DuplicateVertices(proceduralMesh.m_blendWeights, verticesPerSubmesh * proceduralMesh.GetInfluencesPerVertex(), submeshCount);
+
+        // Insert the jointId padding first before duplicating
+        AZStd::vector<uint32_t> extraIds(extraPackedIdCount, 0);
+
+        // Track the count of 32-byte 'elements' (packed) and offsets for creating sub-mesh views
+        uint32_t jointIdElementCountPerSubmesh = aznumeric_caster(proceduralMesh.m_blendIndices.size());
+        uint32_t jointIdOffsetElementsPerSubmesh = jointIdElementCountPerSubmesh + extraPackedIdCount;
+
+        proceduralMesh.m_blendIndices.insert(proceduralMesh.m_blendIndices.end(), extraIds.begin(), extraIds.end());
+        DuplicateVertices(
+            proceduralMesh.m_blendIndices, aznumeric_caster(proceduralMesh.m_blendIndices.size()), submeshCount);
+
+        // Offset duplicate positions in the +y direction, so each sub-mesh ends up in a unique position
+        for (uint32_t subMeshIndex = 1; subMeshIndex < submeshCount; ++subMeshIndex)
+        {
+            for (uint32_t i = 0; i < verticesPerSubmesh; ++i)
+            {
+                proceduralMesh.m_positions[subMeshIndex*verticesPerSubmesh + i][1] +=
+                    aznumeric_cast<float>(subMeshIndex) * proceduralMesh.GetSubMeshYOffset();
+            }
+        }
+
+        auto indexBuffer = CreateTypedBufferAsset(proceduralMesh.m_indices.data(), proceduralMesh.m_indices.size(), AZ::RHI::Format::R32_FLOAT);
+        auto positionBuffer = CreateTypedBufferAsset(proceduralMesh.m_positions.data(), proceduralMesh.m_positions.size(), AZ::RHI::Format::R32G32B32_FLOAT);
+        auto normalBuffer = CreateTypedBufferAsset(proceduralMesh.m_normals.data(), proceduralMesh.m_normals.size(), AZ::RHI::Format::R32G32B32_FLOAT);
+        auto tangentBuffer = CreateTypedBufferAsset(proceduralMesh.m_tangents.data(), proceduralMesh.m_tangents.size(), AZ::RHI::Format::R32G32B32A32_FLOAT);
+        auto bitangentBuffer = CreateTypedBufferAsset(proceduralMesh.m_bitangents.data(), proceduralMesh.m_bitangents.size(), AZ::RHI::Format::R32G32B32_FLOAT);
+        auto uvBuffer = CreateTypedBufferAsset(proceduralMesh.m_uvs.data(), proceduralMesh.m_uvs.size(), AZ::RHI::Format::R32G32_FLOAT);
+        auto skinJointIdBuffer = CreateRawBufferAsset(proceduralMesh.m_blendIndices.data(), proceduralMesh.m_blendIndices.size(), sizeof(proceduralMesh.m_blendIndices[0]));
+        auto skinJointWeightBuffer = CreateTypedBufferAsset(proceduralMesh.m_blendWeights.data(), proceduralMesh.m_blendWeights.size(), AZ::RHI::Format::R32_FLOAT);
 
         //
         // Lod
@@ -81,28 +157,59 @@ namespace AtomSampleViewer
         modelLodCreator.AddLodStreamBuffer(tangentBuffer);
         modelLodCreator.AddLodStreamBuffer(bitangentBuffer);
         modelLodCreator.AddLodStreamBuffer(uvBuffer);
+        modelLodCreator.AddLodStreamBuffer(skinJointIdBuffer);
+        modelLodCreator.AddLodStreamBuffer(skinJointWeightBuffer);
 
-        //
-        // Submesh
-        //
-        modelLodCreator.BeginMesh();
+        for (uint32_t submeshIndex = 0; submeshIndex < submeshCount; ++submeshIndex)
+        {
+            //
+            // Submesh
+            //
+            modelLodCreator.BeginMesh();
 
-        // Set the index buffer view
-        modelLodCreator.SetMeshIndexBuffer(AZ::RPI::BufferAssetView{ indexBuffer, indexBuffer->GetBufferViewDescriptor() });
-        modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "POSITION" }, AZ::Name(), AZ::RPI::BufferAssetView{ positionBuffer, positionBuffer->GetBufferViewDescriptor() });
-        modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "NORMAL" }, AZ::Name(), AZ::RPI::BufferAssetView{ normalBuffer, normalBuffer->GetBufferViewDescriptor() });
-        modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "TANGENT" }, AZ::Name(), AZ::RPI::BufferAssetView{ tangentBuffer, tangentBuffer->GetBufferViewDescriptor() });
-        modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "BITANGENT" }, AZ::Name(), AZ::RPI::BufferAssetView{ bitangentBuffer, bitangentBuffer->GetBufferViewDescriptor() });
-        modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "UV" }, AZ::Name(), AZ::RPI::BufferAssetView{ uvBuffer, uvBuffer->GetBufferViewDescriptor() });
+            // Set the index buffer view
+            RHI::BufferViewDescriptor indexBufferDescriptor = indexBuffer->GetBufferViewDescriptor();
+            uint32_t lodTriangleCount = indexBufferDescriptor.m_elementCount / 3;
+            uint32_t meshTriangleCount = lodTriangleCount / submeshCount;
+            uint32_t indexOffset = meshTriangleCount * submeshIndex * 3;
 
-        AZ::Aabb localAabb = AZ::Aabb::CreateCenterHalfExtents(AZ::Vector3(0.0f, 0.0f, 0.0f), AZ::Vector3(1000000.0f, 1000000.0f, 1000000.0f));
-        modelLodCreator.SetMeshAabb(AZStd::move(localAabb));
+            if (submeshIndex == submeshCount - 1)
+            {
+                meshTriangleCount += lodTriangleCount % submeshCount;
+            }
+            uint32_t indexCount = meshTriangleCount * 3;
+            modelLodCreator.SetMeshIndexBuffer(AZ::RPI::BufferAssetView{ indexBuffer, CreateSubmeshBufferViewDescriptor(indexBuffer, indexCount, indexOffset) });
 
-        RPI::ModelMaterialSlot::StableId slotId = 0;
-        modelCreator.AddMaterialSlot(RPI::ModelMaterialSlot{slotId, AZ::Name{}, AZ::RPI::AssetUtils::LoadAssetByProductPath<AZ::RPI::MaterialAsset>(DefaultSkinnedMeshMaterial)});
-        modelLodCreator.SetMeshMaterialSlot(slotId);
+            // Get the element count and offset for this sub-mesh
+            uint32_t elementCount = verticesPerSubmesh;
+            uint32_t elementOffset = verticesPerSubmesh * submeshIndex;
 
-        modelLodCreator.EndMesh();
+            // Include any truncated vertices if this is the last mesh
+            if (submeshIndex == submeshCount - 1)
+            {
+                elementCount += totalVertices % verticesPerSubmesh;
+            }
+
+            modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "POSITION" }, AZ::Name(), AZ::RPI::BufferAssetView{ positionBuffer, CreateSubmeshBufferViewDescriptor(positionBuffer, elementCount, elementOffset) });
+            modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "NORMAL" }, AZ::Name(), AZ::RPI::BufferAssetView{ normalBuffer, CreateSubmeshBufferViewDescriptor(normalBuffer, elementCount, elementOffset) });
+            modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "TANGENT" }, AZ::Name(), AZ::RPI::BufferAssetView{ tangentBuffer, CreateSubmeshBufferViewDescriptor(tangentBuffer, elementCount, elementOffset) });
+            modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "BITANGENT" }, AZ::Name(), AZ::RPI::BufferAssetView{ bitangentBuffer, CreateSubmeshBufferViewDescriptor(bitangentBuffer, elementCount, elementOffset) });
+            modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "UV" }, AZ::Name(), AZ::RPI::BufferAssetView{ uvBuffer, CreateSubmeshBufferViewDescriptor(uvBuffer, elementCount, elementOffset) });
+            modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "SKIN_JOINTINDICES" }, AZ::Name(), AZ::RPI::BufferAssetView{ skinJointIdBuffer, CreateSubmeshBufferViewDescriptor(skinJointIdBuffer, jointIdElementCountPerSubmesh, jointIdOffsetElementsPerSubmesh * submeshIndex) });
+
+            uint32_t jointWeightElementCount = elementCount * proceduralMesh.GetInfluencesPerVertex();
+            uint32_t jointWeightOffset = elementOffset * proceduralMesh.GetInfluencesPerVertex();
+            modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "SKIN_WEIGHTS" }, AZ::Name(), AZ::RPI::BufferAssetView{ skinJointWeightBuffer, CreateSubmeshBufferViewDescriptor(skinJointWeightBuffer, jointWeightElementCount, jointWeightOffset) });
+
+            AZ::Aabb localAabb = proceduralMesh.m_aabb;
+            modelLodCreator.SetMeshAabb(AZStd::move(localAabb));
+
+            RPI::ModelMaterialSlot::StableId slotId = 0;
+            modelCreator.AddMaterialSlot(RPI::ModelMaterialSlot{slotId, AZ::Name{}, AZ::RPI::AssetUtils::LoadAssetByProductPath<AZ::RPI::MaterialAsset>(DefaultSkinnedMeshMaterial)});
+            modelLodCreator.SetMeshMaterialSlot(slotId);
+
+            modelLodCreator.EndMesh();
+        }
 
         Data::Asset<RPI::ModelLodAsset> lodAsset;
         modelLodCreator.End(lodAsset);
@@ -114,61 +221,14 @@ namespace AtomSampleViewer
         return RPI::Model::FindOrCreate(modelAsset);
     }
 
-    AZStd::intrusive_ptr<AZ::Render::SkinnedMeshInputBuffers> CreateSkinnedMeshInputBuffersFromProceduralSkinnedMesh(const ProceduralSkinnedMesh& proceduralMesh)
+    AZStd::intrusive_ptr<AZ::Render::SkinnedMeshInputBuffers> CreateSkinnedMeshInputBuffersFromProceduralSkinnedMesh(ProceduralSkinnedMesh& proceduralMesh)
     {
         AZStd::intrusive_ptr<AZ::Render::SkinnedMeshInputBuffers> skinnedMeshInputBuffers = aznew AZ::Render::SkinnedMeshInputBuffers;
 
         AZ::Data::AssetId assetId;
         assetId.m_guid = AZ::Uuid::CreateRandom();
-        skinnedMeshInputBuffers->SetAssetId(assetId);
-
-        // For now, use only 1 lod. Better LOD support for the sample will be added with ATOM-3624
-        size_t lodCount = 1;
-        skinnedMeshInputBuffers->SetLodCount(lodCount);
-        for (size_t lodIndex = 0; lodIndex < lodCount; ++lodIndex)
-        {
-            uint32_t lodIndexCount = aznumeric_cast<uint32_t>(proceduralMesh.m_indices.size());
-            uint32_t lodVertexCount = aznumeric_cast<uint32_t>(proceduralMesh.m_positions.size());
-            // Create a single LOD
-            AZ::Render::SkinnedMeshInputLod skinnedMeshLod;
-
-            // With a single sub-mesh
-            AZStd::vector<AZ::Render::SkinnedSubMeshProperties> subMeshes;
-
-            AZ::Render::SkinnedSubMeshProperties subMesh;
-            subMesh.m_aabb = proceduralMesh.m_aabb;
-            subMesh.m_indexOffset = 0;
-            subMesh.m_indexCount = lodIndexCount;
-            subMesh.m_vertexOffset = 0;
-            subMesh.m_vertexCount = lodVertexCount;
-            // Do a load blocking queue on the material asset because the ModelLod will ignore the material if it is not ready
-            subMesh.m_materialSlot.m_defaultMaterialAsset = AZ::RPI::AssetUtils::LoadAssetByProductPath<AZ::RPI::MaterialAsset>(DefaultSkinnedMeshMaterial);
-            subMesh.m_materialSlot.m_stableId = 0;
-
-            subMeshes.push_back(subMesh);
-
-            skinnedMeshLod.SetIndexCount(lodIndexCount);
-            skinnedMeshLod.SetVertexCount(lodVertexCount);
-
-            // Create read-only buffers and views for input buffers that are shared across all instances
-            AZStd::string lodString = AZStd::string::format("_Lod%zu", lodIndex);
-            skinnedMeshLod.CreateSkinningInputBuffer((void*)proceduralMesh.m_positions.data(), AZ::Render::SkinnedMeshInputVertexStreams::Position, lodString + "_SkinnedMeshInputPositions");
-            skinnedMeshLod.CreateSkinningInputBuffer((void*)proceduralMesh.m_normals.data(), AZ::Render::SkinnedMeshInputVertexStreams::Normal, lodString + "_SkinnedMeshInputNormals");
-            skinnedMeshLod.CreateSkinningInputBuffer((void*)proceduralMesh.m_tangents.data(), AZ::Render::SkinnedMeshInputVertexStreams::Tangent, lodString + "_SkinnedMeshInputTangents");
-            skinnedMeshLod.CreateSkinningInputBuffer((void*)proceduralMesh.m_bitangents.data(), AZ::Render::SkinnedMeshInputVertexStreams::BiTangent, lodString + "_SkinnedMeshInputBiTangents");
-            skinnedMeshLod.CreateSkinningInputBuffer((void*)proceduralMesh.m_blendIndices.data(), AZ::Render::SkinnedMeshInputVertexStreams::BlendIndices, lodString + "_SkinnedMeshInputBlendIndices");
-            skinnedMeshLod.CreateSkinningInputBuffer((void*)proceduralMesh.m_blendWeights.data(), AZ::Render::SkinnedMeshInputVertexStreams::BlendWeights, lodString + "_SkinnedMeshInputBlendWeights");
-
-            // Create read-only input assembly buffers that are not modified during skinning and shared across all instances
-            skinnedMeshLod.CreateIndexBuffer(proceduralMesh.m_indices.data(), lodString + "_SkinnedMeshIndexBuffer");
-            skinnedMeshLod.CreateStaticBuffer((void*)proceduralMesh.m_uvs.data(), AZ::Render::SkinnedMeshStaticVertexStreams::UV_0, lodString + "_SkinnedMeshStaticUVs");
-
-            // Set the data that needs to be tracked on a per-sub-mesh basis
-            // and create the common, shared sub-mesh buffer views
-            skinnedMeshLod.SetSubMeshProperties(subMeshes);
-
-            skinnedMeshInputBuffers->SetLod(lodIndex, skinnedMeshLod);
-        } // for all lods
+        AZ::Data::Instance<AZ::RPI::Model> model = CreateModelFromProceduralSkinnedMesh(proceduralMesh);
+        skinnedMeshInputBuffers->CreateFromModelAsset(model->GetModelAsset());
 
         return skinnedMeshInputBuffers;
     }

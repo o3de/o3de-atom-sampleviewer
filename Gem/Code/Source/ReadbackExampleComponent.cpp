@@ -219,7 +219,7 @@ namespace AtomSampleViewer
         createPassRequest.m_passData = AZStd::move(passData);
 
         // Create the connection for the output slot
-        AZ::RPI::PassConnection outputConnection = { AZ::Name("Output"), {AZ::Name("Parent"), AZ::Name("SwapChainOutput")} };
+        AZ::RPI::PassConnection outputConnection = { AZ::Name("Output"), {AZ::Name("Parent"), AZ::Name("PipelineOutput")} };
         createPassRequest.m_connections.push_back(outputConnection);
         AZ::RPI::PassConnection inputConnection = { AZ::Name("Input"), {AZ::Name("This"), AZ::Name(s_previewImageName)} };
         createPassRequest.m_connections.push_back(inputConnection);
@@ -271,7 +271,7 @@ namespace AtomSampleViewer
             m_readback->SetCallback(AZStd::bind(&ReadbackExampleComponent::ReadbackCallback, this, AZStd::placeholders::_1));
         }
 
-        m_fillerPass->ReadbackAttachment(m_readback, AZ::Name("Output"));
+        m_fillerPass->ReadbackAttachment(m_readback, 0, AZ::Name("Output"));
     }
 
     void ReadbackExampleComponent::ReadbackCallback(const AZ::RPI::AttachmentReadback::ReadbackResult& result)

@@ -30,6 +30,9 @@ namespace AtomSampleViewer
         , public AzFramework::WindowNotificationBus::Handler
     {
     public:
+        static constexpr const char* ContentWarning = CommonPhotosensitiveWarning;
+        static constexpr const char* ContentWarningTitle = CommonPhotosensitiveWarningTitle;
+
         AZ_COMPONENT(MultiViewportSwapchainComponent, "{45118741-F7DB-4EE0-9EBF-59B85D7F6194}", AZ::Component);
         AZ_DISABLE_COPY(MultiViewportSwapchainComponent);
 

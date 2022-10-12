@@ -9,7 +9,9 @@
 --
 ----------------------------------------------------------------------------------------------------
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/TransparentTest/')
+RunScript("scripts/TestEnvironment.luac")
+
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/TransparentTest/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 OpenSample('Features/Transparency')

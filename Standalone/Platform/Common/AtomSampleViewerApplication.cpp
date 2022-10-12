@@ -27,7 +27,6 @@
 #include <AzCore/Settings/SettingsRegistryMergeUtils.h>
 #include <AzCore/Utils/Utils.h>
 #include <AzGameFramework/Application/GameApplication.h>
-#include <GridMate/GridMate.h>
 
 namespace AtomSampleViewer
 {
@@ -332,6 +331,7 @@ namespace AtomSampleViewer
 
     int RunGameCommon(int argc, char** argv, AZStd::function<void()> customRunCode)
     {
+        const AZ::Debug::Trace tracer;
         AtomSampleViewer::AtomSampleViewerApplication app(&argc, &argv);
 
         const AzGameFramework::GameApplication::StartupParameters gameAppParams;
@@ -342,14 +342,7 @@ namespace AtomSampleViewer
             customRunCode();
         }
 
-        //GridMate allocator is created in StartCommon
-        const GridMate::GridMateDesc desc;
-        GridMate::IGridMate* gridMate = GridMate::GridMateCreate(desc);
-        AZ_Assert(gridMate, "Failed to create gridmate!");
-
         app.RunMainLoop();
-
-        GridMate::GridMateDestroy(gridMate);
 
         app.Stop();
 

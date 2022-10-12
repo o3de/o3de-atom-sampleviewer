@@ -9,7 +9,9 @@
 --
 ----------------------------------------------------------------------------------------------------
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/MultiRenderPipeline/')
+RunScript("scripts/TestEnvironment.luac")
+
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/MultiRenderPipeline/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 
 function TakeScreenShotForWindow1(fileName)

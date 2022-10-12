@@ -558,13 +558,8 @@ namespace AtomSampleViewer
                 commandList->SetViewports(&m_viewport, 1u);
                 commandList->SetScissors(&m_scissor, 1u);
 
-                // Split the drawcommands depending on the CommandList index.
-                const uint32_t drawInstancePerContext = (static_cast<uint32_t>(m_subMeshInstanceArray.size()) + 1) / context.GetCommandListCount();
-                const uint32_t drawInstanceStart = context.GetCommandListIndex() * drawInstancePerContext;
-                const uint32_t drawInstanceCount = AZStd::min(drawInstanceStart + drawInstancePerContext, static_cast<uint32_t>(m_subMeshInstanceArray.size()));
-
                 // Submit the drawcommands to the CommandList.
-                for (uint32_t instanceIdx = drawInstanceStart; instanceIdx < drawInstanceCount; instanceIdx++)
+                for (uint32_t instanceIdx = context.GetSubmitRange().m_startIndex; instanceIdx < context.GetSubmitRange().m_endIndex; instanceIdx++)
                 {
                     const SubMeshInstance& subMesh = m_subMeshInstanceArray[instanceIdx];
 
@@ -583,7 +578,7 @@ namespace AtomSampleViewer
                     drawItem.m_streamBufferViews = subMesh.bufferStreamViewArray.data();
 
                     // Submit the triangle draw item.
-                    commandList->Submit(drawItem);
+                    commandList->Submit(drawItem, instanceIdx);
                 }
             };
 
@@ -671,11 +666,15 @@ namespace AtomSampleViewer
 
         // Update the worldToClipMatrix 
         Matrix4x4 worldToClipMatrix = m_viewToClipMatrix * worldToViewMatrix;
-        bool set = m_floatBuffer->AllocateOrUpdateBuffer(m_worldToClipHandle, static_cast<void*>(&worldToClipMatrix), static_cast<uint32_t>(sizeof(Matrix4x4)));
-        
+        m_floatBuffer->AllocateOrUpdateBuffer(m_worldToClipHandle,
+                                              static_cast<void *>(&worldToClipMatrix),
+                                              static_cast<uint32_t>(sizeof(Matrix4x4)));
+
         // Update the light direction
-        set = m_floatBuffer->AllocateOrUpdateBuffer(m_lightDirectionHandle, static_cast<void*>(&m_lightDir), static_cast<uint32_t>(sizeof(Vector3)));
-       
+        m_floatBuffer->AllocateOrUpdateBuffer(m_lightDirectionHandle,
+                                              static_cast<void *>(&m_lightDir),
+                                              static_cast<uint32_t>(sizeof(Vector3)));
+
         BasicRHIComponent::OnFramePrepare(frameGraphBuilder);
     }
 

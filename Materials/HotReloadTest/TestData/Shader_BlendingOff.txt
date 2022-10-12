@@ -8,7 +8,7 @@
         }
     },
 
-    "BlendState": {
+    "GlobalTargetBlendState": {
         "Enable": false,
         "BlendSource": "AlphaSource",
         "BlendDest": "AlphaSourceInverse",

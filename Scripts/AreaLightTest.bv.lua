@@ -9,6 +9,8 @@
 --
 ----------------------------------------------------------------------------------------------------
 
+RunScript("scripts/TestEnvironment.luac")
+
 function SetupPointLights()
     SetImguiValue('AreaLightSample/LightType/Point', true)
     SetImguiValue('AreaLightSample/Position Offset', Vector3(0.0, 0.0, 0.0))
@@ -109,7 +111,7 @@ function VaryMetallicOnly()
     SetImguiValue('AreaLightSample/Min Max Metallic', Vector2(0.0, 1.0))
 end
 
-g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/AreaLights/')
+g_screenshotOutputFolder = ResolvePath('@user@/Scripts/Screenshots/' .. g_testEnv .. '/AreaLights/')
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder))
 SelectImageComparisonToleranceLevel("Level E")
 

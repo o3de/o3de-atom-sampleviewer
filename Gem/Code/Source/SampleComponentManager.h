@@ -26,13 +26,13 @@
 #include <Atom/Utils/ImGuiPassTree.h>
 #include <Atom/Utils/ImGuiFrameVisualizer.h>
 #include <Atom/Utils/ImGuiTransientAttachmentProfiler.h>
-#include <Atom/Utils/ImGuiShaderMetrics.h>
 
 #include <AzCore/Component/Component.h>
 #include <AzCore/Component/TickBus.h>
 #include <AzCore/std/containers/vector.h>
 #include <AzCore/std/containers/map.h>
 #include <AzCore/std/smart_ptr/shared_ptr.h>
+#include <AzCore/std/smart_ptr/unique_ptr.h>
 
 #include <AzFramework/Input/Events/InputChannelEventListener.h>
 #include <AzFramework/Entity/EntityContextBus.h>
@@ -40,6 +40,7 @@
 
 #include <Utils/ImGuiSaveFilePath.h>
 #include <Utils/ImGuiHistogramQueue.h>
+#include <Utils/ImGuiMessageBox.h>
 
 namespace AZ
 {
@@ -67,6 +68,8 @@ namespace AtomSampleViewer
         AZStd::function<bool()> m_isSupportedFunc;
         SamplePipelineType m_pipelineType = SamplePipelineType::RHI;
         AZ::ComponentDescriptor* m_componentDescriptor;
+        AZStd::string m_contentWarning;
+        AZStd::string m_contentWarningTitle;
 
         bool operator==(const SampleEntry& other)
         {
@@ -137,7 +140,7 @@ namespace AtomSampleViewer
         void ShowFrameGraphVisualizerWindow();
         void ShowCpuProfilerWindow();
         void ShowGpuProfilerWindow();
-        void ShowShaderMetricsWindow();
+        void ShowFileIoProfilerWindow();
         void ShowTransientAttachmentProfilerWindow();
 
         void RequestExit();
@@ -158,7 +161,7 @@ namespace AtomSampleViewer
         void ClearRPIScene() override;
 
         // FrameCaptureNotificationBus overrides...
-        void OnCaptureFinished(AZ::Render::FrameCaptureResult result, const AZStd::string& info) override;
+        void OnCaptureFinished(uint32_t frameCaptureId, AZ::Render::FrameCaptureResult result, const AZStd::string& info) override;
 
         // AzFramework::AssetCatalogEventBus::Handler overrides ...
         void OnCatalogLoaded(const char* catalogFile) override;
@@ -196,8 +199,12 @@ namespace AtomSampleViewer
 
         int32_t m_selectedSampleIndex = -1;
 
-        static constexpr uint32_t FrameTimeLogSize = 30;
-        ImGuiHistogramQueue m_imGuiFrameTimer;
+        static constexpr uint32_t FrameTimeDefaultLogSize = 100;
+        static constexpr uint32_t FrameTimeMinLogSize = FrameTimeDefaultLogSize;
+        static constexpr uint32_t FrameTimeMaxLogSize = 1000000; // 1M
+        AZStd::unique_ptr<ImGuiHistogramQueue> m_imGuiFrameTimer;
+
+        ImGuiMessageBox m_contentWarningDialog;
 
         bool m_showImGuiMetrics = false;
         bool m_showSampleHelper = false;
@@ -210,8 +217,8 @@ namespace AtomSampleViewer
         bool m_showCullingDebugWindow = false;
         bool m_showCpuProfiler = false;
         bool m_showGpuProfiler = false;
+        bool m_showFileIoProfiler = false;
         bool m_showTransientAttachmentProfiler = false;
-        bool m_showShaderMetrics = false;
 
         bool m_ctrlModifierLDown = false;
         bool m_ctrlModifierRDown = false;
@@ -226,10 +233,6 @@ namespace AtomSampleViewer
         bool m_canSwitchSample = true;
         bool m_canCaptureRADTM = true;
 
-        // 10 number keys 0-9
-        static constexpr size_t s_alphanumericCount = 10;
-        bool m_alphanumericNumbersDown[s_alphanumericCount];
-
         bool m_exitRequested = false;
 
         AzFramework::EntityContextId m_entityContextId;
@@ -239,12 +242,12 @@ namespace AtomSampleViewer
         AZ::Render::ImGuiFrameVisualizer m_imguiFrameGraphVisualizer;
         AZ::Render::ImGuiGpuProfiler m_imguiGpuProfiler;
         AZ::Render::ImGuiTransientAttachmentProfiler m_imguiTransientAttachmentProfiler;
-        AZ::Render::ImGuiShaderMetrics m_imguiShaderMetrics;
 
         ImGuiSaveFilePath m_imguiFrameCaptureSaver;
         bool m_isFrameCapturePending = false;
         bool m_hideImGuiDuringFrameCapture = true;
         int m_countdownForFrameCapture = 0;
+        uint32_t m_frameCaptureId = AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId;
         AZStd::string m_frameCaptureFilePath;
 
         AZStd::unique_ptr<ScriptManager> m_scriptManager;

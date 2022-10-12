@@ -46,6 +46,7 @@ tests= {
     RunScriptWrapper('scripts/decals.bv.luac'),
     RunScriptWrapper('scripts/dynamicdraw.bv.luac'),
     RunScriptWrapper('scripts/dynamicmaterialtest.bv.luac'),
+    RunScriptWrapper('scripts/EyeMaterialTest.bv.luac'),
     RunScriptWrapper('scripts/materialscreenshottests.bv.luac'),
     RunScriptWrapper('scripts/materialhotreloadtest.bv.luac'),
     RunScriptWrapper('scripts/msaa_rpi_test.bv.luac'),
@@ -55,16 +56,22 @@ tests= {
     RunScriptWrapper('scripts/transparenttest.bv.luac'),
     RunScriptWrapper('scripts/streamingimagetest.bv.luac'),
     RunScriptWrapper('scripts/parallaxtest.bv.luac'),
-    RunScriptWrapper('scripts/checkerboardtest.bv.luac'),
+    RunScriptWrapper('scripts/parallaxdepthartifacts.bv.luac'),
+    -- Disable checkerboard pipeline as it's quite out of date and currently a maintenance burden
+    -- https://github.com/o3de/o3de-atom-sampleviewer/issues/456
+    -- RunScriptWrapper('scripts/checkerboardtest.bv.luac'),
     RunScriptWrapper('scripts/scenereloadsoaktest.bv.luac'),
     RunScriptWrapper('scripts/diffusegitest.bv.luac'),
     RunScriptWrapper('scripts/arealighttest.bv.luac'),
     RunScriptWrapper('scripts/multiscene.bv.luac'),
     RunScriptWrapper('scripts/shadowtest.bv.luac'),
     RunScriptWrapper('scripts/shadowedsponzatest.bv.luac'),
+    RunScriptWrapper('scripts/skinnedmesh.bv.luac'),
     RunScriptWrapper('scripts/RenderTargetTexture.bv.luac'),
     RunScriptWrapper('scripts/PassTree.bv.luac'),
     RunScriptWrapper('scripts/ReadbackTest.bv.luac'),
+    RunScriptWrapper('scripts/depthoffieldtest.bv.luac'),
+    RunScriptWrapper('scripts/exposuretest.bv.luac'),
 
     --Fast checking for the samples which don't have a test. Samples should be removed from this list once they have their own tests
 
@@ -99,8 +106,6 @@ tests= {
     FastCheckSample('RPI/RootConstants'),
 
     FastCheckSample('Features/Bloom'),
-    FastCheckSample('Features/DepthOfField'),
-    FastCheckSample('Features/Exposure'),
     FastCheckSample('Features/SkinnedMesh'),
     FastCheckSample('Features/SSAO'),
     FastCheckSample('Features/SSR'),

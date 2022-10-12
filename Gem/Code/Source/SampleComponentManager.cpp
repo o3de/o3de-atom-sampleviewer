@@ -82,6 +82,7 @@
 #include <DynamicMaterialTestComponent.h>
 #include <MaterialHotReloadTestComponent.h>
 #include <ExposureExampleComponent.h>
+#include <EyeMaterialExampleComponent.h>
 #include <SceneReloadSoakTestComponent.h>
 #include <LightCullingExampleComponent.h>
 #include <MeshExampleComponent.h>
@@ -110,6 +111,7 @@
 #include <AzCore/Component/Entity.h>
 #include <AzCore/Debug/Profiler.h>
 #include <AzCore/Debug/ProfilerBus.h>
+#include <AzCore/IO/IStreamerProfiler.h>
 #include <AzCore/Serialization/SerializeContext.h>
 #include <AzCore/Settings/SettingsRegistryMergeUtils.h>
 #include <AzCore/std/smart_ptr/make_shared.h>
@@ -141,10 +143,11 @@ namespace AtomSampleViewer
 {
     namespace
     {
-        const char* PassTreeToolName = "PassTree";
-        const char* CpuProfilerToolName = "CPU Profiler";
-        const char* GpuProfilerToolName = "GPU Profiler";
-        const char* TransientAttachmentProfilerToolName = "Transient Attachment Profiler";
+        constexpr const char* PassTreeToolName = "PassTree";
+        constexpr const char* CpuProfilerToolName = "CPU Profiler";
+        constexpr const char* GpuProfilerToolName = "GPU Profiler";
+        constexpr const char* FileIoProfilerToolName = "File IO Profiler";
+        constexpr const char* TransientAttachmentProfilerToolName = "Transient Attachment Profiler";
     }
 
     bool IsValidNumMSAASamples(int numSamples)
@@ -162,6 +165,8 @@ namespace AtomSampleViewer
         entry.m_componentDescriptor = T::CreateDescriptor();
         entry.m_parentMenuName = menuName;
         entry.m_fullName = entry.m_parentMenuName + '/' + entry.m_sampleName;
+        entry.m_contentWarning = T::ContentWarning;
+        entry.m_contentWarningTitle = T::ContentWarningTitle;
 
         return entry;
     }
@@ -299,10 +304,12 @@ namespace AtomSampleViewer
             NewFeaturesSample<DepthOfFieldExampleComponent>("DepthOfField"),
             NewFeaturesSample<DiffuseGIExampleComponent>("DiffuseGI", []() {return Utils::GetRHIDevice()->GetFeatures().m_rayTracing; }),
             NewFeaturesSample<ExposureExampleComponent>("Exposure"),
+            NewFeaturesSample<EyeMaterialExampleComponent>("EyeMaterial"),
             NewFeaturesSample<LightCullingExampleComponent>("LightCulling"),
             NewFeaturesSample<ParallaxMappingExampleComponent>("Parallax"),
             NewFeaturesSample<ShadowExampleComponent>("Shadow"),
             NewFeaturesSample<ShadowedSponzaExampleComponent>("ShadowedSponza"),
+            NewFeaturesSample<SkinnedMeshExampleComponent>("SkinnedMesh"),
             NewFeaturesSample<SsaoExampleComponent>("SSAO"),
             NewFeaturesSample<SSRExampleComponent>("SSR"),
             NewFeaturesSample<TonemappingExampleComponent>("Tonemapping"),
@@ -323,13 +330,12 @@ namespace AtomSampleViewer
 
     SampleComponentManager::SampleComponentManager()
         : m_imguiFrameCaptureSaver("@user@/frame_capture.xml")
-        , m_imGuiFrameTimer(FrameTimeLogSize, FrameTimeLogSize, 250.0f)
     {
+        m_imGuiFrameTimer = AZStd::make_unique<ImGuiHistogramQueue>(FrameTimeDefaultLogSize, FrameTimeDefaultLogSize, 250.0f);
+
         m_exampleEntity = aznew AZ::Entity();
 
         m_entityContextId = AzFramework::EntityContextId::CreateNull();
-
-        memset(m_alphanumericNumbersDown, 0, s_alphanumericCount);
     }
 
     SampleComponentManager::~SampleComponentManager()
@@ -457,15 +463,39 @@ namespace AtomSampleViewer
                 {
                     if (m_isSampleSupported[i])
                     {
+                        if (m_availableSamples[i].m_contentWarning.empty())
+                        {
+                            m_selectedSampleIndex = i;
+                            m_sampleChangeRequest = true;
+                        }
+                        else
+                        {
+                            m_contentWarningDialog.OpenPopupConfirmation(
+                                m_availableSamples[i].m_contentWarningTitle,
+                                m_availableSamples[i].m_contentWarning,
+                                [this, i]() {
+                                    m_selectedSampleIndex = i;
+                                    m_sampleChangeRequest = true;
+                                });
+                        }
+
                         targetSampleFound = true;
-                        m_selectedSampleIndex = i;
-                        m_sampleChangeRequest = true;
                     }
 
                     break;
                 }
             }
             AZ_Warning("SampleComponentManager", targetSampleFound, "Failed find target sample %s", targetSampleName.c_str());
+        }
+        if (commandLine->HasSwitch("timingSamples"))
+        {
+                AZStd::string timingSamplesStr = commandLine->GetSwitchValue("timingSamples", 0);
+                int timingSamplesCount = 0;
+                if (AZ::StringFunc::LooksLikeInt(timingSamplesStr.c_str(), &timingSamplesCount))
+                {
+                    timingSamplesCount = AZStd::clamp<int>(timingSamplesCount, FrameTimeMinLogSize, FrameTimeMaxLogSize);
+                    m_imGuiFrameTimer = AZStd::make_unique<ImGuiHistogramQueue>(timingSamplesCount, timingSamplesCount, 250.0f);
+                }
         }
 
         // Set default screenshot folder to relative path 'Screenshots'
@@ -524,7 +554,10 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::OnTick(float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint time)
     {
-        m_imGuiFrameTimer.PushValue(deltaTime * 1000.0f);
+        if (m_imGuiFrameTimer)
+        {
+            m_imGuiFrameTimer->PushValue(deltaTime * 1000.0f);
+        }
 
         bool screenshotRequest = false;
 
@@ -550,16 +583,6 @@ namespace AtomSampleViewer
             if (m_alphanumericPDown)
             {
                 screenshotRequest = true;
-            }
-
-            for (size_t i = 0; i < m_availableSamples.size(); ++i)
-            {
-                if (m_alphanumericNumbersDown[i] && i < s_alphanumericCount && m_isSampleSupported[i])
-                {
-                    m_sampleChangeRequest = true;
-                    m_selectedSampleIndex = static_cast<int32_t>(i);
-                    break;
-                }
             }
         }
 
@@ -614,8 +637,11 @@ namespace AtomSampleViewer
             else if (m_countdownForFrameCapture == 0)
             {
                 AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect();
-                AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, m_frameCaptureFilePath);
-                m_countdownForFrameCapture = -1; // Don't call CaptureScreenshot again
+                AZ::Render::FrameCaptureRequestBus::BroadcastResult(m_frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, m_frameCaptureFilePath);
+                if (m_frameCaptureId != AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId ) // if unsuccessfull leave state to attempt again next tick
+                {
+                    m_countdownForFrameCapture = -1; // Don't call CaptureScreenshot again
+                }
             }
         }
     }
@@ -697,14 +723,6 @@ namespace AtomSampleViewer
                 m_escapeDown = true;
             }
 
-            for (size_t i = 0; i < samplesAvailableCount; ++i)
-            {
-                if ((i < s_alphanumericCount) && (inputChannelId == sampleInputMapping[i]))
-                {
-                    m_alphanumericNumbersDown[i] = true;
-                }
-            }
-
             break;
         }
         case AzFramework::InputChannel::State::Ended:
@@ -732,14 +750,6 @@ namespace AtomSampleViewer
             else if (inputChannelId == AzFramework::InputDeviceKeyboard::Key::Escape)
             {
                 m_escapeDown = false;
-            }
-
-            for (size_t i = 0; i < samplesAvailableCount; ++i)
-            {
-                if ((i < s_alphanumericCount) && (inputChannelId == sampleInputMapping[i]))
-                {
-                    m_alphanumericNumbersDown[i] = false;
-                }
             }
 
             break;
@@ -827,18 +837,19 @@ namespace AtomSampleViewer
             ShowGpuProfilerWindow();
         }
 
+        if (m_showFileIoProfiler)
+        {
+            ShowFileIoProfilerWindow();
+        }
+
         if (m_showTransientAttachmentProfiler)
         {
             ShowTransientAttachmentProfilerWindow();
         }
 
-        if (m_showShaderMetrics)
-        {
-            ShowShaderMetricsWindow();
-        }
-
         m_scriptManager->TickImGui();
 
+        m_contentWarningDialog.TickPopup();
     }
 
     void SampleComponentManager::ShowMenuBar()
@@ -897,11 +908,6 @@ namespace AtomSampleViewer
                     m_showFrameGraphVisualizer = !m_showFrameGraphVisualizer;
                 }
 
-                if (ImGui::MenuItem("Shader Metrics"))
-                {
-                    m_showShaderMetrics = !m_showShaderMetrics;
-                }
-
                 ImGui::EndMenu();
             }
             if (ImGui::BeginMenu("Samples"))
@@ -915,33 +921,31 @@ namespace AtomSampleViewer
                             SampleEntry& sample = m_availableSamples[index];
                             const char* sampleName = sample.m_sampleName.c_str();
                             bool enabled = m_isSampleSupported[index];
-                            if (index < s_alphanumericCount)
-                            {
-                                const AZStd::string hotkeyName = AZStd::string::format("Ctrl-%d: ", (index + 1) % 10);
 
-                                if (ImGui::MenuItem(sampleName, hotkeyName.c_str(), false, enabled))
-                                {
-                                    m_selectedSampleIndex = index;
-                                    m_sampleChangeRequest = true;
-                                }
-                            }
-                            else
+                            if (ImGui::MenuItem(sampleName, nullptr, false, enabled))
                             {
-                                if (ImGui::MenuItem(sampleName, nullptr, false, enabled))
+                                Utils::ReportScriptableAction("OpenSample('%s')", sample.m_sampleName.c_str());
+
+                                if (sample.m_contentWarning.empty())
                                 {
-                                    m_selectedSampleIndex = index;
                                     m_sampleChangeRequest = true;
+                                    m_selectedSampleIndex = index;
+                                }
+                                else
+                                {
+                                    m_contentWarningDialog.OpenPopupConfirmation(
+                                        sample.m_contentWarningTitle,
+                                        sample.m_contentWarning,
+                                        [this, index]() {
+                                            m_sampleChangeRequest = true;
+                                            m_selectedSampleIndex = index;
+                                        });
                                 }
                             }
                         }
 
                         ImGui::EndMenu();
                     }
-                }
-
-                if (m_sampleChangeRequest)
-                {
-                    Utils::ReportScriptableAction("OpenSample('%s')", m_availableSamples[m_selectedSampleIndex].m_sampleName.c_str());
                 }
 
                 ImGui::EndMenu();
@@ -959,13 +963,27 @@ namespace AtomSampleViewer
 
             if (ImGui::BeginMenu("Automation"))
             {
+                const char* AutomationContentWarningTitle = AtomSampleComponent::CommonPhotosensitiveWarningTitle;
+                const char* AutomationContentWarning = "Running automated scripts will trigger flashing images that could cause seizures or other adverse effects in photosensitive individuals.";
+
                 if (ImGui::MenuItem("Run Script..."))
                 {
-                    m_scriptManager->OpenScriptRunnerDialog();
+                    m_contentWarningDialog.OpenPopupConfirmation(
+                        AutomationContentWarningTitle,
+                        AutomationContentWarning,
+                        [this]() {
+                            m_scriptManager->OpenScriptRunnerDialog();
+                        });
+
                 }
                 if (ImGui::MenuItem("Run Precommit Wizard..."))
                 {
-                    m_scriptManager->OpenPrecommitWizard();
+                    m_contentWarningDialog.OpenPopupConfirmation(
+                        AutomationContentWarningTitle,
+                        AutomationContentWarning,
+                        [this]() {
+                            m_scriptManager->OpenPrecommitWizard();
+                        });
                 }
 
                 ImGui::EndMenu();
@@ -1001,6 +1019,16 @@ namespace AtomSampleViewer
                     }
 
                     Utils::ReportScriptableAction("ShowTool('%s', %s)", CpuProfilerToolName, m_showCpuProfiler ? "true" : "false");
+                }
+
+                if (AZ::IO::StreamerProfiler::Get() != nullptr)
+                {
+                    if (ImGui::MenuItem(FileIoProfilerToolName))
+                    {
+                        m_showFileIoProfiler = !m_showFileIoProfiler;
+                        Utils::ReportScriptableAction(
+                            "ShowTool('%s', %s)", FileIoProfilerToolName, m_showFileIoProfiler ? "true" : "false");
+                    }
                 }
 
                 if (ImGui::MenuItem(GpuProfilerToolName))
@@ -1097,6 +1125,14 @@ namespace AtomSampleViewer
         }
     }
 
+    void SampleComponentManager::ShowFileIoProfilerWindow()
+    {
+        if (auto profilerImGui = AZ::IO::StreamerProfiler::Get(); profilerImGui)
+        {
+            profilerImGui->DrawStatistics(m_showFileIoProfiler);
+        }
+    }
+
     void SampleComponentManager::ShowGpuProfilerWindow()
     {
         m_imguiGpuProfiler.Draw(m_showGpuProfiler, AZ::RPI::PassSystemInterface::Get()->GetRootPass());
@@ -1109,11 +1145,6 @@ namespace AtomSampleViewer
         {
             m_showTransientAttachmentProfiler = m_imguiTransientAttachmentProfiler.Draw(*transientStats);
         }
-    }
-
-    void SampleComponentManager::ShowShaderMetricsWindow()
-    {
-        m_imguiShaderMetrics.Draw(m_showShaderMetrics, AZ::RPI::ShaderMetricsSystemInterface::Get()->GetMetrics());
     }
 
     void SampleComponentManager::ShowResizeViewportDialog()
@@ -1159,12 +1190,12 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::ShowFramerateHistogram(float deltaTime)
     {
-        if (ImGui::Begin("Frame Time Histogram", &m_showFramerateHistogram, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings))
+        if (m_imGuiFrameTimer && ImGui::Begin("Frame Time Histogram", &m_showFramerateHistogram, ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoSavedSettings))
         {
             ImGuiHistogramQueue::WidgetSettings settings;
             settings.m_reportInverse = false;
             settings.m_units = "ms";
-            m_imGuiFrameTimer.Tick(deltaTime * 1000.0f, settings);
+            m_imGuiFrameTimer->Tick(deltaTime * 1000.0f, settings);
         }
         ImGui::End();
     }
@@ -1173,6 +1204,7 @@ namespace AtomSampleViewer
     void SampleComponentManager::RequestFrameCapture(const AZStd::string& filePath, bool hideImGui)
     {
         AZ_Assert(false == m_isFrameCapturePending, "Frame capture already in progress");
+        AZ_Assert(AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId == m_frameCaptureId, "Unfinished frame capture detected");
         m_isFrameCapturePending = true;
         m_hideImGuiDuringFrameCapture = hideImGui;
         m_frameCaptureFilePath = filePath;
@@ -1196,8 +1228,12 @@ namespace AtomSampleViewer
         }
     }
 
-    void SampleComponentManager::OnCaptureFinished(AZ::Render::FrameCaptureResult /*result*/, const AZStd::string& /*info*/)
+    void SampleComponentManager::OnCaptureFinished(uint32_t captureId, AZ::Render::FrameCaptureResult /*result*/, const AZStd::string& /*info*/)
     {
+        if (captureId != m_frameCaptureId) // ignore captures from other systems
+        {
+            return;
+        }
         AZ::Render::FrameCaptureNotificationBus::Handler::BusDisconnect();
 
         if (m_hideImGuiDuringFrameCapture)
@@ -1210,6 +1246,7 @@ namespace AtomSampleViewer
 
         ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::ResumeScript);
         m_isFrameCapturePending = false;
+        m_frameCaptureId = AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId;
     }
 
     bool SampleComponentManager::IsFrameCapturePending()
@@ -1410,6 +1447,11 @@ namespace AtomSampleViewer
             m_showCpuProfiler = enable;
             return true;
         }
+        else if (toolName == FileIoProfilerToolName)
+        {
+            m_showFileIoProfiler = enable;
+            return true;
+        }
         else if (toolName == GpuProfilerToolName)
         {
             m_showGpuProfiler = enable;
@@ -1489,7 +1531,7 @@ namespace AtomSampleViewer
         // Create and register the rhi scene with only feature processors required for AtomShimRenderer (only for AtomSampleViewerLauncher)
         RPI::SceneDescriptor sceneDesc;
         sceneDesc.m_nameId = AZ::Name("RHI");
-        sceneDesc.m_featureProcessorNames.push_back("AuxGeomFeatureProcessor");
+        sceneDesc.m_featureProcessorNames.push_back("AZ::Render::AuxGeomFeatureProcessor");
         m_rhiScene = RPI::Scene::CreateScene(sceneDesc);
         m_rhiScene->Activate();
 
@@ -1526,10 +1568,8 @@ namespace AtomSampleViewer
     void SampleComponentManager::SwitchSceneForRHISample()
     {
         ReleaseRPIScene();
-        if (!m_rhiScene)
-        {
-            CreateSceneForRHISample();
-        }
+        ReleaseRHIScene();
+        CreateSceneForRHISample();
     }
 
     void SampleComponentManager::CreateSceneForRPISample()
@@ -1618,10 +1658,8 @@ namespace AtomSampleViewer
     void SampleComponentManager::SwitchSceneForRPISample()
     {
         ReleaseRHIScene();
-        if (!m_rpiScene)
-        {
-            CreateSceneForRPISample();
-        }
+        ReleaseRPIScene();
+        CreateSceneForRPISample();
     }
 
     // AzFramework::AssetCatalogEventBus::Handler overrides ...

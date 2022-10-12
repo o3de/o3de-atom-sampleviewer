@@ -386,7 +386,7 @@ namespace AtomSampleViewer
             drawIndexed.m_indexCount = 6;
             drawIndexed.m_instanceCount = 1;
 
-            for (uint32_t rectIndex = 0; rectIndex < s_numRectangles; ++rectIndex)
+            for (uint32_t rectIndex = context.GetSubmitRange().m_startIndex; rectIndex < context.GetSubmitRange().m_endIndex; ++rectIndex)
             {
                 const RHI::ShaderResourceGroup* shaderResourceGroups[] = {m_shaderResourceGroups[typeIndex][rectIndex]->GetRHIShaderResourceGroup()};
 

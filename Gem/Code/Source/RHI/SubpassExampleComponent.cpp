@@ -186,16 +186,14 @@ namespace AtomSampleViewer
             ModelType_Suzanne,
         };
 
-        auto setModelType = [](AZStd::span<const ModelType> types, AZStd::vector<ModelData>& modelDataList)
-        {
-            modelDataList.resize(types.size());
-            for (uint32_t i = 0; i < modelDataList.size(); ++i)
-            {
-                modelDataList[i].m_modelType = types[i];
-            }
-        };
+        AZStd::span<const ModelType> types(&opaqueModels[0], AZ_ARRAY_SIZE(opaqueModels));
+        m_opaqueModelsData.resize(types.size());
 
-        setModelType(AZStd::span<const ModelType>(&opaqueModels[0], AZ_ARRAY_SIZE(opaqueModels)), m_opaqueModelsData);
+        for (uint32_t i = 0; i < m_opaqueModelsData.size(); ++i)
+        {
+            m_opaqueModelsData[i].m_modelType = types[i];
+            m_meshCount += aznumeric_cast<uint32_t>(m_models[m_opaqueModelsData[i].m_modelType]->GetLods()[0]->GetMeshes().size());
+        }
     }
 
     void SubpassExampleComponent::LoadShaders()
@@ -381,7 +379,7 @@ namespace AtomSampleViewer
                 frameGraph.UseDepthStencilAttachment(dsDesc, RHI::ScopeAttachmentAccess::Write);
             }
 
-            frameGraph.SetEstimatedItemCount(static_cast<uint32_t>(m_opaqueModelsData.size()));
+            frameGraph.SetEstimatedItemCount(m_meshCount);
         };
 
         RHI::EmptyCompileFunction<ScopeData> compileFunction;

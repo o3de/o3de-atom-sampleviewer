@@ -94,6 +94,16 @@ namespace AtomSampleViewer
 
             m_modelBrowser.ResetPinnedAssetsToDefault();
         }
+        
+        // 25 was the original max before some changes that increased ENTITY_LATTEST_TEST_COMPONENT_MAX to 100.
+        // AssetLoadTest was crashing (out of descriptors) at 50x50x42 so we put the limit back to 25^3.
+        // Note that limiting to 40^3 will avoid the crash, but the sample doesn't work well at that scale, the UI
+        // doesn't even show up because of a combination of low frame rate, the reload timers, and the time it takes
+        // to load the models, and the fact that the UI is hidden while the models are loading.
+        // So it would be good if we could work on increasing this limit.
+        // (It would also be good if we could improve the design of this sample to make the UI persistent and more
+        //  responsive while the assets keep reloading).
+        Base::SetLatticeMaxDimension(25);
 
         Base::Activate();
     }

@@ -259,7 +259,7 @@ namespace AtomSampleViewer
                 frameGraph.UseShaderAttachment(attachmentDescriptor, RHI::ScopeAttachmentAccess::ReadWrite);
             }
 
-            frameGraph.SetEstimatedItemCount(1);
+            frameGraph.SetEstimatedItemCount(2);
         };
 
         const auto compileFunction = [this](const RHI::FrameGraphCompileContext& context, const ScopeData& scopeData)
@@ -298,11 +298,12 @@ namespace AtomSampleViewer
             dispatchItem.m_arguments = dispatchArgs;
             dispatchItem.m_pipelineState = m_dispatchPipelineState.get();
             dispatchItem.m_shaderResourceGroupCount = 1;
-            dispatchItem.m_shaderResourceGroups[0] = m_dispatchSRG[0]->GetRHIShaderResourceGroup();
-            commandList->Submit(dispatchItem);
 
-            dispatchItem.m_shaderResourceGroups[0] = m_dispatchSRG[1]->GetRHIShaderResourceGroup();
-            commandList->Submit(dispatchItem);
+            for (uint32_t index = context.GetSubmitRange().m_startIndex; index < context.GetSubmitRange().m_endIndex; ++index)
+            {
+                dispatchItem.m_shaderResourceGroups[0] = m_dispatchSRG[index]->GetRHIShaderResourceGroup();
+                commandList->Submit(dispatchItem, index);
+            }
         };
 
         m_scopeProducers.emplace_back(
@@ -358,7 +359,7 @@ namespace AtomSampleViewer
             }
 
             // We will submit a single draw item.
-            frameGraph.SetEstimatedItemCount(1);
+            frameGraph.SetEstimatedItemCount(2);
         };
 
         const auto compileFunction = [this](const RHI::FrameGraphCompileContext& context, const ScopeData& scopeData)
@@ -397,24 +398,22 @@ namespace AtomSampleViewer
             RHI::DrawLinear drawLinear;
             drawLinear.m_vertexCount = BufferData::array_size;
 
-            RHI::ShaderResourceGroup* rhiSRGS[] = { m_drawSRG[0]->GetRHIShaderResourceGroup() };
-
             RHI::DrawItem drawItem;
             drawItem.m_arguments = drawLinear;
             drawItem.m_pipelineState = m_drawPipelineState.get();
             drawItem.m_indexBufferView = nullptr;
             drawItem.m_streamBufferViewCount = 1;
-            drawItem.m_streamBufferViews = &m_streamBufferView[0];
             drawItem.m_shaderResourceGroupCount = 1;
-            drawItem.m_shaderResourceGroups = rhiSRGS;
 
-            // Submit the draw item.
-            commandList->Submit(drawItem);
+            for (uint32_t index = context.GetSubmitRange().m_startIndex; index < context.GetSubmitRange().m_endIndex; ++index)
+            {
+                drawItem.m_streamBufferViews = &m_streamBufferView[index];
 
-            rhiSRGS[0] = { m_drawSRG[1]->GetRHIShaderResourceGroup() };
-            drawItem.m_streamBufferViews = &m_streamBufferView[1];
-            drawItem.m_shaderResourceGroups = rhiSRGS;
-            commandList->Submit(drawItem);
+                RHI::ShaderResourceGroup* rhiSRGS[] = { m_drawSRG[index]->GetRHIShaderResourceGroup() };
+                drawItem.m_shaderResourceGroups = rhiSRGS;
+
+                commandList->Submit(drawItem, index);
+            }
         };
 
         m_scopeProducers.emplace_back(

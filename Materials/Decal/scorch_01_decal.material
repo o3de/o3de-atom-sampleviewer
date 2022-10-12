@@ -1,12 +1,12 @@
 {
     "materialType": "Materials/Types/StandardPBR.materialtype",
-    "materialTypeVersion": 3,
+    "materialTypeVersion": 5,
     "propertyValues": {
         "baseColor.textureMap": "Materials/Decal/scorch_01_decal.tif",
+        "general.doubleSided": true,
         "metallic.useTexture": false,
         "normal.textureMap": "Materials/Decal/scorch_01_decal_nrm.tif",
         "opacity.alphaSource": "Split",
-        "opacity.doubleSided": true,
         "opacity.factor": 0.6899999976158142,
         "opacity.mode": "Cutout",
         "opacity.textureMap": "Materials/Decal/scorch_01_decal.tif",
