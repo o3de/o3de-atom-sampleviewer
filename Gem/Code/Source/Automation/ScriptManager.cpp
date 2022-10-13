@@ -407,7 +407,7 @@ namespace AtomSampleViewer
 
                 if (m_shouldRestoreViewportSize)
                 {
-                    Utils::ResizeClientArea(m_savedViewportWidth, m_savedViewportHeight);
+                    Utils::ResizeClientArea(m_savedViewportWidth, m_savedViewportHeight, AzFramework::WindowPosOptions());
                     m_shouldRestoreViewportSize = false;
                 }
 
@@ -1364,7 +1364,9 @@ namespace AtomSampleViewer
         {
             if (Utils::SupportsResizeClientArea())
             {
-                Utils::ResizeClientArea(width, height);
+                AzFramework::WindowPosOptions options;
+                options.m_ignoreScreenSizeLimit = true;
+                Utils::ResizeClientArea(width, height, options);
             }
             else
             {

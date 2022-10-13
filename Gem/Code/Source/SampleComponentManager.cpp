@@ -1195,7 +1195,7 @@ namespace AtomSampleViewer
 
             if (ImGui::Button("Resize"))
             {
-                Utils::ResizeClientArea(size[0], size[1]);
+                Utils::ResizeClientArea(size[0], size[1], AzFramework::WindowPosOptions());
 
                 Utils::ReportScriptableAction("ResizeViewport(%d, %d)", size[0], size[1]);
 

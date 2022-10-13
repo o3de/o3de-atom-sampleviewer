@@ -57,7 +57,7 @@ namespace AtomSampleViewer
         };
 
         bool SupportsResizeClientArea();
-        void ResizeClientArea(uint32_t width, uint32_t height);
+        void ResizeClientArea(uint32_t width, uint32_t height, const AzFramework::WindowPosOptions& options);
 
         bool SupportsToggleFullScreenOfDefaultWindow();
         void ToggleFullScreenOfDefaultWindow();
