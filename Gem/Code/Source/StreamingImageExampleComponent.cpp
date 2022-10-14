@@ -383,9 +383,9 @@ namespace AtomSampleViewer
             ImGui::Text("Streamable image count: %u", streamingImagePool->GetStreamableImageCount());
             // Add m_totalResidentInBytes and m_reservedInBytes together before ATOM-17037 is done
             size_t totalResident = memoryUsage.m_totalResidentInBytes.load() + memoryUsage.m_reservedInBytes;
-            ImGui::Text("Allocated GPU memory: %d MB (%u)", totalResident/MB, totalResident);
+            ImGui::Text("Allocated GPU memory: %zu MB (%zu)", totalResident/MB, totalResident);
             size_t usedResident = memoryUsage.m_usedResidentInBytes.load() + memoryUsage.m_reservedInBytes;;
-            ImGui::Text("Used GPU memory: %d MB (%u)", usedResident/MB, usedResident);
+            ImGui::Text("Used GPU memory: %zu MB (%zu)", usedResident/MB, usedResident);
             
             size_t budgetInBytes = memoryUsage.m_budgetInBytes;
             int budgetInMB = aznumeric_cast<int>(budgetInBytes/MB);

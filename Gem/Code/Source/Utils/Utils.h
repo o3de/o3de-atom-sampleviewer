@@ -7,6 +7,8 @@
  */
 #pragma once
 
+#include <AzFramework/Windowing/WindowBus.h>
+
 #include <Atom/RHI/Device.h>
 #include <Atom/RHI/PipelineState.h>
 
