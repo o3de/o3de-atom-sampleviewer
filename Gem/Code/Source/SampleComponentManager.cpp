@@ -236,6 +236,10 @@ namespace AtomSampleViewer
             serializeContext->Class<SampleComponentManager, AZ::Component>()
                 ->Version(0)
                 ;
+
+            // This registration matches ShaderOptionValuesSourceData, which is needed by ImGuiShaderUtils, to support
+            // generating JSON for shader variants.
+            serializeContext->RegisterGenericType<AZStd::unordered_map<Name, Name>>();
         }
     }
 
