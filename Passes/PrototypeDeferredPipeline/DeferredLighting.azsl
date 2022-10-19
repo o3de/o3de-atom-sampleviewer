@@ -31,6 +31,16 @@ ShaderResourceGroup PassSrg : SRG_PerPass
         AddressW = Clamp;
     };
     
+    Sampler PointSampler
+    {
+        MinFilter = Point;
+        MagFilter = Point;
+        MipFilter = Point;
+        AddressU = Clamp;
+        AddressV = Clamp;
+        AddressW = Clamp;
+    };
+
     Texture2D<uint4> m_tileLightData;
     StructuredBuffer<uint> m_lightListRemapped;
     //Texture2D<float> m_linearDepthTexture;
@@ -60,6 +70,11 @@ struct PSOutput
     //float4 m_normal : SV_Target4;            //!< RGB10 = EncodeNormalSignedOctahedron(worldNormal), A2 = Flags (IBL/Multiscatter enabled)
 };
 
+// Since the visual results of the deferred pipeline are (in theory) identical to the results
+// of the main pipeline, this option can be enabled to draw a watermark that confirms what
+// you are seeing is actually the deferred pipeline.
+option bool o_deferredPipelineWatermark = true;
+
 PSOutput MainPS(VSOutput IN, in uint sampleIndex : SV_SampleIndex)
 {
     uint2 screenCoords = IN.m_position.xy;
@@ -73,10 +88,13 @@ PSOutput MainPS(VSOutput IN, in uint sampleIndex : SV_SampleIndex)
     float2 roughnessMetallic = PassSrg::m_roughnessMetal.Load(screenCoords, sampleIndex).rg;
     float3 baseColor = PassSrg::m_baseColor.Load(screenCoords, sampleIndex).rgb;
     
-    // TODO: Remove this, it's temporary to help confirm the deferred pipeline is running.
-    if(abs(IN.m_texCoord.x-0.5) < 0.01 || abs(IN.m_texCoord.y-0.5) < 0.01) 
+    if(o_deferredPipelineWatermark)
     {
-        baseColor *= float3(1,0,1); 
+        if(abs(IN.m_texCoord.x-0.5) < 0.01 || abs(IN.m_texCoord.y-0.5) < 0.01) 
+        {
+            float t = sin(50 * (IN.m_texCoord.x + IN.m_texCoord.y)) * 0.5 + 0.5;
+            baseColor *= lerp(float3(1,0.2,1), float3(0.5,1,1), t); 
+        }
     }
 
     // Copied from Gems\Atom\Feature\Common\Assets\Materials\Pipelines\MainPipeline\ForwardPass.azsli

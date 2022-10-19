@@ -5,7 +5,6 @@
                 "MaterialPipelineFiles": [
                     "@gemroot:Atom_Feature_Common@/Assets/Materials/Pipelines/MainPipeline/MainPipeline.materialpipeline",
                     "@gemroot:Atom_Feature_Common@/Assets/Materials/Pipelines/LowEndPipeline/LowEndPipeline.materialpipeline",
-                    // TODO: Figure out how to better support relative paths
                     "@projectroot@/Materials/Pipelines/PrototypeDeferredPipeline/DeferredPipeline.materialpipeline"
                 ]
             }

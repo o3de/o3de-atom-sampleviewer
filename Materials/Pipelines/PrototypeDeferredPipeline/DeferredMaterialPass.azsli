@@ -7,6 +7,7 @@
  */
 
 #include <viewsrg.srgi>
+#include <Atom/RPI/ShaderResourceGroups/DefaultDrawSrg.azsli>
 #include <Atom/Features/PBR/DefaultObjectSrg.azsli>
 //#include <Atom/Features/Pipeline/Forward/ForwardPassSrg.azsli>
 //#include <Atom/Features/Pipeline/Forward/ForwardPassOutput.azsli>
@@ -33,7 +34,7 @@ struct VSOutput
     float3 m_worldPosition : UV0;
 };
 
-#include <Atom/Features/Vertex/VertexHelper.azsli>
+//#include <Atom/Features/Vertex/VertexHelper.azsli>
 
 void MaterialFunction_AdjustLocalPosition(inout float3 localPosition);
 void MaterialFunction_AdjustWorldPosition(inout float3 worldPosition);
@@ -41,7 +42,7 @@ void MaterialFunction_AdjustSurface(inout Surface outSurface);
 
 VSOutput MaterialVS(VSInput IN)
 {
-    VSOutput OUT;
+    VSOutput output;
  
     MaterialFunction_AdjustLocalPosition(IN.m_position);
 
@@ -49,9 +50,14 @@ VSOutput MaterialVS(VSInput IN)
  
     MaterialFunction_AdjustWorldPosition(worldPosition);
 
-    VertexHelper(IN, OUT, worldPosition);
+    output.m_worldPosition = worldPosition;
+    output.m_position = mul(ViewSrg::m_viewProjectionMatrix, float4(worldPosition, 1.0));
+    
+    output.m_tangent = IN.m_tangent.xyz;
+    output.m_bitangent = IN.m_bitangent;
+    output.m_normal = IN.m_normal;
 
-    return OUT;
+    return output;
 }
 
 struct DeferredMaterialOutput
@@ -60,6 +66,9 @@ struct DeferredMaterialOutput
     float4 m_roughnessMetal : SV_Target1; 
     float4 m_normal : SV_Target2;
 };
+
+option bool o_enableIBL = true;
+option bool o_specularF0_enableMultiScatterCompensation = true;
 
 #define MATERIALPIPELINE_SHADER_HAS_PIXEL_STAGE 1
 
@@ -95,9 +104,7 @@ DeferredMaterialOutput MaterialPS(VSOutput IN)
     OUT.m_roughnessMetal = float4(surface.roughnessLinear, surface.metallic, 0, 0);
     OUT.m_normal.rgb = EncodeNormalSignedOctahedron(surface.normal);
     
-    //TODO: switch this after o_enableIBL is hooked up
-    //OUT.m_normal.a = EncodeUnorm2BitFlags(o_enableIBL, o_specularF0_enableMultiScatterCompensation);
-    OUT.m_normal.a = EncodeUnorm2BitFlags(true, o_specularF0_enableMultiScatterCompensation);
+    OUT.m_normal.a = EncodeUnorm2BitFlags(o_enableIBL, o_specularF0_enableMultiScatterCompensation);
 
     return OUT;
 }
