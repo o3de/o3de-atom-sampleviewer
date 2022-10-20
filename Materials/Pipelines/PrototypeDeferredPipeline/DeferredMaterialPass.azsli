@@ -9,53 +9,42 @@
 #include <viewsrg.srgi>
 #include <Atom/RPI/ShaderResourceGroups/DefaultDrawSrg.azsli>
 #include <Atom/Features/PBR/DefaultObjectSrg.azsli>
-//#include <Atom/Features/Pipeline/Forward/ForwardPassSrg.azsli>
-//#include <Atom/Features/Pipeline/Forward/ForwardPassOutput.azsli>
-//#include <Atom/Features/PBR/AlphaUtils.azsli>
 #include <Atom/Features/ColorManagement/TransformColor.azsli>
-//#include <Atom/Features/PBR/Lighting/StandardLighting.azsli>
 #include <Atom/Features/PBR/Surfaces/StandardSurface.azsli>
-//#include <Atom/Features/PBR/Decals.azsli>
 
 struct VSInput
 {
     float3 m_position : POSITION;
     float3 m_normal : NORMAL;
-    float4 m_tangent : TANGENT; 
-    float3 m_bitangent : BITANGENT; 
+    //float4 m_tangent : TANGENT; 
 };
 
 struct VSOutput
 {
     precise linear centroid float4 m_position : SV_Position;
     float3 m_normal: NORMAL;
-    float3 m_tangent : TANGENT; 
-    float3 m_bitangent : BITANGENT; 
+    //float3 m_tangent : TANGENT; 
     float3 m_worldPosition : UV0;
 };
 
-//#include <Atom/Features/Vertex/VertexHelper.azsli>
-
-void MaterialFunction_AdjustLocalPosition(inout float3 localPosition);
-void MaterialFunction_AdjustWorldPosition(inout float3 worldPosition);
-void MaterialFunction_AdjustSurface(inout Surface outSurface);
+#define MATERIALPIPELINE_SHADER_HAS_PIXEL_STAGE 1
+#include <Atom/RPI/MaterialPipelineCallbacks.azsli>
 
 VSOutput MaterialVS(VSInput IN)
 {
-    VSOutput output;
- 
-    MaterialFunction_AdjustLocalPosition(IN.m_position);
+    VertexData adjustableVertexData;
+    adjustableVertexData.InitializeToZero();
+    adjustableVertexData.positionWS = LocalSpaceToWorldSpace(IN.m_position);
+    adjustableVertexData.normalLS = IN.m_normal;
+    //adjustableVertexData.tangentLS = IN.m_tangent;
 
-    float3 worldPosition = mul(ObjectSrg::GetWorldMatrix(), float4(IN.m_position, 1.0)).xyz;
- 
-    MaterialFunction_AdjustWorldPosition(worldPosition);
-
-    output.m_worldPosition = worldPosition;
-    output.m_position = mul(ViewSrg::m_viewProjectionMatrix, float4(worldPosition, 1.0));
+    MaterialFunction_AdjustVertexData(IN.m_position, adjustableVertexData);
     
-    output.m_tangent = IN.m_tangent.xyz;
-    output.m_bitangent = IN.m_bitangent;
-    output.m_normal = IN.m_normal;
+    VSOutput output;
+    output.m_worldPosition = adjustableVertexData.positionWS;
+    output.m_position = mul(ViewSrg::m_viewProjectionMatrix, float4(output.m_worldPosition, 1.0));
+    output.m_normal = adjustableVertexData.normalLS;
+    //output.m_tangent = adjustableVertexData.tangentLS.xyz;
 
     return output;
 }
