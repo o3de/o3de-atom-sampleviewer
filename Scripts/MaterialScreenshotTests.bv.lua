@@ -252,7 +252,7 @@ GenerateMaterialScreenshot('Level F', '009_Opacity_Blended', {lighting="Neutral 
 -- These tests are temporary, specifically for regression testing the new material pipeline system while it is in development.
 -- Once the core material types like StandardPBR are ported to use material pipelines, we can remove these test cases.
 
-g_testMaterialsFolder = 'testdata/materials/materialpipelinetest/'
+g_testMaterialsFolder = 'materials/materialpipelinetest/'
 g_testCaseFolder = 'MaterialPipelineSystem'
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder .. g_testCaseFolder))
 
