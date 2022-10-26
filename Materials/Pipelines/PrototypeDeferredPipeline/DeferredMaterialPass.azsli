@@ -16,6 +16,7 @@ struct VSInput
 {
     float3 m_position : POSITION;
     float3 m_normal : NORMAL;
+    //TODO(DeferredPOC): Support tangent space and normal mapping
     //float4 m_tangent : TANGENT; 
 };
 
@@ -23,6 +24,7 @@ struct VSOutput
 {
     precise linear centroid float4 m_position : SV_Position;
     float3 m_normal: NORMAL;
+    //TODO(DeferredPOC): Support tangent space and normal mapping
     //float3 m_tangent : TANGENT; 
     float3 m_worldPosition : UV0;
 };
@@ -36,6 +38,7 @@ VSOutput MaterialVS(VSInput IN)
     adjustableVertexData.InitializeToZero();
     adjustableVertexData.positionWS = LocalSpaceToWorldSpace(IN.m_position);
     adjustableVertexData.normalLS = IN.m_normal;
+    //TODO(DeferredPOC): Support tangent space and normal mapping
     //adjustableVertexData.tangentLS = IN.m_tangent;
 
     MaterialFunction_AdjustVertexData(IN.m_position, adjustableVertexData);
@@ -44,6 +47,7 @@ VSOutput MaterialVS(VSInput IN)
     output.m_worldPosition = adjustableVertexData.positionWS;
     output.m_position = mul(ViewSrg::m_viewProjectionMatrix, float4(output.m_worldPosition, 1.0));
     output.m_normal = adjustableVertexData.normalLS;
+    //TODO(DeferredPOC): Support tangent space and normal mapping
     //output.m_tangent = adjustableVertexData.tangentLS.xyz;
 
     return output;
@@ -92,7 +96,6 @@ DeferredMaterialOutput MaterialPS(VSOutput IN)
     OUT.m_baseColor = float4(surface.baseColor, 1);
     OUT.m_roughnessMetal = float4(surface.roughnessLinear, surface.metallic, 0, 0);
     OUT.m_normal.rgb = EncodeNormalSignedOctahedron(surface.normal);
-    
     OUT.m_normal.a = EncodeUnorm2BitFlags(o_enableIBL, o_specularF0_enableMultiScatterCompensation);
 
     return OUT;

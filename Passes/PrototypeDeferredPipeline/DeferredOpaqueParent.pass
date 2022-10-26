@@ -71,6 +71,7 @@
                     "TemplateName": "DeferredMaterialPassTemplate",
                     "Connections": [
                         // Inputs...
+
                         // Input/Outputs...
                         {
                             "LocalSlot": "DepthStencilInputOutput",
@@ -83,10 +84,8 @@
                     "PassData": {
                         "$type": "RasterPassData",
                         "DrawListTag": "deferredMaterial",
-                        "PipelineViewTag": "MainCamera"//,
-                        //"PassSrgShaderAsset": {
-                        //    "FilePath": "Passes/PrototypeDeferredPipeline/DeferredMaterialPassSrg.shader"
-                        //}
+                        "PipelineViewTag": "MainCamera"
+                        // No PassSrgShaderAsset is needed here because the material pass only packs GBuffers, and doesn't need any per-pass resources
                     }
                 },
                 {
@@ -408,6 +407,7 @@
                         }
                     }
                 },
+                // TODO(DeferredPOC): Try to hook up subsurface scattering again
                 //{
                 //    "Name": "MSAAResolveScatterDistancePass",
                 //    "TemplateName": "MSAAResolveColorTemplate",
@@ -467,6 +467,7 @@
                                 "Pass": "MSAAResolveDiffusePass",
                                 "Attachment": "Output"
                             }
+                            // TODO(DeferredPOC): Try to hook up subsurface scattering again
                             //"AttachmentRef": {
                             //    "Pass": "SubsurfaceScatteringPass",
                             //    "Attachment": "Output"

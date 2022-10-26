@@ -43,7 +43,6 @@ ShaderResourceGroup PassSrg : SRG_PerPass
 
     Texture2D<uint4> m_tileLightData;
     StructuredBuffer<uint> m_lightListRemapped;
-    //Texture2D<float> m_linearDepthTexture;
     
     Texture2DMS<float2>   m_depthStencilTexture;
 
@@ -54,7 +53,7 @@ ShaderResourceGroup PassSrg : SRG_PerPass
 
 #define FORCE_OPAQUE 1 // Because there is no transparency in deferred, so we don't want the o_opacity_mode shader option
 
-// TODO: Figure out how to support different lighting models.
+//TODO(DeferredPOC): Support multiple lighting models, not just StandardLighting
 #include <Atom/Features/PBR/Lighting/StandardLighting.azsli>
 #include <Atom/Features/PBR/Lights/Ibl.azsli>
 #include <Atom/Features/PBR/Decals.azsli>
@@ -66,13 +65,12 @@ struct PSOutput
     float4 m_specularColor : SV_Target1;     //!< RGB = Specular Lighting, A = Unused
     float4 m_albedo : SV_Target2;            //!< RGB = Surface albedo pre-multiplied by other factors that will be multiplied later by diffuse GI, A = specularOcclusion
     float4 m_specularF0 : SV_Target3;        //!< RGB = Specular F0, A = roughness
-
-    //float4 m_normal : SV_Target4;            //!< RGB10 = EncodeNormalSignedOctahedron(worldNormal), A2 = Flags (IBL/Multiscatter enabled)
 };
 
 // Since the visual results of the deferred pipeline are (in theory) identical to the results
 // of the main pipeline, this option can be enabled to draw a watermark that confirms what
 // you are seeing is actually the deferred pipeline.
+// TODO(DeferredPOC): Make a way to turn this off by default, and only turn it on as needed for testing. Right now we don't have a way to turn it on programmatically.
 option bool o_deferredPipelineWatermark = true;
 
 PSOutput MainPS(VSOutput IN, in uint sampleIndex : SV_SampleIndex)
@@ -104,11 +102,11 @@ PSOutput MainPS(VSOutput IN, in uint sampleIndex : SV_SampleIndex)
     Surface surface;
     surface.position = surfacePosWS;
 
-    // TODO: We don't actually have the vertex normal right now
+    // TODO(DeferredPOC): We don't actually have the vertex normal, so just use the per-pixel normal for now
     surface.vertexNormal = normal;
     surface.normal = normal;
     surface.roughnessLinear = roughnessMetallic.x;
-    float specularF0Factor = 0.5f; // TODO
+    float specularF0Factor = 0.5f; // TODO(DeferredPOC): Consider passing the actual specF0 through a GBuffer
     surface.SetAlbedoAndSpecularF0(baseColor, specularF0Factor, roughnessMetallic.y);
     surface.clearCoat.InitializeToZero();
         
@@ -138,7 +136,7 @@ PSOutput MainPS(VSOutput IN, in uint sampleIndex : SV_SampleIndex)
     ApplyDirectLighting(surface, lightingData, IN.m_position);
 
     // Apply Image Based Lighting (IBL)
-    // TODO: how can we support a reflection probe in deferred?
+    // TODO(DeferredPOC): how can we support a localized reflection probe in deferred?
     ReflectionProbeData unusedReflectionProbe; 
     TextureCube unusedReflectionProbeCubeMap;
     ApplyIBL(surface, lightingData, true, false, unusedReflectionProbe, unusedReflectionProbeCubeMap);
@@ -157,8 +155,6 @@ PSOutput MainPS(VSOutput IN, in uint sampleIndex : SV_SampleIndex)
     OUT.m_specularColor = lightingOutput.m_specularColor;
     OUT.m_specularF0 = lightingOutput.m_specularF0;
     OUT.m_albedo = lightingOutput.m_albedo;
-
-    //OUT.m_diffuseColor.xyz = float3(1,1,0); 
 
     return OUT;
 }

@@ -10,7 +10,6 @@
                 // Inputs...
                 {
                     "Name": "DepthStencilInputOutput",
-                    // TODO: I don't think this needs to be InputOutput, I think it can just be an Input.
                     "SlotType": "InputOutput",
                     "ScopeAttachmentUsage": "DepthStencil"
                 },
