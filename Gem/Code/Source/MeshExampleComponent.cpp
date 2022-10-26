@@ -105,6 +105,7 @@ namespace AtomSampleViewer
         pipelineDesc.m_name = "DeferredPipeline";
         pipelineDesc.m_rootPassTemplate = "DeferredPipelineTemplate";
         pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 4;
+        pipelineDesc.m_allowModification = true; // MainPipeline allows modifications, so the DeferredPipeline must as well, to get a consistent result.
 
         m_deferredPipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
     }
