@@ -292,7 +292,7 @@
             "PassData": {
                 "$type": "FullscreenTrianglePassData",
                 "ShaderAsset": {
-                    // TODO: Make the pass system support source-relative paths
+                    // TODO(DeferredPOC): Make the pass system support source-relative paths
                     "FilePath": "Passes/PrototypeDeferredPipeline/DeferredLighting.shader"
                 },
                 "PipelineViewTag": "MainCamera"
