@@ -251,7 +251,7 @@ SetImguiValue('Use Low End Pipeline', false)
 -- Prototype Deferred Pipeline...
 
 -- TODO: Switch this test case to use StandardPBR once it is ported to the material pipeline system.
-g_testMaterialsFolder = 'testdata/materials/materialpipelinetest/'
+g_testMaterialsFolder = 'materials/materialpipelinetest/'
 g_testCaseFolder = 'PrototypeDeferredPipeline'
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder .. g_testCaseFolder))
 
