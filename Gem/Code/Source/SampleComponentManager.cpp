@@ -117,7 +117,6 @@
 #include <AzCore/Settings/SettingsRegistryMergeUtils.h>
 #include <AzCore/std/smart_ptr/make_shared.h>
 #include <AzCore/std/algorithm.h>
-#include <AzCore/Console/IConsole.h>
 
 #include <AzFramework/API/ApplicationAPI.h>
 #include <AzFramework/Components/ConsoleBus.h>
@@ -143,20 +142,6 @@ namespace Platform
 
 namespace AtomSampleViewer
 {
-#if AZ_TRAIT_OS_IS_HOST_OS_PLATFORM
-    void CVar_EnableHostRenderPipelineOnXR(const bool& value)
-    {
-        const bool xrSystemRegistered = (AZ::RPI::RPISystemInterface::Get()->GetXRSystem() != nullptr);
-        if (xrSystemRegistered)
-        {
-            SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequests::EnableRenderPipeline, value);
-        }
-    }
-
-    AZ_CVAR(bool, r_EnableHostRenderPipelineOnXR, true, CVar_EnableHostRenderPipelineOnXR, AZ::ConsoleFunctorFlags::Null,
-        "When an XR system is present in a host platform, this will enable the regular render pipeline on the host PC as well (true by default).");
-#endif
-
     namespace
     {
         constexpr const char* PassTreeToolName = "PassTree";
@@ -590,11 +575,12 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::OnTick(float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint time)
     {
-        AZ::RPI::RPISystemInterface* rpiSystem = AZ::RPI::RPISystemInterface::Get();
-        if (rpiSystem->GetXRSystem())
+        if (auto* xrSystem = AZ::RPI::RPISystemInterface::Get()->GetXRSystem())
         {
+            EnableRenderPipeline(xrSystem->GetRHIXRRenderingInterface()->IsDefaultRenderPipelineEnabledOnHost());
+
             //Only enable XR pipelines if the XR drivers indicate we have accurate pose information from the device
-            EnableXrPipelines(rpiSystem->GetXRSystem()->ShouldRender());
+            EnableXrPipelines(xrSystem->ShouldRender());
         }
 
         if (m_imGuiFrameTimer)
@@ -1615,12 +1601,8 @@ namespace AtomSampleViewer
         m_rhiScene = RPI::Scene::CreateScene(sceneDesc);
         m_rhiScene->Activate();
 
-        const bool xrSystemRegistered = (AZ::RPI::RPISystemInterface::Get()->GetXRSystem() != nullptr);
-#if AZ_TRAIT_OS_IS_HOST_OS_PLATFORM
-        const bool createDefaultRenderPipeline = true;
-#else
-        const bool createDefaultRenderPipeline = !xrSystemRegistered;
-#endif
+        auto* xrSystem = AZ::RHI::RHISystemInterface::Get()->GetXRSystem();
+        const bool createDefaultRenderPipeline = !xrSystem || xrSystem->IsDefaultRenderPipelineNeeded();
 
         if (createDefaultRenderPipeline)
         {
@@ -1638,16 +1620,14 @@ namespace AtomSampleViewer
             AZ::RPI::PassFilter passFilter = AZ::RPI::PassFilter::CreateWithPassName(AZ::Name("RHISamplePass"), m_renderPipeline.get());
             m_rhiSamplePasses.push_back(azrtti_cast<RHISamplePass*>(AZ::RPI::PassSystemInterface::Get()->FindFirstPass(passFilter)));
 
-#if AZ_TRAIT_OS_IS_HOST_OS_PLATFORM
-            // Disable default pipeline based on xr system and its cvar for host platforms
-            if (xrSystemRegistered && !r_EnableHostRenderPipelineOnXR)
+            // Enable or disable default pipeline on host while there is an xr system.
+            if (xrSystem)
             {
-                EnableRenderPipeline(false);
+                EnableRenderPipeline(xrSystem->IsDefaultRenderPipelineEnabledOnHost());
             }
-#endif
         }
 
-        if (xrSystemRegistered)
+        if (xrSystem)
         {
             RPI::RenderPipelineDescriptor xrPipelineDesc;
             xrPipelineDesc.m_mainViewTagName = "MainCamera";
@@ -1740,12 +1720,8 @@ namespace AtomSampleViewer
         const char* supervariantName = isNonMsaaPipeline ? AZ::RPI::NoMsaaSupervariantName : "";
         AZ::RPI::ShaderSystemInterface::Get()->SetSupervariantName(AZ::Name(supervariantName));
 
-        const bool xrSystemRegistered = (AZ::RPI::RPISystemInterface::Get()->GetXRSystem() != nullptr);
-#if AZ_TRAIT_OS_IS_HOST_OS_PLATFORM
-        const bool createDefaultRenderPipeline = true;
-#else
-        const bool createDefaultRenderPipeline = !xrSystemRegistered;
-#endif
+        auto* xrSystem = AZ::RHI::RHISystemInterface::Get()->GetXRSystem();
+        const bool createDefaultRenderPipeline = !xrSystem || xrSystem->IsDefaultRenderPipelineNeeded();
 
         if (createDefaultRenderPipeline)
         {
@@ -1762,16 +1738,14 @@ namespace AtomSampleViewer
 
             m_renderPipeline->SetDefaultViewFromEntity(m_cameraEntity->GetId());
 
-#if AZ_TRAIT_OS_IS_HOST_OS_PLATFORM
-            // Disable default pipeline based on xr system and its cvar for host platforms
-            if (xrSystemRegistered && !r_EnableHostRenderPipelineOnXR)
+            // Enable or disable default pipeline on host while there is an xr system.
+            if (xrSystem)
             {
-                EnableRenderPipeline(false);
+                EnableRenderPipeline(xrSystem->IsDefaultRenderPipelineEnabledOnHost());
             }
-#endif
         }
 
-        if (xrSystemRegistered)
+        if (xrSystem)
         {
             RPI::RenderPipelineDescriptor xrPipelineDesc;
             xrPipelineDesc.m_mainViewTagName = "MainCamera";
