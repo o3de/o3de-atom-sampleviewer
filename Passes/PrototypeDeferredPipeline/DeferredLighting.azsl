@@ -1,0 +1,160 @@
+/*
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
+ * SPDX-License-Identifier: Apache-2.0 OR MIT
+ *
+ */
+
+#include <viewsrg.srgi>
+
+#include <Atom/Features/PostProcessing/FullscreenVertex.azsli>
+#include <Atom/Features/ScreenSpace/ScreenSpaceUtil.azsli>
+#include <Atom/RPI/ShaderResourceGroups/DefaultDrawSrg.azsli>
+
+ShaderResourceGroup PassSrg : SRG_PerPass
+{
+    Texture2DArray<float> m_directionalLightShadowmap;
+    Texture2DArray<float> m_directionalLightExponentialShadowmap;
+    Texture2DArray<float> m_projectedShadowmaps;
+    Texture2DArray<float> m_projectedExponentialShadowmap;
+    Texture2D m_brdfMap;
+    Texture2D<float> m_fullscreenShadow;
+
+    Sampler LinearSampler
+    {
+        MinFilter = Linear;
+        MagFilter = Linear;
+        MipFilter = Linear;
+        AddressU = Clamp;
+        AddressV = Clamp;
+        AddressW = Clamp;
+    };
+    
+    Sampler PointSampler
+    {
+        MinFilter = Point;
+        MagFilter = Point;
+        MipFilter = Point;
+        AddressU = Clamp;
+        AddressV = Clamp;
+        AddressW = Clamp;
+    };
+
+    Texture2D<uint4> m_tileLightData;
+    StructuredBuffer<uint> m_lightListRemapped;
+    
+    Texture2DMS<float2>   m_depthStencilTexture;
+
+    Texture2DMS<float4> m_baseColor;
+    Texture2DMS<float4> m_roughnessMetal;
+    Texture2DMS<float4> m_normal;
+}
+
+#define FORCE_OPAQUE 1 // Because there is no transparency in deferred, so we don't want the o_opacity_mode shader option
+
+//TODO(DeferredPOC): Support multiple lighting models, not just StandardLighting
+#include <Atom/Features/PBR/Lighting/StandardLighting.azsli>
+#include <Atom/Features/PBR/Lights/Ibl.azsli>
+#include <Atom/Features/PBR/Decals.azsli>
+
+// Copied from ForwardPassOutput
+struct PSOutput
+{
+    float4 m_diffuseColor  : SV_Target0;     //!< RGB = Diffuse Lighting, A = Blend Alpha (for blended surfaces) OR A = special encoding of surfaceScatteringFactor, m_subsurfaceScatteringQuality, o_enableSubsurfaceScattering
+    float4 m_specularColor : SV_Target1;     //!< RGB = Specular Lighting, A = Unused
+    float4 m_albedo : SV_Target2;            //!< RGB = Surface albedo pre-multiplied by other factors that will be multiplied later by diffuse GI, A = specularOcclusion
+    float4 m_specularF0 : SV_Target3;        //!< RGB = Specular F0, A = roughness
+};
+
+// Since the visual results of the deferred pipeline are (in theory) identical to the results
+// of the main pipeline, this option can be enabled to draw a watermark that confirms what
+// you are seeing is actually the deferred pipeline.
+// TODO(DeferredPOC): Make a way to turn this off by default, and only turn it on as needed for testing. Right now we don't have a way to turn it on programmatically.
+option bool o_deferredPipelineWatermark = true;
+
+PSOutput MainPS(VSOutput IN, in uint sampleIndex : SV_SampleIndex)
+{
+    uint2 screenCoords = IN.m_position.xy;
+
+    // ------- Unpack G-Buffers -------
+
+    float zDepth = PassSrg::m_depthStencilTexture.Load(screenCoords, sampleIndex).r;
+    float3 surfacePosWS = WorldPositionFromDepthBufferMS(PassSrg::m_depthStencilTexture, zDepth, IN.m_position.xy).xyz;
+    float3 encodedNormal = PassSrg::m_normal.Load(screenCoords, sampleIndex).xyz;
+    float3 normal = DecodeNormalSignedOctahedron(encodedNormal.xyz);
+    float2 roughnessMetallic = PassSrg::m_roughnessMetal.Load(screenCoords, sampleIndex).rg;
+    float3 baseColor = PassSrg::m_baseColor.Load(screenCoords, sampleIndex).rgb;
+    
+    if(o_deferredPipelineWatermark)
+    {
+        if(abs(IN.m_texCoord.x-0.5) < 0.01 || abs(IN.m_texCoord.y-0.5) < 0.01) 
+        {
+            float t = sin(50 * (IN.m_texCoord.x + IN.m_texCoord.y)) * 0.5 + 0.5;
+            baseColor *= lerp(float3(1,0.2,1), float3(0.5,1,1), t); 
+        }
+    }
+
+    // Copied from Gems\Atom\Feature\Common\Assets\Materials\Pipelines\MainPipeline\ForwardPass.azsli
+
+    // ------- Surface -------
+
+    Surface surface;
+    surface.position = surfacePosWS;
+
+    // TODO(DeferredPOC): We don't actually have the vertex normal, so just use the per-pixel normal for now
+    surface.vertexNormal = normal;
+    surface.normal = normal;
+    surface.roughnessLinear = roughnessMetallic.x;
+    float specularF0Factor = 0.5f; // TODO(DeferredPOC): Consider passing the actual specF0 through a GBuffer
+    surface.SetAlbedoAndSpecularF0(baseColor, specularF0Factor, roughnessMetallic.y);
+    surface.clearCoat.InitializeToZero();
+        
+    surface.CalculateRoughnessA();
+
+    // ------- LightingData -------
+
+    LightingData lightingData;
+
+    // Light iterator
+    lightingData.tileIterator.Init(IN.m_position, PassSrg::m_lightListRemapped, PassSrg::m_tileLightData);
+    lightingData.Init(surface.position, surface.normal, surface.roughnessLinear);
+
+
+    // Diffuse and Specular response
+    lightingData.specularResponse = FresnelSchlickWithRoughness(lightingData.NdotV, surface.specularF0, surface.roughnessLinear);
+    lightingData.diffuseResponse = 1.0f - lightingData.specularResponse;
+
+    const float alpha = 1.0f;
+
+    // ------- Lighting Calculation -------
+
+    // Apply Decals
+    ApplyDecals(lightingData.tileIterator, surface);
+
+    // Apply Direct Lighting
+    ApplyDirectLighting(surface, lightingData, IN.m_position);
+
+    // Apply Image Based Lighting (IBL)
+    // TODO(DeferredPOC): how can we support a localized reflection probe in deferred?
+    ReflectionProbeData unusedReflectionProbe; 
+    TextureCube unusedReflectionProbeCubeMap;
+    ApplyIBL(surface, lightingData, true, false, unusedReflectionProbe, unusedReflectionProbeCubeMap);
+
+    // Finalize Lighting
+    lightingData.FinalizeLighting();
+
+    PbrLightingOutput lightingOutput = GetPbrLightingOutput(surface, lightingData, alpha);
+
+    // ------- Output -------
+
+    PSOutput OUT;
+
+    OUT.m_diffuseColor = lightingOutput.m_diffuseColor;
+    OUT.m_diffuseColor.w = -1; // Subsurface scattering is disabled
+    OUT.m_specularColor = lightingOutput.m_specularColor;
+    OUT.m_specularF0 = lightingOutput.m_specularF0;
+    OUT.m_albedo = lightingOutput.m_albedo;
+
+    return OUT;
+}

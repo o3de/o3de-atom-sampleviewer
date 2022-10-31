@@ -1,0 +1,16 @@
+{
+    "shaderTemplates": [
+        {
+            "shader": "./DeferredMaterialPass.shader.template",
+            "azsli": "Materials/Pipelines/PrototypeDeferredPipeline/DeferredMaterialPass.azsli"
+        },
+        {
+            "shader": "Materials/Pipelines/Common/DepthPass.shader.template",
+            "azsli": "Materials/Pipelines/Common/DepthPass.azsli"
+        },
+        {
+            "shader": "Materials/Pipelines/Common/ShadowmapPass.shader.template",
+            "azsli": "Materials/Pipelines/Common/ShadowmapPass.azsli"
+        }
+    ]
+}
