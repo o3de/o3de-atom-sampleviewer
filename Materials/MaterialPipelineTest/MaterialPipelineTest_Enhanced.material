@@ -1,0 +1,7 @@
+{
+    "materialType": "@projectroot@/Cache/Intermediate Assets/testdata/materials/types/materialpipelinetest_enhanced_generated.materialtype",
+    "materialTypeVersion": 3,
+    "propertyValues": {
+        "subsurfaceScattering.enableSubsurfaceScattering": true
+    }
+}

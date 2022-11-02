@@ -1,0 +1,15 @@
+{
+    "materialType": "@projectroot@/Cache/Intermediate Assets/testdata/materials/types/materialpipelinetest_standard_generated.materialtype",
+    "materialTypeVersion": 3,
+    "propertyValues": {
+        "base.color": [
+            0.16862745583057404,
+            0.6078431606292725,
+            0.4431372582912445,
+            1.0
+        ],
+        "base.roughness": 0.5,
+        "clearCoat.enable": true,
+        "clearCoat.roughness": 0.18000000715255737
+    }
+}
