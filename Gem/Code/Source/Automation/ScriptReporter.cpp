@@ -1046,20 +1046,20 @@ namespace AtomSampleViewer
         }
         else
         {
-            bool imagesWereCompared = false;
+            AZ::Utils::ImageDiffResult result;
             AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
-                imagesWereCompared,
+                result,
                 &AZ::Render::FrameCaptureTestRequestBus::Events::CompareScreenshots,
                 screenshotTestInfo.m_screenshotFilePath,
                 screenshotTestInfo.m_officialBaselineScreenshotFilePath,
-                &screenshotTestInfo.m_officialComparisonResult.m_standardDiffScore,
-                &screenshotTestInfo.m_officialComparisonResult.m_filteredDiffScore,
                 ImperceptibleDiffFilter
             );
+            screenshotTestInfo.m_officialComparisonResult.m_standardDiffScore = result.m_diffScore;
+            screenshotTestInfo.m_officialComparisonResult.m_filteredDiffScore = result.m_filteredDiffScore;
             // Set the final score to the standard score just in case the filtered one is ignored
             screenshotTestInfo.m_officialComparisonResult.m_finalDiffScore = screenshotTestInfo.m_officialComparisonResult.m_standardDiffScore;
 
-            if (imagesWereCompared)
+            if (result.m_resultCode == AZ::Utils::ImageDiffResultCode::Success)
             {
                 screenshotTestInfo.m_officialComparisonResult.m_finalDiffScore = toleranceLevel->m_filterImperceptibleDiffs ?
                     screenshotTestInfo.m_officialComparisonResult.m_filteredDiffScore :
@@ -1094,19 +1094,19 @@ namespace AtomSampleViewer
         {
             // Local screenshots should be expected match 100% every time, otherwise warnings are reported. This will help developers track and investigate changes,
             // for example if they make local changes that impact some unrelated AtomSampleViewer sample in an unexpected way, they will see a warning about this.
-            bool imagesWereCompared = false;
+            AZ::Utils::ImageDiffResult result;
             AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
-                imagesWereCompared,
+                result,
                 &AZ::Render::FrameCaptureTestRequestBus::Events::CompareScreenshots,
                 screenshotTestInfo.m_screenshotFilePath,
                 screenshotTestInfo.m_localBaselineScreenshotFilePath,
-                &screenshotTestInfo.m_localComparisonResult.m_standardDiffScore,
-                &screenshotTestInfo.m_localComparisonResult.m_filteredDiffScore,
                 ImperceptibleDiffFilter
             );
+            screenshotTestInfo.m_localComparisonResult.m_standardDiffScore = result.m_diffScore;
+            screenshotTestInfo.m_localComparisonResult.m_filteredDiffScore = result.m_filteredDiffScore;
             screenshotTestInfo.m_localComparisonResult.m_finalDiffScore = screenshotTestInfo.m_localComparisonResult.m_standardDiffScore;
 
-            if (imagesWereCompared)
+            if (result.m_resultCode == AZ::Utils::ImageDiffResultCode::Success)
             {
                 if(screenshotTestInfo.m_localComparisonResult.m_standardDiffScore == 0.0f)
                 {
