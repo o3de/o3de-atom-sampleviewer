@@ -248,32 +248,30 @@ GenerateMaterialScreenshot('Level F', '009_Opacity_Blended', {lighting="Neutral 
 SetImguiValue('Use Low End Pipeline', false)
 
 ----------------------------------------------------------------------
--- Prototype Deferred Pipeline...
-
--- TODO: Switch this test case to use StandardPBR once it is ported to the material pipeline system.
-g_testMaterialsFolder = 'materials/materialpipelinetest/'
-g_testCaseFolder = 'PrototypeDeferredPipeline'
-Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder .. g_testCaseFolder))
-
-SetImguiValue('Use Deferred Pipeline', true)
-
-GenerateMaterialScreenshot('Level E', 'MaterialPipelineTest_Basic', {screenshotFilename="MaterialPipelineTest_Basic_DeferredPipeline"})
-
-SetImguiValue('Use Deferred Pipeline', false)
-
-----------------------------------------------------------------------
 -- Material Pipeline Abstraction...
 
--- These tests are temporary, specifically for regression testing the new material pipeline system while it is in development.
--- Once the core material types like StandardPBR are ported to use material pipelines, we can remove these test cases.
+-- These test materials are temporary, specifically for regression testing the new material pipeline system while it is in development.
+-- Once the core material types like StandardPBR are ported to use material pipelines, we can switch these over to use core material 
+-- types, and maybe remove some cases if they end up being redundant.
 
 g_testMaterialsFolder = 'materials/materialpipelinetest/'
 g_testCaseFolder = 'MaterialPipelineSystem'
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder .. g_testCaseFolder))
 
 SetImguiValue('Use Low End Pipeline', false)
+SetImguiValue('Use Deferred Pipeline', false)
 GenerateMaterialScreenshot('Level E', 'MaterialPipelineTest_Basic', {screenshotFilename="MaterialPipelineTest_Basic_MainPipeline"})
+GenerateMaterialScreenshot('Level E', 'MaterialPipelineTest_Standard', {screenshotFilename="MaterialPipelineTest_Standard_MainPipeline"})
+GenerateMaterialScreenshot('Level E', 'MaterialPipelineTest_Enhanced', {screenshotFilename="MaterialPipelineTest_Enhanced_MainPipeline", lighting="Test"})
 
 SetImguiValue('Use Low End Pipeline', true)
 GenerateMaterialScreenshot('Level E', 'MaterialPipelineTest_Basic', {screenshotFilename="MaterialPipelineTest_Basic_LowEndPipeline"})
+GenerateMaterialScreenshot('Level E', 'MaterialPipelineTest_Standard', {screenshotFilename="MaterialPipelineTest_Standard_LowEndPipeline"})
+GenerateMaterialScreenshot('Level E', 'MaterialPipelineTest_Enhanced', {screenshotFilename="MaterialPipelineTest_Enhanced_LowEndPipeline", lighting="Test"})
+SetImguiValue('Use Low End Pipeline', false)
 
+SetImguiValue('Use Deferred Pipeline', true)
+GenerateMaterialScreenshot('Level E', 'MaterialPipelineTest_Basic', {screenshotFilename="MaterialPipelineTest_Basic_DeferredPipeline"})
+GenerateMaterialScreenshot('Level E', 'MaterialPipelineTest_Standard', {screenshotFilename="MaterialPipelineTest_Standard_DeferredPipeline"})
+GenerateMaterialScreenshot('Level E', 'MaterialPipelineTest_Enhanced', {screenshotFilename="MaterialPipelineTest_Enhanced_DeferredPipeline", lighting="Test"})
+SetImguiValue('Use Deferred Pipeline', false)

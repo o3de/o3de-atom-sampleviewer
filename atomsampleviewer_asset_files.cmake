@@ -64,7 +64,6 @@ set(FILES
     Shaders/DebugVertexNormals.materialtype
     Shaders/DebugVertexNormals.shader
     Shaders/Instanced.azsl
-    Shaders/MaterialEditorTest.materialtype
     Shaders/StaticMesh.azsl
     Shaders/ComprehensiveTestMaterial/Comprehensive.materialtype
     Shaders/ComprehensiveTestMaterial/Stacks.azsl
