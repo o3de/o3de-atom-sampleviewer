@@ -333,7 +333,7 @@ namespace AtomSampleViewer
     {
         // FloatBuffer ID
         const char* floatBufferId = "m_floatBuffer";
-#if ATOMSAMPLEVIEWER_TRAIT_BINDLESS_PROTOTYPE_SUPPORTS_UNBOUNDED_ARRAY
+#if ATOMSAMPLEVIEWER_TRAIT_BINDLESS_PROTOTYPE_SUPPORTS_DIRECT_BOUND_UNBOUNDED_ARRAY
         // TextureArray ID
         const char* textureArrayId = "m_textureArray";
 #endif
