@@ -258,7 +258,7 @@ namespace AtomSampleViewer
 
     AzFramework::AssetSystem::AssetStatus MaterialHotReloadTestComponent::GetTestAssetStatus(const char* tempSourceFile) const
     {
-        AZStd::string filePath = AZStd::string("materials/hotreloadtest/temp/") + tempSourceFile;
+        AZStd::string filePath = AZStd::string("Materials/HotReloadTest/Temp/") + tempSourceFile;
 
         AzFramework::AssetSystem::AssetStatus status = AzFramework::AssetSystem::AssetStatus::AssetStatus_Unknown;
         AzFramework::AssetSystemRequestBus::BroadcastResult(status, &AzFramework::AssetSystem::AssetSystemRequests::GetAssetStatusSearchType,
