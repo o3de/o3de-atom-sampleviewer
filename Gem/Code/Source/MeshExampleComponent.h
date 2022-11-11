@@ -72,7 +72,7 @@ namespace AtomSampleViewer
         void DestroyMultiViewXRPipeline();
 
         void ActivateLowEndPipeline();
-		void ActivateMultiViewXRPipeline();
+        void ActivateMultiViewXRPipeline();
         void ActivateDeferredPipeline();
         void ActivateOriginalPipeline();
 

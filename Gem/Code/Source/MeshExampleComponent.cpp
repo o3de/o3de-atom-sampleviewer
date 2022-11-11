@@ -117,11 +117,11 @@ namespace AtomSampleViewer
 
     void MeshExampleComponent::CreateMultiViewXRPipeline()
     {
-	    AZ::RPI::RenderPipelineDescriptor pipelineDesc;
-	    pipelineDesc.m_mainViewTagName = "MainCamera";
-	    pipelineDesc.m_name = "MultiViewPipeline";
+        AZ::RPI::RenderPipelineDescriptor pipelineDesc;
+        pipelineDesc.m_mainViewTagName = "MainCamera";
+        pipelineDesc.m_name = "MultiViewPipeline";
         pipelineDesc.m_rootPassTemplate = "MultiViewPipelineTemplate";
-	    pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 1;
+        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 1;
 
         m_multiViewXRPipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
     }
@@ -180,20 +180,20 @@ namespace AtomSampleViewer
 
     void MeshExampleComponent::ActivateMultiViewXRPipeline()
     {
-	    AZ::RPI::RenderPipelinePtr prevPipeline = m_scene->GetDefaultRenderPipeline();
+        AZ::RPI::RenderPipelinePtr prevPipeline = m_scene->GetDefaultRenderPipeline();
 
-	    if (!m_originalPipeline)
-	    {
-		    m_originalPipeline = prevPipeline;
-	    }
+        if (!m_originalPipeline)
+        {
+            m_originalPipeline = prevPipeline;
+        }
 
         m_multiViewXRPipeline->GetRootPass()->SetEnabled(true);
-	    m_scene->AddRenderPipeline(m_multiViewXRPipeline);
+        m_scene->AddRenderPipeline(m_multiViewXRPipeline);
         m_multiViewXRPipeline->SetDefaultView(prevPipeline->GetDefaultView());
-	    m_scene->RemoveRenderPipeline(prevPipeline->GetId());
+        m_scene->RemoveRenderPipeline(prevPipeline->GetId());
 
         m_imguiScope = {};
-	    m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass({ m_multiViewXRPipeline->GetId().GetCStr(), "ImGuiPass" });
+        m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass({ m_multiViewXRPipeline->GetId().GetCStr(), "ImGuiPass" });
     }
 
     void MeshExampleComponent::Activate()
@@ -321,7 +321,7 @@ namespace AtomSampleViewer
             {
                 m_switchPipeline = true;
                 m_useLowEndPipeline = false;
-	            m_useDeferredPipeline = false;
+                m_useDeferredPipeline = false;
             }
 			
             modelNeedsUpdate |= ScriptableImGui::Checkbox("Enable Material Override", &m_enableMaterialOverride);
