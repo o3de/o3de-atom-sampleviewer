@@ -68,8 +68,8 @@ namespace AtomSampleViewer
         void DestroyLowEndPipeline();
         void CreateDeferredPipeline();
         void DestroyDeferredPipeline();
-		void CreateMultiViewXRPipeline();
-		void DestroyMultiViewXRPipeline();
+        void CreateMultiViewXRPipeline();
+        void DestroyMultiViewXRPipeline();
 
         void ActivateLowEndPipeline();
 		void ActivateMultiViewXRPipeline();
@@ -86,7 +86,7 @@ namespace AtomSampleViewer
 
         AZ::RPI::RenderPipelinePtr m_lowEndPipeline = nullptr;
         AZ::RPI::RenderPipelinePtr m_deferredPipeline = nullptr;
-		AZ::RPI::RenderPipelinePtr m_multiViewXRPipeline = nullptr;
+        AZ::RPI::RenderPipelinePtr m_multiViewXRPipeline = nullptr;
         AZ::RPI::RenderPipelinePtr m_originalPipeline = nullptr;
 
         AZStd::shared_ptr<AZ::RPI::WindowContext> m_windowContext;
@@ -123,7 +123,7 @@ namespace AtomSampleViewer
 
         bool m_useLowEndPipeline = false;
         bool m_useDeferredPipeline = false;
-		bool m_useMultiViewXRPipeline = false;
+        bool m_useMultiViewXRPipeline = false;
         bool m_switchPipeline = false;
 
         AZ::Data::Instance<AZ::RPI::Material> m_materialOverrideInstance; //< Holds a copy of the material instance being used when m_enableMaterialOverride is true.
