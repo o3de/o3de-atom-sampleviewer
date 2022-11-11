@@ -140,12 +140,12 @@ namespace AtomSampleViewer
             m_originalPipeline = prevPipeline;
         }
 
-        m_lowEndPipeline->GetRootPass()->SetEnabled(true);
+        m_lowEndPipeline->GetRootPass()->SetEnabled(true); // PassSystem::RemoveRenderPipeline was calling SetEnabled(false)
         m_scene->AddRenderPipeline(m_lowEndPipeline);
         m_lowEndPipeline->SetDefaultView(prevPipeline->GetDefaultView());
         m_scene->RemoveRenderPipeline(prevPipeline->GetId());
 
-        m_imguiScope = {};
+        m_imguiScope = {}; // I'm not sure why this is needed. Something must be wrong in the ImGuiActiveContextScope class
         m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass({ m_lowEndPipeline->GetId().GetCStr(), "ImGuiPass" });
     }
 
@@ -187,12 +187,12 @@ namespace AtomSampleViewer
 			m_originalPipeline = prevPipeline;
 		}
 
-        m_multiViewXRPipeline->GetRootPass()->SetEnabled(true); // PassSystem::RemoveRenderPipeline was calling SetEnabled(false)
+        m_multiViewXRPipeline->GetRootPass()->SetEnabled(true);
 		m_scene->AddRenderPipeline(m_multiViewXRPipeline);
         m_multiViewXRPipeline->SetDefaultView(prevPipeline->GetDefaultView());
 		m_scene->RemoveRenderPipeline(prevPipeline->GetId());
 
-        m_imguiScope = {}; // I'm not sure why this is needed. Something must be wrong in the ImGuiActiveContextScope class
+        m_imguiScope = {};
 		m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass({ m_multiViewXRPipeline->GetId().GetCStr(), "ImGuiPass" });
 	}
 
