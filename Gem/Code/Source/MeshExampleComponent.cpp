@@ -115,6 +115,22 @@ namespace AtomSampleViewer
         m_deferredPipeline = nullptr;
     }
 
+    void MeshExampleComponent::CreateMultiViewXRPipeline()
+    {
+        AZ::RPI::RenderPipelineDescriptor pipelineDesc;
+        pipelineDesc.m_mainViewTagName = "MainCamera";
+        pipelineDesc.m_name = "MultiViewPipeline";
+        pipelineDesc.m_rootPassTemplate = "MultiViewPipelineTemplate";
+        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 1;
+
+        m_multiViewXRPipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
+    }
+
+    void MeshExampleComponent::DestroyMultiViewXRPipeline()
+    {
+        m_multiViewXRPipeline = nullptr;
+    }
+
     void MeshExampleComponent::ActivateLowEndPipeline()
     {
         AZ::RPI::RenderPipelinePtr prevPipeline = m_scene->GetDefaultRenderPipeline();
@@ -162,6 +178,24 @@ namespace AtomSampleViewer
         m_scene->RemoveRenderPipeline(prevPipeline->GetId());
     }
 
+    void MeshExampleComponent::ActivateMultiViewXRPipeline()
+    {
+        AZ::RPI::RenderPipelinePtr prevPipeline = m_scene->GetDefaultRenderPipeline();
+
+        if (!m_originalPipeline)
+        {
+            m_originalPipeline = prevPipeline;
+        }
+
+        m_multiViewXRPipeline->GetRootPass()->SetEnabled(true);
+        m_scene->AddRenderPipeline(m_multiViewXRPipeline);
+        m_multiViewXRPipeline->SetDefaultView(prevPipeline->GetDefaultView());
+        m_scene->RemoveRenderPipeline(prevPipeline->GetId());
+
+        m_imguiScope = {};
+        m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass({ m_multiViewXRPipeline->GetId().GetCStr(), "ImGuiPass" });
+    }
+
     void MeshExampleComponent::Activate()
     {
         UseArcBallCameraController();
@@ -202,16 +236,18 @@ namespace AtomSampleViewer
         AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusConnect();
         CreateLowEndPipeline();
         CreateDeferredPipeline();
+        CreateMultiViewXRPipeline();
     }
 
     void MeshExampleComponent::Deactivate()
     {
-        if (m_useLowEndPipeline || m_useDeferredPipeline)
+        if (m_useLowEndPipeline || m_useDeferredPipeline || m_useMultiViewXRPipeline)
         {
             ActivateOriginalPipeline();
         }
         DestroyLowEndPipeline();
         DestroyDeferredPipeline();
+        DestroyMultiViewXRPipeline();
 
         AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusDisconnect();
         AZ::TickBus::Handler::BusDisconnect();
@@ -249,6 +285,10 @@ namespace AtomSampleViewer
             {
                 ActivateDeferredPipeline();
             }
+            else if (m_useMultiViewXRPipeline)
+            {
+                ActivateMultiViewXRPipeline();
+            }
             else
             {
                 ActivateOriginalPipeline();
@@ -267,14 +307,23 @@ namespace AtomSampleViewer
             {
                 m_switchPipeline = true;
                 m_useDeferredPipeline = false;
+                m_useMultiViewXRPipeline = false;
             }
 
             if (ScriptableImGui::Checkbox("Use Deferred Pipeline", &m_useDeferredPipeline))
             {
                 m_switchPipeline = true;
                 m_useLowEndPipeline = false;
+                m_useMultiViewXRPipeline = false;
             }
 
+            if (ScriptableImGui::Checkbox("Use MultiViewXR Pipeline", &m_useMultiViewXRPipeline))
+            {
+                m_switchPipeline = true;
+                m_useLowEndPipeline = false;
+                m_useDeferredPipeline = false;
+            }
+			
             modelNeedsUpdate |= ScriptableImGui::Checkbox("Enable Material Override", &m_enableMaterialOverride);
            
             if (ScriptableImGui::Checkbox("Show Ground Plane", &m_showGroundPlane))
