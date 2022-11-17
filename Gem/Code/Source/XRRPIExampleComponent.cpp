@@ -9,6 +9,7 @@
 #include <XRRPIExampleComponent.h>
 #include <Atom/Component/DebugCamera/NoClipControllerComponent.h>
 #include <Atom/RPI.Public/Scene.h>
+#include <Atom/RPI.Public/RPISystem.h>
 #include <Atom/RPI.Public/RPISystemInterface.h>
 #include <Atom/RPI.Public/Pass/PassFilter.h>
 #include <Atom/RPI.Reflect/Asset/AssetUtils.h>
@@ -19,6 +20,7 @@
 #include <Utils/Utils.h>
 
 #include <SSRExampleComponent_Traits_Platform.h>
+
 
 namespace AtomSampleViewer
 {
@@ -37,13 +39,18 @@ namespace AtomSampleViewer
 
     void XRRPIExampleComponent::Activate()
     {
+        if (m_xrSystem = AZ::RPI::RPISystemInterface::Get()->GetXRSystem();
+            m_xrSystem == nullptr)
+        {
+            return;
+        }
+
         AZ::TickBus::Handler::BusConnect();
 
         // setup the camera
         Camera::CameraRequestBus::EventResult(m_originalFarClipDistance, GetCameraEntityId(), &Camera::CameraRequestBus::Events::GetFarClipDistance);
         Camera::CameraRequestBus::Event(GetCameraEntityId(), &Camera::CameraRequestBus::Events::SetFarClipDistance, 180.f);
 
-        m_xrSystem = AZ::RPI::RPISystemInterface::Get()->GetXRSystem();
         m_numXrViews = m_xrSystem->GetNumViews();
 
         // create scene
@@ -55,6 +62,11 @@ namespace AtomSampleViewer
 
     void XRRPIExampleComponent::Deactivate()
     {
+        if (!m_xrSystem)
+        {
+            return;
+        }
+
         ShutdownLightingPresets();
 
         GetMeshFeatureProcessor()->ReleaseMesh(m_statueMeshHandle);
@@ -113,7 +125,7 @@ namespace AtomSampleViewer
             AZ::Data::Asset<AZ::RPI::MaterialAsset> materialAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::MaterialAsset>("Materials/XR/XR_Hand_Controller_ControlerMAT.azmaterial", AZ::RPI::AssetUtils::TraceLevel::Assert);
             AZ::Data::Asset<AZ::RPI::ModelAsset> modelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/left_hand_controller.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
             AZ::Transform transform = AZ::Transform::CreateIdentity();
-            
+
             m_leftControllerMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ modelAsset }, AZ::RPI::Material::FindOrCreate(materialAsset));
             m_rightControllerMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ modelAsset }, AZ::RPI::Material::FindOrCreate(materialAsset));
             GetMeshFeatureProcessor()->SetTransform(m_leftControllerMeshHandle, transform);
@@ -182,7 +194,7 @@ namespace AtomSampleViewer
                 resultCode = m_xrSystem->GetControllerPose(i, controllerPose);
 
                 if(resultCode == AZ::RHI::ResultCode::Success && !controllerPose.m_orientation.IsZero())
-                { 
+                {
                     AZ::Vector3 camPosition;
                     AZ::TransformBus::EventResult(camPosition, GetCameraEntityId(), &AZ::TransformBus::Events::GetWorldTranslation);
                     AZ::Vector3 controllerPositionOffset = controllerPose.m_position * ControllerOffsetScale;
@@ -197,16 +209,16 @@ namespace AtomSampleViewer
                     //Apply a Rotation of 90 deg around X axis in order to orient the model to face away from you as default pose
                     AZ::Transform controllerTransform = AZ::Transform::CreateFromQuaternionAndTranslation(
                                 controllerOrientation * AZ::Quaternion::CreateRotationX(-AZ::Constants::Pi / 2), AZ::Vector3(newControllerPos.GetX(), newControllerPos.GetY(),newControllerPos.GetZ()));
-                
+
                     AZ::Render::MeshFeatureProcessorInterface::MeshHandle* controllerMeshhandle = &m_leftControllerMeshHandle;
                     if (i == 1)
                     {
                         controllerMeshhandle = &m_rightControllerMeshHandle;
-                    }   
+                    }
                     GetMeshFeatureProcessor()->SetTransform(*controllerMeshhandle, controllerTransform, AZ::Vector3(m_xrSystem->GetControllerScale(i)));
                 }
             }
-            
+
             //Update Camera movement (left, right forward, back) based on left JoyStick controller
             float m_xJoyStickValue = m_xrSystem->GetXJoyStickState(0);
             float m_yJoyStickValue = m_xrSystem->GetYJoyStickState(0);
@@ -224,7 +236,7 @@ namespace AtomSampleViewer
             // Switch to updating the view using right joystick controller if the Trigger button on the right controller is pressed
             m_rightTriggerButtonPressed = (m_xrSystem->GetTriggerState(1) > 0.1f);
             if (m_rightTriggerButtonPressed)
-            { 
+            {
                 //Update Camera view based on right JoyStick controller
                 float m_xRightJoyStickValue = m_xrSystem->GetXJoyStickState(1);
                 float m_yRightJoyStickValue = m_xrSystem->GetYJoyStickState(1);

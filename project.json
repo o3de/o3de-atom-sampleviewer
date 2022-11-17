@@ -15,7 +15,13 @@
     "engine": "o3de",
     "external_subdirectories": [],
     "gem_names": [
-        "XR",
-        "OpenXRVk"
+        {
+            "name": "OpenXRVk",
+            "optional": true
+        },
+        {
+            "name": "XR",
+            "optional": true
+        }
     ]
 }

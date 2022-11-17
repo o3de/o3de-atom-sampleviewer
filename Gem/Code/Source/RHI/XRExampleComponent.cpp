@@ -35,6 +35,11 @@ namespace AtomSampleViewer
 
     void XRExampleComponent::Activate()
     {
+        if (!AZ::RPI::RPISystemInterface::Get()->GetXRSystem())
+        {
+            return;
+        }
+
         m_depthStencilID = AZ::RHI::AttachmentId{ AZStd::string::format("DepthStencilID_%llu", GetId()) };
         CreateCubeInputAssemblyBuffer();
         CreateCubePipeline();
@@ -385,6 +390,11 @@ namespace AtomSampleViewer
 
     void XRExampleComponent::Deactivate()
     {
+        if (!AZ::RPI::RPISystemInterface::Get()->GetXRSystem())
+        {
+            return;
+        }
+
         m_inputAssemblyBuffer = nullptr;
         m_bufferPool = nullptr;
         m_pipelineState = nullptr;
