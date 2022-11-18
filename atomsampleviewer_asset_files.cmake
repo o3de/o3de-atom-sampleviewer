@@ -40,7 +40,6 @@ set(FILES
     Scripts/ExposureTest.bv.lua
     Scripts/EyeMaterialTest.bv.lua
     Scripts/LightCulling.bv.lua
-    Scripts/MaterialHotReloadTest.bv.lua
     Scripts/MaterialScreenshotTests.bv.lua
     Scripts/MSAA_RPI_Test.bv.lua
     Scripts/MultiRenderPipeline.bv.lua

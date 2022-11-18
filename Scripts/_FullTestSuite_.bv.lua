@@ -48,7 +48,6 @@ tests= {
     RunScriptWrapper('scripts/dynamicmaterialtest.bv.luac'),
     RunScriptWrapper('scripts/EyeMaterialTest.bv.luac'),
     RunScriptWrapper('scripts/materialscreenshottests.bv.luac'),
-    RunScriptWrapper('scripts/materialhotreloadtest.bv.luac'),
     RunScriptWrapper('scripts/msaa_rpi_test.bv.luac'),
     RunScriptWrapper('scripts/cullingandlod.bv.luac'),
     RunScriptWrapper('scripts/multirenderpipeline.bv.luac'),

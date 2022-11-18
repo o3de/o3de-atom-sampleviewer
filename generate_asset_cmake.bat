@@ -40,25 +40,19 @@ echo set(FILES>> %OUTPUT_FILE%
 
         :: Turns "\my\asset\folder" into "/my/asset/folder" for cmake
         set relativeFilePath=!relativeFilePath:\=/!
-        
-        
-        :: Filter out files in Materials/HotReloadTest. materialHotReloadPath is the first 23 characters of the relative file path 
-        set materialHotReloadPath=!relativeFilePath:~0,23!
-        if not !materialHotReloadPath! == Materials/HotReloadTest (
 
-            :: Filter out files in Cache/. cachePath is the first 6 characters of the relative file path 
-            set cachePath=!relativeFilePath:~0,6!
-            if not !cachePath! == Cache/ (
+        :: Filter out files in Cache/. cachePath is the first 6 characters of the relative file path 
+        set cachePath=!relativeFilePath:~0,6!
+        if not !cachePath! == Cache/ (
 
-                :: Filter only relevant file types
-                if !relativeFilePath:~-4!  == .lua          echo %TAB%!relativeFilePath!
-                if !relativeFilePath:~-5!  == .pass         echo %TAB%!relativeFilePath!
-                if !relativeFilePath:~-5!  == .azsl         echo %TAB%!relativeFilePath!
-                if !relativeFilePath:~-6!  == .azsli        echo %TAB%!relativeFilePath!
-                if !relativeFilePath:~-7!  == .shader       echo %TAB%!relativeFilePath!
-                if !relativeFilePath:~-13! == .materialtype echo %TAB%!relativeFilePath!
+            :: Filter only relevant file types
+            if !relativeFilePath:~-4!  == .lua          echo %TAB%!relativeFilePath!
+            if !relativeFilePath:~-5!  == .pass         echo %TAB%!relativeFilePath!
+            if !relativeFilePath:~-5!  == .azsl         echo %TAB%!relativeFilePath!
+            if !relativeFilePath:~-6!  == .azsli        echo %TAB%!relativeFilePath!
+            if !relativeFilePath:~-7!  == .shader       echo %TAB%!relativeFilePath!
+            if !relativeFilePath:~-13! == .materialtype echo %TAB%!relativeFilePath!
             
-            )
         )
     )
 ) >> %OUTPUT_FILE%
