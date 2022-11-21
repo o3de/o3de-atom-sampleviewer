@@ -121,6 +121,19 @@ namespace AtomSampleViewer
 
         AZ::TickBus::Handler::BusConnect();
         CrySystemEventBus::Handler::BusConnect();
+
+        // Add customized pass classes
+        auto* passSystem = AZ::RPI::PassSystemInterface::Get();
+
+        // Load ASV's own pass templates mapping
+        // It can be loaded here and it doesn't need be added via OnReadyLoadTemplatesEvent::Handler
+        // since the first render pipeline is created after this point.
+        const char* asvPassTemplatesFile = "Passes/ASV/PassTemplates.azasset";
+        bool loaded = passSystem->LoadPassTemplateMappings(asvPassTemplatesFile);
+        if (!loaded)
+        {
+            AZ_Fatal("SampleComponentManager", "Failed to load AtomSampleViewer's pass templates at %s", asvPassTemplatesFile);
+        }
     }
 
     void AtomSampleViewerSystemComponent::Deactivate()
