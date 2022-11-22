@@ -2,6 +2,19 @@
     "materialType": "@projectroot@/Cache/Intermediate Assets/testdata/materials/types/materialpipelinetest_enhanced_generated.materialtype",
     "materialTypeVersion": 3,
     "propertyValues": {
+        "anisotropy.anisotropyAngle": 0.6399999856948853,
+        "anisotropy.enableAnisotropy": true,
+        "anisotropy.factor": 0.949999988079071,
+        "baseColor.factor": 0.7599999904632568,
+        "baseColor.textureBlendMode": "Lerp",
+        "baseColor.textureMap": "@gemroot:Atom@/TestData/TestData/Textures/cc0/Concrete019_1K_Color.jpg",
+        "detailLayerGroup.baseColorDetailMap": "@gemroot:Atom@/TestData/TestData/Textures/cc0/Concrete019_1K_Color.jpg",
+        "detailLayerGroup.detailUV.offsetV": 0.9200000166893005,
+        "detailLayerGroup.detailUV.scale": 2.0,
+        "detailLayerGroup.enableBaseColor": true,
+        "detailLayerGroup.enableDetailLayer": true,
+        "detailLayerGroup.enableNormals": true,
+        "detailLayerGroup.normalDetailMap": "@gemroot:Atom@/TestData/TestData/Textures/cc0/Concrete019_1K_Normal.jpg",
         "subsurfaceScattering.enableSubsurfaceScattering": true
     }
 }
