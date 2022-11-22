@@ -1,0 +1,16 @@
+{
+    "Type": "JsonSerialization",
+    "Version": 1,
+    "ClassName": "RenderPipelineDescriptor",
+    "ClassData": {
+        "Name": "DeferredPipeline",
+        "MainViewTag": "MainCamera",
+        "RootPassTemplate": "DeferredPipelineTemplate",
+        "AllowModification": true,
+        "RenderSettings": {
+            "MultisampleState": {
+                "samples": 4
+            }
+        }
+    }
+}
