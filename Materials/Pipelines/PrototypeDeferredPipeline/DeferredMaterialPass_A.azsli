@@ -8,4 +8,5 @@
  
 #define MATERIALPIPELINE_SHADER_HAS_PIXEL_STAGE 1
 
-#include <Atom/RPI/MaterialPipelineCallbacks.azsli>
+//TODO(DeferredPOC): Support clear coat
+#define ENABLE_CLEAR_COAT 0

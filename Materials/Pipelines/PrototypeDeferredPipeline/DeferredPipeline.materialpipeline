@@ -2,18 +2,18 @@
     "shaderTemplates": [
         {
             "shader": "./DeferredMaterialPass.shader.template",
-            "preMaterialAzsli": "./MaterialPass_PreMaterial.azsli",
-            "postMaterialAzsli": "Materials/Pipelines/PrototypeDeferredPipeline/DeferredMaterialPass.azsli"
+            "preMaterialAzsli": "./DeferredMaterialPass_A.azsli",
+            "postMaterialAzsli": "./DeferredMaterialPass_B.azsli"
         },
         {
             "shader": "Materials/Pipelines/Common/DepthPass.shader.template",
-            "preMaterialAzsli": "Materials/Pipelines/Common/DepthAndShadow_PreMaterial.azsli",
-            "postMaterialAzsli": "Materials/Pipelines/Common/DepthPass.azsli"
+            "preMaterialAzsli": "Materials/Pipelines/Common/DepthPass_A.azsli",
+            "postMaterialAzsli": "Materials/Pipelines/Common/DepthPass_B.azsli"
         },
         {
             "shader": "Materials/Pipelines/Common/ShadowmapPass.shader.template",
-            "preMaterialAzsli": "Materials/Pipelines/Common/DepthAndShadow_PreMaterial.azsli",
-            "postMaterialAzsli": "Materials/Pipelines/Common/ShadowmapPass.azsli"
+            "preMaterialAzsli": "Materials/Pipelines/Common/DepthPass_A.azsli",
+            "postMaterialAzsli": "Materials/Pipelines/Common/DepthPass_B.azsli"
         }
     ]
 }

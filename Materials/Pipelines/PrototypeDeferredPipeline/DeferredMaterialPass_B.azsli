@@ -6,9 +6,6 @@
  *
  */
  
-//TODO(DeferredPOC): Support clear coat
-#define ENABLE_CLEAR_COAT 0
-
 #include <viewsrg.srgi>
 #include <Atom/RPI/ShaderResourceGroups/DefaultDrawSrg.azsli>
 #include <Atom/Features/PBR/DefaultObjectSrg.azsli>
