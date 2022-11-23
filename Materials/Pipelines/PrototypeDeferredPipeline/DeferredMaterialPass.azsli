@@ -6,6 +6,17 @@
  *
  */
  
+#define MATERIALPIPELINE_SHADER_HAS_PIXEL_STAGE 1
+
+//TODO(DeferredPOC): Support clear coat
+#define ENABLE_CLEAR_COAT 0
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+#include MATERIAL_TYPE_AZSLI_FILE_PATH
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
 #include <viewsrg.srgi>
 #include <Atom/RPI/ShaderResourceGroups/DefaultDrawSrg.azsli>
 #include <Atom/Features/PBR/DefaultObjectSrg.azsli>
@@ -45,4 +56,5 @@ DeferredMaterialOutput MaterialPS(VsOutput IN, bool isFrontFace : SV_IsFrontFace
 
     return OUT;
 }
+
 
