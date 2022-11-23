@@ -2,7 +2,7 @@
     "shaderTemplates": [
         {
             "shader": "./DeferredMaterialPass.shader.template",
-            "azsli": "Materials/Pipelines/PrototypeDeferredPipeline/DeferredMaterialPass.azsli"
+            "azsli": "./DeferredMaterialPass.azsli"
         },
         {
             "shader": "Materials/Pipelines/Common/DepthPass.shader.template",
@@ -10,7 +10,7 @@
         },
         {
             "shader": "Materials/Pipelines/Common/ShadowmapPass.shader.template",
-            "azsli": "Materials/Pipelines/Common/ShadowmapPass.azsli"
+            "azsli": "Materials/Pipelines/Common/DepthPass.azsli"
         }
     ]
 }

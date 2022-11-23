@@ -6,54 +6,28 @@
  *
  */
  
+#define MATERIALPIPELINE_SHADER_HAS_PIXEL_STAGE 1
+
 //TODO(DeferredPOC): Support clear coat
 #define ENABLE_CLEAR_COAT 0
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+#include MATERIAL_TYPE_AZSLI_FILE_PATH
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include <viewsrg.srgi>
 #include <Atom/RPI/ShaderResourceGroups/DefaultDrawSrg.azsli>
 #include <Atom/Features/PBR/DefaultObjectSrg.azsli>
 #include <Atom/Features/ColorManagement/TransformColor.azsli>
-#include <Atom/Features/PBR/Surfaces/StandardSurface.azsli>
+#include <Atom/Features/PBR/LightingOptions.azsli>
+//#include <Atom/Features/PBR/Surfaces/StandardSurface.azsli>
 
-struct VSInput
+VsOutput MaterialVS(VsInput IN)
 {
-    float3 m_position : POSITION;
-    float3 m_normal : NORMAL;
-    //TODO(DeferredPOC): Support tangent space and normal mapping
-    //float4 m_tangent : TANGENT; 
-};
-
-struct VSOutput
-{
-    precise linear centroid float4 m_position : SV_Position;
-    float3 m_normal: NORMAL;
-    //TODO(DeferredPOC): Support tangent space and normal mapping
-    //float3 m_tangent : TANGENT; 
-    float3 m_worldPosition : UV0;
-};
-
-#define MATERIALPIPELINE_SHADER_HAS_PIXEL_STAGE 1
-#include <Atom/RPI/MaterialPipelineCallbacks.azsli>
-
-VSOutput MaterialVS(VSInput IN)
-{
-    VertexData adjustableVertexData;
-    adjustableVertexData.InitializeToZero();
-    adjustableVertexData.positionWS = LocalSpaceToWorldSpace(IN.m_position);
-    adjustableVertexData.normalLS = IN.m_normal;
-    //TODO(DeferredPOC): Support tangent space and normal mapping
-    //adjustableVertexData.tangentLS = IN.m_tangent;
-
-    MaterialFunction_AdjustVertexData(IN.m_position, adjustableVertexData);
-    
-    VSOutput output;
-    output.m_worldPosition = adjustableVertexData.positionWS;
-    output.m_position = mul(ViewSrg::m_viewProjectionMatrix, float4(output.m_worldPosition, 1.0));
-    output.m_normal = adjustableVertexData.normalLS;
-    //TODO(DeferredPOC): Support tangent space and normal mapping
-    //output.m_tangent = adjustableVertexData.tangentLS.xyz;
-
-    return output;
+    VsOutput OUT = EvaluateVertexGeometry(IN);
+    return OUT;
 }
 
 struct DeferredMaterialOutput
@@ -63,36 +37,13 @@ struct DeferredMaterialOutput
     float4 m_normal : SV_Target2;
 };
 
-option bool o_enableIBL = true;
-option bool o_specularF0_enableMultiScatterCompensation = true;
-
-#define MATERIALPIPELINE_SHADER_HAS_PIXEL_STAGE 1
-
-DeferredMaterialOutput MaterialPS(VSOutput IN)
+DeferredMaterialOutput MaterialPS(VsOutput IN, bool isFrontFace : SV_IsFrontFace)
 {
-    // ------- Surface -------
+    // ------- Geometry -> Surface -------
 
-    // Note, some of the data being set up in this "Surface" section isn't necessary for the deferred material pass,
-    // we are just doing it for consistency with how the same code is structured in the other material pipelines.
+    PixelGeometryData geoData = EvaluatePixelGeometry(IN, isFrontFace);
 
-    Surface surface;
-    surface.position = IN.m_worldPosition.xyz;
-    surface.vertexNormal = normalize(IN.m_normal);
-
-    // These are the values we expect MaterialFunction_EvaluateSurface to potentially replace.
-    surface.normal = surface.vertexNormal;
-    surface.roughnessLinear = 0.0;
-    float3 baseColor = float3(0.5, 0.5, 0.5);
-    float metallic = 0.0;
-    float specularF0Factor = 0.5f;
-    surface.SetAlbedoAndSpecularF0(baseColor, specularF0Factor, metallic);
-
-    //TODO(DeferredPOC): Support clear coat
-    //surface.clearCoat.InitializeToZero();
-
-    MaterialFunction_AdjustSurface(surface);
-    
-    surface.CalculateRoughnessA();
+    Surface surface = EvaluateSurface(geoData);
 
     // ------- Output -------
 
@@ -105,4 +56,5 @@ DeferredMaterialOutput MaterialPS(VSOutput IN)
 
     return OUT;
 }
+
 
