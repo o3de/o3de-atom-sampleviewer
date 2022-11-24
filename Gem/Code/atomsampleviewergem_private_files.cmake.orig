@@ -85,8 +85,13 @@ set(FILES
     Source/RHI/RayTracingExampleComponent.h
     Source/RHI/MatrixAlignmentTestExampleComponent.cpp
     Source/RHI/MatrixAlignmentTestExampleComponent.h
+<<<<<<< HEAD
+=======
+    Source/RHI/XRExampleComponent.cpp
+    Source/RHI/XRExampleComponent.h
     Source/RHI/VariableRateShadingExampleComponent.cpp
     Source/RHI/VariableRateShadingExampleComponent.h
+>>>>>>> 16ebd78 (VariableRateShading RHI sample)
     Source/Performance/HighInstanceExampleComponent.cpp
     Source/Performance/HighInstanceExampleComponent.h
     Source/Performance/100KDrawable_SingleView_ExampleComponent.cpp
