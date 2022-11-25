@@ -179,15 +179,18 @@ namespace AtomSampleViewer
         uint32_t formatSize = GetFormatSize(m_rateShadingImageFormat);
         uint32_t bufferSize = width * height * formatSize;
         AZStd::vector<uint8_t> shadingRatePatternData(bufferSize);
-        // Use the lowest shading rate as the default value.
-        RHI::ShadingRateImageValue defaultValue = device->ConvertShadingRate(m_supportedModes[m_supportedModes.size() - 1]);
-        uint8_t* ptrData = shadingRatePatternData.data();
-        for (uint32_t y = 0; y < height; y++)
+        if (RHI::CheckBitsAll(device->GetFeatures().m_shadingRateTypeMask, RHI::ShadingRateTypeFlags::PerImage))
         {
-            for (uint32_t x = 0; x < width; x++)
+            // Use the lowest shading rate as the default value.
+            RHI::ShadingRateImageValue defaultValue = device->ConvertShadingRate(m_supportedModes[m_supportedModes.size() - 1]);
+            uint8_t* ptrData = shadingRatePatternData.data();
+            for (uint32_t y = 0; y < height; y++)
             {
-                ::memcpy(ptrData, &defaultValue, formatSize);
-                ptrData += formatSize;
+                for (uint32_t x = 0; x < width; x++)
+                {
+                    ::memcpy(ptrData, &defaultValue, formatSize);
+                    ptrData += formatSize;
+                }
             }
         }
 
