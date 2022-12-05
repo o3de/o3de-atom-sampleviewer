@@ -78,6 +78,9 @@ namespace AtomSampleViewer
         // Preload assets 
         void PreloadAssets(const AZStd::vector<AZ::AssetCollectionAsyncLoader::AssetToLoadInfo>& assetList);
 
+        //! Iterate to the next lighting preset in a loop
+        void IterateToNextLightingPreset();
+
         //! Async asset load
         AZ::AssetCollectionAsyncLoader m_assetLoadManager;
 

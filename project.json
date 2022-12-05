@@ -13,5 +13,15 @@
     ],
     "icon_path": "preview.png",
     "engine": "o3de",
-    "external_subdirectories": []
+    "external_subdirectories": [],
+    "gem_names": [
+        {
+            "name": "OpenXRVk",
+            "optional": true
+        },
+        {
+            "name": "XR",
+            "optional": true
+        }
+    ]
 }
