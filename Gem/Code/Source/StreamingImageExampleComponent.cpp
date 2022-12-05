@@ -192,7 +192,8 @@ namespace AtomSampleViewer
             m_imageHotReload.m_srg->SetConstant(m_positionInputIndex, position);
             m_imageHotReload.m_srg->SetConstant(m_sizeInputIndex, size);
             m_imageHotReload.m_srg->SetConstant(m_residentMipInputIndex, static_cast<int>(m_imageHotReload.m_image->GetResidentMipLevel()));
-            m_imageHotReload.m_srg->Compile();
+            // Note: no need to queue the srg for compile since the OnTick would compile it anyway
+
             return;
         }
 
@@ -241,7 +242,7 @@ namespace AtomSampleViewer
         imageToDraw->m_srg->SetConstant(m_positionInputIndex, position);
         imageToDraw->m_srg->SetConstant(m_sizeInputIndex, mipSize);
         imageToDraw->m_srg->SetConstant<int>(m_residentMipInputIndex, imageToDraw->m_image->GetResidentMipLevel());
-        imageToDraw->m_srg->Compile();
+        // no need to queue for compile since the OnTick would compile it anyway
 
         m_numImageCreated++;
 
@@ -353,7 +354,7 @@ namespace AtomSampleViewer
             }
         }
 
-        if (m_imageHotReload.m_image && !m_imageHotReload.m_srg->GetRHIShaderResourceGroup()->IsQueuedForCompile())
+        if (m_imageHotReload.m_image)
         {
             m_imageHotReload.m_srg->SetConstant<int>(m_residentMipInputIndex, m_imageHotReload.m_image->GetResidentMipLevel());
             m_imageHotReload.m_srg->Compile();
@@ -381,10 +382,9 @@ namespace AtomSampleViewer
             ImGui::Indent();
             ImGui::Text("Image count: %u", streamingImagePool->GetImageCount());
             ImGui::Text("Streamable image count: %u", streamingImagePool->GetStreamableImageCount());
-            // Add m_totalResidentInBytes and m_reservedInBytes together before ATOM-17037 is done
-            size_t totalResident = memoryUsage.m_totalResidentInBytes.load() + memoryUsage.m_reservedInBytes;
+            size_t totalResident = memoryUsage.m_totalResidentInBytes.load();
             ImGui::Text("Allocated GPU memory: %zu MB (%zu)", totalResident/MB, totalResident);
-            size_t usedResident = memoryUsage.m_usedResidentInBytes.load() + memoryUsage.m_reservedInBytes;;
+            size_t usedResident = memoryUsage.m_usedResidentInBytes.load();
             ImGui::Text("Used GPU memory: %zu MB (%zu)", usedResident/MB, usedResident);
             
             size_t budgetInBytes = memoryUsage.m_budgetInBytes;
@@ -457,8 +457,15 @@ namespace AtomSampleViewer
             if (m_3dImages.size() == 0)
             {
                 Create3dimages();
+                if (m_3dImages.size() == 0)
+                {
+                    m_viewStreamedImages = true;
+                    return;
+                }
             }
+
             Draw3dImages();
+
         }
     }
 
@@ -662,13 +669,18 @@ namespace AtomSampleViewer
                 layout.m_size,
                 format, imageData.data(), imageData.size());
 
-            // Create the srg
-            Image3dToDraw image3d;
-            image3d.m_srg = RPI::ShaderResourceGroup::Create(m_image3dShaderAsset, m_image3dSrgLayout->GetName());
-            image3d.m_srg->SetImage(image3DInputIndex, image.get(), 0);
-            image3d.m_sliceCount = layout.m_size.m_depth;
+            // The image may not be created successfully if the memory budget was set to a very low value
+            if (image)
+            {
+                // Create the srg
+                Image3dToDraw image3d;
+                image3d.m_srg = RPI::ShaderResourceGroup::Create(m_image3dShaderAsset, m_image3dSrgLayout->GetName());
+                image3d.m_srg->SetImage(image3DInputIndex, image.get(), 0);
+                image3d.m_sliceCount = layout.m_size.m_depth;
 
-            m_3dImages.emplace_back(image3d);
+                m_3dImages.emplace_back(image3d);
+            }
+
         };
 
         // Create large 3D images, where a single image slice is staged/uploaded with multiple commands
