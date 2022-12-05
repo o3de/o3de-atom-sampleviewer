@@ -7,8 +7,6 @@
  */
 
 #include <AtomSampleViewerSystemComponent.h>
-#include <MaterialFunctors/StacksShaderCollectionFunctor.h>
-#include <MaterialFunctors/StacksShaderInputFunctor.h>
 #include <Automation/ImageComparisonConfig.h>
 
 #include <EntityLatticeTestComponent.h>
@@ -54,8 +52,6 @@ namespace AtomSampleViewer
         ImGuiAssetBrowser::Reflect(context);
         ImGuiSidebar::Reflect(context);
         ImGuiSaveFilePath::Reflect(context);
-        StacksShaderCollectionFunctor::Reflect(context);
-        StacksShaderInputFunctor::Reflect(context);
 
         ImageComparisonConfig::Reflect(context);
 

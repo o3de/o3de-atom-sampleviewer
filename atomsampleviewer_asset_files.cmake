@@ -61,9 +61,6 @@ set(FILES
     Shaders/DebugVertexNormals.materialtype
     Shaders/DebugVertexNormals.shader
     Shaders/Instanced.azsl
-    Shaders/ComprehensiveTestMaterial/Comprehensive.materialtype
-    Shaders/ComprehensiveTestMaterial/Stacks.azsl
-    Shaders/ComprehensiveTestMaterial/Stacks.shader
     Shaders/DynamicDraw/DynamicDrawExample.azsl
     Shaders/DynamicDraw/DynamicDrawExample.shader
     Shaders/OptimizationTests/DummyTransformColor.azsl

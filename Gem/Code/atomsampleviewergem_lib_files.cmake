@@ -7,8 +7,4 @@
 #
 
 set(FILES
-    Lib/MaterialFunctors/StacksShaderCollectionFunctor.h
-    Lib/MaterialFunctors/StacksShaderCollectionFunctor.cpp
-    Lib/MaterialFunctors/StacksShaderInputFunctor.h
-    Lib/MaterialFunctors/StacksShaderInputFunctor.cpp
 )
