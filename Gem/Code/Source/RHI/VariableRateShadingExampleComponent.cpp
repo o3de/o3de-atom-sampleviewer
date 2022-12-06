@@ -112,7 +112,6 @@ namespace AtomSampleViewer
         AZ::RHI::RHISystemNotificationBus::Handler::BusConnect();
         AzFramework::InputChannelEventListener::Connect();
 
-
         RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
         const auto& deviceFeatures = device->GetFeatures();
         if (!RHI::CheckBitsAll(deviceFeatures.m_shadingRateTypeMask, RHI::ShadingRateTypeFlags::PerImage))
@@ -125,7 +124,7 @@ namespace AtomSampleViewer
             m_useDrawShadingRate = false;
         }
 
-        if (RHI::CheckBitsAll(deviceFeatures.m_shadingRateTypeMask, RHI::ShadingRateTypeFlags::PerImage))
+        if (m_useImageShadingRate)
         {
             for (uint32_t i = 0; i < static_cast<uint32_t>(RHI::Format::Count); ++i)
             {
@@ -179,7 +178,7 @@ namespace AtomSampleViewer
         uint32_t formatSize = GetFormatSize(m_rateShadingImageFormat);
         uint32_t bufferSize = width * height * formatSize;
         AZStd::vector<uint8_t> shadingRatePatternData(bufferSize);
-        if (RHI::CheckBitsAll(device->GetFeatures().m_shadingRateTypeMask, RHI::ShadingRateTypeFlags::PerImage))
+        if (m_useImageShadingRate)
         {
             // Use the lowest shading rate as the default value.
             RHI::ShadingRateImageValue defaultValue = device->ConvertShadingRate(m_supportedModes[m_supportedModes.size() - 1]);
@@ -283,10 +282,11 @@ namespace AtomSampleViewer
 
         RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
 
+        constexpr uint32_t elementsCount = 4;
         struct Pattern
         {
-            float m_distance[4];
-            uint32_t m_rate[4];
+            float m_distance[elementsCount];
+            uint32_t m_rate[elementsCount];
         };
 
         struct Color

@@ -39,7 +39,6 @@ VSOutput MainVS(VSInput vsInput)
     return OUT;
 }
 
-
 struct PSOutput
 {
     float4 m_color : SV_Target0;
