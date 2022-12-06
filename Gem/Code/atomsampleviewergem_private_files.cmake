@@ -85,6 +85,8 @@ set(FILES
     Source/RHI/RayTracingExampleComponent.h
     Source/RHI/MatrixAlignmentTestExampleComponent.cpp
     Source/RHI/MatrixAlignmentTestExampleComponent.h
+    Source/RHI/XRExampleComponent.cpp
+    Source/RHI/XRExampleComponent.h
     Source/RHI/VariableRateShadingExampleComponent.cpp
     Source/RHI/VariableRateShadingExampleComponent.h
     Source/Performance/HighInstanceExampleComponent.cpp
@@ -196,4 +198,6 @@ set(FILES
     Source/Utils/Utils.h
     Source/Utils/ImGuiProgressList.cpp
     Source/Utils/ImGuiProgressList.h
+    Source/XRRPIExampleComponent.cpp
+    Source/XRRPIExampleComponent.h
 )

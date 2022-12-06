@@ -51,6 +51,12 @@ namespace AtomSampleViewer
 
         //! Clear the RPI scene
         virtual void ClearRPIScene() = 0;
+
+        //! Enables or disables the default render pipeline.
+        virtual void EnableRenderPipeline(bool value) = 0;
+
+        //! Enables or disables the XR pipelines.
+        virtual void EnableXrPipelines(bool value) = 0;
     };
     using SampleComponentManagerRequestBus = AZ::EBus<SampleComponentManagerRequests>;
 

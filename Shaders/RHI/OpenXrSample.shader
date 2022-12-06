@@ -1,14 +1,10 @@
 {
-    "Source" : "BindlessPrototype.azsl",
+    "Source" : "OpenXrSample.azsl",
 
     "DepthStencilState" : { 
-        "Depth" : { "Enable" : false, "CompareFunc" : "GreaterEqual" }
+        "Depth" : { "Enable" : false, "CompareFunc" : "Less" }
     },
-
     "DrawList" : "forward",
-
-    "AddBuildArguments"
-        : { "dxc" : ["-fspv-target-env=vulkan1.2"] },
 
     "ProgramSettings":
     {
