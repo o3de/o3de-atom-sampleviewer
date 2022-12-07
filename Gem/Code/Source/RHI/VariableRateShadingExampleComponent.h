@@ -36,14 +36,14 @@
 namespace AtomSampleViewer
 {
     //! This samples demonstrates the use of Variable Rate Shading on the RHI.
-    //! Shading rates can be specified in 3 different ways: PerDraw, PerPrimtive and PerImage.
-    //! This samples only uses the PerDraw and PerImage modes.
+    //! Shading rates can be specified in 3 different ways: PerDraw, PerPrimtive and PerRegion.
+    //! This samples only uses the PerDraw and PerRegion modes.
     //! The samples render a full screen quad using different shading rates.
-    //! When the PerImage mode is used, an image is generated using a compute shader with different
+    //! When the PerRegion mode is used, an image is generated using a compute shader with different
     //! rates in a circular pattern from the center (or the pointer position).
     //! When a PerDraw mode is used, the rate is applied equally to the whole quad. The rate can be changed
     //! using the GUI of the sample.
-    //! Combinator operations are also exposed when both PerDraw and PerImage are being used.
+    //! Combinator operations are also exposed when both PerDraw and PerRegion are being used.
     class VariableRateShadingExampleComponent final
         : public BasicRHIComponent
         , public AZ::TickBus::Handler
@@ -101,7 +101,7 @@ namespace AtomSampleViewer
         bool m_followPointer = false;
         // Whether to use the PerDraw mode.
         bool m_useDrawShadingRate = false;
-        // Combinator operation to applied between the PerDraw and PerImage shading rate.
+        // Combinator operation to applied between the PerDraw and PerRegion shading rate.
         AZ::RHI::ShadingRateCombinerOp m_combinerOp = AZ::RHI::ShadingRateCombinerOp::Passthrough;
         // Shading rate when using the PerDraw mode.
         AZ::RHI::ShadingRate m_shadingRate = AZ::RHI::ShadingRate::Rate1x1;

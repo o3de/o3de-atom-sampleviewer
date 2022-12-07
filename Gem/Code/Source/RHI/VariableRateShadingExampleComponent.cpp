@@ -114,7 +114,7 @@ namespace AtomSampleViewer
 
         RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
         const auto& deviceFeatures = device->GetFeatures();
-        if (!RHI::CheckBitsAll(deviceFeatures.m_shadingRateTypeMask, RHI::ShadingRateTypeFlags::PerImage))
+        if (!RHI::CheckBitsAll(deviceFeatures.m_shadingRateTypeMask, RHI::ShadingRateTypeFlags::PerRegion))
         {
             m_useImageShadingRate = false;
         }
@@ -573,6 +573,11 @@ namespace AtomSampleViewer
             drawItem.m_streamBufferViews = m_streamBufferViews.data();
 
             commandList->Submit(drawItem);
+
+            if (m_useDrawShadingRate)
+            {
+                commandList->SetFragmentShadingRate(RHI::ShadingRate::Rate1x1);
+            }
         };
 
         const RHI::ScopeId forwardScope("SceneScope");
@@ -786,7 +791,7 @@ namespace AtomSampleViewer
         const auto& deviceFeatures = device->GetFeatures();
 
         ImGui::Spacing();
-        if (RHI::CheckBitsAll(deviceFeatures.m_shadingRateTypeMask, RHI::ShadingRateTypeFlags::PerImage))
+        if (RHI::CheckBitsAll(deviceFeatures.m_shadingRateTypeMask, RHI::ShadingRateTypeFlags::PerRegion))
         {
             ScriptableImGui::Checkbox("Image Shade Rate", &m_useImageShadingRate);
             if (m_useImageShadingRate)
