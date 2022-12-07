@@ -9,22 +9,6 @@
 o3de_pal_dir(pal_dir ${CMAKE_CURRENT_LIST_DIR}/Source/Platform/${PAL_PLATFORM_NAME} "${gem_restricted_path}" "${gem_path}")
 
 ly_add_target(
-    NAME AtomSampleViewer.Lib.Static STATIC
-    NAMESPACE Gem
-    FILES_CMAKE
-        atomsampleviewergem_lib_files.cmake
-    INCLUDE_DIRECTORIES
-        PUBLIC
-            Lib
-    BUILD_DEPENDENCIES
-        PUBLIC
-            AZ::AzGameFramework
-            Gem::Atom_AtomBridge.Static
-            Gem::Atom_RPI.Public
-            Gem::Atom_Utils.Static
-)
-
-ly_add_target(
     NAME AtomSampleViewer.Private.Static STATIC
     NAMESPACE Gem
     FILES_CMAKE
@@ -43,7 +27,6 @@ ly_add_target(
             Gem::Atom_AtomBridge.Static
             Gem::Atom_Feature_Common.Static
             Gem::Atom_Component_DebugCamera.Static
-            Gem::AtomSampleViewer.Lib.Static
             Gem::Profiler.Static
             Gem::DiffuseProbeGrid.Static
 )
@@ -83,7 +66,6 @@ if(PAL_TRAIT_BUILD_HOST_TOOLS)
             PRIVATE
                 AZ::AzGameFramework
                 Gem::Atom_AtomBridge.Static
-                Gem::AtomSampleViewer.Lib.Static
             PUBLIC
                 Gem::Atom_RPI.Edit
     )
