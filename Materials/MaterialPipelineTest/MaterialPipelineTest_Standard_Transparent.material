@@ -1,0 +1,9 @@
+{
+    "materialType": "@projectroot@/Cache/Intermediate Assets/testdata/materials/types/materialpipelinetest_standard_generated.materialtype",
+    "materialTypeVersion": 3,
+    "parentMaterial": "MaterialPipelineTest_Standard.material",
+    "propertyValues": {
+        "opacity.factor": 0.3700000047683716,
+        "opacity.mode": "Blended"
+    }
+}
