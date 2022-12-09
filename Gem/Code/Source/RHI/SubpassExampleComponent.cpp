@@ -231,9 +231,9 @@ namespace AtomSampleViewer
             ->DepthStencilAttachment(AZ::RHI::Format::D32_FLOAT, m_depthStencilAttachmentId);
         // Composition Subpass
         attachmentsBuilder.AddSubpass()
-            ->SubpassInputAttachment(m_positionAttachmentId)
-            ->SubpassInputAttachment(m_normalAttachmentId)
-            ->SubpassInputAttachment(m_albedoAttachmentId)
+            ->SubpassInputAttachment(m_positionAttachmentId, RHI::ImageAspectFlags::Color)
+            ->SubpassInputAttachment(m_normalAttachmentId, RHI::ImageAspectFlags::Color)
+            ->SubpassInputAttachment(m_albedoAttachmentId, RHI::ImageAspectFlags::Color)
             ->RenderTargetAttachment(m_outputAttachmentId)
             ->DepthStencilAttachment(m_depthStencilAttachmentId);
 

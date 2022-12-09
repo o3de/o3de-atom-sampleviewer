@@ -87,6 +87,8 @@ set(FILES
     Source/RHI/MatrixAlignmentTestExampleComponent.h
     Source/RHI/XRExampleComponent.cpp
     Source/RHI/XRExampleComponent.h
+    Source/RHI/VariableRateShadingExampleComponent.cpp
+    Source/RHI/VariableRateShadingExampleComponent.h
     Source/Performance/HighInstanceExampleComponent.cpp
     Source/Performance/HighInstanceExampleComponent.h
     Source/Performance/100KDrawable_SingleView_ExampleComponent.cpp

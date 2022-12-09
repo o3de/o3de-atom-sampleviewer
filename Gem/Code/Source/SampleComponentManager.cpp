@@ -65,6 +65,7 @@
 #include <RHI/BindlessPrototypeExampleComponent.h>
 #include <RHI/RayTracingExampleComponent.h>
 #include <RHI/MatrixAlignmentTestExampleComponent.h>
+#include <RHI/VariableRateShadingExampleComponent.h>
 
 #include <Performance/100KDrawable_SingleView_ExampleComponent.h>
 #include <Performance/100KDraw_10KDrawable_MultiView_ExampleComponent.h>
@@ -309,6 +310,7 @@ namespace AtomSampleViewer
             NewRHISample<TrianglesConstantBufferExampleComponent>("TrianglesConstantBuffer"),
             NewRHISample<XRExampleComponent>("OpenXr", []() { return AZ::RHI::RHISystemInterface::Get()->GetXRSystem() != nullptr; }),
             NewRHISample<MatrixAlignmentTestExampleComponent>("MatrixAlignmentTest"),
+            NewRHISample<VariableRateShadingExampleComponent>("VariableRateShading", []() { return Utils::GetRHIDevice()->GetFeatures().m_shadingRateTypeMask != RHI::ShadingRateTypeFlags::None; }),
             NewRPISample<AssetLoadTestComponent>("AssetLoadTest"),
             NewRPISample<AuxGeomExampleComponent>("AuxGeom"),
             NewRPISample<BakedShaderVariantExampleComponent>("BakedShaderVariant"),
