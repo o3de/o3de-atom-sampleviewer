@@ -2,15 +2,81 @@
     "shaderTemplates": [
         {
             "shader": "./DeferredMaterialPass.shader.template",
-            "azsli": "./DeferredMaterialPass.azsli"
+            "azsli": "./DeferredMaterialPass.azsli",
+            "tag": "main"
         },
         {
             "shader": "Materials/Pipelines/Common/DepthPass.shader.template",
-            "azsli": "Materials/Pipelines/Common/DepthPass.azsli"
+            "azsli": "Materials/Pipelines/Common/DepthPass.azsli",
+            "tag": "depth"
         },
         {
             "shader": "Materials/Pipelines/Common/ShadowmapPass.shader.template",
-            "azsli": "Materials/Pipelines/Common/DepthPass.azsli"
+            "azsli": "Materials/Pipelines/Common/DepthPass.azsli",
+            "tag": "shadow"
+        },
+        // This deferred pipeline uses the same transparent pass as the main pipeline
+        {
+            "shader": "Materials/Pipelines/MainPipeline/Transparent_StandardLighting.shader.template",
+            "azsli": "Materials/Pipelines/MainPipeline/Transparent_StandardLighting.azsli",
+            "tag": "transparent"
+        },
+        {
+            "shader": "Materials/Pipelines/MainPipeline/TintedTransparent_StandardLighting.shader.template",
+            "azsli": "Materials/Pipelines/MainPipeline/Transparent_StandardLighting.azsli",
+            "tag": "tintedTransparent"
+        },
+        {
+            "shader": "Materials/Pipelines/MainPipeline/Transparent_EnhancedLighting.shader.template",
+            "azsli": "Materials/Pipelines/MainPipeline/Transparent_EnhancedLighting.azsli",
+            "tag": "transparent"
+        },
+        {
+            "shader": "Materials/Pipelines/MainPipeline/TintedTransparent_EnhancedLighting.shader.template",
+            "azsli": "Materials/Pipelines/MainPipeline/Transparent_EnhancedLighting.azsli",
+            "tag": "tintedTransparent"
         }
-    ]
+    ],
+    "runtime": {
+        "properties": [
+            {
+                "name": "isTransparent",
+                "type": "Bool",
+                "defaultValue": false
+            },
+            {
+                "name": "isTintedTransparent",
+                "type": "Bool",
+                "defaultValue": false
+            },
+            {
+                "name": "castShadows",
+                "type": "Bool",
+                "defaultValue": true
+            },
+            {
+                "name": "doubleSided",
+                "type": "Bool",
+                "defaultValue": false
+            }
+        ],
+        "functors": 
+        [
+            {
+                "type": "Lua",
+                "args": {
+                    //TODO(MaterialPipeline): Make the builder touch up this path so it can be relative to the .materialtype file
+                    "file": "Materials/Pipelines/Common/ShaderEnable.lua"
+                }
+            },
+            {
+                "type": "Lua",
+                "args": {
+                    //TODO(MaterialPipeline): Make the builder touch up this path so it can be relative to the .materialtype file
+                    "file": "Materials/Pipelines/Common/DoubleSided.lua"
+                }
+            }
+        ]
+    },
+    "pipelineScript": "./DeferredPipelineScript.lua"
 }
