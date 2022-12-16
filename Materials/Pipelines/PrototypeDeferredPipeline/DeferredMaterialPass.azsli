@@ -22,7 +22,6 @@
 #include <Atom/Features/PBR/DefaultObjectSrg.azsli>
 #include <Atom/Features/ColorManagement/TransformColor.azsli>
 #include <Atom/Features/PBR/LightingOptions.azsli>
-//#include <Atom/Features/PBR/Surfaces/StandardSurface.azsli>
 
 VsOutput MaterialVS(VsInput IN)
 {
@@ -35,8 +34,15 @@ struct DeferredMaterialOutput
     float4 m_baseColor  : SV_Target0;
     float4 m_roughnessMetal : SV_Target1; 
     float4 m_normal : SV_Target2;
+    
+#if OUTPUT_DEPTH
+    float m_depth : SV_Depth;
+#endif
 };
 
+#if !OUTPUT_DEPTH
+    [earlydepthstencil]
+#endif
 DeferredMaterialOutput MaterialPS(VsOutput IN, bool isFrontFace : SV_IsFrontFace)
 {
     // ------- Geometry -> Surface -------
@@ -53,6 +59,11 @@ DeferredMaterialOutput MaterialPS(VsOutput IN, bool isFrontFace : SV_IsFrontFace
     OUT.m_roughnessMetal = float4(surface.roughnessLinear, surface.metallic, 0, 0);
     OUT.m_normal.rgb = EncodeNormalSignedOctahedron(surface.normal);
     OUT.m_normal.a = EncodeUnorm2BitFlags(o_enableIBL, o_specularF0_enableMultiScatterCompensation);
+    
+#if OUTPUT_DEPTH
+    // Can be modified in Parallax calculations in EvaluatePixelGeometry
+    OUT.m_depth = IN.position.z;
+#endif
 
     return OUT;
 }

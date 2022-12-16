@@ -1,0 +1,14 @@
+{
+    "materialType": "@projectroot@/Cache/Intermediate Assets/testdata/materials/types/materialpipelinetest_enhanced_generated.materialtype",
+    "materialTypeVersion": 3,
+    "parentMaterial": "MaterialPipelineTest_Enhanced.material",
+    "propertyValues": {
+        "parallax.algorithm": "Relief",
+        "parallax.factor": 0.10000000149011612,
+        "parallax.offset": 0.03799999877810478,
+        "parallax.pdo": true,
+        "parallax.quality": "Medium",
+        "parallax.textureMap": "@gemroot:Atom@/TestData/TestData/Textures/cc0/Concrete019_1K_Displacement.jpg",
+        "subsurfaceScattering.enableSubsurfaceScattering": false
+    }
+}
