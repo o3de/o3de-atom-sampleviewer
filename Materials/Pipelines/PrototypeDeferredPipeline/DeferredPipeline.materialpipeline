@@ -6,14 +6,29 @@
             "tag": "main"
         },
         {
+            "shader": "./DeferredMaterialPass_CustomZ.shader.template",
+            "azsli": "./DeferredMaterialPass.azsli",
+            "tag": "main_customZ"
+        },
+        {
             "shader": "Materials/Pipelines/Common/DepthPass.shader.template",
             "azsli": "Materials/Pipelines/Common/DepthPass.azsli",
             "tag": "depth"
         },
         {
+            "shader": "Materials/Pipelines/Common/DepthPass_CustomZ.shader.template",
+            "azsli": "Materials/Pipelines/Common/DepthPass_CustomZ.azsli",
+            "tag": "depth_customZ"
+        },
+        {
             "shader": "Materials/Pipelines/Common/ShadowmapPass.shader.template",
             "azsli": "Materials/Pipelines/Common/DepthPass.azsli",
             "tag": "shadow"
+        },
+        {
+            "shader": "Materials/Pipelines/Common/ShadowmapPass_CustomZ.shader.template",
+            "azsli": "Materials/Pipelines/Common/DepthPass_CustomZ.azsli",
+            "tag": "shadow_customZ"
         },
         // This deferred pipeline uses the same transparent pass as the main pipeline
         {
@@ -56,6 +71,16 @@
             },
             {
                 "name": "doubleSided",
+                "type": "Bool",
+                "defaultValue": false
+            },
+            {
+                "name": "hasPerPixelDepth",
+                "type": "Bool",
+                "defaultValue": false
+            },
+            {
+                "name": "hasPerPixelClip",
                 "type": "Bool",
                 "defaultValue": false
             }

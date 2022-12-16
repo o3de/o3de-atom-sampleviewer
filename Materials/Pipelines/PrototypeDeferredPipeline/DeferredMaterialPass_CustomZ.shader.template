@@ -1,5 +1,7 @@
 {
     "Source" : "TEMPLATE_AZSL_PATH",
+    
+    "Definitions": ["OUTPUT_DEPTH=1"],
 
     "DepthStencilState" :
     {

@@ -22,6 +22,14 @@ function MaterialTypeSetup(context)
     context:IncludeShader("DepthPass")
     context:IncludeShader("ShadowmapPass")
     context:IncludeShader("DeferredMaterialPass")
+    
+    -- Unlike Standard and Enhanced, BaseLighting doesn't have "_CustomZ" just because BasePBR.materialtype doesn't use alpha cutout or POM PDO, so we don't need it right now.
+    -- But that could be added if some other material type wants to use BaseLighting with one of these features, as they don't really relate to the lighting model.
+    if(lightingModel ~= "Base") then
+        context:IncludeShader("DeferredMaterialPass_CustomZ")
+        context:IncludeShader("DepthPass_CustomZ")
+        context:IncludeShader("ShadowmapPass_CustomZ")
+    end
 
     -- Even though the enhanced lighting model is not supported by the deferred pass, since this pipeline 
     -- uses the same transparent pass shaders as the main pipeline, we can actually support the Standard
@@ -36,7 +44,7 @@ function MaterialTypeSetup(context)
         context:IncludeShader("Transparent_EnhancedLighting")
         context:IncludeShader("TintedTransparent_EnhancedLighting")
     end
-
+    
     return true
 end
 
