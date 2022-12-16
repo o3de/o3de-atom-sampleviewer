@@ -8,7 +8,6 @@
 
 #include <SponzaBenchmarkComponent.h>
 
-#include <Atom/RHI/Device.h>
 #include <Atom/RHI/Factory.h>
 
 #include <Atom/Feature/ImGui/SystemBus.h>

@@ -6,21 +6,20 @@
  *
  */
 
-#include <Passes/RayTracingAmbientOcclusionPass.h>
+#include <Atom/Feature/TransformService/TransformServiceFeatureProcessor.h>
 #include <Atom/RHI/CommandList.h>
-#include <Atom/RHI/DeviceDispatchRaysItem.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/FrameScheduler.h>
 #include <Atom/RHI/RHISystemInterface.h>
 #include <Atom/RHI/ScopeProducerFunction.h>
-#include <Atom/RPI.Public/Buffer/BufferSystemInterface.h>
 #include <Atom/RPI.Public/Buffer/Buffer.h>
-#include <Atom/RPI.Public/RenderPipeline.h>
-#include <Atom/RPI.Public/Scene.h>
+#include <Atom/RPI.Public/Buffer/BufferSystemInterface.h>
 #include <Atom/RPI.Public/Pass/PassUtils.h>
 #include <Atom/RPI.Public/RPIUtils.h>
+#include <Atom/RPI.Public/RenderPipeline.h>
+#include <Atom/RPI.Public/Scene.h>
 #include <Atom/RPI.Public/View.h>
-#include <Atom/Feature/TransformService/TransformServiceFeatureProcessor.h>
+#include <Passes/RayTracingAmbientOcclusionPass.h>
 
 namespace AZ
 {
@@ -49,8 +48,6 @@ namespace AZ
 
         void RayTracingAmbientOcclusionPass::CreateRayTracingPipelineState()
         {
-            RHI::Ptr<RHI::Device> device = RHI::RHISystemInterface::Get()->GetDevice();
-
             // load ray generation shader
             const char* rayGenerationShaderFilePath = "Shaders/RayTracing/RTAOGeneration.azshader";
             m_rayGenerationShader = RPI::LoadShader(rayGenerationShaderFilePath);
@@ -89,7 +86,7 @@ namespace AZ
             AZ_Assert(m_shaderResourceGroup, "[RayTracingAmbientOcclusionPass '%s']: Failed to create SRG from shader asset '%s'",
                 GetPathName().GetCStr(), rayGenerationShaderFilePath);
 
-            RHI::DeviceRayTracingPipelineStateDescriptor descriptor;
+            RHI::RayTracingPipelineStateDescriptor descriptor;
             descriptor.Build()
                 ->PipelineState(m_globalPipelineState.get())
                 ->ShaderLibrary(rayGenerationShaderDescriptor)
@@ -102,8 +99,8 @@ namespace AZ
                 ->ClosestHitShaderName(AZ::Name("AoClosestHit"));
 
             // create the ray tracing pipeline state object
-            m_rayTracingPipelineState = RHI::Factory::Get().CreateRayTracingPipelineState();
-            m_rayTracingPipelineState->Init(*device.get(), &descriptor);
+            m_rayTracingPipelineState = RHI::RayTracingPipelineState::Create();
+            m_rayTracingPipelineState->Init(RHI::AllDevices, descriptor);
         }
 
         void RayTracingAmbientOcclusionPass::FrameBeginInternal(FramePrepareParams params)
@@ -119,15 +116,14 @@ namespace AZ
 
             if (!m_rayTracingShaderTable)
             {
-                RHI::Ptr<RHI::Device> device = RHI::RHISystemInterface::Get()->GetDevice();
                 auto& rayTracingBufferPools = m_rayTracingFeatureProcessor->GetBufferPools();
 
-                // Build shader table once. Since we are not using local srg so we don't need to rebuild it even when scene changed 
-                m_rayTracingShaderTable = RHI::Factory::Get().CreateRayTracingShaderTable();
-                m_rayTracingShaderTable->Init(*device.get(), rayTracingBufferPools);
+                // Build shader table once. Since we are not using local srg so we don't need to rebuild it even when scene changed
+                m_rayTracingShaderTable = RHI::RayTracingShaderTable::Create();
+                m_rayTracingShaderTable->Init(RHI::AllDevices, rayTracingBufferPools);
 
-                AZStd::shared_ptr<RHI::DeviceRayTracingShaderTableDescriptor> descriptor =
-                    AZStd::make_shared<RHI::DeviceRayTracingShaderTableDescriptor>();
+                AZStd::shared_ptr<RHI::RayTracingShaderTableDescriptor> descriptor =
+                    AZStd::make_shared<RHI::RayTracingShaderTableDescriptor>();
                 descriptor->Build(AZ::Name("RayTracingAOShaderTable"), m_rayTracingPipelineState)
                     ->RayGenerationRecord(AZ::Name("AoRayGen"))
                     ->MissRecord(AZ::Name("AoMiss"))
@@ -162,7 +158,7 @@ namespace AZ
             RHI::ShaderInputConstantIndex constantIndex;
 
             // Bind scene TLAS buffer
-            const RHI::Ptr<RHI::DeviceBuffer> tlasBuffer = m_rayTracingFeatureProcessor->GetTlas()->GetTlasBuffer();
+            const RHI::Ptr<RHI::Buffer> tlasBuffer = m_rayTracingFeatureProcessor->GetTlas()->GetTlasBuffer();
             if (tlasBuffer)
             {
                 // TLAS
@@ -220,20 +216,20 @@ namespace AZ
             RPI::PassAttachment* outputAttachment = GetOutputBinding(0).GetAttachment().get();
             RHI::Size targetImageSize = outputAttachment->m_descriptor.m_image.m_size;
 
-            const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] =
-            {
-                m_shaderResourceGroup->GetRHIShaderResourceGroup()
+            const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
+                m_shaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
             };
 
             RHI::DeviceDispatchRaysItem dispatchRaysItem;
             dispatchRaysItem.m_arguments.m_direct.m_width = targetImageSize.m_width;
             dispatchRaysItem.m_arguments.m_direct.m_height = targetImageSize.m_height;
             dispatchRaysItem.m_arguments.m_direct.m_depth = 1;
-            dispatchRaysItem.m_rayTracingPipelineState = m_rayTracingPipelineState.get();
-            dispatchRaysItem.m_rayTracingShaderTable = m_rayTracingShaderTable.get();
+            dispatchRaysItem.m_rayTracingPipelineState = m_rayTracingPipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
+            dispatchRaysItem.m_rayTracingShaderTable =
+                m_rayTracingShaderTable->GetDeviceRayTracingShaderTable(context.GetDeviceIndex()).get();
             dispatchRaysItem.m_shaderResourceGroupCount = 1;
             dispatchRaysItem.m_shaderResourceGroups = shaderResourceGroups;
-            dispatchRaysItem.m_globalPipelineState = m_globalPipelineState.get();
+            dispatchRaysItem.m_globalPipelineState = m_globalPipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
 
             // submit the DispatchRays item
             context.GetCommandList()->Submit(dispatchRaysItem);

@@ -14,7 +14,7 @@
 #include <Atom/RHI.Reflect/InputStreamLayoutBuilder.h>
 #include <Atom/RHI.Reflect/RenderAttachmentLayoutBuilder.h>
 #include <Atom/RHI/CommandList.h>
-#include <Atom/RHI/DeviceIndirectBufferWriter.h>
+#include <Atom/RHI/IndirectBufferWriter.h>
 #include <Atom/RPI.Public/Shader/Shader.h>
 #include <Atom/RPI.Reflect/Shader/ShaderAsset.h>
 #include <AzCore/Math/MathUtils.h>
@@ -31,10 +31,10 @@ namespace AtomSampleViewer
         const uint32_t ThreadGroupSize = 128;
         const char* IndirectBufferAttachmentId = "IndirectBufferAttachmentId";
         const char* CulledIndirectBufferAttachmentId = "CulledIndirectBufferAttachmentId";
-        const char* CountBufferAttachmentId  = "CountBufferAttachmentId";
+        const char* CountBufferAttachmentId = "CountBufferAttachmentId";
         const char* DepthBufferAttachmentId = "DepthBufferAttachmentId";
         const AZ::Vector2 VelocityRange(0.1f, 0.3f);
-    }
+    } // namespace IndirectRendering
 
     float GetRandomFloat(float min, float max)
     {
@@ -47,9 +47,7 @@ namespace AtomSampleViewer
     {
         if (auto* serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
         {
-            serializeContext->Class<IndirectRenderingExampleComponent, AZ::Component>()
-                ->Version(0)
-                ;
+            serializeContext->Class<IndirectRenderingExampleComponent, AZ::Component>()->Version(0);
         }
     }
 
@@ -85,7 +83,8 @@ namespace AtomSampleViewer
                 static_cast<uint32_t>(m_windowContext->GetViewport().m_maxX - m_windowContext->GetViewport().m_minX),
                 static_cast<uint32_t>(m_windowContext->GetViewport().m_maxY - m_windowContext->GetViewport().m_minY),
                 AZ::RHI::Format::D32_FLOAT);
-            const AZ::RHI::TransientImageDescriptor transientImageDescriptor(RHI::AttachmentId{ IndirectRendering::DepthBufferAttachmentId }, imageDescriptor);
+            const AZ::RHI::TransientImageDescriptor transientImageDescriptor(
+                RHI::AttachmentId{ IndirectRendering::DepthBufferAttachmentId }, imageDescriptor);
             builder.CreateTransientImage(transientImageDescriptor);
 
             if (m_deviceSupportsCountBuffer)
@@ -114,14 +113,12 @@ namespace AtomSampleViewer
 
     void IndirectRenderingExampleComponent::InitInputAssemblyResources()
     {
-        RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
+        RHI::StreamBufferView& triangleStreamBufferView = m_streamBufferViews[0];
+        RHI::StreamBufferView& instancesIndicesStreamBufferView = m_streamBufferViews[1];
+        RHI::StreamBufferView& quadStreamBufferView = m_streamBufferViews[2];
 
-        RHI::DeviceStreamBufferView& triangleStreamBufferView = m_streamBufferViews[0];
-        RHI::DeviceStreamBufferView& instancesIndicesStreamBufferView = m_streamBufferViews[1];
-        RHI::DeviceStreamBufferView& quadStreamBufferView = m_streamBufferViews[2];
-
-        RHI::DeviceIndexBufferView& triangleIndexBufferView = m_indexBufferViews[0];
-        RHI::DeviceIndexBufferView& quadIndexBufferView = m_indexBufferViews[1];
+        RHI::IndexBufferView& triangleIndexBufferView = m_indexBufferViews[0];
+        RHI::IndexBufferView& quadIndexBufferView = m_indexBufferViews[1];
 
         // We use an index to identify an object at draw time.
         // On platforms that support setting inline constant through indirect commands we use an inline constant to set
@@ -134,18 +131,23 @@ namespace AtomSampleViewer
         layoutBuilder.AddBuffer(RHI::StreamStepFunction::PerInstance)->Channel("BLENDINDICES0", RHI::Format::R32_UINT);
         m_inputStreamLayout = layoutBuilder.End();
 
-        m_inputAssemblyBufferPool = RHI::Factory::Get().CreateBufferPool();
+        m_inputAssemblyBufferPool = aznew RHI::BufferPool();
 
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-        m_inputAssemblyBufferPool->Init(*device, bufferPoolDesc);
+        m_inputAssemblyBufferPool->Init(RHI::AllDevices, bufferPoolDesc);
 
         {
             BufferData bufferData;
 
             const float triangleWidth = 1.0f;
-            SetVertexPosition(bufferData.m_trianglePositions.data(), 0, 0, sqrt(pow(triangleWidth * 2.0f, 2.0f) - pow(triangleWidth, 2.0f)) - triangleWidth, 0.0);
+            SetVertexPosition(
+                bufferData.m_trianglePositions.data(),
+                0,
+                0,
+                sqrt(pow(triangleWidth * 2.0f, 2.0f) - pow(triangleWidth, 2.0f)) - triangleWidth,
+                0.0);
             SetVertexPosition(bufferData.m_trianglePositions.data(), 1, -triangleWidth, -triangleWidth, 0.0);
             SetVertexPosition(bufferData.m_trianglePositions.data(), 2, triangleWidth, -triangleWidth, 0.0);
 
@@ -158,9 +160,9 @@ namespace AtomSampleViewer
                 bufferData.m_instanceIndices[i] = i;
             }
 
-            m_inputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
+            m_inputAssemblyBuffer = aznew RHI::Buffer();
 
-            RHI::DeviceBufferInitRequest request;
+            RHI::BufferInitRequest request;
             request.m_buffer = m_inputAssemblyBuffer.get();
             request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, sizeof(bufferData) };
             request.m_initialData = &bufferData;
@@ -173,80 +175,58 @@ namespace AtomSampleViewer
             switch (m_mode)
             {
             case SequenceType::IARootConstantsDraw:
-            {
-                triangleStreamBufferView =
                 {
-                    *m_inputAssemblyBuffer,
-                    offsetof(BufferData, m_trianglePositions),
-                    sizeof(BufferData::m_trianglePositions),
-                    sizeof(VertexPosition)
-                };
+                    triangleStreamBufferView = { *m_inputAssemblyBuffer,
+                                                 offsetof(BufferData, m_trianglePositions),
+                                                 sizeof(BufferData::m_trianglePositions),
+                                                 sizeof(VertexPosition) };
 
-                triangleIndexBufferView =
-                {
-                    *m_inputAssemblyBuffer,
-                    offsetof(BufferData, m_triangleIndices),
-                    sizeof(BufferData::m_triangleIndices),
-                    RHI::IndexFormat::Uint16
-                };
+                    triangleIndexBufferView = { *m_inputAssemblyBuffer,
+                                                offsetof(BufferData, m_triangleIndices),
+                                                sizeof(BufferData::m_triangleIndices),
+                                                RHI::IndexFormat::Uint16 };
 
-                quadStreamBufferView =
-                {
-                    *m_inputAssemblyBuffer,
-                    offsetof(BufferData, m_quadPositions),
-                    sizeof(BufferData::m_quadPositions),
-                    sizeof(VertexPosition)
-                };
+                    quadStreamBufferView = { *m_inputAssemblyBuffer,
+                                             offsetof(BufferData, m_quadPositions),
+                                             sizeof(BufferData::m_quadPositions),
+                                             sizeof(VertexPosition) };
 
-                quadIndexBufferView =
-                {
-                    *m_inputAssemblyBuffer,
-                    offsetof(BufferData, m_quadIndices),
-                    sizeof(BufferData::m_quadIndices),
-                    RHI::IndexFormat::Uint16
-                };
-                break;
-            }
+                    quadIndexBufferView = { *m_inputAssemblyBuffer,
+                                            offsetof(BufferData, m_quadIndices),
+                                            sizeof(BufferData::m_quadIndices),
+                                            RHI::IndexFormat::Uint16 };
+                    break;
+                }
             case SequenceType::DrawOnly:
-            {
-                m_streamBufferViews[0] =
                 {
-                    *m_inputAssemblyBuffer,
-                    offsetof(BufferData, m_trianglePositions),
-                    sizeof(BufferData::m_trianglePositions) + sizeof(BufferData::m_quadPositions),
-                    sizeof(VertexPosition)
-                };
+                    m_streamBufferViews[0] = { *m_inputAssemblyBuffer,
+                                               offsetof(BufferData, m_trianglePositions),
+                                               sizeof(BufferData::m_trianglePositions) + sizeof(BufferData::m_quadPositions),
+                                               sizeof(VertexPosition) };
 
-                m_indexBufferViews[0] =
-                {
-                    *m_inputAssemblyBuffer,
-                    offsetof(BufferData, m_triangleIndices), // Need to offset the index buffer to the proper location
-                    sizeof(BufferData::m_triangleIndices) + sizeof(BufferData::m_quadIndices),
-                    RHI::IndexFormat::Uint16
-                };
-                break;
-            }
+                    m_indexBufferViews[0] = { *m_inputAssemblyBuffer,
+                                              offsetof(
+                                                  BufferData, m_triangleIndices), // Need to offset the index buffer to the proper location
+                                              sizeof(BufferData::m_triangleIndices) + sizeof(BufferData::m_quadIndices),
+                                              RHI::IndexFormat::Uint16 };
+                    break;
+                }
             default:
                 AZ_Assert(false, "Invalid Sequence type");
                 return;
             }
 
-            instancesIndicesStreamBufferView =
-            {
-                *m_inputAssemblyBuffer,
-                offsetof(BufferData, m_instanceIndices),
-                sizeof(BufferData::m_instanceIndices),
-                sizeof(uint32_t)
+            instancesIndicesStreamBufferView = {
+                *m_inputAssemblyBuffer, offsetof(BufferData, m_instanceIndices), sizeof(BufferData::m_instanceIndices), sizeof(uint32_t)
             };
 
-            RHI::ValidateStreamBufferViews(m_inputStreamLayout, AZStd::span<const RHI::DeviceStreamBufferView>(m_streamBufferViews.data(), 2));
+            RHI::ValidateStreamBufferViews(m_inputStreamLayout, AZStd::span<const RHI::StreamBufferView>(m_streamBufferViews.data(), 2));
         }
     }
 
-
     void IndirectRenderingExampleComponent::InitShaderResources()
     {
-        {  
+        {
             auto shader = m_indirectDrawShader;
             if (shader == nullptr)
             {
@@ -259,10 +239,9 @@ namespace AtomSampleViewer
             shader->GetVariant(m_indirectDrawShaderVariantStableId).ConfigurePipelineState(drawPipelineStateDescriptor);
 
             RHI::RenderAttachmentLayoutBuilder attachmentsBuilder;
-            attachmentsBuilder.AddSubpass()
-                ->RenderTargetAttachment(m_outputFormat)
-                ->DepthStencilAttachment(RHI::Format::D32_FLOAT);
-            [[maybe_unused]] RHI::ResultCode result = attachmentsBuilder.End(drawPipelineStateDescriptor.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
+            attachmentsBuilder.AddSubpass()->RenderTargetAttachment(m_outputFormat)->DepthStencilAttachment(RHI::Format::D32_FLOAT);
+            [[maybe_unused]] RHI::ResultCode result =
+                attachmentsBuilder.End(drawPipelineStateDescriptor.m_renderAttachmentConfiguration.m_renderAttachmentLayout);
             AZ_Assert(result == RHI::ResultCode::Success, "Failed to create render attachment layout");
 
             drawPipelineStateDescriptor.m_renderStates.m_depthStencilState = AZ::RHI::DepthStencilState::CreateDepth();
@@ -270,7 +249,11 @@ namespace AtomSampleViewer
             m_drawPipelineState = shader->AcquirePipelineState(drawPipelineStateDescriptor);
             if (!m_drawPipelineState)
             {
-                AZ_Error(IndirectRendering::SampleName, false, "Failed to acquire default pipeline state for shader '%s'", IndirectDrawShaderFilePath);
+                AZ_Error(
+                    IndirectRendering::SampleName,
+                    false,
+                    "Failed to acquire default pipeline state for shader '%s'",
+                    IndirectDrawShaderFilePath);
                 return;
             }
 
@@ -293,13 +276,17 @@ namespace AtomSampleViewer
             }
 
             AZ::RHI::PipelineStateDescriptorForDispatch computePipelineStateDescriptor;
-            
+
             shader->GetVariant(m_indirectDispatchShaderVariantStableId).ConfigurePipelineState(computePipelineStateDescriptor);
 
             m_cullPipelineState = shader->AcquirePipelineState(computePipelineStateDescriptor);
             if (!m_cullPipelineState)
             {
-                AZ_Error(IndirectRendering::SampleName, false, "Failed to acquire default pipeline state for shader '%s'", IndirectDispatchShaderFilePath);
+                AZ_Error(
+                    IndirectRendering::SampleName,
+                    false,
+                    "Failed to acquire default pipeline state for shader '%s'",
+                    IndirectDispatchShaderFilePath);
                 return;
             }
 
@@ -321,23 +308,30 @@ namespace AtomSampleViewer
             for (uint32_t i = 0; i < NumSequencesType; ++i)
             {
                 m_indirectCommandsShaderResourceGroups[i] = CreateShaderResourceGroup(shader, srgNames[i], IndirectRendering::SampleName);
-                FindShaderInputIndex(&m_cullingInputIndirectBufferIndices[i], m_indirectCommandsShaderResourceGroups[i], inputCommandsId, IndirectRendering::SampleName);
-                FindShaderInputIndex(&m_cullingOutputIndirectBufferIndices[i], m_indirectCommandsShaderResourceGroups[i], outputCommandsId, IndirectRendering::SampleName);
+                FindShaderInputIndex(
+                    &m_cullingInputIndirectBufferIndices[i],
+                    m_indirectCommandsShaderResourceGroups[i],
+                    inputCommandsId,
+                    IndirectRendering::SampleName);
+                FindShaderInputIndex(
+                    &m_cullingOutputIndirectBufferIndices[i],
+                    m_indirectCommandsShaderResourceGroups[i],
+                    outputCommandsId,
+                    IndirectRendering::SampleName);
             }
         }
     }
 
     void IndirectRenderingExampleComponent::InitIndirectRenderingResources()
     {
-        RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
         RHI::ResultCode result;
 
-        m_shaderBufferPool = RHI::Factory::Get().CreateBufferPool();
+        m_shaderBufferPool = aznew RHI::BufferPool();
 
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::ShaderRead | RHI::BufferBindFlags::Indirect;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-        m_shaderBufferPool->Init(*device, bufferPoolDesc);
+        m_shaderBufferPool->Init(RHI::AllDevices, bufferPoolDesc);
 
         // Create the layout depending on which commands are supported by the device.
         m_indirectDrawBufferLayout = RHI::IndirectBufferLayout();
@@ -357,11 +351,11 @@ namespace AtomSampleViewer
 
         // Create the signature and pass the pipeline state since we may have
         // an inline constants command.
-        m_indirectDrawBufferSignature = RHI::Factory::Get().CreateIndirectBufferSignature();
-        RHI::DeviceIndirectBufferSignatureDescriptor signatureDescriptor;
-        signatureDescriptor.m_layout = m_indirectDrawBufferLayout;
+        m_indirectDrawBufferSignature = RHI::IndirectBufferSignature::Create();
+        RHI::IndirectBufferSignatureDescriptor signatureDescriptor;
+        signatureDescriptor.m_descriptor.m_layout = m_indirectDrawBufferLayout;
         signatureDescriptor.m_pipelineState = m_drawPipelineState.get();
-        result = m_indirectDrawBufferSignature->Init(*device, signatureDescriptor);
+        result = m_indirectDrawBufferSignature->Init(RHI::AllDevices, signatureDescriptor);
 
         if (result != RHI::ResultCode::Success)
         {
@@ -369,31 +363,29 @@ namespace AtomSampleViewer
             return;
         }
 
-        m_sourceIndirectBuffer = RHI::Factory::Get().CreateBuffer();
+        m_sourceIndirectBuffer = aznew RHI::Buffer();
 
         uint32_t commandsStride = m_indirectDrawBufferSignature->GetByteStride();
-        RHI::DeviceBufferInitRequest request;
+        RHI::BufferInitRequest request;
         request.m_buffer = m_sourceIndirectBuffer.get();
-        request.m_descriptor = RHI::BufferDescriptor(
-            bufferPoolDesc.m_bindFlags,
-            commandsStride * s_maxNumberOfObjects);
+        request.m_descriptor = RHI::BufferDescriptor(bufferPoolDesc.m_bindFlags, commandsStride * s_maxNumberOfObjects);
         m_shaderBufferPool->InitBuffer(request);
 
         // Create a writer to populate the buffer with the commands.
-        auto indirectBufferWriter = RHI::Factory::Get().CreateIndirectBufferWriter();
-        result = indirectBufferWriter->Init(
-            m_sourceIndirectBuffer.get(), 0, commandsStride, s_maxNumberOfObjects, *m_indirectDrawBufferSignature);
+        auto indirectBufferWriter = aznew RHI::IndirectBufferWriter();
+        result =
+            indirectBufferWriter->Init(*m_sourceIndirectBuffer, 0, commandsStride, s_maxNumberOfObjects, *m_indirectDrawBufferSignature);
         if (result != RHI::ResultCode::Success)
         {
             AZ_Assert(false, "Fail to initialize Indirect Buffer Writer");
             return;
         }
 
-        RHI::DeviceStreamBufferView& triangleStreamBufferView = m_streamBufferViews[0];
-        RHI::DeviceStreamBufferView& quadStreamBufferView = m_streamBufferViews[2];
+        RHI::StreamBufferView& triangleStreamBufferView = m_streamBufferViews[0];
+        RHI::StreamBufferView& quadStreamBufferView = m_streamBufferViews[2];
 
-        RHI::DeviceIndexBufferView& triangleIndexBufferView = m_indexBufferViews[0];
-        RHI::DeviceIndexBufferView& quadIndexBufferView = m_indexBufferViews[1];
+        RHI::IndexBufferView& triangleIndexBufferView = m_indexBufferViews[0];
+        RHI::IndexBufferView& quadIndexBufferView = m_indexBufferViews[1];
 
         // Write the commands using the IndirectBufferWriter
         // We alternate between drawing a triangle and a quad.
@@ -407,22 +399,11 @@ namespace AtomSampleViewer
                         ->SetVertexView(0, triangleStreamBufferView)
                         ->SetIndexView(triangleIndexBufferView);
                 }
-                indirectBufferWriter->DrawIndexed(
-                    RHI::DrawIndexed(
-                        1,
-                        i,
-                        0,
-                        3,
-                        0));
+                indirectBufferWriter->DrawIndexed(RHI::DrawIndexed(1, i, 0, 3, 0));
             }
             else
             {
-                RHI::DrawIndexed arguments(
-                    1,
-                    i,
-                    0,
-                    6,
-                    0);
+                RHI::DrawIndexed arguments(1, i, 0, 6, 0);
 
                 switch (m_mode)
                 {
@@ -452,15 +433,15 @@ namespace AtomSampleViewer
 
         auto viewDescriptor = RHI::BufferViewDescriptor::CreateStructured(0, s_maxNumberOfObjects, commandsStride);
         m_sourceIndirectBufferView = m_sourceIndirectBuffer->GetBufferView(viewDescriptor);
-                  
-        if(!m_sourceIndirectBufferView.get())
+
+        if (!m_sourceIndirectBufferView.get())
         {
             AZ_Assert(false, "Fail to initialize Indirect Buffer View");
             return;
         }
 
         // Create the buffer that will contain the compute dispatch arguments.
-        m_indirectDispatchBuffer = RHI::Factory::Get().CreateBuffer();
+        m_indirectDispatchBuffer = aznew RHI::Buffer();
         {
             m_indirectDispatchBufferLayout = RHI::IndirectBufferLayout();
             m_indirectDispatchBufferLayout.AddIndirectCommand(RHI::IndirectCommandDescriptor(RHI::IndirectCommandType::Dispatch));
@@ -470,10 +451,10 @@ namespace AtomSampleViewer
                 return;
             }
 
-            m_indirectDispatchBufferSignature = RHI::Factory::Get().CreateIndirectBufferSignature();
+            m_indirectDispatchBufferSignature = RHI::IndirectBufferSignature::Create();
             signatureDescriptor = {};
-            signatureDescriptor.m_layout = m_indirectDispatchBufferLayout;
-            result = m_indirectDispatchBufferSignature->Init(*device, signatureDescriptor);
+            signatureDescriptor.m_descriptor.m_layout = m_indirectDispatchBufferLayout;
+            result = m_indirectDispatchBufferSignature->Init(RHI::AllDevices, signatureDescriptor);
 
             if (result != RHI::ResultCode::Success)
             {
@@ -484,23 +465,16 @@ namespace AtomSampleViewer
             uint32_t indirectDispatchStride = m_indirectDispatchBufferSignature->GetByteStride();
             request = {};
             request.m_buffer = m_indirectDispatchBuffer.get();
-            request.m_descriptor = RHI::BufferDescriptor(
-                bufferPoolDesc.m_bindFlags,
-                indirectDispatchStride);
+            request.m_descriptor = RHI::BufferDescriptor(bufferPoolDesc.m_bindFlags, indirectDispatchStride);
             m_shaderBufferPool->InitBuffer(request);
 
-            m_indirectDispatchBufferView =
-            {
-                *m_indirectDispatchBuffer,
-                *m_indirectDispatchBufferSignature,
-                0,
-                indirectDispatchStride,
-                indirectDispatchStride
+            m_indirectDispatchBufferView = {
+                *m_indirectDispatchBuffer, *m_indirectDispatchBufferSignature, 0, indirectDispatchStride, indirectDispatchStride
             };
 
-            m_indirectDispatchWriter = RHI::Factory::Get().CreateIndirectBufferWriter();
-            result = m_indirectDispatchWriter->Init(
-                m_indirectDispatchBuffer.get(), 0, indirectDispatchStride, 1, *m_indirectDispatchBufferSignature);
+            m_indirectDispatchWriter = aznew RHI::IndirectBufferWriter();
+            result =
+                m_indirectDispatchWriter->Init(*m_indirectDispatchBuffer, 0, indirectDispatchStride, 1, *m_indirectDispatchBufferSignature);
             if (result != RHI::ResultCode::Success)
             {
                 AZ_Assert(false, "Fail to initialize Indirect Buffer Writer");
@@ -527,27 +501,26 @@ namespace AtomSampleViewer
             data.m_velocity.Set(GetRandomFloat(IndirectRendering::VelocityRange.GetX(), IndirectRendering::VelocityRange.GetY()));
         }
 
-        m_instancesBufferPool = RHI::Factory::Get().CreateBufferPool();
+        m_instancesBufferPool = aznew RHI::BufferPool();
 
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::ShaderRead;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Host;
-        m_instancesBufferPool->Init(*device, bufferPoolDesc);
+        m_instancesBufferPool->Init(RHI::AllDevices, bufferPoolDesc);
 
-        m_instancesDataBuffer = RHI::Factory::Get().CreateBuffer();
+        m_instancesDataBuffer = aznew RHI::Buffer();
 
-        RHI::DeviceBufferInitRequest request;
+        RHI::BufferInitRequest request;
         request.m_buffer = m_instancesDataBuffer.get();
-        request.m_descriptor = RHI::BufferDescriptor{
-            RHI::BufferBindFlags::ShaderRead,
-            sizeof(InstanceData) * s_maxNumberOfObjects };
+        request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::ShaderRead, sizeof(InstanceData) * s_maxNumberOfObjects };
         request.m_initialData = m_instancesData.data();
         m_instancesBufferPool->InitBuffer(request);
 
-        auto descriptor = RHI::BufferViewDescriptor::CreateStructured(0, static_cast<uint32_t>(m_instancesData.size()), sizeof(InstanceData));
+        auto descriptor =
+            RHI::BufferViewDescriptor::CreateStructured(0, static_cast<uint32_t>(m_instancesData.size()), sizeof(InstanceData));
         m_instancesDataBufferView = m_instancesDataBuffer->GetBufferView(descriptor);
-                  
-        if(!m_instancesDataBufferView.get())
+
+        if (!m_instancesDataBufferView.get())
         {
             AZ_Assert(false, "Fail to initialize Instances Data Buffer View");
             return;
@@ -558,25 +531,21 @@ namespace AtomSampleViewer
         // the compute shader has culled the commands.
         if (m_deviceSupportsCountBuffer)
         {
-            m_copyBufferPool = RHI::Factory::Get().CreateBufferPool();
+            m_copyBufferPool = aznew RHI::BufferPool();
 
             bufferPoolDesc = {};
             bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::CopyRead;
             bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Host;
-            m_copyBufferPool->Init(*device, bufferPoolDesc);
+            m_copyBufferPool->Init(RHI::AllDevices, bufferPoolDesc);
 
-            m_resetCounterBuffer = RHI::Factory::Get().CreateBuffer();
+            m_resetCounterBuffer = aznew RHI::Buffer();
 
             AZStd::vector<uint32_t> initData;
             initData.assign(static_cast<size_t>(std::ceil(float(s_maxNumberOfObjects) / maxIndirectDrawCount)), 0);
 
             request = {};
             request.m_buffer = m_resetCounterBuffer.get();
-            request.m_descriptor = RHI::BufferDescriptor
-            {
-                RHI::BufferBindFlags::CopyRead,
-                sizeof(uint32_t) * initData.size()
-            };
+            request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::CopyRead, sizeof(uint32_t) * initData.size() };
             request.m_initialData = initData.data();
             m_copyBufferPool->InitBuffer(request);
         }
@@ -585,17 +554,20 @@ namespace AtomSampleViewer
             const Name instancesDataId{ "m_instancesData" };
             const Name matrixId{ "m_matrix" };
 
-            FindShaderInputIndex(&m_sceneInstancesDataBufferIndex, m_sceneShaderResourceGroup, instancesDataId, IndirectRendering::SampleName);
+            FindShaderInputIndex(
+                &m_sceneInstancesDataBufferIndex, m_sceneShaderResourceGroup, instancesDataId, IndirectRendering::SampleName);
             FindShaderInputIndex(&m_sceneMatrixInputIndex, m_sceneShaderResourceGroup, matrixId, IndirectRendering::SampleName);
             float screenAspect = GetViewportWidth() / GetViewportHeight();
             m_sceneShaderResourceGroup->SetBufferView(m_sceneInstancesDataBufferIndex, m_instancesDataBufferView.get());
-            m_sceneShaderResourceGroup->SetConstant(m_sceneMatrixInputIndex, AZ::Matrix4x4::CreateScale(AZ::Vector3(1.f/ screenAspect, 1.f, 1.f)));
+            m_sceneShaderResourceGroup->SetConstant(
+                m_sceneMatrixInputIndex, AZ::Matrix4x4::CreateScale(AZ::Vector3(1.f / screenAspect, 1.f, 1.f)));
             m_sceneShaderResourceGroup->Compile();
         }
 
         {
             uint32_t sequenceTypeIndex = static_cast<uint32_t>(m_mode);
-            m_indirectCommandsShaderResourceGroups[sequenceTypeIndex]->SetBufferView(m_cullingInputIndirectBufferIndices[sequenceTypeIndex], m_sourceIndirectBufferView.get());
+            m_indirectCommandsShaderResourceGroups[sequenceTypeIndex]->SetBufferView(
+                m_cullingInputIndirectBufferIndices[sequenceTypeIndex], m_sourceIndirectBufferView.get());
         }
     }
 
@@ -612,16 +584,14 @@ namespace AtomSampleViewer
                 countBufferAttachment.m_attachmentId = IndirectRendering::CountBufferAttachmentId;
                 countBufferAttachment.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::DontCare;
                 countBufferAttachment.m_bufferViewDescriptor = RHI::BufferViewDescriptor::CreateStructured(
-                    0,
-                    static_cast<uint32_t>(m_resetCounterBuffer->GetDescriptor().m_byteCount / sizeof(uint32_t)),
-                    sizeof(uint32_t));
+                    0, static_cast<uint32_t>(m_resetCounterBuffer->GetDescriptor().m_byteCount / sizeof(uint32_t)), sizeof(uint32_t));
                 frameGraph.UseCopyAttachment(countBufferAttachment, RHI::ScopeAttachmentAccess::Write);
             }
         };
 
         const auto compileFunction = [this](const RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
-            const RHI::DeviceBufferView* countBufferView = context.GetBufferView(RHI::AttachmentId{ IndirectRendering::CountBufferAttachmentId });
+            const RHI::BufferView* countBufferView = context.GetBufferView(RHI::AttachmentId{ IndirectRendering::CountBufferAttachmentId });
             m_copyDescriptor.m_sourceBuffer = m_resetCounterBuffer.get();
             m_copyDescriptor.m_sourceOffset = 0;
             m_copyDescriptor.m_destinationBuffer = &countBufferView->GetBuffer();
@@ -631,21 +601,13 @@ namespace AtomSampleViewer
 
         const auto executeFunction = [this](const RHI::FrameGraphExecuteContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
-            RHI::DeviceCopyItem copyItem(m_copyDescriptor);
+            RHI::DeviceCopyItem copyItem(m_copyDescriptor.GetDeviceCopyBufferDescriptor(context.GetDeviceIndex()));
             context.GetCommandList()->Submit(copyItem);
         };
 
         m_scopeProducers.emplace_back(
-            aznew RHI::ScopeProducerFunction<
-            ScopeData,
-            decltype(prepareFunction),
-            decltype(compileFunction),
-            decltype(executeFunction)>(
-                RHI::ScopeId{ "IndirectResetCounterScope" },
-                ScopeData{},
-                prepareFunction,
-                compileFunction,
-                executeFunction));
+            aznew RHI::ScopeProducerFunction<ScopeData, decltype(prepareFunction), decltype(compileFunction), decltype(executeFunction)>(
+                RHI::ScopeId{ "IndirectResetCounterScope" }, ScopeData{}, prepareFunction, compileFunction, executeFunction));
     }
 
     void IndirectRenderingExampleComponent::CreateCullingScope()
@@ -677,17 +639,16 @@ namespace AtomSampleViewer
                 countBufferAttachment.m_attachmentId = IndirectRendering::CountBufferAttachmentId;
                 countBufferAttachment.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
                 countBufferAttachment.m_bufferViewDescriptor = RHI::BufferViewDescriptor::CreateStructured(
-                    0,
-                    static_cast<uint32_t>(m_resetCounterBuffer->GetDescriptor().m_byteCount / sizeof(uint32_t)),
-                    sizeof(uint32_t));
+                    0, static_cast<uint32_t>(m_resetCounterBuffer->GetDescriptor().m_byteCount / sizeof(uint32_t)), sizeof(uint32_t));
                 frameGraph.UseShaderAttachment(countBufferAttachment, RHI::ScopeAttachmentAccess::ReadWrite);
             }
         };
 
-        const auto compileFunction = [this, maxIndirectDrawCount](const RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
+        const auto compileFunction =
+            [this, maxIndirectDrawCount](const RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
-
-            const RHI::DeviceBufferView* culledBufferView = context.GetBufferView(RHI::AttachmentId{ IndirectRendering::CulledIndirectBufferAttachmentId });
+            const RHI::BufferView* culledBufferView =
+                context.GetBufferView(RHI::AttachmentId{ IndirectRendering::CulledIndirectBufferAttachmentId });
 
             uint32_t sequenceTypeIndex = static_cast<uint32_t>(m_mode);
             auto& indirectCommandsSRG = m_indirectCommandsShaderResourceGroups[sequenceTypeIndex];
@@ -696,7 +657,8 @@ namespace AtomSampleViewer
 
             if (m_deviceSupportsCountBuffer)
             {
-                const RHI::DeviceBufferView* countBufferView = context.GetBufferView(RHI::AttachmentId{ IndirectRendering::CountBufferAttachmentId });
+                const RHI::BufferView* countBufferView =
+                    context.GetBufferView(RHI::AttachmentId{ IndirectRendering::CountBufferAttachmentId });
 
                 m_cullShaderResourceGroup->SetBufferView(m_cullingCountBufferIndex, countBufferView);
                 m_drawIndirect.m_countBuffer = &countBufferView->GetBuffer();
@@ -712,14 +674,7 @@ namespace AtomSampleViewer
             m_cullShaderResourceGroup->Compile();
 
             uint32_t stride = m_indirectDrawBufferSignature->GetByteStride();
-            m_indirectDrawBufferView =
-            {
-                culledBufferView->GetBuffer(),
-                *m_indirectDrawBufferSignature,
-                0,
-                stride * m_numObjects,
-                stride
-            };
+            m_indirectDrawBufferView = { culledBufferView->GetBuffer(), *m_indirectDrawBufferSignature, 0, stride * m_numObjects, stride };
         };
 
         const auto executeFunction = [this](const RHI::FrameGraphExecuteContext& context, [[maybe_unused]] const ScopeData& scopeData)
@@ -728,38 +683,33 @@ namespace AtomSampleViewer
 
             RHI::DeviceDispatchItem dispatchItem;
             uint32_t numSrgs = 0;
-            dispatchItem.m_shaderResourceGroups[numSrgs++] = m_cullShaderResourceGroup->GetRHIShaderResourceGroup();
-            dispatchItem.m_shaderResourceGroups[numSrgs++] = m_sceneShaderResourceGroup->GetRHIShaderResourceGroup();
+            dispatchItem.m_shaderResourceGroups[numSrgs++] =
+                m_cullShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get();
+            dispatchItem.m_shaderResourceGroups[numSrgs++] =
+                m_sceneShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get();
 
             for (const auto& srg : m_indirectCommandsShaderResourceGroups)
             {
-                dispatchItem.m_shaderResourceGroups[numSrgs++] = srg->GetRHIShaderResourceGroup();
+                dispatchItem.m_shaderResourceGroups[numSrgs++] =
+                    srg->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get();
             }
 
             // Submit the dispatch in an indirect manner.
             // Not really needed but it tests the indirect dispatch code.
-            RHI::DeviceDispatchIndirect dispatchArgs(1, m_indirectDispatchBufferView, 0);
+            RHI::DeviceDispatchIndirect dispatchArgs(
+                1, m_indirectDispatchBufferView.GetDeviceIndirectBufferView(context.GetDeviceIndex()), 0);
 
             dispatchItem.m_arguments = dispatchArgs;
-            dispatchItem.m_pipelineState = m_cullPipelineState.get();
+            dispatchItem.m_pipelineState = m_cullPipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
             dispatchItem.m_shaderResourceGroupCount = static_cast<uint8_t>(numSrgs);
 
             commandList->Submit(dispatchItem);
         };
 
         m_scopeProducers.emplace_back(
-            aznew RHI::ScopeProducerFunction<
-            ScopeData,
-            decltype(prepareFunction),
-            decltype(compileFunction),
-            decltype(executeFunction)>(
-                RHI::ScopeId{ "IndirecDispatchScope" },
-                ScopeData{},
-                prepareFunction,
-                compileFunction,
-                executeFunction));
+            aznew RHI::ScopeProducerFunction<ScopeData, decltype(prepareFunction), decltype(compileFunction), decltype(executeFunction)>(
+                RHI::ScopeId{ "IndirecDispatchScope" }, ScopeData{}, prepareFunction, compileFunction, executeFunction));
     }
-
 
     void IndirectRenderingExampleComponent::CreateDrawingScope()
     {
@@ -768,7 +718,8 @@ namespace AtomSampleViewer
         RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
         uint32_t maxIndirectDrawCount = device->GetLimits().m_maxIndirectDrawCount;
 
-        const auto prepareFunction = [this, maxIndirectDrawCount](RHI::FrameGraphInterface frameGraph, [[maybe_unused]] ScopeData& scopeData)
+        const auto prepareFunction =
+            [this, maxIndirectDrawCount](RHI::FrameGraphInterface frameGraph, [[maybe_unused]] ScopeData& scopeData)
         {
             {
                 // Binds the swap chain as a color attachment.
@@ -796,9 +747,7 @@ namespace AtomSampleViewer
                 descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
                 descriptor.m_loadStoreAction.m_storeAction = RHI::AttachmentStoreAction::Store;
                 descriptor.m_bufferViewDescriptor = RHI::BufferViewDescriptor::CreateStructured(
-                    0,
-                    static_cast<uint32_t>(m_resetCounterBuffer->GetDescriptor().m_byteCount / sizeof(uint32_t)),
-                    sizeof(uint32_t));
+                    0, static_cast<uint32_t>(m_resetCounterBuffer->GetDescriptor().m_byteCount / sizeof(uint32_t)), sizeof(uint32_t));
                 frameGraph.UseAttachment(descriptor, RHI::ScopeAttachmentAccess::Read, RHI::ScopeAttachmentUsage::Indirect);
             }
 
@@ -808,19 +757,18 @@ namespace AtomSampleViewer
                 descriptor.m_attachmentId = IndirectRendering::CulledIndirectBufferAttachmentId;
                 descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
                 descriptor.m_loadStoreAction.m_storeAction = RHI::AttachmentStoreAction::Store;
-                descriptor.m_bufferViewDescriptor = RHI::BufferViewDescriptor::CreateStructured(
-                    0,
-                    m_numObjects,
-                    m_indirectDrawBufferSignature->GetByteStride());
+                descriptor.m_bufferViewDescriptor =
+                    RHI::BufferViewDescriptor::CreateStructured(0, m_numObjects, m_indirectDrawBufferSignature->GetByteStride());
                 frameGraph.UseAttachment(descriptor, RHI::ScopeAttachmentAccess::Read, RHI::ScopeAttachmentUsage::Indirect);
             }
 
-            frameGraph.SetEstimatedItemCount(uint32_t(std::ceil(m_numObjects/ float(maxIndirectDrawCount))));
+            frameGraph.SetEstimatedItemCount(uint32_t(std::ceil(m_numObjects / float(maxIndirectDrawCount))));
         };
 
         RHI::EmptyCompileFunction<ScopeData> compileFunction;
 
-        const auto executeFunction = [this, maxIndirectDrawCount](const RHI::FrameGraphExecuteContext& context, [[maybe_unused]] const ScopeData& scopeData)
+        const auto executeFunction =
+            [this, maxIndirectDrawCount](const RHI::FrameGraphExecuteContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
             RHI::CommandList* commandList = context.GetCommandList();
 
@@ -828,14 +776,14 @@ namespace AtomSampleViewer
             commandList->SetViewports(&m_viewport, 1);
             commandList->SetScissors(&m_scissor, 1);
 
-            const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = { m_sceneShaderResourceGroup->GetRHIShaderResourceGroup() };
+            const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
+                m_sceneShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
+            };
 
             // In case multi indirect drawing is not supported
             // we need to emit multiple indirect draw calls.
             m_drawIndirect.m_countBufferByteOffset = 0;
-            for (uint32_t i = 0;
-                i < m_numObjects;
-                i += maxIndirectDrawCount, m_drawIndirect.m_countBufferByteOffset += sizeof(uint32_t))
+            for (uint32_t i = 0; i < m_numObjects; i += maxIndirectDrawCount, m_drawIndirect.m_countBufferByteOffset += sizeof(uint32_t))
             {
                 // Offset the indirect buffer depending on the number of indirect draw calls that we can do.
                 m_drawIndirect.m_maxSequenceCount = AZStd::min(m_numObjects - i, maxIndirectDrawCount);
@@ -843,13 +791,18 @@ namespace AtomSampleViewer
                 m_drawIndirect.m_indirectBufferView = &m_indirectDrawBufferView;
 
                 RHI::DeviceDrawItem drawItem;
-                drawItem.m_arguments = m_drawIndirect;
-                drawItem.m_pipelineState = m_drawPipelineState.get();
-                drawItem.m_indexBufferView = &m_indexBufferViews[0];
+                drawItem.m_arguments = m_drawIndirect.GetDeviceIndirectArguments(context.GetDeviceIndex());
+                drawItem.m_pipelineState = m_drawPipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
+                auto indexBufferView{ m_indexBufferViews[0].GetDeviceIndexBufferView(context.GetDeviceIndex()) };
+                drawItem.m_indexBufferView = &indexBufferView;
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
                 drawItem.m_streamBufferViewCount = 2;
-                drawItem.m_streamBufferViews = m_streamBufferViews.data();
+                AZStd::array<AZ::RHI::DeviceStreamBufferView, 2> streamBufferViews{
+                    m_streamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()),
+                    m_streamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())
+                };
+                drawItem.m_streamBufferViews = streamBufferViews.data();
 
                 // Submit the indirect draw item.
                 commandList->Submit(drawItem);
@@ -857,16 +810,8 @@ namespace AtomSampleViewer
         };
 
         m_scopeProducers.emplace_back(
-            aznew RHI::ScopeProducerFunction<
-            ScopeData,
-            decltype(prepareFunction),
-            decltype(compileFunction),
-            decltype(executeFunction)>(
-                RHI::ScopeId{ "IndirectDrawScope" },
-                ScopeData{},
-                prepareFunction,
-                compileFunction,
-                executeFunction));
+            aznew RHI::ScopeProducerFunction<ScopeData, decltype(prepareFunction), decltype(compileFunction), decltype(executeFunction)>(
+                RHI::ScopeId{ "IndirectDrawScope" }, ScopeData{}, prepareFunction, compileFunction, executeFunction));
     }
 
     void IndirectRenderingExampleComponent::Activate()
@@ -901,29 +846,46 @@ namespace AtomSampleViewer
 
         // List of all assets this example needs.
         AZStd::vector<AssetCollectionAsyncLoader::AssetToLoadInfo> assetList = {
-            {IndirectDrawShaderFilePath, azrtti_typeid<RPI::ShaderAsset>()},
-            {IndirectDispatchShaderFilePath, azrtti_typeid<RPI::ShaderAsset>()},
+            { IndirectDrawShaderFilePath, azrtti_typeid<RPI::ShaderAsset>() },
+            { IndirectDispatchShaderFilePath, azrtti_typeid<RPI::ShaderAsset>() },
         };
 
         // Configure the imgui progress list widget.
         auto onUserCancelledAction = [&]()
         {
-            //AZ_TracePrintf(AsyncCompute::sampleName, "Cancelled by user.\n");
+            // AZ_TracePrintf(AsyncCompute::sampleName, "Cancelled by user.\n");
             m_assetLoadManager->Cancel();
             SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequests::Reset);
         };
 
-        m_imguiProgressList.OpenPopup("Waiting For Assets...", "Assets pending for processing:", {}, onUserCancelledAction, true /*automaticallyCloseOnAction*/, "Cancel");
+        m_imguiProgressList.OpenPopup(
+            "Waiting For Assets...",
+            "Assets pending for processing:",
+            {},
+            onUserCancelledAction,
+            true /*automaticallyCloseOnAction*/,
+            "Cancel");
 
-        AZStd::for_each(assetList.begin(), assetList.end(),
-            [&](const AssetCollectionAsyncLoader::AssetToLoadInfo& item) { m_imguiProgressList.AddItem(item.m_assetPath); });
+        AZStd::for_each(
+            assetList.begin(),
+            assetList.end(),
+            [&](const AssetCollectionAsyncLoader::AssetToLoadInfo& item)
+            {
+                m_imguiProgressList.AddItem(item.m_assetPath);
+            });
         m_imguiProgressList.AddItem(IndirectDrawVariantLabel);
         m_imguiProgressList.AddItem(IndirectDispatchVariantLabel);
 
         // Kickoff asynchronous asset loading, the activation will continue once all assets are available.
-        m_assetLoadManager->LoadAssetsAsync(assetList, [&](AZStd::string_view assetName, [[maybe_unused]] bool success, size_t pendingAssetCount)
+        m_assetLoadManager->LoadAssetsAsync(
+            assetList,
+            [&](AZStd::string_view assetName, [[maybe_unused]] bool success, size_t pendingAssetCount)
             {
-                AZ_Error(LogName, success, "Error loading asset %s, a crash will occur when OnAllAssetsReadyActivate() is called!", assetName.data());
+                AZ_Error(
+                    LogName,
+                    success,
+                    "Error loading asset %s, a crash will occur when OnAllAssetsReadyActivate() is called!",
+                    assetName.data());
                 m_imguiProgressList.RemoveItem(assetName);
                 if (!pendingAssetCount && !m_doneLoadingShaders)
                 {
@@ -931,7 +893,6 @@ namespace AtomSampleViewer
                     InitRequestsForShaderVariants();
                 }
             });
-
     }
 
     void IndirectRenderingExampleComponent::OnAllAssetsReadyActivate()
@@ -1019,17 +980,19 @@ namespace AtomSampleViewer
             if (m_instancesData[i].m_offset.GetX() > offsetBounds)
             {
                 m_instancesData[i].m_offset.SetX(-offsetBounds);
-                m_instancesData[i].m_velocity.Set(GetRandomFloat(IndirectRendering::VelocityRange.GetX(), IndirectRendering::VelocityRange.GetY()));
+                m_instancesData[i].m_velocity.Set(
+                    GetRandomFloat(IndirectRendering::VelocityRange.GetX(), IndirectRendering::VelocityRange.GetY()));
             }
         }
 
-        RHI::DeviceBufferMapRequest request(*m_instancesDataBuffer, 0, sizeof(InstanceData) * m_numObjects);
-        RHI::DeviceBufferMapResponse response;
+        RHI::BufferMapRequest request(*m_instancesDataBuffer, 0, sizeof(InstanceData) * m_numObjects);
+        RHI::BufferMapResponse response;
 
         m_instancesBufferPool->MapBuffer(request, response);
-        if (response.m_data)
+        if (response.m_data.size())
         {
-            ::memcpy(response.m_data, m_instancesData.data(), request.m_byteCount);
+            for (auto& data : response.m_data)
+                ::memcpy(data, m_instancesData.data(), request.m_byteCount);
             m_instancesBufferPool->UnmapBuffer(*m_instancesDataBuffer);
         }
     }
@@ -1039,7 +1002,8 @@ namespace AtomSampleViewer
         if (m_sceneShaderResourceGroup)
         {
             float aspectRatio = width / float(height);
-            m_sceneShaderResourceGroup->SetConstant(m_sceneMatrixInputIndex, AZ::Matrix4x4::CreateScale(AZ::Vector3(1.f / aspectRatio, 1.f, 1.f)));
+            m_sceneShaderResourceGroup->SetConstant(
+                m_sceneMatrixInputIndex, AZ::Matrix4x4::CreateScale(AZ::Vector3(1.f / aspectRatio, 1.f, 1.f)));
             m_sceneShaderResourceGroup->Compile();
         }
     }
@@ -1063,8 +1027,9 @@ namespace AtomSampleViewer
             AZ::RPI::ShaderReloadNotificationBus::MultiHandler::BusConnect(m_indirectDrawShader->GetAsset().GetId());
             // We use a shader option to tell the shader if the object index must be read from the vertex input or an inline constant.
             m_indirectDrawShaderOptionGroup = m_indirectDrawShader->CreateShaderOptionGroup();
-            m_indirectDrawShaderOptionGroup.SetValue(AZ::Name("o_useRootConstants"), m_mode == SequenceType::IARootConstantsDraw ? AZ::Name("true") : AZ::Name("false"));
-            //Kickoff the asynchronous loading of the variant tree.
+            m_indirectDrawShaderOptionGroup.SetValue(
+                AZ::Name("o_useRootConstants"), m_mode == SequenceType::IARootConstantsDraw ? AZ::Name("true") : AZ::Name("false"));
+            // Kickoff the asynchronous loading of the variant tree.
             auto shaderVariant = m_indirectDrawShader->GetVariant(m_indirectDrawShaderOptionGroup.GetShaderVariantId());
             if (!shaderVariant.IsRootVariant())
             {
@@ -1082,8 +1047,9 @@ namespace AtomSampleViewer
             m_indirectDispatchShaderOptionGroup = m_indirectDispatchShader->CreateShaderOptionGroup();
             const char* optionValues[] = { "SequenceType::Draw", "SequenceType::IAInlineConstDraw" };
             m_indirectDispatchShaderOptionGroup.SetValue(AZ::Name("o_sequenceType"), AZ::Name(optionValues[static_cast<uint32_t>(m_mode)]));
-            m_indirectDispatchShaderOptionGroup.SetValue(AZ::Name("o_countBufferSupported"), m_deviceSupportsCountBuffer ? AZ::Name("true") : AZ::Name("false"));
-            //Kickoff the asynchronous loading of the variant tree.
+            m_indirectDispatchShaderOptionGroup.SetValue(
+                AZ::Name("o_countBufferSupported"), m_deviceSupportsCountBuffer ? AZ::Name("true") : AZ::Name("false"));
+            // Kickoff the asynchronous loading of the variant tree.
             auto shaderVariant = m_indirectDispatchShader->GetVariant(m_indirectDispatchShaderOptionGroup.GetShaderVariantId());
             if (!shaderVariant.IsRootVariant())
             {
@@ -1106,7 +1072,7 @@ namespace AtomSampleViewer
 
     void IndirectRenderingExampleComponent::OnShaderVariantReinitialized(const AZ::RPI::ShaderVariant& shaderVariant)
     {
-        //AZ_TracePrintf(LogName, "Got variant %s\n", shaderVariantAsset.GetHint().c_str());
+        // AZ_TracePrintf(LogName, "Got variant %s\n", shaderVariantAsset.GetHint().c_str());
         const AZ::Data::AssetId* shaderAssetId = AZ::RPI::ShaderReloadNotificationBus::GetCurrentBusId();
         if (*shaderAssetId == m_indirectDrawShader->GetAsset().GetId())
         {

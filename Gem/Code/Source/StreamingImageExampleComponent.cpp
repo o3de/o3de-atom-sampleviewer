@@ -50,12 +50,12 @@ namespace AtomSampleViewer
     void StreamingImageExampleComponent::PrepareRenderData()
     {
         const auto CreatePipeline = [](const char* shaderFilepath,
-            const char* srgName,
-            Data::Asset<AZ::RPI::ShaderAsset>& shaderAsset,
-            RHI::Ptr<AZ::RHI::ShaderResourceGroupLayout>& srgLayout,
-            RHI::ConstPtr<RHI::DevicePipelineState>& pipelineState,
-            RHI::DrawListTag& drawListTag,
-            RPI::Scene* scene)
+                                       const char* srgName,
+                                       Data::Asset<AZ::RPI::ShaderAsset>& shaderAsset,
+                                       RHI::Ptr<AZ::RHI::ShaderResourceGroupLayout>& srgLayout,
+                                       RHI::ConstPtr<RHI::PipelineState>& pipelineState,
+                                       RHI::DrawListTag& drawListTag,
+                                       RPI::Scene* scene)
         {
             // Since the shader is using SV_VertexID and SV_InstanceID as VS input, we won't need to have vertex buffer.
             // Also, the index buffer is not needed with DrawLinear.

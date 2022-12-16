@@ -9,7 +9,7 @@
 #pragma once
 
 #include <Atom/RHI.Reflect/Handle.h>
-#include <Atom/RHI/DevicePipelineState.h>
+#include <Atom/RHI/PipelineState.h>
 
 #include <Atom/RPI.Public/Model/ModelLod.h>
 #include <Atom/RPI.Public/Model/Model.h>
@@ -26,7 +26,7 @@ namespace AZ
 {
     namespace RHI
     {
-        class DeviceBufferView;
+        class BufferView;
     };
 };
 
@@ -56,7 +56,7 @@ namespace AtomSampleViewer
 
             AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> GetSrg(const AZStd::string srgName);
             void CompileSrg(const AZStd::string srgName);
-            bool SetBufferView(const AZStd::string srgName, const AZStd::string srgId, const AZ::RHI::DeviceBufferView* bufferView);
+            bool SetBufferView(const AZStd::string srgName, const AZStd::string srgId, const AZ::RHI::BufferView* bufferView);
 
         private:
             AZStd::unordered_map<AZ::Name, AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>> m_srgMap;
@@ -87,7 +87,7 @@ namespace AtomSampleViewer
         {
             static const uint32_t FloatSizeInBytes = static_cast<uint32_t>(sizeof(float));
         public:
-            FloatBuffer(AZ::RHI::Ptr<AZ::RHI::DeviceBufferPool> bufferPool, const uint32_t sizeInBytes);
+            FloatBuffer(AZ::RHI::Ptr<AZ::RHI::BufferPool> bufferPool, const uint32_t sizeInBytes);
             ~FloatBuffer();
 
             // Allocates data if the provided handle is empty, else it updates it
@@ -100,14 +100,14 @@ namespace AtomSampleViewer
             bool UpdateBuffer(const FloatBufferHandle& handle, const void* data, const uint32_t sizeInBytes);
 
             // Maps host data to the device
-            bool MapData(const AZ::RHI::DeviceBufferMapRequest& mapRequest, const void* data);
+            bool MapData(const AZ::RHI::BufferMapRequest& mapRequest, const void* data);
 
             // Create the buffer
             void CreateBufferFromPool(const uint32_t byteCount);
 
             // Buffer resource
-            AZ::RHI::Ptr<AZ::RHI::DeviceBufferPool> m_bufferPool = nullptr;
-            AZ::RHI::Ptr<AZ::RHI::DeviceBuffer> m_buffer = nullptr;
+            AZ::RHI::Ptr<AZ::RHI::BufferPool> m_bufferPool = nullptr;
+            AZ::RHI::Ptr<AZ::RHI::Buffer> m_buffer = nullptr;
 
             // Number of bytes that are allocated
             uint32_t m_allocatedInBytes = 0;
@@ -205,7 +205,7 @@ namespace AtomSampleViewer
         AZStd::vector<ObjectInterval> m_objectIntervalArray;
 
         // NOTE: Assume the same pipeline for every draw item
-        AZ::RHI::ConstPtr<AZ::RHI::DevicePipelineState> m_pipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_pipelineState;
 
         // Handle holding the world matrix
         FloatBufferHandle m_worldToClipHandle;
@@ -236,7 +236,7 @@ namespace AtomSampleViewer
         AZ::Data::Instance<AZ::RPI::Model> m_model = nullptr;
 
         // BufferPool used to allocate buffers in this example
-        AZ::RHI::Ptr<AZ::RHI::DeviceBufferPool> m_bufferPool = nullptr;
+        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_bufferPool = nullptr;
 
         // Pool size in bytes, 1MB
         static constexpr uint32_t m_poolSizeInBytes = 1u << 20u;

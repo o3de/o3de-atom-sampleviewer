@@ -13,8 +13,8 @@
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 
 #include <Atom/RHI.Reflect/SamplerState.h>
-#include <Atom/RHI/DeviceBufferPool.h>
-#include <Atom/RHI/DeviceDrawItem.h>
+#include <Atom/RHI/BufferPool.h>
+#include <Atom/RHI/DrawItem.h>
 
 #include <AzCore/Component/TickBus.h>
 
@@ -59,7 +59,7 @@ namespace AtomSampleViewer
 
 
         // ------------------- demo mode variables -------------------
-        AZ::RHI::ConstPtr<AZ::RHI::DevicePipelineState>        m_demoPipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_demoPipelineState;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_demoShaderResourceGroup;
 
         AZ::RHI::ShaderInputConstantIndex m_demoObjectMatrixInputIndex;
@@ -85,7 +85,7 @@ namespace AtomSampleViewer
 
 
         // ------------------- render mode variables -------------------
-        AZ::RHI::ConstPtr<AZ::RHI::DevicePipelineState>        m_renderPipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_renderPipelineState;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_renderShaderResourceGroup;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_viewShaderResourceGroup;
 
@@ -123,10 +123,10 @@ namespace AtomSampleViewer
 
 
         // ---------------- streaming buffer variables ----------------
-        AZ::RHI::Ptr<AZ::RHI::DeviceBufferPool> m_bufferPool;
-        AZ::RHI::Ptr<AZ::RHI::DeviceBuffer> m_indexBuffer;
-        AZ::RHI::Ptr<AZ::RHI::DeviceBuffer> m_positionBuffer;
-        AZ::RHI::Ptr<AZ::RHI::DeviceBuffer> m_uvBuffer;
+        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_bufferPool;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_indexBuffer;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_positionBuffer;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_uvBuffer;
 
         struct BufferData
         {
@@ -135,8 +135,8 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 6> m_indices;
         };
 
-        AZ::RHI::DeviceDrawItem m_drawItem;
-        AZStd::array<AZ::RHI::DeviceStreamBufferView, 2> m_streamBufferViews;
+        AZ::RHI::DrawItem m_drawItem;
+        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
         // ------------------------------------------------------------
 
         AZ::EntityId m_cameraEntityId;

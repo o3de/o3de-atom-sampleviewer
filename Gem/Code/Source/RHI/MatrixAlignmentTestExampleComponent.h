@@ -13,12 +13,11 @@
 
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 
-#include <Atom/RHI/Device.h>
-#include <Atom/RHI/DeviceBufferPool.h>
-#include <Atom/RHI/DeviceDrawItem.h>
+#include <Atom/RHI/BufferPool.h>
+#include <Atom/RHI/DrawItem.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/DevicePipelineState.h>
+#include <Atom/RHI/PipelineState.h>
 
 #include <RHI/BasicRHIComponent.h>
 
@@ -81,11 +80,10 @@ namespace AtomSampleViewer
             const AZ::RHI::ShaderInputConstantIndex& dataAfterMatrixConstantId,
             const AZ::RHI::ShaderInputConstantIndex& matrixConstantId);
 
+        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_inputAssemblyBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_inputAssemblyBuffer;
 
-        AZ::RHI::Ptr<AZ::RHI::DeviceBufferPool> m_inputAssemblyBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::DeviceBuffer> m_inputAssemblyBuffer;
-
-        AZ::RHI::ConstPtr<AZ::RHI::DevicePipelineState> m_pipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_pipelineState;
 
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_shaderResourceGroup;
 
@@ -176,8 +174,8 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 6> m_indices;
         };
 
-        AZStd::array<AZ::RHI::DeviceStreamBufferView, 2> m_streamBufferViews;
-        AZ::RHI::DeviceDrawItem m_drawItem;
+        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
+        AZ::RHI::DrawItem m_drawItem;
 
         // ImGui stuff.
         ImGuiSidebar m_imguiSidebar;

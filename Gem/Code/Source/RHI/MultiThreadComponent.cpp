@@ -9,7 +9,6 @@
 
 #include <AzCore/Math/MatrixUtils.h>
 
-#include <Atom/RHI/DeviceDrawItem.h>
 #include <Atom/RHI.Reflect/RenderAttachmentLayoutBuilder.h>
 #include <Atom/RPI.Public/Shader/Shader.h>
 #include <AzCore/Math/Random.h>
@@ -145,15 +144,14 @@ namespace AtomSampleViewer
     }
 
     void MultiThreadComponent::CreateInputAssemblyBuffer()
-    {       
-        const AZ::RHI::Ptr<AZ::RHI::Device> device = Utils::GetRHIDevice();
+    {
         AZ::RHI::ResultCode result = AZ::RHI::ResultCode::Success;
 
-        m_bufferPool = AZ::RHI::Factory::Get().CreateBufferPool();
+        m_bufferPool = aznew RHI::BufferPool();
         AZ::RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = AZ::RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = AZ::RHI::HeapMemoryLevel::Device;
-        result = m_bufferPool->Init(*device, bufferPoolDesc);
+        result = m_bufferPool->Init(RHI::AllDevices, bufferPoolDesc);
         if (result != AZ::RHI::ResultCode::Success)
         {
             AZ_Error("MultiThreadComponent", false, "Failed to initialize buffer pool with error code %d", result);
@@ -162,8 +160,8 @@ namespace AtomSampleViewer
 
         SingleCubeBufferData bufferData = CreateSingleCubeBufferData(AZ::Vector4(1.0f, 0.0f, 0.0f, 0.0f));
 
-        m_inputAssemblyBuffer = AZ::RHI::Factory::Get().CreateBuffer();
-        AZ::RHI::DeviceBufferInitRequest request;
+        m_inputAssemblyBuffer = aznew RHI::Buffer();
+        AZ::RHI::BufferInitRequest request;
 
         request.m_buffer = m_inputAssemblyBuffer.get();
         request.m_descriptor = AZ::RHI::BufferDescriptor{ AZ::RHI::BufferBindFlags::InputAssembly, sizeof(SingleCubeBufferData) };
@@ -206,7 +204,8 @@ namespace AtomSampleViewer
         m_streamLayoutDescriptor.Clear();
         m_streamLayoutDescriptor = layoutBuilder.End();
 
-        AZ::RHI::ValidateStreamBufferViews(m_streamLayoutDescriptor, m_streamBufferViews);
+        AZ::RHI::ValidateStreamBufferViews(
+            m_streamLayoutDescriptor, static_cast<AZStd::span<const RHI::StreamBufferView>>(m_streamBufferViews));
     }
 
     void MultiThreadComponent::CreatePipeline()
@@ -326,16 +325,23 @@ namespace AtomSampleViewer
             
             for (uint32_t i = context.GetSubmitRange().m_startIndex; i < context.GetSubmitRange().m_endIndex; ++i)
             {
-                const AZ::RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[i]->GetRHIShaderResourceGroup() };
+                const AZ::RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
+                    m_shaderResourceGroups[i]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
+                };
 
                 AZ::RHI::DeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
-                drawItem.m_pipelineState = m_pipelineState.get();
-                drawItem.m_indexBufferView = &m_indexBufferView;
+                drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
+                auto indexBufferView{ m_indexBufferView.GetDeviceIndexBufferView(context.GetDeviceIndex()) };
+                drawItem.m_indexBufferView = &indexBufferView;
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(AZ::RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
                 drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
-                drawItem.m_streamBufferViews = m_streamBufferViews.data();
+                AZStd::array<AZ::RHI::DeviceStreamBufferView, 2> streamBufferViews{
+                    m_streamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()),
+                    m_streamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())
+                };
+                drawItem.m_streamBufferViews = streamBufferViews.data();
 
                 commandList->Submit(drawItem, i);
             }

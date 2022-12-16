@@ -204,7 +204,7 @@ namespace AtomSampleViewer
 
     void BindlessPrototypeExampleComponent::CreateBufferPool()
     {
-        m_bufferPool = RHI::Factory::Get().CreateBufferPool();
+        m_bufferPool = aznew RHI::BufferPool();
         m_bufferPool->SetName(Name("BindlessBufferPool"));
 
         RHI::BufferPoolDescriptor bufferPoolDesc;
@@ -213,16 +213,15 @@ namespace AtomSampleViewer
         bufferPoolDesc.m_hostMemoryAccess = RHI::HostMemoryAccess::Write;
         bufferPoolDesc.m_budgetInBytes = m_poolSizeInBytes;
 
-        const RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
-        [[maybe_unused]] RHI::ResultCode resultCode = m_bufferPool->Init(*device, bufferPoolDesc);
+        [[maybe_unused]] RHI::ResultCode resultCode = m_bufferPool->Init(RHI::AllDevices, bufferPoolDesc);
         AZ_Assert(resultCode == RHI::ResultCode::Success, "Failed to create Material Buffer Pool");
     };
 
     void BindlessPrototypeExampleComponent::FloatBuffer::CreateBufferFromPool(const uint32_t byteCount)
     {
-        m_buffer = RHI::Factory::Get().CreateBuffer();
+        m_buffer = aznew RHI::Buffer();
         m_buffer->SetName(Name("FloatBuffer"));
-        RHI::DeviceBufferInitRequest bufferRequest;
+        RHI::BufferInitRequest bufferRequest;
         bufferRequest.m_descriptor.m_bindFlags = RHI::BufferBindFlags::ShaderRead;
         bufferRequest.m_descriptor.m_byteCount = byteCount;
         bufferRequest.m_buffer = m_buffer.get();
@@ -401,7 +400,7 @@ namespace AtomSampleViewer
             const uint32_t byteCount = m_bufferFloatCount * static_cast<uint32_t>(sizeof(float));
             m_floatBuffer = std::make_unique<FloatBuffer>(FloatBuffer(m_bufferPool, byteCount));
 
-            AZ::RHI::Ptr<AZ::RHI::DeviceBufferView> bufferView = RHI::Factory::Get().CreateBufferView();
+            AZ::RHI::Ptr<AZ::RHI::BufferView> bufferView = aznew RHI::BufferView();
             {
                 bufferView->SetName(Name(m_floatBufferSrgName));
                 RHI::BufferViewDescriptor bufferViewDesc = RHI::BufferViewDescriptor::CreateStructured(0u, m_bufferFloatCount, sizeof(float));
@@ -457,7 +456,7 @@ namespace AtomSampleViewer
             Data::Instance<AZ::RPI::ShaderResourceGroup> imageSrg = m_bindlessSrg->GetSrg(m_imageSrgName);
             AZ::RHI::ShaderInputImageUnboundedArrayIndex imageIndex = imageSrg->FindShaderInputImageUnboundedArrayIndex(AZ::Name(textureArrayId));
 
-            AZStd::vector<const RHI::DeviceImageView*> imageViews;
+            AZStd::vector<const RHI::ImageView*> imageViews;
             for (uint32_t textureIdx = 0u; textureIdx < InternalBP::ImageCount; textureIdx++)
             {
                 AZ::Data::Instance<AZ::RPI::StreamingImage> image = LoadStreamingImage(InternalBP::Images[textureIdx], InternalBP::SampleName);
@@ -564,18 +563,28 @@ namespace AtomSampleViewer
                     const SubMeshInstance& subMesh = m_subMeshInstanceArray[instanceIdx];
 
                     const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
-                        subMesh.m_perSubMeshSrg->GetRHIShaderResourceGroup(),
-                        m_bindlessSrg->GetSrg(m_imageSrgName)->GetRHIShaderResourceGroup(),
-                        m_bindlessSrg->GetSrg(m_floatBufferSrgName)->GetRHIShaderResourceGroup(),
+                        subMesh.m_perSubMeshSrg->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get(),
+                        m_bindlessSrg->GetSrg(m_imageSrgName)
+                            ->GetRHIShaderResourceGroup()
+                            ->GetDeviceShaderResourceGroup(context.GetDeviceIndex())
+                            .get(),
+                        m_bindlessSrg->GetSrg(m_floatBufferSrgName)
+                            ->GetRHIShaderResourceGroup()
+                            ->GetDeviceShaderResourceGroup(context.GetDeviceIndex())
+                            .get(),
                     };
                     RHI::DeviceDrawItem drawItem;
-                    drawItem.m_arguments = subMesh.m_mesh->m_drawArguments;
-                    drawItem.m_pipelineState = m_pipelineState.get();
-                    drawItem.m_indexBufferView = &subMesh.m_mesh->m_indexBufferView;
+                    drawItem.m_arguments = subMesh.m_mesh->m_drawArguments.GetDeviceDrawArguments(context.GetDeviceIndex());
+                    drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
+                    auto indexBufferView{ subMesh.m_mesh->m_indexBufferView.GetDeviceIndexBufferView(context.GetDeviceIndex()) };
+                    drawItem.m_indexBufferView = &indexBufferView;
                     drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                     drawItem.m_shaderResourceGroups = shaderResourceGroups;
                     drawItem.m_streamBufferViewCount = static_cast<uint8_t>(subMesh.bufferStreamViewArray.size());
-                    drawItem.m_streamBufferViews = subMesh.bufferStreamViewArray.data();
+                    AZStd::fixed_vector<RHI::DeviceStreamBufferView, RHI::Limits::Pipeline::StreamCountMax> bufferStreamViewArray;
+                    for (const auto& viewArray : subMesh.bufferStreamViewArray)
+                        bufferStreamViewArray.emplace_back(viewArray.GetDeviceStreamBufferView(context.GetDeviceIndex()));
+                    drawItem.m_streamBufferViews = bufferStreamViewArray.data();
 
                     // Submit the triangle draw item.
                     commandList->Submit(drawItem, instanceIdx);
@@ -709,7 +718,8 @@ namespace AtomSampleViewer
         srg->Compile();
     }
 
-    bool BindlessPrototypeExampleComponent::BindlessSrg::SetBufferView(const AZStd::string srgName, const AZStd::string srgId, const AZ::RHI::DeviceBufferView* bufferView)
+    bool BindlessPrototypeExampleComponent::BindlessSrg::SetBufferView(
+        const AZStd::string srgName, const AZStd::string srgId, const AZ::RHI::BufferView* bufferView)
     {
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> srg = GetSrg(srgName);
         const AZ::RHI::ShaderInputBufferIndex inputIndex = srg->FindShaderInputBufferIndex(AZ::Name(srgId));
@@ -719,7 +729,7 @@ namespace AtomSampleViewer
         return false;
     }
 
-    BindlessPrototypeExampleComponent::FloatBuffer::FloatBuffer(RHI::Ptr<RHI::DeviceBufferPool> bufferPool, const uint32_t sizeInBytes)
+    BindlessPrototypeExampleComponent::FloatBuffer::FloatBuffer(RHI::Ptr<RHI::BufferPool> bufferPool, const uint32_t sizeInBytes)
     {
         m_bufferPool = bufferPool;
 
@@ -757,7 +767,7 @@ namespace AtomSampleViewer
         const uint32_t alignedDataSize = RHI::AlignUp(sizeInBytes, FloatSizeInBytes);
         AZ_Assert(m_allocatedInBytes + alignedDataSize < m_totalSizeInBytes, "Allocating too much data in the FLoatBuffer");
 
-        const RHI::DeviceBufferMapRequest mapRequest(*m_buffer, m_allocatedInBytes, sizeInBytes);
+        const RHI::BufferMapRequest mapRequest(*m_buffer, m_allocatedInBytes, sizeInBytes);
         MapData(mapRequest, data);
 
         // Create the handle
@@ -772,19 +782,20 @@ namespace AtomSampleViewer
 
     bool BindlessPrototypeExampleComponent::FloatBuffer::UpdateBuffer(const FloatBufferHandle& handle, const void* data, const uint32_t sizeInBytes)
     {
-        const RHI::DeviceBufferMapRequest mapRequest(*m_buffer, handle.GetIndex() * FloatSizeInBytes, sizeInBytes);
+        const RHI::BufferMapRequest mapRequest(*m_buffer, handle.GetIndex() * FloatSizeInBytes, sizeInBytes);
         return MapData(mapRequest, data);
     }
 
-    bool BindlessPrototypeExampleComponent::FloatBuffer::MapData(const RHI::DeviceBufferMapRequest& mapRequest, const void* data)
+    bool BindlessPrototypeExampleComponent::FloatBuffer::MapData(const RHI::BufferMapRequest& mapRequest, const void* data)
     {
-        RHI::DeviceBufferMapResponse response;
+        RHI::BufferMapResponse response;
         [[maybe_unused]] RHI::ResultCode result = m_bufferPool->MapBuffer(mapRequest, response);
         // ResultCode::Unimplemented is used by Null Renderer and hence is a valid use case
         AZ_Assert(result == RHI::ResultCode::Success || result == RHI::ResultCode::Unimplemented, "Failed to map object buffer]");
-        if (response.m_data)
+        if (response.m_data.size())
         {
-            memcpy(response.m_data, data, mapRequest.m_byteCount);
+            for(auto& responseData : response.m_data)
+                memcpy(responseData, data, mapRequest.m_byteCount);
             m_bufferPool->UnmapBuffer(*m_buffer);
             return true;
         }

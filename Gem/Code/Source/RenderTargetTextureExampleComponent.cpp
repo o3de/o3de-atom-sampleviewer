@@ -10,7 +10,6 @@
 
 #include <Atom/Component/DebugCamera/NoClipControllerComponent.h>
 
-#include <Atom/RHI/Device.h>
 #include <Atom/RHI/Factory.h>
 
 #include <Atom/RPI.Public/DynamicDraw/DynamicDrawInterface.h>

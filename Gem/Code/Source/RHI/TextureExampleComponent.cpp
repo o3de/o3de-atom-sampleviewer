@@ -11,13 +11,13 @@
 
 #include <SampleComponentManager.h>
 
-#include <Atom/RHI/Factory.h>
-#include <Atom/RHI/CommandList.h>
-#include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/DeviceImage.h>
-#include <Atom/RHI/DeviceImagePool.h>
 #include <Atom/RHI.Reflect/InputStreamLayoutBuilder.h>
 #include <Atom/RHI.Reflect/RenderAttachmentLayoutBuilder.h>
+#include <Atom/RHI/CommandList.h>
+#include <Atom/RHI/Factory.h>
+#include <Atom/RHI/FrameScheduler.h>
+#include <Atom/RHI/Image.h>
+#include <Atom/RHI/ImagePool.h>
 
 #include <Atom/RPI.Public/Image/ImageSystemInterface.h>
 #include <Atom/RPI.Public/Image/StreamingImagePool.h>
@@ -48,8 +48,6 @@ namespace AtomSampleViewer
     {
         using namespace AZ;
 
-        const RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
-
         BufferData bufferData;
         const auto positionBufSize = static_cast<uint32_t>(bufferData.m_positions.size() * sizeof(VertexPosition));
         const auto indexBufSize = static_cast<uint32_t>(bufferData.m_indices.size() * sizeof(uint16_t));
@@ -58,21 +56,21 @@ namespace AtomSampleViewer
         AZ::RHI::PipelineStateDescriptorForDraw pipelineStateDescriptor;
 
         {
-            m_bufferPool = RHI::Factory::Get().CreateBufferPool();
+            m_bufferPool = aznew RHI::BufferPool();
 
             RHI::BufferPoolDescriptor bufferPoolDesc;
             bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
             bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-            m_bufferPool->Init(*device, bufferPoolDesc);
+            m_bufferPool->Init(RHI::AllDevices, bufferPoolDesc);
 
             SetFullScreenRect(bufferData.m_positions.data(), bufferData.m_uvs.data(), bufferData.m_indices.data());
 
-            m_positionBuffer = RHI::Factory::Get().CreateBuffer();
-            m_indexBuffer = RHI::Factory::Get().CreateBuffer();
-            m_uvBuffer = RHI::Factory::Get().CreateBuffer();
+            m_positionBuffer = aznew RHI::Buffer();
+            m_indexBuffer = aznew RHI::Buffer();
+            m_uvBuffer = aznew RHI::Buffer();
 
             RHI::ResultCode result = RHI::ResultCode::Success;
-            RHI::DeviceBufferInitRequest request;
+            RHI::BufferInitRequest request;
 
             request.m_buffer = m_positionBuffer.get();
             request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, positionBufSize };
@@ -126,7 +124,8 @@ namespace AtomSampleViewer
             layoutBuilder.AddBuffer()->Channel("UV", RHI::Format::R32G32_FLOAT);
             pipelineStateDescriptor.m_inputStreamLayout = layoutBuilder.End();
 
-            RHI::ValidateStreamBufferViews(pipelineStateDescriptor.m_inputStreamLayout, m_streamBufferViews);
+            RHI::ValidateStreamBufferViews(
+                pipelineStateDescriptor.m_inputStreamLayout, static_cast<AZStd::span<const RHI::StreamBufferView>>((m_streamBufferViews)));
         }
 
         {
@@ -226,28 +225,30 @@ namespace AtomSampleViewer
                 commandList->SetViewports(&m_viewport, 1);
                 commandList->SetScissors(&m_scissor, 1);
 
-                const RHI::DeviceIndexBufferView indexBufferView =
-                {
-                    *m_indexBuffer,
-                    0,
-                    indexBufSize,
-                    RHI::IndexFormat::Uint16
+                const RHI::DeviceIndexBufferView indexBufferView = {
+                    *m_indexBuffer->GetDeviceBuffer(context.GetDeviceIndex()), 0, indexBufSize, RHI::IndexFormat::Uint16
                 };
 
                 RHI::DrawIndexed drawIndexed;
                 drawIndexed.m_indexCount = 6;
                 drawIndexed.m_instanceCount = 1;
 
-                const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroup->GetRHIShaderResourceGroup() };
+                const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
+                    m_shaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
+                };
 
                 RHI::DeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
-                drawItem.m_pipelineState = m_pipelineState.get();
+                drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
                 drawItem.m_indexBufferView = &indexBufferView;
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
                 drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
-                drawItem.m_streamBufferViews = m_streamBufferViews.data();
+                AZStd::array<AZ::RHI::DeviceStreamBufferView, 2> streamBufferViews{
+                    m_streamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()),
+                    m_streamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())
+                };
+                drawItem.m_streamBufferViews = streamBufferViews.data();
 
                 commandList->Submit(drawItem);
             };

@@ -7,9 +7,6 @@
  */
 #pragma once
 
-#include <Atom/RHI/Device.h>
-#include <Atom/RHI/DevicePipelineState.h>
-
 #include <Atom/RPI.Public/Base.h>
 #include <Atom/RPI.Public/Image/StreamingImage.h>
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>

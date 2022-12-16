@@ -13,8 +13,8 @@
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 
 #include <Atom/RHI.Reflect/SamplerState.h>
-#include <Atom/RHI/DeviceBufferPool.h>
-#include <Atom/RHI/DeviceDrawItem.h>
+#include <Atom/RHI/BufferPool.h>
+#include <Atom/RHI/DrawItem.h>
 
 #include <AzCore/Component/TickBus.h>
 
@@ -49,11 +49,11 @@ namespace AtomSampleViewer
         AZ::RHI::ImageSubresourceLayout m_imageLayout;
 
         // Rendering resources
-        AZ::RHI::Ptr<AZ::RHI::DeviceImagePool> m_imagePool = nullptr;
-        AZ::Data::Instance<AZ::RHI::DeviceImage> m_image = nullptr;
-        AZ::RHI::Ptr<AZ::RHI::DeviceImageView> m_imageView = nullptr;
+        AZ::RHI::Ptr<AZ::RHI::ImagePool> m_imagePool = nullptr;
+        AZ::Data::Instance<AZ::RHI::Image> m_image = nullptr;
+        AZ::RHI::Ptr<AZ::RHI::ImageView> m_imageView = nullptr;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_shaderResourceGroup = nullptr;
-        AZ::RHI::ConstPtr<AZ::RHI::DevicePipelineState> m_pipelineState = nullptr;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_pipelineState = nullptr;
 
         // Shader Input indices
         AZ::RHI::ShaderInputImageIndex m_texture3dInputIndex;

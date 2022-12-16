@@ -8,16 +8,15 @@
 
 #pragma once
 
-#include <Atom/RHI/Device.h>
-#include <Atom/RHI/DeviceBufferPool.h>
-#include <Atom/RHI/DeviceDispatchRaysItem.h>
-#include <Atom/RHI/DevicePipelineState.h>
-#include <Atom/RHI/DeviceRayTracingAccelerationStructure.h>
-#include <Atom/RHI/DeviceRayTracingBufferPools.h>
-#include <Atom/RHI/DeviceRayTracingPipelineState.h>
-#include <Atom/RHI/DeviceRayTracingShaderTable.h>
+#include <Atom/RHI/BufferPool.h>
+#include <Atom/RHI/DispatchRaysItem.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/FrameScheduler.h>
+#include <Atom/RHI/PipelineState.h>
+#include <Atom/RHI/RayTracingAccelerationStructure.h>
+#include <Atom/RHI/RayTracingBufferPools.h>
+#include <Atom/RHI/RayTracingPipelineState.h>
+#include <Atom/RHI/RayTracingShaderTable.h>
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 #include <AzCore/Component/Component.h>
 #include <AzCore/Math/Matrix4x4.h>
@@ -65,28 +64,28 @@ namespace AtomSampleViewer
         static const uint32_t m_imageHeight = 1080;
 
         // resource pools
-        RHI::Ptr<RHI::DeviceBufferPool> m_inputAssemblyBufferPool;
-        RHI::Ptr<RHI::DeviceImagePool> m_imagePool;
-        RHI::Ptr<RHI::DeviceRayTracingBufferPools> m_rayTracingBufferPools;
+        RHI::Ptr<RHI::BufferPool> m_inputAssemblyBufferPool;
+        RHI::Ptr<RHI::ImagePool> m_imagePool;
+        RHI::Ptr<RHI::RayTracingBufferPools> m_rayTracingBufferPools;
 
         // triangle vertex/index buffers
         AZStd::array<VertexPosition, 3> m_triangleVertices;
         AZStd::array<uint16_t, 3> m_triangleIndices;
 
-        RHI::Ptr<RHI::DeviceBuffer> m_triangleVB;
-        RHI::Ptr<RHI::DeviceBuffer> m_triangleIB;
+        RHI::Ptr<RHI::Buffer> m_triangleVB;
+        RHI::Ptr<RHI::Buffer> m_triangleIB;
 
         // rectangle vertex/index buffers
         AZStd::array<VertexPosition, 4> m_rectangleVertices;
         AZStd::array<uint16_t, 6> m_rectangleIndices;
 
-        RHI::Ptr<RHI::DeviceBuffer> m_rectangleVB;
-        RHI::Ptr<RHI::DeviceBuffer> m_rectangleIB;
+        RHI::Ptr<RHI::Buffer> m_rectangleVB;
+        RHI::Ptr<RHI::Buffer> m_rectangleIB;
 
         // ray tracing acceleration structures
-        RHI::Ptr<RHI::DeviceRayTracingBlas> m_triangleRayTracingBlas;
-        RHI::Ptr<RHI::DeviceRayTracingBlas> m_rectangleRayTracingBlas;
-        RHI::Ptr<RHI::DeviceRayTracingTlas> m_rayTracingTlas;
+        RHI::Ptr<RHI::RayTracingBlas> m_triangleRayTracingBlas;
+        RHI::Ptr<RHI::RayTracingBlas> m_rectangleRayTracingBlas;
+        RHI::Ptr<RHI::RayTracingTlas> m_rayTracingTlas;
         RHI::BufferViewDescriptor m_tlasBufferViewDescriptor;
         RHI::AttachmentId m_tlasBufferAttachmentId = RHI::AttachmentId("tlasBufferAttachmentId");
 
@@ -97,14 +96,14 @@ namespace AtomSampleViewer
         Data::Instance<RPI::Shader> m_closestHitSolidShader;
 
         // ray tracing pipeline state
-        RHI::Ptr<RHI::DeviceRayTracingPipelineState> m_rayTracingPipelineState;
+        RHI::Ptr<RHI::RayTracingPipelineState> m_rayTracingPipelineState;
 
         // ray tracing shader table
-        RHI::Ptr<RHI::DeviceRayTracingShaderTable> m_rayTracingShaderTable;
+        RHI::Ptr<RHI::RayTracingShaderTable> m_rayTracingShaderTable;
 
         // ray tracing global shader resource group and pipeline state
         Data::Instance<RPI::ShaderResourceGroup> m_globalSrg;
-        RHI::ConstPtr<RHI::DevicePipelineState> m_globalPipelineState;
+        RHI::ConstPtr<RHI::PipelineState> m_globalPipelineState;
 
         // ray tracing local shader resource groups, one for each object in the scene
         enum LocalSrgs
@@ -119,8 +118,8 @@ namespace AtomSampleViewer
         bool m_buildLocalSrgs = true;
 
         // output image, written to by the ray tracing shader and displayed in the fullscreen draw shader
-        RHI::Ptr<RHI::DeviceImage> m_outputImage;
-        RHI::Ptr<RHI::DeviceImageView> m_outputImageView;
+        RHI::Ptr<RHI::Image> m_outputImage;
+        RHI::Ptr<RHI::ImageView> m_outputImageView;
         RHI::ImageViewDescriptor m_outputImageViewDescriptor;
         RHI::AttachmentId m_outputImageAttachmentId = RHI::AttachmentId("outputImageAttachmentId");
 
@@ -132,15 +131,15 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 6> m_indices;
         };
 
-        RHI::Ptr<RHI::DeviceBuffer> m_fullScreenInputAssemblyBuffer;
-        AZStd::array<RHI::DeviceStreamBufferView, 2> m_fullScreenStreamBufferViews;
-        RHI::DeviceIndexBufferView m_fullScreenIndexBufferView;
+        RHI::Ptr<RHI::Buffer> m_fullScreenInputAssemblyBuffer;
+        AZStd::array<RHI::StreamBufferView, 2> m_fullScreenStreamBufferViews;
+        RHI::IndexBufferView m_fullScreenIndexBufferView;
         RHI::InputStreamLayout m_fullScreenInputStreamLayout;
 
-        RHI::ConstPtr<RHI::DevicePipelineState> m_drawPipelineState;
+        RHI::ConstPtr<RHI::PipelineState> m_drawPipelineState;
         Data::Instance<RPI::ShaderResourceGroup> m_drawSRG;
         RHI::ShaderInputConstantIndex m_drawDimensionConstantIndex;
-        RHI::DeviceDrawItem m_drawItem;
+        RHI::DrawItem m_drawItem;
 
         // time variable for moving the triangles and rectangle each frame
         float m_time = 0.0f;

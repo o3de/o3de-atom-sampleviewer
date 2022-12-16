@@ -58,8 +58,7 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 6> m_indices;
         };
 
-        RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
-        m_inputAssemblyBufferPool = RHI::Factory::Get().CreateBufferPool();
+        m_inputAssemblyBufferPool = aznew RHI::BufferPool();
 
         // Load the shader
         {
@@ -132,11 +131,11 @@ namespace AtomSampleViewer
             RHI::BufferPoolDescriptor bufferPoolDesc;
             bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
             bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-            m_inputAssemblyBufferPool->Init(*device, bufferPoolDesc);
-            m_rectangleInputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
+            m_inputAssemblyBufferPool->Init(RHI::AllDevices, bufferPoolDesc);
+            m_rectangleInputAssemblyBuffer = aznew RHI::Buffer();
 
             RHI::ResultCode result = RHI::ResultCode::Success;
-            RHI::DeviceBufferInitRequest request;
+            RHI::BufferInitRequest request;
             request.m_buffer = m_rectangleInputAssemblyBuffer.get();
             request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, sizeof(bufferData) };
             request.m_initialData = &bufferData;
@@ -161,7 +160,8 @@ namespace AtomSampleViewer
                 sizeof(VertexUV)
             };
 
-            RHI::ValidateStreamBufferViews(m_rectangleInputStreamLayout, m_rectangleStreamBufferViews);
+            RHI::ValidateStreamBufferViews(
+                m_rectangleInputStreamLayout, static_cast<AZStd::span<const AZ::RHI::StreamBufferView>>(m_rectangleStreamBufferViews));
         }
 
         // Creates a scope for rendering the triangle.
@@ -205,29 +205,33 @@ namespace AtomSampleViewer
                 commandList->SetViewports(&viewport, 1u);
                 commandList->SetScissors(&m_scissor, 1u);
 
-                const RHI::DeviceIndexBufferView indexBufferView =
-                {
-                    *m_rectangleInputAssemblyBuffer,
-                    offsetof(RectangleBufferData, m_indices),
-                    sizeof(RectangleBufferData::m_indices),
-                    RHI::IndexFormat::Uint16
-                };
+                const RHI::DeviceIndexBufferView indexBufferView = { *m_rectangleInputAssemblyBuffer->GetDeviceBuffer(
+                                                                         context.GetDeviceIndex()),
+                                                                     offsetof(RectangleBufferData, m_indices),
+                                                                     sizeof(RectangleBufferData::m_indices),
+                                                                     RHI::IndexFormat::Uint16 };
 
                 RHI::DrawIndexed drawIndexed;
                 drawIndexed.m_indexCount = 6u;
                 drawIndexed.m_instanceCount = 1u;
 
                 const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
-                    m_textureArraySrg->GetRHIShaderResourceGroup(), m_textureIndexSrg->GetRHIShaderResourceGroup() };
+                    m_textureArraySrg->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get(),
+                    m_textureIndexSrg->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
+                };
 
                 RHI::DeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
-                drawItem.m_pipelineState = m_pipelineState.get();
+                drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
                 drawItem.m_indexBufferView = &indexBufferView;
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
                 drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_rectangleStreamBufferViews.size());
-                drawItem.m_streamBufferViews = m_rectangleStreamBufferViews.data();
+                AZStd::array<AZ::RHI::DeviceStreamBufferView, 2> rectangleStreamBufferViews{
+                    m_rectangleStreamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()),
+                    m_rectangleStreamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())
+                };
+                drawItem.m_streamBufferViews = rectangleStreamBufferViews.data();
 
                 // Submit the triangle draw item.
                 commandList->Submit(drawItem);

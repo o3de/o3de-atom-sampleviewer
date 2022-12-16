@@ -16,12 +16,11 @@
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 #include <Atom/RPI.Public/WindowContext.h>
 
-#include <Atom/RHI/Device.h>
-#include <Atom/RHI/DeviceBufferPool.h>
-#include <Atom/RHI/DeviceDrawItem.h>
+#include <Atom/RHI/BufferPool.h>
+#include <Atom/RHI/DrawItem.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/DevicePipelineState.h>
+#include <Atom/RHI/PipelineState.h>
 #include <Atom/RHI/ScopeProducer.h>
 
 #include <AzCore/Math/Matrix4x4.h>
@@ -91,22 +90,22 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 3> m_indices;
         };
 
-        AZ::RHI::Ptr<AZ::RHI::DeviceBufferPool> m_inputAssemblyBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::DeviceBuffer> m_inputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_inputAssemblyBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_inputAssemblyBuffer;
 
-        AZStd::array<AZ::RHI::DeviceStreamBufferView, 2> m_streamBufferViews;
-        AZ::RHI::DeviceIndexBufferView m_indexBufferView;
+        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
+        AZ::RHI::IndexBufferView m_indexBufferView;
 
-        AZ::RHI::Ptr<AZ::RHI::DeviceBufferPool> m_constantBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_constantBufferPool;
 
-        AZ::RHI::Ptr<AZ::RHI::DeviceBuffer> m_constantBuffer;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_constantBuffer;
 
-        AZ::RHI::Ptr<AZ::RHI::DeviceBufferView> m_constantBufferView;
+        AZ::RHI::Ptr<AZ::RHI::BufferView> m_constantBufferView;
 
         // --------------------------------------------------------
         // Pipeline state and SRG to be constructed from the shader
         // --------------------------------------------------------
-        AZ::RHI::ConstPtr<AZ::RHI::DevicePipelineState> m_pipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_pipelineState;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_shaderResourceGroup;
     };
 } // namespace AtomSampleViewer

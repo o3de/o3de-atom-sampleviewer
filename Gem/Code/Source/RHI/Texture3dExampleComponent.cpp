@@ -11,13 +11,13 @@
 
 #include <SampleComponentManager.h>
 
-#include <Atom/RHI/Factory.h>
-#include <Atom/RHI/CommandList.h>
-#include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/DeviceImage.h>
-#include <Atom/RHI/DeviceImagePool.h>
 #include <Atom/RHI.Reflect/InputStreamLayoutBuilder.h>
 #include <Atom/RHI.Reflect/RenderAttachmentLayoutBuilder.h>
+#include <Atom/RHI/CommandList.h>
+#include <Atom/RHI/Factory.h>
+#include <Atom/RHI/FrameScheduler.h>
+#include <Atom/RHI/Image.h>
+#include <Atom/RHI/ImagePool.h>
 
 #include <Atom/RPI.Public/Image/ImageSystemInterface.h>
 #include <Atom/RPI.Public/Image/StreamingImagePool.h>
@@ -48,8 +48,6 @@ namespace AtomSampleViewer
     {
         using namespace AZ;
 
-        const RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
-
         // Get the window size
         AzFramework::NativeWindowHandle windowHandle = nullptr;
         AzFramework::WindowSystemRequestBus::BroadcastResult(
@@ -62,8 +60,7 @@ namespace AtomSampleViewer
 
         // Create image pool
         {
-            AZ::RHI::Factory& factory = RHI::Factory::Get();
-            m_imagePool = factory.CreateImagePool();
+            m_imagePool = aznew RHI::ImagePool();
             m_imagePool->SetName(Name("Texture3DPool"));
 
             RHI::ImagePoolDescriptor imagePoolDesc = {};
@@ -71,7 +68,7 @@ namespace AtomSampleViewer
             const uint64_t imagePoolBudget = 1 << 24; // 16 Megabyte
             imagePoolDesc.m_budgetInBytes = imagePoolBudget;
 
-            const RHI::ResultCode resultCode = m_imagePool->Init(*device, imagePoolDesc);
+            const RHI::ResultCode resultCode = m_imagePool->Init(RHI::AllDevices, imagePoolDesc);
             if (resultCode != RHI::ResultCode::Success)
             {
                 AZ_Error("Texture3dExampleComponent", false, "Failed to initialize image pool.");
@@ -93,10 +90,10 @@ namespace AtomSampleViewer
                                                             "textures/streaming/streaming19.dds.streamingimage" });
 
             // Create the image resource
-            m_image = RHI::Factory::Get().CreateImage();
+            m_image = aznew RHI::Image();
             m_image->SetName(Name("Texture3D"));
 
-            RHI::DeviceImageInitRequest imageRequest;
+            RHI::ImageInitRequest imageRequest;
             imageRequest.m_image = m_image.get();
             imageRequest.m_descriptor = RHI::ImageDescriptor::Create3D(RHI::ImageBindFlags::ShaderRead, m_imageLayout.m_size.m_width, m_imageLayout.m_size.m_height, m_imageLayout.m_size.m_depth, format);
             RHI::ResultCode resultCode = m_imagePool->InitImage(imageRequest);
@@ -120,11 +117,11 @@ namespace AtomSampleViewer
             }
 
             // Update/stage the image with data
-            RHI::DeviceImageSubresourceLayoutPlaced imageSubresourceLayout;
+            RHI::ImageSubresourceLayoutPlaced imageSubresourceLayout;
             RHI::ImageSubresourceRange range(0, 0, 0, 0);
-            m_image->GetSubresourceLayouts(range, &imageSubresourceLayout, nullptr);
+            m_image->GetSubresourceLayout(imageSubresourceLayout);
 
-            RHI::DeviceImageUpdateRequest updateRequest;
+            RHI::ImageUpdateRequest updateRequest;
             updateRequest.m_image = m_image.get();
             updateRequest.m_sourceSubresourceLayout = imageSubresourceLayout;
             updateRequest.m_sourceData = imageData.data();
@@ -220,12 +217,14 @@ namespace AtomSampleViewer
                 drawIndexed.m_vertexCount = 4;
                 drawIndexed.m_instanceCount = 1;
 
-                const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroup->GetRHIShaderResourceGroup() };
+                const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
+                    m_shaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
+                };
 
                 // Create the draw item
                 RHI::DeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
-                drawItem.m_pipelineState = m_pipelineState.get();
+                drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
                 drawItem.m_indexBufferView = nullptr;
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;

@@ -11,7 +11,6 @@
 #include <Atom/Component/DebugCamera/ArcBallControllerComponent.h>
 #include <Atom/Component/DebugCamera/NoClipControllerComponent.h>
 #include <Atom/Feature/CoreLights/PhotometricValue.h>
-#include <Atom/RHI/Device.h>
 #include <Atom/RHI/Factory.h>
 
 #include <Atom/RPI.Public/View.h>

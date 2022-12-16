@@ -8,12 +8,12 @@
 
 #include <ReadbackExampleComponent.h>
 
-#include <Atom/RPI.Public/Scene.h>
-#include <Atom/RPI.Public/RenderPipeline.h>
-#include <Atom/RPI.Public/Pass/FullscreenTrianglePass.h>
-#include <Atom/RPI.Public/Image/ImageSystemInterface.h>
 #include <Atom/RPI.Public/Image/AttachmentImagePool.h>
+#include <Atom/RPI.Public/Image/ImageSystemInterface.h>
+#include <Atom/RPI.Public/Pass/FullscreenTrianglePass.h>
 #include <Atom/RPI.Public/RPIUtils.h>
+#include <Atom/RPI.Public/RenderPipeline.h>
+#include <Atom/RPI.Public/Scene.h>
 
 #include <Atom/RPI.Reflect/Asset/AssetUtils.h>
 #include <Atom/RPI.Reflect/Pass/FullscreenTrianglePassData.h>
@@ -73,8 +73,10 @@ namespace AtomSampleViewer
         {
             UploadReadbackResult();
 
-            AZ_Error("ReadbackExample", m_resourceWidth == m_readbackStat.m_descriptor.m_size.m_width, "Incorrect resource width read back.");
-            AZ_Error("ReadbackExample", m_resourceHeight == m_readbackStat.m_descriptor.m_size.m_height, "Incorrect resource height read back.");
+            AZ_Error(
+                "ReadbackExample", m_resourceWidth == m_readbackStat.m_descriptor.m_size.m_width, "Incorrect resource width read back.");
+            AZ_Error(
+                "ReadbackExample", m_resourceHeight == m_readbackStat.m_descriptor.m_size.m_height, "Incorrect resource height read back.");
 
             m_textureNeedsUpdate = false;
         }
@@ -84,7 +86,8 @@ namespace AtomSampleViewer
 
     void ReadbackExampleComponent::DefaultWindowCreated()
     {
-        AZ::Render::Bootstrap::DefaultWindowBus::BroadcastResult(m_windowContext, &AZ::Render::Bootstrap::DefaultWindowBus::Events::GetDefaultWindowContext);
+        AZ::Render::Bootstrap::DefaultWindowBus::BroadcastResult(
+            m_windowContext, &AZ::Render::Bootstrap::DefaultWindowBus::Events::GetDefaultWindowContext);
     }
 
     void ReadbackExampleComponent::CreatePipeline()
@@ -163,8 +166,11 @@ namespace AtomSampleViewer
         // Load the shader
         AZ::Data::AssetId shaderAssetId;
         AZ::Data::AssetCatalogRequestBus::BroadcastResult(
-            shaderAssetId, &AZ::Data::AssetCatalogRequestBus::Events::GetAssetIdByPath,
-            s_fillerShaderPath, azrtti_typeid<AZ::RPI::ShaderAsset>(), false);
+            shaderAssetId,
+            &AZ::Data::AssetCatalogRequestBus::Events::GetAssetIdByPath,
+            s_fillerShaderPath,
+            azrtti_typeid<AZ::RPI::ShaderAsset>(),
+            false);
         if (!shaderAssetId.IsValid())
         {
             AZ_Assert(false, "[DisplayMapperPass] Unable to obtain asset id for %s.", s_fillerShaderPath);
@@ -182,7 +188,7 @@ namespace AtomSampleViewer
         createPassRequest.m_passData = AZStd::move(passData);
 
         // Create the connection for the output slot
-        AZ::RPI::PassConnection connection = { AZ::Name("Output"), {AZ::Name("This"), AZ::Name(s_readbackImageName)} };
+        AZ::RPI::PassConnection connection = { AZ::Name("Output"), { AZ::Name("This"), AZ::Name(s_readbackImageName) } };
         createPassRequest.m_connections.push_back(connection);
 
         // Register the imported attachment
@@ -201,8 +207,11 @@ namespace AtomSampleViewer
         // Load the shader
         AZ::Data::AssetId shaderAssetId;
         AZ::Data::AssetCatalogRequestBus::BroadcastResult(
-            shaderAssetId, &AZ::Data::AssetCatalogRequestBus::Events::GetAssetIdByPath,
-            s_previewShaderPath, azrtti_typeid<AZ::RPI::ShaderAsset>(), false);
+            shaderAssetId,
+            &AZ::Data::AssetCatalogRequestBus::Events::GetAssetIdByPath,
+            s_previewShaderPath,
+            azrtti_typeid<AZ::RPI::ShaderAsset>(),
+            false);
         if (!shaderAssetId.IsValid())
         {
             AZ_Assert(false, "[DisplayMapperPass] Unable to obtain asset id for %s.", s_previewShaderPath);
@@ -219,9 +228,9 @@ namespace AtomSampleViewer
         createPassRequest.m_passData = AZStd::move(passData);
 
         // Create the connection for the output slot
-        AZ::RPI::PassConnection outputConnection = { AZ::Name("Output"), {AZ::Name("Parent"), AZ::Name("PipelineOutput")} };
+        AZ::RPI::PassConnection outputConnection = { AZ::Name("Output"), { AZ::Name("Parent"), AZ::Name("PipelineOutput") } };
         createPassRequest.m_connections.push_back(outputConnection);
-        AZ::RPI::PassConnection inputConnection = { AZ::Name("Input"), {AZ::Name("This"), AZ::Name(s_previewImageName)} };
+        AZ::RPI::PassConnection inputConnection = { AZ::Name("Input"), { AZ::Name("This"), AZ::Name(s_previewImageName) } };
         createPassRequest.m_connections.push_back(inputConnection);
 
         // Register the imported attachment
@@ -244,7 +253,12 @@ namespace AtomSampleViewer
             createRequest.m_imageName = AZ::Name(s_readbackImageName);
             createRequest.m_isUniqueName = false;
             createRequest.m_imagePool = pool.get();
-            createRequest.m_imageDescriptor = AZ::RHI::ImageDescriptor::Create2D(AZ::RHI::ImageBindFlags::Color | AZ::RHI::ImageBindFlags::ShaderWrite | AZ::RHI::ImageBindFlags::CopyRead | AZ::RHI::ImageBindFlags::CopyWrite, m_resourceWidth, m_resourceHeight, AZ::RHI::Format::R8G8B8A8_UNORM);
+            createRequest.m_imageDescriptor = AZ::RHI::ImageDescriptor::Create2D(
+                AZ::RHI::ImageBindFlags::Color | AZ::RHI::ImageBindFlags::ShaderWrite | AZ::RHI::ImageBindFlags::CopyRead |
+                    AZ::RHI::ImageBindFlags::CopyWrite,
+                m_resourceWidth,
+                m_resourceHeight,
+                AZ::RHI::Format::R8G8B8A8_UNORM);
 
             m_readbackImage = AZ::RPI::AttachmentImage::Create(createRequest);
         }
@@ -255,7 +269,11 @@ namespace AtomSampleViewer
             createRequest.m_imageName = AZ::Name(s_previewImageName);
             createRequest.m_isUniqueName = false;
             createRequest.m_imagePool = pool.get();
-            createRequest.m_imageDescriptor = AZ::RHI::ImageDescriptor::Create2D(AZ::RHI::ImageBindFlags::ShaderRead | AZ::RHI::ImageBindFlags::CopyRead | AZ::RHI::ImageBindFlags::CopyWrite, m_resourceWidth, m_resourceHeight, AZ::RHI::Format::R8G8B8A8_UNORM);
+            createRequest.m_imageDescriptor = AZ::RHI::ImageDescriptor::Create2D(
+                AZ::RHI::ImageBindFlags::ShaderRead | AZ::RHI::ImageBindFlags::CopyRead | AZ::RHI::ImageBindFlags::CopyWrite,
+                m_resourceWidth,
+                m_resourceHeight,
+                AZ::RHI::Format::R8G8B8A8_UNORM);
 
             m_previewImage = AZ::RPI::AttachmentImage::Create(createRequest);
         }
@@ -277,8 +295,8 @@ namespace AtomSampleViewer
     void ReadbackExampleComponent::ReadbackCallback(const AZ::RPI::AttachmentReadback::ReadbackResult& result)
     {
         const AZ::RHI::ImageSubresourceRange range(0, 0, 0, 0);
-        AZ::RHI::DeviceImageSubresourceLayoutPlaced layout;
-        m_previewImage->GetRHIImage()->GetSubresourceLayouts(range, &layout, nullptr);
+        AZ::RHI::ImageSubresourceLayoutPlaced layout;
+        m_previewImage->GetRHIImage()->GetSubresourceLayout(layout);
 
         m_textureNeedsUpdate = true;
         m_resultData = result.m_dataBuffer;
@@ -292,10 +310,10 @@ namespace AtomSampleViewer
     void ReadbackExampleComponent::UploadReadbackResult() const
     {
         const AZ::RHI::ImageSubresourceRange range(0, 0, 0, 0);
-        AZ::RHI::DeviceImageSubresourceLayoutPlaced layout;
-        m_previewImage->GetRHIImage()->GetSubresourceLayouts(range, &layout, nullptr);
-        AZ::RHI::DeviceImageUpdateRequest updateRequest;
-        updateRequest.m_image = m_previewImage->GetRHIImage();
+        AZ::RHI::ImageSubresourceLayoutPlaced layout;
+        m_previewImage->GetRHIImage()->GetSubresourceLayout(layout);
+        AZ::RHI::ImageUpdateRequest updateRequest;
+        updateRequest.m_image = m_previewImage->GetActualRHIImage();
         updateRequest.m_sourceSubresourceLayout = layout;
         updateRequest.m_sourceData = m_resultData->begin();
         updateRequest.m_imageSubresourcePixelOffset = AZ::RHI::Origin(0, 0, 0);
@@ -319,7 +337,8 @@ namespace AtomSampleViewer
             ImGui::Separator();
             ImGui::NewLine();
 
-            if (ScriptableImGui::Button("Readback")) {
+            if (ScriptableImGui::Button("Readback"))
+            {
                 PerformReadback();
             }
 
@@ -331,12 +350,15 @@ namespace AtomSampleViewer
                 ImGui::NewLine();
                 ImGui::Text("Name: %s", m_readbackStat.m_name.GetCStr());
                 ImGui::Text("Bytes read: %zu", m_readbackStat.m_bytesRead);
-                ImGui::Text("[%i; %i; %i]", m_readbackStat.m_descriptor.m_size.m_width, m_readbackStat.m_descriptor.m_size.m_height, m_readbackStat.m_descriptor.m_size.m_depth);
+                ImGui::Text(
+                    "[%i; %i; %i]",
+                    m_readbackStat.m_descriptor.m_size.m_width,
+                    m_readbackStat.m_descriptor.m_size.m_height,
+                    m_readbackStat.m_descriptor.m_size.m_depth);
                 ImGui::Text("%s", AZ::RHI::ToString(m_readbackStat.m_descriptor.m_format));
-
             }
 
             m_imguiSidebar.End();
         }
     }
-}
+} // namespace AtomSampleViewer
