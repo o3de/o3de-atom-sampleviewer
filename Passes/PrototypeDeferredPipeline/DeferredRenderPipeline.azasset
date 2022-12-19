@@ -5,6 +5,7 @@
     "ClassData": {
         "Name": "DeferredPipeline",
         "MainViewTag": "MainCamera",
+        "MaterialPipelineTag": "DeferredPipeline",
         "RootPassTemplate": "DeferredPipelineTemplate",
         "AllowModification": true,
         "RenderSettings": {
