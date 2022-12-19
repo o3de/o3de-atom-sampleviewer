@@ -1,5 +1,5 @@
 {
-    "materialType": "@gemroot:Atom@/TestData/TestData/Materials/Types/materialpipelinetest_enhanced.materialtype",
+    "materialType": "Materials/Types/EnhancedPBR.materialtype",
     "materialTypeVersion": 3,
     "propertyValues": {
         "anisotropy.anisotropyAngle": 0.6399999856948853,

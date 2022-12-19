@@ -1,5 +1,5 @@
 {
-    "materialType": "@gemroot:Atom@/TestData/TestData/Materials/Types/materialpipelinetest_standard.materialtype",
+    "materialType": "Materials/Types/StandardPBR.materialtype",
     "materialTypeVersion": 3,
     "parentMaterial": "MaterialPipelineTest_Standard.material",
     "propertyValues": {
