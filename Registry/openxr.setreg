@@ -2,7 +2,7 @@
     "O3DE": {
         "Atom": {
             "RHI": {
-                "XRFoveatedLevel" : 3
+                "XRFoveatedLevel" : 2
             }
         }
     }
