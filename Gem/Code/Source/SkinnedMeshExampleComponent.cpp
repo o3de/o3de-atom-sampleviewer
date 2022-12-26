@@ -129,6 +129,11 @@ namespace AtomSampleViewer
 
         ScriptableImGui::Checkbox("Draw bones", &m_drawBones);
 
+        if (ScriptableImGui::Button("Reset Clock"))
+        {
+            m_runTime = 0;
+        }
+
         m_imguiSidebar.End();
     }
 
