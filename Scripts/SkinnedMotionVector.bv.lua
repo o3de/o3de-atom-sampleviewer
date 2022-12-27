@@ -30,7 +30,7 @@ SelectImageComparisonToleranceLevel("Level E")
 ShowTool('PassTree', true)
 SetImguiValue('Show Pass Attachments', true)
 SetImguiValue('Preview Attachment', true)
-SetImguiValue('Color Range', Vector2(0.000000, 0.01)) -- Use a constrained color range so small values will show up better
+SetImguiValue('Color Range', Vector2(0.0, 0.01)) -- Use a constrained color range so small values will show up better
 SetImguiValue('MeshMotionVectorPass/[InputOutput] [MotionInputOutput] [Image] CameraMotion [R16G16_FLOAT] [1920x1080]', true)
 IdleFrames(1) -- Wait one frame to apply imgui change
 
@@ -48,6 +48,8 @@ TestDelayedCapture(2.3, 'MotionVector3.png')
 SetShowImGui(true)
 
 -- Hide the pass tree tool
+SetImguiValue('Color Range', Vector2(0.0, 1.0))
+IdleFrames(1) -- Make sure Color Range is applied before hiding Preview Attachment
 SetImguiValue('Preview Attachment', false)
 SetImguiValue('Show Pass Attachments', false)
 IdleFrames(1) -- Wait one frame to apply imgui change
