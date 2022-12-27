@@ -1,5 +1,5 @@
 {
-    "materialType": "@projectroot@/Cache/Intermediate Assets/testdata/materials/types/materialpipelinetest_enhanced_generated.materialtype",
+    "materialType": "@gemroot:Atom@/TestData/TestData/Materials/Types/materialpipelinetest_enhanced.materialtype",
     "materialTypeVersion": 3,
     "propertyValues": {
         "anisotropy.anisotropyAngle": 0.6399999856948853,
