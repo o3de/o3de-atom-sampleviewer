@@ -24,6 +24,7 @@ end
 OpenSample('Features/SkinnedMesh')
 ResizeViewport(1920, 1080)
 NoClipCameraController_SetPitch(DegToRad(-30))
+SetImguiValue('Draw bones', false)
 SelectImageComparisonToleranceLevel("Level E")
 
 -- Show the pass tree tool and enable preview image attachment so we can capture the motion vector image
