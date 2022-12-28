@@ -1,8 +1,8 @@
 {
     "O3DE": {
         "Atom": {
-            "RHI": {
-                "XRFoveatedLevel" : 2
+            "OpenXR": {
+                "FoveatedLevel" : 2
             }
         }
     }
