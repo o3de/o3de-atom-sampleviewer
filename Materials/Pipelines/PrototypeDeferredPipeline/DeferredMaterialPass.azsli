@@ -10,6 +10,7 @@
 
 //TODO(DeferredPOC): Support clear coat
 #define ENABLE_CLEAR_COAT 0
+#define ENABLE_TRANSMISSION 0
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -19,7 +20,6 @@
 
 #include <viewsrg.srgi>
 #include <Atom/RPI/ShaderResourceGroups/DefaultDrawSrg.azsli>
-#include <Atom/Features/PBR/DefaultObjectSrg.azsli>
 #include <Atom/Features/ColorManagement/TransformColor.azsli>
 #include <Atom/Features/PBR/LightingOptions.azsli>
 
