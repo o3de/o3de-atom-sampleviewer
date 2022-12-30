@@ -19,6 +19,7 @@ g_modelWithLayerMask = 'testdata/objects/paintedplane.azmodel'
 g_modelHermanubis = 'materialeditor/viewportmodels/hermanubis.azmodel'
 g_modelTube = 'testdata/objects/tube.azmodel'
 g_modelGrass = 'objects/grass_tile_large.azmodel'
+g_reflectionProbe = 'models/reflectionprobesphere.azmodel'
 
 function GenerateMaterialScreenshot(imageComparisonThresholdLevel, materialName, options)
     if options == nil then options = {} end
@@ -158,6 +159,15 @@ GenerateMaterialScreenshot('Level G', '103_DetailMaps_BaseColorWithMask',       
 GenerateMaterialScreenshot('Level H', '104_DetailMaps_Normal',                  {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
 GenerateMaterialScreenshot('Level H', '104_DetailMaps_NormalWithMask',          {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
 GenerateMaterialScreenshot('Level H', '105_DetailMaps_BlendMaskUsingDetailUVs', {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
+
+----------------------------------------------------------------------
+-- Reflection Probe Material...
+
+g_testMaterialsFolder = 'materials/reflectionprobe/'
+g_testCaseFolder = 'ReflectionProbe'
+Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder .. g_testCaseFolder))
+
+GenerateMaterialScreenshot('Level E', 'ReflectionProbeVisualization', {lighting="Neutral Urban", model=g_reflectionProbe})
 
 ----------------------------------------------------------------------
 -- StandardMultilayerPBR Materials...
