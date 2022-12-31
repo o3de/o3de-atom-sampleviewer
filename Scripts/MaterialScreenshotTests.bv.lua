@@ -253,8 +253,9 @@ g_testCaseFolder = 'LowEndPipeline'
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder .. g_testCaseFolder))
 
 -- We're not really getting full coverage here, but just some cursory regression tests to make sure the low-end pipeline doesn't break.
-GenerateMaterialScreenshot('Level E', '004_MetalMap')
-GenerateMaterialScreenshot('Level F', '009_Opacity_Blended', {lighting="Neutral Urban", model=g_beveledCubeModel})
+-- (Use a "_LowEndPipeline" filename suffix just so these screenshots in the results summary are not confused with the same material names from the "StandardPBR" folder)
+GenerateMaterialScreenshot('Level E', '004_MetalMap', {screenshotFilename="004_MetalMap_LowEndPipeline"})
+GenerateMaterialScreenshot('Level F', '009_Opacity_Blended', {lighting="Neutral Urban", model=g_beveledCubeModel, screenshotFilename="009_Opacity_Blended_LowEndPipeline"})
 
 SetImguiValue('Use Low End Pipeline', false)
 
