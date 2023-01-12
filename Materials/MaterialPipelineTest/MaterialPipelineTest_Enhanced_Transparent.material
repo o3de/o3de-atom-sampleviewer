@@ -1,5 +1,5 @@
 {
-    "materialType": "Materials/Types/EnhancedPBR.materialtype",
+    "materialType": "@gemroot:Atom@/TestData/TestData/Materials/Types/materialpipelinetest_enhanced.materialtype",
     "materialTypeVersion": 3,
     "parentMaterial": "MaterialPipelineTest_Enhanced.material",
     "propertyValues": {
