@@ -28,6 +28,7 @@ namespace AtomSampleViewer
         , public SampleComponentManagerNotificationBus::Handler
     {
     public:
+        AZ_CLASS_ALLOCATOR(AtomSampleViewerApplication, AZ::SystemAllocator)
         AtomSampleViewerApplication();
         AtomSampleViewerApplication(int* argc, char*** argv);
         ~AtomSampleViewerApplication() override;
