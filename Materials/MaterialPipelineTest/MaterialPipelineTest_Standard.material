@@ -1,5 +1,5 @@
 {
-    "materialType": "@gemroot:Atom@/TestData/TestData/Materials/Types/materialpipelinetest_standard.materialtype",
+    "materialType": "@gemroot:Atom_Feature_Common@/Assets/Materials/Types/StandardPBR.materialtype",
     "materialTypeVersion": 3,
     "propertyValues": {
         "baseColor.textureMap": "@engroot@/Gems/AtomContent/Sponza/Assets/Textures/bricks_1k_basecolor.png",
