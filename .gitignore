@@ -8,3 +8,4 @@ AssetProcessorTemp/**
 [Cc]ache/
 [Uu]ser/
 .DS_Store
+CMakeUserPresets.json
