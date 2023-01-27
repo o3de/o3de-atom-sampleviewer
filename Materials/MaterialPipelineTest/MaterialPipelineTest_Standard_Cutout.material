@@ -1,11 +1,11 @@
 {
-    "materialType": "@gemroot:Atom@/TestData/TestData/Materials/Types/materialpipelinetest_standard.materialtype",
+    "materialType": "@gemroot:Atom_TestData@/Assets/TestData/Materials/Types/materialpipelinetest_standard.materialtype",
     "materialTypeVersion": 3,
     "parentMaterial": "MaterialPipelineTest_Standard.material",
     "propertyValues": {
         "general.doubleSided": true,
         "opacity.alphaSource": "Split",
         "opacity.mode": "Cutout",
-        "opacity.textureMap": "@gemroot:Atom@/TestData/TestData/Textures/checker8x8_512.png"
+        "opacity.textureMap": "@gemroot:Atom_TestData@/Assets/TestData/Textures/checker8x8_512.png"
     }
 }
