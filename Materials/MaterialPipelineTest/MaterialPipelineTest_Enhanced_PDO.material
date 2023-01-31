@@ -8,7 +8,7 @@
         "parallax.offset": 0.03799999877810478,
         "parallax.pdo": true,
         "parallax.quality": "Medium",
-        "parallax.textureMap": "@gemroot:Atom@/TestData/TestData/Textures/cc0/Concrete019_1K_Displacement.jpg",
+        "parallax.textureMap": "@gemroot:Atom_TestData@/Assets/TestData/Textures/cc0/Concrete019_1K_Displacement.jpg",
         "subsurfaceScattering.enableSubsurfaceScattering": false
     }
 }

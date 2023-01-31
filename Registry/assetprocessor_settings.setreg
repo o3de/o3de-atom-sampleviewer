@@ -17,11 +17,6 @@
                     "recursive": 1,
                     "order": 3
                 },
-                "ScanFolder AtomTestData": {
-                    "watch": "@GEMROOT:Atom@/TestData",
-                    "recursive": 1,
-                    "order": 1000
-                },
                 "RC cgf": {
                     "ignore": true
                 },
