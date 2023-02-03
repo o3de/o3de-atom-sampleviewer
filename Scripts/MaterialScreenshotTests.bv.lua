@@ -19,6 +19,7 @@ g_modelWithLayerMask = 'testdata/objects/paintedplane.azmodel'
 g_modelHermanubis = 'materialeditor/viewportmodels/hermanubis.azmodel'
 g_modelTube = 'testdata/objects/tube.azmodel'
 g_modelGrass = 'objects/grass_tile_large.azmodel'
+g_reflectionProbe = 'models/reflectionprobesphere.azmodel'
 
 function GenerateMaterialScreenshot(imageComparisonThresholdLevel, materialName, options)
     if options == nil then options = {} end
@@ -160,6 +161,15 @@ GenerateMaterialScreenshot('Level H', '104_DetailMaps_NormalWithMask',          
 GenerateMaterialScreenshot('Level H', '105_DetailMaps_BlendMaskUsingDetailUVs', {model=g_modelHermanubis, lighting="Blouberg Sunrise 1 (Alt)", cameraHeading=175.0, cameraPitch=5.0, cameraDistance=0.75, cameraZ=0.5})
 
 ----------------------------------------------------------------------
+-- Reflection Probe Material...
+
+g_testMaterialsFolder = 'materials/reflectionprobe/'
+g_testCaseFolder = 'ReflectionProbe'
+Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder .. g_testCaseFolder))
+
+GenerateMaterialScreenshot('Level E', 'ReflectionProbeVisualization', {lighting="Neutral Urban", model=g_reflectionProbe})
+
+----------------------------------------------------------------------
 -- StandardMultilayerPBR Materials...
 
 g_testMaterialsFolder = 'testdata/materials/standardmultilayerpbrtestcases/'
@@ -243,8 +253,9 @@ g_testCaseFolder = 'LowEndPipeline'
 Print('Saving screenshots to ' .. NormalizePath(g_screenshotOutputFolder .. g_testCaseFolder))
 
 -- We're not really getting full coverage here, but just some cursory regression tests to make sure the low-end pipeline doesn't break.
-GenerateMaterialScreenshot('Level E', '004_MetalMap')
-GenerateMaterialScreenshot('Level F', '009_Opacity_Blended', {lighting="Neutral Urban", model=g_beveledCubeModel})
+-- (Use a "_LowEndPipeline" filename suffix just so these screenshots in the results summary are not confused with the same material names from the "StandardPBR" folder)
+GenerateMaterialScreenshot('Level E', '004_MetalMap', {screenshotFilename="004_MetalMap_LowEndPipeline"})
+GenerateMaterialScreenshot('Level F', '009_Opacity_Blended', {lighting="Neutral Urban", model=g_beveledCubeModel, screenshotFilename="009_Opacity_Blended_LowEndPipeline"})
 
 SetImguiValue('Use Low End Pipeline', false)
 
