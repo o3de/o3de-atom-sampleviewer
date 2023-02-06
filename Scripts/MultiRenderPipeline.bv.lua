@@ -78,8 +78,8 @@ SelectImageComparisonToleranceLevel("Level F")
 
 -- IBL only
 SetImguiValue('Add/Remove IBL', true)
--- IBL takes 2 frames to apply 
-IdleFrames(2) 
+-- IBL takes some frames to apply 
+IdleFrames(5)
 TakeScreenShotForWindow1('IBL_window1.png')
 TakeScreenShotForWindow2('IBL_window2.png')
 
