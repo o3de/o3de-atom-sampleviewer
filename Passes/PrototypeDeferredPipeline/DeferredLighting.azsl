@@ -70,8 +70,8 @@ struct PSOutput
 // Since the visual results of the deferred pipeline are (in theory) identical to the results
 // of the main pipeline, this option can be enabled to draw a watermark that confirms what
 // you are seeing is actually the deferred pipeline.
-// TODO(DeferredPOC): Make a way to turn this on as needed for testing. Right now we don't have a way to turn it on programmatically.
-option bool o_deferredPipelineWatermark = false;
+// TODO(DeferredPOC): Make a way to turn this off by default, and only turn it on as needed for testing. Right now we don't have a way to turn it on programmatically.
+option bool o_deferredPipelineWatermark = true;
 
 PSOutput MainPS(VSOutput IN, in uint sampleIndex : SV_SampleIndex)
 {

@@ -87,7 +87,6 @@ namespace AtomSampleViewer
         AZ::RPI::RenderPipelineDescriptor pipelineDesc;
         pipelineDesc.m_mainViewTagName = "MainCamera";
         pipelineDesc.m_name = "LowEndPipeline";
-        pipelineDesc.m_materialPipelineTag = "LowEndPipeline";
         pipelineDesc.m_rootPassTemplate = "LowEndPipelineTemplate";
         pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 4;
 
@@ -104,7 +103,6 @@ namespace AtomSampleViewer
         AZ::RPI::RenderPipelineDescriptor pipelineDesc;
         pipelineDesc.m_mainViewTagName = "MainCamera";
         pipelineDesc.m_name = "DeferredPipeline";
-        pipelineDesc.m_materialPipelineTag = "DeferredPipeline";
         pipelineDesc.m_rootPassTemplate = "DeferredPipelineTemplate";
         pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 4;
         pipelineDesc.m_allowModification = true; // MainPipeline allows modifications, so the DeferredPipeline must as well, to get a consistent result.

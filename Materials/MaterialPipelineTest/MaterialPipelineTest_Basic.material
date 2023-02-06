@@ -1,5 +1,5 @@
 {
-    "materialType": "@gemroot:Atom_Feature_Common@/Assets/Materials/Types/BasePBR.materialtype",
+    "materialType": "@gemroot:Atom_TestData@/Assets/TestData/Materials/Types/materialpipelinetest_basic.materialtype",
     "materialTypeVersion": 3,
     "propertyValues": {
         "baseColor.textureMap": "@gemroot:Atom_Feature_Common@/Assets/Textures/Default/default_basecolor.tif",
