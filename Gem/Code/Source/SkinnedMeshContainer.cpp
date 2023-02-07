@@ -27,7 +27,7 @@
 
 namespace
 {
-    static const char* const SkinnedMeshMaterial = "materials/special/debugvertexstreams.azmaterial";
+    static const char* const SkinnedMeshMaterial = "materials/defaultpbr.azmaterial";
 }
 
 namespace AtomSampleViewer

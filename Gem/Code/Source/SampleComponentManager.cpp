@@ -1822,8 +1822,10 @@ namespace AtomSampleViewer
     {
         if (m_rpiScene)
         {
-            RPI::RPISystemInterface::Get()->UnregisterScene(m_rpiScene);
+            m_xrPipelines.clear();
+            m_renderPipeline = nullptr;
 
+            RPI::RPISystemInterface::Get()->UnregisterScene(m_rpiScene);
             auto sceneSystem = AzFramework::SceneSystemInterface::Get();
             AZ_Assert(sceneSystem, "Scene system was destroyed before SampleComponentManager was able to unregister the RPI scene.");
             AZStd::shared_ptr<AzFramework::Scene> scene = sceneSystem->GetScene(AzFramework::Scene::MainSceneName);
@@ -1831,7 +1833,6 @@ namespace AtomSampleViewer
             [[maybe_unused]] bool result = scene->UnsetSubsystem(m_rpiScene);
             AZ_Assert(result, "SampleComponentManager failed to unregister its RPI scene from the general scene.");
             
-            m_xrPipelines.clear();
             m_rpiScene = nullptr;
         }
     }

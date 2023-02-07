@@ -1,5 +1,5 @@
 {
-    "materialType": "@projectroot@/Cache/Intermediate Assets/testdata/materials/types/materialpipelinetest_empty_generated.materialtype",
+    "materialType": "@gemroot:Atom_TestData@/Assets/TestData/Materials/Types/materialpipelinetest_empty.materialtype",
     "materialTypeVersion": 3,
     "propertyValues": {
     }

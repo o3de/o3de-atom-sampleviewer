@@ -1,5 +1,5 @@
 {
-    "materialType": "@projectroot@/Cache/Intermediate Assets/testdata/materials/types/materialpipelinetest_animated_generated.materialtype",
+    "materialType": "@gemroot:Atom_TestData@/Assets/TestData/Materials/Types/materialpipelinetest_animated.materialtype",
     "materialTypeVersion": 3,
     "propertyValues": {
         "settings.amplitude": 0.009999999776482582,

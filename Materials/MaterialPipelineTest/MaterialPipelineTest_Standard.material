@@ -1,10 +1,10 @@
 {
-    "materialType": "@projectroot@/Cache/Intermediate Assets/testdata/materials/types/materialpipelinetest_standard_generated.materialtype",
+    "materialType": "@gemroot:Atom_Feature_Common@/Assets/Materials/Types/StandardPBR.materialtype",
     "materialTypeVersion": 3,
     "propertyValues": {
         "baseColor.textureMap": "@engroot@/Gems/AtomContent/Sponza/Assets/Textures/bricks_1k_basecolor.png",
         "clearCoat.enable": true,
-        "clearCoat.influenceMap": "@gemroot:Atom@/TestData/TestData/Textures/checker8x8_512.png",
+        "clearCoat.influenceMap": "@gemroot:Atom_TestData@/Assets/TestData/Textures/checker8x8_512.png",
         "clearCoat.roughness": 0.10999999940395355,
         "emissive.color": [
             1.0,
@@ -14,7 +14,7 @@
         ],
         "emissive.enable": true,
         "emissive.intensity": 1.2599999904632568,
-        "emissive.textureMap": "@gemroot:Atom@/TestData/TestData/Textures/checker8x8_gray_512.png",
+        "emissive.textureMap": "@gemroot:Atom_TestData@/Assets/TestData/Textures/checker8x8_gray_512.png",
         "normal.textureMap": "@engroot@/Gems/AtomContent/Sponza/Assets/Textures/bricks_1k_normal.jpg",
         "occlusion.diffuseTextureMap": "@engroot@/Gems/AtomContent/Sponza/Assets/Textures/bricks_1k_ao.png",
         "occlusion.specularTextureMap": "@engroot@/Gems/AtomContent/Sponza/Assets/Textures/bricks_1k_ao.png",

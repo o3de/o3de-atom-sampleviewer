@@ -52,7 +52,6 @@ struct VSOutput
     float3 m_shadowCoords[ViewSrg::MaxCascadeCount] : UV3;
 };
 
-#include <Atom/Features/Vertex/VertexHelper.azsli>
 option bool o_emissive_useTexture; 
 
 VSOutput MainVS(VSInput IN)

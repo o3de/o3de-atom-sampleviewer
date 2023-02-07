@@ -21,11 +21,23 @@ function MaterialTypeSetup(context)
     
     context:IncludeShader("DepthPass")
     context:IncludeShader("ShadowmapPass")
-    context:IncludeShader("DeferredMaterialPass")
+
+    if(lightingModel == "Base" or lightingModel == "Standard" or lightingModel == "Enhanced") then
+        context:IncludeShader("DeferredMaterialPass")
+    else
+        Warning("The deferred pipeline does not support the " .. lightingModel .. " lighting model. This combination should not be used at runtime.")
+        -- This allows returning 'true' to pass the build, but the surface won't be rendered at runtime.
+        -- TODO(MaterialPipeline): Instead of rendering nothing, either render an error shader (like a magenta surface) or fall back to StandardLighting.
+        --                         For an error shader, .materialtype needs to have new field for an ObjectSrg azsli file separate from "materialShaderCode", so that
+        --                         the error shader can use the same ObjectSrg as the other shaders (depth/shadow) without including the unsupported materialShaderCode.
+        --                         Using StandardLighting as a fallback is even more difficult because it requires some kind of adapter to move data from the Surface that
+        --                         the material type wants to use, to the Surface that the lighting model supports. (It's a natural fit for downgrading from Enhanced to
+        --                         Standard but there is compatibility issues between Skin and Standard).
+    end
     
     -- Unlike Standard and Enhanced, BaseLighting doesn't have "_CustomZ" just because BasePBR.materialtype doesn't use alpha cutout or POM PDO, so we don't need it right now.
     -- But that could be added if some other material type wants to use BaseLighting with one of these features, as they don't really relate to the lighting model.
-    if(lightingModel ~= "Base") then
+    if(lightingModel ~= "Base" and lightingModel ~= "Skin") then
         context:IncludeShader("DeferredMaterialPass_CustomZ")
         context:IncludeShader("DepthPass_CustomZ")
         context:IncludeShader("ShadowmapPass_CustomZ")

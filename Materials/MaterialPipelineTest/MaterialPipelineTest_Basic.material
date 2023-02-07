@@ -1,12 +1,12 @@
 {
-    "materialType": "@projectroot@/Cache/Intermediate Assets/testdata/materials/types/materialpipelinetest_basic_generated.materialtype",
+    "materialType": "@gemroot:Atom_Feature_Common@/Assets/Materials/Types/BasePBR.materialtype",
     "materialTypeVersion": 3,
     "propertyValues": {
         "baseColor.textureMap": "@gemroot:Atom_Feature_Common@/Assets/Textures/Default/default_basecolor.tif",
-        "metallic.textureMap": "@gemroot:Atom@/TestData/TestData/Textures/checker8x8_512.png",
+        "metallic.textureMap": "@gemroot:Atom_TestData@/Assets/TestData/Textures/checker8x8_512.png",
         "normal.textureMap": "@gemroot:Atom_Feature_Common@/Assets/Textures/Default/default_normal.tif",
         "roughness.lowerBound": 0.10999999940395355,
-        "roughness.textureMap": "@gemroot:Atom@/TestData/TestData/Textures/checker8x8_gray_512.png",
+        "roughness.textureMap": "@gemroot:Atom_TestData@/Assets/TestData/Textures/checker8x8_gray_512.png",
         "roughness.upperBound": 0.8899999856948853,
         "specularF0.factor": 0.4399999976158142,
         "uv.rotateDegrees": 45.0

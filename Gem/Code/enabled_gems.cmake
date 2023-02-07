@@ -26,4 +26,5 @@ set(ENABLED_GEMS
     DiffuseProbeGrid
     XR
     OpenXRVk
+    Atom_TestData
 )
