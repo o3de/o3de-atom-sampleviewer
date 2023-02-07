@@ -667,12 +667,19 @@ namespace AtomSampleViewer
             }
             else if (m_countdownForFrameCapture == 0)
             {
-                AZ::Render::FrameCaptureRequestBus::BroadcastResult(m_frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, m_frameCaptureFilePath);
-                if (m_frameCaptureId != AZ::Render::InvalidFrameCaptureId ) // if unsuccessfull leave state to attempt again next tick
+                AZ::Outcome<AZ::Render::FrameCaptureId, AZ::Render::FrameCaptureError> capOutcome;
+                AZ::Render::FrameCaptureRequestBus::BroadcastResult(capOutcome, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, m_frameCaptureFilePath);
+                if (capOutcome.IsSuccess()) // if unsuccessfull leave state to attempt again next tick
                 {
+                    m_frameCaptureId = capOutcome.GetValue();
+
                     AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect(m_frameCaptureId);
 
                     m_countdownForFrameCapture = -1; // Don't call CaptureScreenshot again
+                }
+                else
+                {
+                    m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
                 }
             }
         }

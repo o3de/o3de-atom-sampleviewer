@@ -690,7 +690,7 @@ namespace AtomSampleViewer
         ImGui::Text("Screenshot Name: %s", screenshotTest.m_officialBaselineScreenshotFilePath.c_str());
 
         ImGui::Separator();
-        ImGui::Text("Diff Score: %f", screenshotTest.m_officialComparisonResult.m_finalDiffScore);
+        ImGui::Text("Diff Score: %f", screenshotTest.m_officialComparisonResult.m_diffScore);
 
         // TODO: Render screenshots in ImGui.
         ImGui::Separator();
@@ -854,7 +854,7 @@ namespace AtomSampleViewer
             const ScriptReporter::ScreenshotTestInfo& screenshotTest = scriptReport.m_screenshotTests[reportIndex.second];
             ImGui::Text(
                 "\t%s %s '%s' %f", scriptReport.m_scriptAssetPath.c_str(), screenshotTest.m_screenshotFilePath.c_str(),
-                screenshotTest.m_toleranceLevel.m_name.c_str(), screenshotTest.m_officialComparisonResult.m_finalDiffScore);
+                screenshotTest.m_toleranceLevel.m_name.c_str(), screenshotTest.m_officialComparisonResult.m_diffScore);
         }
         // Present the information by printing highest differences first. See enum class ImageDifferenceLevel
         for (int i = aznumeric_cast<int>(imageDifferenceSummary.size() - 1); i >= 0; --i)
@@ -868,7 +868,7 @@ namespace AtomSampleViewer
                     const ScriptReporter::ScreenshotTestInfo& screenshotTest = scriptReport.m_screenshotTests[reportIndex.second];
                     ImGui::Text(
                         "\t%s %s '%s' %f", scriptReport.m_scriptAssetPath.c_str(), screenshotTest.m_screenshotFilePath.c_str(),
-                        screenshotTest.m_toleranceLevel.m_name.c_str(), screenshotTest.m_officialComparisonResult.m_finalDiffScore);
+                        screenshotTest.m_toleranceLevel.m_name.c_str(), screenshotTest.m_officialComparisonResult.m_diffScore);
                 }
             }
         }
@@ -1413,11 +1413,20 @@ namespace AtomSampleViewer
 
     bool ScriptManager::PrepareForScreenCapture(const AZStd::string& imageName)
     {
-        AZStd::string fullFilePath;
+        AZ::Outcome<AZStd::string, AZ::Render::FrameCaptureTestError> pathOutcome;
+
         AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
-            fullFilePath,
+            pathOutcome,
             &AZ::Render::FrameCaptureTestRequestBus::Events::BuildScreenshotFilePath,
             imageName, true);
+
+        if (!pathOutcome.IsSuccess())
+        {
+            ReportScriptError(pathOutcome.GetError().m_errorMessage);
+            return false;
+        }
+
+        AZStd::string fullFilePath = pathOutcome.IsSuccess() ? pathOutcome.GetValue() : "";
 
         // Delete the file if it already exists because if the screen capture fails, we don't want to do a screenshot comparison test using an old screenshot.
         if (AZ::IO::LocalFileIO::GetInstance()->Exists(fullFilePath.c_str()) && !AZ::IO::LocalFileIO::GetInstance()->Remove(fullFilePath.c_str()))
@@ -1497,27 +1506,39 @@ namespace AtomSampleViewer
             // Note this will pause the script until the capture is complete
             if (PrepareForScreenCapture(imageName))
             {
-                AZStd::string screenshotFilePath;
+                AZ::Outcome<AZStd::string, AZ::Render::FrameCaptureTestError> pathOutcome;
+
                 AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
-                    screenshotFilePath,
+                    pathOutcome,
                     &AZ::Render::FrameCaptureTestRequestBus::Events::BuildScreenshotFilePath,
                     imageName, true);
 
-                AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
-                AZ::Render::FrameCaptureId frameCaptureId = AZ::Render::InvalidFrameCaptureId;
-                AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, screenshotFilePath);
-                if (frameCaptureId != AZ::Render::InvalidFrameCaptureId)
+                if (!pathOutcome.IsSuccess())
                 {
-                    s_instance->AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect(frameCaptureId);
-                    s_instance->m_frameCaptureId = frameCaptureId;
-                }
-                else
-                {
-                    AZ_Error("Automation", false, "Failed to initiate frame capture for '%s'", screenshotFilePath.c_str());
+                    ReportScriptError(pathOutcome.GetError().m_errorMessage);
                     s_instance->m_isCapturePending = false;
                     s_instance->m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
                     s_instance->ResumeScript();
+                    return;
                 }
+
+                AZStd::string screenshotFilePath = pathOutcome.GetValue();
+
+                AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
+                
+                AZ::Outcome<AZ::Render::FrameCaptureId, AZ::Render::FrameCaptureError> capOutcome;
+                AZ::Render::FrameCaptureRequestBus::BroadcastResult(capOutcome, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, screenshotFilePath);
+                if (!capOutcome.IsSuccess())
+                {
+                    ReportScriptError(AZStd::string::format("Failed to initiate frame capture for '%s'", screenshotFilePath.c_str()));
+                    s_instance->m_isCapturePending = false;
+                    s_instance->m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
+                    s_instance->ResumeScript();
+                    return;
+                }
+
+                s_instance->m_frameCaptureId = capOutcome.GetValue();
+                s_instance->AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect(s_instance->m_frameCaptureId);
             }
         };
 
@@ -1544,27 +1565,39 @@ namespace AtomSampleViewer
             // Note this will pause the script until the capture is complete
             if (PrepareForScreenCapture(imageName))
             {
-                AZStd::string screenshotFilePath;
+                AZ::Outcome<AZStd::string, AZ::Render::FrameCaptureTestError> pathOutcome;
+
                 AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
-                    screenshotFilePath,
+                    pathOutcome,
                     &AZ::Render::FrameCaptureTestRequestBus::Events::BuildScreenshotFilePath,
                     imageName, true);
 
-                AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
-                AZ::Render::FrameCaptureId frameCaptureId = AZ::Render::InvalidFrameCaptureId;
-                AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, screenshotFilePath);
-                if (frameCaptureId != AZ::Render::InvalidFrameCaptureId)
+                if (!pathOutcome.IsSuccess())
                 {
-                    s_instance->AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect(frameCaptureId);
-                    s_instance->m_frameCaptureId = frameCaptureId;
-                }
-                else
-                {
-                    AZ_Error("Automation", false, "Failed to initiate frame capture for '%s'", screenshotFilePath.c_str());
+                    ReportScriptError(pathOutcome.GetError().m_errorMessage);
                     s_instance->m_isCapturePending = false;
                     s_instance->m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
                     s_instance->ResumeScript();
+                    return;
                 }
+
+                AZStd::string screenshotFilePath = pathOutcome.GetValue();
+
+                AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
+                
+                AZ::Outcome<AZ::Render::FrameCaptureId, AZ::Render::FrameCaptureError> capOutcome;
+                AZ::Render::FrameCaptureRequestBus::BroadcastResult(capOutcome, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, screenshotFilePath);
+                if (!capOutcome.IsSuccess())
+                {
+                    ReportScriptError(AZStd::string::format("Failed to initiate frame capture for '%s'", screenshotFilePath.c_str()));
+                    s_instance->m_isCapturePending = false;
+                    s_instance->m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
+                    s_instance->ResumeScript();
+                    return;
+                }
+
+                s_instance->m_frameCaptureId = capOutcome.GetValue();
+                s_instance->AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect(s_instance->m_frameCaptureId);
             }
         };
 
@@ -1588,27 +1621,39 @@ namespace AtomSampleViewer
             // Note this will pause the script until the capture is complete
             if (PrepareForScreenCapture(imageName))
             {
-                AZStd::string screenshotFilePath;
+                AZ::Outcome<AZStd::string, AZ::Render::FrameCaptureTestError> pathOutcome;
+
                 AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
-                    screenshotFilePath,
+                    pathOutcome,
                     &AZ::Render::FrameCaptureTestRequestBus::Events::BuildScreenshotFilePath,
                     imageName, true);
 
-                AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
-                AZ::Render::FrameCaptureId frameCaptureId = AZ::Render::InvalidFrameCaptureId;
-                AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshotWithPreview, screenshotFilePath);
-                if (frameCaptureId != AZ::Render::InvalidFrameCaptureId)
+                if (!pathOutcome.IsSuccess())
                 {
-                    s_instance->AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect(frameCaptureId);
-                    s_instance->m_frameCaptureId = frameCaptureId;
-                }
-                else
-                {
-                    AZ_Error("Automation", false, "Failed to initiate frame capture for '%s'", screenshotFilePath.c_str());
+                    ReportScriptError(pathOutcome.GetError().m_errorMessage);
                     s_instance->m_isCapturePending = false;
                     s_instance->m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
                     s_instance->ResumeScript();
+                    return;
                 }
+
+                AZStd::string screenshotFilePath = pathOutcome.GetValue();
+
+                AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
+                
+                AZ::Outcome<AZ::Render::FrameCaptureId, AZ::Render::FrameCaptureError> capOutcome;
+                AZ::Render::FrameCaptureRequestBus::BroadcastResult(capOutcome, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshotWithPreview, screenshotFilePath);
+                if (!capOutcome.IsSuccess())
+                {
+                    ReportScriptError(AZStd::string::format("Failed to initiate frame capture for '%s'", screenshotFilePath.c_str()));
+                    s_instance->m_isCapturePending = false;
+                    s_instance->m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
+                    s_instance->ResumeScript();
+                    return;
+                }
+
+                s_instance->m_frameCaptureId = capOutcome.GetValue();
+                s_instance->AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect(s_instance->m_frameCaptureId);
             }
         };
 
@@ -1699,27 +1744,40 @@ namespace AtomSampleViewer
             // Note this will pause the script until the capture is complete
             if (PrepareForScreenCapture(imageName))
             {
-                AZStd::string screenshotFilePath;
+                AZ::Outcome<AZStd::string, AZ::Render::FrameCaptureTestError> pathOutcome;
+
                 AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
-                    screenshotFilePath,
+                    pathOutcome,
                     &AZ::Render::FrameCaptureTestRequestBus::Events::BuildScreenshotFilePath,
                     imageName, true);
 
-                AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
-                AZ::Render::FrameCaptureId frameCaptureId = AZ::Render::InvalidFrameCaptureId;
-                AZ::Render::FrameCaptureRequestBus::BroadcastResult(frameCaptureId, &AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachment, passHierarchy, slot, screenshotFilePath, readbackOption);
-                if (frameCaptureId != AZ::Render::InvalidFrameCaptureId)
+                if (!pathOutcome.IsSuccess())
                 {
-                    s_instance->AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect(frameCaptureId);
-                    s_instance->m_frameCaptureId = frameCaptureId;
-                }
-                else
-                {
-                    AZ_Error("Automation", false, "Failed to initiate frame capture for '%s'", screenshotFilePath.c_str());
+                    ReportScriptError(pathOutcome.GetError().m_errorMessage);
                     s_instance->m_isCapturePending = false;
                     s_instance->m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
                     s_instance->ResumeScript();
+                    return;
                 }
+
+                AZStd::string screenshotFilePath = pathOutcome.GetValue();
+
+                AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
+
+                AZ::Outcome<AZ::Render::FrameCaptureId, AZ::Render::FrameCaptureError> capOutcome;
+                AZ::Render::FrameCaptureRequestBus::BroadcastResult(capOutcome, &AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachment, screenshotFilePath, passHierarchy, slot, readbackOption);
+                if (!capOutcome.IsSuccess())
+                {
+                    ReportScriptError(AZStd::string::format("Failed to initiate frame capture for '%s'", screenshotFilePath.c_str()));
+                    s_instance->m_isCapturePending = false;
+                    s_instance->m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
+                    s_instance->ResumeScript();
+                    return;
+                }
+
+                s_instance->m_frameCaptureId = capOutcome.GetValue();
+                s_instance->AZ::Render::FrameCaptureNotificationBus::Handler::BusConnect(s_instance->m_frameCaptureId);
+
             }
         };
 
