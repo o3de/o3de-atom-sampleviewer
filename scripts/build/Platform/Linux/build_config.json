@@ -17,8 +17,8 @@
       "CONFIGURATION": "profile",
       "OUTPUT_DIRECTORY": "build/linux",
       "CMAKE_OPTIONS": "-G 'Ninja Multi-Config' -DLY_PARALLEL_LINK_JOBS=4",
-      "CMAKE_TARGET": "Editor AutomatedTesting.GameLauncher AtomSampleviewerStandalone AssetProcessor",
-      "CMAKE_LY_PROJECTS": "AutomatedTesting AtomSampleViewer"
+      "CMAKE_TARGET": "Editor AtomSampleviewerStandalone AssetProcessor",
+      "CMAKE_LY_PROJECTS": "AtomSampleViewer"
     }
   },
   "asv_release": {
@@ -30,8 +30,8 @@
       "CONFIGURATION": "release",
       "OUTPUT_DIRECTORY": "build/linux",
       "CMAKE_OPTIONS": "-G 'Ninja Multi-Config' -DLY_PARALLEL_LINK_JOBS=4",
-      "CMAKE_TARGET": "Editor AutomatedTesting.GameLauncher AtomSampleviewerStandalone AssetProcessor",
-      "CMAKE_LY_PROJECTS": "AutomatedTesting AtomSampleViewer"
+      "CMAKE_TARGET": "Editor AtomSampleviewerStandalone AssetProcessor",
+      "CMAKE_LY_PROJECTS": "AtomSampleViewer"
     }
   }
 }

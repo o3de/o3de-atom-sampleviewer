@@ -19,7 +19,7 @@
       "CMAKE_OPTIONS": "-DCMAKE_SYSTEM_VERSION=10.0 -DLY_TEST_IMPACT_INSTRUMENTATION_BIN=%TEST_IMPACT_WIN_BINARY%",
       "CMAKE_TARGET": "Editor AutomatedTesting.GameLauncher AtomSampleviewerStandalone AssetProcessor",
       "CMAKE_NATIVE_BUILD_ARGS": "/m /nologo",
-      "CMAKE_LY_PROJECTS": "AutomatedTesting AtomSampleViewer"
+      "CMAKE_LY_PROJECTS": "AtomSampleViewer"
     }
   },
   "asv_release": {
@@ -31,9 +31,9 @@
       "CONFIGURATION": "release",
       "OUTPUT_DIRECTORY": "build\\windows",
       "CMAKE_OPTIONS": "-DCMAKE_SYSTEM_VERSION=10.0",
-      "CMAKE_TARGET": "Editor AutomatedTesting.GameLauncher AtomSampleviewerStandalone AssetProcessor",
+      "CMAKE_TARGET": "Editor AtomSampleviewerStandalone AssetProcessor",
       "CMAKE_NATIVE_BUILD_ARGS": "/m /nologo",
-      "CMAKE_LY_PROJECTS": "AutomatedTesting AtomSampleViewer"
+      "CMAKE_LY_PROJECTS": "AtomSampleViewer"
     }
   }
 }
