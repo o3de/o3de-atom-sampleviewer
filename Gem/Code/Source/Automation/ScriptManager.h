@@ -137,11 +137,11 @@ namespace AtomSampleViewer
         static void Script_SelectImageComparisonToleranceLevel(const AZStd::string& toleranceLevelName);
 
         // All of the following functions capture a frame and save it to the given file path.
-        // The path must be under the "Scripts/Screenshots" folder and have extension ".ppm".
+        // The path must be under the "scripts/Screenshots" folder and have extension ".ppm".
         // If screenshot comparison testing is enabled, this will also check the captured image against a
         // baseline image file. The function will assume the corresponding expected image will be in a similar path,
         // but with "Screenshots" replaced with "ExpectedScreenshots". For example, the expected file for
-        // "Scripts/Screenshots/StandardPbr/test.ppm" should be at "Scripts/ExpectedScreenshots/StandardPbr/test.ppm".
+        // "scripts/Screenshots/StandardPbr/test.ppm" should be at "scripts/ExpectedScreenshots/StandardPbr/test.ppm".
 
         static void Script_CaptureScreenshot(const AZStd::string& imageName);
         static void Script_CaptureScreenshotWithImGui(const AZStd::string& imageName);

@@ -1,9 +1,9 @@
 g_renderApiName = GetRenderApiName()
 
-g_screenshotOutputFolder = '@user@/Scripts/Screenshots/'
+g_screenshotOutputFolder = '@user@/scripts/Screenshots/'
 testEnv = GetRenderApiName()
 
 SetScreenshotFolder(g_screenshotOutputFolder)
 SetTestEnvPath(testEnv)
-SetLocalBaselineImageFolder('@user@/Scripts/Screenshotslocalbaseline/')
-SetOfficialBaselineImageFolder('@projectroot@/Scripts/Expectedscreenshots/')
+SetLocalBaselineImageFolder('@user@/scripts/Screenshotslocalbaseline/')
+SetOfficialBaselineImageFolder('@projectroot@/scripts/Expectedscreenshots/')
