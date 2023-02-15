@@ -17,7 +17,7 @@
       "CONFIGURATION": "profile",
       "OUTPUT_DIRECTORY": "build/linux",
       "CMAKE_OPTIONS": "-G 'Ninja Multi-Config' -DLY_PARALLEL_LINK_JOBS=4",
-      "CMAKE_TARGET": "Editor AtomSampleviewerStandalone AssetProcessor",
+      "CMAKE_TARGET": "Editor AtomSampleViewerStandalone AssetProcessor",
       "CMAKE_LY_PROJECTS": "AtomSampleViewer"
     }
   },
@@ -30,7 +30,7 @@
       "CONFIGURATION": "release",
       "OUTPUT_DIRECTORY": "build/linux",
       "CMAKE_OPTIONS": "-G 'Ninja Multi-Config' -DLY_PARALLEL_LINK_JOBS=4",
-      "CMAKE_TARGET": "Editor AtomSampleviewerStandalone AssetProcessor",
+      "CMAKE_TARGET": "Editor AtomSampleViewerStandalone AssetProcessor",
       "CMAKE_LY_PROJECTS": "AtomSampleViewer"
     }
   }
