@@ -1,0 +1,9 @@
+{
+    "O3DE": {
+        "Atom": {
+            "OpenXR": {
+                "FoveatedLevel" : 2
+            }
+        }
+    }
+}

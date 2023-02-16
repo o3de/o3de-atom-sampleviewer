@@ -29,10 +29,12 @@
 #include <Atom/RPI.Public/Scene.h>
 #include <Atom/RPI.Reflect/Asset/AssetUtils.h>
 #include <Atom/RPI.Reflect/Image/AttachmentImageAsset.h>
+#include <Atom/RPI.Reflect/Image/AttachmentImageAssetCreator.h>
 #include <Atom/RPI.Reflect/Shader/IShaderVariantFinder.h>
 
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/RHISystemInterface.h>
+#include <Atom/RHI/RHIUtils.h>
 #include <Atom/RHI.Reflect/AliasedHeapEnums.h>
 
 #include <Automation/ScriptManager.h>
@@ -570,6 +572,7 @@ namespace AtomSampleViewer
 
         m_windowContext = nullptr;
         m_brdfTexture.reset();
+        m_xrVrsTexture.reset();
 
         ReleaseRHIScene();
         ReleaseRPIScene();
@@ -1749,18 +1752,29 @@ namespace AtomSampleViewer
 
         if (xrSystem)
         {
+            RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
+            if (RHI::CheckBitsAll(device->GetFeatures().m_shadingRateTypeMask, RHI::ShadingRateTypeFlags::PerRegion) && !m_xrVrsTexture)
+            {
+                auto* xrRPISystem = AZ::RPI::RPISystemInterface::Get()->GetXRSystem();
+                // Need to fill the contents of the Variable shade rating image.
+                const AZStd::shared_ptr<const RPI::PassTemplate> forwardTemplate =
+                    RPI::PassSystemInterface::Get()->GetPassTemplate(Name("MultiViewForwardPassTemplate"));
+
+                m_xrVrsTexture = xrRPISystem->InitPassFoveatedAttachment(*forwardTemplate);
+            }
+
             RPI::RenderPipelineDescriptor xrPipelineDesc;
             xrPipelineDesc.m_mainViewTagName = "MainCamera";
             xrPipelineDesc.m_renderSettings.m_multisampleState.m_samples = static_cast<uint16_t>(m_numMSAASamples);
 
             // Build the pipeline for left eye
             xrPipelineDesc.m_name = "RPISamplePipelineXRLeft";
-            xrPipelineDesc.m_rootPassTemplate = "LowEndPipelineXRLeftTemplate";
+            xrPipelineDesc.m_rootPassTemplate = "MultiViewXRLeftPipelineTemplate";
             RPI::RenderPipelinePtr renderPipelineLeft = RPI::RenderPipeline::CreateRenderPipelineForWindow(xrPipelineDesc, *m_windowContext.get(), AZ::RPI::ViewType::XrLeft);
 
             // Build the pipeline for right eye
             xrPipelineDesc.m_name = "RHISamplePipelineXRRight";
-            xrPipelineDesc.m_rootPassTemplate = "LowEndPipelineXRRightTemplate";
+            xrPipelineDesc.m_rootPassTemplate = "MultiViewXRRightPipelineTemplate";
             RPI::RenderPipelinePtr renderPipelineRight = RPI::RenderPipeline::CreateRenderPipelineForWindow(xrPipelineDesc, *m_windowContext.get(), AZ::RPI::ViewType::XrRight);
 
             //Add both the pipelines to the scene
