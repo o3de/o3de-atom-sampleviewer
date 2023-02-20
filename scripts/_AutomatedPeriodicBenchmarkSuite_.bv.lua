@@ -8,7 +8,7 @@
 --
 --
 ----------------------------------------------------------------------------------------------------
-g_baseFolder = ResolvePath('@user@/Scripts/PerformanceBenchmarks/')
+g_baseFolder = ResolvePath('@user@/scripts/PerformanceBenchmarks/')
 IDLE_COUNT = 100
 FRAME_COUNT = 100
 SAMPLES_TO_RUN = {

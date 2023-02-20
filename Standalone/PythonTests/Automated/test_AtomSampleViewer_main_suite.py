@@ -30,7 +30,7 @@ class TestAutomationMainSuite:
     def test_AutomatedReviewTestSuite(self, request, workspace, launcher_platform, rhi, atomsampleviewer_log_monitor):
         # Script call setup.
         test_script = '_FullTestSuite_.bv.lua'
-        test_script_path = os.path.join(workspace.paths.project(), 'Scripts', test_script)
+        test_script_path = os.path.join(workspace.paths.project(), 'scripts', test_script)
         if not os.path.exists(test_script_path):
             raise AtomSampleViewerException(f'Test script does not exist in path: {test_script_path}')
         cmd = os.path.join(workspace.paths.build_directory(),
@@ -55,9 +55,9 @@ class TestAutomationMainSuite:
                 unexpected_lines=unexpected_lines, halt_on_unexpected=True, timeout=400)
         except ly_test_tools.log.log_monitor.LogMonitorException as e:
             expected_screenshots_path = os.path.join(
-                workspace.paths.project(), "Scripts", "ExpectedScreenshots")
+                workspace.paths.project(), "scripts", "ExpectedScreenshots")
             test_screenshots_path = os.path.join(
-                workspace.paths.project(), "user", "Scripts", "Screenshots")
+                workspace.paths.project(), "user", "scripts", "Screenshots")
             raise AtomSampleViewerException(
                 f"Got error: {e}\n"
                 f"Screenshot comparison check failed using Render Hardware Interface (RHI): '{rhi}'\n"

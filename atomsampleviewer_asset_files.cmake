@@ -26,37 +26,37 @@ set(FILES
     Passes/RHISamplePipeline.pass
     Passes/SelectorPass.pass
     Passes/SsaoPipeline.pass
-    Scripts/AreaLightTest.bv.lua
-    Scripts/AuxGeom.bv.lua
-    Scripts/CheckerboardTest.bv.lua
-    Scripts/CullingAndLod.bv.lua
-    Scripts/Decals.bv.lua
-    Scripts/DepthOfFieldTest.bv.lua
-    Scripts/DiffuseGITest.bv.lua
-    Scripts/DynamicDraw.bv.lua
-    Scripts/DynamicMaterialTest.bv.lua
-    Scripts/ExposureTest.bv.lua
-    Scripts/EyeMaterialTest.bv.lua
-    Scripts/LightCulling.bv.lua
-    Scripts/MaterialScreenshotTests.bv.lua
-    Scripts/MSAA_RPI_Test.bv.lua
-    Scripts/MultiRenderPipeline.bv.lua
-    Scripts/MultiScene.bv.lua
-    Scripts/ParallaxDepthArtifacts.bv.lua
-    Scripts/ParallaxTest.bv.lua
-    Scripts/PassTree.bv.lua
-    Scripts/ReadbackTest.bv.lua
-    Scripts/RenderTargetTexture.bv.lua
-    Scripts/SceneReloadSoakTest.bv.lua
-    Scripts/ShaderReloadSoakTest.bv.lua
-    Scripts/ShadowedSponzaTest.bv.lua
-    Scripts/ShadowTest.bv.lua
-    Scripts/SkinnedMesh.bv.lua
-    Scripts/StreamingImageTest.bv.lua
-    Scripts/TestEnvironment.lua
-    Scripts/TransparentTest.bv.lua
-    Scripts/_AutomatedPeriodicBenchmarkSuite_.bv.lua
-    Scripts/_FullTestSuite_.bv.lua
+    scripts/AreaLightTest.bv.lua
+    scripts/AuxGeom.bv.lua
+    scripts/CheckerboardTest.bv.lua
+    scripts/CullingAndLod.bv.lua
+    scripts/Decals.bv.lua
+    scripts/DepthOfFieldTest.bv.lua
+    scripts/DiffuseGITest.bv.lua
+    scripts/DynamicDraw.bv.lua
+    scripts/DynamicMaterialTest.bv.lua
+    scripts/ExposureTest.bv.lua
+    scripts/EyeMaterialTest.bv.lua
+    scripts/LightCulling.bv.lua
+    scripts/MaterialScreenshotTests.bv.lua
+    scripts/MSAA_RPI_Test.bv.lua
+    scripts/MultiRenderPipeline.bv.lua
+    scripts/MultiScene.bv.lua
+    scripts/ParallaxDepthArtifacts.bv.lua
+    scripts/ParallaxTest.bv.lua
+    scripts/PassTree.bv.lua
+    scripts/ReadbackTest.bv.lua
+    scripts/RenderTargetTexture.bv.lua
+    scripts/SceneReloadSoakTest.bv.lua
+    scripts/ShaderReloadSoakTest.bv.lua
+    scripts/ShadowedSponzaTest.bv.lua
+    scripts/ShadowTest.bv.lua
+    scripts/SkinnedMesh.bv.lua
+    scripts/StreamingImageTest.bv.lua
+    scripts/TestEnvironment.lua
+    scripts/TransparentTest.bv.lua
+    scripts/_AutomatedPeriodicBenchmarkSuite_.bv.lua
+    scripts/_FullTestSuite_.bv.lua
     Shaders/DebugVertexNormals.azsl
     Shaders/DebugVertexNormals.materialtype
     Shaders/DebugVertexNormals.shader
