@@ -120,7 +120,7 @@ namespace AtomSampleViewer
             }
 
             // Update/stage the image with data
-            RHI::ImageSubresourceLayoutPlaced imageSubresourceLayout;
+            RHI::ImageSubresourceLayout imageSubresourceLayout;
             RHI::ImageSubresourceRange range(0, 0, 0, 0);
             m_image->GetSubresourceLayouts(range, &imageSubresourceLayout, nullptr);
 
