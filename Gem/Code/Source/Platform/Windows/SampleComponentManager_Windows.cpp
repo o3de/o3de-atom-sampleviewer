@@ -30,6 +30,17 @@ namespace AtomSampleViewer
         return "MainPipeline";
     }
 
+    const char* SampleComponentManager::GetMaterialPipelineName()
+    {
+        // Use Low end pipeline template for VR
+        AZ::RPI::XRRenderingInterface* xrSystem = AZ::RPI::RPISystemInterface::Get()->GetXRSystem();
+        if (xrSystem)
+        {
+            return "LowEndPipeline";
+        }
+        return "MainPipeline";
+    }
+
     int SampleComponentManager::GetDefaultNumMSAASamples()
     {
         // Use sample count of 1 for VR pipelines

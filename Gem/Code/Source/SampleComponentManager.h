@@ -181,6 +181,7 @@ namespace AtomSampleViewer
         static bool IsMultiViewportSwapchainSampleSupported();
         void AdjustImGuiFontScale();
         const char* GetRootPassTemplateName();
+        const char* GetMaterialPipelineName();
         int GetDefaultNumMSAASamples();
 
         // ---------- variables -----------------
@@ -189,7 +190,7 @@ namespace AtomSampleViewer
 
         AZStd::vector<SampleEntry> m_availableSamples;
         // Maps from parent menu item name to a vector of indices into the available samples vector above
-        // Note: we specifically use an ordered map to ensure menus are alphabatized.
+        // Note: we specifically use an ordered map to ensure menus are alphabetized.
         AZStd::map<AZStd::string, AZStd::vector<int32_t>> m_groupedSamples;
 
         // Entity to hold only example component. It doesn't need an entity context.
