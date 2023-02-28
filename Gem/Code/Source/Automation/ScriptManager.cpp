@@ -1413,7 +1413,7 @@ namespace AtomSampleViewer
 
     bool ScriptManager::PrepareForScreenCapture(const AZStd::string& imageName)
     {
-        AZ::Outcome<AZStd::string, AZ::Render::FrameCaptureTestError> pathOutcome;
+        AZ::Render::FrameCapturePathOutcome pathOutcome;
 
         AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
             pathOutcome,
@@ -1506,7 +1506,7 @@ namespace AtomSampleViewer
             // Note this will pause the script until the capture is complete
             if (PrepareForScreenCapture(imageName))
             {
-                AZ::Outcome<AZStd::string, AZ::Render::FrameCaptureTestError> pathOutcome;
+                AZ::Render::FrameCapturePathOutcome pathOutcome;
 
                 AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
                     pathOutcome,
@@ -1526,7 +1526,7 @@ namespace AtomSampleViewer
 
                 AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
                 
-                AZ::Outcome<AZ::Render::FrameCaptureId, AZ::Render::FrameCaptureError> capOutcome;
+                AZ::Render::FrameCaptureOutcome capOutcome;
                 AZ::Render::FrameCaptureRequestBus::BroadcastResult(capOutcome, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, screenshotFilePath);
                 if (!capOutcome.IsSuccess())
                 {
@@ -1565,7 +1565,7 @@ namespace AtomSampleViewer
             // Note this will pause the script until the capture is complete
             if (PrepareForScreenCapture(imageName))
             {
-                AZ::Outcome<AZStd::string, AZ::Render::FrameCaptureTestError> pathOutcome;
+                AZ::Render::FrameCapturePathOutcome pathOutcome;
 
                 AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
                     pathOutcome,
@@ -1585,7 +1585,7 @@ namespace AtomSampleViewer
 
                 AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
                 
-                AZ::Outcome<AZ::Render::FrameCaptureId, AZ::Render::FrameCaptureError> capOutcome;
+                AZ::Render::FrameCaptureOutcome capOutcome;
                 AZ::Render::FrameCaptureRequestBus::BroadcastResult(capOutcome, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, screenshotFilePath);
                 if (!capOutcome.IsSuccess())
                 {
@@ -1621,7 +1621,7 @@ namespace AtomSampleViewer
             // Note this will pause the script until the capture is complete
             if (PrepareForScreenCapture(imageName))
             {
-                AZ::Outcome<AZStd::string, AZ::Render::FrameCaptureTestError> pathOutcome;
+                AZ::Render::FrameCapturePathOutcome pathOutcome;
 
                 AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
                     pathOutcome,
@@ -1641,7 +1641,7 @@ namespace AtomSampleViewer
 
                 AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
                 
-                AZ::Outcome<AZ::Render::FrameCaptureId, AZ::Render::FrameCaptureError> capOutcome;
+                AZ::Render::FrameCaptureOutcome capOutcome;
                 AZ::Render::FrameCaptureRequestBus::BroadcastResult(capOutcome, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshotWithPreview, screenshotFilePath);
                 if (!capOutcome.IsSuccess())
                 {
@@ -1744,7 +1744,7 @@ namespace AtomSampleViewer
             // Note this will pause the script until the capture is complete
             if (PrepareForScreenCapture(imageName))
             {
-                AZ::Outcome<AZStd::string, AZ::Render::FrameCaptureTestError> pathOutcome;
+                AZ::Render::FrameCapturePathOutcome pathOutcome;
 
                 AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
                     pathOutcome,
@@ -1764,7 +1764,7 @@ namespace AtomSampleViewer
 
                 AZ_Assert(s_instance->m_frameCaptureId == AZ::Render::InvalidFrameCaptureId, "Attempting to start a capture while one is in progress");
 
-                AZ::Outcome<AZ::Render::FrameCaptureId, AZ::Render::FrameCaptureError> capOutcome;
+                AZ::Render::FrameCaptureOutcome capOutcome;
                 AZ::Render::FrameCaptureRequestBus::BroadcastResult(capOutcome, &AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachment, screenshotFilePath, passHierarchy, slot, readbackOption);
                 if (!capOutcome.IsSuccess())
                 {

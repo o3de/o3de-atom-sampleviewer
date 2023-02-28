@@ -134,48 +134,48 @@ namespace AtomSampleViewer
     {   
         AZ_Assert(!screenshotName.empty(), "The screenshot file name shouldn't be empty.");
 
-        AZ::Outcome<AZStd::string, AZ::Render::FrameCaptureTestError> outcome;
+        AZ::Render::FrameCapturePathOutcome pathOutcome;
 
         AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
-            outcome,
+            pathOutcome,
             &AZ::Render::FrameCaptureTestRequestBus::Events::BuildScreenshotFilePath,
             screenshotName, true);
 
-        if (outcome.IsSuccess())
+        if (pathOutcome.IsSuccess())
         {
-            m_screenshotFilePath = outcome.GetValue();
+            m_screenshotFilePath = pathOutcome.GetValue();
         }
         else
         {
-            AZ_Error("ScriptReporter", false, "%s", outcome.GetError().m_errorMessage.c_str());
+            AZ_Error("ScriptReporter", false, "%s", pathOutcome.GetError().m_errorMessage.c_str());
         }
 
         AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
-            outcome,
+            pathOutcome,
             &AZ::Render::FrameCaptureTestRequestBus::Events::BuildOfficialBaselineFilePath,
             screenshotName, false);
 
-        if (outcome.IsSuccess())
+        if (pathOutcome.IsSuccess())
         {
-            m_officialBaselineScreenshotFilePath = outcome.GetValue();
+            m_officialBaselineScreenshotFilePath = pathOutcome.GetValue();
         }
         else
         {
-            AZ_Error("ScriptReporter", false, "%s", outcome.GetError().m_errorMessage.c_str());
+            AZ_Error("ScriptReporter", false, "%s", pathOutcome.GetError().m_errorMessage.c_str());
         }
 
         AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
-            outcome,
+            pathOutcome,
             &AZ::Render::FrameCaptureTestRequestBus::Events::BuildLocalBaselineFilePath,
             screenshotName, true);
 
-        if (outcome.IsSuccess())
+        if (pathOutcome.IsSuccess())
         {
-            m_localBaselineScreenshotFilePath = outcome.GetValue();
+            m_localBaselineScreenshotFilePath = pathOutcome.GetValue();
         }
         else
         {
-            AZ_Error("ScriptReporter", false, "%s", outcome.GetError().m_errorMessage.c_str());
+            AZ_Error("ScriptReporter", false, "%s", pathOutcome.GetError().m_errorMessage.c_str());
         }
     }
 
@@ -1022,7 +1022,7 @@ namespace AtomSampleViewer
         }
         else
         {
-            AZ::Outcome<AZStd::string, AZ::Render::FrameCaptureTestError> pathOutcome;
+            AZ::Render::FrameCapturePathOutcome pathOutcome;
 
             AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
                 pathOutcome,
@@ -1078,7 +1078,7 @@ namespace AtomSampleViewer
         }
         else
         {
-            AZ::Outcome<AZ::Utils::ImageDiffResult, AZ::Render::FrameCaptureTestError> compOutcome;
+            AZ::Render::FrameCaptureComparisonOutcome compOutcome;
             AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
                 compOutcome,
                 &AZ::Render::FrameCaptureTestRequestBus::Events::CompareScreenshots,
@@ -1124,7 +1124,7 @@ namespace AtomSampleViewer
         {
             // Local screenshots should be expected match 100% every time, otherwise warnings are reported. This will help developers track and investigate changes,
             // for example if they make local changes that impact some unrelated AtomSampleViewer sample in an unexpected way, they will see a warning about this.
-            AZ::Outcome<AZ::Utils::ImageDiffResult, AZ::Render::FrameCaptureTestError> compOutcome;
+            AZ::Render::FrameCaptureComparisonOutcome compOutcome;
             AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
                 compOutcome,
                 &AZ::Render::FrameCaptureTestRequestBus::Events::CompareScreenshots,

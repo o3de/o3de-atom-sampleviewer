@@ -308,7 +308,7 @@ namespace AtomSampleViewer
 
         m_capturedColorAsString.clear();
 
-        AZ::Outcome<AZ::Render::FrameCaptureId, AZ::Render::FrameCaptureError> capOutcome;
+        AZ::Render::FrameCaptureOutcome capOutcome;
         AZ::Render::FrameCaptureRequestBus::BroadcastResult(
             capOutcome,
             &AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachmentWithCallback,

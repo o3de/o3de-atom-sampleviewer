@@ -667,7 +667,7 @@ namespace AtomSampleViewer
             }
             else if (m_countdownForFrameCapture == 0)
             {
-                AZ::Outcome<AZ::Render::FrameCaptureId, AZ::Render::FrameCaptureError> capOutcome;
+                AZ::Render::FrameCaptureOutcome capOutcome;
                 AZ::Render::FrameCaptureRequestBus::BroadcastResult(capOutcome, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, m_frameCaptureFilePath);
                 if (capOutcome.IsSuccess()) // if unsuccessfull leave state to attempt again next tick
                 {
