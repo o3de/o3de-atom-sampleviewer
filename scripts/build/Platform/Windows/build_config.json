@@ -35,5 +35,26 @@
       "CMAKE_NATIVE_BUILD_ARGS": "/m /nologo",
       "CMAKE_LY_PROJECTS": "AtomSampleViewer"
     }
+  },
+  "asv_test_gpu_profile": {
+    "TAGS":[
+      "periodic-clean-daily-internal"
+    ],
+    "PIPELINE_ENV":{
+      "NODE_LABEL":"windows-gpu"
+    },
+    "COMMAND": "build_test_windows.cmd",
+    "PARAMETERS": {
+      "CONFIGURATION": "profile",
+      "OUTPUT_DIRECTORY": "build\\windows",
+      "CMAKE_OPTIONS": "-G \"Visual Studio 16 2019\" -DCMAKE_SYSTEM_VERSION=10.0",
+      "CMAKE_LY_PROJECTS": "AtomSampleViewer",
+      "CMAKE_TARGET": "TEST_SUITE_smoke TEST_SUITE_main",
+      "CMAKE_NATIVE_BUILD_ARGS": "/m /nologo",
+      "CTEST_OPTIONS": "-L \"(SUITE_smoke_REQUIRES_gpu|SUITE_main_REQUIRES_gpu)\" -T Test --no-tests=error",
+      "TEST_METRICS": "True",
+      "TEST_RESULTS": "True",
+      "TEST_SCREENSHOTS": "True"
+    }
   }
 }
