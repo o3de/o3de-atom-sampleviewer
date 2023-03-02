@@ -315,7 +315,11 @@ namespace AtomSampleViewer
     {
         AZStd::string filePath = m_imguiFrameCaptureSaver.GetSaveFilePath();
         AZStd::string slot = "Output";
-        AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachment, m_capturePassHierarchy, slot, filePath,
+        AZ::Render::FrameCaptureRequestBus::Broadcast(
+            &AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachment,
+            filePath,
+            m_capturePassHierarchy,
+            slot,
             AZ::RPI::PassAttachmentReadbackOption::Output);
     }
 

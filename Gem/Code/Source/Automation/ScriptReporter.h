@@ -104,9 +104,11 @@ namespace AtomSampleViewer
             };
 
             ResultCode m_resultCode = ResultCode::None;
-            float m_standardDiffScore = 0.0f;
-            float m_filteredDiffScore = 0.0f; //!< The diff score after filtering out visually imperceptible differences.
-            float m_finalDiffScore = 0.0f; //! The diff score that was used for comparison. May be m_diffScore or m_filteredDiffScore.
+            //! The diff score that was used for comparison..
+            //! The diff score can be before or after filtering out visually imperceptible differences,
+            //! depending on the tolerance level settings.
+            //! See CalcImageDiffRms.
+            float m_diffScore = 0.0f;
 
             AZStd::string GetSummaryString() const;
         };

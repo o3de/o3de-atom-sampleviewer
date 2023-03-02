@@ -307,12 +307,17 @@ namespace AtomSampleViewer
         };
 
         m_capturedColorAsString.clear();
-        bool startedCapture = false;
+
+        AZ::Render::FrameCaptureOutcome capOutcome;
         AZ::Render::FrameCaptureRequestBus::BroadcastResult(
-            startedCapture, &AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachmentWithCallback, m_passHierarchy,
-            AZStd::string("Output"), captureCallback, AZ::RPI::PassAttachmentReadbackOption::Output);
-        AZ_Error(LogName, startedCapture, "Failed to start CapturePassAttachmentWithCallback");
-        return startedCapture;
+            capOutcome,
+            &AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachmentWithCallback,
+            captureCallback,
+            m_passHierarchy,
+            AZStd::string("Output"),
+            AZ::RPI::PassAttachmentReadbackOption::Output);
+        AZ_Error(LogName, capOutcome.IsSuccess(), "%s", capOutcome.GetError().m_errorMessage.c_str());
+        return capOutcome.IsSuccess();
     }
 
     uint32_t ShaderReloadTestComponent::ReadPixel(const uint8_t* rawRGBAPixelData, const AZ::RHI::ImageDescriptor& imageDescriptor, uint32_t x, uint32_t y) const
