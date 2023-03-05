@@ -50,7 +50,7 @@ DeferredMaterialOutput MaterialPS(VsOutput IN, bool isFrontFace : SV_IsFrontFace
 
     PixelGeometryData geoData = EvaluatePixelGeometry(IN, isFrontFace);
 
-    Surface surface = EvaluateSurface(geoData);
+    Surface surface = EvaluateSurface(IN, geoData);
 
     // ------- Output -------
 
