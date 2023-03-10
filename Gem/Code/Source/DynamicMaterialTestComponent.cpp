@@ -95,15 +95,10 @@ namespace AtomSampleViewer
         AZ::Data::Asset<AZ::RPI::MaterialAsset>& materialAsset = m_materialConfigs[m_currentMaterialConfig].m_materialAsset;
         AZ::Data::Instance<AZ::RPI::Material> material = Material::Create(materialAsset);
          
-        Render::MaterialAssignmentMap materialMap;
-        Render::MaterialAssignment& defaultMaterial = materialMap[Render::DefaultMaterialAssignmentId];
-        defaultMaterial.m_materialAsset = materialAsset;
-        defaultMaterial.m_materialInstance = material;
-
         Render::MeshHandleDescriptor meshDescriptor;
         meshDescriptor.m_modelAsset = m_modelAsset;
         meshDescriptor.m_isRayTracingEnabled = false;
-        auto meshHandle = GetMeshFeatureProcessor()->AcquireMesh(meshDescriptor, materialMap);
+        auto meshHandle = GetMeshFeatureProcessor()->AcquireMesh(meshDescriptor, material);
         GetMeshFeatureProcessor()->SetTransform(meshHandle, transform);
 
         Data::Instance<RPI::Model> model = GetMeshFeatureProcessor()->GetModel(meshHandle);

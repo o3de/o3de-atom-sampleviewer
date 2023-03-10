@@ -267,7 +267,7 @@ namespace AtomSampleViewer
         m_modelAsset = {};
         m_groundPlaneModelAsset = {};
 
-        m_materialOverrideInstance = nullptr;
+        m_customMaterialInstance = nullptr;
 
         ShutdownLightingPresets();
     }
@@ -415,7 +415,7 @@ namespace AtomSampleViewer
             ImGui::Separator();
             ImGui::Spacing();
 
-            if (m_materialOverrideInstance && ImGui::Button("Material Details..."))
+            if (m_customMaterialInstance && ImGui::Button("Material Details..."))
             {
                 m_imguiMaterialDetails.OpenDialog();
             }
@@ -458,11 +458,11 @@ namespace AtomSampleViewer
         {
             AZ::Data::Asset<AZ::RPI::MaterialAsset> materialAsset;
             materialAsset.Create(selectedMaterialAssetId);
-            m_materialOverrideInstance = AZ::RPI::Material::FindOrCreate(materialAsset);
+            m_customMaterialInstance = AZ::RPI::Material::FindOrCreate(materialAsset);
         }
         else
         {
-            m_materialOverrideInstance = nullptr;
+            m_customMaterialInstance = nullptr;
         }
 
 
@@ -472,14 +472,14 @@ namespace AtomSampleViewer
 
             m_modelAsset.Create(m_modelBrowser.GetSelectedAssetId());
             GetMeshFeatureProcessor()->ReleaseMesh(m_meshHandle);
-            m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_modelAsset }, m_materialOverrideInstance);
+            m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_modelAsset }, m_customMaterialInstance);
             GetMeshFeatureProcessor()->SetTransform(m_meshHandle, AZ::Transform::CreateIdentity());
             GetMeshFeatureProcessor()->ConnectModelChangeEventHandler(m_meshHandle, m_changedHandler);
             GetMeshFeatureProcessor()->SetMeshLodConfiguration(m_meshHandle, m_lodConfig);
         }
         else
         {
-            GetMeshFeatureProcessor()->SetMaterialAssignmentMap(m_meshHandle, m_materialOverrideInstance);
+            GetMeshFeatureProcessor()->SetCustomMaterials(m_meshHandle, m_customMaterialInstance);
         }
     }
     

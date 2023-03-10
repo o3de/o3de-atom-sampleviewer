@@ -178,26 +178,21 @@ namespace AtomSampleViewer
 
     void DepthOfFieldExampleComponent::RemoveController()
     {
-        AZ::Debug::CameraControllerRequestBus::Event(
-            GetCameraEntityId(),
-            &AZ::Debug::CameraControllerRequestBus::Events::Disable);
+        AZ::Debug::CameraControllerRequestBus::Event(GetCameraEntityId(), &AZ::Debug::CameraControllerRequestBus::Events::Disable);
     }
 
     void DepthOfFieldExampleComponent::CreateMeshes()
     {
         using namespace AZ;
 
-        Render::MaterialAssignmentMap materials;
-        Render::MaterialAssignment& defaultMaterial = materials[AZ::Render::DefaultMaterialAssignmentId];
-        defaultMaterial.m_materialAsset = m_materialAsset;
-        defaultMaterial.m_materialInstance = RPI::Material::FindOrCreate(defaultMaterial.m_materialAsset);
+        auto materialInstance = RPI::Material::FindOrCreate(m_materialAsset);
 
         Vector3 translation = Vector3::CreateZero();
         Transform scaleTransform = Transform::CreateUniformScale(ModelScaleRatio);
 
         for (MeshHandle& meshHandle : m_meshHandles)
         {
-            meshHandle = GetMeshFeatureProcessor()->AcquireMesh(Render::MeshHandleDescriptor{ m_bunnyModelAsset }, materials);
+            meshHandle = GetMeshFeatureProcessor()->AcquireMesh(Render::MeshHandleDescriptor{ m_bunnyModelAsset }, materialInstance);
 
             auto transform = AZ::Transform::CreateTranslation(translation);
             transform *= scaleTransform;
