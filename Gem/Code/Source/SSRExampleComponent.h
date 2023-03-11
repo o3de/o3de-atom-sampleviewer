@@ -46,7 +46,7 @@ namespace AtomSampleViewer
 
         void OnModelReady(AZ::Data::Instance<AZ::RPI::Model> model);
         void DrawSidebar();
-        void EnableSSR(bool enabled);
+        void UpdateSSROptions();
 
         // meshes
         AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_statueMeshHandle;
@@ -64,7 +64,11 @@ namespace AtomSampleViewer
 
         ImGuiSidebar m_imguiSidebar;
         bool m_enableSSR = true;
+        bool m_rayTracing = false;
+        bool m_rayTraceFallbackData = true;
         bool m_resetCamera = true;
         float m_originalFarClipDistance = 0.0f;
+        float m_maxDepthThreshold = 0.4f;
+        float m_temporalFilteringStrength = 0.25f;
     };
 } // namespace AtomSampleViewer
