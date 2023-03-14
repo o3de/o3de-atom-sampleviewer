@@ -46,22 +46,18 @@ namespace AtomSampleViewer
         AZ::RPI::AssetUtils::TraceLevel traceLevel = AZ::RPI::AssetUtils::TraceLevel::Assert;
         auto meshAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/shaderball_simple.azmodel", traceLevel);
         auto materialAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::MaterialAsset>(DefaultPbrMaterialPath, traceLevel);
-
-        AZ::Render::MaterialAssignmentMap materials;
-        AZ::Render::MaterialAssignment& defaultMaterial = materials[AZ::Render::DefaultMaterialAssignmentId];
-        defaultMaterial.m_materialAsset = materialAsset;
-        defaultMaterial.m_materialInstance = AZ::RPI::Material::FindOrCreate(defaultMaterial.m_materialAsset);
+        auto materialInstance = AZ::RPI::Material::FindOrCreate(materialAsset);
 
         m_meshFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::MeshFeatureProcessorInterface>();
-        m_meshHandle = m_meshFeatureProcessor->AcquireMesh(AZ::Render::MeshHandleDescriptor{ meshAsset }, materials);
+        m_meshHandle = m_meshFeatureProcessor->AcquireMesh(AZ::Render::MeshHandleDescriptor{ meshAsset }, materialInstance);
         m_meshFeatureProcessor->SetTransform(m_meshHandle, AZ::Transform::CreateIdentity());
-        
-        AZ::Debug::CameraControllerRequestBus::Event(GetCameraEntityId(), &AZ::Debug::CameraControllerRequestBus::Events::Enable,
+
+        AZ::Debug::CameraControllerRequestBus::Event(
+            GetCameraEntityId(), &AZ::Debug::CameraControllerRequestBus::Events::Enable,
             azrtti_typeid<AZ::Debug::ArcBallControllerComponent>());
 
         // Add an Image based light.
         m_defaultIbl.Init(m_scene);
-
 
         AZ::TickBus::Handler::BusConnect();
 

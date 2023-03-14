@@ -126,7 +126,7 @@ namespace AtomSampleViewer
         bool m_useMultiViewXRPipeline = false;
         bool m_switchPipeline = false;
 
-        AZ::Data::Instance<AZ::RPI::Material> m_materialOverrideInstance; //< Holds a copy of the material instance being used when m_enableMaterialOverride is true.
+        AZ::Data::Instance<AZ::RPI::Material> m_customMaterialInstance; //< Holds a copy of the material instance being used when m_enableMaterialOverride is true.
         AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_meshHandle;
         AZ::Data::Asset<AZ::RPI::ModelAsset> m_modelAsset;
 

@@ -12,7 +12,6 @@
 #include <SampleComponentConfig.h>
 #include <SampleComponentManager.h>
 
-#include <Atom/Feature/Material/MaterialAssignment.h>
 #include <Atom/RPI.Reflect/Asset/AssetUtils.h>
 #include <Atom/RPI.Reflect/Material/MaterialAsset.h>
 #include <Atom/RPI.Reflect/Model/ModelAsset.h>
@@ -215,7 +214,7 @@ namespace AtomSampleViewer
             AZ::Data::Asset<AZ::RPI::MaterialAsset> materialAsset;
             materialAsset.Create(selectedMaterialAssetId);
             m_material = AZ::RPI::Material::FindOrCreate(materialAsset);
-            m_meshFeatureProcessor->SetMaterialAssignmentMap(m_meshHandle, m_material);
+            m_meshFeatureProcessor->SetCustomMaterials(m_meshHandle, m_material);
         }
     }
 } // namespace AtomSampleViewer
