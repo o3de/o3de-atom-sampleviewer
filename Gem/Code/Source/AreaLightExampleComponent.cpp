@@ -26,7 +26,6 @@
 #include <Atom/Component/DebugCamera/NoClipControllerComponent.h>
 
 #include <imgui/imgui.h>
-#include <Atom/Feature/Material/MaterialAssignment.h>
 
 #include <RHI/BasicRHIComponent.h>
 

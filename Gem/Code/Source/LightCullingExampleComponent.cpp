@@ -82,14 +82,6 @@ namespace AtomSampleViewer
         color.SetA(AuxGeomDebugAlpha);
         return color;
     }
-    static AZ::Render::MaterialAssignmentMap CreateMaterialAssignmentMap(const char* materialPath)
-    {
-        Render::MaterialAssignmentMap materials;
-        Render::MaterialAssignment& defaultMaterialAssignment = materials[AZ::Render::DefaultMaterialAssignmentId];
-        defaultMaterialAssignment.m_materialAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::MaterialAsset>(materialPath, RPI::AssetUtils::TraceLevel::Assert);
-        defaultMaterialAssignment.m_materialInstance = RPI::Material::FindOrCreate(defaultMaterialAssignment.m_materialAsset);
-        return materials;
-    }
 
     LightCullingExampleComponent::LightCullingExampleComponent()
     {
@@ -790,10 +782,12 @@ namespace AtomSampleViewer
         Data::Asset<RPI::ModelAsset> transparentModelAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>(TransparentModelName, RPI::AssetUtils::TraceLevel::Assert);
 
         // Override the shader ball material with a transparent material
-        Render::MaterialAssignmentMap materialAssignmentMap = CreateMaterialAssignmentMap(TransparentMaterialName);
+        auto materialAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::MaterialAsset>(TransparentMaterialName, RPI::AssetUtils::TraceLevel::Assert);
+        auto materialInstance = RPI::Material::FindOrCreate(materialAsset);
+
         for (const AZ::Vector3& position : TransparentModelPositions)
         {
-            AZ::Render::MeshFeatureProcessorInterface::MeshHandle meshHandle = GetMeshFeatureProcessor()->AcquireMesh(MeshHandleDescriptor{ transparentModelAsset }, materialAssignmentMap);
+            AZ::Render::MeshFeatureProcessorInterface::MeshHandle meshHandle = GetMeshFeatureProcessor()->AcquireMesh(MeshHandleDescriptor{ transparentModelAsset }, materialInstance);
             GetMeshFeatureProcessor()->SetTransform(meshHandle, Transform::CreateTranslation(position));
             m_transparentMeshHandles.push_back(std::move(meshHandle));
         }
