@@ -11,7 +11,7 @@
         "baseColor.factor": 0.75,
         "metallic.factor": 1.0,
         "normal.textureMap": "Textures/Default/default_normal.tif",
-        "roughness.factor": 0.20000000298023224,
+        "roughness.factor": 0.40000000298023224,
         "specularF0.enableMultiScatterCompensation": true,
         "specularF0.factor": 1.0
     }
