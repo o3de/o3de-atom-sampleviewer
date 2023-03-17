@@ -40,15 +40,4 @@ namespace AtomSampleViewer
         }
         return "MainPipeline";
     }
-
-    int SampleComponentManager::GetDefaultNumMSAASamples()
-    {
-        // Use sample count of 1 for VR pipelines
-        AZ::RPI::XRRenderingInterface* xrSystem = AZ::RPI::RPISystemInterface::Get()->GetXRSystem();
-        if (xrSystem)
-        {
-            return 1;
-        }
-        return 4;
-    }
 } // namespace AtomSampleViewer

@@ -403,8 +403,6 @@ namespace AtomSampleViewer
         AZ_Assert(passSystem, "Cannot get the pass system.");
 
         passSystem->AddPassCreator(Name("RayTracingAmbientOcclusionPass"), &AZ::Render::RayTracingAmbientOcclusionPass::Create);
-
-        m_numMSAASamples = GetDefaultNumMSAASamples();
     }
 
     void SampleComponentManager::ActivateInternal()
@@ -1308,7 +1306,7 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::ResetNumMSAASamples()
     {
-        m_numMSAASamples = GetDefaultNumMSAASamples();
+        m_numMSAASamples = 1;
     }
 
     void SampleComponentManager::ResetRPIScene()

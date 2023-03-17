@@ -182,7 +182,6 @@ namespace AtomSampleViewer
         void AdjustImGuiFontScale();
         const char* GetRootPassTemplateName();
         const char* GetMaterialPipelineName();
-        int GetDefaultNumMSAASamples();
 
         // ---------- variables -----------------
 
@@ -270,8 +269,8 @@ namespace AtomSampleViewer
         // Scene and some variables for RPI samples
         AZ::RPI::ScenePtr m_rpiScene;
 
-        // number of MSAA samples, initialized in Activate() and can vary by platform
-        int m_numMSAASamples = 0;
+        // number of MSAA samples
+        int m_numMSAASamples = 1;
 
         // Cache PC and XR pipelines
         AZ::RPI::RenderPipelinePtr m_renderPipeline = nullptr;
