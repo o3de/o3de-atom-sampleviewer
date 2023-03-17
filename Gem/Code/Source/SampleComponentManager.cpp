@@ -1301,17 +1301,27 @@ namespace AtomSampleViewer
     {
         AZ_Assert(IsValidNumMSAASamples(numMSAASamples), "Invalid MSAA sample setting");
 
-        m_numMSAASamples = numMSAASamples;
+        m_numMsaaSamples = numMSAASamples;
     }
 
     int16_t SampleComponentManager::GetNumMSAASamples()
     {
-        return m_numMSAASamples;
+        return m_numMsaaSamples;
+    }
+
+    void SampleComponentManager::SetDefaultNumMSAASamples(int16_t defaultNumMsaaSamples)
+    {
+        m_defaultNumMsaaSamples = defaultNumMsaaSamples;
+    }
+
+    int16_t SampleComponentManager::GetDefaultNumMSAASamples()
+    {
+        return m_defaultNumMsaaSamples;
     }
 
     void SampleComponentManager::ResetNumMSAASamples()
     {
-        m_numMSAASamples = 1;
+        m_numMsaaSamples = m_defaultNumMsaaSamples;
     }
 
     void SampleComponentManager::ResetRPIScene()
@@ -1730,8 +1740,8 @@ namespace AtomSampleViewer
         RPI::RPISystemInterface::Get()->RegisterScene(m_rpiScene);
 
         // set pipeline MSAA samples
-        AZ_Assert(IsValidNumMSAASamples(m_numMSAASamples), "Invalid MSAA sample setting");
-        const bool isNonMsaaPipeline = (m_numMSAASamples == 1);
+        AZ_Assert(IsValidNumMSAASamples(m_numMsaaSamples), "Invalid MSAA sample setting");
+        const bool isNonMsaaPipeline = (m_numMsaaSamples == 1);
         const char* supervariantName = isNonMsaaPipeline ? AZ::RPI::NoMsaaSupervariantName : "";
         AZ::RPI::ShaderSystemInterface::Get()->SetSupervariantName(AZ::Name(supervariantName));
 
@@ -1747,7 +1757,7 @@ namespace AtomSampleViewer
             pipelineDesc.m_materialPipelineTag = GetMaterialPipelineName();
             pipelineDesc.m_mainViewTagName = "MainCamera";
             pipelineDesc.m_allowModification = true;
-            pipelineDesc.m_renderSettings.m_multisampleState.m_samples = static_cast<uint16_t>(m_numMSAASamples);
+            pipelineDesc.m_renderSettings.m_multisampleState.m_samples = static_cast<uint16_t>(m_numMsaaSamples);
 
             m_renderPipeline = RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext.get());
             m_rpiScene->AddRenderPipeline(m_renderPipeline);
@@ -1776,7 +1786,7 @@ namespace AtomSampleViewer
 
             RPI::RenderPipelineDescriptor xrPipelineDesc;
             xrPipelineDesc.m_mainViewTagName = "MainCamera";
-            xrPipelineDesc.m_renderSettings.m_multisampleState.m_samples = static_cast<uint16_t>(m_numMSAASamples);
+            xrPipelineDesc.m_renderSettings.m_multisampleState.m_samples = static_cast<uint16_t>(m_numMsaaSamples);
 
             // Build the pipeline for left eye
             xrPipelineDesc.m_name = "RPISamplePipelineXRLeft";
