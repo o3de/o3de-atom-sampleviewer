@@ -155,7 +155,7 @@ namespace AtomSampleViewer
         constexpr const char* SampleSetting = "/O3DE/AtomSampleViewer/Sample";
     }
 
-    bool IsValidNumMSAASamples(int numSamples)
+    bool IsValidNumMSAASamples(int16_t numSamples)
     {
         return (numSamples == 1) || (numSamples == 2) || (numSamples == 4) || (numSamples == 8);
     }
@@ -1297,11 +1297,16 @@ namespace AtomSampleViewer
         }
     }
 
-    void SampleComponentManager::SetNumMSAASamples(int numMSAASamples)
+    void SampleComponentManager::SetNumMSAASamples(int16_t numMSAASamples)
     {
         AZ_Assert(IsValidNumMSAASamples(numMSAASamples), "Invalid MSAA sample setting");
 
         m_numMSAASamples = numMSAASamples;
+    }
+
+    int16_t SampleComponentManager::GetNumMSAASamples()
+    {
+        return m_numMSAASamples;
     }
 
     void SampleComponentManager::ResetNumMSAASamples()

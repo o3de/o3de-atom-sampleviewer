@@ -157,7 +157,8 @@ namespace AtomSampleViewer
         void RequestFrameCapture(const AZStd::string& filePath, bool hideImGui) override;
         bool IsFrameCapturePending() override;
         void RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd, int randomSeed) override;
-        void SetNumMSAASamples(int numMSAASamples) override;
+        void SetNumMSAASamples(int16_t numMSAASamples) override;
+        int16_t GetNumMSAASamples() override;
         void ResetNumMSAASamples() override;
         void ResetRPIScene() override;
         void ClearRPIScene() override;
@@ -270,7 +271,7 @@ namespace AtomSampleViewer
         AZ::RPI::ScenePtr m_rpiScene;
 
         // number of MSAA samples
-        int m_numMSAASamples = 1;
+        int16_t m_numMSAASamples = 1;
 
         // Cache PC and XR pipelines
         AZ::RPI::RenderPipelinePtr m_renderPipeline = nullptr;
