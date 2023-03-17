@@ -122,12 +122,6 @@ if(PAL_TRAIT_BUILD_SUPPORTS_TESTS)
 endif()
 
 
-################################################################################
-# Gem dependencies
-################################################################################
-
-ly_enable_gems(PROJECT_NAME AtomSampleViewer GEM_FILE enabled_gems.cmake)
-
 # If we build a server, then apply the gems to the server
 if(PAL_TRAIT_BUILD_SERVER_SUPPORTED)
     set_property(GLOBAL APPEND PROPERTY LY_LAUNCHER_SERVER_PROJECTS AtomSampleViewer)
