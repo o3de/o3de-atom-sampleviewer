@@ -157,7 +157,11 @@ namespace AtomSampleViewer
         void RequestFrameCapture(const AZStd::string& filePath, bool hideImGui) override;
         bool IsFrameCapturePending() override;
         void RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd, int randomSeed) override;
-        void SetNumMSAASamples(int numMSAASamples) override;
+        void SetNumMSAASamples(int16_t numMsaaSamples) override;
+        int16_t GetNumMSAASamples() override;
+        void SetDefaultNumMSAASamples(int16_t defaultNumMsaaSamples) override;
+        int16_t GetDefaultNumMSAASamples() override;
+
         void ResetNumMSAASamples() override;
         void ResetRPIScene() override;
         void ClearRPIScene() override;
@@ -182,7 +186,6 @@ namespace AtomSampleViewer
         void AdjustImGuiFontScale();
         const char* GetRootPassTemplateName();
         const char* GetMaterialPipelineName();
-        int GetDefaultNumMSAASamples();
 
         // ---------- variables -----------------
 
@@ -270,8 +273,9 @@ namespace AtomSampleViewer
         // Scene and some variables for RPI samples
         AZ::RPI::ScenePtr m_rpiScene;
 
-        // number of MSAA samples, initialized in Activate() and can vary by platform
-        int m_numMSAASamples = 0;
+        // number of MSAA samples
+        int16_t m_numMsaaSamples = 1; 
+        int16_t m_defaultNumMsaaSamples = 1;
 
         // Cache PC and XR pipelines
         AZ::RPI::RenderPipelinePtr m_renderPipeline = nullptr;

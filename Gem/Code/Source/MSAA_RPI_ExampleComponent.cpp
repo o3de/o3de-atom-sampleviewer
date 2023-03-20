@@ -98,7 +98,7 @@ namespace AtomSampleViewer
         if (isNonMsaaPipeline != m_isNonMsaaPipeline)
         {      
             // set the number of MSAA samples and reset the RPI scene
-            SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequests::SetNumMSAASamples, m_numSamples);
+            SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequests::SetNumMSAASamples, static_cast<uint16_t>(m_numSamples));
             SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequests::ResetRPIScene);
 
             // reset internal sample scene related data

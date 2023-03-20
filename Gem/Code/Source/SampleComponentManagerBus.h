@@ -41,7 +41,16 @@ namespace AtomSampleViewer
 
         //! Set the number of MSAA samples
         //! @param numMSAASamples the number of MSAA samples
-        virtual void SetNumMSAASamples(int numMSAASamples) = 0;
+        virtual void SetNumMSAASamples(int16_t numMsaaSamples) = 0;
+
+        //! Gets the number of MSAA samples
+        virtual int16_t GetNumMSAASamples() = 0;
+
+        //! Sets the default number of MSAA samples
+        virtual void SetDefaultNumMSAASamples(int16_t defaultNumMsaaSamples) = 0;
+
+        //! Gets the default number of MSAA samples
+        virtual int16_t GetDefaultNumMSAASamples() = 0;
 
         //! Set the number of MSAA samples to the platform default
         virtual void ResetNumMSAASamples() = 0;

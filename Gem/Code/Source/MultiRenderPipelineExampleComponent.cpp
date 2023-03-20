@@ -304,7 +304,12 @@ namespace AtomSampleViewer
         pipelineDesc.m_mainViewTagName = "MainCamera";
         pipelineDesc.m_name = "SecondPipeline";
         pipelineDesc.m_rootPassTemplate = "MainPipeline";
-        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 4;
+
+        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 1;
+        SampleComponentManagerRequestBus::BroadcastResult(
+            pipelineDesc.m_renderSettings.m_multisampleState.m_samples,
+            &SampleComponentManagerRequests::GetNumMSAASamples);
+
         pipelineDesc.m_allowModification = true;
         m_secondPipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_secondWindowContext);
 

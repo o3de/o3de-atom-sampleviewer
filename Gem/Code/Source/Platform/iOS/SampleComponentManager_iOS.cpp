@@ -33,9 +33,4 @@ namespace AtomSampleViewer
     {
         return "LowEndPipeline";
     }
-
-    int SampleComponentManager::GetDefaultNumMSAASamples()
-    {
-        return 1;
-    }
 } // namespace AtomSampleViewer
