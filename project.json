@@ -1,10 +1,10 @@
 {
     "project_name": "AtomSampleViewer",
     "project_id": "{D882E365-54D6-586E-BD78-2650F3057D49}",
-    "origin": "The primary repo for AtomSampleViewer goes here: i.e. http://www.mydomain.com",
-    "license": "What license AtomSampleViewer uses goes here: i.e. https://opensource.org/licenses/Apache-2.0 Or https://opensource.org/licenses/MIT etc.",
+    "origin": "https://github.com/o3de/o3de-atom-sampleviewer",
+    "license": "https://opensource.org/licenses/Apache-2.0 Or https://opensource.org/licenses/MIT etc.",
     "display_name": "AtomSampleViewer",
-    "summary": "A short description of AtomSampleViewer.",
+    "summary": "AtomSampleViewer project.",
     "canonical_tags": [
         "Project"
     ],
@@ -13,8 +13,28 @@
     ],
     "icon_path": "preview.png",
     "engine": "o3de",
-    "external_subdirectories": [],
+    "external_subdirectories": [
+        "Gem"
+    ],
     "gem_names": [
+        "Maestro",
+        "TextureAtlas",
+        "LmbrCentral",
+        "LyShine",
+        "Camera",
+        "EMotionFX",
+        "Atom",
+        "AtomSampleViewer",
+        "SceneProcessing",
+        "EditorPythonBindings",
+        "ImGui",
+        "Profiler",
+        "Sponza",
+        "MaterialEditor",
+        "UiBasics",
+        "StreamerProfiler",
+        "DiffuseProbeGrid",
+        "Atom_TestData",
         {
             "name": "OpenXRVk",
             "optional": true
