@@ -34,6 +34,7 @@
 
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/RHISystemInterface.h>
+#include <Atom/RHI/RHIMemoryStatisticsInterface.h>
 #include <Atom/RHI/RHIUtils.h>
 #include <Atom/RHI.Reflect/AliasedHeapEnums.h>
 
@@ -1180,7 +1181,7 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::ShowTransientAttachmentProfilerWindow()
     {
-        auto* transientStats = AZ::RHI::RHISystemInterface::Get()->GetTransientAttachmentStatistics();
+        auto* transientStats = AZ::RHI::RHIMemoryStatisticsInterface::Get()->GetTransientAttachmentStatistics();
         if (transientStats)
         {
             m_showTransientAttachmentProfiler = m_imguiTransientAttachmentProfiler.Draw(*transientStats);
