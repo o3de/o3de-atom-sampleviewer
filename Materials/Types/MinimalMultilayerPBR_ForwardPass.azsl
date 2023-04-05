@@ -89,11 +89,11 @@ VSOutput MinimalMultilayerPBR_MainPassVS(VSInput IN, uint instanceId : SV_Instan
 
 ForwardPassOutput MinimalMultilayerPBR_MainPassPS(VSOutput IN)
 {
-    float4x4 objectToWorld = GetObjectToWorldMatrix(IN.m_instanceId);
-    float3x3 objectToWorldIT = GetObjectToWorldMatrixInverseTranspose(IN.m_instanceId);
+    real4x4 objectToWorld = real4x4(GetObjectToWorldMatrix(IN.m_instanceId));
+    real3x3 objectToWorldIT = real3x3(GetObjectToWorldMatrixInverseTranspose(IN.m_instanceId));
 
     float3 vertexNormal, vertexTangent, vertexBitangent;
-    ConstructTBN(IN.m_normal, IN.m_tangent, objectToWorld, objectToWorldIT, vertexNormal, vertexTangent, vertexBitangent);
+    ConstructTBN(real3(IN.m_normal), real4(IN.m_tangent), objectToWorld, objectToWorldIT, vertexNormal, vertexTangent, vertexBitangent);
 
     float3 baseColor1 = GetBaseColorInput(MaterialSrg::m_layer1_baseColorTexture, MaterialSrg::m_sampler, IN.m_uv, MaterialSrg::m_layer1_baseColor, o_layer1_useBaseColorTexture);
     float3 baseColor2 = GetBaseColorInput(MaterialSrg::m_layer2_baseColorTexture, MaterialSrg::m_sampler, IN.m_uv, MaterialSrg::m_layer2_baseColor, o_layer2_useBaseColorTexture);
