@@ -109,7 +109,6 @@ namespace AtomSampleViewer
         pipelineDesc.m_name = "DeferredPipeline";
         pipelineDesc.m_materialPipelineTag = "DeferredPipeline";
         pipelineDesc.m_rootPassTemplate = "DeferredPipelineTemplate";
-        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 4;
         pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 1;
         SampleComponentManagerRequestBus::BroadcastResult(
             pipelineDesc.m_renderSettings.m_multisampleState.m_samples,
