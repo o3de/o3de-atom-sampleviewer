@@ -27,6 +27,7 @@
 #include <AzCore/Script/ScriptAsset.h>
 #include <AzCore/Math/MathReflection.h>
 #include <AzCore/Console/IConsole.h>
+#include <AzCore/Time/ITime.h>
 
 #include <AzFramework/API/ApplicationAPI.h>
 #include <AzFramework/Components/ConsoleBus.h>
@@ -1253,9 +1254,10 @@ namespace AtomSampleViewer
         {
             AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
 
-            int milliseconds = static_cast<int>(seconds * 1000);
-
-            AZ::Interface<AZ::IConsole>::Get()->PerformCommand(AZStd::string::format("t_simulationTickDeltaOverride %d", milliseconds).c_str());
+            AZ::TimeUs us = AZ::SecondsToTimeUs(seconds);
+            
+            AZ::CVarFixedString commandString = AZ::CVarFixedString::format("t_simulationTickDeltaOverride %" PRId64, static_cast<int64_t>(us));
+            AZ::Interface<AZ::IConsole>::Get()->PerformCommand(commandString.c_str());
             s_instance->m_frameTimeIsLocked = true;
         };
 
@@ -1530,7 +1532,7 @@ namespace AtomSampleViewer
                 AZ::Render::FrameCaptureRequestBus::BroadcastResult(capOutcome, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, screenshotFilePath);
                 if (!capOutcome.IsSuccess())
                 {
-                    ReportScriptError(AZStd::string::format("Failed to initiate frame capture for '%s'", screenshotFilePath.c_str()));
+                    ReportScriptError(AZStd::string::format("Failed to initiate screenshot capture for '%s: %s'", screenshotFilePath.c_str(), capOutcome.GetError().m_errorMessage.c_str()));
                     s_instance->m_isCapturePending = false;
                     s_instance->m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
                     s_instance->ResumeScript();
@@ -1589,7 +1591,7 @@ namespace AtomSampleViewer
                 AZ::Render::FrameCaptureRequestBus::BroadcastResult(capOutcome, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, screenshotFilePath);
                 if (!capOutcome.IsSuccess())
                 {
-                    ReportScriptError(AZStd::string::format("Failed to initiate frame capture for '%s'", screenshotFilePath.c_str()));
+                    ReportScriptError(AZStd::string::format("Failed to initiate screenshot capture for '%s: %s'", screenshotFilePath.c_str(), capOutcome.GetError().m_errorMessage.c_str()));
                     s_instance->m_isCapturePending = false;
                     s_instance->m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
                     s_instance->ResumeScript();
@@ -1645,7 +1647,7 @@ namespace AtomSampleViewer
                 AZ::Render::FrameCaptureRequestBus::BroadcastResult(capOutcome, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshotWithPreview, screenshotFilePath);
                 if (!capOutcome.IsSuccess())
                 {
-                    ReportScriptError(AZStd::string::format("Failed to initiate frame capture for '%s'", screenshotFilePath.c_str()));
+                    ReportScriptError(AZStd::string::format("Failed to initiate screenshot capture for '%s: %s'", screenshotFilePath.c_str(), capOutcome.GetError().m_errorMessage.c_str()));
                     s_instance->m_isCapturePending = false;
                     s_instance->m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
                     s_instance->ResumeScript();
@@ -1768,7 +1770,7 @@ namespace AtomSampleViewer
                 AZ::Render::FrameCaptureRequestBus::BroadcastResult(capOutcome, &AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachment, screenshotFilePath, passHierarchy, slot, readbackOption);
                 if (!capOutcome.IsSuccess())
                 {
-                    ReportScriptError(AZStd::string::format("Failed to initiate frame capture for '%s'", screenshotFilePath.c_str()));
+                    ReportScriptError(AZStd::string::format("Failed to initiate screenshot capture for '%s: %s'", screenshotFilePath.c_str(), capOutcome.GetError().m_errorMessage.c_str()));
                     s_instance->m_isCapturePending = false;
                     s_instance->m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
                     s_instance->ResumeScript();

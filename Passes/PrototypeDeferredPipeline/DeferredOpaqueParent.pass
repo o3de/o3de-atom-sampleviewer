@@ -247,6 +247,13 @@
                             }
                         },
                         {
+                            "LocalSlot": "DepthLinear",
+                            "AttachmentRef": {
+                                "Pass": "Parent",
+                                "Attachment": "DepthLinear"
+                            }
+                        },
+                        {
                             "LocalSlot": "SpecularInputOutput",
                             "AttachmentRef": {
                                 "Pass": "DeferredLighting",
