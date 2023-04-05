@@ -175,6 +175,7 @@ namespace AtomSampleViewer
                 AZ::Render::MeshHandleDescriptor meshDescriptor;
                 meshDescriptor.m_modelAsset = renderData.m_skinnedMeshInstance->m_model->GetModelAsset();
                 meshDescriptor.m_isRayTracingEnabled = false;
+                meshDescriptor.m_isAlwaysDynamic = true;
                 renderData.m_meshHandle =
                     AZStd::make_shared<AZ::Render::MeshFeatureProcessorInterface::MeshHandle>(m_meshFeatureProcessor->AcquireMesh(
                         meshDescriptor, materialOverrideInstance));

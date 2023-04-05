@@ -345,7 +345,7 @@ namespace AtomSampleViewer
         }
 
         // only need to set the image the first time all images were streamed
-        if (m_streamingImageEnd == 0 && numStreamed == m_numImageCreated && m_numImageCreated > 0)
+        if (m_streamingImageEnd == 0 && numStreamed == m_numImageCreated && m_numImageCreated > 0 && m_numImageAssetQueued == m_numImageCreated)
         {
             m_streamingImageEnd = AZStd::GetTimeUTCMilliSecond();
             for (auto& imageInfo : m_images)
