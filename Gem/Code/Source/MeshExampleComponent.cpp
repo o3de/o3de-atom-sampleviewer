@@ -89,7 +89,10 @@ namespace AtomSampleViewer
         pipelineDesc.m_name = "LowEndPipeline";
         pipelineDesc.m_materialPipelineTag = "LowEndPipeline";
         pipelineDesc.m_rootPassTemplate = "LowEndPipelineTemplate";
-        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 4;
+        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 1;
+        SampleComponentManagerRequestBus::BroadcastResult(
+            pipelineDesc.m_renderSettings.m_multisampleState.m_samples,
+            &SampleComponentManagerRequests::GetNumMSAASamples);
 
         m_lowEndPipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
     }
@@ -107,6 +110,10 @@ namespace AtomSampleViewer
         pipelineDesc.m_materialPipelineTag = "DeferredPipeline";
         pipelineDesc.m_rootPassTemplate = "DeferredPipelineTemplate";
         pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 4;
+        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 1;
+        SampleComponentManagerRequestBus::BroadcastResult(
+            pipelineDesc.m_renderSettings.m_multisampleState.m_samples,
+            &SampleComponentManagerRequests::GetNumMSAASamples);
         pipelineDesc.m_allowModification = true; // MainPipeline allows modifications, so the DeferredPipeline must as well, to get a consistent result.
 
         m_deferredPipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);

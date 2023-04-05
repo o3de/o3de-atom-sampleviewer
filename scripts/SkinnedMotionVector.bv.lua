@@ -36,10 +36,11 @@ SetImguiValue('MeshMotionVectorPass/[InputOutput] [MotionInputOutput] [Image] Ca
 IdleFrames(1) -- Wait one frame to apply imgui change
 
 -- We need to lock the frame time to get deterministic timing of the screenshots for consistency between runs
-LockFrameTime(1/30)
-IdleFrames(1)
+LockFrameTime(1/100)
 
 SetShowImGui(false)
+
+IdleFrames(1)
 
 -- capture image attachment previews at different points in the animation
 TestDelayedCapture(0.2, 'MotionVector1.png')
