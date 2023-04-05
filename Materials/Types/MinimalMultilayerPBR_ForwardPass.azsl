@@ -9,6 +9,7 @@
 #include <viewsrg.srgi>
 #include <Atom/Features/PBR/DefaultObjectSrg.azsli>
 #include <Atom/RPI/ShaderResourceGroups/DefaultDrawSrg.azsli>
+#include <Atom/Features/InstancedTransforms.azsli>
 #include <Atom/Features/Pipeline/Forward/ForwardPassSrg.azsli>
 #include <Atom/Features/Pipeline/Forward/ForwardPassOutput.azsli>
 #include <Atom/Features/PBR/AlphaUtils.azsli>
@@ -71,7 +72,7 @@ VSOutput MinimalMultilayerPBR_MainPassVS(VSInput IN, uint instanceId : SV_Instan
 {
     VSOutput OUT;
  
-    float3 worldPosition = mul(DrawSrg::GetWorldMatrix(instanceId), float4(IN.m_position, 1.0)).xyz;
+    float3 worldPosition = mul(GetObjectToWorldMatrix(instanceId), float4(IN.m_position, 1.0)).xyz;
  
     OUT.m_uv = IN.m_uv;
 
@@ -88,8 +89,8 @@ VSOutput MinimalMultilayerPBR_MainPassVS(VSInput IN, uint instanceId : SV_Instan
 
 ForwardPassOutput MinimalMultilayerPBR_MainPassPS(VSOutput IN)
 {
-    float4x4 objectToWorld = DrawSrg::GetWorldMatrix(IN.m_instanceId);
-    float3x3 objectToWorldIT = DrawSrg::GetWorldMatrixInverseTranspose(IN.m_instanceId);
+    float4x4 objectToWorld = GetObjectToWorldMatrix(IN.m_instanceId);
+    float3x3 objectToWorldIT = GetObjectToWorldMatrixInverseTranspose(IN.m_instanceId);
 
     float3 vertexNormal, vertexTangent, vertexBitangent;
     ConstructTBN(IN.m_normal, IN.m_tangent, objectToWorld, objectToWorldIT, vertexNormal, vertexTangent, vertexBitangent);

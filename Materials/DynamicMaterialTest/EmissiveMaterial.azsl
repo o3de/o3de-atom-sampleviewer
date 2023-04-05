@@ -10,6 +10,7 @@
 #include <Atom/Features/PBR/AlphaUtils.azsli>
 #include <Atom/Features/PBR/DefaultObjectSrg.azsli>
 #include <Atom/RPI/ShaderResourceGroups/DefaultDrawSrg.azsli>
+#include <Atom/Features/InstancedTransforms.azsli>
 #include <Atom/Features/Pipeline/Forward/ForwardPassSrg.azsli>
 #include <Atom/Features/Pipeline/Forward/ForwardPassOutput.azsli>
 #include <Atom/Features/ColorManagement/TransformColor.azsli>
@@ -58,7 +59,7 @@ option bool o_emissive_useTexture;
 VSOutput MainVS(VSInput IN, uint instanceId : SV_InstanceID)
 {
     VSOutput OUT;
-    float3 worldPosition = mul(DrawSrg::GetWorldMatrix(instanceId), float4(IN.m_position, 1.0)).xyz;
+    float3 worldPosition = mul(GetObjectToWorldMatrix(instanceId), float4(IN.m_position, 1.0)).xyz;
     OUT.m_worldPosition = worldPosition;
     OUT.m_position = mul(ViewSrg::m_viewProjectionMatrix, float4(OUT.m_worldPosition, 1.0));
     OUT.m_normal = IN.m_normal;
@@ -69,8 +70,8 @@ VSOutput MainVS(VSInput IN, uint instanceId : SV_InstanceID)
 
 ForwardPassOutput MainPS(VSOutput IN)
 {
-    float4x4 objectToWorld = DrawSrg::GetWorldMatrix(IN.m_instanceId);
-    float3x3 objectToWorldIT = DrawSrg::GetWorldMatrixInverseTranspose(IN.m_instanceId);
+    float4x4 objectToWorld = GetObjectToWorldMatrix(IN.m_instanceId);
+    float3x3 objectToWorldIT = GetObjectToWorldMatrixInverseTranspose(IN.m_instanceId);
 
     float3 vertexNormal, vertexTangent, vertexBitangent;
     ConstructTBN(IN.m_normal, IN.m_tangent, objectToWorld, objectToWorldIT, vertexNormal, vertexTangent, vertexBitangent);
