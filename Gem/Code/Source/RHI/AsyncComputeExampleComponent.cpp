@@ -553,6 +553,10 @@ namespace AtomSampleViewer
         // Kickoff asynchronous asset loading, the activation will continue once all assets are available.
         m_assetLoadManager->LoadAssetsAsync(assetList, [&](AZStd::string_view assetName, [[maybe_unused]] bool success, size_t pendingAssetCount)
             {
+                if (m_fullyActivated)
+                {
+                    return;
+                }
                 AZ_Error(AsyncCompute::sampleName, success, "Error loading asset %s, a crash will occur when OnAllAssetsReadyActivate() is called!", assetName.data());
                 AZ_TracePrintf(AsyncCompute::sampleName, "Asset %s loaded %s. Wait for %zu more assets before full activation\n", assetName.data(), success ? "successfully" : "UNSUCCESSFULLY", pendingAssetCount);
                 m_imguiProgressList.RemoveItem(assetName);
