@@ -158,7 +158,7 @@ namespace AtomSampleViewer
         pipelineDesc.m_renderStates.m_blendState.m_targets[0].m_blendOp = RHI::BlendOp::Add;
 
         m_pipelineState = shader->AcquirePipelineState(pipelineDesc);
-        if (!m_pipelineState)
+        if (!m_pipelineState || !m_pipelineState->IsInitialized())
         {
             AZ_Error(s_dualSourceBlendingName, false, "Failed to acquire default pipeline state for shader '%s'", shaderFilePath);
             return;

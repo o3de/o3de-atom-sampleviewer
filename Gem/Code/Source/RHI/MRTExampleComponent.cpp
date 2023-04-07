@@ -120,7 +120,7 @@ namespace AtomSampleViewer
         AZ_Assert(result == RHI::ResultCode::Success, "Failed to create render attachment layout");
 
         m_pipelineStates[0] = shader->AcquirePipelineState(pipelineDesc);
-        if (!m_pipelineStates[0])
+        if (!m_pipelineStates[0] || !m_pipelineStates[0]->IsInitialized())
         {
             AZ_Error(sampleName, false, "Failed to acquire default pipeline state for shader '%s'", MRTTargetShaderFilePath);
             return;
@@ -154,7 +154,7 @@ namespace AtomSampleViewer
         AZ_Assert(result == RHI::ResultCode::Success, "Failed to create render attachment layout");
 
         m_pipelineStates[1] = shader->AcquirePipelineState(pipelineDesc);
-        if (!m_pipelineStates[1])
+        if (!m_pipelineStates[1] || !m_pipelineStates[1]->IsInitialized())
         {
             AZ_Error(sampleName, false, "Failed to acquire default pipeline state for shader '%s'", MRTScreenShaderFilePath);
             return;

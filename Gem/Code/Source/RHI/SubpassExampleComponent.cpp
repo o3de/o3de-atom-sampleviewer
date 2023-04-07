@@ -265,7 +265,7 @@ namespace AtomSampleViewer
 
                 pipelineDesc.m_renderStates.m_rasterState.m_cullMode = modelData.m_modelType == ModelType_Plane ? RHI::CullMode::None : RHI::CullMode::Back;
                 modelData.m_pipelineState = shader->AcquirePipelineState(pipelineDesc);
-                if (!modelData.m_pipelineState)
+                if (!modelData.m_pipelineState || !modelData.m_pipelineState->IsInitialized())
                 {
                     AZ_Error(SubpassInputExample::SampleName, false, "Failed to acquire default pipeline state for shader");
                     return;
@@ -291,7 +291,7 @@ namespace AtomSampleViewer
 
             // Composition Pipeline
             m_compositionPipeline = shader->AcquirePipelineState(pipelineDesc);
-            if (!m_compositionPipeline)
+            if (!m_compositionPipeline || !m_compositionPipeline->IsInitialized())
             {
                 AZ_Error(SubpassInputExample::SampleName, false, "Failed to acquire composition pipeline state for shader");
                 return;

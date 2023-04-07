@@ -270,7 +270,7 @@ namespace AtomSampleViewer
 
         auto& pipeline = m_pipelineStates[static_cast<uint32_t>(type)];
         pipeline = m_triangleShader->AcquirePipelineState(pipelineStateDescriptor);
-        if (!pipeline)
+        if (!pipeline || !pipeline->IsInitialized())
         {
             AZ_Error(SampleName, false, "Failed to acquire default pipeline state for shader '%s'", TriangeShaderFilePath);
             return;
@@ -402,7 +402,7 @@ namespace AtomSampleViewer
         AZ_Assert(result == RHI::ResultCode::Success, "Failed to create render attachment layout");
 
         m_customResolveMSAAPipelineState = m_customMSAAResolveShader->AcquirePipelineState(pipelineStateDescriptor);
-        if (!m_customResolveMSAAPipelineState)
+        if (!m_customResolveMSAAPipelineState || !m_customResolveMSAAPipelineState->IsInitialized())
         {
             AZ_Error(SampleName, false, "Failed to acquire default pipeline state for shader '%s'", CustomResolveShaderFilePath);
             return;
