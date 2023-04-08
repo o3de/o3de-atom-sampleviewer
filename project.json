@@ -14,7 +14,8 @@
     "icon_path": "preview.png",
     "engine": "o3de",
     "external_subdirectories": [
-        "Gem"
+        "Gem",
+        "Standalone"
     ],
     "gem_names": [
         "Maestro",
