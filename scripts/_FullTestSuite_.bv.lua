@@ -72,6 +72,7 @@ tests= {
     RunScriptWrapper('scripts/ReadbackTest.bv.luac'),
     RunScriptWrapper('scripts/depthoffieldtest.bv.luac'),
     RunScriptWrapper('scripts/exposuretest.bv.luac'),
+    RunScriptWrapper('scripts/shaderreloadsoaktest.bv.luac'),
 
     --Fast checking for the samples which don't have a test. Samples should be removed from this list once they have their own tests
 
