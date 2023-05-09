@@ -43,11 +43,18 @@ namespace AtomSampleViewer
                                 "textures/streaming/streaming3.dds.streamingimage",
                                 "textures/streaming/streaming4.dds.streamingimage",
                                 "textures/streaming/streaming5.dds.streamingimage",
-                                "textures/streaming/streaming6.dds.streamingimage",
                                 "textures/streaming/streaming7.dds.streamingimage",
+                                "textures/streaming/streaming8.dds.streamingimage",
+        };
+
+        const char* CubeMapImages[] = {
+            "lightingpresets/default_iblskyboxcm.exr.streamingimage", 
+            "lightingpresets/lowcontrast/artist_workshop_4k_iblskyboxcm.exr.streamingimage", 
+            "lightingpresets/lowcontrast/blouberg_sunrise_1_4k_iblskyboxcm.exr.streamingimage"
         };
 
         const uint32_t ImageCount = AZ::RHI::ArraySize(Images);
+        const uint32_t CubeMapImageCount = AZ::RHI::ArraySize(CubeMapImages);
 
         // Randomizer, used to generate unique diffuse colors for the materials
         AZ::SimpleLcgRandom g_randomizer;
@@ -55,6 +62,11 @@ namespace AtomSampleViewer
         static uint32_t RandomValue()
         {
             return g_randomizer.GetRandom() % ImageCount;
+        }
+
+        static uint32_t RandomCubeMapValue()
+        {
+            return g_randomizer.GetRandom() % CubeMapImageCount;
         }
 
         template<typename Asset, typename Instance>
@@ -72,57 +84,60 @@ namespace AtomSampleViewer
             return assetInstance;
         }
 
-        // Simple material structures
+        // Material type to test read only buffer, read write buffer, read write texture
         struct BindlessMaterial0
         {
             BindlessMaterial0()
             {
-                const uint32_t colorUint = g_randomizer.GetRandom();
-                AZ::Color color;
-                color.FromU32(colorUint);
-
-                m_diffuseColor = color;
+                m_colorBufferId = g_randomizer.GetRandom() % 2; //We only have two read only buffers (m_colorBuffer1 and m_colorBuffer2)
+                m_colorBufferMultiplierBufferId = 2; //We only have one read write buffer so the id will 2.
+                m_colorImageMultiplierBufferId = ImageCount + CubeMapImageCount;
             }
 
             const uint32_t m_materialIndex = 0u;
-            AZ::Color m_diffuseColor;
+            // id to to read only buffer
+            uint32_t m_colorBufferId;
+            // id to read write buffer
+            uint32_t m_colorBufferMultiplierBufferId;
+            // id to read write texture
+            uint32_t m_colorImageMultiplierBufferId;
         };
 
+        // Material type to test unbounded array in a non-bindless srg
         struct BindlessMaterial1
         {
             BindlessMaterial1()
             {
-                const uint32_t colorUint = g_randomizer.GetRandom();
-                AZ::Color color;
-                color.FromU32(colorUint);
-
                 m_diffuseTextureIndex = RandomValue();
             }
-
             const uint32_t m_materialIndex = 1u;
-            AZ::Color m_diffuseColor;
+            // id to read only texture
             uint32_t m_diffuseTextureIndex;
         };
 
+        // Material type to test read only texture via Bindless srg
         struct BindlessMaterial2
         {
             BindlessMaterial2()
             {
-                const uint32_t colorUint = g_randomizer.GetRandom();
-                AZ::Color color;
-                color.FromU32(colorUint);
-                m_diffuseColor = color;
-
                 m_diffuseTextureIndex = RandomValue();
-                m_normalTextureIndex = RandomValue();
-                m_specularTextureIndex = RandomValue();
             }
 
             const uint32_t m_materialIndex = 2u;
-            AZ::Color m_diffuseColor;
+            // id to read only texture
             uint32_t m_diffuseTextureIndex;
-            uint32_t m_normalTextureIndex;
-            uint32_t m_specularTextureIndex;
+        };
+
+        // Material type to test read only cubemap texture
+        struct BindlessMaterial3
+        {
+            BindlessMaterial3()
+            {
+                m_cubemapTextureIndex = ImageCount + RandomCubeMapValue();
+            }
+            const uint32_t m_materialIndex = 3u;
+            // id to read only cube map texture
+            uint32_t m_cubemapTextureIndex;
         };
     };
 
@@ -200,21 +215,42 @@ namespace AtomSampleViewer
         CreateObjects();
     }
 
-    void BindlessPrototypeExampleComponent::CreateBufferPool()
+    void BindlessPrototypeExampleComponent::CreatePools()
     {
-        m_bufferPool = RHI::Factory::Get().CreateBufferPool();
-        m_bufferPool->SetName(Name("BindlessBufferPool"));
-
-        RHI::BufferPoolDescriptor bufferPoolDesc;
-        bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::ShaderRead;
-        bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-        bufferPoolDesc.m_hostMemoryAccess = RHI::HostMemoryAccess::Write;
-        bufferPoolDesc.m_budgetInBytes = m_poolSizeInBytes;
-
         const RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
-        [[maybe_unused]] RHI::ResultCode resultCode = m_bufferPool->Init(*device, bufferPoolDesc);
-        AZ_Assert(resultCode == RHI::ResultCode::Success, "Failed to create Material Buffer Pool");
-    };
+        //Create Buffer pool for read only buffers
+        {
+            m_bufferPool = RHI::Factory::Get().CreateBufferPool();
+            m_bufferPool->SetName(Name("BindlessBufferPool"));
+            RHI::BufferPoolDescriptor bufferPoolDesc;
+            bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::ShaderRead;
+            bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
+            bufferPoolDesc.m_hostMemoryAccess = RHI::HostMemoryAccess::Write;
+            bufferPoolDesc.m_budgetInBytes = m_poolSizeInBytes;
+            [[maybe_unused]] RHI::ResultCode resultCode = m_bufferPool->Init(*device, bufferPoolDesc);
+            AZ_Assert(resultCode == RHI::ResultCode::Success, "Failed to create Material Buffer Pool");
+        }
+
+        // Create Buffer pool for read write buffers
+        {
+            m_computeBufferPool = RHI::Factory::Get().CreateBufferPool();
+            RHI::BufferPoolDescriptor bufferPoolDesc;
+            bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::ShaderReadWrite;
+            bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
+            bufferPoolDesc.m_hostMemoryAccess = RHI::HostMemoryAccess::Write;
+            [[maybe_unused]] RHI::ResultCode result = m_computeBufferPool->Init(*device, bufferPoolDesc);
+            AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialized compute buffer pool");
+        }
+
+        // Create Image pool for read write images
+        {
+            RHI::ImagePoolDescriptor imagePoolDesc;
+            imagePoolDesc.m_bindFlags = RHI::ImageBindFlags::ShaderReadWrite;
+            m_rwImagePool = RHI::Factory::Get().CreateImagePool();
+            [[maybe_unused]] RHI::ResultCode result = m_rwImagePool->Init(*device, imagePoolDesc);
+            AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialize output image pool");
+        }
+    }
 
     void BindlessPrototypeExampleComponent::FloatBuffer::CreateBufferFromPool(const uint32_t byteCount)
     {
@@ -227,7 +263,54 @@ namespace AtomSampleViewer
 
         [[maybe_unused]] RHI::ResultCode resultCode = m_bufferPool->InitBuffer(bufferRequest);
         AZ_Assert(resultCode == RHI::ResultCode::Success, "Failed to create Material Buffer");
-    };
+    }
+
+    void BindlessPrototypeExampleComponent::CreateIndirectBuffer(
+        const Name& bufferName,
+        AZ::RHI::Ptr<AZ::RHI::Buffer>& indirectionBuffer,
+        AZ::RHI::Ptr<AZ::RHI::BufferView>& bufferView, 
+        size_t byteSize)
+    {
+        indirectionBuffer = RHI::Factory::Get().CreateBuffer();
+        indirectionBuffer->SetName(bufferName);
+        RHI::BufferInitRequest bufferRequest;
+        bufferRequest.m_descriptor.m_bindFlags = RHI::BufferBindFlags::ShaderRead;
+        bufferRequest.m_descriptor.m_byteCount = byteSize;
+        bufferRequest.m_buffer = indirectionBuffer.get();
+        [[maybe_unused]] RHI::ResultCode resultCode = m_bufferPool->InitBuffer(bufferRequest);
+        AZ_Assert(resultCode == RHI::ResultCode::Success, "Failed to create Indirection Buffer");
+
+        RHI::BufferViewDescriptor viewDesc =
+            RHI::BufferViewDescriptor::CreateRaw(0, aznumeric_cast<uint32_t>(bufferRequest.m_descriptor.m_byteCount));
+        bufferView = indirectionBuffer->GetBufferView(viewDesc);
+    }
+
+    void BindlessPrototypeExampleComponent::CreateColorBuffer(
+        const Name& bufferName,
+        const AZ::Vector4& colorVal, 
+        AZ::RHI::Ptr<AZ::RHI::Buffer>& buffer, 
+        AZ::RHI::Ptr<AZ::RHI::BufferView>& bufferView)
+    {
+        AZStd::array<float, 4> randColors;
+        randColors[0] = colorVal.GetX();
+        randColors[1] = colorVal.GetY();
+        randColors[2] = colorVal.GetZ();
+        randColors[3] = colorVal.GetW();
+
+        buffer = RHI::Factory::Get().CreateBuffer();
+        buffer->SetName(bufferName);
+        RHI::BufferInitRequest bufferRequest;
+        bufferRequest.m_descriptor.m_bindFlags = RHI::BufferBindFlags::ShaderRead;
+        bufferRequest.m_descriptor.m_byteCount = sizeof(float) * 4;
+        bufferRequest.m_buffer = buffer.get();
+        bufferRequest.m_initialData = randColors.data();
+        [[maybe_unused]] RHI::ResultCode resultCode = m_bufferPool->InitBuffer(bufferRequest);
+        AZ_Assert(resultCode == RHI::ResultCode::Success, "Failed to create m_colorBuffer1 Buffer");
+
+        RHI::BufferViewDescriptor viewDesc =
+            RHI::BufferViewDescriptor::CreateRaw(0, aznumeric_cast<uint32_t>(bufferRequest.m_descriptor.m_byteCount));
+        bufferView = buffer->GetBufferView(viewDesc);
+    }
 
     void BindlessPrototypeExampleComponent::ClearObjects()
     {
@@ -309,7 +392,7 @@ namespace AtomSampleViewer
         for (FloatBufferHandle& handle : m_materialHandleArray)
         {
             // Generate a random material type
-            const uint32_t MaterialTypeCount = 3u;
+            const uint32_t MaterialTypeCount = 4u;
             const uint32_t materialTypeIndex = InternalBP::g_randomizer.GetRandom() % MaterialTypeCount;
 
             // Allocate a material
@@ -325,6 +408,11 @@ namespace AtomSampleViewer
             {
                 AllocateMaterial<InternalBP::BindlessMaterial2>(handle);
             }
+            else if (materialTypeIndex == 3u)
+            {
+                AllocateMaterial<InternalBP::BindlessMaterial3>(handle);
+            }
+
             AZ_Assert(handle.IsValid(), "Allocated descriptor is invalid");
         }
     }
@@ -350,6 +438,9 @@ namespace AtomSampleViewer
             m_shader = AtomSampleViewer::BasicRHIComponent::LoadShader(BindlessPrototypeShader, InternalBP::SampleName);
             AZ_Assert(m_shader, "Shader isn't loaded correctly");
         }
+
+        // Load compute shaders required for compute passes needed to write to read write resources
+        LoadComputeShaders();
 
         // Set the camera
         {
@@ -397,8 +488,8 @@ namespace AtomSampleViewer
 #endif
                          }));
 
-        // Create the BufferPool
-        CreateBufferPool();
+        // Create all the needed pools
+        CreatePools();
 
         m_bindlessSrg->CompileSrg(m_samplerSrgName);
 
@@ -467,22 +558,55 @@ namespace AtomSampleViewer
             m_imageViews.push_back(image->GetImageView());
         }
 
-        // Set the indirect buffer for the images
+        // Load appropriate cubemap textures used by the unbounded texture array
+        AZStd::vector<const RHI::ImageView*> cubemapImageViews;
+        for (uint32_t textureIdx = 0u; textureIdx < InternalBP::CubeMapImageCount; textureIdx++)
         {
-            m_indirectionBuffer = RHI::Factory::Get().CreateBuffer();
-            m_indirectionBuffer->SetName(Name("IndirectionBuffer"));
-            RHI::BufferInitRequest bufferRequest;
-            bufferRequest.m_descriptor.m_bindFlags = RHI::BufferBindFlags::ShaderRead;
-            bufferRequest.m_descriptor.m_byteCount = sizeof(uint32_t) * InternalBP::ImageCount;
-            bufferRequest.m_buffer = m_indirectionBuffer.get();
-            [[maybe_unused]] RHI::ResultCode resultCode = m_bufferPool->InitBuffer(bufferRequest);
-            AZ_Assert(resultCode == RHI::ResultCode::Success, "Failed to create Indirection Buffer");
-
-            RHI::BufferViewDescriptor viewDesc =
-                RHI::BufferViewDescriptor::CreateRaw(0, aznumeric_cast<uint32_t>(bufferRequest.m_descriptor.m_byteCount));
-            m_indirectionBufferView = m_indirectionBuffer->GetBufferView(viewDesc);
+            AZ::Data::Instance<AZ::RPI::StreamingImage> image = LoadStreamingImage(InternalBP::CubeMapImages[textureIdx], InternalBP::SampleName);
+            m_cubemapImages.push_back(image);
         }
         
+        // Create the indirect buffer to hold indices for bindless images-> ImageCount 2d texture + CubeMapImageCount cubemap textures + m_computeImage (read write texture that was written into by the compute pass)
+        CreateIndirectBuffer(Name("ImageIndirectionBuffer"), m_imageIndirectionBuffer, m_imageIndirectionBufferView, sizeof(uint32_t) * (InternalBP::ImageCount + InternalBP::CubeMapImageCount + 1));
+        // Create the indirect buffer to hold indices for bindless buffers -> 2 read only buffers that contain color values + m_computeBuffer which is the read write buffer that was written into by the compute pass
+        CreateIndirectBuffer(Name("BufferIndirectionBuffer"), m_bufferIndirectionBuffer, m_bufferIndirectionBufferView, sizeof(uint32_t) * sizeof(uint32_t) * 3);
+
+        //Read only buffer with green-ish color
+        CreateColorBuffer(Name("ColorBuffer1"), AZ::Vector4(0.1, 0.4, 0.1, 1.0), m_colorBuffer1, m_colorBuffer1View);
+        // Read only buffer with blue-ish color
+        CreateColorBuffer(Name("ColorBuffer2"), AZ::Vector4(0.1, 0.1, 0.4, 1.0), m_colorBuffer2, m_colorBuffer2View);
+
+        // Set the color multiplier buffer
+        {
+            m_computeBuffer = RHI::Factory::Get().CreateBuffer();
+            m_computeBuffer->SetName(Name("m_colorBufferMultiplier"));
+            uint32_t bufferSize = sizeof(uint32_t);//RHI ::GetFormatSize(RHI::Format::R32G32B32A32_FLOAT);
+
+            RHI::BufferInitRequest request;
+            request.m_buffer = m_computeBuffer.get();
+            request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::ShaderReadWrite, bufferSize };
+            [[maybe_unused]] RHI::ResultCode result = m_computeBufferPool->InitBuffer(request);
+            AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialized compute buffer");
+
+            m_rwBufferViewDescriptor = RHI::BufferViewDescriptor::CreateRaw(0, bufferSize);
+            m_computeBufferView = m_computeBuffer->GetBufferView(m_rwBufferViewDescriptor);
+        }
+
+        // Set the image version of color multiplier buffer
+        {
+            m_computeImage = RHI::Factory::Get().CreateImage();
+
+            RHI::ImageInitRequest request;
+            request.m_image = m_computeImage.get();
+            request.m_descriptor =
+                RHI::ImageDescriptor::Create2D(RHI::ImageBindFlags::ShaderReadWrite, 1, 1, RHI::Format::R32G32B32A32_FLOAT);
+            [[maybe_unused]] RHI::ResultCode result = m_rwImagePool->InitImage(request);
+            AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialize output image");
+
+            m_rwImageViewDescriptor = RHI::ImageViewDescriptor::Create(RHI::Format::R32G32B32A32_FLOAT, 0, 0);
+            m_computeImageView = m_computeImage->GetImageView(m_rwImageViewDescriptor);
+        }
+
 #if ATOMSAMPLEVIEWER_TRAIT_BINDLESS_PROTOTYPE_SUPPORTS_DIRECT_BOUND_UNBOUNDED_ARRAY
        // Set the images
        {
@@ -507,123 +631,10 @@ namespace AtomSampleViewer
         // Create the objects
         CreateObjects();
 
-        // Creates a scope for rendering the model.
-        {
-            struct ScopeData
-            {
-                //UserDataParam - Empty for this samples
-            };
-
-            const auto prepareFunction = [this](RHI::FrameGraphInterface frameGraph, [[maybe_unused]] ScopeData& scopeData)
-            {
-                // Binds the swap chain as a color attachment. Clears it to white.
-                {
-                    RHI::ImageScopeAttachmentDescriptor descriptor;
-                    descriptor.m_attachmentId = m_outputAttachmentId;
-                    descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
-                    frameGraph.UseColorAttachment(descriptor);
-                }
-
-                // Create & Binds DepthStencil image
-                {
-                    // Get the depth stencil
-                    m_depthStencilID = AZ::RHI::AttachmentId{ "DepthStencilID" };
-
-                    const RHI::ImageDescriptor imageDescriptor = RHI::ImageDescriptor::Create2D(
-                        RHI::ImageBindFlags::DepthStencil, m_outputWidth, m_outputHeight, AZ::RHI::Format::D32_FLOAT);
-                    const RHI::TransientImageDescriptor transientImageDescriptor(m_depthStencilID, imageDescriptor);
-                    frameGraph.GetAttachmentDatabase().CreateTransientImage(transientImageDescriptor);
-
-                    RHI::ImageScopeAttachmentDescriptor depthStencilDescriptor;
-                    depthStencilDescriptor.m_attachmentId = m_depthStencilID;
-                    depthStencilDescriptor.m_imageViewDescriptor.m_overrideFormat = AZ::RHI::Format::D32_FLOAT;
-                    depthStencilDescriptor.m_loadStoreAction.m_clearValue = AZ::RHI::ClearValue::CreateDepth(0.0f);
-                    depthStencilDescriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Clear;
-                    depthStencilDescriptor.m_loadStoreAction.m_loadActionStencil = RHI::AttachmentLoadAction::Clear;
-                    frameGraph.UseDepthStencilAttachment(depthStencilDescriptor, RHI::ScopeAttachmentAccess::ReadWrite);
-                }
-
-                // Submit the sub mesh count
-                frameGraph.SetEstimatedItemCount(static_cast<uint32_t>(m_subMeshInstanceArray.size()));
-            };
-
-            const auto compileFunction = [this]([[maybe_unused]] const AZ::RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
-            {
-                // Set the handles for the individual SRGs per sub mesh 
-                for (const ObjectInterval& objectInterval : m_objectIntervalArray)
-                {
-                    for (uint32_t subMeshIdx = objectInterval.m_min; subMeshIdx < objectInterval.m_max; subMeshIdx++)
-                    {
-                        // Update the constant data
-                        SubMeshInstance& subMesh = m_subMeshInstanceArray[subMeshIdx];
-                        // Set the view handle
-                        bool set = subMesh.m_perSubMeshSrg->SetConstant(subMesh.m_viewHandleIndex, m_worldToClipHandle);
-                        AZ_Assert(set, "Failed to set the view constant");
-                        // Set the light handle
-                        set = subMesh.m_perSubMeshSrg->SetConstant(subMesh.m_lightHandleIndex, m_lightDirectionHandle);
-                        AZ_Assert(set, "Failed to set the view constant");
-                        // Set the object handle
-                        set = subMesh.m_perSubMeshSrg->SetConstant(subMesh.m_objecHandleIndex, objectInterval.m_objectHandle);
-                        AZ_Assert(set, "Failed to set the object constant");
-                        // Set the material handle
-                        const uint32_t materialHandleIndex = subMeshIdx % m_materialCount;
-                        const FloatBufferHandle materialHandle = m_materialHandleArray[materialHandleIndex];
-                        set = subMesh.m_perSubMeshSrg->SetConstant(subMesh.m_materialHandleIndex, materialHandle);
-                        AZ_Assert(set, "Failed to set the material constant");
-
-                        subMesh.m_perSubMeshSrg->Compile();
-                    }
-                }
-            };
-
-            const auto executeFunction = [this]([[maybe_unused]] const RHI::FrameGraphExecuteContext& context, [[maybe_unused]] const ScopeData& scopeData)
-            {
-                RHI::CommandList* commandList = context.GetCommandList();
-
-                // Set persistent viewport and scissor state.
-                commandList->SetViewports(&m_viewport, 1u);
-                commandList->SetScissors(&m_scissor, 1u);
-
-                // Submit the drawcommands to the CommandList.
-                for (uint32_t instanceIdx = context.GetSubmitRange().m_startIndex; instanceIdx < context.GetSubmitRange().m_endIndex; instanceIdx++)
-                {
-                    const SubMeshInstance& subMesh = m_subMeshInstanceArray[instanceIdx];
-
-                    const RHI::ShaderResourceGroup* shaderResourceGroups[] = {
-                        m_bindlessSrg->GetSrg(m_samplerSrgName)->GetRHIShaderResourceGroup(),
-                        subMesh.m_perSubMeshSrg->GetRHIShaderResourceGroup(),
-                        m_bindlessSrg->GetSrg(m_floatBufferSrgName)->GetRHIShaderResourceGroup(),
-#if ATOMSAMPLEVIEWER_TRAIT_BINDLESS_PROTOTYPE_SUPPORTS_DIRECT_BOUND_UNBOUNDED_ARRAY
-                        m_bindlessSrg->GetSrg(m_imageSrgName)->GetRHIShaderResourceGroup(),
-#endif
-                        m_bindlessSrg->GetSrg(m_indirectionBufferSrgName)->GetRHIShaderResourceGroup(),
-                    };
-                    RHI::DrawItem drawItem;
-                    drawItem.m_arguments = subMesh.m_mesh->m_drawArguments;
-                    drawItem.m_pipelineState = m_pipelineState.get();
-                    drawItem.m_indexBufferView = &subMesh.m_mesh->m_indexBufferView;
-                    drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
-                    drawItem.m_shaderResourceGroups = shaderResourceGroups;
-                    drawItem.m_streamBufferViewCount = static_cast<uint8_t>(subMesh.bufferStreamViewArray.size());
-                    drawItem.m_streamBufferViews = subMesh.bufferStreamViewArray.data();
-
-                    // Submit the triangle draw item.
-                    commandList->Submit(drawItem, instanceIdx);
-                }
-            };
-
-            m_scopeProducers.emplace_back(
-                aznew RHI::ScopeProducerFunction<
-                ScopeData,
-                decltype(prepareFunction),
-                decltype(compileFunction),
-                decltype(executeFunction)>(
-                    m_scopeId,
-                    ScopeData{},
-                    prepareFunction,
-                    compileFunction,
-                    executeFunction));
-        }
+        // Create all the scopes for this sample
+        CreateBufferComputeScope();
+        CreateImageComputeScope();
+        CreateBindlessScope();
 
         // Connect the busses
         AZ::RHI::RHISystemNotificationBus::Handler::BusConnect();
@@ -633,13 +644,31 @@ namespace AtomSampleViewer
     void BindlessPrototypeExampleComponent::Deactivate()
     {
         m_imguiSidebar.Deactivate();
-
         m_model = nullptr;
-
         m_shader = nullptr;
         m_pipelineState = nullptr;
-        m_bindlessSrg = nullptr;
+
         m_floatBuffer = nullptr;
+        m_computeBuffer = nullptr;
+        m_computeImage = nullptr;
+        m_colorBuffer1 = nullptr;
+        m_colorBuffer2 = nullptr;
+        m_imageIndirectionBuffer = nullptr;
+        m_bufferIndirectionBuffer = nullptr;
+
+        m_colorBuffer1View = nullptr;
+        m_colorBuffer2View = nullptr;
+        m_computeBufferView = nullptr;
+        m_computeImageView = nullptr;
+        m_imageIndirectionBufferView = nullptr;
+        m_bufferIndirectionBufferView = nullptr;
+
+        m_bufferPool = nullptr;
+        m_computeBufferPool = nullptr;
+
+        m_bufferDispatchSRG = nullptr;
+        m_imageDispatchSRG = nullptr;
+        m_bindlessSrg = nullptr;
     }
 
     void BindlessPrototypeExampleComponent::OnTick(float deltaTime, [[maybe_unused]] ScriptTimePoint scriptTime)
@@ -707,25 +736,73 @@ namespace AtomSampleViewer
 
         Data::Instance<AZ::RPI::ShaderResourceGroup> indirectionBufferSrg = m_bindlessSrg->GetSrg(m_indirectionBufferSrgName);
 
-        RHI::BufferMapRequest mapRequest{ *m_indirectionBuffer, 0, sizeof(uint32_t) * InternalBP::ImageCount };
-        RHI::BufferMapResponse mapResponse;
-        m_bufferPool->MapBuffer(mapRequest, mapResponse);
-
-        AZStd::vector<const RHI::ImageView*> views;
-        for(AZ::Data::Instance<AZ::RPI::StreamingImage> image : m_images)
+        // Indirect buffer that will contain indices for all read only textures and read write textures within the bindless heap
         {
-            views.push_back(image->GetImageView());
-        }
-        
-        bool readOnlyTexture = true;
-        uint32_t arrayIndex = 0;
-        auto indirectionBufferIndex = indirectionBufferSrg->FindShaderInputBufferIndex(AZ::Name{ "m_indirectionBuffer" });
-        indirectionBufferSrg->SetBindlessViews(
-            indirectionBufferIndex, m_indirectionBufferView.get(),
-            views, static_cast<uint32_t*>(mapResponse.m_data),
-            readOnlyTexture, arrayIndex);
+            //Read only textures = InternalBP::Images , InternalBP::CubeMapImages, m_computeImageView
+            RHI::BufferMapRequest mapRequest{ *m_imageIndirectionBuffer, 0,
+                                              sizeof(uint32_t) * (InternalBP::ImageCount + InternalBP::CubeMapImageCount + 1) };
+            RHI::BufferMapResponse mapResponse;
+            m_bufferPool->MapBuffer(mapRequest, mapResponse);
 
-        m_bufferPool->UnmapBuffer(*m_indirectionBuffer);
+            AZStd::vector<const RHI::ImageView*> views;
+            AZStd::vector<bool> isViewReadOnly;
+
+            //Add read only 2d texture views
+            for (AZ::Data::Instance<AZ::RPI::StreamingImage> image : m_images)
+            {
+                views.push_back(image->GetImageView());
+                isViewReadOnly.push_back(true);
+            }
+
+            //Add read only cube map texture views
+            for (AZ::Data::Instance<AZ::RPI::StreamingImage> image : m_cubemapImages)
+            {
+                views.push_back(image->GetImageView());
+                isViewReadOnly.push_back(true);
+            }
+
+            //Ad read write texture view
+            views.push_back(m_computeImageView.get());
+            isViewReadOnly.push_back(false);
+
+            // Populate the indirect buffer with indices of the views that reside within the bindless heap
+            uint32_t arrayIndex = 0;
+            auto indirectionBufferIndex = indirectionBufferSrg->FindShaderInputBufferIndex(AZ::Name{ "m_imageIndirectionBuffer" });
+            indirectionBufferSrg->SetBindlessViews(
+                indirectionBufferIndex, m_imageIndirectionBufferView.get(), views, static_cast<uint32_t*>(mapResponse.m_data),
+                isViewReadOnly, arrayIndex);
+
+            m_bufferPool->UnmapBuffer(*m_imageIndirectionBuffer);
+        }
+
+        // Indirect buffer that will contain indices for all read only buffers and read write buffers within the bindless heap
+        {
+            RHI::BufferMapRequest mapRequest{ *m_bufferIndirectionBuffer, 0, sizeof(uint32_t) * 3 };
+            RHI::BufferMapResponse mapResponse;
+            m_bufferPool->MapBuffer(mapRequest, mapResponse);
+
+            AZStd::vector<const RHI::BufferView*> views;
+            AZStd::vector<bool> isViewReadOnly;
+           
+            // Add read only buffer views
+            views.push_back(m_colorBuffer1View.get());
+            isViewReadOnly.push_back(true);
+            views.push_back(m_colorBuffer2View.get());
+            isViewReadOnly.push_back(true);
+
+            //Add read write buffer view
+            views.push_back(m_computeBufferView.get());
+            isViewReadOnly.push_back(false);
+
+            //Populate the indirect buffer with indices of the views that reside within the bindless heap
+            uint32_t arrayIndex = 0;
+            auto indirectionBufferIndex = indirectionBufferSrg->FindShaderInputBufferIndex(AZ::Name{ "m_bufferIndirectionBuffer" });
+            indirectionBufferSrg->SetBindlessViews(
+                indirectionBufferIndex, m_bufferIndirectionBufferView.get(), views, static_cast<uint32_t*>(mapResponse.m_data),
+                isViewReadOnly, arrayIndex);
+
+            m_bufferPool->UnmapBuffer(*m_bufferIndirectionBuffer);
+        }
         indirectionBufferSrg->Compile();
 
         BasicRHIComponent::OnFramePrepare(frameGraphBuilder);
@@ -843,5 +920,360 @@ namespace AtomSampleViewer
         }
 
         return false;
+    }
+
+    void BindlessPrototypeExampleComponent::LoadComputeShaders()
+    {
+        using namespace AZ;
+        //Load the compute shader related to the compute pass that will write a value to a read write buffer
+        {
+            const char* shaderFilePath = "Shaders/RHI/BindlessBufferComputeDispatch.azshader";
+
+            const auto shader = LoadShader(shaderFilePath, InternalBP::SampleName);
+            if (shader == nullptr)
+            {
+                return;
+            }
+
+            RHI::PipelineStateDescriptorForDispatch pipelineDesc;
+            shader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId).ConfigurePipelineState(pipelineDesc);
+
+            const auto& numThreads = shader->GetAsset()->GetAttribute(RHI::ShaderStage::Compute, Name("numthreads"));
+            if (numThreads)
+            {
+                const RHI::ShaderStageAttributeArguments& args = *numThreads;
+                m_bufferNumThreadsX = args[0].type() == azrtti_typeid<int>() ? AZStd::any_cast<int>(args[0]) : m_bufferNumThreadsX;
+                m_bufferNumThreadsY = args[1].type() == azrtti_typeid<int>() ? AZStd::any_cast<int>(args[1]) : m_bufferNumThreadsY;
+                m_bufferNumThreadsZ = args[2].type() == azrtti_typeid<int>() ? AZStd::any_cast<int>(args[2]) : m_bufferNumThreadsZ;
+            }
+            else
+            {
+                AZ_Error(InternalBP::SampleName, false, "Did not find expected numthreads attribute");
+            }
+
+            m_bufferDispatchPipelineState = shader->AcquirePipelineState(pipelineDesc);
+            if (!m_bufferDispatchPipelineState)
+            {
+                AZ_Error(InternalBP::SampleName, false, "Failed to acquire default pipeline state for shader '%s'", shaderFilePath);
+                return;
+            }
+            m_bufferDispatchSRG = CreateShaderResourceGroup(shader, "BufferSrg", InternalBP::SampleName);
+        }
+
+        // Load the compute shader related to the compute pass that will write a value to a read write texture
+        {
+            const char* shaderFilePath = "Shaders/RHI/BindlessImageComputeDispatch.azshader";
+
+            const auto shader = LoadShader(shaderFilePath, InternalBP::SampleName);
+            if (shader == nullptr)
+            {
+                return;
+            }
+
+            RHI::PipelineStateDescriptorForDispatch pipelineDesc;
+            shader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId).ConfigurePipelineState(pipelineDesc);
+
+            const auto& numThreads = shader->GetAsset()->GetAttribute(RHI::ShaderStage::Compute, Name("numthreads"));
+            if (numThreads)
+            {
+                const RHI::ShaderStageAttributeArguments& args = *numThreads;
+                m_imageNumThreadsX = args[0].type() == azrtti_typeid<int>() ? AZStd::any_cast<int>(args[0]) : m_imageNumThreadsX;
+                m_imageNumThreadsY = args[1].type() == azrtti_typeid<int>() ? AZStd::any_cast<int>(args[1]) : m_imageNumThreadsY;
+                m_imageNumThreadsZ = args[2].type() == azrtti_typeid<int>() ? AZStd::any_cast<int>(args[2]) : m_imageNumThreadsZ;
+            }
+            else
+            {
+                AZ_Error(InternalBP::SampleName, false, "Did not find expected numthreads attribute");
+            }
+
+            m_imageDispatchPipelineState = shader->AcquirePipelineState(pipelineDesc);
+            if (!m_imageDispatchPipelineState)
+            {
+                AZ_Error(InternalBP::SampleName, false, "Failed to acquire default pipeline state for shader '%s'", shaderFilePath);
+                return;
+            }
+            m_imageDispatchSRG = CreateShaderResourceGroup(shader, "ImageSrg", InternalBP::SampleName);
+        }
+    }
+
+    void BindlessPrototypeExampleComponent::CreateBufferComputeScope()
+    {
+        using namespace AZ;
+
+        struct ScopeData
+        {
+            // UserDataParam - Empty for this samples
+        };
+
+        const auto prepareFunction = [this](RHI::FrameGraphInterface frameGraph, [[maybe_unused]] ScopeData& scopeData)
+        {
+            // attach compute buffer
+            {
+                [[maybe_unused]] RHI::ResultCode result =
+                    frameGraph.GetAttachmentDatabase().ImportBuffer(m_bufferAttachmentId, m_computeBuffer);
+                AZ_Error(
+                    InternalBP::SampleName, result == RHI::ResultCode::Success, "Failed to import compute buffer with error %d", result);
+
+                RHI::BufferScopeAttachmentDescriptor desc;
+                desc.m_attachmentId = m_bufferAttachmentId;
+                desc.m_bufferViewDescriptor = m_rwBufferViewDescriptor;
+                desc.m_loadStoreAction.m_clearValue = AZ::RHI::ClearValue::CreateVector4Float(0.0f, 0.0f, 0.0f, 0.0f);
+
+                frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::ReadWrite);
+
+                const Name computeBufferId{ "m_colorBufferMultiplier" };
+                RHI::ShaderInputBufferIndex computeBufferIndex = m_bufferDispatchSRG->FindShaderInputBufferIndex(computeBufferId);
+                AZ_Error(
+                    InternalBP::SampleName, computeBufferIndex.IsValid(), "Failed to find shader input buffer %s.",
+                    computeBufferId.GetCStr());
+                m_bufferDispatchSRG->SetBufferView(computeBufferIndex, m_computeBufferView.get());
+                m_bufferDispatchSRG->Compile();
+            }
+
+            frameGraph.SetEstimatedItemCount(1);
+        };
+
+        RHI::EmptyCompileFunction<ScopeData> compileFunction;
+
+        const auto executeFunction = [this](const RHI::FrameGraphExecuteContext& context, [[maybe_unused]] const ScopeData& scopeData)
+        {
+            RHI::CommandList* commandList = context.GetCommandList();
+
+            // Set persistent viewport and scissor state.
+            commandList->SetViewports(&m_viewport, 1);
+            commandList->SetScissors(&m_scissor, 1);
+
+            AZStd::array<const RHI::ShaderResourceGroup*, 8> shaderResourceGroups;
+            shaderResourceGroups[0] = m_bufferDispatchSRG->GetRHIShaderResourceGroup();
+
+            RHI::DispatchItem dispatchItem;
+            RHI::DispatchDirect dispatchArgs;
+
+            dispatchArgs.m_threadsPerGroupX = aznumeric_cast<uint16_t>(m_bufferNumThreadsX);
+            dispatchArgs.m_threadsPerGroupY = aznumeric_cast<uint16_t>(m_bufferNumThreadsY);
+            dispatchArgs.m_threadsPerGroupZ = aznumeric_cast<uint16_t>(m_bufferNumThreadsZ);
+            dispatchArgs.m_totalNumberOfThreadsX = 1;
+            dispatchArgs.m_totalNumberOfThreadsY = 1;
+            dispatchArgs.m_totalNumberOfThreadsZ = 1;
+
+            dispatchItem.m_arguments = dispatchArgs;
+            dispatchItem.m_pipelineState = m_bufferDispatchPipelineState.get();
+            dispatchItem.m_shaderResourceGroupCount = 1;
+            dispatchItem.m_shaderResourceGroups = shaderResourceGroups;
+
+            commandList->Submit(dispatchItem);
+        };
+
+        m_scopeProducers.emplace_back(
+            aznew RHI::ScopeProducerFunction<ScopeData, decltype(prepareFunction), decltype(compileFunction), decltype(executeFunction)>(
+                RHI::ScopeId{ "ComputeBuffer" }, ScopeData{}, prepareFunction, compileFunction, executeFunction));
+    }
+
+    void BindlessPrototypeExampleComponent::CreateImageComputeScope()
+    {
+        using namespace AZ;
+
+        struct ScopeData
+        {
+            // UserDataParam - Empty for this samples
+        };
+
+        const auto prepareFunction = [this](RHI::FrameGraphInterface frameGraph, [[maybe_unused]] ScopeData& scopeData)
+        {
+            // attach compute buffer
+            {
+                [[maybe_unused]] RHI::ResultCode result =
+                    frameGraph.GetAttachmentDatabase().ImportImage(m_imageAttachmentId, m_computeImage);
+                AZ_Error(
+                    InternalBP::SampleName, result == RHI::ResultCode::Success, "Failed to import compute buffer with error %d", result);
+
+                RHI::ImageScopeAttachmentDescriptor desc;
+                desc.m_attachmentId = m_imageAttachmentId;
+                desc.m_imageViewDescriptor = m_rwImageViewDescriptor;
+                desc.m_loadStoreAction.m_clearValue = AZ::RHI::ClearValue::CreateVector4Float(0.0f, 0.0f, 0.0f, 0.0f);
+
+                frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::ReadWrite);
+
+                const Name computeBufferId{ "m_colorImageMultiplier" };
+                RHI::ShaderInputImageIndex computeBufferIndex = m_imageDispatchSRG->FindShaderInputImageIndex(computeBufferId);
+                AZ_Error(
+                    InternalBP::SampleName, computeBufferIndex.IsValid(), "Failed to find shader input buffer %s.",
+                    computeBufferId.GetCStr());
+                m_imageDispatchSRG->SetImageView(computeBufferIndex, m_computeImageView.get());
+                m_imageDispatchSRG->Compile();
+            }
+
+            frameGraph.SetEstimatedItemCount(1);
+        };
+
+        RHI::EmptyCompileFunction<ScopeData> compileFunction;
+
+        const auto executeFunction = [this](const RHI::FrameGraphExecuteContext& context, [[maybe_unused]] const ScopeData& scopeData)
+        {
+            RHI::CommandList* commandList = context.GetCommandList();
+
+            // Set persistent viewport and scissor state.
+            commandList->SetViewports(&m_viewport, 1);
+            commandList->SetScissors(&m_scissor, 1);
+
+            AZStd::array<const RHI::ShaderResourceGroup*, 8> shaderResourceGroups;
+            shaderResourceGroups[0] = m_imageDispatchSRG->GetRHIShaderResourceGroup();
+
+            RHI::DispatchItem dispatchItem;
+            RHI::DispatchDirect dispatchArgs;
+
+            dispatchArgs.m_threadsPerGroupX = aznumeric_cast<uint16_t>(m_imageNumThreadsX);
+            dispatchArgs.m_threadsPerGroupY = aznumeric_cast<uint16_t>(m_imageNumThreadsY);
+            dispatchArgs.m_threadsPerGroupZ = aznumeric_cast<uint16_t>(m_imageNumThreadsZ);
+            dispatchArgs.m_totalNumberOfThreadsX = 1;
+            dispatchArgs.m_totalNumberOfThreadsY = 1;
+            dispatchArgs.m_totalNumberOfThreadsZ = 1;
+
+            dispatchItem.m_arguments = dispatchArgs;
+            dispatchItem.m_pipelineState = m_imageDispatchPipelineState.get();
+            dispatchItem.m_shaderResourceGroupCount = 1;
+            dispatchItem.m_shaderResourceGroups = shaderResourceGroups;
+
+            commandList->Submit(dispatchItem);
+        };
+
+        m_scopeProducers.emplace_back(
+            aznew RHI::ScopeProducerFunction<ScopeData, decltype(prepareFunction), decltype(compileFunction), decltype(executeFunction)>(
+                RHI::ScopeId{ "ComputeImage" }, ScopeData{}, prepareFunction, compileFunction, executeFunction));
+    }
+
+    void BindlessPrototypeExampleComponent::CreateBindlessScope()
+    {
+        // Creates a scope for rendering the model.
+        {
+            struct ScopeData
+            {
+                // UserDataParam - Empty for this samples
+            };
+
+            const auto prepareFunction = [this](RHI::FrameGraphInterface frameGraph, [[maybe_unused]] ScopeData& scopeData)
+            {
+                // Binds the swap chain as a color attachment. Clears it to white.
+                {
+                    RHI::ImageScopeAttachmentDescriptor descriptor;
+                    descriptor.m_attachmentId = m_outputAttachmentId;
+                    descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
+                    frameGraph.UseColorAttachment(descriptor);
+                }
+
+                // Create & Binds DepthStencil image
+                {
+                    // Get the depth stencil
+                    m_depthStencilID = AZ::RHI::AttachmentId{ "DepthStencilID" };
+
+                    const RHI::ImageDescriptor imageDescriptor = RHI::ImageDescriptor::Create2D(
+                        RHI::ImageBindFlags::DepthStencil, m_outputWidth, m_outputHeight, AZ::RHI::Format::D32_FLOAT);
+                    const RHI::TransientImageDescriptor transientImageDescriptor(m_depthStencilID, imageDescriptor);
+                    frameGraph.GetAttachmentDatabase().CreateTransientImage(transientImageDescriptor);
+
+                    RHI::ImageScopeAttachmentDescriptor depthStencilDescriptor;
+                    depthStencilDescriptor.m_attachmentId = m_depthStencilID;
+                    depthStencilDescriptor.m_imageViewDescriptor.m_overrideFormat = AZ::RHI::Format::D32_FLOAT;
+                    depthStencilDescriptor.m_loadStoreAction.m_clearValue = AZ::RHI::ClearValue::CreateDepth(0.0f);
+                    depthStencilDescriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Clear;
+                    depthStencilDescriptor.m_loadStoreAction.m_loadActionStencil = RHI::AttachmentLoadAction::Clear;
+                    frameGraph.UseDepthStencilAttachment(depthStencilDescriptor, RHI::ScopeAttachmentAccess::ReadWrite);
+                }
+
+                {
+                    RHI::BufferScopeAttachmentDescriptor desc;
+                    desc.m_attachmentId = m_bufferAttachmentId;
+                    desc.m_bufferViewDescriptor = m_rwBufferViewDescriptor;
+                    desc.m_loadStoreAction.m_clearValue = AZ::RHI::ClearValue::CreateVector4Float(0.0f, 0.0f, 0.0f, 0.0f);
+
+                    frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::ReadWrite);
+                }
+
+                {
+                    RHI::ImageScopeAttachmentDescriptor desc;
+                    desc.m_attachmentId = m_imageAttachmentId;
+                    desc.m_imageViewDescriptor = m_rwImageViewDescriptor;
+                    desc.m_loadStoreAction.m_clearValue = AZ::RHI::ClearValue::CreateVector4Float(0.0f, 0.0f, 0.0f, 0.0f);
+
+                    frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::ReadWrite);
+                }
+                // Submit the sub mesh count
+                frameGraph.SetEstimatedItemCount(static_cast<uint32_t>(m_subMeshInstanceArray.size()));
+            };
+
+            const auto compileFunction =
+                [this]([[maybe_unused]] const AZ::RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
+            {
+                // Set the handles for the individual SRGs per sub mesh
+                for (const ObjectInterval& objectInterval : m_objectIntervalArray)
+                {
+                    for (uint32_t subMeshIdx = objectInterval.m_min; subMeshIdx < objectInterval.m_max; subMeshIdx++)
+                    {
+                        // Update the constant data
+                        SubMeshInstance& subMesh = m_subMeshInstanceArray[subMeshIdx];
+                        // Set the view handle
+                        bool set = subMesh.m_perSubMeshSrg->SetConstant(subMesh.m_viewHandleIndex, m_worldToClipHandle);
+                        AZ_Assert(set, "Failed to set the view constant");
+                        // Set the light handle
+                        set = subMesh.m_perSubMeshSrg->SetConstant(subMesh.m_lightHandleIndex, m_lightDirectionHandle);
+                        AZ_Assert(set, "Failed to set the view constant");
+                        // Set the object handle
+                        set = subMesh.m_perSubMeshSrg->SetConstant(subMesh.m_objecHandleIndex, objectInterval.m_objectHandle);
+                        AZ_Assert(set, "Failed to set the object constant");
+                        // Set the material handle
+                        const uint32_t materialHandleIndex = subMeshIdx % m_materialCount;
+                        const FloatBufferHandle materialHandle = m_materialHandleArray[materialHandleIndex];
+                        set = subMesh.m_perSubMeshSrg->SetConstant(subMesh.m_materialHandleIndex, materialHandle);
+                        AZ_Assert(set, "Failed to set the material constant");
+
+                        subMesh.m_perSubMeshSrg->Compile();
+                    }
+                }
+            };
+
+            const auto executeFunction =
+                [this]([[maybe_unused]] const RHI::FrameGraphExecuteContext& context, [[maybe_unused]] const ScopeData& scopeData)
+            {
+                RHI::CommandList* commandList = context.GetCommandList();
+
+                // Set persistent viewport and scissor state.
+                commandList->SetViewports(&m_viewport, 1u);
+                commandList->SetScissors(&m_scissor, 1u);
+
+                // Submit the drawcommands to the CommandList.
+                for (uint32_t instanceIdx = context.GetSubmitRange().m_startIndex; instanceIdx < context.GetSubmitRange().m_endIndex;
+                     instanceIdx++)
+                {
+                    const SubMeshInstance& subMesh = m_subMeshInstanceArray[instanceIdx];
+
+                    const RHI::ShaderResourceGroup* shaderResourceGroups[] =
+                    {
+                        m_bindlessSrg->GetSrg(m_samplerSrgName)->GetRHIShaderResourceGroup(),
+                        subMesh.m_perSubMeshSrg->GetRHIShaderResourceGroup(),
+                        m_bindlessSrg->GetSrg(m_floatBufferSrgName)->GetRHIShaderResourceGroup(),
+#if ATOMSAMPLEVIEWER_TRAIT_BINDLESS_PROTOTYPE_SUPPORTS_DIRECT_BOUND_UNBOUNDED_ARRAY
+                        m_bindlessSrg->GetSrg(m_imageSrgName)->GetRHIShaderResourceGroup(),
+#endif
+                        m_bindlessSrg->GetSrg(m_indirectionBufferSrgName)->GetRHIShaderResourceGroup(),
+                    };
+                    RHI::DrawItem drawItem;
+                    drawItem.m_arguments = subMesh.m_mesh->m_drawArguments;
+                    drawItem.m_pipelineState = m_pipelineState.get();
+                    drawItem.m_indexBufferView = &subMesh.m_mesh->m_indexBufferView;
+                    drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
+                    drawItem.m_shaderResourceGroups = shaderResourceGroups;
+                    drawItem.m_streamBufferViewCount = static_cast<uint8_t>(subMesh.bufferStreamViewArray.size());
+                    drawItem.m_streamBufferViews = subMesh.bufferStreamViewArray.data();
+
+                    // Submit the triangle draw item.
+                    commandList->Submit(drawItem, instanceIdx);
+                }
+            };
+
+            m_scopeProducers.emplace_back(
+                aznew
+                    RHI::ScopeProducerFunction<ScopeData, decltype(prepareFunction), decltype(compileFunction), decltype(executeFunction)>(
+                        m_scopeId, ScopeData{}, prepareFunction, compileFunction, executeFunction));
+        }
     }
 }; // namespace AtomSampleViewer

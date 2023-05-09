@@ -42,7 +42,8 @@ ShaderResourceGroup FloatBufferSrg : FloatBufferSemanticId
 
 ShaderResourceGroup IndirectionBufferSrg : IndirectionBufferSemanticId
 {
-    ByteAddressBuffer m_indirectionBuffer;
+    ByteAddressBuffer m_imageIndirectionBuffer;
+    ByteAddressBuffer m_bufferIndirectionBuffer;
 }; 
 
 ShaderResourceGroup SamplerSrg : FrequencyPerScene

@@ -256,7 +256,7 @@ namespace AtomSampleViewer
 
 
                 float minimumExposure = m_exposureControlSettings->GetEyeAdaptationExposureMin();
-                if (ImGui::SliderFloat("Minumum Exposure", &minimumExposure, -16.0f, 16.0f, "%0.4f") || !m_isInitParameters)
+                if (ImGui::SliderFloat("Minimum Exposure", &minimumExposure, -16.0f, 16.0f, "%0.4f") || !m_isInitParameters)
                 {
                     m_exposureControlSettings->SetEyeAdaptationExposureMin(minimumExposure);
                     m_exposureControlSettings->OnConfigChanged();
