@@ -83,7 +83,7 @@ PSOutput MainPS(VSOutput psInput)
     }
     else
     {
-		float3 texColor = ImageMipsSrg::m_texture.SampleLevel(ImageMipsSrg::m_sampler, psInput.m_uvlod.xy, psInput.m_uvlod.z).xyz;
+        float3 texColor = ImageMipsSrg::m_texture.SampleLevel(ImageMipsSrg::m_sampler, psInput.m_uvlod.xy, psInput.m_uvlod.z).xyz;
         OUT.m_color = float4(TransformColor(texColor, ColorSpaceId::LinearSRGB, ColorSpaceId::SRGB), 1.0);
     }
     return OUT;
