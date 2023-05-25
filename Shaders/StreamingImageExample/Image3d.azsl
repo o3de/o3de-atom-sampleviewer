@@ -6,7 +6,8 @@
  *
  */
 
-#include <viewsrg.srgi>
+#include <Atom/Features/SrgSemantics.azsli>
+#include <Atom/Features/ColorManagement/TransformColor.azsli>
 
 ShaderResourceGroup ImageSrg : SRG_PerDraw
 {
@@ -33,8 +34,6 @@ struct VSOutput
 struct PSOutput
 {
     float4 m_color : SV_Target0;
-    float4 m_specular : SV_Target1;
-    float4 m_scatterDistance : SV_Target2;
 };
 
 VSOutput MainVS(VSInput vsInput)
@@ -63,10 +62,9 @@ PSOutput MainPS(VSOutput psInput)
     uint numberOfLevels;
     ImageSrg::m_texture3D.GetDimensions(0, width, height, depth, numberOfLevels);
 
-    OUT.m_color = ImageSrg::m_texture3D.Load(int4(width * psInput.m_uv.x, height * psInput.m_uv.y, psInput.slice, 0));
+    float3 texColor = ImageSrg::m_texture3D.Load(int4(width * psInput.m_uv.x, height * psInput.m_uv.y, psInput.slice, 0)).xyz;
+    OUT.m_color = float4(TransformColor(texColor, ColorSpaceId::LinearSRGB, ColorSpaceId::SRGB), 1.0);
     
-    OUT.m_specular = float4(0,0,0,1);
-    OUT.m_scatterDistance = float4(0,0,0,0);
     return OUT;
 }
 

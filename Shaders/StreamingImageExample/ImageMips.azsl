@@ -6,7 +6,8 @@
  *
  */
 
-#include <viewsrg.srgi>
+#include <Atom/Features/SrgSemantics.azsli>
+#include <Atom/Features/ColorManagement/TransformColor.azsli>
 
 ShaderResourceGroup ImageMipsSrg : SRG_PerDraw
 {
@@ -18,6 +19,8 @@ ShaderResourceGroup ImageMipsSrg : SRG_PerDraw
     Sampler m_sampler
     {
         MaxAnisotropy = 16;
+        MinFilter = Linear;
+        MagFilter = Linear;
         AddressU = Wrap;
         AddressV = Wrap;
         AddressW = Wrap;
@@ -39,8 +42,6 @@ struct VSOutput
 struct PSOutput
 {
     float4 m_color : SV_Target0;
-    float4 m_specular : SV_Target1;
-    float4 m_scatterDistance : SV_Target2;
 };
 
 VSOutput MainVS(VSInput vsInput)
@@ -78,14 +79,13 @@ PSOutput MainPS(VSOutput psInput)
     PSOutput OUT;
     if (psInput.m_uvlod.z < 0)
     {
-         OUT.m_color = float4(1.0, 1.0, 1.0, 1.0);
+        OUT.m_color = float4(1.0, 1.0, 1.0, 1.0);
     }
     else
     {
-         OUT.m_color = ImageMipsSrg::m_texture.SampleLevel(ImageMipsSrg::m_sampler, psInput.m_uvlod.xy, psInput.m_uvlod.z);
+        float3 texColor = ImageMipsSrg::m_texture.SampleLevel(ImageMipsSrg::m_sampler, psInput.m_uvlod.xy, psInput.m_uvlod.z).xyz;
+        OUT.m_color = float4(TransformColor(texColor, ColorSpaceId::LinearSRGB, ColorSpaceId::SRGB), 1.0);
     }
-    OUT.m_specular = float4(0,0,0,1);
-    OUT.m_scatterDistance = float4(0,0,0,0);
     return OUT;
 }
 
