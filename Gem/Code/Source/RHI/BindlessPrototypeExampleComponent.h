@@ -35,14 +35,15 @@ namespace AZ
 namespace AtomSampleViewer
 {
     
-    //! This sample tests a naive approach of achieving bindless resources.
+    //! This sample tests various resource types: read only textures, read only buffers, read only cube 
+    //! map textures, read write textures and read write buffers.
     //! This sample utilizes a FloatBuffer, which is a StructuredBuffer with the element type of Float, which
     //! is 4-byte aligned.
     //! All data that is used in this sample is allocated in this buffer, like: materials, objects, 
     //! transforms, etc. This allows for various types of data to be stored within the same buffer. The data
     //! is accessible with handles, which acts as an offset within the FloatBuffer to access data.
     //!
-    //! The texture views are stored in a descriptor which holds an image view array. 
+    //! All the bindless heap indices for views to various resource types are passed in via an indirect buffer.
     //!
     class BindlessPrototypeExampleComponent final
         : public BasicRHIComponent
@@ -170,6 +171,20 @@ namespace AtomSampleViewer
         // Creates the materials
         void CreateMaterials();
 
+        // Create read only buffers that has color values
+        void CreateColorBuffer(
+            const AZ::Name& bufferName,
+            const AZ::Vector4& colorVal,
+            AZ::RHI::Ptr<AZ::RHI::Buffer>& buffer,
+            AZ::RHI::Ptr<AZ::RHI::BufferView>& bufferView);
+
+        // Create indirect buffer that will contain index of the view into the bindless heap
+        void CreateIndirectBuffer(
+            const AZ::Name& bufferName,
+            AZ::RHI::Ptr<AZ::RHI::Buffer>& indirectionBuffer,
+            AZ::RHI::Ptr<AZ::RHI::BufferView>& bufferView,
+            size_t byteSize);
+
         // Helper function to allocate or update data in the FloatBuffer
         template<typename T>
         void AllocateMaterial(FloatBufferHandle& handle)
@@ -179,12 +194,23 @@ namespace AtomSampleViewer
             AZ_Assert(result, "Failed to allocate FloatBuffer");
         }
 
-        // Create the BufferPol
-        void CreateBufferPool();
+        // Create all the needed pools
+        void CreatePools();
 
-        //Recreate objects
+        // Recreate objects
         void Recreate();
         
+        // Load compute shaders related to writing to rwtexture and rwbuffer
+        void LoadComputeShader(const char* shaderFilePath);
+        void LoadComputeShaders();
+
+        // Create compute passes for writing to rwbuffer and rwtexture
+        void CreateBufferComputeScope();
+        void CreateImageComputeScope();
+
+        // Create the pass that will read all the various resources and use them to render meshes via a raster pass
+        void CreateBindlessScope();
+
         // ImGui sidebar
         ImGuiSidebar m_imguiSidebar;
 
@@ -220,6 +246,8 @@ namespace AtomSampleViewer
 
         // Image array holding all of the StreamImages
         AZStd::vector<AZ::Data::Instance<AZ::RPI::StreamingImage>> m_images;
+        // Image array holding all of the Stream cubemap images
+        AZStd::vector<AZ::Data::Instance<AZ::RPI::StreamingImage>> m_cubemapImages;
 
         AZStd::vector<const AZ::RHI::ImageView*> m_imageViews;
 
@@ -246,11 +274,30 @@ namespace AtomSampleViewer
         AZ::RHI::Ptr<AZ::RHI::BufferPool> m_bufferPool = nullptr;
 
         // Indirection buffer holding uint indices of texture resources
-        AZ::RHI::Ptr<AZ::RHI::Buffer> m_indirectionBuffer = nullptr;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_imageIndirectionBuffer = nullptr;
+        // Indirection buffer holding uint indices of buffer resources
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_bufferIndirectionBuffer = nullptr;
+        // View associated with the buffer holding indices to bindless images
+        AZ::RHI::Ptr<AZ::RHI::BufferView> m_imageIndirectionBufferView = nullptr;
+        // View associated with the buffer holding indices to bindless buffers
+        AZ::RHI::Ptr<AZ::RHI::BufferView> m_bufferIndirectionBufferView = nullptr;
 
-        // View associated with the indirection buffer
-        AZ::RHI::Ptr<AZ::RHI::BufferView> m_indirectionBufferView = nullptr;
-        
+        // Color buffer holding color related floats
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_colorBuffer1 = nullptr;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_colorBuffer2 = nullptr;
+        // Views related to the buffers declared above
+        AZ::RHI::Ptr<AZ::RHI::BufferView> m_colorBuffer1View = nullptr;
+        AZ::RHI::Ptr<AZ::RHI::BufferView> m_colorBuffer2View = nullptr;
+
+        // Thread count for compute shaders.
+        int m_bufferNumThreadsX = 1;
+        int m_bufferNumThreadsY = 1;
+        int m_bufferNumThreadsZ = 1;
+
+        int m_imageNumThreadsX = 1;
+        int m_imageNumThreadsY = 1;
+        int m_imageNumThreadsZ = 1;
+
         // Pool size in bytes, 1MB
         static constexpr uint32_t m_poolSizeInBytes = 1u << 20u;
 
@@ -274,6 +321,29 @@ namespace AtomSampleViewer
         static constexpr int32_t m_maxObjectPerAxis = 10u;
         // Total object count
         static constexpr uint32_t m_objectCount = m_maxObjectPerAxis * m_maxObjectPerAxis * m_maxObjectPerAxis;
+
+        // Compute pass related PSOs
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_bufferDispatchPipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_imageDispatchPipelineState;
+        
+        // Compute pass related buffer pool which will create a rwbuffer
+        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_computeBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_computeBuffer;
+        AZ::RHI::Ptr<AZ::RHI::BufferView> m_computeBufferView;
+        AZ::RHI::BufferViewDescriptor m_rwBufferViewDescriptor;
+
+         // Compute pass related image pool which will create a rwimage
+        AZ::RHI::Ptr<AZ::RHI::ImagePool> m_rwImagePool;
+        AZ::RHI::Ptr<AZ::RHI::Image> m_computeImage;
+        AZ::RHI::Ptr<AZ::RHI::ImageView> m_computeImageView;
+        AZ::RHI::ImageViewDescriptor m_rwImageViewDescriptor;
+
+        // Compute pass related SRGs
+        AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_bufferDispatchSRG;
+        AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_imageDispatchSRG;
+        AZ::RHI::AttachmentId m_bufferAttachmentId = AZ::RHI::AttachmentId("bufferAttachmentId");
+        AZ::RHI::AttachmentId m_imageAttachmentId = AZ::RHI::AttachmentId("imageAttachmentId");
+        
     };
 
 } // namespace AtomSampleViewer

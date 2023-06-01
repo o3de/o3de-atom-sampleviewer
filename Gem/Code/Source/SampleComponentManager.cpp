@@ -288,7 +288,7 @@ namespace AtomSampleViewer
         return {
             NewRHISample<AlphaToCoverageExampleComponent>("AlphaToCoverage"),
             NewRHISample<AsyncComputeExampleComponent>("AsyncCompute"),
-            NewRHISample<BindlessPrototypeExampleComponent>("BindlessPrototype", []() {return Utils::GetRHIDevice()->GetFeatures().m_unboundedArrays; }),
+            NewRHISample<BindlessPrototypeExampleComponent>("BindlessPrototype"),
             NewRHISample<ComputeExampleComponent>("Compute"),
             NewRHISample<CopyQueueComponent>("CopyQueue"),
             NewRHISample<DualSourceBlendingComponent>("DualSourceBlending", []() {return Utils::GetRHIDevice()->GetFeatures().m_dualSourceBlending; }),
