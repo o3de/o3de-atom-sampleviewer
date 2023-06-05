@@ -60,6 +60,8 @@ namespace AtomSampleViewer
         case RHI::ShadingRate::Rate2x4: return "Rate2x4";
         case RHI::ShadingRate::Rate4x2: return "Rate4x2";
         case RHI::ShadingRate::Rate4x4: return "Rate4x4";
+        case RHI::ShadingRate::Rate4x1: return "Rate4x1";
+        case RHI::ShadingRate::Rate1x4: return "Rate1x4";
         default: return "";
         }
     }
