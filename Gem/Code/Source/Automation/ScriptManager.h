@@ -69,6 +69,8 @@ namespace AtomSampleViewer
 
         void RunMainTestSuite(const AZStd::string& suiteFilePath, bool exitOnTestEnd, int randomSeed);
 
+        static ScriptManager* GetInstance();
+
     private:
         static constexpr const char* FullSuiteScriptFilepath = "scripts/_fulltestsuite_.bv.luac";
 
@@ -352,7 +354,5 @@ namespace AtomSampleViewer
 
         bool m_prevShowImGui = true;
         bool m_showImGui = true;
-
-        static ScriptManager* s_instance;
     };
 } // namespace AtomSampleViewer

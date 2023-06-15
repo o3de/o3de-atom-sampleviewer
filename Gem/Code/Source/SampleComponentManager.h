@@ -52,35 +52,10 @@ namespace AtomSampleViewer
 {
     class ScriptManager;
 
-    enum class SamplePipelineType : uint32_t
-    {
-        RHI = 0,
-        RPI
-    };
-
-    class SampleEntry
-    {
-    public:
-        AZStd::string m_parentMenuName;
-        AZStd::string m_sampleName;
-        // m_parentMenuName/m_sampleName
-        AZStd::string m_fullName;
-        AZ::Uuid m_sampleUuid;
-        AZStd::function<bool()> m_isSupportedFunc;
-        SamplePipelineType m_pipelineType = SamplePipelineType::RHI;
-        AZ::ComponentDescriptor* m_componentDescriptor;
-        AZStd::string m_contentWarning;
-        AZStd::string m_contentWarningTitle;
-
-        bool operator==(const SampleEntry& other)
-        {
-            return other.m_sampleName == m_sampleName && other.m_parentMenuName == m_parentMenuName;
-        }
-    };
-
     class SampleComponentManager final
         : public AZ::Component
         , public SampleComponentManagerRequestBus::Handler
+        , public SampleComponentSingletonRequestBus::Handler
         , public AZ::TickBus::Handler
         , public AzFramework::InputChannelEventListener
         , public AZ::Render::FrameCaptureNotificationBus::Handler
@@ -94,6 +69,7 @@ namespace AtomSampleViewer
         static void Reflect(AZ::ReflectContext* context);
 
         static void GetRequiredServices(AZ::ComponentDescriptor::DependencyArrayType& required);
+        static void GetProvidedServices(AZ::ComponentDescriptor::DependencyArrayType& provided);
         static void GetDependentServices(AZ::ComponentDescriptor::DependencyArrayType& dependent);
 
         static AZStd::vector<SampleEntry> GetSamples();
@@ -106,9 +82,6 @@ namespace AtomSampleViewer
         void Deactivate() override;
 
     private:
-
-        void RegisterSampleComponent(const SampleEntry& sample);
-
         // AZ::TickBus::Handler
         void OnTick(float deltaTime, AZ::ScriptTimePoint time) override;
 
@@ -161,6 +134,11 @@ namespace AtomSampleViewer
         int16_t GetNumMSAASamples() override;
         void SetDefaultNumMSAASamples(int16_t defaultNumMsaaSamples) override;
         int16_t GetDefaultNumMSAASamples() override;
+
+        // SampleComponentSingletonRequestBus overrides
+        void RegisterSampleComponent(const SampleEntry& sample) override;
+        ScriptManager* GetScriptManagerInstance() override;
+        ScriptableImGui* GetScriptableImGuiInstance() override;
 
         void ResetNumMSAASamples() override;
         void ResetRPIScene() override;
@@ -260,6 +238,7 @@ namespace AtomSampleViewer
         AZStd::string m_frameCaptureFilePath;
 
         AZStd::unique_ptr<ScriptManager> m_scriptManager;
+        AZStd::unique_ptr<ScriptableImGui> m_scriptableImGui;
 
         AZStd::shared_ptr<AZ::RPI::WindowContext> m_windowContext;
 

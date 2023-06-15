@@ -42,6 +42,8 @@ namespace AtomSampleViewer
             ~ScopedNameContext() { ScriptableImGui::PopNameContext(); }
         };
 
+        static ScriptableImGui* GetInstance();
+
         //! This can be used to add some context around the ImGui labels that are exposed to the script system.
         //! Each call to PushNameContext() will add a prefix the ImGui labels to form the script field IDs.
         //! For example, the following will result in a script field ID of "A/B/MyButton" instead of just "MyButton".
@@ -97,9 +99,6 @@ namespace AtomSampleViewer
         /////////////////////////////////////////////////////////////////////////////////////////////////
         // Private API for ScriptManager to call...
 
-        static void Create();
-        static void Destory();
-
         //! Call this every frame to report errors when scripted actions aren't consumed through ImGui API function calls.
         //! This usually indicates that a script is trying to manipulate ImGui elements that don't exist.
         static void CheckAllActionsConsumed();
@@ -152,8 +151,6 @@ namespace AtomSampleViewer
         ActionMap m_scriptedActions;
 
         bool m_isInScriptedComboPopup = false;
-
-        static ScriptableImGui* s_instance;
     };
 
 } // namespace AtomSampleViewer

@@ -11,27 +11,23 @@
 #include <AzFramework/StringFunc/StringFunc.h>
 #include <Utils/Utils.h>
 
+#include <SampleComponentManagerBus.h>
+
 namespace AtomSampleViewer
 {
-    ScriptableImGui* ScriptableImGui::s_instance = nullptr;
-
-    void ScriptableImGui::Create()
+    ScriptableImGui* ScriptableImGui::GetInstance()
     {
-        AZ_Assert(s_instance == nullptr, "instance already called");
-        s_instance = aznew ScriptableImGui();
-    }
-
-    void ScriptableImGui::Destory()
-    {
-        AZ_Assert(s_instance != nullptr, "instance is null");
-        delete s_instance;
-        s_instance = nullptr;
+        static ScriptableImGui* s_instance = nullptr;
+        if (!s_instance)
+        {
+            AtomSampleViewer::SampleComponentSingletonRequestBus::BroadcastResult(s_instance, &AtomSampleViewer::SampleComponentSingletonRequestBus::Events::GetScriptableImGuiInstance);
+        }
+        return s_instance;
     }
 
     void ScriptableImGui::CheckAllActionsConsumed()
     {
-        AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
-
+        ScriptableImGui* s_instance = GetInstance();
         AZ_Error("Automation", s_instance->m_scriptedActions.empty(), "Not all scripted ImGui actions were consumed");
         for (auto iter : s_instance->m_scriptedActions)
         {
@@ -43,31 +39,27 @@ namespace AtomSampleViewer
 
     void ScriptableImGui::ClearActions()
     {
-        AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
-
+        ScriptableImGui* s_instance = GetInstance();
         s_instance->m_scriptedActions.clear();
         s_instance->m_nameContextStack.clear();
     }
 
     void ScriptableImGui::PushNameContext(const AZStd::string& nameContext)
     {
-        AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
-
+        ScriptableImGui* s_instance = GetInstance();
         s_instance->m_nameContextStack.push_back(nameContext);
     }
 
     void ScriptableImGui::PopNameContext()
     {
-        AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
-
+        ScriptableImGui* s_instance = GetInstance();
         AZ_Assert(!s_instance->m_nameContextStack.empty(), "Called PopNameContext too many times");
         s_instance->m_nameContextStack.pop_back();
     }
 
     ScriptableImGui::ActionItem ScriptableImGui::FindAndRemoveAction(const AZStd::string& pathToImGuiItem)
     {
-        AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
-
+        ScriptableImGui* s_instance = GetInstance();
         auto iter = s_instance->m_scriptedActions.find(pathToImGuiItem);
         if (iter != s_instance->m_scriptedActions.end())
         {
@@ -81,6 +73,7 @@ namespace AtomSampleViewer
 
     AZStd::string ScriptableImGui::MakeFullPath(const AZStd::string& forLabel)
     {
+        ScriptableImGui* s_instance = GetInstance();
         static constexpr char Delimiter[] = "/";
 
         AZStd::string fullPath;
@@ -101,31 +94,31 @@ namespace AtomSampleViewer
 
     void ScriptableImGui::SetBool(const AZStd::string& pathToImGuiItem, bool value)
     {
-        AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
+        ScriptableImGui* s_instance = GetInstance();
         s_instance->m_scriptedActions[pathToImGuiItem] = value;
     }
 
     void ScriptableImGui::SetNumber(const AZStd::string& pathToImGuiItem, float value)
     {
-        AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
+        ScriptableImGui* s_instance = GetInstance();
         s_instance->m_scriptedActions[pathToImGuiItem] = value;
     }
 
     void ScriptableImGui::SetVector(const AZStd::string& pathToImGuiItem, const AZ::Vector2& value)
     {
-        AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
+        ScriptableImGui* s_instance = GetInstance();
         s_instance->m_scriptedActions[pathToImGuiItem] = value;
     }
 
     void ScriptableImGui::SetVector(const AZStd::string& pathToImGuiItem, const AZ::Vector3& value)
     {
-        AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
+        ScriptableImGui* s_instance = GetInstance();
         s_instance->m_scriptedActions[pathToImGuiItem] = value;
     }
 
     void ScriptableImGui::SetString(const AZStd::string& pathToImGuiItem, const AZStd::string& value)
     {
-        AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
+        ScriptableImGui* s_instance = GetInstance();
         s_instance->m_scriptedActions[pathToImGuiItem] = value;
     }
 
@@ -498,8 +491,6 @@ namespace AtomSampleViewer
 
     bool ScriptableImGui::TreeNodeEx(const char* label, ImGuiSelectableFlags flags)
     {
-        AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
-
         if (ImGui::TreeNodeEx(label, flags))
         {
             PushNameContext(label);
@@ -517,7 +508,7 @@ namespace AtomSampleViewer
 
     bool ScriptableImGui::BeginCombo(const char* label, const char* preview_value, ImGuiComboFlags flags)
     {
-        AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
+        ScriptableImGui* s_instance = GetInstance();
 
         const AZStd::string pathToImGuiItem = MakeFullPath(label);
 
@@ -541,6 +532,7 @@ namespace AtomSampleViewer
 
     void ScriptableImGui::EndCombo()
     {
+        ScriptableImGui* s_instance = GetInstance();
         if (s_instance->m_isInScriptedComboPopup)
         {
             s_instance->m_isInScriptedComboPopup = false;
