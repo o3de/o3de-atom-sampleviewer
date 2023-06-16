@@ -162,30 +162,6 @@ namespace AtomSampleViewer
     }
 
     template <typename T>
-    static SampleEntry NewSample(SamplePipelineType type, const char* menuName, const AZStd::string& name)
-    {
-        SampleEntry entry;
-        entry.m_sampleName = name;
-        entry.m_sampleUuid = azrtti_typeid<T>();
-        entry.m_pipelineType = type;
-        entry.m_componentDescriptor = T::CreateDescriptor();
-        entry.m_parentMenuName = menuName;
-        entry.m_fullName = entry.m_parentMenuName + '/' + entry.m_sampleName;
-        entry.m_contentWarning = T::ContentWarning;
-        entry.m_contentWarningTitle = T::ContentWarningTitle;
-
-        return entry;
-    }
-
-    template <typename T>
-    static SampleEntry NewSample(SamplePipelineType type, const char* menuName, const AZStd::string& name, AZStd::function<bool()> isSupportedFunction)
-    {
-        SampleEntry entry = NewSample<T>(type, menuName, name);
-        entry.m_isSupportedFunc = isSupportedFunction;
-        return entry;
-    }
-
-    template <typename T>
     static SampleEntry NewRHISample(const AZStd::string& name)
     {
         return NewSample<T>(SamplePipelineType::RHI, "RHI", name);
@@ -278,6 +254,11 @@ namespace AtomSampleViewer
         required.push_back(AZ_CRC("PrototypeLmbrCentralService", 0xe35e6de0));
     }
 
+    void SampleComponentManager::GetProvidedServices(AZ::ComponentDescriptor::DependencyArrayType& provided)
+    {
+        provided.push_back(AZ_CRC_CE("SampleComponentManagerService"));
+    }
+
     void SampleComponentManager::GetDependentServices(AZ::ComponentDescriptor::DependencyArrayType& dependent)
     {
         dependent.push_back(AZ_CRC("AzFrameworkConfigurationSystemComponentService", 0xcc49c96e)); // Ensures a scene is created for the GameEntityContext
@@ -364,6 +345,18 @@ namespace AtomSampleViewer
         }
     }
 
+    ScriptManager* SampleComponentManager::GetScriptManagerInstance()
+    {
+        AZ_Assert(m_scriptManager, "Script Manager is nullptr");
+        return m_scriptManager.get();
+    }
+
+    ScriptableImGui* SampleComponentManager::GetScriptableImGuiInstance()
+    {
+        AZ_Assert(m_scriptableImGui, "Scriptable ImGui is nullptr");
+        return m_scriptableImGui.get();
+    }
+
     SampleComponentManager::SampleComponentManager()
         : m_imguiFrameCaptureSaver("@user@/frame_capture.xml")
     {
@@ -392,6 +385,7 @@ namespace AtomSampleViewer
         }
 
         m_scriptManager = AZStd::make_unique<ScriptManager>();
+        m_scriptableImGui = AZStd::make_unique<ScriptableImGui>();
     }
 
     void SampleComponentManager::Activate()
@@ -399,6 +393,7 @@ namespace AtomSampleViewer
         // We can only initialize this component after the asset catalog has been loaded.
         AzFramework::AssetCatalogEventBus::Handler::BusConnect();
         AZ::Render::ImGuiSystemNotificationBus::Handler::BusConnect();
+        SampleComponentSingletonRequestBus::Handler::BusConnect();
 
         auto* passSystem = AZ::RPI::PassSystemInterface::Get();
         AZ_Assert(passSystem, "Cannot get the pass system.");
@@ -560,6 +555,7 @@ namespace AtomSampleViewer
         AZ::Render::ImGuiSystemNotificationBus::Handler::BusDisconnect();
         m_scriptManager->Deactivate();
         m_imguiFrameCaptureSaver.Deactivate();
+        SampleComponentSingletonRequestBus::Handler::BusDisconnect();
         SampleComponentManagerRequestBus::Handler::BusDisconnect();
         AZ::TickBus::Handler::BusDisconnect();
         AzFramework::InputChannelEventListener::Disconnect();
