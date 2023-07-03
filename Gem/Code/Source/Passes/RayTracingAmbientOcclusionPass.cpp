@@ -226,9 +226,9 @@ namespace AZ
             };
 
             RHI::DispatchRaysItem dispatchRaysItem;
-            dispatchRaysItem.m_width = targetImageSize.m_width;
-            dispatchRaysItem.m_height = targetImageSize.m_height;
-            dispatchRaysItem.m_depth = 1;
+            dispatchRaysItem.m_arguments.m_direct.m_width = targetImageSize.m_width;
+            dispatchRaysItem.m_arguments.m_direct.m_height = targetImageSize.m_height;
+            dispatchRaysItem.m_arguments.m_direct.m_depth = 1;
             dispatchRaysItem.m_rayTracingPipelineState = m_rayTracingPipelineState.get();
             dispatchRaysItem.m_rayTracingShaderTable = m_rayTracingShaderTable.get();
             dispatchRaysItem.m_shaderResourceGroupCount = 1;
