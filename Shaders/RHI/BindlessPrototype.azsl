@@ -61,6 +61,9 @@ ShaderResourceGroup HandleSrg : PerSubMesh
     uint m_perObjectHandle;
     uint m_materialHandle;
     uint m_lightHandle;
+
+    uint m_uvBufferIndex;
+    uint m_uvBufferByteOffset;
 };
 
 struct VertexInput
@@ -70,6 +73,7 @@ struct VertexInput
     float3 m_tangent : TANGENT;
     float3 m_bitangent : BITANGENT;
     float2 m_uv : UV0;
+    uint m_vertexId : SV_VertexID;
 };
 
 struct VertexOutput
@@ -102,7 +106,9 @@ VertexOutput MainVS(VertexInput vsInput)
 
     const float4 worldPosition = mul(perObject.m_localToWorldMatrix,  float4(vsInput.m_position, 1.0));
     OUT.m_position = mul(worldToClipMatrix, worldPosition);
-    OUT.m_uv = vsInput.m_uv;
+    OUT.m_uv =
+        asfloat(Bindless::GetByteAddressBuffer(HandleSrg::m_uvBufferIndex).Load2(HandleSrg::m_uvBufferByteOffset + vsInput.m_vertexId * 8));
+    // OUT.m_uv = vsInput.m_uv;
     OUT.m_normal = normalize(vsInput.m_normal);
 
     return OUT;

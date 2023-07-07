@@ -126,6 +126,8 @@ namespace AtomSampleViewer
             AZ::RHI::ShaderInputNameIndex m_objecHandleIndex = "m_perObjectHandle";
             AZ::RHI::ShaderInputNameIndex m_materialHandleIndex = "m_materialHandle";
             AZ::RHI::ShaderInputNameIndex m_lightHandleIndex = "m_lightHandle";
+            AZ::RHI::ShaderInputNameIndex m_uvBufferHandleIndex = "m_uvBufferIndex";
+            AZ::RHI::ShaderInputNameIndex m_uvBufferByteOffsetHandleIndex = "m_uvBufferByteOffset";
 
             AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_perSubMeshSrg;
 
@@ -133,6 +135,9 @@ namespace AtomSampleViewer
             AZ::RPI::ModelLod::StreamBufferViewList bufferStreamViewArray;
 
             AZ::Matrix4x4 m_modelMatrix;
+
+            uint32_t m_uvBufferIndex = 0;
+            uint32_t m_uvBufferByteOffset = 0;
         };
 
     public:
