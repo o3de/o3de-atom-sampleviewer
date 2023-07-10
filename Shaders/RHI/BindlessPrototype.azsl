@@ -108,7 +108,6 @@ VertexOutput MainVS(VertexInput vsInput)
     OUT.m_position = mul(worldToClipMatrix, worldPosition);
     OUT.m_uv =
         asfloat(Bindless::GetByteAddressBuffer(HandleSrg::m_uvBufferIndex).Load2(HandleSrg::m_uvBufferByteOffset + vsInput.m_vertexId * 8));
-    // OUT.m_uv = vsInput.m_uv;
     OUT.m_normal = normalize(vsInput.m_normal);
 
     return OUT;
