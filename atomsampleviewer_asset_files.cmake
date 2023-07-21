@@ -11,6 +11,8 @@ set(FILES
     Materials/DynamicMaterialTest/EmissiveMaterial.shader
     Materials/DynamicMaterialTest/EmissiveWithCppFunctors.materialtype
     Materials/DynamicMaterialTest/EmissiveWithLuaFunctors.materialtype
+    Materials/Pipelines/PrototypeDeferredPipeline/DeferredMaterialPass.azsli
+    Materials/Pipelines/PrototypeDeferredPipeline/DeferredPipelineScript.lua
     Materials/Types/MinimalMultilayerPBR.materialtype
     Materials/Types/MinimalMultilayerPBR_ForwardPass.azsl
     Materials/Types/MinimalMultilayerPBR_ForwardPass.shader
@@ -24,8 +26,18 @@ set(FILES
     Passes/RenderTexture.pass
     Passes/RHISamplePass.pass
     Passes/RHISamplePipeline.pass
+    Passes/RHISamplePipelineXRLeft.pass
+    Passes/RHISamplePipelineXRRight.pass
     Passes/SelectorPass.pass
     Passes/SsaoPipeline.pass
+    Passes/PrototypeDeferredPipeline/DeferredLighting.azsl
+    Passes/PrototypeDeferredPipeline/DeferredLighting.pass
+    Passes/PrototypeDeferredPipeline/DeferredLighting.shader
+    Passes/PrototypeDeferredPipeline/DeferredMaterial.pass
+    Passes/PrototypeDeferredPipeline/DeferredMaterialPassSrg.azsl
+    Passes/PrototypeDeferredPipeline/DeferredMaterialPassSrg.shader
+    Passes/PrototypeDeferredPipeline/DeferredOpaqueParent.pass
+    Passes/PrototypeDeferredPipeline/DeferredPipeline.pass
     scripts/AreaLightTest.bv.lua
     scripts/AuxGeom.bv.lua
     scripts/CheckerboardTest.bv.lua
@@ -37,6 +49,7 @@ set(FILES
     scripts/DynamicMaterialTest.bv.lua
     scripts/ExposureTest.bv.lua
     scripts/EyeMaterialTest.bv.lua
+    scripts/frametime.sa.lua
     scripts/LightCulling.bv.lua
     scripts/MaterialScreenshotTests.bv.lua
     scripts/MSAA_RPI_Test.bv.lua
@@ -52,6 +65,7 @@ set(FILES
     scripts/ShadowedSponzaTest.bv.lua
     scripts/ShadowTest.bv.lua
     scripts/SkinnedMesh.bv.lua
+    scripts/SkinnedMotionVector.bv.lua
     scripts/StreamingImageTest.bv.lua
     scripts/TestEnvironment.lua
     scripts/TransparentTest.bv.lua
@@ -86,6 +100,10 @@ set(FILES
     Shaders/RHI/AsyncComputeShadow.shader
     Shaders/RHI/AsyncComputeTonemapping.azsl
     Shaders/RHI/AsyncComputeTonemapping.shader
+    Shaders/RHI/BindlessBufferComputeDispatch.azsl
+    Shaders/RHI/BindlessBufferComputeDispatch.shader
+    Shaders/RHI/BindlessImageComputeDispatch.azsl
+    Shaders/RHI/BindlessImageComputeDispatch.shader
     Shaders/RHI/BindlessPrototype.azsl
     Shaders/RHI/BindlessPrototype.shader
     Shaders/RHI/BindlessPrototypeSrg.azsli
@@ -123,6 +141,8 @@ set(FILES
     Shaders/RHI/MultipleViewsShadow.shader
     Shaders/RHI/Multithread.azsl
     Shaders/RHI/Multithread.shader
+    Shaders/RHI/OpenXrSample.azsl
+    Shaders/RHI/OpenXrSample.shader
     Shaders/RHI/RayTracingClosestHitGradient.azsl
     Shaders/RHI/RayTracingClosestHitGradient.shader
     Shaders/RHI/RayTracingClosestHitSolid.azsl
@@ -172,6 +192,12 @@ set(FILES
     Shaders/RHI/Triangle.shader
     Shaders/RHI/TrianglesConstantBuffer.azsl
     Shaders/RHI/TrianglesConstantBuffer.shader
+    Shaders/RHI/VariableRateShading.azsl
+    Shaders/RHI/VariableRateShading.shader
+    Shaders/RHI/VariableRateShadingCompute.azsl
+    Shaders/RHI/VariableRateShadingCompute.shader
+    Shaders/RHI/VariableRateShadingImage.azsl
+    Shaders/RHI/VariableRateShadingImage.shader
     Shaders/RootConstantsExample/ColorMesh.azsl
     Shaders/RootConstantsExample/ColorMesh.shader
     Shaders/StreamingImageExample/Image3d.azsl
