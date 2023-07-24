@@ -1788,13 +1788,13 @@ namespace AtomSampleViewer
             // Build the pipeline for left eye
             xrPipelineDesc.m_name = "RPISamplePipelineXRLeft";
             xrPipelineDesc.m_materialPipelineTag = "MultiViewPipeline";
-            xrPipelineDesc.m_rootPassTemplate = "MultiViewXRLeftPipelineTemplate";
+            xrPipelineDesc.m_rootPassTemplate = "MultiViewPipelineTemplate";
             RPI::RenderPipelinePtr renderPipelineLeft = RPI::RenderPipeline::CreateRenderPipelineForWindow(xrPipelineDesc, *m_windowContext.get(), AZ::RPI::ViewType::XrLeft);
 
             // Build the pipeline for right eye
             xrPipelineDesc.m_name = "RHISamplePipelineXRRight";
             xrPipelineDesc.m_materialPipelineTag = "MultiViewPipeline";
-            xrPipelineDesc.m_rootPassTemplate = "MultiViewXRRightPipelineTemplate";
+            xrPipelineDesc.m_rootPassTemplate = "MultiViewPipelineTemplate";
             RPI::RenderPipelinePtr renderPipelineRight = RPI::RenderPipeline::CreateRenderPipelineForWindow(xrPipelineDesc, *m_windowContext.get(), AZ::RPI::ViewType::XrRight);
 
             //Add both the pipelines to the scene
