@@ -24,7 +24,7 @@ namespace AtomSampleViewer
     RHISamplePass::RHISamplePass(const AZ::RPI::PassDescriptor& descriptor)
         : AZ::RPI::RenderPass(descriptor)
     {
-        m_flags.m_hasPipelineViewTag = true;
+        m_flags.m_bindViewSrg = true;
         m_pipelineViewTag = "MainCamera";
     }
 
