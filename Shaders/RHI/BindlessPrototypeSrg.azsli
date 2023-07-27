@@ -35,6 +35,8 @@ ShaderResourceGroupSemantic NonBindlessTextureSemanticId
     FrequencyId = 3;
 };
 
+#include <Atom/Features/Bindless.azsli>
+
 ShaderResourceGroup FloatBufferSrg : FloatBufferSemanticId
 {
     StructuredBuffer<FloatBuffer> m_floatBuffer;

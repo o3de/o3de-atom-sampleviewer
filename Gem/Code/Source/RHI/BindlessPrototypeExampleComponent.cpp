@@ -344,11 +344,20 @@ namespace AtomSampleViewer
             const uint32_t lodModel = 0u;
             const ModelLod::Mesh& mesh = m_model->GetLods()[lodModel]->GetMeshes()[subMeshIdx];
 
+            auto uvAssetBufferView{ m_model->GetModelAsset()->GetLodAssets()[lodModel]->GetMeshes()[subMeshIdx].GetSemanticBufferAssetView(
+                AZ::Name{ "UV" }) };
+            auto rpiUVBuffer{ AZ::RPI::Buffer::FindOrCreate(uvAssetBufferView->GetBufferAsset()) };
+            const RHI::BufferView* uvBufferView = rpiUVBuffer->GetBufferView();
+            uint32_t uvBufferByteOffset =
+                uvAssetBufferView->GetBufferViewDescriptor().m_elementSize * uvAssetBufferView->GetBufferViewDescriptor().m_elementOffset;
+
             m_subMeshInstanceArray.resize(m_subMeshInstanceArray.size() + 1);
             SubMeshInstance& subMeshInstance = m_subMeshInstanceArray.back();
 
             subMeshInstance.m_perSubMeshSrg = CreateShaderResourceGroup(m_shader, "HandleSrg", InternalBP::SampleName);
             subMeshInstance.m_mesh = &mesh;
+            subMeshInstance.m_uvBufferIndex = uvBufferView->GetBindlessReadIndex();
+            subMeshInstance.m_uvBufferByteOffset = uvBufferByteOffset;
 
             // Set the buffer stream
             RHI::InputStreamLayout layout;
@@ -1225,6 +1234,11 @@ namespace AtomSampleViewer
                         const FloatBufferHandle materialHandle = m_materialHandleArray[materialHandleIndex];
                         set = subMesh.m_perSubMeshSrg->SetConstant(subMesh.m_materialHandleIndex, materialHandle);
                         AZ_Assert(set, "Failed to set the material constant");
+
+                        set = subMesh.m_perSubMeshSrg->SetConstant(subMesh.m_uvBufferHandleIndex, subMesh.m_uvBufferIndex);
+                        AZ_Assert(set, "Failed to set the UV buffer index");
+                        set = subMesh.m_perSubMeshSrg->SetConstant(subMesh.m_uvBufferByteOffsetHandleIndex, subMesh.m_uvBufferByteOffset);
+                        AZ_Assert(set, "Failed to set the UV buffer byte index");
 
                         subMesh.m_perSubMeshSrg->Compile();
                     }
