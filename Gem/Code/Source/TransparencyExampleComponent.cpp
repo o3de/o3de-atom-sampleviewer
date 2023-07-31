@@ -106,21 +106,23 @@ namespace AtomSampleViewer
 
                 for (int i = 0; i < NumOfMeshes; ++i)
                 {
-                    const AZ::Render::MaterialAssignmentMap& materials = GetMeshFeatureProcessor()->GetMaterialAssignmentMap(m_meshHandles[i]);
-                    const AZ::Render::MaterialAssignment defaultMaterial = AZ::Render::GetMaterialAssignmentFromMap(materials, AZ::Render::DefaultMaterialAssignmentId);
-                    AZ::Data::Instance<AZ::RPI::Material> material = defaultMaterial.m_materialInstance;
-
-                    material->SetPropertyValue(colorProperty, colors[i]);
-
-                    if (material->NeedsCompile())
+                    for (auto& customMaterial : GetMeshFeatureProcessor()->GetCustomMaterials(m_meshHandles[i]))
                     {
-                        bool thisMaterialsCompiled = material->Compile();
-                        numMaterialsCompiled += uint32_t(thisMaterialsCompiled);
-                    }
-                    else
-                    {
-                        // Material already compiled
-                        ++numMaterialsCompiled;
+                        if (AZ::Data::Instance<AZ::RPI::Material> material = customMaterial.second.m_material)
+                        {
+                            material->SetPropertyValue(colorProperty, colors[i]);
+
+                            if (material->NeedsCompile())
+                            {
+                                bool thisMaterialsCompiled = material->Compile();
+                                numMaterialsCompiled += uint32_t(thisMaterialsCompiled);
+                            }
+                            else
+                            {
+                                // Material already compiled
+                                ++numMaterialsCompiled;
+                            }
+                        }
                     }
                 }
 
@@ -136,12 +138,9 @@ namespace AtomSampleViewer
 
     void TransparencyExampleComponent::LoadMesh(AZ::Transform transform)
     {
-        AZ::Render::MaterialAssignmentMap materialMap;
-        AZ::Render::MaterialAssignment& defaultMaterial = materialMap[AZ::Render::DefaultMaterialAssignmentId];
-        defaultMaterial.m_materialAsset = m_materialAsset;
-        defaultMaterial.m_materialInstance = AZ::RPI::Material::Create(m_materialAsset);
+        auto materialInstance = AZ::RPI::Material::Create(m_materialAsset);
 
-        AZ::Render::MeshFeatureProcessorInterface::MeshHandle meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_modelAsset }, materialMap);
+        AZ::Render::MeshFeatureProcessorInterface::MeshHandle meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_modelAsset }, materialInstance);
         GetMeshFeatureProcessor()->SetTransform(meshHandle, transform);
 
         AZ::Data::Instance<AZ::RPI::Model> model = GetMeshFeatureProcessor()->GetModel(meshHandle);

@@ -85,6 +85,10 @@ set(FILES
     Source/RHI/RayTracingExampleComponent.h
     Source/RHI/MatrixAlignmentTestExampleComponent.cpp
     Source/RHI/MatrixAlignmentTestExampleComponent.h
+    Source/RHI/XRExampleComponent.cpp
+    Source/RHI/XRExampleComponent.h
+    Source/RHI/VariableRateShadingExampleComponent.cpp
+    Source/RHI/VariableRateShadingExampleComponent.h
     Source/Performance/HighInstanceExampleComponent.cpp
     Source/Performance/HighInstanceExampleComponent.h
     Source/Performance/100KDrawable_SingleView_ExampleComponent.cpp
@@ -133,8 +137,6 @@ set(FILES
     Source/EyeMaterialExampleComponent.cpp
     Source/LightCullingExampleComponent.cpp
     Source/LightCullingExampleComponent.h
-    Source/MaterialHotReloadTestComponent.cpp
-    Source/MaterialHotReloadTestComponent.h
     Source/MeshExampleComponent.cpp
     Source/MeshExampleComponent.h
     Source/MSAA_RPI_ExampleComponent.cpp
@@ -186,18 +188,16 @@ set(FILES
     Source/Utils/ImGuiAssetBrowser.h
     Source/Utils/ImGuiHistogramQueue.cpp
     Source/Utils/ImGuiHistogramQueue.h
-    Source/Utils/ImGuiMaterialDetails.cpp
-    Source/Utils/ImGuiMaterialDetails.h
     Source/Utils/ImGuiMessageBox.cpp
     Source/Utils/ImGuiMessageBox.h
     Source/Utils/ImGuiSaveFilePath.cpp
     Source/Utils/ImGuiSaveFilePath.h
-    Source/Utils/ImGuiShaderUtils.cpp
-    Source/Utils/ImGuiShaderUtils.h
     Source/Utils/ImGuiSidebar.cpp
     Source/Utils/ImGuiSidebar.h
     Source/Utils/Utils.cpp
     Source/Utils/Utils.h
     Source/Utils/ImGuiProgressList.cpp
     Source/Utils/ImGuiProgressList.h
+    Source/XRRPIExampleComponent.cpp
+    Source/XRRPIExampleComponent.h
 )

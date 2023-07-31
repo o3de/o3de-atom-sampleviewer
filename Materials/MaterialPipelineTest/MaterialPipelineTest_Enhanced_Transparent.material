@@ -1,0 +1,9 @@
+{
+    "materialType": "@gemroot:Atom_Feature_Common@/Assets/Materials/Types/EnhancedPBR.materialtype",
+    "materialTypeVersion": 3,
+    "parentMaterial": "MaterialPipelineTest_Enhanced.material",
+    "propertyValues": {
+        "opacity.factor": 0.47999998927116394,
+        "opacity.mode": "Blended"
+    }
+}

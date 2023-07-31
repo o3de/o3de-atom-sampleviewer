@@ -69,13 +69,13 @@ namespace AtomSampleViewer
                     if (screenshotTestInfos[j].m_officialComparisonResult.m_resultCode == ScriptReporter::ImageComparisonResult::ResultCode::Pass)
                     {
                         m_reportsOrderedByThresholdToInspect.insert(AZStd::pair<float, ScriptReporter::ReportIndex>(
-                            screenshotTestInfos[j].m_officialComparisonResult.m_finalDiffScore,
+                            screenshotTestInfos[j].m_officialComparisonResult.m_diffScore,
                             ScriptReporter::ReportIndex{ i, j }));
                     }
                     else
                     {
                         m_failedReports.insert(AZStd::pair<float, ScriptReporter::ReportIndex>(
-                            screenshotTestInfos[j].m_officialComparisonResult.m_finalDiffScore,
+                            screenshotTestInfos[j].m_officialComparisonResult.m_diffScore,
                             ScriptReporter::ReportIndex{ i, j }));
                     }
                 }

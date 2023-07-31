@@ -1,0 +1,15 @@
+{
+    "materialType": "@gemroot:Atom_Feature_Common@/Assets/Materials/Types/EnhancedPBR.materialtype",
+    "materialTypeVersion": 3,
+    "parentMaterial": "MaterialPipelineTest_Enhanced.material",
+    "propertyValues": {
+        "baseColor.color": [
+            0.286900132894516,
+            0.5570611357688904,
+            1.0,
+            1.0
+        ],
+        "opacity.factor": 0.23999999463558197,
+        "opacity.mode": "TintedTransparent"
+    }
+}

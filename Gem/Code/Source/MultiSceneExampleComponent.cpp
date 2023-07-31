@@ -97,6 +97,7 @@ namespace AtomSampleViewer
         pipelineDesc.m_name = "SecondPipeline";              // Sets the debug name for this pipeline
         pipelineDesc.m_rootPassTemplate = "MainPipeline";    // References a template in AtomSampleViewer\Passes\MainPipeline.pass
         pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 4;
+        pipelineDesc.m_allowModification = true;
         m_pipeline = RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
 
         m_scene->AddRenderPipeline(m_pipeline);
@@ -312,7 +313,7 @@ namespace AtomSampleViewer
 
         // Release the probe
         m_reflectionProbeFeatureProcessor->RemoveReflectionProbe(m_reflectionProbeHandle);
-        m_reflectionProbeHandle = nullptr;
+        m_reflectionProbeHandle = {};
 
         // Release all meshes
         for (auto& shaderBallMeshHandle : m_shaderBallMeshHandles)

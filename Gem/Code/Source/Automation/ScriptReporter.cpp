@@ -29,91 +29,13 @@ namespace AtomSampleViewer
         "Sort by Script", "Sort by Official Baseline Diff Score", "Sort by Local Baseline Diff Score",
     };
 
-    namespace ScreenshotPaths
-    {
-        AZStd::string GetScreenshotsFolder(bool resolvePath)
-        {
-            AZStd::string path = "@user@/scripts/screenshots/";
-
-            if (resolvePath)
-            {
-                path = Utils::ResolvePath(path);
-            }
-
-            return path;
-        }
-
-        AZStd::string GetLocalBaselineFolder(bool resolvePath)
-        {
-            AZStd::string path = AZStd::string::format("@user@/scripts/screenshotslocalbaseline/");
-
-            if (resolvePath)
-            {
-                path = Utils::ResolvePath(path);
-            }
-
-            return path;
-        }
-
-        AZStd::string GetOfficialBaselineFolder(bool resolvePath)
-        {
-            AZStd::string path = "scripts/expectedscreenshots/";
-
-            if (resolvePath)
-            {
-                path = Utils::ResolvePath(path);
-            }
-
-            return path;
-        }
-
-        AZStd::string GetLocalBaseline(const AZStd::string& forScreenshotFile)
-        {
-            AZStd::string localBaselineFolder = GetLocalBaselineFolder(false);
-            AzFramework::StringFunc::Replace(localBaselineFolder, "@user@/", "");
-            AZStd::string newPath = forScreenshotFile;
-            if (!AzFramework::StringFunc::Replace(newPath, "scripts/screenshots", localBaselineFolder.c_str()))
-            {
-                newPath = "";
-            }
-            return Utils::ResolvePath(newPath);
-        }
-
-        AZStd::string GetOfficialBaseline(const AZStd::string& forScreenshotFile, const AZStd::string& envPath)
-        {
-            AZStd::string path = forScreenshotFile;
-            const AZStd::string userPath = Utils::ResolvePath("@user@");
-
-            // make the path relative to the user folder
-            if (!AzFramework::StringFunc::Replace(path, userPath.c_str(), ""))
-            {
-                return "";
-            }
-
-            // After replacing "screenshots" with "expectedscreenshots", the path should be a valid asset path, relative to asset root.
-            if (!AzFramework::StringFunc::Replace(path, "scripts/screenshots", "scripts/expectedscreenshots"))
-            {
-                return "";
-            }
-
-            if (!AzFramework::StringFunc::Replace(path, envPath.c_str(), ""))
-            {
-                return "";
-            }
-            // Turn it back into a full path
-            path = Utils::ResolvePath("@projectroot@/" + path);
-
-            return path;
-        }
-    }
-
     AZStd::string ScriptReporter::ImageComparisonResult::GetSummaryString() const
     {
         AZStd::string resultString;
 
         if (m_resultCode == ResultCode::ThresholdExceeded || m_resultCode == ResultCode::Pass)
         {
-            resultString = AZStd::string::format("Diff Score: %f", m_finalDiffScore);
+            resultString = AZStd::string::format("Diff Score: %f", m_diffScore);
         }
         else if (m_resultCode == ResultCode::WrongSize)
         {
@@ -170,7 +92,7 @@ namespace AtomSampleViewer
         m_invalidationMessage = message;
 
         // Reporting this message here instead of when running the script so it won't show up as an error in the ImGui report.
-        AZ_Error("Automation", m_invalidationMessage.empty(), "Subsequent test results will be invalid because '%s'", m_invalidationMessage.c_str());
+        AZ_Error("ScriptReporter", m_invalidationMessage.empty(), "Subsequent test results will be invalid because '%s'", m_invalidationMessage.c_str());
     }
 
     void ScriptReporter::PushScript(const AZStd::string& scriptAssetPath)
@@ -208,18 +130,60 @@ namespace AtomSampleViewer
         return !m_currentScriptIndexStack.empty();
     }
 
-    ScriptReporter::ScreenshotTestInfo::ScreenshotTestInfo(const AZStd::string& screenshotFilePath, const AZStd::string& envPath)
-        : m_screenshotFilePath(Utils::ResolvePath(screenshotFilePath))
-    {
-        m_officialBaselineScreenshotFilePath = ScreenshotPaths::GetOfficialBaseline(m_screenshotFilePath, envPath);
-        m_localBaselineScreenshotFilePath = ScreenshotPaths::GetLocalBaseline(m_screenshotFilePath);
+    ScriptReporter::ScreenshotTestInfo::ScreenshotTestInfo(const AZStd::string& screenshotName)
+    {   
+        AZ_Assert(!screenshotName.empty(), "The screenshot file name shouldn't be empty.");
+
+        AZ::Render::FrameCapturePathOutcome pathOutcome;
+
+        AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
+            pathOutcome,
+            &AZ::Render::FrameCaptureTestRequestBus::Events::BuildScreenshotFilePath,
+            screenshotName, true);
+
+        if (pathOutcome.IsSuccess())
+        {
+            m_screenshotFilePath = pathOutcome.GetValue();
+        }
+        else
+        {
+            AZ_Error("ScriptReporter", false, "%s", pathOutcome.GetError().m_errorMessage.c_str());
+        }
+
+        AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
+            pathOutcome,
+            &AZ::Render::FrameCaptureTestRequestBus::Events::BuildOfficialBaselineFilePath,
+            screenshotName, false);
+
+        if (pathOutcome.IsSuccess())
+        {
+            m_officialBaselineScreenshotFilePath = pathOutcome.GetValue();
+        }
+        else
+        {
+            AZ_Error("ScriptReporter", false, "%s", pathOutcome.GetError().m_errorMessage.c_str());
+        }
+
+        AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
+            pathOutcome,
+            &AZ::Render::FrameCaptureTestRequestBus::Events::BuildLocalBaselineFilePath,
+            screenshotName, true);
+
+        if (pathOutcome.IsSuccess())
+        {
+            m_localBaselineScreenshotFilePath = pathOutcome.GetValue();
+        }
+        else
+        {
+            AZ_Error("ScriptReporter", false, "%s", pathOutcome.GetError().m_errorMessage.c_str());
+        }
     }
 
-    bool ScriptReporter::AddScreenshotTest(const AZStd::string& path, const AZStd::string& envPath)
+    bool ScriptReporter::AddScreenshotTest(const AZStd::string& imageName)
     {
         AZ_Assert(GetCurrentScriptReport(), "There is no active script");
 
-        ScreenshotTestInfo screenshotTestInfo(path, envPath);
+        ScreenshotTestInfo screenshotTestInfo(imageName);
         GetCurrentScriptReport()->m_screenshotTests.push_back(AZStd::move(screenshotTestInfo));
 
         return true;
@@ -580,11 +544,11 @@ namespace AtomSampleViewer
                         float diffScore = 0.0f;
                         if (m_currentSortOption == SortOption::OfficialBaselineDiffScore)
                         {
-                            diffScore = screenshotResult.m_officialComparisonResult.m_standardDiffScore;
+                            diffScore = screenshotResult.m_officialComparisonResult.m_diffScore;
                         }
                         else if (m_currentSortOption == SortOption::LocalBaselineDiffScore)
                         {
-                            diffScore = screenshotResult.m_localComparisonResult.m_standardDiffScore;
+                            diffScore = screenshotResult.m_localComparisonResult.m_diffScore;
                         }
 
                         const bool screenshotPassed = screenshotResult.m_officialComparisonResult.m_resultCode == ImageComparisonResult::ResultCode::Pass;
@@ -660,7 +624,7 @@ namespace AtomSampleViewer
                     ImGui::Text("Used Tolerance: %s", screenshotResult.m_toleranceLevel.ToString().c_str());
 
                     const ImageComparisonToleranceLevel* suggestedTolerance = ScriptReporter::FindBestToleranceLevel(
-                        screenshotResult.m_officialComparisonResult.m_finalDiffScore,
+                        screenshotResult.m_officialComparisonResult.m_diffScore,
                         screenshotResult.m_toleranceLevel.m_filterImperceptibleDiffs);
 
                     if (suggestedTolerance)
@@ -672,10 +636,10 @@ namespace AtomSampleViewer
                     {
                         // This gives an idea of what the tolerance level would be if the imperceptible diffs were not filtered out.
                         const ImageComparisonToleranceLevel* unfilteredTolerance =
-                            ScriptReporter::FindBestToleranceLevel(screenshotResult.m_officialComparisonResult.m_standardDiffScore, false);
+                            ScriptReporter::FindBestToleranceLevel(screenshotResult.m_officialComparisonResult.m_diffScore, false);
 
                         ImGui::Text(
-                            "(Unfiltered Diff Score: %f%s)", screenshotResult.m_officialComparisonResult.m_standardDiffScore,
+                            "(Unfiltered Diff Score: %f%s)", screenshotResult.m_officialComparisonResult.m_diffScore,
                             unfilteredTolerance ? AZStd::string::format(" ~ '%s'", unfilteredTolerance->m_name.c_str()).c_str() : "");
                     }
                 }
@@ -866,11 +830,11 @@ namespace AtomSampleViewer
             for (size_t j = 0; j < screenshotTestInfos.size(); ++j)
             {
                 m_reportsSortedByOfficialBaslineScore.insert(AZStd::pair<float, ReportIndex>(
-                    screenshotTestInfos[j].m_officialComparisonResult.m_standardDiffScore,
+                    screenshotTestInfos[j].m_officialComparisonResult.m_diffScore,
                     ReportIndex{ i, j }));
 
                 m_reportsSortedByLocaBaslineScore.insert(AZStd::pair<float, ReportIndex>(
-                    screenshotTestInfos[j].m_localComparisonResult.m_standardDiffScore,
+                    screenshotTestInfos[j].m_localComparisonResult.m_diffScore,
                     ReportIndex{ i, j }));
             }
         }
@@ -878,12 +842,12 @@ namespace AtomSampleViewer
 
     void ScriptReporter::ReportScriptError([[maybe_unused]] const AZStd::string& message)
     {
-        AZ_Error("Automation", false, "Script: %s", message.c_str());
+        AZ_Error("ScriptReporter", false, "Script: %s", message.c_str());
     }
 
     void ScriptReporter::ReportScriptWarning([[maybe_unused]] const AZStd::string& message)
     {
-        AZ_Warning("Automation", false, "Script: %s", message.c_str());
+        AZ_Warning("ScriptReporter", false, "Script: %s", message.c_str());
     }
 
     void ScriptReporter::ReportScriptIssue(const AZStd::string& message, TraceLevel traceLevel)
@@ -909,80 +873,6 @@ namespace AtomSampleViewer
             actualImageFilePath.c_str());
 
         ReportScriptIssue(fullMessage, traceLevel);
-    }
-
-    bool ScriptReporter::DiffImages(ImageComparisonResult& imageComparisonResult, const AZStd::string& expectedImageFilePath, const AZStd::string& actualImageFilePath, TraceLevel traceLevel)
-    {
-        using namespace AZ::Utils;
-
-        AZStd::vector<uint8_t> actualImageBuffer;
-        AZ::RHI::Size actualImageSize;
-        AZ::RHI::Format actualImageFormat;
-        if (!LoadPngData(imageComparisonResult, actualImageFilePath, actualImageBuffer, actualImageSize, actualImageFormat, traceLevel))
-        {
-            // Even though LoadPngData might have reported an error, we need to report our own here with the "Screenshot check failed" string
-            // because the error handler in ScriptReporter::ScriptReport is looking for that.
-            ReportScreenshotComparisonIssue("Screenshot check failed. 'Actual' file not loaded.",
-                expectedImageFilePath,
-                actualImageFilePath,
-                traceLevel);
-            return false;
-        }
-
-        AZStd::vector<uint8_t> expectedImageBuffer;
-        AZ::RHI::Size expectedImageSize;
-        AZ::RHI::Format expectedImageFormat;
-        if (!LoadPngData(imageComparisonResult, expectedImageFilePath, expectedImageBuffer, expectedImageSize, expectedImageFormat, traceLevel))
-        {
-            // Even though LoadPngData might have reported an error, we need to report our own here with the "Screenshot check failed" string
-            // because the error handler in ScriptReporter::ScriptReport is looking for that.
-            ReportScreenshotComparisonIssue("Screenshot check failed. 'Expected' file not loaded.",
-                expectedImageFilePath,
-                actualImageFilePath,
-                traceLevel);
-            return false;
-        }
-
-        float diffScore = 0.0f;
-        float filteredDiffScore = 0.0f;
-
-        static constexpr float ImperceptibleDiffFilter = 0.01;
-
-        ImageDiffResultCode rmsResult = AZ::Utils::CalcImageDiffRms(
-            actualImageBuffer, actualImageSize, actualImageFormat,
-            expectedImageBuffer, expectedImageSize, expectedImageFormat,
-            &diffScore,
-            &filteredDiffScore,
-            ImperceptibleDiffFilter);
-
-        if (rmsResult != ImageDiffResultCode::Success)
-        {
-            if(rmsResult == ImageDiffResultCode::SizeMismatch)
-            {
-                ReportScreenshotComparisonIssue(AZStd::string::format("Screenshot check failed. Sizes don't match. Expected %u x %u but was %u x %u.",
-                    expectedImageSize.m_width, expectedImageSize.m_height,
-                    actualImageSize.m_width, actualImageSize.m_height),
-                    expectedImageFilePath,
-                    actualImageFilePath,
-                    traceLevel);
-                imageComparisonResult.m_resultCode = ImageComparisonResult::ResultCode::WrongSize;
-                return false;
-            }
-            else if (rmsResult == ImageDiffResultCode::FormatMismatch || rmsResult == ImageDiffResultCode::UnsupportedFormat)
-            {
-                ReportScreenshotComparisonIssue(AZStd::string::format("Screenshot check failed. Could not compare screenshots due to a format issue."),
-                    expectedImageFilePath,
-                    actualImageFilePath,
-                    traceLevel);
-                imageComparisonResult.m_resultCode = ImageComparisonResult::ResultCode::WrongFormat;
-                return false;
-            }
-        }
-
-        imageComparisonResult.m_standardDiffScore = diffScore;
-        imageComparisonResult.m_filteredDiffScore = filteredDiffScore;
-        imageComparisonResult.m_finalDiffScore = diffScore; // Set the final score to the standard score just in case the filtered one is ignored
-        return true;
     }
 
     void ScriptReporter::UpdateAllLocalBaselineImages()
@@ -1058,7 +948,7 @@ namespace AtomSampleViewer
 
             if (!io->Exists(m_officialBaselineSourceFolder.c_str()))
             {
-                AZ_Error("Automation", false, "Could not find source folder '%s'. Copying to source baseline can only be used on dev platforms.", m_officialBaselineSourceFolder.c_str());
+                AZ_Error("ScriptReporter", false, "Could not find source folder '%s'. Copying to source baseline can only be used on dev platforms.", m_officialBaselineSourceFolder.c_str());
                 m_officialBaselineSourceFolder.clear();
                 success = false;
             }
@@ -1120,9 +1010,7 @@ namespace AtomSampleViewer
     void ScriptReporter::ClearImageComparisonResult(ImageComparisonResult& comparisonResult)
     {
         comparisonResult.m_resultCode = ImageComparisonResult::ResultCode::Pass;
-        comparisonResult.m_standardDiffScore = 0.0f;
-        comparisonResult.m_filteredDiffScore = 0.0f;
-        comparisonResult.m_finalDiffScore = 0.0f;
+        comparisonResult.m_diffScore = 0.0f;
     }
 
     void ScriptReporter::ShowUpdateLocalBaselineResult(int successCount, int failureCount)
@@ -1134,7 +1022,17 @@ namespace AtomSampleViewer
         }
         else
         {
-            message = "Destination: " + ScreenshotPaths::GetLocalBaselineFolder(true) + "\n";
+            AZ::Render::FrameCapturePathOutcome pathOutcome;
+
+            AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
+                pathOutcome,
+                &AZ::Render::FrameCaptureTestRequestBus::Events::BuildScreenshotFilePath,
+                "", true);
+
+            AZ_Error("ScriptReporter", pathOutcome.IsSuccess(), "%s", pathOutcome.GetError().m_errorMessage.c_str());
+
+            AZStd::string localBaselineFolder = pathOutcome.IsSuccess() ? pathOutcome.GetValue() : "";
+            message = "Destination: " + localBaselineFolder + "\n";
 
             if (successCount > 0)
             {
@@ -1168,28 +1066,36 @@ namespace AtomSampleViewer
             return;
         }
 
+        auto io = AZ::IO::LocalFileIO::GetInstance();
         screenshotTestInfo.m_toleranceLevel = *toleranceLevel;
+        static constexpr float ImperceptibleDiffFilter = 0.01;
 
-        if (screenshotTestInfo.m_officialBaselineScreenshotFilePath.empty())
+        if (screenshotTestInfo.m_officialBaselineScreenshotFilePath.empty()
+            || !io->Exists(screenshotTestInfo.m_officialBaselineScreenshotFilePath.c_str()))
         {
             ReportScriptError(AZStd::string::format("Screenshot check failed. Could not determine expected screenshot path for '%s'", screenshotTestInfo.m_screenshotFilePath.c_str()));
             screenshotTestInfo.m_officialComparisonResult.m_resultCode = ImageComparisonResult::ResultCode::FileNotFound;
         }
         else
         {
-            bool imagesWereCompared = DiffImages(
-                screenshotTestInfo.m_officialComparisonResult,
-                screenshotTestInfo.m_officialBaselineScreenshotFilePath,
+            AZ::Render::FrameCaptureComparisonOutcome compOutcome;
+            AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
+                compOutcome,
+                &AZ::Render::FrameCaptureTestRequestBus::Events::CompareScreenshots,
                 screenshotTestInfo.m_screenshotFilePath,
-                TraceLevel::Error);
+                screenshotTestInfo.m_officialBaselineScreenshotFilePath,
+                ImperceptibleDiffFilter
+            );
 
-            if (imagesWereCompared)
+            screenshotTestInfo.m_officialComparisonResult.m_diffScore = 0.0;
+
+            if (compOutcome.IsSuccess())
             {
-                screenshotTestInfo.m_officialComparisonResult.m_finalDiffScore = toleranceLevel->m_filterImperceptibleDiffs ?
-                    screenshotTestInfo.m_officialComparisonResult.m_filteredDiffScore :
-                    screenshotTestInfo.m_officialComparisonResult.m_standardDiffScore;
+                screenshotTestInfo.m_officialComparisonResult.m_diffScore = toleranceLevel->m_filterImperceptibleDiffs
+                    ? compOutcome.GetValue().m_diffScore
+                    : compOutcome.GetValue().m_filteredDiffScore;
 
-                if (screenshotTestInfo.m_officialComparisonResult.m_finalDiffScore <= toleranceLevel->m_threshold)
+                if (screenshotTestInfo.m_officialComparisonResult.m_diffScore <= toleranceLevel->m_threshold)
                 {
                     screenshotTestInfo.m_officialComparisonResult.m_resultCode = ImageComparisonResult::ResultCode::Pass;
                 }
@@ -1199,7 +1105,7 @@ namespace AtomSampleViewer
                     // If you change this message, be sure to update the associated tests as well located here: "C:/path/to/Lumberyard/AtomSampleViewer/Standalone/PythonTests"
                     ReportScreenshotComparisonIssue(
                         AZStd::string::format("Screenshot check failed. Diff score %f exceeds threshold of %f ('%s').",
-                            screenshotTestInfo.m_officialComparisonResult.m_finalDiffScore, toleranceLevel->m_threshold, toleranceLevel->m_name.c_str()),
+                            screenshotTestInfo.m_officialComparisonResult.m_diffScore, toleranceLevel->m_threshold, toleranceLevel->m_name.c_str()),
                         screenshotTestInfo.m_officialBaselineScreenshotFilePath,
                         screenshotTestInfo.m_screenshotFilePath,
                         TraceLevel::Error);
@@ -1208,7 +1114,8 @@ namespace AtomSampleViewer
             }
         }
 
-        if (screenshotTestInfo.m_localBaselineScreenshotFilePath.empty())
+        if (screenshotTestInfo.m_localBaselineScreenshotFilePath.empty()
+            || !io->Exists(screenshotTestInfo.m_localBaselineScreenshotFilePath.c_str()))
         {
             ReportScriptWarning(AZStd::string::format("Screenshot check failed. Could not determine local baseline screenshot path for '%s'", screenshotTestInfo.m_screenshotFilePath.c_str()));
             screenshotTestInfo.m_localComparisonResult.m_resultCode = ImageComparisonResult::ResultCode::FileNotFound;
@@ -1217,23 +1124,29 @@ namespace AtomSampleViewer
         {
             // Local screenshots should be expected match 100% every time, otherwise warnings are reported. This will help developers track and investigate changes,
             // for example if they make local changes that impact some unrelated AtomSampleViewer sample in an unexpected way, they will see a warning about this.
-
-            bool imagesWereCompared = DiffImages(
-                screenshotTestInfo.m_localComparisonResult,
-                screenshotTestInfo.m_localBaselineScreenshotFilePath,
+            AZ::Render::FrameCaptureComparisonOutcome compOutcome;
+            AZ::Render::FrameCaptureTestRequestBus::BroadcastResult(
+                compOutcome,
+                &AZ::Render::FrameCaptureTestRequestBus::Events::CompareScreenshots,
                 screenshotTestInfo.m_screenshotFilePath,
-                TraceLevel::Warning);
+                screenshotTestInfo.m_localBaselineScreenshotFilePath,
+                ImperceptibleDiffFilter
+            );
 
-            if (imagesWereCompared)
+            screenshotTestInfo.m_localComparisonResult.m_diffScore = 0.0f;
+
+            if (compOutcome.IsSuccess())
             {
-                if(screenshotTestInfo.m_localComparisonResult.m_standardDiffScore == 0.0f)
+                screenshotTestInfo.m_localComparisonResult.m_diffScore = compOutcome.GetValue().m_diffScore;
+
+                if (screenshotTestInfo.m_localComparisonResult.m_diffScore == 0.0f)
                 {
                     screenshotTestInfo.m_localComparisonResult.m_resultCode = ImageComparisonResult::ResultCode::Pass;
                 }
                 else
                 {
                     ReportScreenshotComparisonIssue(
-                        AZStd::string::format("Screenshot check failed. Screenshot does not match the local baseline; something has changed. Diff score is %f.", screenshotTestInfo.m_localComparisonResult.m_standardDiffScore),
+                        AZStd::string::format("Screenshot check failed. Screenshot does not match the local baseline; something has changed. Diff score is %f.", screenshotTestInfo.m_localComparisonResult.m_diffScore),
                         screenshotTestInfo.m_localBaselineScreenshotFilePath,
                         screenshotTestInfo.m_screenshotFilePath,
                         TraceLevel::Warning);

@@ -15,5 +15,4 @@ set(FILES
     SampleComponentManager_Windows.cpp
     StreamingImageExampleComponent_Windows.cpp
     Utils_Windows.cpp
-    ScriptReporter_Windows.cpp
 )

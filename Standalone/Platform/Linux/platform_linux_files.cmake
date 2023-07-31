@@ -7,6 +7,6 @@
 #
 
 set(FILES
-    ../Common/AtomSampleViewerApplication_common.cpp
+    AtomSampleViewerApplication_linux.cpp
     main_linux.cpp
 )

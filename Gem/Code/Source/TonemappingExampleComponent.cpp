@@ -292,7 +292,7 @@ namespace AtomSampleViewer
     void TonemappingExampleComponent::UpdateCapturePassHierarchy()
     {
         AZ_Assert(static_cast<Render::DisplayMapperOperationType>(m_displayMapperConfiguration.m_operationType)
-            != Render::DisplayMapperOperationType::Invalid, "Invalid display mapper operation mode");
+            <= Render::DisplayMapperOperationType::Reinhard, "Invalid display mapper operation mode");
         AZStd::array<AZStd::string, 5> displayMapperPasses = {
             "AcesOutputTransform",
             "AcesLutPass",
@@ -315,7 +315,11 @@ namespace AtomSampleViewer
     {
         AZStd::string filePath = m_imguiFrameCaptureSaver.GetSaveFilePath();
         AZStd::string slot = "Output";
-        AZ::Render::FrameCaptureRequestBus::Broadcast(&AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachment, m_capturePassHierarchy, slot, filePath,
+        AZ::Render::FrameCaptureRequestBus::Broadcast(
+            &AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachment,
+            filePath,
+            m_capturePassHierarchy,
+            slot,
             AZ::RPI::PassAttachmentReadbackOption::Output);
     }
 
@@ -338,7 +342,7 @@ namespace AtomSampleViewer
     const char* TonemappingExampleComponent::GetDisplayMapperOperationTypeLabel() const
     {
         AZ_Assert(static_cast<Render::DisplayMapperOperationType>(m_displayMapperConfiguration.m_operationType)
-            != Render::DisplayMapperOperationType::Invalid, "Invalid display mapper operation mode");
+            <= Render::DisplayMapperOperationType::Reinhard, "Invalid display mapper operation mode");
         const char* displayMapperOperationTypeLabels[] =
         {
             "ACES",

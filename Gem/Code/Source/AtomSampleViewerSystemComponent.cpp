@@ -7,8 +7,6 @@
  */
 
 #include <AtomSampleViewerSystemComponent.h>
-#include <MaterialFunctors/StacksShaderCollectionFunctor.h>
-#include <MaterialFunctors/StacksShaderInputFunctor.h>
 #include <Automation/ImageComparisonConfig.h>
 
 #include <EntityLatticeTestComponent.h>
@@ -54,8 +52,6 @@ namespace AtomSampleViewer
         ImGuiAssetBrowser::Reflect(context);
         ImGuiSidebar::Reflect(context);
         ImGuiSaveFilePath::Reflect(context);
-        StacksShaderCollectionFunctor::Reflect(context);
-        StacksShaderInputFunctor::Reflect(context);
 
         ImageComparisonConfig::Reflect(context);
 
@@ -110,7 +106,7 @@ namespace AtomSampleViewer
         AZ::ComponentApplicationBus::Broadcast(&AZ::ComponentApplicationBus::Events::QueryApplicationType, appType);
         if (appType.IsValid() && !appType.IsEditor())
         {
-            // AtomSampleViewer SampleComponentManager creates and manages its own scene and render pipelines. 
+            // AtomSampleViewer SampleComponentManager creates and manages its own scene and render pipelines.
             // We disable the creation of default scene in BootStrapSystemComponent
             AZ::Render::Bootstrap::DefaultWindowBus::Broadcast(&AZ::Render::Bootstrap::DefaultWindowBus::Events::SetCreateDefaultScene, false);
         }
@@ -121,6 +117,19 @@ namespace AtomSampleViewer
 
         AZ::TickBus::Handler::BusConnect();
         CrySystemEventBus::Handler::BusConnect();
+
+        // Add customized pass classes
+        auto* passSystem = AZ::RPI::PassSystemInterface::Get();
+
+        // Load ASV's own pass templates mapping
+        // It can be loaded here and it doesn't need be added via OnReadyLoadTemplatesEvent::Handler
+        // since the first render pipeline is created after this point.
+        const char* asvPassTemplatesFile = "Passes/ASV/PassTemplates.azasset";
+        bool loaded = passSystem->LoadPassTemplateMappings(asvPassTemplatesFile);
+        if (!loaded)
+        {
+            AZ_Fatal("SampleComponentManager", "Failed to load AtomSampleViewer's pass templates at %s", asvPassTemplatesFile);
+        }
     }
 
     void AtomSampleViewerSystemComponent::Deactivate()
@@ -207,7 +216,7 @@ namespace AtomSampleViewer
 
         if (!m_testsLogged)
         {
-            AZStd::chrono::duration<float> elapsedTime = HighResTimer::now() - m_timestamp;
+            auto elapsedTime = AZStd::chrono::duration_cast<AZStd::chrono::duration<float>>(HighResTimer::now() - m_timestamp);
 
             if (m_frameCount == 1)
             {

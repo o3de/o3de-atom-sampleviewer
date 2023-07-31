@@ -1,0 +1,10 @@
+{
+    "materialType": "@gemroot:Atom_Feature_Common@/Assets/Materials/Types/StandardPBR.materialtype",
+    "materialTypeVersion": 3,
+    "parentMaterial": "MaterialPipelineTest_Standard.material",
+    "propertyValues": {
+        "emissive.enable": false,
+        "opacity.factor": 0.20999999344348907,
+        "opacity.mode": "TintedTransparent"
+    }
+}

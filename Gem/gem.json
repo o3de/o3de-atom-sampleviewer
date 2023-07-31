@@ -1,20 +1,20 @@
 {
-    "gem_name": "AtomSampleViewerGem",
-    "display_name": "AtomSampleViewerGem",
-    "license": "What license AtomSampleViewerGem uses goes here: i.e. Apache-2.0 or MIT",
-    "license_url": "Link to the license web site goes here: i.e. https://opensource.org/licenses/Apache-2.0 Or https://opensource.org/licenses/MIT",
-    "origin": "The name of the originator goes here. i.e. XYZ Inc.",
-    "origin_url": "The primary repo for AtomSampleViewerGem goes here: i.e. http://www.mydomain.com",
+    "gem_name": "AtomSampleViewer",
+    "display_name": "AtomSampleViewer",
+    "license": "Apache-2.0 or MIT",
+    "license_url": "https://opensource.org/licenses/Apache-2.0 Or https://opensource.org/licenses/MIT",
+    "origin": "O3DE",
+    "origin_url": "https://github.com/o3de/o3de-atom-sampleviewer",
     "type": "Code",
-    "summary": "A short description of AtomSampleViewerGem goes here.",
+    "summary": "Gem for the Atom Sample Viewer project.",
     "canonical_tags": [
         "Gem"
     ],
     "user_tags": [
-        "AtomSampleViewerGem"
+        "AtomSampleViewer"
     ],
     "icon_path": "preview.png",
-    "requirements": "Notice of any requirements AtomSampleViewerGem has goes here. i.e. This requires X other gem",
-    "documentation_url": "Link to any documentation of AtomSampleViewerGem goes here: i.e. https://o3de.org/docs/user-guide/gems/reference/design/white-box/",
+    "requirements": "",
+    "documentation_url": "",
     "dependencies": []
 }

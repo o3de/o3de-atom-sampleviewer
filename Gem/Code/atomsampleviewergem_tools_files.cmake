@@ -9,8 +9,4 @@
 set(FILES
     Tools/AtomSampleViewerToolsSystemComponent.h
     Tools/AtomSampleViewerToolsSystemComponent.cpp
-    Tools/MaterialFunctors/StacksShaderCollectionFunctorSourceData.h
-    Tools/MaterialFunctors/StacksShaderCollectionFunctorSourceData.cpp
-    Tools/MaterialFunctors/StacksShaderInputFunctorSourceData.h
-    Tools/MaterialFunctors/StacksShaderInputFunctorSourceData.cpp
 )

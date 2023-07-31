@@ -22,6 +22,8 @@
 
 #include <Utils/ImGuiSidebar.h>
 
+#include <BindlessPrototype_Traits_Platform.h>
+
 namespace AZ
 {
     namespace RHI
@@ -180,6 +182,9 @@ namespace AtomSampleViewer
         // Create the BufferPol
         void CreateBufferPool();
 
+        //Recreate objects
+        void Recreate();
+        
         // ImGui sidebar
         ImGuiSidebar m_imguiSidebar;
 
@@ -216,6 +221,8 @@ namespace AtomSampleViewer
         // Image array holding all of the StreamImages
         AZStd::vector<AZ::Data::Instance<AZ::RPI::StreamingImage>> m_images;
 
+        AZStd::vector<const AZ::RHI::ImageView*> m_imageViews;
+
         // Light direction handle
         FloatBufferHandle m_lightDirectionHandle;
 
@@ -238,6 +245,12 @@ namespace AtomSampleViewer
         // BufferPool used to allocate buffers in this example
         AZ::RHI::Ptr<AZ::RHI::BufferPool> m_bufferPool = nullptr;
 
+        // Indirection buffer holding uint indices of texture resources
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_indirectionBuffer = nullptr;
+
+        // View associated with the indirection buffer
+        AZ::RHI::Ptr<AZ::RHI::BufferView> m_indirectionBufferView = nullptr;
+        
         // Pool size in bytes, 1MB
         static constexpr uint32_t m_poolSizeInBytes = 1u << 20u;
 
@@ -246,8 +259,12 @@ namespace AtomSampleViewer
         static constexpr uint32_t m_modelLod = 0u;
 
         AZ::RHI::ScopeId m_scopeId;
-        static constexpr const char* m_imageSrgName = "ImageSrg";
+        static constexpr const char* m_samplerSrgName = "SamplerSrg";
         static constexpr const char* m_floatBufferSrgName = "FloatBufferSrg";
+        static constexpr const char* m_indirectionBufferSrgName = "IndirectionBufferSrg";
+#if ATOMSAMPLEVIEWER_TRAIT_BINDLESS_PROTOTYPE_SUPPORTS_DIRECT_BOUND_UNBOUNDED_ARRAY
+        static constexpr const char* m_imageSrgName = "ImageSrg";
+#endif
 
         // Material count
         static constexpr uint32_t m_materialCount = 1024u;

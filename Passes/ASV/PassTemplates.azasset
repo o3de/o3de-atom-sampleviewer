@@ -5,14 +5,6 @@
     "ClassData": {
         "AssetPaths": [
             {
-                "Name": "ImGuiOnlyPipeline",
-                "Path": "Passes/ImGuiOnlyPipeline.pass"
-            },
-            {
-                "Name": "ImGuiNoInputPassTemplate",
-                "Path": "Passes/ImGuiNoInput.pass"
-            },
-            {
                 "Name": "CheckerboardResolveColorTemplate",
                 "Path": "Passes/CheckerboardResolveColor.pass"
             },
@@ -45,6 +37,14 @@
                 "Path": "Passes/RHISamplePipeline.pass"
             },
             {
+                "Name": "RHISamplePipelineXRLeftTemplate",
+                "Path": "Passes/RHISamplePipelineXRLeft.pass"
+            },
+            {
+                "Name": "RHISamplePipelineXRRightTemplate",
+                "Path": "Passes/RHISamplePipelineXRRight.pass"
+            },
+            {
                 "Name": "SsaoPipeline",
                 "Path": "Passes/SsaoPipeline.pass"
             },
@@ -75,6 +75,22 @@
             {
                 "Name": "ReadbackPipelineTemplate",
                 "Path": "Passes/ReadbackPipeline.pass"
+            },
+            {
+                "Name": "DeferredPipelineTemplate",
+                "Path": "Passes/PrototypeDeferredPipeline/DeferredPipeline.pass"
+            },
+            {
+                "Name": "DeferredOpaqueParentTemplate",
+                "Path": "Passes/PrototypeDeferredPipeline/DeferredOpaqueParent.pass"
+            },
+            {
+                "Name": "DeferredMaterialPassTemplate",
+                "Path": "Passes/PrototypeDeferredPipeline/DeferredMaterial.pass"
+            },
+            {
+                "Name": "DeferredLightingPassTemplate",
+                "Path": "Passes/PrototypeDeferredPipeline/DeferredLighting.pass"
             }
         ]
     }

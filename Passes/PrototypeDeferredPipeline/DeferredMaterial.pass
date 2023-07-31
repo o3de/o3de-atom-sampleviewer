@@ -1,0 +1,144 @@
+{
+    "Type": "JsonSerialization",
+    "Version": 1,
+    "ClassName": "PassAsset",
+    "ClassData": {
+        "PassTemplate": {
+            "Name": "DeferredMaterialPassTemplate",
+            "PassClass": "RasterPass",
+            "Slots": [
+                // Inputs...
+                {
+                    "Name": "DepthStencilInputOutput",
+                    "SlotType": "InputOutput",
+                    "ScopeAttachmentUsage": "DepthStencil"
+                },
+                // Outputs...
+                {
+                    "Name": "BaseColorOutput",
+                    "SlotType": "Output",
+                    "ScopeAttachmentUsage": "RenderTarget",
+                    "LoadStoreAction": {
+                        "ClearValue": {
+                            "Value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "LoadAction": "Clear"
+                    }
+                },
+                {
+                    "Name": "RoughnessMetalOutput",
+                    "SlotType": "Output",
+                    "ScopeAttachmentUsage": "RenderTarget",
+                    "LoadStoreAction": {
+                        "ClearValue": {
+                            "Value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "LoadAction": "Clear"
+                    }
+                },
+                {
+                    "Name": "NormalOutput",
+                    "SlotType": "Output",
+                    "ScopeAttachmentUsage": "RenderTarget",
+                    "LoadStoreAction": {
+                        "ClearValue": {
+                            "Value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "LoadAction": "Clear"
+                    }
+                }
+            ],
+            "ImageAttachments": [
+                {
+                    "Name": "BaseColorImage",
+                    "SizeSource": {
+                        "Source": {
+                            "Pass": "Parent",
+                            "Attachment": "PipelineOutput"
+                        }
+                    },
+                    "MultisampleSource": {
+                        "Pass": "This",
+                        "Attachment": "DepthStencilInputOutput"
+                    },
+                    "ImageDescriptor": {
+                        "Format": "R16G16B16A16_FLOAT",
+                        "SharedQueueMask": "Graphics"
+                    }
+                },
+                {
+                    "Name": "RoughnessMetalImage",
+                    "SizeSource": {
+                        "Source": {
+                            "Pass": "Parent",
+                            "Attachment": "PipelineOutput"
+                        }
+                    },
+                    "MultisampleSource": {
+                        "Pass": "This",
+                        "Attachment": "DepthStencilInputOutput"
+                    },
+                    "ImageDescriptor": {
+                        "Format": "R16G16B16A16_FLOAT",
+                        "SharedQueueMask": "Graphics"
+                    }
+                },
+                {
+                    "Name": "NormalImage",
+                    "SizeSource": {
+                        "Source": {
+                            "Pass": "Parent",
+                            "Attachment": "PipelineOutput"
+                        }
+                    },
+                    "MultisampleSource": {
+                        "Pass": "This",
+                        "Attachment": "DepthStencilInputOutput"
+                    },
+                    "ImageDescriptor": {
+                        "Format": "R10G10B10A2_UNORM",
+                        "SharedQueueMask": "Graphics"
+                    }
+                }
+            ],
+            "Connections": [
+                {
+                    "LocalSlot": "BaseColorOutput",
+                    "AttachmentRef": {
+                        "Pass": "This",
+                        "Attachment": "BaseColorImage"
+                    }
+                },
+                {
+                    "LocalSlot": "RoughnessMetalOutput",
+                    "AttachmentRef": {
+                        "Pass": "This",
+                        "Attachment": "RoughnessMetalImage"
+                    }
+                },
+                {
+                    "LocalSlot": "NormalOutput",
+                    "AttachmentRef": {
+                        "Pass": "This",
+                        "Attachment": "NormalImage"
+                    }
+                }
+            ]
+        }
+    }
+}

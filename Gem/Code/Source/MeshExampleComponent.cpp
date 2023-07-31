@@ -87,6 +87,7 @@ namespace AtomSampleViewer
         AZ::RPI::RenderPipelineDescriptor pipelineDesc;
         pipelineDesc.m_mainViewTagName = "MainCamera";
         pipelineDesc.m_name = "LowEndPipeline";
+        pipelineDesc.m_materialPipelineTag = "LowEndPipeline";
         pipelineDesc.m_rootPassTemplate = "LowEndPipelineTemplate";
         pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 4;
 
@@ -98,22 +99,103 @@ namespace AtomSampleViewer
         m_lowEndPipeline = nullptr;
     }
 
+    void MeshExampleComponent::CreateDeferredPipeline()
+    {
+        AZ::RPI::RenderPipelineDescriptor pipelineDesc;
+        pipelineDesc.m_mainViewTagName = "MainCamera";
+        pipelineDesc.m_name = "DeferredPipeline";
+        pipelineDesc.m_materialPipelineTag = "DeferredPipeline";
+        pipelineDesc.m_rootPassTemplate = "DeferredPipelineTemplate";
+        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 4;
+        pipelineDesc.m_allowModification = true; // MainPipeline allows modifications, so the DeferredPipeline must as well, to get a consistent result.
+
+        m_deferredPipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
+    }
+
+    void MeshExampleComponent::DestroyDeferredPipeline()
+    {
+        m_deferredPipeline = nullptr;
+    }
+
+    void MeshExampleComponent::CreateMultiViewXRPipeline()
+    {
+        AZ::RPI::RenderPipelineDescriptor pipelineDesc;
+        pipelineDesc.m_mainViewTagName = "MainCamera";
+        pipelineDesc.m_name = "MultiViewPipeline";
+        pipelineDesc.m_rootPassTemplate = "MultiViewPipelineTemplate";
+        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 1;
+
+        m_multiViewXRPipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
+    }
+
+    void MeshExampleComponent::DestroyMultiViewXRPipeline()
+    {
+        m_multiViewXRPipeline = nullptr;
+    }
+
     void MeshExampleComponent::ActivateLowEndPipeline()
     {
-        m_originalPipeline = m_scene->GetDefaultRenderPipeline();
-        m_scene->AddRenderPipeline(m_lowEndPipeline);
-        m_lowEndPipeline->SetDefaultView(m_originalPipeline->GetDefaultView());
-        m_scene->RemoveRenderPipeline(m_originalPipeline->GetId());
+        AZ::RPI::RenderPipelinePtr prevPipeline = m_scene->GetDefaultRenderPipeline();
 
+        if (!m_originalPipeline)
+        {
+            m_originalPipeline = prevPipeline;
+        }
+
+        m_lowEndPipeline->GetRootPass()->SetEnabled(true); // PassSystem::RemoveRenderPipeline was calling SetEnabled(false)
+        m_scene->AddRenderPipeline(m_lowEndPipeline);
+        m_lowEndPipeline->SetDefaultView(prevPipeline->GetDefaultView());
+        m_scene->RemoveRenderPipeline(prevPipeline->GetId());
+
+        m_imguiScope = {}; // I'm not sure why this is needed. Something must be wrong in the ImGuiActiveContextScope class
         m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass({ m_lowEndPipeline->GetId().GetCStr(), "ImGuiPass" });
     }
 
-    void MeshExampleComponent::DeactivateLowEndPipeline()
+    void MeshExampleComponent::ActivateDeferredPipeline()
+    {
+        AZ::RPI::RenderPipelinePtr prevPipeline = m_scene->GetDefaultRenderPipeline();
+
+        if (!m_originalPipeline)
+        {
+            m_originalPipeline = prevPipeline;
+        }
+
+        m_deferredPipeline->GetRootPass()->SetEnabled(true); // PassSystem::RemoveRenderPipeline was calling SetEnabled(false)
+        m_scene->AddRenderPipeline(m_deferredPipeline);
+        m_deferredPipeline->SetDefaultView(prevPipeline->GetDefaultView());
+        m_scene->RemoveRenderPipeline(prevPipeline->GetId());
+
+        m_imguiScope = {}; // I'm not sure why this is needed. Something must be wrong in the ImGuiActiveContextScope class
+        m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass({m_deferredPipeline->GetId().GetCStr(), "ImGuiPass"});
+    }
+
+    void MeshExampleComponent::ActivateOriginalPipeline()
     {
         m_imguiScope = {}; // restores previous ImGui context.
 
+        AZ::RPI::RenderPipelinePtr prevPipeline = m_scene->GetDefaultRenderPipeline();
+
+        m_originalPipeline->GetRootPass()->SetEnabled(true); // PassSystem::RemoveRenderPipeline was calling SetEnabled(false)
         m_scene->AddRenderPipeline(m_originalPipeline);
-        m_scene->RemoveRenderPipeline(m_lowEndPipeline->GetId());
+        m_scene->RemoveRenderPipeline(prevPipeline->GetId());
+    }
+
+    void MeshExampleComponent::ActivateMultiViewXRPipeline()
+    {
+        AZ::RPI::RenderPipelinePtr prevPipeline = m_scene->GetDefaultRenderPipeline();
+
+        if (!m_originalPipeline)
+        {
+            m_originalPipeline = prevPipeline;
+        }
+
+        m_multiViewXRPipeline->GetRootPass()->SetEnabled(true);
+        m_scene->AddRenderPipeline(m_multiViewXRPipeline);
+        m_multiViewXRPipeline->SetDefaultView(prevPipeline->GetDefaultView());
+        m_scene->RemoveRenderPipeline(prevPipeline->GetId());
+
+        m_imguiScope = {};
+        m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass({ m_multiViewXRPipeline->GetId().GetCStr(), "ImGuiPass" });
     }
 
     void MeshExampleComponent::Activate()
@@ -155,15 +237,20 @@ namespace AtomSampleViewer
         AZ::TickBus::Handler::BusConnect();
         AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusConnect();
         CreateLowEndPipeline();
+        CreateDeferredPipeline();
+        CreateMultiViewXRPipeline();
     }
 
     void MeshExampleComponent::Deactivate()
     {
-        if (m_useLowEndPipeline)
+        if (m_useLowEndPipeline || m_useDeferredPipeline || m_useMultiViewXRPipeline)
         {
-            DeactivateLowEndPipeline();
+            ActivateOriginalPipeline();
         }
         DestroyLowEndPipeline();
+        DestroyDeferredPipeline();
+        DestroyMultiViewXRPipeline();
+
         AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusDisconnect();
         AZ::TickBus::Handler::BusDisconnect();
 
@@ -180,7 +267,7 @@ namespace AtomSampleViewer
         m_modelAsset = {};
         m_groundPlaneModelAsset = {};
 
-        m_materialOverrideInstance = nullptr;
+        m_customMaterialInstance = nullptr;
 
         ShutdownLightingPresets();
     }
@@ -196,9 +283,17 @@ namespace AtomSampleViewer
             {
                 ActivateLowEndPipeline();
             }
+            else if (m_useDeferredPipeline)
+            {
+                ActivateDeferredPipeline();
+            }
+            else if (m_useMultiViewXRPipeline)
+            {
+                ActivateMultiViewXRPipeline();
+            }
             else
             {
-                DeactivateLowEndPipeline();
+                ActivateOriginalPipeline();
             }
 
             m_switchPipeline = false;
@@ -210,8 +305,27 @@ namespace AtomSampleViewer
 
             ImGuiAssetBrowser::WidgetSettings assetBrowserSettings;
 
-            m_switchPipeline = ScriptableImGui::Checkbox("Use Low End Pipeline", &m_useLowEndPipeline) || m_switchPipeline;
+            if (ScriptableImGui::Checkbox("Use Low End Pipeline", &m_useLowEndPipeline))
+            {
+                m_switchPipeline = true;
+                m_useDeferredPipeline = false;
+                m_useMultiViewXRPipeline = false;
+            }
 
+            if (ScriptableImGui::Checkbox("Use Deferred Pipeline", &m_useDeferredPipeline))
+            {
+                m_switchPipeline = true;
+                m_useLowEndPipeline = false;
+                m_useMultiViewXRPipeline = false;
+            }
+
+            if (ScriptableImGui::Checkbox("Use MultiViewXR Pipeline", &m_useMultiViewXRPipeline))
+            {
+                m_switchPipeline = true;
+                m_useLowEndPipeline = false;
+                m_useDeferredPipeline = false;
+            }
+			
             modelNeedsUpdate |= ScriptableImGui::Checkbox("Enable Material Override", &m_enableMaterialOverride);
            
             if (ScriptableImGui::Checkbox("Show Ground Plane", &m_showGroundPlane))
@@ -301,16 +415,15 @@ namespace AtomSampleViewer
             ImGui::Separator();
             ImGui::Spacing();
 
-            if (m_materialOverrideInstance && ImGui::Button("Material Details..."))
+            if (m_customMaterialInstance && ImGui::Button("Material Details..."))
             {
-                m_imguiMaterialDetails.SetMaterial(m_materialOverrideInstance);
                 m_imguiMaterialDetails.OpenDialog();
             }
 
             m_imguiSidebar.End();
         }
 
-        m_imguiMaterialDetails.Tick();
+        m_imguiMaterialDetails.Tick(&GetMeshFeatureProcessor()->GetDrawPackets(m_meshHandle));
 
         if (modelNeedsUpdate)
         {
@@ -345,11 +458,11 @@ namespace AtomSampleViewer
         {
             AZ::Data::Asset<AZ::RPI::MaterialAsset> materialAsset;
             materialAsset.Create(selectedMaterialAssetId);
-            m_materialOverrideInstance = AZ::RPI::Material::FindOrCreate(materialAsset);
+            m_customMaterialInstance = AZ::RPI::Material::FindOrCreate(materialAsset);
         }
         else
         {
-            m_materialOverrideInstance = nullptr;
+            m_customMaterialInstance = nullptr;
         }
 
 
@@ -359,14 +472,14 @@ namespace AtomSampleViewer
 
             m_modelAsset.Create(m_modelBrowser.GetSelectedAssetId());
             GetMeshFeatureProcessor()->ReleaseMesh(m_meshHandle);
-            m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_modelAsset }, m_materialOverrideInstance);
+            m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_modelAsset }, m_customMaterialInstance);
             GetMeshFeatureProcessor()->SetTransform(m_meshHandle, AZ::Transform::CreateIdentity());
             GetMeshFeatureProcessor()->ConnectModelChangeEventHandler(m_meshHandle, m_changedHandler);
             GetMeshFeatureProcessor()->SetMeshLodConfiguration(m_meshHandle, m_lodConfig);
         }
         else
         {
-            GetMeshFeatureProcessor()->SetMaterialAssignmentMap(m_meshHandle, m_materialOverrideInstance);
+            GetMeshFeatureProcessor()->SetCustomMaterials(m_meshHandle, m_customMaterialInstance);
         }
     }
     

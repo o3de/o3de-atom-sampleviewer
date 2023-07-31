@@ -7,8 +7,6 @@
  */
 
 #include <Tools/AtomSampleViewerToolsSystemComponent.h>
-#include <MaterialFunctors/StacksShaderCollectionFunctorSourceData.h>
-#include <MaterialFunctors/StacksShaderInputFunctorSourceData.h>
 
 #include <Atom/RPI.Edit/Material/MaterialFunctorSourceDataRegistration.h>
 
@@ -28,15 +26,10 @@ namespace AtomSampleViewer
                     ->Version(0)
                 ;
             }
-
-            StacksShaderCollectionFunctorSourceData::Reflect(context);
-            StacksShaderInputFunctorSourceData::Reflect(context);
         }
 
         void AtomSampleViewerToolsSystemComponent::Activate()
         {
-            AZ::RPI::MaterialFunctorSourceDataRegistration::Get()->RegisterMaterialFunctor("StacksShaderCollection", azrtti_typeid<StacksShaderCollectionFunctorSourceData>());
-            AZ::RPI::MaterialFunctorSourceDataRegistration::Get()->RegisterMaterialFunctor("StacksShaderInput",      azrtti_typeid<StacksShaderInputFunctorSourceData>());
         }
 
         void AtomSampleViewerToolsSystemComponent::Deactivate()

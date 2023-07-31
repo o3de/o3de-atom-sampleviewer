@@ -173,19 +173,17 @@ namespace AtomSampleViewer
 
     void AssetLoadTestComponent::OnAllAssetsReadyActivate()
     {
-        AZ::Render::MaterialAssignmentMap materials;
         for (ModelInstanceData& instanceData : m_modelInstanceData)
         {
-            AZ::Render::MaterialAssignment& defaultAssignment = materials[AZ::Render::DefaultMaterialAssignmentId];
-            defaultAssignment = {};
-
+            AZ::Data::Instance<AZ::RPI::Material> materialInstance;
             if (instanceData.m_materialAssetId.IsValid())
             {
-                defaultAssignment.m_materialAsset.Create(instanceData.m_materialAssetId);
-                defaultAssignment.m_materialInstance = AZ::RPI::Material::FindOrCreate(defaultAssignment.m_materialAsset);
+                AZ::Data::Asset<RPI::MaterialAsset> materialAsset;
+                materialAsset.Create(instanceData.m_materialAssetId);
+                materialInstance = AZ::RPI::Material::FindOrCreate(materialAsset);
 
                 // cache the material when its loaded
-                m_cachedMaterials.insert(defaultAssignment.m_materialAsset);
+                m_cachedMaterials.insert(materialAsset);
             }
 
             if (instanceData.m_modelAssetId.IsValid())
@@ -193,7 +191,7 @@ namespace AtomSampleViewer
                 AZ::Data::Asset<AZ::RPI::ModelAsset> modelAsset;
                 modelAsset.Create(instanceData.m_modelAssetId);
 
-                instanceData.m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ modelAsset }, materials);
+                instanceData.m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ modelAsset }, materialInstance);
                 GetMeshFeatureProcessor()->SetTransform(instanceData.m_meshHandle, instanceData.m_transform);
             }
         }

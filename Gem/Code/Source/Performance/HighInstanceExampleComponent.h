@@ -136,7 +136,6 @@ namespace AtomSampleViewer
 
         AZStd::vector<AZStd::string> m_expandedModelList; // has models that are more expensive on the gpu
         AZStd::vector<AZStd::string> m_simpleModelList; // Aims to keep the test cpu bottlenecked by using trivial geometry such as a cube
-        size_t m_lastPinnedModelCount = 0;
 
         float m_originalFarClipDistance;
         bool m_updateTransformEnabled = false;

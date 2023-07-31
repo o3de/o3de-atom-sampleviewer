@@ -1,0 +1,501 @@
+{
+    "Type": "JsonSerialization",
+    "Version": 1,
+    "ClassName": "PassAsset",
+    "ClassData": {
+        "PassTemplate": {
+            "Name": "DeferredOpaqueParentTemplate",
+            "PassClass": "ParentPass",
+            "Slots": [
+                // Inputs...
+                {
+                    "Name": "DirectionalShadowmap",
+                    "SlotType": "Input"
+                },
+                {
+                    "Name": "DirectionalESM",
+                    "SlotType": "Input"
+                },
+                {
+                    "Name": "ProjectedShadowmap",
+                    "SlotType": "Input"
+                },
+                {
+                    "Name": "ProjectedESM",
+                    "SlotType": "Input"
+                },
+                {
+                    "Name": "TileLightData",
+                    "SlotType": "Input"
+                },
+                {
+                    "Name": "LightListRemapped",
+                    "SlotType": "Input"
+                },
+                {
+                    "Name": "DepthLinear",
+                    "SlotType": "Input"
+                },
+                // Input/Outputs...
+                {
+                    "Name": "DepthStencil",
+                    "SlotType": "InputOutput"
+                },
+                // Outputs...
+                {
+                    "Name": "Output",
+                    "SlotType": "Output"
+                },
+                {
+                    "Name": "DiffuseProbeGridVisualization",
+                    "SlotType": "Output"
+                },
+                // SwapChain here is only used to reference the frame height and format
+                {
+                    "Name": "PipelineOutput",
+                    "SlotType": "InputOutput"
+                }
+            ],
+            "Connections": [
+                {
+                    "LocalSlot": "Output",
+                    "AttachmentRef": {
+                        "Pass": "DiffuseSpecularMergePass",
+                        "Attachment": "Output"
+                    }
+                }
+            ],
+            "PassRequests": [
+                {
+                    "Name": "DeferredMaterial",
+                    "TemplateName": "DeferredMaterialPassTemplate",
+                    "Connections": [
+                        // Inputs...
+
+                        // Input/Outputs...
+                        {
+                            "LocalSlot": "DepthStencilInputOutput",
+                            "AttachmentRef": {
+                                "Pass": "Parent",
+                                "Attachment": "DepthStencil"
+                            }
+                        }
+                    ],
+                    "PassData": {
+                        "$type": "RasterPassData",
+                        "DrawListTag": "deferredMaterial",
+                        "PipelineViewTag": "MainCamera"
+                        // No PassSrgShaderAsset is needed here because the material pass only packs GBuffers, and doesn't need any per-pass resources
+                    }
+                },
+                {
+                    "Name": "DeferredLighting",
+                    "TemplateName": "DeferredLightingPassTemplate",
+                    "Connections": [
+                        // Inputs...
+                        {
+                            "LocalSlot": "DirectionalLightShadowmap",
+                            "AttachmentRef": {
+                                "Pass": "Parent",
+                                "Attachment": "DirectionalShadowmap"
+                            }
+                        },
+                        {
+                            "LocalSlot": "ExponentialShadowmapDirectional",
+                            "AttachmentRef": {
+                                "Pass": "Parent",
+                                "Attachment": "DirectionalESM"
+                            }
+                        },
+                        {
+                            "LocalSlot": "ProjectedShadowmap",
+                            "AttachmentRef": {
+                                "Pass": "Parent",
+                                "Attachment": "ProjectedShadowmap"
+                            }
+                        },
+                        {
+                            "LocalSlot": "ExponentialShadowmapProjected",
+                            "AttachmentRef": {
+                                "Pass": "Parent",
+                                "Attachment": "ProjectedESM"
+                            }
+                        },
+                        {
+                            "LocalSlot": "TileLightData",
+                            "AttachmentRef": {
+                                "Pass": "Parent",
+                                "Attachment": "TileLightData"
+                            }
+                        },
+                        {
+                            "LocalSlot": "LightListRemapped",
+                            "AttachmentRef": {
+                                "Pass": "Parent",
+                                "Attachment": "LightListRemapped"
+                            }
+                        },
+                        {
+                            "LocalSlot": "DepthStencil",
+                            "AttachmentRef": {
+                                "Pass": "Parent",
+                                "Attachment": "DepthStencil"
+                            }
+                        },
+                        {
+                            "LocalSlot": "InputDepthStencil",
+                            "AttachmentRef": {
+                                "Pass": "Parent",
+                                "Attachment": "DepthStencil"
+                            }
+                        },
+                        {
+                            "LocalSlot": "BaseColor",
+                            "AttachmentRef": {
+                                "Pass": "DeferredMaterial",
+                                "Attachment": "BaseColorOutput"
+                            }
+                        },
+                        {
+                            "LocalSlot": "RoughnessMetal",
+                            "AttachmentRef": {
+                                "Pass": "DeferredMaterial",
+                                "Attachment": "RoughnessMetalOutput"
+                            }
+                        },
+                        {
+                            "LocalSlot": "Normal",
+                            "AttachmentRef": {
+                                "Pass": "DeferredMaterial",
+                                "Attachment": "NormalOutput"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "DiffuseGlobalFullscreenPass",
+                    "TemplateName": "DiffuseGlobalFullscreenPassTemplate",
+                    "Connections": [
+                        {
+                            "LocalSlot": "DiffuseInputOutput",
+                            "AttachmentRef": {
+                                "Pass": "DeferredLighting",
+                                "Attachment": "DiffuseOutput"
+                            }
+                        },
+                        {
+                            "LocalSlot": "AlbedoInput",
+                            "AttachmentRef": {
+                                "Pass": "DeferredLighting",
+                                "Attachment": "AlbedoOutput"
+                            }
+                        },
+                        {
+                            "LocalSlot": "NormalInput",
+                            "AttachmentRef": {
+                                "Pass": "DeferredMaterial",
+                                "Attachment": "NormalOutput"
+                            }
+                        },
+                        {
+                            "LocalSlot": "DepthStencilTextureInput",
+                            "AttachmentRef": {
+                                "Pass": "DeferredMaterial",
+                                "Attachment": "DepthStencilInputOutput"
+                            }
+                        },
+                        {
+                            "LocalSlot": "DepthStencilInputOutput",
+                            "AttachmentRef": {
+                                "Pass": "DeferredMaterial",
+                                "Attachment": "DepthStencilInputOutput"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "ReflectionsPass",
+                    "TemplateName": "ReflectionsParentPassTemplate",
+                    "Enabled": true,
+                    "Connections": [
+                        {
+                            "LocalSlot": "NormalInput",
+                            "AttachmentRef": {
+                                "Pass": "DeferredMaterial",
+                                "Attachment": "NormalOutput"
+                            }
+                        },
+                        {
+                            "LocalSlot": "SpecularF0Input",
+                            "AttachmentRef": {
+                                "Pass": "DeferredLighting",
+                                "Attachment": "SpecularF0Output"
+                            }
+                        },
+                        {
+                            "LocalSlot": "AlbedoInput",
+                            "AttachmentRef": {
+                                "Pass": "DeferredLighting",
+                                "Attachment": "AlbedoOutput"
+                            }
+                        },
+                        {
+                            "LocalSlot": "DepthStencilInputOutput",
+                            "AttachmentRef": {
+                                "Pass": "DeferredMaterial",
+                                "Attachment": "DepthStencilInputOutput"
+                            }
+                        },
+                        {
+                            "LocalSlot": "SpecularInputOutput",
+                            "AttachmentRef": {
+                                "Pass": "DeferredLighting",
+                                "Attachment": "SpecularOutput"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "SkyBoxPass",
+                    "TemplateName": "SkyBoxTwoOutputsTemplate",
+                    "Enabled": true,
+                    "Connections": [
+                        {
+                            "LocalSlot": "SpecularInputOutput",
+                            "AttachmentRef": {
+                                "Pass": "ReflectionsPass",
+                                "Attachment": "SpecularInputOutput"
+                            }
+                        },
+                        {
+                            "LocalSlot": "ReflectionInputOutput",
+                            "AttachmentRef": {
+                                "Pass": "ReflectionsPass",
+                                "Attachment": "ReflectionOutput"
+                            }
+                        },
+                        {
+                            "LocalSlot": "SkyBoxDepth",
+                            "AttachmentRef": {
+                                "Pass": "ReflectionsPass",
+                                "Attachment": "DepthStencilInputOutput"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "SkyAtmosphereParentPass",
+                    "TemplateName": "SkyAtmosphereParentTemplate",
+                    "Enabled": true,
+                    "Connections": [
+                        {
+                            "LocalSlot": "SpecularInputOutput",
+                            "AttachmentRef": {
+                                "Pass": "SkyBoxPass",
+                                "Attachment": "SpecularInputOutput"
+                            }
+                        },
+                        {
+                            "LocalSlot": "ReflectionInputOutput",
+                            "AttachmentRef": {
+                                "Pass": "SkyBoxPass",
+                                "Attachment": "ReflectionInputOutput"
+                            }
+                        },
+                        {
+                            "LocalSlot": "SkyBoxDepth",
+                            "AttachmentRef": {
+                                "Pass": "SkyBoxPass",
+                                "Attachment": "SkyBoxDepth"
+                            }
+                        },
+                        {
+                            "LocalSlot": "DirectionalShadowmap",
+                            "AttachmentRef": {
+                                "Pass": "Parent",
+                                "Attachment": "DirectionalShadowmap"
+                            }
+                        },
+                        {
+                            "LocalSlot": "DirectionalESM",
+                            "AttachmentRef": {
+                                "Pass": "Parent",
+                                "Attachment": "DirectionalESM"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "ReflectionCompositePass",
+                    "TemplateName": "ReflectionCompositePassTemplate",
+                    "Connections": [
+                        {
+                            "LocalSlot": "ReflectionInput",
+                            "AttachmentRef": {
+                                "Pass": "SkyAtmosphereParentPass",
+                                "Attachment": "ReflectionInputOutput"
+                            }
+                        },
+                        {
+                            "LocalSlot": "SpecularInputOutput",
+                            "AttachmentRef": {
+                                "Pass": "SkyAtmosphereParentPass",
+                                "Attachment": "SpecularInputOutput"
+                            }
+                        },
+                        {
+                            "LocalSlot": "DepthStencilInputOutput",
+                            "AttachmentRef": {
+                                "Pass": "SkyBoxPass",
+                                "Attachment": "SkyBoxDepth"
+                            }
+                        }
+                    ],
+                    "PassData": {
+                        "$type": "FullscreenTrianglePassData",
+                        "ShaderAsset": {
+                            "FilePath": "Shaders/Reflections/ReflectionComposite.shader"
+                        },
+                        "StencilRef": 1, // See RenderCommon.h and ReflectionComposite.shader
+                        "PipelineViewTag": "MainCamera"
+                    }
+                },
+                {
+                    "Name": "MSAAResolveDiffusePass",
+                    "TemplateName": "MSAAResolveColorTemplate",
+                    "Connections": [
+                        {
+                            "LocalSlot": "Input",
+                            "AttachmentRef": {
+                                "Pass": "DiffuseGlobalFullscreenPass",
+                                "Attachment": "DiffuseInputOutput"
+                            }
+                        }
+                    ]
+                },
+                {
+                    "Name": "MSAAResolveSpecularPass",
+                    "TemplateName": "MSAAResolveCustomTemplate",
+                    "Connections": [
+                        {
+                            "LocalSlot": "Input",
+                            "AttachmentRef": {
+                                "Pass": "ReflectionCompositePass",
+                                "Attachment": "SpecularInputOutput"
+                            }
+                        }
+                    ],
+                    "PassData": {
+                        "$type": "FullscreenTrianglePassData",
+                        "ShaderAsset": {
+                            "FilePath": "Shaders/PostProcessing/MSAAResolveCustom.shader"
+                        },
+                        "PipelineViewTag": "MainCamera",
+                        "ShaderDataMappings": {
+                            "UintMappings": [
+                                {
+                                    "Name": "enableNeighborClamping",
+                                    "Value": 1
+                                }
+                            ],
+                            "FloatMappings": [
+                                {
+                                    "Name": "maxNeighborContrast",
+                                    "Value": 1.5
+                                }
+                            ]
+                        }
+                    }
+                },
+                // TODO(DeferredPOC): Try to hook up subsurface scattering again
+                //{
+                //    "Name": "MSAAResolveScatterDistancePass",
+                //    "TemplateName": "MSAAResolveColorTemplate",
+                //    "Connections": [
+                //        {
+                //            "LocalSlot": "Input",
+                //            "AttachmentRef": {
+                //                "Pass": "ForwardSubsurface",
+                //                "Attachment": "ScatterDistanceOutput"
+                //            }
+                //        }
+                //    ]
+                //},
+                //{
+                //    "Name": "SubsurfaceScatteringPass",
+                //    "TemplateName": "SubsurfaceScatteringPassTemplate",
+                //    "Enabled": true,
+                //    "Connections": [
+                //        {
+                //            "LocalSlot": "InputDiffuse",
+                //            "AttachmentRef": {
+                //                "Pass": "MSAAResolveDiffusePass",
+                //                "Attachment": "Output"
+                //            }
+                //        },
+                //        {
+                //            "LocalSlot": "InputLinearDepth",
+                //            "AttachmentRef": {
+                //                "Pass": "Parent",
+                //                "Attachment": "DepthLinear"
+                //            }
+                //        },
+                //        {
+                //            "LocalSlot": "InputScatterDistance",
+                //            "AttachmentRef": {
+                //                "Pass": "MSAAResolveScatterDistancePass",
+                //                "Attachment": "Output"
+                //            }
+                //        }
+                //    ],
+                //    "PassData": {
+                //        "$type": "ComputePassData",
+                //        "ShaderAsset": {
+                //            "FilePath": "Shaders/PostProcessing/ScreenSpaceSubsurfaceScatteringCS.shader"
+                //        },
+                //        "Make Fullscreen Pass": true,
+                //        "PipelineViewTag": "MainCamera"
+                //    }
+                //},
+                {
+                    "Name": "Ssao",
+                    "TemplateName": "SsaoParentTemplate",
+                    "Connections": [
+                        {
+                            "LocalSlot": "Modulate",
+                            "AttachmentRef": {
+                                "Pass": "MSAAResolveDiffusePass",
+                                "Attachment": "Output"
+                            }
+                            // TODO(DeferredPOC): Try to hook up subsurface scattering again
+                            //"AttachmentRef": {
+                            //    "Pass": "SubsurfaceScatteringPass",
+                            //    "Attachment": "Output"
+                            //}
+                        }
+                    ]
+                },
+                {
+                    "Name": "DiffuseSpecularMergePass",
+                    "TemplateName": "DiffuseSpecularMergeTemplate",
+                    "Connections": [
+                        {
+                            "LocalSlot": "InputDiffuse",
+                            "AttachmentRef": {
+                                "Pass": "Ssao",
+                                "Attachment": "Output"
+                            }
+                        },
+                        {
+                            "LocalSlot": "InputSpecular",
+                            "AttachmentRef": {
+                                "Pass": "MSAAResolveSpecularPass",
+                                "Attachment": "Output"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

@@ -94,14 +94,14 @@ namespace AtomSampleViewer
         auto readResult = AZ::Utils::ReadFile(copyFrom.c_str());
         if (!readResult.IsSuccess())
         {
-            AZ_Error("MaterialHotReloadTestComponent", false, "%s", readResult.GetError().c_str());
+            AZ_Error("ShaderReloadTestComponent", false, "%s", readResult.GetError().c_str());
             return;
         }
 
         auto writeResult = AZ::Utils::WriteFile(readResult.GetValue(), copyTo.c_str());
         if (!writeResult.IsSuccess())
         {
-            AZ_Error("MaterialHotReloadTestComponent", false, "%s", writeResult.GetError().c_str());
+            AZ_Error("ShaderReloadTestComponent", false, "%s", writeResult.GetError().c_str());
             return;
         }
     }
@@ -114,7 +114,7 @@ namespace AtomSampleViewer
         {
             if (!AZ::IO::LocalFileIO::GetInstance()->Remove(deletePath.c_str()))
             {
-                AZ_Error("MaterialHotReloadTestComponent", false, "Failed to delete '%s'.", deletePath.c_str());
+                AZ_Error("ShaderReloadTestComponent", false, "Failed to delete '%s'.", deletePath.c_str());
             }
         }
     }
@@ -307,12 +307,17 @@ namespace AtomSampleViewer
         };
 
         m_capturedColorAsString.clear();
-        bool startedCapture = false;
+
+        AZ::Render::FrameCaptureOutcome capOutcome;
         AZ::Render::FrameCaptureRequestBus::BroadcastResult(
-            startedCapture, &AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachmentWithCallback, m_passHierarchy,
-            AZStd::string("Output"), captureCallback, AZ::RPI::PassAttachmentReadbackOption::Output);
-        AZ_Error(LogName, startedCapture, "Failed to start CapturePassAttachmentWithCallback");
-        return startedCapture;
+            capOutcome,
+            &AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachmentWithCallback,
+            captureCallback,
+            m_passHierarchy,
+            AZStd::string("Output"),
+            AZ::RPI::PassAttachmentReadbackOption::Output);
+        AZ_Error(LogName, capOutcome.IsSuccess(), "%s", capOutcome.GetError().m_errorMessage.c_str());
+        return capOutcome.IsSuccess();
     }
 
     uint32_t ShaderReloadTestComponent::ReadPixel(const uint8_t* rawRGBAPixelData, const AZ::RHI::ImageDescriptor& imageDescriptor, uint32_t x, uint32_t y) const

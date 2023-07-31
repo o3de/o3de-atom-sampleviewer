@@ -1,0 +1,12 @@
+{
+    "materialType": "@gemroot:Atom_Feature_Common@/Assets/Materials/Types/StandardPBR.materialtype",
+    "materialTypeVersion": 3,
+    "parentMaterial": "MaterialPipelineTest_Standard.material",
+    "propertyValues": {
+        "parallax.algorithm": "Relief",
+        "parallax.factor": 0.30000001192092896,
+        "parallax.offset": 0.14499999582767487,
+        "parallax.pdo": true,
+        "parallax.quality": "Medium"
+    }
+}

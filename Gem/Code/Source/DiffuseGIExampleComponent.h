@@ -14,7 +14,6 @@
 #include <AzCore/Component/TickBus.h>
 #include <Utils/Utils.h>
 #include <Utils/ImGuiSidebar.h>
-#include <Utils/ImGuiMaterialDetails.h>
 #include <Utils/ImGuiAssetBrowser.h>
 #include <Atom/RPI.Public/WindowContext.h>
 #include <Atom/Feature/Mesh/MeshFeatureProcessorInterface.h>

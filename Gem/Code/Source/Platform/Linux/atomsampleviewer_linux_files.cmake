@@ -16,5 +16,4 @@ set(FILES
     SampleComponentManager_Linux.cpp
     StreamingImageExampleComponent_Linux.cpp
     Utils_Linux.cpp
-    ScriptReporter_Linux.cpp
 )

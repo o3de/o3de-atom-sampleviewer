@@ -23,6 +23,7 @@
 
 #include <Atom/Utils/ImGuiCullingDebug.h>
 #include <Atom/Utils/ImGuiGpuProfiler.h>
+#include <Atom/Utils/ImGuiMaterialDetails.h>
 #include <Atom/Utils/ImGuiPassTree.h>
 #include <Atom/Utils/ImGuiFrameVisualizer.h>
 #include <Atom/Utils/ImGuiTransientAttachmentProfiler.h>
@@ -147,6 +148,7 @@ namespace AtomSampleViewer
         void SampleChange();
         void CameraReset();
         void ShutdownActiveSample();
+        void SetRHISamplePass(BasicRHIComponent* sampleComponent);
 
         // SampleComponentManagerRequestBus overrides...
         void Reset() override;
@@ -159,9 +161,11 @@ namespace AtomSampleViewer
         void ResetNumMSAASamples() override;
         void ResetRPIScene() override;
         void ClearRPIScene() override;
+        void EnableRenderPipeline(bool value) override;
+        void EnableXrPipelines(bool value) override;
 
         // FrameCaptureNotificationBus overrides...
-        void OnCaptureFinished(uint32_t frameCaptureId, AZ::Render::FrameCaptureResult result, const AZStd::string& info) override;
+        void OnFrameCaptureFinished(AZ::Render::FrameCaptureResult result, const AZStd::string& info) override;
 
         // AzFramework::AssetCatalogEventBus::Handler overrides ...
         void OnCatalogLoaded(const char* catalogFile) override;
@@ -177,6 +181,7 @@ namespace AtomSampleViewer
         static bool IsMultiViewportSwapchainSampleSupported();
         void AdjustImGuiFontScale();
         const char* GetRootPassTemplateName();
+        const char* GetMaterialPipelineName();
         int GetDefaultNumMSAASamples();
 
         // ---------- variables -----------------
@@ -185,17 +190,18 @@ namespace AtomSampleViewer
 
         AZStd::vector<SampleEntry> m_availableSamples;
         // Maps from parent menu item name to a vector of indices into the available samples vector above
-        // Note: we specifically use an ordered map to ensure menus are alphabatized.
+        // Note: we specifically use an ordered map to ensure menus are alphabetized.
         AZStd::map<AZStd::string, AZStd::vector<int32_t>> m_groupedSamples;
 
         // Entity to hold only example component. It doesn't need an entity context.
         AZ::Entity* m_exampleEntity = nullptr;
 
-        AZ::Component* m_activeSample = nullptr;
+        AZStd::vector<AZ::Component*> m_activeSamples;
 
         AZ::Entity* m_cameraEntity = nullptr;
 
         AZ::Data::Instance<AZ::RPI::AttachmentImage> m_brdfTexture;
+        AZ::Data::Instance<AZ::RPI::AttachmentImage> m_xrVrsTexture;
 
         int32_t m_selectedSampleIndex = -1;
 
@@ -247,7 +253,7 @@ namespace AtomSampleViewer
         bool m_isFrameCapturePending = false;
         bool m_hideImGuiDuringFrameCapture = true;
         int m_countdownForFrameCapture = 0;
-        uint32_t m_frameCaptureId = AZ::Render::FrameCaptureRequests::s_InvalidFrameCaptureId;
+        AZ::Render::FrameCaptureId m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
         AZStd::string m_frameCaptureFilePath;
 
         AZStd::unique_ptr<ScriptManager> m_scriptManager;
@@ -259,12 +265,16 @@ namespace AtomSampleViewer
 
         // Scene and some variables for RHI samples
         AZ::RPI::ScenePtr m_rhiScene;
-        AZ::RPI::Ptr<RHISamplePass> m_rhiSamplePass = nullptr;
+        AZStd::vector<AZ::RPI::Ptr<RHISamplePass>> m_rhiSamplePasses;
 
         // Scene and some variables for RPI samples
         AZ::RPI::ScenePtr m_rpiScene;
 
         // number of MSAA samples, initialized in Activate() and can vary by platform
         int m_numMSAASamples = 0;
+
+        // Cache PC and XR pipelines
+        AZ::RPI::RenderPipelinePtr m_renderPipeline = nullptr;
+        AZStd::vector<AZ::RPI::RenderPipelinePtr> m_xrPipelines;
     };
 } // namespace AtomSampleViewer

@@ -27,7 +27,7 @@
 
 namespace
 {
-    static const char* const SkinnedMeshMaterial = "materials/special/debugvertexstreams.azmaterial";
+    static const char* const SkinnedMeshMaterial = "materials/defaultpbr.azmaterial";
 }
 
 namespace AtomSampleViewer
@@ -170,10 +170,6 @@ namespace AtomSampleViewer
             auto materialAsset = AZ::RPI::AssetUtils::LoadAssetByProductPath<AZ::RPI::MaterialAsset>(SkinnedMeshMaterial);
             auto materialOverrideInstance = AZ::RPI::Material::FindOrCreate(materialAsset);
 
-            AZ::Render::MaterialAssignmentMap materialMap;
-            materialMap[AZ::Render::DefaultMaterialAssignmentId].m_materialAsset = materialAsset;
-            materialMap[AZ::Render::DefaultMaterialAssignmentId].m_materialInstance = materialOverrideInstance;
-
             if (renderData.m_skinnedMeshInstance->m_model)
             {
                 AZ::Render::MeshHandleDescriptor meshDescriptor;
@@ -181,7 +177,7 @@ namespace AtomSampleViewer
                 meshDescriptor.m_isRayTracingEnabled = false;
                 renderData.m_meshHandle =
                     AZStd::make_shared<AZ::Render::MeshFeatureProcessorInterface::MeshHandle>(m_meshFeatureProcessor->AcquireMesh(
-                        meshDescriptor, materialMap));
+                        meshDescriptor, materialOverrideInstance));
                 m_meshFeatureProcessor->SetTransform(*renderData.m_meshHandle, renderData.m_rootTransform);
             }
             // If render proxies already exist, they will be auto-freed

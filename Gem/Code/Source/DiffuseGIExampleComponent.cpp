@@ -227,103 +227,94 @@ namespace AtomSampleViewer
         // left wall
         if (m_leftWallVisible)
         {
-            AZ::Render::MaterialAssignmentMap materialMap;
-            materialMap[AZ::Render::DefaultMaterialAssignmentId].m_materialAsset = GetCornellBoxMaterialAsset(m_leftWallColor);
-            materialMap[AZ::Render::DefaultMaterialAssignmentId].m_materialInstance = AZ::RPI::Material::FindOrCreate(GetCornellBoxMaterialAsset(m_leftWallColor));
-        
             AZ::Transform transform = AZ::Transform::CreateIdentity();
             transform.SetTranslation(-5.0f, 0.0f, 0.0f);
             transform *= AZ::Transform::CreateRotationY(AZ::Constants::HalfPi);
             AZ::Vector3 nonUniformScale(10.05f, 10.05f, 1.0f);
-            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::LeftWall)] = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_planeModelAsset }, materialMap);
-            GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::LeftWall)], transform, nonUniformScale);
+            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::LeftWall)] = GetMeshFeatureProcessor()->AcquireMesh(
+                AZ::Render::MeshHandleDescriptor{ m_planeModelAsset },
+                AZ::RPI::Material::FindOrCreate(GetCornellBoxMaterialAsset(m_leftWallColor)));
+            GetMeshFeatureProcessor()->SetTransform(
+                m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::LeftWall)], transform, nonUniformScale);
         }
-        
+
         // right wall
         if (m_rightWallVisible)
         {
-            AZ::Render::MaterialAssignmentMap materialMap;
-            materialMap[AZ::Render::DefaultMaterialAssignmentId].m_materialAsset = GetCornellBoxMaterialAsset(m_rightWallColor);
-            materialMap[AZ::Render::DefaultMaterialAssignmentId].m_materialInstance = AZ::RPI::Material::FindOrCreate(GetCornellBoxMaterialAsset(m_rightWallColor));
-        
             AZ::Transform transform = AZ::Transform::CreateIdentity();
             transform.SetTranslation(5.0f, 0.0f, 0.0f);
             transform *= AZ::Transform::CreateRotationY(-AZ::Constants::HalfPi);
             AZ::Vector3 nonUniformScale(10.05f, 10.05f, 1.0f);
-            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::RightWall)] = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_planeModelAsset }, materialMap);
-            GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::RightWall)], transform, nonUniformScale);
+            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::RightWall)] = GetMeshFeatureProcessor()->AcquireMesh(
+                AZ::Render::MeshHandleDescriptor{ m_planeModelAsset },
+                AZ::RPI::Material::FindOrCreate(GetCornellBoxMaterialAsset(m_rightWallColor)));
+            GetMeshFeatureProcessor()->SetTransform(
+                m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::RightWall)], transform, nonUniformScale);
         }
-        
+
         // back wall
         if (m_backWallVisible)
         {
-            AZ::Render::MaterialAssignmentMap materialMap;
-            materialMap[AZ::Render::DefaultMaterialAssignmentId].m_materialAsset = GetCornellBoxMaterialAsset(m_backWallColor);
-            materialMap[AZ::Render::DefaultMaterialAssignmentId].m_materialInstance = AZ::RPI::Material::FindOrCreate(GetCornellBoxMaterialAsset(m_backWallColor));
-        
             AZ::Transform transform = AZ::Transform::CreateIdentity();
             transform.SetTranslation(0.0f, 5.0f, 0.0f);
             transform *= AZ::Transform::CreateRotationX(AZ::Constants::HalfPi);
             AZ::Vector3 nonUniformScale(10.05f, 10.05f, 1.0f);
-            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::BackWall)] = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_planeModelAsset }, materialMap);
-            GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::BackWall)], transform, nonUniformScale);
+            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::BackWall)] = GetMeshFeatureProcessor()->AcquireMesh(
+                AZ::Render::MeshHandleDescriptor{ m_planeModelAsset },
+                AZ::RPI::Material::FindOrCreate(GetCornellBoxMaterialAsset(m_backWallColor)));
+            GetMeshFeatureProcessor()->SetTransform(
+                m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::BackWall)], transform, nonUniformScale);
         }
-        
+
         // ceiling
         if (m_ceilingVisible)
         {
-            AZ::Render::MaterialAssignmentMap materialMap;
-            materialMap[AZ::Render::DefaultMaterialAssignmentId].m_materialAsset = GetCornellBoxMaterialAsset(m_ceilingColor);
-            materialMap[AZ::Render::DefaultMaterialAssignmentId].m_materialInstance = AZ::RPI::Material::FindOrCreate(GetCornellBoxMaterialAsset(m_ceilingColor));
-        
             AZ::Transform transform = AZ::Transform::CreateIdentity();
             transform.SetTranslation(0.0f, 0.0f, 5.0f);
             transform *= AZ::Transform::CreateRotationX(AZ::Constants::Pi);
             AZ::Vector3 nonUniformScale(10.05f, 10.05f, 1.0f);
-            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Ceiling)] = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_planeModelAsset }, materialMap);
-            GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Ceiling)], transform, nonUniformScale);
+            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Ceiling)] = GetMeshFeatureProcessor()->AcquireMesh(
+                AZ::Render::MeshHandleDescriptor{ m_planeModelAsset },
+                AZ::RPI::Material::FindOrCreate(GetCornellBoxMaterialAsset(m_ceilingColor)));
+            GetMeshFeatureProcessor()->SetTransform(
+                m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Ceiling)], transform, nonUniformScale);
         }
-        
+
         // floor
         if (m_floorVisible)
         {
-            AZ::Render::MaterialAssignmentMap materialMap;
-            materialMap[AZ::Render::DefaultMaterialAssignmentId].m_materialAsset = GetCornellBoxMaterialAsset(m_floorColor);
-            materialMap[AZ::Render::DefaultMaterialAssignmentId].m_materialInstance = AZ::RPI::Material::FindOrCreate(GetCornellBoxMaterialAsset(m_floorColor));
-        
             AZ::Transform transform = AZ::Transform::CreateIdentity();
             transform.SetTranslation(0.0f, 0.0f, -5.0f);
             AZ::Vector3 nonUniformScale(10.05f, 10.05f, 1.0f);
-            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Floor)] = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_planeModelAsset }, materialMap);
-            GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Floor)], transform, nonUniformScale);
+            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Floor)] = GetMeshFeatureProcessor()->AcquireMesh(
+                AZ::Render::MeshHandleDescriptor{ m_planeModelAsset },
+                AZ::RPI::Material::FindOrCreate(GetCornellBoxMaterialAsset(m_floorColor)));
+            GetMeshFeatureProcessor()->SetTransform(
+                m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Floor)], transform, nonUniformScale);
         }
-        
+
         // large box
         {
-            AZ::Render::MaterialAssignmentMap materialMap;
-            materialMap[AZ::Render::DefaultMaterialAssignmentId].m_materialAsset = m_whiteMaterialAsset;
-            materialMap[AZ::Render::DefaultMaterialAssignmentId].m_materialInstance = AZ::RPI::Material::FindOrCreate(m_whiteMaterialAsset);
-        
             AZ::Transform transform = AZ::Transform::CreateIdentity();
             transform.SetTranslation(-2.0f, 0.0f, -2.0f);
             transform *= AZ::Transform::CreateRotationZ(AZ::Constants::HalfPi * 0.2f);
             AZ::Vector3 nonUniformScale(3.0f, 3.0f, 6.0f);
-            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::LargeBox)] = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_cubeModelAsset }, materialMap);
-            GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::LargeBox)], transform, nonUniformScale);
+            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::LargeBox)] = GetMeshFeatureProcessor()->AcquireMesh(
+                AZ::Render::MeshHandleDescriptor{ m_cubeModelAsset }, AZ::RPI::Material::FindOrCreate(m_whiteMaterialAsset));
+            GetMeshFeatureProcessor()->SetTransform(
+                m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::LargeBox)], transform, nonUniformScale);
         }
-        
+
         // small box
         {
-            AZ::Render::MaterialAssignmentMap materialMap;
-            materialMap[AZ::Render::DefaultMaterialAssignmentId].m_materialAsset = m_whiteMaterialAsset;
-            materialMap[AZ::Render::DefaultMaterialAssignmentId].m_materialInstance = AZ::RPI::Material::FindOrCreate(m_whiteMaterialAsset);
-        
             AZ::Transform transform = AZ::Transform::CreateIdentity();
             transform.SetTranslation(2.0f, -1.5f, -3.5f);
             transform *= AZ::Transform::CreateRotationZ(-AZ::Constants::HalfPi * 0.2f);
             AZ::Vector3 nonUniformScale(3.0f, 3.0f, 3.0f);
-            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::SmallBox)] = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_cubeModelAsset }, materialMap);
-            GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::SmallBox)], transform, nonUniformScale);
+            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::SmallBox)] = GetMeshFeatureProcessor()->AcquireMesh(
+                AZ::Render::MeshHandleDescriptor{ m_cubeModelAsset }, AZ::RPI::Material::FindOrCreate(m_whiteMaterialAsset));
+            GetMeshFeatureProcessor()->SetTransform(
+                m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::SmallBox)], transform, nonUniformScale);
         }
 
         // stop now if we were only loading the geometry
@@ -338,22 +329,28 @@ namespace AtomSampleViewer
 
         // point light
         {
-            AZ::Render::PointLightFeatureProcessorInterface* pointLightFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::PointLightFeatureProcessorInterface>();
+            AZ::Render::PointLightFeatureProcessorInterface* pointLightFeatureProcessor =
+                m_scene->GetFeatureProcessor<AZ::Render::PointLightFeatureProcessorInterface>();
             m_pointLightHandle = pointLightFeatureProcessor->AcquireLight();
             pointLightFeatureProcessor->SetPosition(m_pointLightHandle, m_pointLightPos);
-            pointLightFeatureProcessor->SetRgbIntensity(m_pointLightHandle, AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Candela>(m_pointLightIntensity * m_pointLightColor));
+            pointLightFeatureProcessor->SetRgbIntensity(
+                m_pointLightHandle,
+                AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Candela>(m_pointLightIntensity * m_pointLightColor));
             pointLightFeatureProcessor->SetBulbRadius(m_pointLightHandle, 1.0f);
-            pointLightFeatureProcessor->SetAttenuationRadius(m_pointLightHandle, ComputePointLightAttenuationRadius(m_pointLightColor, m_pointLightIntensity));
+            pointLightFeatureProcessor->SetAttenuationRadius(
+                m_pointLightHandle, ComputePointLightAttenuationRadius(m_pointLightColor, m_pointLightIntensity));
         }
 
         // diffuse probe grid
         {
-            AZ::Render::DiffuseProbeGridFeatureProcessorInterface* diffuseProbeGridFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DiffuseProbeGridFeatureProcessorInterface>();
+            AZ::Render::DiffuseProbeGridFeatureProcessorInterface* diffuseProbeGridFeatureProcessor =
+                m_scene->GetFeatureProcessor<AZ::Render::DiffuseProbeGridFeatureProcessorInterface>();
             AZ::Transform transform = AZ::Transform::CreateIdentity();
 
             m_origin.Set(-0.8f, 0.5f, -0.055f);
             transform.SetTranslation(m_origin);
-            m_diffuseProbeGrid = diffuseProbeGridFeatureProcessor->AddProbeGrid(transform, AZ::Vector3(12.0f, 12.0f, 12.0f), AZ::Vector3(1.5f, 1.5f, 2.0f));
+            m_diffuseProbeGrid =
+                diffuseProbeGridFeatureProcessor->AddProbeGrid(transform, AZ::Vector3(12.0f, 12.0f, 12.0f), AZ::Vector3(1.5f, 1.5f, 2.0f));
             diffuseProbeGridFeatureProcessor->SetAmbientMultiplier(m_diffuseProbeGrid, m_ambientMultiplier);
 
             m_viewBias = 0.5f;
@@ -362,7 +359,8 @@ namespace AtomSampleViewer
             m_normalBias = 0.1f;
             diffuseProbeGridFeatureProcessor->SetNormalBias(m_diffuseProbeGrid, m_normalBias);
 
-            AZ::Render::DiffuseGlobalIlluminationFeatureProcessorInterface* diffuseGlobalIlluminationFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::DiffuseGlobalIlluminationFeatureProcessorInterface>();
+            AZ::Render::DiffuseGlobalIlluminationFeatureProcessorInterface* diffuseGlobalIlluminationFeatureProcessor =
+                m_scene->GetFeatureProcessor<AZ::Render::DiffuseGlobalIlluminationFeatureProcessorInterface>();
             diffuseGlobalIlluminationFeatureProcessor->SetQualityLevel(AZ::Render::DiffuseGlobalIlluminationQualityLevel::Medium);
         }
 

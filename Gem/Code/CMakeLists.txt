@@ -6,23 +6,7 @@
 #
 #
 
-ly_get_list_relative_pal_filename(pal_dir ${CMAKE_CURRENT_LIST_DIR}/Source/Platform/${PAL_PLATFORM_NAME})
-
-ly_add_target(
-    NAME AtomSampleViewer.Lib.Static STATIC
-    NAMESPACE Gem
-    FILES_CMAKE
-        atomsampleviewergem_lib_files.cmake
-    INCLUDE_DIRECTORIES
-        PUBLIC
-            Lib
-    BUILD_DEPENDENCIES
-        PUBLIC
-            AZ::AzGameFramework
-            Gem::Atom_AtomBridge.Static
-            Gem::Atom_RPI.Public
-            Gem::Atom_Utils.Static
-)
+o3de_pal_dir(pal_dir ${CMAKE_CURRENT_LIST_DIR}/Source/Platform/${PAL_PLATFORM_NAME} "${gem_restricted_path}" "${gem_path}")
 
 ly_add_target(
     NAME AtomSampleViewer.Private.Static STATIC
@@ -43,7 +27,6 @@ ly_add_target(
             Gem::Atom_AtomBridge.Static
             Gem::Atom_Feature_Common.Static
             Gem::Atom_Component_DebugCamera.Static
-            Gem::AtomSampleViewer.Lib.Static
             Gem::Profiler.Static
             Gem::DiffuseProbeGrid.Static
 )
@@ -67,6 +50,7 @@ ly_add_target(
 # if enabled, AtomSampleViewer is used by the Client and ServerLauncher
 ly_create_alias(NAME AtomSampleViewer.Clients  NAMESPACE Gem TARGETS Gem::AtomSampleViewer)
 ly_create_alias(NAME AtomSampleViewer.Servers  NAMESPACE Gem TARGETS Gem::AtomSampleViewer)
+ly_create_alias(NAME AtomSampleViewer.Unified  NAMESPACE Gem TARGETS Gem::AtomSampleViewer)
 
 if(PAL_TRAIT_BUILD_HOST_TOOLS)
 
@@ -83,7 +67,6 @@ if(PAL_TRAIT_BUILD_HOST_TOOLS)
             PRIVATE
                 AZ::AzGameFramework
                 Gem::Atom_AtomBridge.Static
-                Gem::AtomSampleViewer.Lib.Static
             PUBLIC
                 Gem::Atom_RPI.Edit
     )
@@ -138,12 +121,6 @@ if(PAL_TRAIT_BUILD_SUPPORTS_TESTS)
     )
 endif()
 
-
-################################################################################
-# Gem dependencies
-################################################################################
-
-ly_enable_gems(PROJECT_NAME AtomSampleViewer GEM_FILE enabled_gems.cmake)
 
 # If we build a server, then apply the gems to the server
 if(PAL_TRAIT_BUILD_SERVER_SUPPORTED)

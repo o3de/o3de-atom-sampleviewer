@@ -92,22 +92,18 @@ namespace AtomSampleViewer
 
     void SceneReloadSoakTestComponent::CreateLatticeInstance(const Transform& transform)
     {
-        Render::MaterialAssignmentMap materials;
-        Render::MaterialAssignment& defaultMaterial = materials[Render::DefaultMaterialAssignmentId];
-        defaultMaterial.m_materialAsset = Data::AssetManager::Instance().GetAsset<MaterialAsset>(m_materialAssetId, AZ::Data::AssetLoadBehavior::PreLoad);
-        defaultMaterial.m_materialAsset.BlockUntilLoadComplete();
+        Data::Asset<MaterialAsset> materialAsset;
+        materialAsset.Create(m_materialAssetId);
 
         // We have a mixture of both unique and shared instance to give more variety and therefore more opportunity for things to break.
         bool materialIsUnique = (m_materialIsUnique.size() % 2) == 0;
-        defaultMaterial.m_materialInstance = materialIsUnique ?
-            Material::Create(defaultMaterial.m_materialAsset) :
-            Material::FindOrCreate(defaultMaterial.m_materialAsset);
+        auto materialInstance = materialIsUnique ? Material::Create(materialAsset) : Material::FindOrCreate(materialAsset);
         m_materialIsUnique.push_back(materialIsUnique);
 
         Data::Asset<ModelAsset> modelAsset;
         modelAsset.Create(m_modelAssetId);
 
-        auto meshHandle = GetMeshFeatureProcessor()->AcquireMesh(Render::MeshHandleDescriptor{ modelAsset }, materials);
+        auto meshHandle = GetMeshFeatureProcessor()->AcquireMesh(Render::MeshHandleDescriptor{ modelAsset }, materialInstance);
         GetMeshFeatureProcessor()->SetTransform(meshHandle, transform);
         m_meshHandles.push_back(AZStd::move(meshHandle));
     }
@@ -132,19 +128,8 @@ namespace AtomSampleViewer
             bool updatedSharedMaterialInstance = false;
             size_t entityIndex = 0;
 
-            MaterialPropertyIndex colorPropertyIndex;
-
             for (auto& meshHandle : m_meshHandles)
             {
-                const Render::MaterialAssignmentMap& materials = GetMeshFeatureProcessor()->GetMaterialAssignmentMap(meshHandle);
-                const auto defaultMaterialItr = materials.find(Render::DefaultMaterialAssignmentId);
-                const auto& defaultMaterial = defaultMaterialItr != materials.end() ? defaultMaterialItr->second : Render::MaterialAssignment();
-                Data::Instance<Material> material = defaultMaterial.m_materialInstance;
-                if (material == nullptr)
-                {
-                    continue;
-                }
-
                 static const float speed = 4.0f;
                 const float t = static_cast<float>(sin(m_totalTime * speed) * 0.5f + 0.5f);
 
@@ -168,26 +153,27 @@ namespace AtomSampleViewer
 
                 if (m_materialIsUnique[entityIndex] || !updatedSharedMaterialInstance)
                 {
-                    if (colorPropertyIndex.IsNull())
+                    for (auto& customMaterialPair : GetMeshFeatureProcessor()->GetCustomMaterials(meshHandle))
                     {
-                        colorPropertyIndex = material->FindPropertyIndex(Name("baseColor.color"));
-                    }
-
-                    if (colorPropertyIndex.IsValid())
-                    {
-                        material->SetPropertyValue(colorPropertyIndex, color);
-
-                        if (!m_materialIsUnique[entityIndex])
+                        if (Data::Instance<Material> material = customMaterialPair.second.m_material)
                         {
-                            updatedSharedMaterialInstance = true;
+                            MaterialPropertyIndex colorPropertyIndex = material->FindPropertyIndex(Name("baseColor.color"));
+                            if (colorPropertyIndex.IsValid())
+                            {
+                                material->SetPropertyValue(colorPropertyIndex, color);
+                                material->Compile();
+
+                                if (!m_materialIsUnique[entityIndex])
+                                {
+                                    updatedSharedMaterialInstance = true;
+                                }
+                            }
+                            else
+                            {
+                                AZ_Error("", false, "Could not find the color property index");
+                            }
                         }
                     }
-                    else
-                    {
-                        AZ_Error("", false, "Could not find the color property index");
-                    }
-
-                    material->Compile();
                 }
 
                 entityIndex++;

@@ -17,7 +17,6 @@ set(FILES
     SampleComponentManager_iOS.cpp
     StreamingImageExampleComponent_iOS.cpp
     Utils_iOS.cpp
-    ScriptReporter_iOS.cpp
 )
 
 set(LY_COMPILE_OPTIONS

@@ -16,12 +16,12 @@
 
 #include <Utils/Utils.h>
 #include <Utils/ImGuiSidebar.h>
-#include <Utils/ImGuiMaterialDetails.h>
 #include <Utils/ImGuiAssetBrowser.h>
 
 #include <Atom/Bootstrap/DefaultWindowBus.h>
 #include <Atom/Feature/ImGui/ImGuiUtils.h>
 #include <Atom/Feature/SkyBox/SkyBoxFeatureProcessorInterface.h>
+#include <Atom/Utils/ImGuiMaterialDetails.h>
 
 namespace AtomSampleViewer
 {
@@ -66,12 +66,28 @@ namespace AtomSampleViewer
 
         void CreateLowEndPipeline();
         void DestroyLowEndPipeline();
+        void CreateDeferredPipeline();
+        void DestroyDeferredPipeline();
+        void CreateMultiViewXRPipeline();
+        void DestroyMultiViewXRPipeline();
 
         void ActivateLowEndPipeline();
-        void DeactivateLowEndPipeline();
+        void ActivateMultiViewXRPipeline();
+        void ActivateDeferredPipeline();
+        void ActivateOriginalPipeline();
 
-        AZ::RPI::RenderPipelinePtr m_lowEndPipeline;
-        AZ::RPI::RenderPipelinePtr m_originalPipeline;
+        enum class Pipeline
+        {
+            Original,
+            LowEnd,
+            Deferred
+        };
+        Pipeline m_currentPipeline = Pipeline::Original;
+
+        AZ::RPI::RenderPipelinePtr m_lowEndPipeline = nullptr;
+        AZ::RPI::RenderPipelinePtr m_deferredPipeline = nullptr;
+        AZ::RPI::RenderPipelinePtr m_multiViewXRPipeline = nullptr;
+        AZ::RPI::RenderPipelinePtr m_originalPipeline = nullptr;
 
         AZStd::shared_ptr<AZ::RPI::WindowContext> m_windowContext;
         AZ::Render::ImGuiActiveContextScope m_imguiScope;
@@ -106,9 +122,11 @@ namespace AtomSampleViewer
         bool m_cameraControllerDisabled = false;
 
         bool m_useLowEndPipeline = false;
+        bool m_useDeferredPipeline = false;
+        bool m_useMultiViewXRPipeline = false;
         bool m_switchPipeline = false;
 
-        AZ::Data::Instance<AZ::RPI::Material> m_materialOverrideInstance; //< Holds a copy of the material instance being used when m_enableMaterialOverride is true.
+        AZ::Data::Instance<AZ::RPI::Material> m_customMaterialInstance; //< Holds a copy of the material instance being used when m_enableMaterialOverride is true.
         AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_meshHandle;
         AZ::Data::Asset<AZ::RPI::ModelAsset> m_modelAsset;
 
@@ -117,7 +135,7 @@ namespace AtomSampleViewer
         AZ::Data::Instance<AZ::RPI::Material> m_groundPlaneMaterial;
 
         ImGuiSidebar m_imguiSidebar;
-        ImGuiMaterialDetails m_imguiMaterialDetails;
+        AZ::Render::ImGuiMaterialDetails m_imguiMaterialDetails;
         ImGuiAssetBrowser m_materialBrowser;
         ImGuiAssetBrowser m_modelBrowser;
     };

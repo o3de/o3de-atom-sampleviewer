@@ -22,6 +22,7 @@
 #include <AzCore/Serialization/Utils.h>
 #include <AzCore/Settings/SettingsRegistryMergeUtils.h>
 #include <AzCore/std/sort.h>
+#include <AzCore/std/time.h>
 
 #include <AzFramework/IO/LocalFileIO.h>
 #include <AzFramework/Components/TransformComponent.h>
@@ -183,7 +184,7 @@ namespace AtomSampleViewer
 
         // If there are any assets that haven't finished loading yet, and thus haven't been disconnected, disconnect now.
         AZ::Data::AssetBus::MultiHandler::BusDisconnect();
-        
+
         m_defaultIbl.Reset();
 
         m_skyboxFeatureProcessor->Enable(false);
@@ -196,7 +197,7 @@ namespace AtomSampleViewer
 
     void SponzaBenchmarkComponent::OnTick(float deltaTime, AZ::ScriptTimePoint timePoint)
     {
-        AZ_PROFILE_DATAPOINT(AzRender, deltaTime, "Frame Time");
+        AZ_PROFILE_DATAPOINT(AzRender, deltaTime, L"Frame Time");
 
         // Camera Configuration
         {
@@ -322,7 +323,7 @@ namespace AtomSampleViewer
             BenchmarkLoadEnd();
         }
 
-        AZ_PROFILE_DATAPOINT(AzRender, m_currentLoadBenchmarkData.m_totalMBLoaded, "MB Loaded Off Disk");
+        AZ_PROFILE_DATAPOINT(AzRender, m_currentLoadBenchmarkData.m_totalMBLoaded, L"MB Loaded Off Disk");
     }
 
     void SponzaBenchmarkComponent::BenchmarkLoadStart()
@@ -594,7 +595,7 @@ namespace AtomSampleViewer
         if (ImGui::Begin("Results"))
         {
             ImGui::Columns(2);
-            
+
             ImGui::Text("Load");
             ImGui::NextColumn();
             ImGui::Text("Run");
