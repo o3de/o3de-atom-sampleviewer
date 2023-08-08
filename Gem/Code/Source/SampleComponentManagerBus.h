@@ -10,6 +10,11 @@
 #include <AzCore/EBus/EBus.h>
 #include <AzCore/std/string/string.h>
 
+namespace AZ
+{
+    class ComponentDescriptor;
+}
+
 namespace AtomSampleViewer
 {
     enum class SamplePipelineType : uint32_t
