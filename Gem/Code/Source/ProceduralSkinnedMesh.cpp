@@ -9,7 +9,6 @@
 #include <ProceduralSkinnedMesh.h>
 
 #include <AzCore/Math/MathUtils.h>
-#include <Atom/RHI.Reflect/Bits.h>
 #include <Atom/RPI.Reflect/Model/ModelAssetHelpers.h>
 
 const uint32_t maxInfluencesPerVertex = 4;
