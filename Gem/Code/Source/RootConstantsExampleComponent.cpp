@@ -64,9 +64,9 @@ namespace AtomSampleViewer
         {
             const char* modelsPath[] =
             {
-                "objects/shaderball_simple.azmodel",
-                "objects/bunny.azmodel",
-                "testdata/objects/cube/cube.azmodel"
+                "objects/shaderball_simple.fbx.azmodel",
+                "objects/bunny.fbx.azmodel",
+                "testdata/objects/cube/cube.fbx.azmodel"
             };
 
             for (uint32_t i = 0; i < AZ_ARRAY_SIZE(modelsPath); ++i)

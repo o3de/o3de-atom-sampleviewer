@@ -44,9 +44,9 @@ namespace AtomSampleViewer
     using namespace AZ::Render;
     using namespace AZ::RPI;
 
-    static const char* WorldModelName = "Objects/Sponza.azmodel";
+    static const char* WorldModelName = "Objects/Sponza.fbx.azmodel";
 
-    static const char* TransparentModelName = "Objects/ShaderBall_simple.azmodel";
+    static const char* TransparentModelName = "Objects/ShaderBall_simple.fbx.azmodel";
     static const char* TransparentMaterialName = "materials/DefaultPBRTransparent.azmaterial";
 
     static const char* DecalMaterialPath = "materials/Decal/airship_tail_01_decal.azmaterial";

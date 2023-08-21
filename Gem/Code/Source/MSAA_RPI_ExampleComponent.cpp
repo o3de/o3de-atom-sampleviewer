@@ -160,15 +160,15 @@ namespace AtomSampleViewer
         switch (m_modelType)
         {
         case 0:
-            return AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/cylinder.azmodel", traceLevel);
+            return AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/cylinder.fbx.azmodel", traceLevel);
         case 1:
-            return AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/cube.azmodel", traceLevel);
+            return AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/cube.fbx.azmodel", traceLevel);
         case 2:
-            return AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/shaderball_simple.azmodel", traceLevel);
+            return AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/shaderball_simple.fbx.azmodel", traceLevel);
         }
 
         AZ_Warning("MSAA_RPI_ExampleComponent", false, "Unsupported model type");
-        return AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/cylinder.azmodel", traceLevel);
+        return AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/cylinder.fbx.azmodel", traceLevel);
     }
 
     void MSAA_RPI_ExampleComponent::ActivateModel()

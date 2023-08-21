@@ -95,7 +95,7 @@ namespace AtomSampleViewer
 
     void SsaoExampleComponent::ActivateModel()
     {
-        const char* modelPath = "objects/sponza.azmodel";
+        const char* modelPath = "objects/sponza.fbx.azmodel";
 
         // Get Model and Material asset
         Data::Asset<RPI::ModelAsset> modelAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>(modelPath, RPI::AssetUtils::TraceLevel::Assert);

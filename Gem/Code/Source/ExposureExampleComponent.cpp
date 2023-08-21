@@ -112,7 +112,7 @@ namespace AtomSampleViewer
     {
         using namespace AZ;
 
-        const char* sponzaPath = "objects/sponza.azmodel";
+        const char* sponzaPath = "objects/sponza.fbx.azmodel";
         Data::Asset<RPI::ModelAsset> modelAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>(sponzaPath, RPI::AssetUtils::TraceLevel::Assert);
         Data::Asset<RPI::MaterialAsset> materialAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::MaterialAsset>(DefaultPbrMaterialPath, RPI::AssetUtils::TraceLevel::Assert);
         m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(Render::MeshHandleDescriptor{ modelAsset }, AZ::RPI::Material::FindOrCreate(materialAsset));

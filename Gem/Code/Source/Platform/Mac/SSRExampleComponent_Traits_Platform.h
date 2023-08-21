@@ -6,4 +6,4 @@
  *
  */
 
-#define ATOMSAMPLEVIEWER_TRAIT_SSR_SAMPLE_HERMANUBIS_MODEL_NAME "objects/hermanubis/hermanubis_high.azmodel"
+#define ATOMSAMPLEVIEWER_TRAIT_SSR_SAMPLE_HERMANUBIS_MODEL_NAME "objects/hermanubis/hermanubis_high.fbx.azmodel"

@@ -148,10 +148,10 @@ namespace AtomSampleViewer
     {
         const char* modelsPath[ModelType_Count] =
         {
-            "objects/plane.azmodel",
-            "objects/shaderball_simple.azmodel",
-            "objects/bunny.azmodel",
-            "objects/suzanne.azmodel",
+            "objects/plane.fbx.azmodel",
+            "objects/shaderball_simple.fbx.azmodel",
+            "objects/bunny.fbx.azmodel",
+            "objects/suzanne.fbx.azmodel",
         };
 
         for (uint32_t i = 0; i < AZ_ARRAY_SIZE(modelsPath); ++i)

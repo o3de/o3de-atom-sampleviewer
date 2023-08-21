@@ -73,8 +73,8 @@ namespace AtomSampleViewer
     void ParallaxMappingExampleComponent::Activate()
     {
         // Asset
-        m_planeAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/plane.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
-        m_boxAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/cube.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
+        m_planeAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/plane.fbx.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
+        m_boxAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/cube.fbx.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
         m_parallaxMaterialAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::MaterialAsset>("testdata/materials/parallaxrock.azmaterial", AZ::RPI::AssetUtils::TraceLevel::Assert);
         m_defaultMaterialAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::MaterialAsset>("materials/defaultpbr.azmaterial", AZ::RPI::AssetUtils::TraceLevel::Assert);
         m_parallaxMaterial = AZ::RPI::Material::Create(m_parallaxMaterialAsset);
