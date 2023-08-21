@@ -19,7 +19,7 @@ namespace AtomSampleViewer
 {
     static const int NumOfMeshes = 10;
     static const float MeshSpacing = 1.0f;
-    static const char* MeshPath = "objects/plane.azmodel";
+    static const char* MeshPath = "objects/plane.fbx.azmodel";
     static const char* MaterialPath = "materials/transparentdoubleside.azmaterial";
     static const char* ColorPropertyName = "baseColor.color";
     static const float DefaultCameraDistance = 2.0f;

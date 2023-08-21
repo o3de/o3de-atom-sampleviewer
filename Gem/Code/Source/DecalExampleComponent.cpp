@@ -29,7 +29,7 @@ namespace AtomSampleViewer
 {
     namespace
     {
-        static constexpr const char* TargetMeshName = "objects/plane.azmodel";
+        static constexpr const char* TargetMeshName = "objects/plane.fbx.azmodel";
         static constexpr const char* TargetMaterialName = "materials/defaultpbr.azmaterial";
     }
 
@@ -54,7 +54,7 @@ namespace AtomSampleViewer
 
         // List of all assets this example needs.
         AZStd::vector<AZ::AssetCollectionAsyncLoader::AssetToLoadInfo> assetList = {
-            {"objects/plane.azmodel", azrtti_typeid<AZ::RPI::ModelAsset>()}, // The model
+            { TargetMeshName, azrtti_typeid<AZ::RPI::ModelAsset>() }, // The model
         };
 
         ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::PauseScript);

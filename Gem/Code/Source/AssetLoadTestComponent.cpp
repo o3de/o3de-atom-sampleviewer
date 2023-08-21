@@ -66,9 +66,9 @@ namespace AtomSampleViewer
 
         const AZStd::vector<AZStd::string> defaultModelAllowist =
         {
-            "Objects/bunny.azmodel",
-            "Objects/Shaderball_simple.azmodel",
-            "Objects/suzanne.azmodel",
+            "Objects/bunny.fbx.azmodel",
+            "Objects/Shaderball_simple.fbx.azmodel",
+            "Objects/suzanne.fbx.azmodel",
         };
         m_modelBrowser.SetDefaultPinnedAssets(defaultModelAllowist);
     }
@@ -226,7 +226,7 @@ namespace AtomSampleViewer
         }
         else
         {
-            return AZ::RPI::AssetUtils::GetAssetIdForProductPath("testdata/objects/cube/cube.azmodel", AZ::RPI::AssetUtils::TraceLevel::Error);
+            return AZ::RPI::AssetUtils::GetAssetIdForProductPath("testdata/objects/cube/cube.fbx.azmodel", AZ::RPI::AssetUtils::TraceLevel::Error);
         }
     }
 

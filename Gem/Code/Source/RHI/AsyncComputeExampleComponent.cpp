@@ -286,7 +286,7 @@ namespace AtomSampleViewer
     void AsyncComputeExampleComponent::LoadModel()
     {
         // Load the asset
-        auto modelAsset = m_assetLoadManager->GetAsset<AZ::RPI::ModelAsset>("objects/shaderball_simple.azmodel");
+        auto modelAsset = m_assetLoadManager->GetAsset<AZ::RPI::ModelAsset>("objects/shaderball_simple.fbx.azmodel");
         AZ_Assert(modelAsset.IsReady(), "The model asset is supposed to be ready.");
 
         m_model = AZ::RPI::Model::FindOrCreate(modelAsset);
@@ -534,7 +534,7 @@ namespace AtomSampleViewer
             {"Shaders/RHI/AsyncComputeLuminanceMap.azshader", azrtti_typeid<RPI::ShaderAsset>()},     // Vertex + Fragment
             {"Shaders/RHI/AsyncComputeLuminanceReduce.azshader", azrtti_typeid<RPI::ShaderAsset>()},  // Compute
             {"Shaders/RHI/AsyncComputeTonemapping.azshader", azrtti_typeid<RPI::ShaderAsset>()},    // Compute
-            {"objects/shaderball_simple.azmodel", azrtti_typeid<AZ::RPI::ModelAsset>()}, // The model
+            {"objects/shaderball_simple.fbx.azmodel", azrtti_typeid<AZ::RPI::ModelAsset>()}, // The model
         };
 
 

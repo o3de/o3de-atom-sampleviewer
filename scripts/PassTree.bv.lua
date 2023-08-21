@@ -32,7 +32,7 @@ ResizeViewport(800, 600)
 SelectImageComparisonToleranceLevel("Level G")
 
 -- choose model, material and lighting
-SetImguiValue('Models/##Available', 'objects/shaderball_simple.azmodel')
+SetImguiValue('Models/##Available', 'objects/shaderball_simple.fbx.azmodel')
 SetImguiValue('Enable Material Override', true)
 SetImguiValue('Materials/##Available', 'materials/defaultpbr.azmaterial')
 SetImguiValue('Lighting Preset##SampleBase/Thumbnail', true)

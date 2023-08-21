@@ -76,7 +76,7 @@ namespace AtomSampleViewer
         m_meshHandles.reserve(instanceCount);
 
         const char* materialPath = DefaultPbrMaterialPath;
-        const char* modelPath = "objects/shaderball_simple.azmodel";
+        const char* modelPath = "objects/shaderball_simple.fbx.azmodel";
 
         Data::AssetCatalogRequestBus::BroadcastResult(
             m_materialAssetId, &Data::AssetCatalogRequestBus::Events::GetAssetIdByPath,

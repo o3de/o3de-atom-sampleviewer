@@ -93,7 +93,7 @@ namespace AtomSampleViewer
         // cube
         {
             AZ::Data::Asset<AZ::RPI::MaterialAsset> materialAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::MaterialAsset>("materials/ssrexample/cube.azmaterial", AZ::RPI::AssetUtils::TraceLevel::Assert);
-            AZ::Data::Asset<AZ::RPI::ModelAsset> modelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/cube.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
+            AZ::Data::Asset<AZ::RPI::ModelAsset> modelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/cube.fbx.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
             AZ::Transform transform = AZ::Transform::CreateIdentity();
             transform.SetTranslation(-4.5f, 0.0f, 0.49f);
 
@@ -104,7 +104,7 @@ namespace AtomSampleViewer
         // shader ball
         {
             AZ::Data::Asset<AZ::RPI::MaterialAsset> materialAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::MaterialAsset>("Materials/Presets/PBR/default_grid.azmaterial", AZ::RPI::AssetUtils::TraceLevel::Assert);
-            AZ::Data::Asset<AZ::RPI::ModelAsset> modelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/ShaderBall_simple.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
+            AZ::Data::Asset<AZ::RPI::ModelAsset> modelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/ShaderBall_simple.fbx.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
             AZ::Transform transform = AZ::Transform::CreateIdentity();
             transform *= AZ::Transform::CreateRotationZ(AZ::Constants::Pi);
             transform.SetTranslation(4.5f, 0.0f, 0.89f);
@@ -144,7 +144,7 @@ namespace AtomSampleViewer
         m_groundMaterialAsset.Create(groundMaterialAssetId);
 
         // load mesh
-        AZ::Data::Asset<AZ::RPI::ModelAsset> planeModel = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/plane.azmodel", AZ::RPI::AssetUtils::TraceLevel::Error);
+        AZ::Data::Asset<AZ::RPI::ModelAsset> planeModel = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/plane.fbx.azmodel", AZ::RPI::AssetUtils::TraceLevel::Error);
         m_groundMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ planeModel }, AZ::RPI::Material::FindOrCreate(m_groundMaterialAsset));
 
         AZ::Transform transform = AZ::Transform::CreateIdentity();
