@@ -19,7 +19,7 @@
 
 namespace AtomSampleViewer
 {
-    static const char* MeshPath = "objects/eye.azmodel";
+    static const char* MeshPath = "objects/eye.fbx.azmodel";
     static const char* MaterialPath = "materials/eye/001_EyeBasic.azmaterial";
     static const float DefaultCameraHeading = 40.0f;
     static const float DefaultCameraDistance = 2.0f;

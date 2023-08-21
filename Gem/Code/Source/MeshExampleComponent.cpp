@@ -238,7 +238,7 @@ namespace AtomSampleViewer
 
         AZ::Data::Asset<AZ::RPI::MaterialAsset> groundPlaneMaterialAsset = AZ::RPI::AssetUtils::LoadAssetByProductPath<AZ::RPI::MaterialAsset>(DefaultPbrMaterialPath, AZ::RPI::AssetUtils::TraceLevel::Error);
         m_groundPlaneMaterial = AZ::RPI::Material::FindOrCreate(groundPlaneMaterialAsset);
-        m_groundPlaneModelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/plane.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
+        m_groundPlaneModelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/plane.fbx.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
 
         AZ::TickBus::Handler::BusConnect();
         AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusConnect();

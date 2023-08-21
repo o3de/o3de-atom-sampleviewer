@@ -68,19 +68,19 @@ namespace AtomSampleViewer
 
         m_expandedModelList =
         {
-            "materialeditor/viewportmodels/cone.azmodel",
-            "materialeditor/viewportmodels/cube.azmodel",
-            "materialeditor/viewportmodels/cylinder.azmodel",
-            "materialeditor/viewportmodels/platonicsphere.azmodel",
-            "materialeditor/viewportmodels/polarsphere.azmodel",
-            "materialeditor/viewportmodels/quadsphere.azmodel",
-            "materialeditor/viewportmodels/torus.azmodel",
-            "objects/cube.azmodel",
-            "objects/cylinder.azmodel",
+            "materialeditor/viewportmodels/cone.fbx.azmodel",
+            "materialeditor/viewportmodels/cube.fbx.azmodel",
+            "materialeditor/viewportmodels/cylinder.fbx.azmodel",
+            "materialeditor/viewportmodels/platonicsphere.fbx.azmodel",
+            "materialeditor/viewportmodels/polarsphere.fbx.azmodel",
+            "materialeditor/viewportmodels/quadsphere.fbx.azmodel",
+            "materialeditor/viewportmodels/torus.fbx.azmodel",
+            "objects/cube.fbx.azmodel",
+            "objects/cylinder.fbx.azmodel",
         };
         m_simpleModelList =
         {
-            "objects/cube.azmodel"
+            "objects/cube.fbx.azmodel"
         };
         m_modelBrowser.SetDefaultPinnedAssets(m_simpleModelList);
     }
@@ -289,7 +289,7 @@ namespace AtomSampleViewer
         }
         else
         {
-            return AZ::RPI::AssetUtils::GetAssetIdForProductPath("testdata/objects/cube/cube.azmodel", AZ::RPI::AssetUtils::TraceLevel::Error);
+            return AZ::RPI::AssetUtils::GetAssetIdForProductPath("testdata/objects/cube/cube.fbx.azmodel", AZ::RPI::AssetUtils::TraceLevel::Error);
         }
     }
 

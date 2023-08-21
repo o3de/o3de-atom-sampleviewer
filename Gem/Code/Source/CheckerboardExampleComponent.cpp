@@ -44,7 +44,7 @@ namespace AtomSampleViewer
     void CheckerboardExampleComponent::Activate()
     {
         AZ::RPI::AssetUtils::TraceLevel traceLevel = AZ::RPI::AssetUtils::TraceLevel::Assert;
-        auto meshAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/shaderball_simple.azmodel", traceLevel);
+        auto meshAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/shaderball_simple.fbx.azmodel", traceLevel);
         auto materialAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::MaterialAsset>(DefaultPbrMaterialPath, traceLevel);
         auto materialInstance = AZ::RPI::Material::FindOrCreate(materialAsset);
 

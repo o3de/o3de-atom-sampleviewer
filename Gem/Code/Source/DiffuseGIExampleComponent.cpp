@@ -157,11 +157,11 @@ namespace AtomSampleViewer
     {
         // load plane and cube models
         // all geometry in the CornellBox is created from planes and boxes
-        static constexpr const char PlaneModelPath[] = "objects/plane.azmodel";
+        static constexpr const char PlaneModelPath[] = "objects/plane.fbx.azmodel";
         AZ::Data::AssetId planeAssetId = AZ::RPI::AssetUtils::GetAssetIdForProductPath(PlaneModelPath, AZ::RPI::AssetUtils::TraceLevel::Error);
         m_planeModelAsset.Create(planeAssetId);
 
-        static constexpr const char CubeModelPath[] = "objects/cube.azmodel";
+        static constexpr const char CubeModelPath[] = "objects/cube.fbx.azmodel";
         AZ::Data::AssetId cubeAssetId = AZ::RPI::AssetUtils::GetAssetIdForProductPath(CubeModelPath, AZ::RPI::AssetUtils::TraceLevel::Error);
         m_cubeModelAsset.Create(cubeAssetId);
 
@@ -187,7 +187,7 @@ namespace AtomSampleViewer
         m_whiteMaterialAsset.Create(whiteMaterialAssetId);
 
         // Sponza models
-        static constexpr const char InteriorModelPath[] = "objects/sponza.azmodel";
+        static constexpr const char InteriorModelPath[] = "objects/sponza.fbx.azmodel";
         AZ::Data::AssetId interiorAssetId = AZ::RPI::AssetUtils::GetAssetIdForProductPath(InteriorModelPath, AZ::RPI::AssetUtils::TraceLevel::Error);
         m_sponzaModelAsset.Create(interiorAssetId);
 

@@ -11,15 +11,15 @@
 
 RunScript("scripts/TestEnvironment.luac")
 
-g_shaderballModel = 'materialeditor/viewportmodels/shaderball.azmodel'
-g_cubeModel = 'materialeditor/viewportmodels/cube.azmodel'
-g_beveledCubeModel = 'materialeditor/viewportmodels/beveledcube.azmodel'
-g_modelWithoutLayerMask = 'objects/bunny.azmodel'
-g_modelWithLayerMask = 'testdata/objects/paintedplane.azmodel'
-g_modelHermanubis = 'materialeditor/viewportmodels/hermanubis.azmodel'
-g_modelTube = 'testdata/objects/tube.azmodel'
-g_modelGrass = 'objects/grass_tile_large.azmodel'
-g_reflectionProbe = 'models/reflectionprobesphere.azmodel'
+g_shaderballModel = 'materialeditor/viewportmodels/shaderball.fbx.azmodel'
+g_cubeModel = 'materialeditor/viewportmodels/cube.fbx.azmodel'
+g_beveledCubeModel = 'materialeditor/viewportmodels/beveledcube.fbx.azmodel'
+g_modelWithoutLayerMask = 'objects/bunny.fbx.azmodel'
+g_modelWithLayerMask = 'testdata/objects/paintedplane.fbx.azmodel'
+g_modelHermanubis = 'materialeditor/viewportmodels/hermanubis.fbx.azmodel'
+g_modelTube = 'testdata/objects/tube.fbx.azmodel'
+g_modelGrass = 'objects/grass_tile_large.fbx.azmodel'
+g_reflectionProbe = 'models/reflectionprobesphere.fbx.azmodel'
 
 function GenerateMaterialScreenshot(imageComparisonThresholdLevel, materialName, options)
     if options == nil then options = {} end

@@ -169,8 +169,8 @@ namespace AtomSampleViewer
 
         ClearMeshes();
 
-        const char objectModelFilename[] = "Objects/sphere_5lods.azmodel";
-        const char planeModelFilename[] = "Objects/plane.azmodel";
+        const char objectModelFilename[] = "Objects/sphere_5lods.fbx.azmodel";
+        const char planeModelFilename[] = "Objects/plane.fbx.azmodel";
         Data::Asset<RPI::ModelAsset> objectModelAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::ModelAsset>(
             objectModelFilename, RPI::AssetUtils::TraceLevel::Assert);
         Data::Asset<RPI::ModelAsset> planeModelAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::ModelAsset>(

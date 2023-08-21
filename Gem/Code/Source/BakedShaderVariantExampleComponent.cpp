@@ -38,7 +38,7 @@ namespace AtomSampleViewer
     {
         namespace Products
         {
-            static constexpr const char ModelFilePath[] = "objects/plane.azmodel";
+            static constexpr const char ModelFilePath[] = "objects/plane.fbx.azmodel";
         } // namespace Products
     } // namespace
 

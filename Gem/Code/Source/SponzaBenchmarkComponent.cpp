@@ -106,7 +106,7 @@ namespace AtomSampleViewer
     {
         auto traceLevel = AZ::RPI::AssetUtils::TraceLevel::Assert;
         m_sponzaInteriorAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>
-            ("Objects/Sponza.azmodel", traceLevel);
+            ("Objects/Sponza.fbx.azmodel", traceLevel);
 
         m_sponzaInteriorMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_sponzaInteriorAsset });
 

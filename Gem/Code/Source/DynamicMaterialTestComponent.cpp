@@ -71,7 +71,7 @@ namespace AtomSampleViewer
     
     void DynamicMaterialTestComponent::PrepareCreateLatticeInstances(uint32_t instanceCount)
     {
-        const char* modelPath = "objects/shaderball_simple.azmodel";
+        const char* modelPath = "objects/shaderball_simple.fbx.azmodel";
 
         Data::AssetId modelAssetId;
         Data::AssetCatalogRequestBus::BroadcastResult(
