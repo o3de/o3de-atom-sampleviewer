@@ -134,11 +134,17 @@ namespace AtomSampleViewer
             }
         }
 
+        size_t positionStreamSize = proceduralMesh.m_positions.size() / RHI::GetFormatComponentCount(RPI::PositionFormat);
+        size_t normalStreamSize = proceduralMesh.m_normals.size() / RHI::GetFormatComponentCount(RPI::NormalFormat);
+        size_t tangentStreamSize = proceduralMesh.m_tangents.size() / RHI::GetFormatComponentCount(RPI::TangentFormat);
+        size_t bitangentStreamSize = proceduralMesh.m_bitangents.size() / RHI::GetFormatComponentCount(RPI::BitangentFormat);
+        
         auto indexBuffer = CreateTypedBufferAsset(proceduralMesh.m_indices.data(), proceduralMesh.m_indices.size(), AZ::RHI::Format::R32_FLOAT);
-        auto positionBuffer = CreateTypedBufferAsset(proceduralMesh.m_positions.data(), proceduralMesh.m_positions.size(), RPI::PositionFormat);
-        auto normalBuffer = CreateTypedBufferAsset(proceduralMesh.m_normals.data(), proceduralMesh.m_normals.size(), RPI::NormalFormat);
-        auto tangentBuffer = CreateTypedBufferAsset(proceduralMesh.m_tangents.data(), proceduralMesh.m_tangents.size(), RPI::TangentFormat);
-        auto bitangentBuffer = CreateTypedBufferAsset(proceduralMesh.m_bitangents.data(), proceduralMesh.m_bitangents.size(), RPI::BitangentFormat);
+        
+        auto positionBuffer = CreateTypedBufferAsset(proceduralMesh.m_positions.data(), positionStreamSize, RPI::PositionFormat);
+        auto normalBuffer = CreateTypedBufferAsset(proceduralMesh.m_normals.data(), normalStreamSize, RPI::NormalFormat);
+        auto tangentBuffer = CreateTypedBufferAsset(proceduralMesh.m_tangents.data(), tangentStreamSize, RPI::TangentFormat);
+        auto bitangentBuffer = CreateTypedBufferAsset(proceduralMesh.m_bitangents.data(), bitangentStreamSize, RPI::BitangentFormat);
         auto uvBuffer = CreateTypedBufferAsset(proceduralMesh.m_uvs.data(), proceduralMesh.m_uvs.size(), RPI::UVFormat);
         auto skinJointIdBuffer = CreateRawBufferAsset(proceduralMesh.m_blendIndices.data(), proceduralMesh.m_blendIndices.size(), sizeof(proceduralMesh.m_blendIndices[0]));
         auto skinJointWeightBuffer = CreateTypedBufferAsset(proceduralMesh.m_blendWeights.data(), proceduralMesh.m_blendWeights.size(), RPI::SkinWeightFormat);
