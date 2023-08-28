@@ -182,7 +182,6 @@ namespace AtomSampleViewer
         AZ::Entity* m_cameraEntity = nullptr;
 
         AZ::Data::Instance<AZ::RPI::AttachmentImage> m_brdfTexture;
-        AZ::Data::Instance<AZ::RPI::AttachmentImage> m_xrVrsTexture;
 
         int32_t m_selectedSampleIndex = -1;
 
