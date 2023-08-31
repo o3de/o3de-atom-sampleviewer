@@ -124,13 +124,11 @@ namespace AtomSampleViewer
         // Offset duplicate positions in the +y direction, so each sub-mesh ends up in a unique position
         for (uint32_t subMeshIndex = 1; subMeshIndex < submeshCount; ++subMeshIndex)
         {
-            for (uint32_t i = 0; i < proceduralMesh.GetAlignedVertCountForRGBStream(); i+=3)
+            for (uint32_t i = 0; i < proceduralMesh.GetVertexCount(); i ++)
             {
-                if ((proceduralMesh.GetAlignedVertCountForRGBStream() * subMeshIndex) + i + 1 < proceduralMesh.m_positions.size())
-                {
-                    proceduralMesh.m_positions[(proceduralMesh.GetAlignedVertCountForRGBStream() * subMeshIndex) + i + 1] +=
+                uint32_t yPosPerSubMesh = (proceduralMesh.GetAlignedVertCountForRGBStream() * subMeshIndex) + (i*3) + 1;
+                proceduralMesh.m_positions[yPosPerSubMesh] +=
                         aznumeric_cast<float>(subMeshIndex) * proceduralMesh.GetSubMeshYOffset();
-                }
             }
         }
 
