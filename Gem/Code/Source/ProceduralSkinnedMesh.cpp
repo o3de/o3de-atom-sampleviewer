@@ -9,6 +9,7 @@
 #include <ProceduralSkinnedMesh.h>
 
 #include <AzCore/Math/MathUtils.h>
+#include <Atom/RPI.Reflect/Model/ModelAssetHelpers.h>
 
 const uint32_t maxInfluencesPerVertex = 4;
 
@@ -19,6 +20,11 @@ namespace AtomSampleViewer
         m_verticesPerSegment = skinnedMeshConfig.m_verticesPerSegment;
         m_segmentCount = static_cast<uint32_t>(skinnedMeshConfig.m_segmentCount);
         m_vertexCount = m_segmentCount * m_verticesPerSegment;
+
+        m_alignedVertCountForRGBStream = aznumeric_cast<uint32_t>(RPI::ModelAssetHelpers::GetAlignedCount<float>(m_vertexCount, RHI::Format::R32G32B32_FLOAT, RPI::SkinnedMeshBufferAlignment));
+
+        m_alignedVertCountForRGBAStream = aznumeric_cast<uint32_t>(RPI::ModelAssetHelpers::GetAlignedCount<float>(m_vertexCount, RHI::Format::R32G32B32A32_FLOAT, RPI::SkinnedMeshBufferAlignment));
+        
         m_boneCount = AZ::GetMax(1u, static_cast<uint32_t>(skinnedMeshConfig.m_boneCount));
         m_influencesPerVertex = AZ::GetMax(0u, AZ::GetMin(static_cast<uint32_t>(skinnedMeshConfig.m_influencesPerVertex), AZ::GetMin(m_boneCount, maxInfluencesPerVertex)));
         m_subMeshCount = skinnedMeshConfig.m_subMeshCount;
@@ -130,13 +136,21 @@ namespace AtomSampleViewer
             }
         }
 
-        m_positions.resize(m_vertexCount);
-        m_normals.resize(m_vertexCount);
-        m_tangents.resize(m_vertexCount);
-        m_bitangents.resize(m_vertexCount);
-        // We pack 16 bit joint id's into 32 bit uints, so use half the number of joints for the uint count
-        m_blendIndices.resize(m_vertexCount * m_influencesPerVertex / 2);
-        m_blendWeights.resize(m_vertexCount * m_influencesPerVertex);
+        m_positions.resize(m_alignedVertCountForRGBStream);
+        m_normals.resize(m_alignedVertCountForRGBStream);
+        m_bitangents.resize(m_alignedVertCountForRGBStream);
+        
+        size_t alignedTangentVertCount = RPI::ModelAssetHelpers::GetAlignedCount<float>(m_vertexCount, RPI::TangentFormat, RPI::SkinnedMeshBufferAlignment);
+        m_tangents.resize(alignedTangentVertCount);
+        
+        // We pack 16 bit joint id's into 32 bit uints.
+        uint32_t numVertInfluences = m_vertexCount * m_influencesPerVertex;
+        size_t alignedIndicesVertCount = RPI::ModelAssetHelpers::GetAlignedCount<uint32_t>(numVertInfluences, RPI::SkinIndicesFormat, RPI::SkinnedMeshBufferAlignment);
+        m_blendIndices.resize(alignedIndicesVertCount);
+
+        size_t alignedWeightsVertCount = RPI::ModelAssetHelpers::GetAlignedCount<float>(numVertInfluences, RPI::SkinWeightFormat, RPI::SkinnedMeshBufferAlignment);
+        m_blendWeights.resize(alignedWeightsVertCount);
+
         m_uvs.resize(m_vertexCount);
 
         for (uint32_t vertexIndex = 0; vertexIndex < m_vertexCount; ++vertexIndex)
@@ -147,19 +161,19 @@ namespace AtomSampleViewer
 
             // Get the x and y positions from a unit circle
             float vertexAngle = (AZ::Constants::TwoPi / static_cast<float>(m_verticesPerSegment - 1)) * static_cast<float>(indexWithinTheCurrentSegment);
-            m_positions[vertexIndex][0] = cosf(vertexAngle) * m_radius;
-            m_positions[vertexIndex][1] = sinf(vertexAngle) * m_radius;
-            m_positions[vertexIndex][2] = m_segmentHeightOffsets[segmentIndex];
+            m_positions[(vertexIndex * RPI::PositionFloatsPerVert) + 0] = cosf(vertexAngle) * m_radius;
+            m_positions[(vertexIndex * RPI::PositionFloatsPerVert) + 1] = sinf(vertexAngle) * m_radius;
+            m_positions[(vertexIndex * RPI::PositionFloatsPerVert) + 2] = m_segmentHeightOffsets[segmentIndex];
 
             // Normals are flat on the z-plane and point away from the origin in the direction of the vertex position
-            m_normals[vertexIndex][0] = m_positions[vertexIndex][0];
-            m_normals[vertexIndex][1] = m_positions[vertexIndex][1];
-            m_normals[vertexIndex][2] = 0.0f;
+            m_normals[(vertexIndex * RPI::PositionFloatsPerVert) + 0] = m_positions[(vertexIndex * RPI::PositionFloatsPerVert) + 0];
+            m_normals[(vertexIndex * RPI::PositionFloatsPerVert) + 1] = m_positions[(vertexIndex * RPI::PositionFloatsPerVert) + 1];
+            m_normals[(vertexIndex * RPI::PositionFloatsPerVert) + 2] = 0.0f;
 
             // Bitangent is straight down
-            m_bitangents[vertexIndex][0] = 0.0f;
-            m_bitangents[vertexIndex][1] = 0.0f;
-            m_bitangents[vertexIndex][2] = -1.0f;
+            m_bitangents[(vertexIndex * RPI::PositionFloatsPerVert)+0] = 0.0f;
+            m_bitangents[(vertexIndex * RPI::PositionFloatsPerVert)+1] = 0.0f;
+            m_bitangents[(vertexIndex * RPI::PositionFloatsPerVert)+2] = -1.0f;
 
             for (size_t i = 0; i < m_influencesPerVertex; ++i)
             {
@@ -200,10 +214,11 @@ namespace AtomSampleViewer
             uint32_t leftVertex = vertexIndex;
             // The last vertex of the segment will have the first vertex of the segment as its neighbor, not just the next vertex (which would be in the next segment)
             uint32_t rightVertex = (leftVertex + 1) % m_verticesPerSegment;
-            m_tangents[vertexIndex][0] = m_positions[leftVertex][0] - m_positions[rightVertex][0];
-            m_tangents[vertexIndex][1] = m_positions[leftVertex][1] - m_positions[rightVertex][1];
-            m_tangents[vertexIndex][2] = 0.0f;
-            m_tangents[vertexIndex][3] = 1.0f;
+            m_tangents[(vertexIndex * RPI::TangentFloatsPerVert)+0] = m_positions[(leftVertex * RPI::PositionFloatsPerVert) + 0] - m_positions[(rightVertex * RPI::PositionFloatsPerVert)+0];
+            m_tangents[(vertexIndex * RPI::TangentFloatsPerVert)+1] = m_positions[(leftVertex * RPI::PositionFloatsPerVert) + 1] - m_positions[(rightVertex * RPI::PositionFloatsPerVert)+1];
+
+            m_tangents[(vertexIndex * RPI::TangentFloatsPerVert)+2] = 0.0f;
+            m_tangents[(vertexIndex * RPI::TangentFloatsPerVert)+3] = 1.0f;
         }
     }
 
@@ -336,5 +351,20 @@ namespace AtomSampleViewer
 
             m_segmentHeightOffsets[segmentIndex] = currentSegmentHeight - heightOffset;
         }
+    }
+
+    uint32_t ProceduralSkinnedMesh::GetVertexCount() const
+    {
+        return m_vertexCount;
+    }
+
+    uint32_t ProceduralSkinnedMesh::GetAlignedVertCountForRGBStream() const
+    {
+        return m_alignedVertCountForRGBStream;
+    }
+
+    uint32_t ProceduralSkinnedMesh::GetAlignedVertCountForRGBAStream() const
+    {
+        return m_alignedVertCountForRGBAStream;
     }
 }
