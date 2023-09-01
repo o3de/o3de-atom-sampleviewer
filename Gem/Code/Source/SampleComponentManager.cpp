@@ -1716,6 +1716,12 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::CreateSceneForRPISample()
     {
+        // set pipeline MSAA samples
+        AZ_Assert(IsValidNumMSAASamples(m_numMsaaSamples), "Invalid MSAA sample setting");
+        const bool isNonMsaaPipeline = (m_numMsaaSamples == 1);
+        const char* supervariantName = isNonMsaaPipeline ? AZ::RPI::NoMsaaSupervariantName : "";
+        AZ::RPI::ShaderSystemInterface::Get()->SetSupervariantName(AZ::Name(supervariantName));
+
         // Create and register a scene with all available feature processors
         RPI::SceneDescriptor sceneDesc;
         sceneDesc.m_nameId = AZ::Name("RPI");
@@ -1735,12 +1741,8 @@ namespace AtomSampleViewer
 
         // Register scene to RPI system so it will be processed/rendered per tick
         RPI::RPISystemInterface::Get()->RegisterScene(m_rpiScene);
-
-        // set pipeline MSAA samples
-        AZ_Assert(IsValidNumMSAASamples(m_numMsaaSamples), "Invalid MSAA sample setting");
-        const bool isNonMsaaPipeline = (m_numMsaaSamples == 1);
-        const char* supervariantName = isNonMsaaPipeline ? AZ::RPI::NoMsaaSupervariantName : "";
-        AZ::RPI::ShaderSystemInterface::Get()->SetSupervariantName(AZ::Name(supervariantName));
+        
+        
 
         auto* xrSystem = AZ::RHI::RHISystemInterface::Get()->GetXRSystem();
         const bool createDefaultRenderPipeline = !xrSystem || xrSystem->IsDefaultRenderPipelineNeeded();
