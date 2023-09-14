@@ -504,8 +504,8 @@ namespace AtomSampleViewer
         AzFramework::WindowSize windowSize;
         AzFramework::WindowRequestBus::EventResult(
             windowSize,
-            windowHandle,
-            &AzFramework::WindowRequestBus::Events::GetClientAreaSize);
+            windowHandle, 
+            &AzFramework::WindowRequestBus::Events::GetRenderResolution);
 
         const float loadingWindowWidth = 225.0f;
         const float loadingWindowHeight = 65.0f;
@@ -550,8 +550,8 @@ namespace AtomSampleViewer
         AzFramework::WindowSize windowSize;
         AzFramework::WindowRequestBus::EventResult(
             windowSize,
-            windowHandle,
-            &AzFramework::WindowRequestBus::Events::GetClientAreaSize);
+            windowHandle, 
+            &AzFramework::WindowRequestBus::Events::GetRenderResolution);
 
         const float halfWindowWidth = windowSize.m_width * 0.5f;
         const float halfWindowHeight = windowSize.m_height * 0.5f;
