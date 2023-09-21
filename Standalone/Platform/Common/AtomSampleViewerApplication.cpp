@@ -17,6 +17,8 @@
 
 #include <AzFramework/Asset/AssetSystemBus.h>
 #include <AzFramework/Asset/AssetProcessorMessages.h>
+#include <AzFramework/AzFrameworkNativeUIModule.h>
+#include <AzFramework/Components/NativeUISystemComponent.h>
 #include <AzFramework/IO/LocalFileIO.h>
 #include <AzFramework/Network/AssetProcessorConnection.h>
 #include <AzFramework/StringFunc/StringFunc.h>
@@ -114,6 +116,12 @@ namespace AtomSampleViewer
 
     }
 
+    void AtomSampleViewerApplication::CreateStaticModules(AZStd::vector<AZ::Module*>& outModules)
+    {
+        AzFramework::Application::CreateStaticModules(outModules);
+        outModules.push_back(aznew AzFramework::AzFrameworkNativeUIModule());
+    }
+
     void AtomSampleViewerApplication::WriteStartupLog()
     {
         AZ::IO::FileIOBase* fileIO = AZ::IO::FileIOBase::GetInstance();
@@ -204,6 +212,17 @@ namespace AtomSampleViewer
         }
 
         Application::Destroy();
+    }
+
+    AZ::ComponentTypeList AtomSampleViewerApplication::GetRequiredSystemComponents() const
+    {
+        AZ::ComponentTypeList components = AzFramework::Application::GetRequiredSystemComponents();
+        components.insert(
+            components.end(),
+            {
+                azrtti_typeid<AzFramework::NativeUISystemComponent>(),
+            });
+        return components;
     }
 
     void AtomSampleViewerApplication::Tick()
