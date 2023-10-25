@@ -41,8 +41,7 @@ namespace AtomSampleViewer
 
                 AZ_Error(
                     "RunDiffTool", false,
-                    "RunDiffTool: Unable to launch Beyond Compare %s : errno = %s . Make sure you have installed Beyond Compare command "
-                    "line tools.",
+                    "RunDiffTool: Unable to launch Diff Tool %s : errno = %s .",
                     diffToolPath.c_str(), strerror(errno));
 
                 _exit(errno);

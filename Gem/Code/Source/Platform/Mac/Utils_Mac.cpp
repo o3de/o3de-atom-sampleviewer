@@ -39,7 +39,7 @@ namespace AtomSampleViewer
                 char* args[] = { const_cast<char*>(diffToolPath.c_str()), const_cast<char*>(filePathA.c_str()), const_cast<char*>(filePathB.c_str()), static_cast<char*>(0)};
                 execv(diffToolPath.c_str(), args);
 
-                AZ_TracePrintf("RunDiffTool", "RunDiffTool: Unable to launch Beyond Compare %s : errno = %s . Make sure you have installed Beyond Compare command line tools.", diffToolPath.c_str(), strerror(errno));
+                AZ_TracePrintf("RunDiffTool", "RunDiffTool: Unable to launch Diff Tool %s : errno = %s .", diffToolPath.c_str(), strerror(errno));
                 std::cerr << strerror(errno) << std::endl;
 
                 _exit(errno);
