@@ -2,8 +2,9 @@
     "materialType": "Materials/Types/Eye.materialtype",
     "materialTypeVersion": 1,
     "propertyValues": {
-        "eye.innerEyeIOR": 1.2000000476837158,
-        "eye.irisDepth": 0.46000000834465027,
+        "eye.innerEyeIOR": 1.336,
+        "eye.irisDepth": 0.401,
+		"eye.irisRadius": 0.042,
         "iris.baseColor.color": [
             0.503395140171051,
             0.7551079392433167,
