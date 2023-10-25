@@ -7,6 +7,9 @@
  */
 #include <Utils/Utils.h>
 
+#include <AzCore/IO/SystemFile.h>
+#include <AzCore/Settings/SettingsRegistryMergeUtils.h>
+
 #include <AtomCore/Instance/InstanceDatabase.h>
 #include <Atom/RHI/RHISystemInterface.h>
 #include <Atom/RPI.Public/RenderPipeline.h>
@@ -255,6 +258,61 @@ namespace AtomSampleViewer
             {
                 return true;
             }
+            return false;
+        }
+
+        bool RunDiffTool(const AZStd::string& filePathA, const AZStd::string& filePathB)
+        {
+            // First let's try to use the user's favorite diff tool. 
+            static constexpr AZStd::string_view DiffToolPathKey = "/O3DE/External/DiffTool";
+
+            AZStd::string diffToolPath;
+            if (auto registry = AZ::SettingsRegistry::Get())
+            {
+                registry->Get(diffToolPath, DiffToolPathKey);
+            }
+
+            if (!diffToolPath.empty())
+            {
+                // Does the executable exist?
+                if (AZ::IO::SystemFile::Exists(diffToolPath.c_str()))
+                {
+                    return RunDiffTool_Impl(diffToolPath, filePathA, filePathB);
+                }
+
+                AZ_Warning(
+                    "ASV::RunDiffTool", false, "The user's diff tool <%s> doesn't exist. Will use the platform default <%s>.\n",
+                    diffToolPath.c_str(), GetDefaultDiffToolPath_Impl().c_str());
+
+            }
+
+            // If the key doesn't exist in the registry, or the user specified executable doesn't exist, then
+            // use the platform default.
+            diffToolPath = GetDefaultDiffToolPath_Impl();
+            if (!diffToolPath.empty())
+            {
+                // Does the executable exist?
+                if (AZ::IO::SystemFile::Exists(diffToolPath.c_str()))
+                {
+                    return RunDiffTool_Impl(diffToolPath, filePathA, filePathB);
+                }
+
+                AZ_Warning(
+                    "ASV::RunDiffTool", false,
+                    "The platform default diff tool <%s> doesn't exist.\n"
+                    "You can customize the tool path in the settings registry key: %s.\n",
+                    diffToolPath.c_str(),
+                    DiffToolPathKey.data());
+            }
+            else
+            {
+                AZ_Warning(
+                    "ASV::RunDiffTool", false,
+                    "No default diff tool has been defined for the current platform.\n"
+                    "You can customize the tool path in the settings registry key: %s.\n",
+                    DiffToolPathKey.data());
+            }
+
             return false;
         }
 
