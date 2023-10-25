@@ -18,11 +18,17 @@ namespace AtomSampleViewer
             return true;
         }
 
-        bool RunDiffTool(const AZStd::string& filePathA, const AZStd::string& filePathB)
+        AZStd::string GetDefaultDiffToolPath_Impl()
+        {
+            return AZStd::string("C:\\Program Files\\Beyond Compare 4\\BCompare.exe");
+        }
+
+        bool RunDiffTool_Impl(const AZStd::string& diffToolPath, const AZStd::string& filePathA, const AZStd::string& filePathB)
         {
             bool result = false;
 
-            AZStd::wstring exeW = L"C:\\Program Files\\Beyond Compare 4\\BCompare.exe";
+            AZStd::wstring exeW;
+            AZStd::to_wstring(exeW, diffToolPath.c_str());
             AZStd::wstring filePathAW;
             AZStd::to_wstring(filePathAW, filePathA.c_str());
             AZStd::wstring filePathBW;
