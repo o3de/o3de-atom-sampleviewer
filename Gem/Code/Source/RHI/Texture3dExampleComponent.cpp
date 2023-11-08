@@ -57,8 +57,8 @@ namespace AtomSampleViewer
             &AzFramework::WindowSystemRequestBus::Events::GetDefaultWindowHandle);
         AzFramework::WindowRequestBus::EventResult(
             m_windowSize,
-            windowHandle,
-            &AzFramework::WindowRequestBus::Events::GetClientAreaSize);
+            windowHandle, 
+            &AzFramework::WindowRequestBus::Events::GetRenderResolution);
 
         // Create image pool
         {
