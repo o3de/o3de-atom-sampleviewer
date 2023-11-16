@@ -11,6 +11,7 @@
 #include <AzCore/Component/Component.h>
 
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
+#include <Atom/RPI.Public/XR/XRSpaceNotificationBus.h>
 
 #include <Atom/RHI/FrameScheduler.h>
 #include <Atom/RHI/DrawItem.h>
@@ -28,10 +29,15 @@ namespace AtomSampleViewer
 {
     //! The purpose of this sample is to establish a simple XR sample utilizing a simple VR pipeline
     //! It will render a mesh per controller plus one for the front view. It will prove out all the 
-    //! code related related to openxr device, instance, swapchain, session, input, space.       
+    //! code related related to openxr device, instance, swapchain, session, input, space.
+    //! There will be three instances of this class active.
+    //! 1- The main pipline.
+    //! 2- The Left eye pipeline.
+    //! 3- The Right eye pipeline.       
     class XRExampleComponent final
         : public BasicRHIComponent
         , public AZ::TickBus::Handler
+        , public AZ::RPI::XRSpaceNotificationBus::Handler
     {
     public:
         AZ_COMPONENT(XRExampleComponent, "{A7D9A921-1FF9-4078-92BD-169E258456E7}");
@@ -64,6 +70,20 @@ namespace AtomSampleViewer
 
         // TickBus::Handler
         void OnTick(float deltaTime, AZ::ScriptTimePoint time) override;
+
+        // AZ::RPI::XRSpaceNotificationBus::Handler overrides
+        // This notification arrives before this.OnFramePrepare, additionally it is called
+        // after XR System calls XrSystem::BeginFrame. Why this is important? Because these
+        // transformations are calculated by the XR Device based on a predicted display time
+        // for the current frame. If the shaders update the viewSrg with this freash data
+        // the rendered image appears more stable and less jittery.
+        void OnXRSpaceLocationsChanged(
+            const AZ::Transform& baseSpaceToHeadTm,
+            const AZ::Transform& headToLeftEyeTm,
+            const AZ::Transform& headToRightEyeTm) override;
+
+        // Controller (aka Joysticks) poses/transforms are relative to the head transform.
+        AZ::Transform m_baseSpaceToHeadTm;
 
         //! Create IA data
         void CreateCubeInputAssemblyBuffer();
