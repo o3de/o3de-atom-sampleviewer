@@ -459,7 +459,8 @@ namespace AtomSampleViewer
 
             commandList->BuildBottomLevelAccelerationStructure(*m_triangleRayTracingBlas);
             commandList->BuildBottomLevelAccelerationStructure(*m_rectangleRayTracingBlas);
-            commandList->BuildTopLevelAccelerationStructure(*m_rayTracingTlas, {});
+            commandList->BuildTopLevelAccelerationStructure(
+                *m_rayTracingTlas, { m_triangleRayTracingBlas.get(), m_rectangleRayTracingBlas.get() });
         };
 
         m_scopeProducers.emplace_back(
