@@ -37,11 +37,11 @@
         "DiffuseProbeGrid",
         "Atom_TestData",
         {
-            "name": "OpenXRVk",
+            "name": "OpenXRVk>=1.0.1",
             "optional": true
         },
         {
-            "name": "XR",
+            "name": "XR>=1.0.1",
             "optional": true
         }
     ]
