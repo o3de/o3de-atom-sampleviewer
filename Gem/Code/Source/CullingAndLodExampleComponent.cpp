@@ -185,14 +185,14 @@ namespace AtomSampleViewer
         {
             for (uint32_t y = 0; y < numAlongYAxis; ++y)
             {
-                auto meshHandle = meshFP->AcquireMesh(Render::MeshHandleDescriptor{ objectModelAsset }, material);
+                auto meshHandle = meshFP->AcquireMesh(Render::MeshHandleDescriptor(objectModelAsset, material));
                 Transform modelToWorld = Transform::CreateTranslation(Vector3(x * spacing, y * spacing, 2.0f));
                 meshFP->SetTransform(meshHandle, modelToWorld);
                 m_meshHandles.push_back(AZStd::move(meshHandle));
             }
         }
 
-        auto planeMeshHandle = meshFP->AcquireMesh(Render::MeshHandleDescriptor{ planeModelAsset }, material);
+        auto planeMeshHandle = meshFP->AcquireMesh(Render::MeshHandleDescriptor(planeModelAsset, material));
         Vector3 planeNonUniformScale(numAlongXAxis * spacing, numAlongYAxis * spacing, 1.0f);
         Transform planeModelToWorld = Transform::CreateTranslation(Vector3(0.5f * numAlongXAxis * spacing, 0.5f * numAlongYAxis * spacing, 0.0f));
         meshFP->SetTransform(planeMeshHandle, planeModelToWorld, planeNonUniformScale);

@@ -62,19 +62,6 @@ namespace AtomSampleViewer
         , m_modelBrowser("@user@/MeshExampleComponent/model_browser.xml")
         , m_imguiSidebar("@user@/MeshExampleComponent/sidebar.xml")
     {
-        m_changedHandler = AZ::Render::MeshFeatureProcessorInterface::ModelChangedEvent::Handler
-        {
-            [&](AZ::Data::Instance<AZ::RPI::Model> model)
-            {
-                ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::ResumeScript);
-
-                // This handler will be connected to the feature processor so that when the model is updated, the camera
-                // controller will reset. This ensures the camera is a reasonable distance from the model when it resizes.
-                ResetCameraController();
-
-                UpdateGroundPlane();
-            }
-        };
     }
 
     void MeshExampleComponent::DefaultWindowCreated()
@@ -478,10 +465,25 @@ namespace AtomSampleViewer
 
             m_modelAsset.Create(m_modelBrowser.GetSelectedAssetId());
             GetMeshFeatureProcessor()->ReleaseMesh(m_meshHandle);
-            m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_modelAsset }, m_customMaterialInstance);
-            GetMeshFeatureProcessor()->SetTransform(m_meshHandle, AZ::Transform::CreateIdentity());
-            GetMeshFeatureProcessor()->ConnectModelChangeEventHandler(m_meshHandle, m_changedHandler);
+
+            AZ::Render::MeshHandleDescriptor descriptor(m_modelAsset, m_customMaterialInstance);
+            descriptor.m_modelChangedEventHandler = AZ::Render::MeshHandleDescriptor::ModelChangedEvent::Handler{
+                [this](const AZ::Data::Instance<AZ::RPI::Model>& /*model*/)
+                {
+                    ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::ResumeScript);
+
+                    // This handler will be connected to the feature processor so that when the model is updated, the camera
+                    // controller will reset. This ensures the camera is a reasonable distance from the model when it resizes.
+                    ResetCameraController();
+
+                    UpdateGroundPlane();
+                }
+            };
+
+            m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(descriptor);
+
             GetMeshFeatureProcessor()->SetMeshLodConfiguration(m_meshHandle, m_lodConfig);
+            GetMeshFeatureProcessor()->SetTransform(m_meshHandle, AZ::Transform::CreateIdentity());
         }
         else
         {
@@ -491,7 +493,8 @@ namespace AtomSampleViewer
     
     void MeshExampleComponent::CreateGroundPlane()
     {
-        m_groundPlandMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_groundPlaneModelAsset }, m_groundPlaneMaterial);
+        m_groundPlandMeshHandle =
+            GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor(m_groundPlaneModelAsset, m_groundPlaneMaterial));
     }
 
     void MeshExampleComponent::UpdateGroundPlane()

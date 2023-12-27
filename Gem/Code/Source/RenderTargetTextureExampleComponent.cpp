@@ -229,7 +229,7 @@ namespace AtomSampleViewer
         // bunny mesh
         auto bunnyAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::ModelAsset>(BunnyModelFilePath,
             RPI::AssetUtils::TraceLevel::Assert);
-        m_meshHandle = meshFeatureProcessor->AcquireMesh(Render::MeshHandleDescriptor{ bunnyAsset }, m_material);
+        m_meshHandle = meshFeatureProcessor->AcquireMesh(Render::MeshHandleDescriptor(bunnyAsset, m_material));
         meshFeatureProcessor->SetTransform(m_meshHandle, Transform::CreateTranslation(Vector3(0.f, 0.f, 0.21f)));
 
         // Set camera to use no clip controller and adjust its fov and transform

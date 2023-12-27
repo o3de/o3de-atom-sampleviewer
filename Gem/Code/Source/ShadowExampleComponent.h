@@ -119,9 +119,6 @@ namespace AtomSampleViewer
         AZ::Data::Instance<AZ::RPI::Material> m_materialInstance;
 
         // ModelReadyHandles
-        using ModelChangedHandler = AZ::Render::MeshFeatureProcessorInterface::ModelChangedEvent::Handler;
-        ModelChangedHandler m_bunnyReadyHandle;
-        ModelChangedHandler m_floorReadyHandle;
         bool m_bunnyMeshIsReady = false;
         bool m_floorMeshIsReady = false;
 

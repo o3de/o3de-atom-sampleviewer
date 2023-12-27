@@ -102,20 +102,15 @@ namespace AtomSampleViewer
         Data::Asset<RPI::MaterialAsset> materialAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::MaterialAsset>(DefaultPbrMaterialPath, RPI::AssetUtils::TraceLevel::Assert);
 
         // Create Mesh and Model
-        MeshFeatureProcessorInterface* meshFeatureProcessor = GetMeshFeatureProcessor();
-        m_meshHandle = meshFeatureProcessor->AcquireMesh(MeshHandleDescriptor{ modelAsset }, RPI::Material::FindOrCreate(materialAsset));
-        meshFeatureProcessor->SetTransform(m_meshHandle, Transform::CreateIdentity());
-        Data::Instance<RPI::Model> model = meshFeatureProcessor->GetModel(m_meshHandle);
+        Render::MeshHandleDescriptor descriptor(modelAsset, RPI::Material::FindOrCreate(materialAsset));
+        descriptor.m_modelChangedEventHandler =
+            AZ::Render::MeshHandleDescriptor::ModelChangedEvent::Handler{ [this](const AZ::Data::Instance<AZ::RPI::Model>& model)
+                                                                          {
+                                                                              OnModelReady(model);
+                                                                          } };
 
-        // Async Model loading
-        if (model)
-        {
-            OnModelReady(model);
-        }
-        else
-        {
-            meshFeatureProcessor->ConnectModelChangeEventHandler(m_meshHandle, m_meshChangedHandler);
-        }
+        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(descriptor);
+        GetMeshFeatureProcessor()->SetTransform(m_meshHandle, Transform::CreateIdentity());
     }
 
     void SsaoExampleComponent::DeactivateModel()

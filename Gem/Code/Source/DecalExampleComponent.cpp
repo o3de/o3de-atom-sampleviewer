@@ -79,7 +79,7 @@ namespace AtomSampleViewer
     {
         const auto meshAsset = m_assetLoadManager.GetAsset<AZ::RPI::ModelAsset>(TargetMeshName);
         const auto materialAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::MaterialAsset>(TargetMaterialName, AZ::RPI::AssetUtils::TraceLevel::Assert);
-        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ meshAsset }, AZ::RPI::Material::FindOrCreate(materialAsset));
+        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor(meshAsset, AZ::RPI::Material::FindOrCreate(materialAsset)));
         ScaleObjectToFitDecals();
     }
 

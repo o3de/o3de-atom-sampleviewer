@@ -63,13 +63,6 @@ namespace AtomSampleViewer
         // sample mesh
         int m_modelType = 0;
         AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_meshHandle;
-        AZ::Render::MeshFeatureProcessorInterface::ModelChangedEvent::Handler m_meshChangedHandler
-        {
-            [&](AZ::Data::Instance<AZ::RPI::Model> model)
-            {
-                OnModelReady(model);
-            }
-        };
 
         // original render pipeline when the sample was started
         AZ::RPI::RenderPipelinePtr m_originalPipeline;
