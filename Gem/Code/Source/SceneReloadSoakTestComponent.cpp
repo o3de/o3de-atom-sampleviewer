@@ -103,9 +103,9 @@ namespace AtomSampleViewer
         Data::Asset<ModelAsset> modelAsset;
         modelAsset.Create(m_modelAssetId);
 
-        auto meshHandle = GetMeshFeatureProcessor()->AcquireMesh(Render::MeshHandleDescriptor{ modelAsset }, materialInstance);
+        auto meshHandle = GetMeshFeatureProcessor()->AcquireMesh(Render::MeshHandleDescriptor(modelAsset, materialInstance));
         GetMeshFeatureProcessor()->SetTransform(meshHandle, transform);
-        m_meshHandles.push_back(AZStd::move(meshHandle));
+        m_meshHandles.emplace_back(AZStd::move(meshHandle));
     }
 
     void SceneReloadSoakTestComponent::DestroyLatticeInstances()

@@ -35,7 +35,7 @@ namespace AtomSampleViewer
         : public AZ::TickBus::Handler
         , public AzFramework::WindowNotificationBus::Handler
     {
-        using ModelChangedHandler = AZ::Render::MeshFeatureProcessorInterface::ModelChangedEvent::Handler;
+        using ModelChangedHandler = AZ::Render::MeshHandleDescriptor::ModelChangedEvent::Handler;
         using PointLightHandle = AZ::Render::PointLightFeatureProcessorInterface::LightHandle;
         using DiskLightHandle = AZ::Render::DiskLightFeatureProcessorInterface::LightHandle;
         using DirectionalLightHandle = AZ::Render::DirectionalLightFeatureProcessorInterface::LightHandle;
@@ -85,9 +85,6 @@ namespace AtomSampleViewer
         // Meshes
         AZStd::vector<AZ::Render::MeshFeatureProcessorInterface::MeshHandle> m_shaderBallMeshHandles;
         AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_floorMeshHandle;
-
-        // Model change handlers
-        AZStd::vector<ModelChangedHandler> m_shaderBallChangedHandles;
 
         // Various FeatureProcessor handles
         PointLightHandle m_pointLightHandle;

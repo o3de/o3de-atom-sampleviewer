@@ -179,7 +179,7 @@ namespace AtomSampleViewer
             if (instanceData.m_materialAssetId.IsValid())
             {
                 AZ::Data::Asset<RPI::MaterialAsset> materialAsset;
-                materialAsset.Create(instanceData.m_materialAssetId);
+                materialAsset.Create(instanceData.m_materialAssetId, true);
                 materialInstance = AZ::RPI::Material::FindOrCreate(materialAsset);
 
                 // cache the material when its loaded
@@ -188,10 +188,10 @@ namespace AtomSampleViewer
 
             if (instanceData.m_modelAssetId.IsValid())
             {
-                AZ::Data::Asset<AZ::RPI::ModelAsset> modelAsset;
-                modelAsset.Create(instanceData.m_modelAssetId);
-
-                instanceData.m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ modelAsset }, materialInstance);
+                AZ::Render::MeshHandleDescriptor descriptor;
+                descriptor.m_modelAsset.Create(instanceData.m_modelAssetId, true);
+                descriptor.m_customMaterials[AZ::Render::DefaultCustomMaterialId].m_material = materialInstance;
+                instanceData.m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(descriptor);
                 GetMeshFeatureProcessor()->SetTransform(instanceData.m_meshHandle, instanceData.m_transform);
             }
         }

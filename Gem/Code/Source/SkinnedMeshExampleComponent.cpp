@@ -53,7 +53,7 @@ namespace AtomSampleViewer
     void SkinnedMeshExampleComponent::CreatePlaneObject()
     {
         auto meshAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/plane.fbx.azmodel");
-        m_planeMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ meshAsset });
+        m_planeMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor(meshAsset));
         GetMeshFeatureProcessor()->SetTransform(m_planeMeshHandle, AZ::Transform::CreateIdentity());
     }
 

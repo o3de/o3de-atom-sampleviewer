@@ -190,10 +190,7 @@ namespace AtomSampleViewer
         float m_originalFarClipDistance = 0.f;
 
         AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_meshHandle;
-        AZ::Render::MeshFeatureProcessorInterface::ModelChangedEvent::Handler m_meshChangedHandler
-        {
-            [&](AZ::Data::Instance<AZ::RPI::Model> model) { OnModelReady(model); }
-        };
+
         bool m_worldModelAssetLoaded = false;
 
         AZ::Aabb m_worldModelAABB;

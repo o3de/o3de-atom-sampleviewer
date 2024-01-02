@@ -86,7 +86,8 @@ namespace AtomSampleViewer
             AZ::Transform transform = AZ::Transform::CreateIdentity();
             transform.SetTranslation(0.0f, 0.0f, -0.05f);
 
-            m_statueMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ modelAsset }, AZ::RPI::Material::FindOrCreate(materialAsset));
+            m_statueMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(
+                AZ::Render::MeshHandleDescriptor(modelAsset, AZ::RPI::Material::FindOrCreate(materialAsset)));
             GetMeshFeatureProcessor()->SetTransform(m_statueMeshHandle, transform);
         }
 
@@ -97,7 +98,8 @@ namespace AtomSampleViewer
             AZ::Transform transform = AZ::Transform::CreateIdentity();
             transform.SetTranslation(-4.5f, 0.0f, 0.49f);
 
-            m_boxMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ modelAsset }, AZ::RPI::Material::FindOrCreate(materialAsset));
+            m_boxMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(
+                AZ::Render::MeshHandleDescriptor(modelAsset, AZ::RPI::Material::FindOrCreate(materialAsset)));
             GetMeshFeatureProcessor()->SetTransform(m_boxMeshHandle, transform);
         }
 
@@ -109,7 +111,8 @@ namespace AtomSampleViewer
             transform *= AZ::Transform::CreateRotationZ(AZ::Constants::Pi);
             transform.SetTranslation(4.5f, 0.0f, 0.89f);
 
-            m_shaderBallMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ modelAsset }, AZ::RPI::Material::FindOrCreate(materialAsset));
+            m_shaderBallMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(
+                AZ::Render::MeshHandleDescriptor(modelAsset, AZ::RPI::Material::FindOrCreate(materialAsset)));
             GetMeshFeatureProcessor()->SetTransform(m_shaderBallMeshHandle, transform);
         }
     }
@@ -145,7 +148,8 @@ namespace AtomSampleViewer
 
         // load mesh
         AZ::Data::Asset<AZ::RPI::ModelAsset> planeModel = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/plane.fbx.azmodel", AZ::RPI::AssetUtils::TraceLevel::Error);
-        m_groundMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ planeModel }, AZ::RPI::Material::FindOrCreate(m_groundMaterialAsset));
+        m_groundMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(
+            AZ::Render::MeshHandleDescriptor(planeModel, AZ::RPI::Material::FindOrCreate(m_groundMaterialAsset)));
 
         AZ::Transform transform = AZ::Transform::CreateIdentity();
         const AZ::Vector3 nonUniformScale(15.0f, 15.0f, 1.0f);

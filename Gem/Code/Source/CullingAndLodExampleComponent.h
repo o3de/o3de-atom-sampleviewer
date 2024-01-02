@@ -100,7 +100,7 @@ namespace AtomSampleViewer
 
         // models
         AZStd::vector<AZ::Render::MeshFeatureProcessorInterface::MeshHandle> m_meshHandles;
-        AZStd::vector<AZ::Render::MeshFeatureProcessorInterface::ModelChangedEvent::Handler> m_modelChangedHandlers;
+        AZStd::vector<AZ::Render::MeshHandleDescriptor::ModelChangedEvent::Handler> m_modelChangedHandlers;
 
         // GUI
         ImGuiSidebar m_imguiSidebar;

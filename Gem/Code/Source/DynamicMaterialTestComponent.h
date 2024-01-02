@@ -76,8 +76,6 @@ namespace AtomSampleViewer
 
         bool m_waitingForMeshes = false;
         uint32_t m_loadedMeshCounter = 0;
-        AZStd::vector<AZ::Render::MeshFeatureProcessorInterface::ModelChangedEvent::Handler> m_meshLoadEventHandlers;
-
         float m_currentTime = 0.0f;
     };
 } // namespace AtomSampleViewer

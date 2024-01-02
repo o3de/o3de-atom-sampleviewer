@@ -44,12 +44,14 @@ namespace AtomSampleViewer
     void CheckerboardExampleComponent::Activate()
     {
         AZ::RPI::AssetUtils::TraceLevel traceLevel = AZ::RPI::AssetUtils::TraceLevel::Assert;
-        auto meshAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/shaderball_simple.fbx.azmodel", traceLevel);
+        auto modelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/shaderball_simple.fbx.azmodel", traceLevel);
         auto materialAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::MaterialAsset>(DefaultPbrMaterialPath, traceLevel);
         auto materialInstance = AZ::RPI::Material::FindOrCreate(materialAsset);
 
         m_meshFeatureProcessor = m_scene->GetFeatureProcessor<AZ::Render::MeshFeatureProcessorInterface>();
-        m_meshHandle = m_meshFeatureProcessor->AcquireMesh(AZ::Render::MeshHandleDescriptor{ meshAsset }, materialInstance);
+
+        m_meshHandle = m_meshFeatureProcessor->AcquireMesh(AZ::Render::MeshHandleDescriptor(modelAsset, materialInstance));
+
         m_meshFeatureProcessor->SetTransform(m_meshHandle, AZ::Transform::CreateIdentity());
 
         AZ::Debug::CameraControllerRequestBus::Event(

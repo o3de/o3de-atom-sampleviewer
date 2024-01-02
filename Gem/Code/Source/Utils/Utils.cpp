@@ -170,11 +170,12 @@ namespace AtomSampleViewer
             constexpr uint32_t width = 4;
             constexpr uint32_t height = 4;
 
-            AZStd::string assetName = AZStd::string::format("SolidColorBackground_%u", color);
-            AZ::Data::AssetId assetId = AZ::Uuid::CreateName(assetName.c_str());
+            const AZStd::string assetName = AZStd::string::format("SolidColorBackground_%u", color);
+            const AZ::Data::InstanceId instanceId = AZ::Data::InstanceId::CreateName(assetName.c_str());
 
             // Check for existing image of the same color
-            AZ::Data::Instance<AZ::RPI::StreamingImage> existingImage = AZ::Data::InstanceDatabase<AZ::RPI::StreamingImage>::Instance().Find(AZ::Data::InstanceId::CreateFromAssetId(assetId));
+            AZ::Data::Instance<AZ::RPI::StreamingImage> existingImage =
+                AZ::Data::InstanceDatabase<AZ::RPI::StreamingImage>::Instance().Find(instanceId);
             if (existingImage)
             {
                 return existingImage;
@@ -193,7 +194,7 @@ namespace AtomSampleViewer
             // Create a new streaming image
 
             AZ::RPI::StreamingImageAssetCreator imageCreator;
-            imageCreator.Begin(assetId);
+            imageCreator.Begin(AZ::Data::AssetId(instanceId.GetGuid(), 0));
 
             int32_t arraySize = 6;
             AZ::RHI::Format format = AZ::RHI::Format::R8G8B8A8_UNORM_SRGB;
@@ -209,8 +210,7 @@ namespace AtomSampleViewer
             // Create the mip chain
 
             AZ::RPI::ImageMipChainAssetCreator mipChainCreator;
-            assetId.m_subId = 1;
-            mipChainCreator.Begin(assetId, 1, 6);
+            mipChainCreator.Begin(AZ::Data::AssetId(instanceId.GetGuid(), 1), 1, 6);
 
             uint32_t pitch = width * pixelSize;
 
@@ -236,7 +236,7 @@ namespace AtomSampleViewer
             AZ::Data::Asset<AZ::RPI::StreamingImageAsset> imageAsset;
             imageCreator.End(imageAsset);
 
-            return AZ::RPI::StreamingImage::FindOrCreate(imageAsset);
+            return AZ::Data::InstanceDatabase<AZ::RPI::StreamingImage>::Instance().FindOrCreate(instanceId, imageAsset);
         }
 
         AZStd::string ResolvePath(const AZStd::string& path)

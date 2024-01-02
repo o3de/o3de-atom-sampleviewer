@@ -43,7 +43,6 @@ namespace AtomSampleViewer
         AZ::Data::Asset<AZ::RPI::ModelAsset> m_modelAsset;
         AZ::Data::Asset<AZ::RPI::MaterialAsset> m_materialAsset;
         AZStd::vector<AZ::Render::MeshFeatureProcessorInterface::MeshHandle> m_meshHandles;
-        AZStd::vector<AZ::Render::MeshFeatureProcessorInterface::ModelChangedEvent::Handler> m_meshLoadEventHandlers;
         Utils::DefaultIBL m_defaultIbl;
 
         bool m_waitingForMeshes = false;

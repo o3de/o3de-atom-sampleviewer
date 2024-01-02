@@ -92,7 +92,7 @@ namespace AtomSampleViewer
     void EyeMaterialExampleComponent::LoadMesh(AZ::Transform transform)
     {
         m_materialInstance = AZ::RPI::Material::Create(m_materialAsset);
-        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_modelAsset }, m_materialInstance);
+        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor(m_modelAsset, m_materialInstance));
         GetMeshFeatureProcessor()->SetTransform(m_meshHandle, transform);
     }
 

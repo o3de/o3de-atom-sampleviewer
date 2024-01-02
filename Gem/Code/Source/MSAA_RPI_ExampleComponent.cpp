@@ -173,25 +173,22 @@ namespace AtomSampleViewer
 
     void MSAA_RPI_ExampleComponent::ActivateModel()
     {
-        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ GetModelAsset() }, AZ::RPI::Material::FindOrCreate(GetMaterialAsset()));
-        GetMeshFeatureProcessor()->SetTransform(m_meshHandle, AZ::Transform::CreateIdentity());
+        ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::PauseScript);
 
-        AZ::Data::Instance<AZ::RPI::Model> model = GetMeshFeatureProcessor()->GetModel(m_meshHandle);
-        if (model)
-        {
-            OnModelReady(model);
-        }
-        else
-        {
-            ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::PauseScript);
-            GetMeshFeatureProcessor()->ConnectModelChangeEventHandler(m_meshHandle, m_meshChangedHandler);
-        }
+        AZ::Render::MeshHandleDescriptor descriptor(GetModelAsset(), AZ::RPI::Material::FindOrCreate(GetMaterialAsset()));
+        descriptor.m_modelChangedEventHandler =
+            AZ::Render::MeshHandleDescriptor::ModelChangedEvent::Handler{ [this](const AZ::Data::Instance<AZ::RPI::Model>& model)
+                                                                          {
+                                                                              OnModelReady(model);
+                                                                          } };
+
+        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(descriptor);
+        GetMeshFeatureProcessor()->SetTransform(m_meshHandle, AZ::Transform::CreateIdentity());
     }
 
     void MSAA_RPI_ExampleComponent::OnModelReady(AZ::Data::Instance<AZ::RPI::Model> model)
     {
         AZ::Data::Asset<AZ::RPI::ModelAsset> modelAsset = model->GetModelAsset();
-        m_meshChangedHandler.Disconnect();
         ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::ResumeScript);
     }
 
