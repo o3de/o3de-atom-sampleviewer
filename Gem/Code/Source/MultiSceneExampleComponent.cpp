@@ -172,7 +172,7 @@ namespace AtomSampleViewer
             const Vector3 nonUniformScale{ 24.f, 24.f, 1.0f };
             const Vector3 translation{ 0.f, 0.f, 0.0f };
             const auto transform = Transform::CreateTranslation(translation);
-            m_floorMeshHandle = LoadMesh(CubeModelFilePath, ModelChangedHandler{});
+            m_floorMeshHandle = LoadMesh(CubeModelFilePath, ModelChangedHandler{[](const Data::Instance<RPI::Model>&){}});
             m_meshFeatureProcessor->SetTransform(m_floorMeshHandle, transform, nonUniformScale);
         }
 
