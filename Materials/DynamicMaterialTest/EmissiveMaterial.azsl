@@ -102,7 +102,7 @@ ForwardPassOutput MainPS(VSOutput IN)
 
     // Light iterator
     lightingData.tileIterator.Init(IN.m_position, PassSrg::m_lightListRemapped, PassSrg::m_tileLightData);
-    lightingData.Init(surface.position, surface.normal, surface.roughnessLinear);
+    lightingData.Init(surface.position, surface.normal, surface.roughnessLinear, ViewSrg::m_worldPosition.xyz);
 
     // Emissive
     float3 emissive = MaterialSrg::m_emissiveColor.rgb * MaterialSrg::m_emissiveIntensity;
