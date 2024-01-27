@@ -399,6 +399,7 @@ namespace AtomSampleViewer
             const auto lightTransform = AZ::Transform::CreateRotationZ(m_directionalLightYaw) * AZ::Transform::CreateRotationX(m_directionalLightPitch);
             directionalLightFeatureProcessor->SetDirection(m_directionalLightHandle, lightTransform.GetBasis(1));
             directionalLightFeatureProcessor->SetRgbIntensity(m_directionalLightHandle, AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Lux>(m_directionalLightIntensity * m_directionalLightColor));
+            directionalLightFeatureProcessor->SetShadowEnabled(m_directionalLightHandle, true);
             directionalLightFeatureProcessor->SetCascadeCount(m_directionalLightHandle, 4);
             directionalLightFeatureProcessor->SetShadowmapSize(m_directionalLightHandle, AZ::Render::ShadowmapSize::Size2048);
             directionalLightFeatureProcessor->SetViewFrustumCorrectionEnabled(m_directionalLightHandle, false);
