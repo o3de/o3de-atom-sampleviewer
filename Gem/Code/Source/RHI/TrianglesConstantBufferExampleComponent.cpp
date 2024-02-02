@@ -95,10 +95,10 @@ namespace AtomSampleViewer
 
     void TrianglesConstantBufferExampleComponent::UploadDataToConstantBuffer(InstanceInfo* data, uint32_t elementSize, uint32_t elementCount)
     {
-        AZ::RHI::BufferMapRequest mapRequest;
+        AZ::RHI::SingleDeviceBufferMapRequest mapRequest;
         mapRequest.m_buffer = m_constantBuffer.get();
         mapRequest.m_byteCount = elementSize * elementCount;
-        AZ::RHI::BufferMapResponse mapResponse;
+        AZ::RHI::SingleDeviceBufferMapResponse mapResponse;
         AZ::RHI::ResultCode resultCode = m_constantBufferPool->MapBuffer(mapRequest, mapResponse);
         if (resultCode == AZ::RHI::ResultCode::Success)
         {
@@ -138,7 +138,7 @@ namespace AtomSampleViewer
 
             m_inputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
 
-            RHI::BufferInitRequest request;
+            RHI::SingleDeviceBufferInitRequest request;
             request.m_buffer = m_inputAssemblyBuffer.get();
             request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, sizeof(bufferData) };
             request.m_initialData = &bufferData;
@@ -260,9 +260,9 @@ namespace AtomSampleViewer
                 drawIndexed.m_indexCount = 3;
                 drawIndexed.m_instanceCount = s_numberOfTrianglesTotal;
 
-                const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroup->GetRHIShaderResourceGroup() };
+                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroup->GetRHIShaderResourceGroup() };
 
-                RHI::DrawItem drawItem;
+                RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
                 drawItem.m_pipelineState = m_pipelineState.get();
                 drawItem.m_indexBufferView = &m_indexBufferView;
@@ -298,7 +298,7 @@ namespace AtomSampleViewer
         const uint32_t constantBufferSize = sizeof(InstanceInfo) * s_numberOfTrianglesTotal;
 
         m_constantBuffer = RHI::Factory::Get().CreateBuffer();
-        RHI::BufferInitRequest request;
+        RHI::SingleDeviceBufferInitRequest request;
         request.m_buffer = m_constantBuffer.get();
         request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::Constant, constantBufferSize };
         [[maybe_unused]] RHI::ResultCode result = m_constantBufferPool->InitBuffer(request);

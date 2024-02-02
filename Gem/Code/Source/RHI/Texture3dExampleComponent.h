@@ -12,8 +12,8 @@
 
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 
-#include <Atom/RHI/BufferPool.h>
-#include <Atom/RHI/DrawItem.h>
+#include <Atom/RHI/SingleDeviceBufferPool.h>
+#include <Atom/RHI/SingleDeviceDrawItem.h>
 #include <Atom/RHI.Reflect/SamplerState.h>
 
 #include <AzCore/Component/TickBus.h>
@@ -46,14 +46,14 @@ namespace AtomSampleViewer
 
         ImGuiSidebar m_imguiSidebar;
         AzFramework::WindowSize m_windowSize;
-        AZ::RHI::ImageSubresourceLayout m_imageLayout;
+        AZ::RHI::SingleDeviceImageSubresourceLayout m_imageLayout;
 
         // Rendering resources
-        AZ::RHI::Ptr<AZ::RHI::ImagePool> m_imagePool = nullptr;
-        AZ::Data::Instance<AZ::RHI::Image> m_image = nullptr;
-        AZ::RHI::Ptr<AZ::RHI::ImageView> m_imageView = nullptr;
+        AZ::RHI::Ptr<AZ::RHI::SingleDeviceImagePool> m_imagePool = nullptr;
+        AZ::Data::Instance<AZ::RHI::SingleDeviceImage> m_image = nullptr;
+        AZ::RHI::Ptr<AZ::RHI::SingleDeviceImageView> m_imageView = nullptr;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_shaderResourceGroup = nullptr;
-        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_pipelineState = nullptr;
+        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_pipelineState = nullptr;
 
         // Shader Input indices
         AZ::RHI::ShaderInputImageIndex m_texture3dInputIndex;

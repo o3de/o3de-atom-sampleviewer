@@ -11,11 +11,11 @@
 
 #include <AzCore/Math/Vector3.h>
 
-#include <Atom/RHI/BufferPool.h>
+#include <Atom/RHI/SingleDeviceBufferPool.h>
 #include <Atom/RHI/Device.h>
-#include <Atom/RHI/DrawItem.h>
-#include <Atom/RHI/ImagePool.h>
-#include <Atom/RHI/PipelineState.h>
+#include <Atom/RHI/SingleDeviceDrawItem.h>
+#include <Atom/RHI/SingleDeviceImagePool.h>
+#include <Atom/RHI/SingleDevicePipelineState.h>
 
 namespace AtomSampleViewer
 {
@@ -47,11 +47,11 @@ namespace AtomSampleViewer
         // Triangles setting
         void SetTriangleVertices(int startIndex, VertexPosition* vertexData, AZ::Vector3 center, float offset);
 
-        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_inputAssemblyBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::Buffer> m_inputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferPool> m_inputAssemblyBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_inputAssemblyBuffer;
 
-        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_pipelineStateBasePass;
-        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::PipelineState>, 8> m_pipelineStateStencil;
+        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_pipelineStateBasePass;
+        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState>, 8> m_pipelineStateStencil;
 
         static const size_t s_numberOfVertices = 48;
 
@@ -62,8 +62,8 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, s_numberOfVertices> m_indices;
         };
 
-        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
-        AZ::RHI::DrawItem m_drawItem;
+        AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> m_streamBufferViews;
+        AZ::RHI::SingleDeviceDrawItem m_drawItem;
 
         AZ::RHI::AttachmentId m_depthStencilID;
         AZ::RHI::ClearValue m_depthClearValue;

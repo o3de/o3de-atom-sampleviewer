@@ -14,11 +14,11 @@
 #include <Atom/RPI.Public/XR/XRSpaceNotificationBus.h>
 
 #include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/DrawItem.h>
+#include <Atom/RHI/SingleDeviceDrawItem.h>
 #include <Atom/RHI/Device.h>
 #include <Atom/RHI/Factory.h>
-#include <Atom/RHI/PipelineState.h>
-#include <Atom/RHI/BufferPool.h>
+#include <Atom/RHI/SingleDevicePipelineState.h>
+#include <Atom/RHI/SingleDeviceBufferPool.h>
 
 #include <AzCore/Math/Matrix4x4.h>
 
@@ -94,11 +94,11 @@ namespace AtomSampleViewer
         //! Create the relevant Scope
         void CreateScope();
 
-        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_bufferPool;
-        AZ::RHI::IndexBufferView m_indexBufferView;
-        AZ::RHI::Ptr<AZ::RHI::Buffer> m_inputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferPool> m_bufferPool;
+        AZ::RHI::SingleDeviceIndexBufferView m_indexBufferView;
+        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_inputAssemblyBuffer;
         AZ::RHI::InputStreamLayout m_streamLayoutDescriptor;
-        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_pipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_pipelineState;
 
         struct BufferData
         {
@@ -107,8 +107,8 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 3> m_indices;
         };
 
-        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
-        AZ::RHI::DrawItem m_drawItem;
+        AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> m_streamBufferViews;
+        AZ::RHI::SingleDeviceDrawItem m_drawItem;
         float m_time = 0.0f;
         AZStd::array<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, NumberOfCubes> m_shaderResourceGroups;
         AZStd::array<AZ::Matrix4x4, NumberOfCubes> m_modelMatrices;

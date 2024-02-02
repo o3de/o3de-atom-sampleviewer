@@ -11,8 +11,8 @@
 #include <SampleComponentManager.h>
 #include <Atom/RHI/CommandList.h>
 #include <Atom/RHI/FrameGraphInterface.h>
-#include <Atom/RHI/RayTracingPipelineState.h>
-#include <Atom/RHI/RayTracingShaderTable.h>
+#include <Atom/RHI/SingleDeviceRayTracingPipelineState.h>
+#include <Atom/RHI/SingleDeviceRayTracingShaderTable.h>
 #include <Atom/RHI.Reflect/InputStreamLayoutBuilder.h>
 #include <Atom/RHI.Reflect/RenderAttachmentLayoutBuilder.h>
 #include <Atom/RPI.Public/Shader/Shader.h>
@@ -88,7 +88,7 @@ namespace AtomSampleViewer
         }
 
         // initialize ray tracing buffer pools
-        m_rayTracingBufferPools = RHI::RayTracingBufferPools::CreateRHIRayTracingBufferPools();
+        m_rayTracingBufferPools = RHI::SingleDeviceRayTracingBufferPools::CreateRHIRayTracingBufferPools();
         m_rayTracingBufferPools->Init(device);
     }
 
@@ -104,7 +104,7 @@ namespace AtomSampleViewer
             m_triangleVB = RHI::Factory::Get().CreateBuffer();
             m_triangleVB->SetName(AZ::Name("Triangle VB"));
 
-            RHI::BufferInitRequest request;
+            RHI::SingleDeviceBufferInitRequest request;
             request.m_buffer = m_triangleVB.get();
             request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, sizeof(m_triangleVertices) };
             request.m_initialData = m_triangleVertices.data();
@@ -133,7 +133,7 @@ namespace AtomSampleViewer
             m_rectangleVB = RHI::Factory::Get().CreateBuffer();
             m_rectangleVB->SetName(AZ::Name("Rectangle VB"));
 
-            RHI::BufferInitRequest request;
+            RHI::SingleDeviceBufferInitRequest request;
             request.m_buffer = m_rectangleVB.get();
             request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, sizeof(m_rectangleVertices) };
             request.m_initialData = m_rectangleVertices.data();
@@ -164,7 +164,7 @@ namespace AtomSampleViewer
 
         m_fullScreenInputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
 
-        RHI::BufferInitRequest request;
+        RHI::SingleDeviceBufferInitRequest request;
         request.m_buffer = m_fullScreenInputAssemblyBuffer.get();
         request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, sizeof(bufferData) };
         request.m_initialData = &bufferData;
@@ -207,7 +207,7 @@ namespace AtomSampleViewer
         // create output image
         m_outputImage = RHI::Factory::Get().CreateImage();
 
-        RHI::ImageInitRequest request;
+        RHI::SingleDeviceImageInitRequest request;
         request.m_image = m_outputImage.get();
         request.m_descriptor = RHI::ImageDescriptor::Create2D(RHI::ImageBindFlags::ShaderReadWrite, m_imageWidth, m_imageHeight, RHI::Format::R8G8B8A8_UNORM);
         [[maybe_unused]] RHI::ResultCode result = m_imagePool->InitImage(request);
@@ -221,9 +221,9 @@ namespace AtomSampleViewer
 
     void RayTracingExampleComponent::CreateRayTracingAccelerationStructureObjects()
     {
-        m_triangleRayTracingBlas = AZ::RHI::RayTracingBlas::CreateRHIRayTracingBlas();
-        m_rectangleRayTracingBlas = AZ::RHI::RayTracingBlas::CreateRHIRayTracingBlas();
-        m_rayTracingTlas = AZ::RHI::RayTracingTlas::CreateRHIRayTracingTlas();
+        m_triangleRayTracingBlas = AZ::RHI::SingleDeviceRayTracingBlas::CreateRHIRayTracingBlas();
+        m_rectangleRayTracingBlas = AZ::RHI::SingleDeviceRayTracingBlas::CreateRHIRayTracingBlas();
+        m_rayTracingTlas = AZ::RHI::SingleDeviceRayTracingTlas::CreateRHIRayTracingTlas();
     }
 
     void RayTracingExampleComponent::CreateRasterShader()
@@ -294,7 +294,7 @@ namespace AtomSampleViewer
         m_globalSrg = CreateShaderResourceGroup(m_rayGenerationShader, "RayTracingGlobalSrg", RayTracingExampleName);
 
         // build the ray tracing pipeline state descriptor
-        RHI::RayTracingPipelineStateDescriptor descriptor;
+        RHI::SingleDeviceRayTracingPipelineStateDescriptor descriptor;
         descriptor.Build()
             ->PipelineState(m_globalPipelineState.get())
             ->ShaderLibrary(rayGenerationShaderDescriptor)
@@ -335,7 +335,7 @@ namespace AtomSampleViewer
             // create triangle BLAS buffer if necessary
             if (!m_triangleRayTracingBlas->IsValid())
             {
-                RHI::StreamBufferView triangleVertexBufferView =
+                RHI::SingleDeviceStreamBufferView triangleVertexBufferView =
                 {
                     *m_triangleVB,
                     0,
@@ -343,7 +343,7 @@ namespace AtomSampleViewer
                     sizeof(VertexPosition)
                 };
 
-                RHI::IndexBufferView triangleIndexBufferView =
+                RHI::SingleDeviceIndexBufferView triangleIndexBufferView =
                 {
                     *m_triangleIB,
                     0,
@@ -351,7 +351,7 @@ namespace AtomSampleViewer
                     RHI::IndexFormat::Uint16
                 };
 
-                RHI::RayTracingBlasDescriptor triangleBlasDescriptor;
+                RHI::SingleDeviceRayTracingBlasDescriptor triangleBlasDescriptor;
                 triangleBlasDescriptor.Build()
                     ->Geometry()
                         ->VertexFormat(RHI::Format::R32G32B32_FLOAT)
@@ -365,7 +365,7 @@ namespace AtomSampleViewer
             // create rectangle BLAS if necessary
             if (!m_rectangleRayTracingBlas->IsValid())
             {
-                RHI::StreamBufferView rectangleVertexBufferView =
+                RHI::SingleDeviceStreamBufferView rectangleVertexBufferView =
                 {
                     *m_rectangleVB,
                     0,
@@ -373,7 +373,7 @@ namespace AtomSampleViewer
                     sizeof(VertexPosition)
                 };
 
-                RHI::IndexBufferView rectangleIndexBufferView =
+                RHI::SingleDeviceIndexBufferView rectangleIndexBufferView =
                 {
                     *m_rectangleIB,
                     0,
@@ -381,7 +381,7 @@ namespace AtomSampleViewer
                     RHI::IndexFormat::Uint16
                 };
 
-                RHI::RayTracingBlasDescriptor rectangleBlasDescriptor;
+                RHI::SingleDeviceRayTracingBlasDescriptor rectangleBlasDescriptor;
                 rectangleBlasDescriptor.Build()
                     ->Geometry()
                         ->VertexFormat(RHI::Format::R32G32B32_FLOAT)
@@ -412,7 +412,7 @@ namespace AtomSampleViewer
             rectangleTransform.MultiplyByUniformScale(100.0f);
 
             // create the TLAS
-            RHI::RayTracingTlasDescriptor tlasDescriptor;
+            RHI::SingleDeviceRayTracingTlasDescriptor tlasDescriptor;
             tlasDescriptor.Build()
                 ->Instance()
                     ->InstanceID(0)
@@ -570,7 +570,7 @@ namespace AtomSampleViewer
                 m_globalSrg->Compile();
 
                 // update the ray tracing shader table
-                AZStd::shared_ptr<RHI::RayTracingShaderTableDescriptor> descriptor = AZStd::make_shared<RHI::RayTracingShaderTableDescriptor>();
+                AZStd::shared_ptr<RHI::SingleDeviceRayTracingShaderTableDescriptor> descriptor = AZStd::make_shared<RHI::SingleDeviceRayTracingShaderTableDescriptor>();
                 descriptor->Build(AZ::Name("RayTracingExampleShaderTable"), m_rayTracingPipelineState)
                     ->RayGenerationRecord(AZ::Name("RayGenerationShader"))
                     ->MissRecord(AZ::Name("MissShader"))
@@ -593,11 +593,11 @@ namespace AtomSampleViewer
 
             RHI::CommandList* commandList = context.GetCommandList();
 
-            const RHI::ShaderResourceGroup* shaderResourceGroups[] = {
+            const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = {
                 m_globalSrg->GetRHIShaderResourceGroup()
             };
 
-            RHI::DispatchRaysItem dispatchRaysItem;
+            RHI::SingleDeviceDispatchRaysItem dispatchRaysItem;
             dispatchRaysItem.m_arguments.m_direct.m_width = m_imageWidth;
             dispatchRaysItem.m_arguments.m_direct.m_height = m_imageHeight;
             dispatchRaysItem.m_arguments.m_direct.m_depth = 1;
@@ -672,9 +672,9 @@ namespace AtomSampleViewer
             drawIndexed.m_indexCount = 6;
             drawIndexed.m_instanceCount = 1;
 
-            const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_drawSRG->GetRHIShaderResourceGroup() };
+            const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_drawSRG->GetRHIShaderResourceGroup() };
 
-            RHI::DrawItem drawItem;
+            RHI::SingleDeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;
             drawItem.m_pipelineState = m_drawPipelineState.get();
             drawItem.m_indexBufferView = &m_fullScreenIndexBufferView;

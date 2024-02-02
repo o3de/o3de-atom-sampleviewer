@@ -511,7 +511,7 @@ namespace AtomSampleViewer
         return image;
     }
 
-    void BasicRHIComponent::CreateImage3dData(AZStd::vector<uint8_t>& data, AZ::RHI::ImageSubresourceLayout& layout, AZ::RHI::Format& format, AZStd::vector<const char*>&& imageAssetPaths)
+    void BasicRHIComponent::CreateImage3dData(AZStd::vector<uint8_t>& data, AZ::RHI::SingleDeviceImageSubresourceLayout& layout, AZ::RHI::Format& format, AZStd::vector<const char*>&& imageAssetPaths)
     {
         using namespace AZ;
 
@@ -532,7 +532,7 @@ namespace AtomSampleViewer
         AZStd::vector<RHI::ImageDescriptor> imageDescriptors;
         imageDescriptors.reserve(imageAssetPaths.size());
 
-        AZStd::vector<RHI::ImageSubresourceLayout> imageSubresourceLayouts;
+        AZStd::vector<RHI::SingleDeviceImageSubresourceLayout> imageSubresourceLayouts;
         imageSubresourceLayouts.reserve(imageAssetPaths.size());
 
         AZStd::vector<Data::Asset<RPI::ImageMipChainAsset>> imageMipAssets;
@@ -552,7 +552,7 @@ namespace AtomSampleViewer
             mipAsset.BlockUntilLoadComplete();
             imageMipAssets.emplace_back(mipAsset);
 
-            const RHI::ImageSubresourceLayout subImageLayout = mipAsset->GetSubImageLayout(0);
+            const RHI::SingleDeviceImageSubresourceLayout subImageLayout = mipAsset->GetSubImageLayout(0);
             imageSubresourceLayouts.emplace_back(subImageLayout);
         }
 

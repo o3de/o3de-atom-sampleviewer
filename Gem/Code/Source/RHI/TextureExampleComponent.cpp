@@ -14,8 +14,8 @@
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/CommandList.h>
 #include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/Image.h>
-#include <Atom/RHI/ImagePool.h>
+#include <Atom/RHI/SingleDeviceImage.h>
+#include <Atom/RHI/SingleDeviceImagePool.h>
 #include <Atom/RHI.Reflect/InputStreamLayoutBuilder.h>
 #include <Atom/RHI.Reflect/RenderAttachmentLayoutBuilder.h>
 
@@ -72,7 +72,7 @@ namespace AtomSampleViewer
             m_uvBuffer = RHI::Factory::Get().CreateBuffer();
 
             RHI::ResultCode result = RHI::ResultCode::Success;
-            RHI::BufferInitRequest request;
+            RHI::SingleDeviceBufferInitRequest request;
 
             request.m_buffer = m_positionBuffer.get();
             request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, positionBufSize };
@@ -226,7 +226,7 @@ namespace AtomSampleViewer
                 commandList->SetViewports(&m_viewport, 1);
                 commandList->SetScissors(&m_scissor, 1);
 
-                const RHI::IndexBufferView indexBufferView =
+                const RHI::SingleDeviceIndexBufferView indexBufferView =
                 {
                     *m_indexBuffer,
                     0,
@@ -238,9 +238,9 @@ namespace AtomSampleViewer
                 drawIndexed.m_indexCount = 6;
                 drawIndexed.m_instanceCount = 1;
 
-                const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroup->GetRHIShaderResourceGroup() };
+                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroup->GetRHIShaderResourceGroup() };
 
-                RHI::DrawItem drawItem;
+                RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
                 drawItem.m_pipelineState = m_pipelineState.get();
                 drawItem.m_indexBufferView = &indexBufferView;

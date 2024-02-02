@@ -9,7 +9,7 @@
 
 #include <AzCore/Component/TickBus.h>
 
-#include <Atom/RHI/PipelineState.h>
+#include <Atom/RHI/SingleDevicePipelineState.h>
 #include <RHI/BasicRHIComponent.h>
 
 namespace AtomSampleViewer
@@ -60,17 +60,17 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, geometryIndexCount> m_indices;
         };
 
-        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_inputAssemblyBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::Buffer> m_inputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferPool> m_inputAssemblyBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_inputAssemblyBuffer;
 
-        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
-        AZ::RHI::IndexBufferView m_indexBufferView;
+        AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> m_streamBufferViews;
+        AZ::RHI::SingleDeviceIndexBufferView m_indexBufferView;
         AZ::RHI::InputStreamLayout m_inputStreamLayout;
 
         // ----------------------------------
         // Pipeline and Shader Resource Group
         // ----------------------------------
-        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_pipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_pipelineState;
         AZ::Data::Instance < AZ::RPI::ShaderResourceGroup> m_shaderResourceGroup;
         AZ::RHI::ShaderInputConstantIndex m_blendFactorIndex;
 
