@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <Atom/RHI/SingleDeviceBufferPool.h>
+#include <Atom/RHI/MultiDeviceBufferPool.h>
 #include <Atom/RHI/SingleDeviceDrawItem.h>
 #include <Atom/RHI/ScopeProducer.h>
 
@@ -57,8 +57,8 @@ namespace AtomSampleViewer
         void ReadRenderTargetShader();
         void ReadScreenShader();
         
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferPool> m_bufferPool;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_inputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_bufferPool;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_inputAssemblyBuffer;
 
         AZStd::array<AZ::RHI::TransientImageDescriptor, 3> m_renderTargetImageDescriptors;
 

@@ -11,7 +11,7 @@
 
 #include <AzCore/Math/Vector3.h>
 
-#include <Atom/RHI/SingleDeviceBufferPool.h>
+#include <Atom/RHI/MultiDeviceBufferPool.h>
 #include <Atom/RHI/Device.h>
 #include <Atom/RHI/SingleDeviceDrawItem.h>
 #include <Atom/RHI/SingleDeviceImagePool.h>
@@ -47,8 +47,8 @@ namespace AtomSampleViewer
         // Triangles setting
         void SetTriangleVertices(int startIndex, VertexPosition* vertexData, AZ::Vector3 center, float offset);
 
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferPool> m_inputAssemblyBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_inputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_inputAssemblyBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_inputAssemblyBuffer;
 
         AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_pipelineStateBasePass;
         AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState>, 8> m_pipelineStateStencil;

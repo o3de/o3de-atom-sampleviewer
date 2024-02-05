@@ -18,8 +18,8 @@
 #include <Atom/RHI.Reflect/ShaderResourceGroupLayoutDescriptor.h>
 #include <Atom/RHI.Reflect/ScopeId.h>
 
-#include <Atom/RHI/SingleDeviceBuffer.h>
-#include <Atom/RHI/SingleDeviceBufferPool.h>
+#include <Atom/RHI/MultiDeviceBuffer.h>
+#include <Atom/RHI/MultiDeviceBufferPool.h>
 #include <Atom/RHI/SingleDeviceDrawItem.h>
 #include <Atom/RHI/SingleDevicePipelineState.h>
 #include <Atom/RHI/SingleDeviceStreamBufferView.h>
@@ -103,9 +103,9 @@ namespace AtomSampleViewer
         void CreateCustomMSAAResolveScope();
 
 
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferPool> m_inputAssemblyBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_triangleInputAssemblyBuffer;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_quadInputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_inputAssemblyBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_triangleInputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_quadInputAssemblyBuffer;
         
         AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState>, s_numMSAAExamples> m_pipelineStates;
         AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_customResolveMSAAPipelineState;

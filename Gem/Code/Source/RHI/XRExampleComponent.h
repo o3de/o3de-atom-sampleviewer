@@ -18,7 +18,7 @@
 #include <Atom/RHI/Device.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/SingleDevicePipelineState.h>
-#include <Atom/RHI/SingleDeviceBufferPool.h>
+#include <Atom/RHI/MultiDeviceBufferPool.h>
 
 #include <AzCore/Math/Matrix4x4.h>
 
@@ -94,9 +94,9 @@ namespace AtomSampleViewer
         //! Create the relevant Scope
         void CreateScope();
 
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferPool> m_bufferPool;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_bufferPool;
         AZ::RHI::SingleDeviceIndexBufferView m_indexBufferView;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_inputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_inputAssemblyBuffer;
         AZ::RHI::InputStreamLayout m_streamLayoutDescriptor;
         AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_pipelineState;
 

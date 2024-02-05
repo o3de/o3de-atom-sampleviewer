@@ -74,12 +74,12 @@ namespace AtomSampleViewer
         using namespace AZ;
         RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
 
-        m_inputAssemblyBufferPool = RHI::Factory::Get().CreateBufferPool();
+        m_inputAssemblyBufferPool = aznew RHI::MultiDeviceBufferPool();
 
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-        m_inputAssemblyBufferPool->Init(*device, bufferPoolDesc);
+        m_inputAssemblyBufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
 
         BufferData bufferData;
         SetVertexPosition(bufferData.m_positions.data(), 0, -1.0f, -1.0f, 0.0f);
@@ -91,9 +91,9 @@ namespace AtomSampleViewer
         SetVertexColor(bufferData.m_colors.data(), 2, 0.0, 0.0, 1.0, 1.0);
 
         SetVertexIndexIncreasing(bufferData.m_indices.data(), bufferData.m_indices.size());
-        m_inputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
+        m_inputAssemblyBuffer = aznew RHI::MultiDeviceBuffer();
 
-        RHI::SingleDeviceBufferInitRequest request;
+        RHI::MultiDeviceBufferInitRequest request;
         request.m_buffer = m_inputAssemblyBuffer.get();
         request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, sizeof(bufferData) };
         request.m_initialData = &bufferData;
@@ -101,7 +101,7 @@ namespace AtomSampleViewer
 
         m_streamBufferViews[0] =
         {
-            *m_inputAssemblyBuffer,
+            *m_inputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
             offsetof(BufferData, m_positions),
             sizeof(BufferData::m_positions),
             sizeof(VertexPosition)
@@ -109,7 +109,7 @@ namespace AtomSampleViewer
 
         m_streamBufferViews[1] =
         {
-            *m_inputAssemblyBuffer,
+            *m_inputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
             offsetof(BufferData, m_colors),
             sizeof(BufferData::m_colors),
             sizeof(VertexColor)
@@ -117,7 +117,7 @@ namespace AtomSampleViewer
 
         m_indexBufferView =
         {
-            *m_inputAssemblyBuffer,
+            *m_inputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
             offsetof(BufferData, m_indices),
             sizeof(BufferData::m_indices),
             RHI::IndexFormat::Uint16

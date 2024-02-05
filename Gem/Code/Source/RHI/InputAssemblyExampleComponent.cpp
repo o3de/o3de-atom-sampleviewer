@@ -66,7 +66,7 @@ namespace AtomSampleViewer
             }
 
             {
-                frameGraphBuilder.GetAttachmentDatabase().ImportBuffer(AZ::Name{ InputAssembly::ImportedInputAssemblyBufferAttachmentId }, m_inputAssemblyBuffer);
+                frameGraphBuilder.GetAttachmentDatabase().ImportBuffer(AZ::Name{ InputAssembly::ImportedInputAssemblyBufferAttachmentId }, m_inputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex));
             }
 
             float aspectRatio = static_cast<float>(m_outputWidth / m_outputHeight);
@@ -145,16 +145,16 @@ namespace AtomSampleViewer
     {
         using namespace AZ;
         RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
-        m_inputAssemblyBufferPool = RHI::Factory::Get().CreateBufferPool();
+        m_inputAssemblyBufferPool = aznew RHI::MultiDeviceBufferPool();
 
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly | RHI::BufferBindFlags::ShaderReadWrite;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-        m_inputAssemblyBufferPool->Init(*device, bufferPoolDesc);
+        m_inputAssemblyBufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
 
-        m_inputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
+        m_inputAssemblyBuffer = aznew RHI::MultiDeviceBuffer();
 
-        RHI::SingleDeviceBufferInitRequest request;
+        RHI::MultiDeviceBufferInitRequest request;
         request.m_buffer = m_inputAssemblyBuffer.get();
         request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly | RHI::BufferBindFlags::ShaderReadWrite, sizeof(BufferData) };
         request.m_initialData = nullptr;
@@ -266,14 +266,14 @@ namespace AtomSampleViewer
         {
             AZ_UNUSED(scopeData);
             {
-                const RHI::SingleDeviceBufferView* inputAssemblyBufferView = context.GetBufferView(RHI::AttachmentId{ InputAssembly::InputAssemblyBufferAttachmentId });
+                const auto* inputAssemblyBufferView = context.GetBufferView(RHI::AttachmentId{ InputAssembly::InputAssemblyBufferAttachmentId });
                 m_dispatchSRG[0]->SetBufferView(m_dispatchIABufferIndex, inputAssemblyBufferView);
                 m_dispatchSRG[0]->SetConstant(m_dispatchTimeConstantIndex, m_time);
                 m_dispatchSRG[0]->Compile();
             }
 
             {
-                const RHI::SingleDeviceBufferView* inputAssemblyBufferView = context.GetBufferView(RHI::AttachmentId{ InputAssembly::ImportedInputAssemblyBufferAttachmentId });
+                const auto* inputAssemblyBufferView = context.GetBufferView(RHI::AttachmentId{ InputAssembly::ImportedInputAssemblyBufferAttachmentId });
                 m_dispatchSRG[1]->SetBufferView(m_dispatchIABufferIndex, inputAssemblyBufferView);
                 m_dispatchSRG[1]->SetConstant(m_dispatchTimeConstantIndex, m_time);
                 m_dispatchSRG[1]->Compile();
@@ -366,7 +366,7 @@ namespace AtomSampleViewer
         {
             AZ_UNUSED(scopeData);
             {
-                const RHI::SingleDeviceBufferView* inputAssemblyBufferView = context.GetBufferView(RHI::AttachmentId{ InputAssembly::InputAssemblyBufferAttachmentId });
+                const auto* inputAssemblyBufferView = context.GetBufferView(RHI::AttachmentId{ InputAssembly::InputAssemblyBufferAttachmentId });
                 if (inputAssemblyBufferView)
                 {
                     m_streamBufferView[0] = {inputAssemblyBufferView->GetBuffer(), 0, sizeof(BufferData), sizeof(BufferData::value_type)};
@@ -376,7 +376,7 @@ namespace AtomSampleViewer
             }
 
             {
-                const RHI::SingleDeviceBufferView* inputAssemblyBufferView = context.GetBufferView(RHI::AttachmentId{ InputAssembly::ImportedInputAssemblyBufferAttachmentId });
+                const auto* inputAssemblyBufferView = context.GetBufferView(RHI::AttachmentId{ InputAssembly::ImportedInputAssemblyBufferAttachmentId });
                 if (inputAssemblyBufferView)
                 {
                     m_streamBufferView[1] = {inputAssemblyBufferView->GetBuffer(), 0, sizeof(BufferData), sizeof(BufferData::value_type)};

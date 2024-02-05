@@ -16,8 +16,8 @@
 #include <Atom/RHI.Reflect/ShaderResourceGroupLayoutDescriptor.h>
 #include <Atom/RHI.Reflect/ScopeId.h>
 
-#include <Atom/RHI/SingleDeviceBuffer.h>
-#include <Atom/RHI/SingleDeviceBufferPool.h>
+#include <Atom/RHI/MultiDeviceBuffer.h>
+#include <Atom/RHI/MultiDeviceBufferPool.h>
 #include <Atom/RHI/SingleDeviceDrawItem.h>
 #include <Atom/RHI/SingleDevicePipelineState.h>
 #include <Atom/RHI/SingleDeviceQueryPool.h>
@@ -92,8 +92,8 @@ namespace AtomSampleViewer
         void SetQueryType(QueryType type);
         void DrawSampleSettings();
 
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferPool> m_inputAssemblyBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_quadInputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_inputAssemblyBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_quadInputAssemblyBuffer;
 
         struct BufferData
         {
@@ -128,8 +128,8 @@ namespace AtomSampleViewer
 
         QueryType m_currentType = QueryType::Occlusion;
 
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferPool> m_predicationBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_predicationBuffer;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_predicationBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_predicationBuffer;
         AZ::RHI::BufferScopeAttachmentDescriptor m_predicationBufferAttachmentDescriptor;
 
         bool m_timestampEnabled = false;

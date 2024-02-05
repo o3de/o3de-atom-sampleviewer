@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <Atom/RHI/SingleDeviceBufferPool.h>
+#include <Atom/RHI/MultiDeviceBufferPool.h>
 #include <Atom/RHI/SingleDeviceDrawItem.h>
 #include <Atom/RHI/ScopeProducer.h>
 
@@ -120,8 +120,8 @@ namespace AtomSampleViewer
         };
        
         // Quad related variables
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferPool> m_quadBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_quadInputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_quadBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_quadInputAssemblyBuffer;
         AZ::RHI::SingleDeviceIndexBufferView m_quadIndexBufferView;
         AZStd::array<AZStd::vector<AZ::RHI::SingleDeviceStreamBufferView>, NumScopes> m_quadStreamBufferViews;
 
