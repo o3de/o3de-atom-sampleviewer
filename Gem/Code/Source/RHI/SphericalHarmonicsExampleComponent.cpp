@@ -93,21 +93,21 @@ namespace AtomSampleViewer
         }
 
         {
-            m_bufferPool = RHI::Factory::Get().CreateBufferPool();
+            m_bufferPool = aznew RHI::MultiDeviceBufferPool();
 
             RHI::BufferPoolDescriptor bufferPoolDesc;
             bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
             bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-            m_bufferPool->Init(*device, bufferPoolDesc);
+            m_bufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
 
             SetFullScreenRect(bufferData.m_positions.data(), bufferData.m_uvs.data(), bufferData.m_indices.data());
 
-            m_positionBuffer = RHI::Factory::Get().CreateBuffer();
-            m_indexBuffer = RHI::Factory::Get().CreateBuffer();
-            m_uvBuffer = RHI::Factory::Get().CreateBuffer();
+            m_positionBuffer = aznew RHI::MultiDeviceBuffer();
+            m_indexBuffer = aznew RHI::MultiDeviceBuffer();
+            m_uvBuffer = aznew RHI::MultiDeviceBuffer();
 
             RHI::ResultCode result = RHI::ResultCode::Success;
-            RHI::SingleDeviceBufferInitRequest request;
+            RHI::MultiDeviceBufferInitRequest request;
 
             request.m_buffer = m_positionBuffer.get();
             request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, positionBufSize };
@@ -143,14 +143,14 @@ namespace AtomSampleViewer
             }
 
             m_streamBufferViews[0] = {
-                *m_positionBuffer,
+                *m_positionBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
                 0,
                 positionBufSize,
                 sizeof(VertexPosition)
             };
 
             m_streamBufferViews[1] = {
-                *m_uvBuffer,
+                *m_uvBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
                 0,
                 uvBufSize,
                 sizeof(VertexUV)
@@ -311,7 +311,7 @@ namespace AtomSampleViewer
 
                 const RHI::SingleDeviceIndexBufferView indexBufferView =
                 {
-                    *m_indexBuffer,
+                    *m_indexBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
                     0,
                     indexBufSize,
                     RHI::IndexFormat::Uint16

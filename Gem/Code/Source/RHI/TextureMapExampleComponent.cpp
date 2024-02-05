@@ -206,12 +206,12 @@ namespace AtomSampleViewer
     void TextureMapExampleComponent::CreateInputAssemblyBufferPool()
     {
         const AZ::RHI::Ptr<AZ::RHI::Device> device = Utils::GetRHIDevice();
-        m_inputAssemblyBufferPool = AZ::RHI::Factory::Get().CreateBufferPool();
+        m_inputAssemblyBufferPool = aznew AZ::RHI::MultiDeviceBufferPool();
 
         AZ::RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = AZ::RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = AZ::RHI::HeapMemoryLevel::Device;
-        m_inputAssemblyBufferPool->Init(*device, bufferPoolDesc);
+        m_inputAssemblyBufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
     }
 
     void TextureMapExampleComponent::InitRenderTargetBufferView()
@@ -767,9 +767,9 @@ namespace AtomSampleViewer
         uint32_t uvSize, void* uvData, uint32_t uvTypeSize,
         uint32_t indexSize, void* indexData)
     {
-        m_positionBuffer[target] = AZ::RHI::Factory::Get().CreateBuffer();
+        m_positionBuffer[target] = aznew AZ::RHI::MultiDeviceBuffer();
         AZ::RHI::ResultCode result = AZ::RHI::ResultCode::Success;
-        AZ::RHI::SingleDeviceBufferInitRequest request;
+        AZ::RHI::MultiDeviceBufferInitRequest request;
         request.m_buffer = m_positionBuffer[target].get();
         request.m_descriptor = AZ::RHI::BufferDescriptor{ AZ::RHI::BufferBindFlags::InputAssembly, posSize };
         request.m_initialData = posData;
@@ -782,13 +782,13 @@ namespace AtomSampleViewer
 
         m_bufferViews[target].m_streamBufferViews[0] =
         {
-            *m_positionBuffer[target],
+            *m_positionBuffer[target]->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
             0,
             posSize,
             sizeof(VertexPosition)
         };
 
-        m_uvBuffer[target] = AZ::RHI::Factory::Get().CreateBuffer();
+        m_uvBuffer[target] = aznew AZ::RHI::MultiDeviceBuffer();
         request.m_buffer = m_uvBuffer[target].get();
         request.m_descriptor = AZ::RHI::BufferDescriptor{ AZ::RHI::BufferBindFlags::InputAssembly, uvSize };
         request.m_initialData = uvData;
@@ -801,13 +801,13 @@ namespace AtomSampleViewer
 
         m_bufferViews[target].m_streamBufferViews[1] =
         {
-            *m_uvBuffer[target],
+            *m_uvBuffer[target]->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
             0,
             uvSize,
             uvTypeSize
         };
 
-        m_indexBuffer[target] = AZ::RHI::Factory::Get().CreateBuffer();
+        m_indexBuffer[target] = aznew AZ::RHI::MultiDeviceBuffer();
         request.m_buffer = m_indexBuffer[target].get();
         request.m_descriptor = AZ::RHI::BufferDescriptor{ AZ::RHI::BufferBindFlags::InputAssembly, indexSize };
         request.m_initialData = indexData;
@@ -820,7 +820,7 @@ namespace AtomSampleViewer
 
         m_bufferViews[target].m_indexBufferView =
         {
-            *m_indexBuffer[target],
+            *m_indexBuffer[target]->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
             0,
             indexSize,
             AZ::RHI::IndexFormat::Uint16

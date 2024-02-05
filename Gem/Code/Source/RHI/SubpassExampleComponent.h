@@ -17,7 +17,7 @@
 #include <Atom/RPI.Public/Model/Model.h>
 #include <Atom/RPI.Public/Model/ModelLod.h>
 
-#include <Atom/RHI/SingleDeviceBufferPool.h>
+#include <Atom/RHI/MultiDeviceBufferPool.h>
 #include <Atom/RHI/SingleDeviceDrawItem.h>
 #include <Atom/RHI/Device.h>
 #include <Atom/RHI/Factory.h>

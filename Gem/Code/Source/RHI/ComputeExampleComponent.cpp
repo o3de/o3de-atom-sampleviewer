@@ -103,19 +103,19 @@ namespace AtomSampleViewer
         using namespace AZ;
         RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
 
-        m_inputAssemblyBufferPool = RHI::Factory::Get().CreateBufferPool();
+        m_inputAssemblyBufferPool = aznew RHI::MultiDeviceBufferPool();
 
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-        m_inputAssemblyBufferPool->Init(*device, bufferPoolDesc);
+        m_inputAssemblyBufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
 
         BufferData bufferData;
         SetFullScreenRect(bufferData.m_positions.data(), bufferData.m_uvs.data(), bufferData.m_indices.data());
 
-        m_inputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
+        m_inputAssemblyBuffer = aznew RHI::MultiDeviceBuffer();
 
-        RHI::SingleDeviceBufferInitRequest request;
+        RHI::MultiDeviceBufferInitRequest request;
         request.m_buffer = m_inputAssemblyBuffer.get();
         request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, sizeof(bufferData) };
         request.m_initialData = &bufferData;
@@ -123,7 +123,7 @@ namespace AtomSampleViewer
 
         m_streamBufferViews[0] =
         {
-            *m_inputAssemblyBuffer,
+            *m_inputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
             offsetof(BufferData, m_positions),
             sizeof(BufferData::m_positions),
             sizeof(VertexPosition)
@@ -131,7 +131,7 @@ namespace AtomSampleViewer
 
         m_streamBufferViews[1] =
         {
-            *m_inputAssemblyBuffer,
+            *m_inputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
             offsetof(BufferData, m_uvs),
             sizeof(BufferData::m_uvs),
             sizeof(VertexUV)
@@ -139,7 +139,7 @@ namespace AtomSampleViewer
 
         m_indexBufferView =
         {
-            *m_inputAssemblyBuffer,
+            *m_inputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
             offsetof(BufferData, m_indices),
             sizeof(BufferData::m_indices),
             RHI::IndexFormat::Uint16
@@ -235,20 +235,20 @@ namespace AtomSampleViewer
         RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
 
         RHI::ResultCode result = RHI::ResultCode::Success;
-        m_computeBufferPool = RHI::Factory::Get().CreateBufferPool();
+        m_computeBufferPool = aznew RHI::MultiDeviceBufferPool();
 
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::ShaderReadWrite;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
         bufferPoolDesc.m_hostMemoryAccess = RHI::HostMemoryAccess::Write;
 
-        result = m_computeBufferPool->Init(*device, bufferPoolDesc);
+        result = m_computeBufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
         AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialized compute buffer pool");
 
-        m_computeBuffer = RHI::Factory::Get().CreateBuffer();
+        m_computeBuffer = aznew RHI::MultiDeviceBuffer();
         uint32_t bufferSize = m_bufferWidth * m_bufferHeight * RHI::GetFormatSize(RHI::Format::R32G32B32A32_FLOAT);
 
-        RHI::SingleDeviceBufferInitRequest request;
+        RHI::MultiDeviceBufferInitRequest request;
         request.m_buffer = m_computeBuffer.get();
         request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::ShaderReadWrite, bufferSize };
         result = m_computeBufferPool->InitBuffer(request);
@@ -256,13 +256,13 @@ namespace AtomSampleViewer
 
         
         m_bufferViewDescriptor = RHI::BufferViewDescriptor::CreateStructured(0, m_bufferWidth * m_bufferHeight, RHI::GetFormatSize(RHI::Format::R32G32B32A32_FLOAT));
-        m_computeBufferView = m_computeBuffer->GetBufferView(m_bufferViewDescriptor);
+        m_computeBufferView = m_computeBuffer->BuildBufferView(m_bufferViewDescriptor);
                   
         if(!m_computeBufferView.get())
         {
             AZ_Assert(false, "Failed to initialized compute buffer view");
         }
-        AZ_Assert(m_computeBufferView->IsFullView(), "compute Buffer View initialization failed to cover in full the Compute Buffer");
+        AZ_Assert(m_computeBufferView->GetDeviceBufferView(RHI::MultiDevice::DefaultDeviceIndex)->IsFullView(), "compute Buffer View initialization failed to cover in full the Compute Buffer");
 
     }
 
@@ -279,7 +279,7 @@ namespace AtomSampleViewer
         {
             // attach compute buffer
             {
-                [[maybe_unused]] RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportBuffer(m_bufferAttachmentId, m_computeBuffer);
+                [[maybe_unused]] RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportBuffer(m_bufferAttachmentId, m_computeBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex));
                 AZ_Error(s_computeExampleName, result == RHI::ResultCode::Success, "Failed to import compute buffer with error %d", result);
 
                 RHI::BufferScopeAttachmentDescriptor desc;
@@ -292,7 +292,7 @@ namespace AtomSampleViewer
                 const Name computeBufferId{ "m_computeBuffer" };
                 RHI::ShaderInputBufferIndex computeBufferIndex = m_dispatchSRGs[1]->FindShaderInputBufferIndex(computeBufferId);
                 AZ_Error(s_computeExampleName, computeBufferIndex.IsValid(), "Failed to find shader input buffer %s.", computeBufferId.GetCStr());
-                m_dispatchSRGs[1]->SetBufferView(computeBufferIndex, m_computeBufferView.get());
+                m_dispatchSRGs[1]->SetBufferView(computeBufferIndex, m_computeBufferView->GetDeviceBufferView(RHI::MultiDevice::DefaultDeviceIndex).get());
                 m_dispatchSRGs[1]->Compile();
             }
 
@@ -376,7 +376,7 @@ namespace AtomSampleViewer
                 const Name computeBufferId{ "m_computeBuffer" };
                 RHI::ShaderInputBufferIndex computeBufferIndex = m_drawSRGs[1]->FindShaderInputBufferIndex(computeBufferId);
                 AZ_Error(s_computeExampleName, computeBufferIndex.IsValid(), "Failed to find shader input buffer %s.", computeBufferId.GetCStr());
-                m_drawSRGs[1]->SetBufferView(computeBufferIndex, m_computeBufferView.get());
+                m_drawSRGs[1]->SetBufferView(computeBufferIndex, m_computeBufferView->GetDeviceBufferView(RHI::MultiDevice::DefaultDeviceIndex).get());
                 m_drawSRGs[1]->Compile();
             }
 

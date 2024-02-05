@@ -60,8 +60,8 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, geometryIndexCount> m_indices;
         };
 
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferPool> m_inputAssemblyBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_inputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_inputAssemblyBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_inputAssemblyBuffer;
 
         AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> m_streamBufferViews;
         AZ::RHI::SingleDeviceIndexBufferView m_indexBufferView;

@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <Atom/RHI/SingleDeviceBufferPool.h>
+#include <Atom/RHI/MultiDeviceBufferPool.h>
 #include <Atom/RHI/SingleDeviceDrawItem.h>
 #include <Atom/RHI/ScopeProducer.h>
 
@@ -80,8 +80,8 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 6> m_indices;
         };
 
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferPool> m_inputAssemblyBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_inputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_inputAssemblyBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_inputAssemblyBuffer;
 
         AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> m_streamBufferViews;
         AZ::RHI::SingleDeviceIndexBufferView m_indexBufferView;
@@ -90,9 +90,9 @@ namespace AtomSampleViewer
         // ----------------------------
         // Compute Buffer
         // ----------------------------
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferPool> m_computeBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_computeBuffer;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferView> m_computeBufferView;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_computeBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_computeBuffer;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferView> m_computeBufferView;
         AZ::RHI::BufferViewDescriptor m_bufferViewDescriptor;
         AZ::RHI::AttachmentId m_bufferAttachmentId = AZ::RHI::AttachmentId("bufferAttachmentId");
 

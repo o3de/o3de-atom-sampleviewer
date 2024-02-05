@@ -87,8 +87,6 @@ namespace AtomSampleViewer
 
     void XRExampleComponent::OnFramePrepare(AZ::RHI::FrameGraphBuilder& frameGraphBuilder)
     {
-        AZ::Matrix4x4 projection = AZ::Matrix4x4::CreateIdentity();
-
         AZ::RPI::XRRenderingInterface* xrSystem = AZ::RPI::RPISystemInterface::Get()->GetXRSystem();
         if (xrSystem && xrSystem->ShouldRender())
         {
@@ -196,11 +194,11 @@ namespace AtomSampleViewer
         const AZ::RHI::Ptr<AZ::RHI::Device> device = Utils::GetRHIDevice();
         AZ::RHI::ResultCode result = AZ::RHI::ResultCode::Success;
 
-        m_bufferPool = AZ::RHI::Factory::Get().CreateBufferPool();
+        m_bufferPool = aznew AZ::RHI::MultiDeviceBufferPool();
         AZ::RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = AZ::RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = AZ::RHI::HeapMemoryLevel::Device;
-        result = m_bufferPool->Init(*device, bufferPoolDesc);
+        result = m_bufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
         if (result != AZ::RHI::ResultCode::Success)
         {
             AZ_Error("XRExampleComponent", false, "Failed to initialize buffer pool with error code %d", result);
@@ -209,8 +207,8 @@ namespace AtomSampleViewer
 
         SingleCubeBufferData bufferData = CreateSingleCubeBufferData();
 
-        m_inputAssemblyBuffer = AZ::RHI::Factory::Get().CreateBuffer();
-        AZ::RHI::SingleDeviceBufferInitRequest request;
+        m_inputAssemblyBuffer = aznew AZ::RHI::MultiDeviceBuffer();
+        AZ::RHI::MultiDeviceBufferInitRequest request;
 
         request.m_buffer = m_inputAssemblyBuffer.get();
         request.m_descriptor = AZ::RHI::BufferDescriptor{ AZ::RHI::BufferBindFlags::InputAssembly, sizeof(SingleCubeBufferData) };
@@ -224,7 +222,7 @@ namespace AtomSampleViewer
 
         m_streamBufferViews[0] =
         {
-            *m_inputAssemblyBuffer,
+            *m_inputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
             offsetof(SingleCubeBufferData, m_positions),
             sizeof(SingleCubeBufferData::m_positions),
             sizeof(VertexPosition)
@@ -232,7 +230,7 @@ namespace AtomSampleViewer
 
         m_streamBufferViews[1] =
         {
-            *m_inputAssemblyBuffer,
+            *m_inputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
             offsetof(SingleCubeBufferData, m_colors),
             sizeof(SingleCubeBufferData::m_colors),
             sizeof(VertexColor)
@@ -240,7 +238,7 @@ namespace AtomSampleViewer
 
         m_indexBufferView =
         {
-            *m_inputAssemblyBuffer,
+            *m_inputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
             offsetof(SingleCubeBufferData, m_indices),
             sizeof(SingleCubeBufferData::m_indices),
             AZ::RHI::IndexFormat::Uint16

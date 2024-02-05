@@ -50,12 +50,12 @@ namespace AtomSampleViewer
     {
         using namespace AZ;
         RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
-        m_inputAssemblyBufferPool = RHI::Factory::Get().CreateBufferPool();
+        m_inputAssemblyBufferPool = aznew RHI::MultiDeviceBufferPool();
 
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-        m_inputAssemblyBufferPool->Init(*device, bufferPoolDesc);
+        m_inputAssemblyBufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
 
         m_depthImageAttachmentId = RHI::AttachmentId("A2C_Depth");
         m_multisamleDepthImageAttachmentId = RHI::AttachmentId("A2C_MSAA_Depth");
@@ -145,10 +145,10 @@ namespace AtomSampleViewer
         RectangleBufferData bufferData;
         SetFullScreenRect(bufferData.m_positions.data(), bufferData.m_uvs.data(), bufferData.m_indices.data());
 
-        m_rectangleInputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
+        m_rectangleInputAssemblyBuffer = aznew RHI::MultiDeviceBuffer();
 
         RHI::ResultCode result = RHI::ResultCode::Success;
-        RHI::SingleDeviceBufferInitRequest request;
+        RHI::MultiDeviceBufferInitRequest request;
         request.m_buffer = m_rectangleInputAssemblyBuffer.get();
         request.m_descriptor = RHI::BufferDescriptor{RHI::BufferBindFlags::InputAssembly, sizeof(bufferData)};
         request.m_initialData = &bufferData;
@@ -160,14 +160,14 @@ namespace AtomSampleViewer
         }
         
         m_rectangleStreamBufferViews[0] = {
-            *m_rectangleInputAssemblyBuffer,
+            *m_rectangleInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
             offsetof(RectangleBufferData, m_positions),
             sizeof(RectangleBufferData::m_positions),
             sizeof(VertexPosition)
         };
         
         m_rectangleStreamBufferViews[1] = {
-            *m_rectangleInputAssemblyBuffer,
+            *m_rectangleInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
             offsetof(RectangleBufferData, m_uvs),
             sizeof(RectangleBufferData::m_uvs),
             sizeof(VertexUV)
@@ -398,7 +398,7 @@ namespace AtomSampleViewer
 
                 const RHI::SingleDeviceIndexBufferView indexBufferView =
                 {
-                    *m_rectangleInputAssemblyBuffer,
+                    *m_rectangleInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
                     offsetof(RectangleBufferData, m_indices),
                     sizeof(RectangleBufferData::m_indices),
                     RHI::IndexFormat::Uint16

@@ -115,11 +115,11 @@ namespace AtomSampleViewer
         // -------------------------------------
         // Input Assembly buffer and buffer view
         // -------------------------------------
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferPool> m_inputAssemblyBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_inputAssemblyBufferPool;
         // array for buffer and buffer view ( all render targets + screen)
-        AZStd::array< AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer>, s_numOfTargets + 1> m_positionBuffer;
-        AZStd::array< AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer>, s_numOfTargets + 1> m_uvBuffer;
-        AZStd::array< AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer>, s_numOfTargets + 1> m_indexBuffer;
+        AZStd::array< AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer>, s_numOfTargets + 1> m_positionBuffer;
+        AZStd::array< AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer>, s_numOfTargets + 1> m_uvBuffer;
+        AZStd::array< AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer>, s_numOfTargets + 1> m_indexBuffer;
         AZStd::array<BufferViewData, s_numOfTargets + 1> m_bufferViews;
 
         // ---------------------------------------
