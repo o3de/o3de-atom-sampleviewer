@@ -217,7 +217,6 @@ namespace AtomSampleViewer
 
     void BindlessPrototypeExampleComponent::CreatePools()
     {
-        const RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
         //Create Buffer pool for read only buffers
         {
             m_bufferPool = aznew RHI::MultiDeviceBufferPool();
@@ -246,8 +245,8 @@ namespace AtomSampleViewer
         {
             RHI::ImagePoolDescriptor imagePoolDesc;
             imagePoolDesc.m_bindFlags = RHI::ImageBindFlags::ShaderReadWrite;
-            m_rwImagePool = RHI::Factory::Get().CreateImagePool();
-            [[maybe_unused]] RHI::ResultCode result = m_rwImagePool->Init(*device, imagePoolDesc);
+            m_rwImagePool = aznew RHI::MultiDeviceImagePool();
+            [[maybe_unused]] RHI::ResultCode result = m_rwImagePool->Init(RHI::MultiDevice::DefaultDevice, imagePoolDesc);
             AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialize output image pool");
         }
     }
@@ -555,16 +554,14 @@ namespace AtomSampleViewer
         }
 
         //Load appropriate textures used by the unbounded texture array
-        AZStd::vector<const RHI::SingleDeviceImageView*> imageViews;
         for (uint32_t textureIdx = 0u; textureIdx < InternalBP::ImageCount; textureIdx++)
         {
             AZ::Data::Instance<AZ::RPI::StreamingImage> image = LoadStreamingImage(InternalBP::Images[textureIdx], InternalBP::SampleName);
             m_images.push_back(image);
-            m_imageViews.push_back(image->GetImageView());
+            m_imageViews.push_back(image->GetImageView()->GetDeviceImageView(RHI::MultiDevice::DefaultDeviceIndex).get());
         }
 
         // Load appropriate cubemap textures used by the unbounded texture array
-        AZStd::vector<const RHI::SingleDeviceImageView*> cubemapImageViews;
         for (uint32_t textureIdx = 0u; textureIdx < InternalBP::CubeMapImageCount; textureIdx++)
         {
             AZ::Data::Instance<AZ::RPI::StreamingImage> image = LoadStreamingImage(InternalBP::CubeMapImages[textureIdx], InternalBP::SampleName);
@@ -599,9 +596,9 @@ namespace AtomSampleViewer
 
         // Set the image version of color multiplier buffer
         {
-            m_computeImage = RHI::Factory::Get().CreateImage();
+            m_computeImage = aznew RHI::MultiDeviceImage();
 
-            RHI::SingleDeviceImageInitRequest request;
+            RHI::MultiDeviceImageInitRequest request;
             request.m_image = m_computeImage.get();
             request.m_descriptor =
                 RHI::ImageDescriptor::Create2D(RHI::ImageBindFlags::ShaderReadWrite, 1, 1, RHI::Format::R32G32B32A32_FLOAT);
@@ -609,7 +606,7 @@ namespace AtomSampleViewer
             AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialize output image");
 
             m_rwImageViewDescriptor = RHI::ImageViewDescriptor::Create(RHI::Format::R32G32B32A32_FLOAT, 0, 0);
-            m_computeImageView = m_computeImage->GetImageView(m_rwImageViewDescriptor);
+            m_computeImageView = m_computeImage->BuildImageView(m_rwImageViewDescriptor);
         }
 
 #if ATOMSAMPLEVIEWER_TRAIT_BINDLESS_PROTOTYPE_SUPPORTS_DIRECT_BOUND_UNBOUNDED_ARRAY
@@ -755,19 +752,19 @@ namespace AtomSampleViewer
             //Add read only 2d texture views
             for (AZ::Data::Instance<AZ::RPI::StreamingImage> image : m_images)
             {
-                views.push_back(image->GetImageView());
+                views.push_back(image->GetImageView()->GetDeviceImageView(RHI::MultiDevice::DefaultDeviceIndex).get());
                 isViewReadOnly.push_back(true);
             }
 
             //Add read only cube map texture views
             for (AZ::Data::Instance<AZ::RPI::StreamingImage> image : m_cubemapImages)
             {
-                views.push_back(image->GetImageView());
+                views.push_back(image->GetImageView()->GetDeviceImageView(RHI::MultiDevice::DefaultDeviceIndex).get());
                 isViewReadOnly.push_back(true);
             }
 
             //Ad read write texture view
-            views.push_back(m_computeImageView.get());
+            views.push_back(m_computeImageView->GetDeviceImageView(RHI::MultiDevice::DefaultDeviceIndex).get());
             isViewReadOnly.push_back(false);
 
             // Populate the indirect buffer with indices of the views that reside within the bindless heap
@@ -1088,7 +1085,7 @@ namespace AtomSampleViewer
             // attach compute buffer
             {
                 [[maybe_unused]] RHI::ResultCode result =
-                    frameGraph.GetAttachmentDatabase().ImportImage(m_imageAttachmentId, m_computeImage);
+                    frameGraph.GetAttachmentDatabase().ImportImage(m_imageAttachmentId, m_computeImage->GetDeviceImage(RHI::MultiDevice::DefaultDeviceIndex));
                 AZ_Error(
                     InternalBP::SampleName, result == RHI::ResultCode::Success, "Failed to import compute buffer with error %d", result);
 
@@ -1104,7 +1101,7 @@ namespace AtomSampleViewer
                 AZ_Error(
                     InternalBP::SampleName, computeBufferIndex.IsValid(), "Failed to find shader input buffer %s.",
                     computeBufferId.GetCStr());
-                m_imageDispatchSRG->SetImageView(computeBufferIndex, m_computeImageView.get());
+                m_imageDispatchSRG->SetImageView(computeBufferIndex, m_computeImageView->GetDeviceImageView(RHI::MultiDevice::DefaultDeviceIndex).get());
                 m_imageDispatchSRG->Compile();
             }
 

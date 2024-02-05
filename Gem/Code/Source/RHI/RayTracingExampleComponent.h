@@ -67,7 +67,7 @@ namespace AtomSampleViewer
 
         // resource pools
         RHI::Ptr<RHI::MultiDeviceBufferPool> m_inputAssemblyBufferPool;
-        RHI::Ptr<RHI::SingleDeviceImagePool> m_imagePool;
+        RHI::Ptr<RHI::MultiDeviceImagePool> m_imagePool;
         RHI::Ptr<RHI::SingleDeviceRayTracingBufferPools> m_rayTracingBufferPools;
 
         // triangle vertex/index buffers
@@ -120,8 +120,8 @@ namespace AtomSampleViewer
         bool m_buildLocalSrgs = true;
 
         // output image, written to by the ray tracing shader and displayed in the fullscreen draw shader
-        RHI::Ptr<RHI::SingleDeviceImage> m_outputImage;
-        RHI::Ptr<RHI::SingleDeviceImageView> m_outputImageView;
+        RHI::Ptr<RHI::MultiDeviceImage> m_outputImage;
+        RHI::Ptr<RHI::MultiDeviceImageView> m_outputImageView;
         RHI::ImageViewDescriptor m_outputImageViewDescriptor;
         RHI::AttachmentId m_outputImageAttachmentId = RHI::AttachmentId("outputImageAttachmentId");
 

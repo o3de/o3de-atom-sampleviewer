@@ -372,7 +372,7 @@ namespace AtomSampleViewer
         if (m_imguiSidebar.Begin())
         {
             Data::Instance<RPI::StreamingImagePool> streamingImagePool = RPI::ImageSystemInterface::Get()->GetSystemStreamingPool();
-            const RHI::SingleDeviceStreamingImagePool* rhiPool = streamingImagePool->GetRHIPool();
+            const auto* rhiPool = streamingImagePool->GetRHIPool();
             const RHI::HeapMemoryUsage& memoryUsage = rhiPool->GetHeapMemoryUsage(RHI::HeapMemoryLevel::Device);
 
             const size_t MB = 1024*1024;

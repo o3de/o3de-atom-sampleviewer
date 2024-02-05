@@ -46,12 +46,12 @@ namespace AtomSampleViewer
 
         ImGuiSidebar m_imguiSidebar;
         AzFramework::WindowSize m_windowSize;
-        AZ::RHI::SingleDeviceImageSubresourceLayout m_imageLayout;
+        AZ::RHI::MultiDeviceImageSubresourceLayout m_imageLayout;
 
         // Rendering resources
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceImagePool> m_imagePool = nullptr;
-        AZ::Data::Instance<AZ::RHI::SingleDeviceImage> m_image = nullptr;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceImageView> m_imageView = nullptr;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceImagePool> m_imagePool = nullptr;
+        AZ::Data::Instance<AZ::RHI::MultiDeviceImage> m_image = nullptr;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceImageView> m_imageView = nullptr;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_shaderResourceGroup = nullptr;
         AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_pipelineState = nullptr;
 

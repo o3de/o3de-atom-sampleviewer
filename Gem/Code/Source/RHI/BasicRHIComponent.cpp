@@ -552,7 +552,7 @@ namespace AtomSampleViewer
             mipAsset.BlockUntilLoadComplete();
             imageMipAssets.emplace_back(mipAsset);
 
-            const RHI::SingleDeviceImageSubresourceLayout subImageLayout = mipAsset->GetSubImageLayout(0);
+            const auto subImageLayout = mipAsset->GetSubImageLayout(0);
             imageSubresourceLayouts.emplace_back(subImageLayout);
         }
 

@@ -165,8 +165,8 @@ namespace AtomSampleViewer
         // Scene images
         static constexpr uint32_t NumSceneImages = 2;
         AZStd::array<AZ::RHI::AttachmentId, NumSceneImages> m_sceneIds = { { AZ::RHI::AttachmentId("SceneId1"), AZ::RHI::AttachmentId("SceneId2") } };
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceImagePool> m_imagePool;
-        AZStd::array<AZ::RHI::Ptr<AZ::RHI::SingleDeviceImage>, NumSceneImages> m_sceneImages;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceImagePool> m_imagePool;
+        AZStd::array<AZ::RHI::Ptr<AZ::RHI::MultiDeviceImage>, NumSceneImages> m_sceneImages;
         uint32_t m_currentSceneImageIndex = 0;
         uint32_t m_previousSceneImageIndex = 1;
 
