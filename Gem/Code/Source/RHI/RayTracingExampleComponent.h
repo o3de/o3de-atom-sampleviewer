@@ -18,7 +18,7 @@
 #include <Atom/RHI/Device.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/SingleDevicePipelineState.h>
-#include <Atom/RHI/SingleDeviceBufferPool.h>
+#include <Atom/RHI/MultiDeviceBufferPool.h>
 #include <RHI/BasicRHIComponent.h>
 #include <Atom/RHI/SingleDeviceRayTracingBufferPools.h>
 #include <Atom/RHI/SingleDeviceRayTracingAccelerationStructure.h>
@@ -66,7 +66,7 @@ namespace AtomSampleViewer
         static const uint32_t m_imageHeight = 1080;
 
         // resource pools
-        RHI::Ptr<RHI::SingleDeviceBufferPool> m_inputAssemblyBufferPool;
+        RHI::Ptr<RHI::MultiDeviceBufferPool> m_inputAssemblyBufferPool;
         RHI::Ptr<RHI::SingleDeviceImagePool> m_imagePool;
         RHI::Ptr<RHI::SingleDeviceRayTracingBufferPools> m_rayTracingBufferPools;
 
@@ -74,15 +74,15 @@ namespace AtomSampleViewer
         AZStd::array<VertexPosition, 3> m_triangleVertices;
         AZStd::array<uint16_t, 3> m_triangleIndices;
 
-        RHI::Ptr<RHI::SingleDeviceBuffer> m_triangleVB;
-        RHI::Ptr<RHI::SingleDeviceBuffer> m_triangleIB;
+        RHI::Ptr<RHI::MultiDeviceBuffer> m_triangleVB;
+        RHI::Ptr<RHI::MultiDeviceBuffer> m_triangleIB;
 
         // rectangle vertex/index buffers
         AZStd::array<VertexPosition, 4> m_rectangleVertices;
         AZStd::array<uint16_t, 6> m_rectangleIndices;
 
-        RHI::Ptr<RHI::SingleDeviceBuffer> m_rectangleVB;
-        RHI::Ptr<RHI::SingleDeviceBuffer> m_rectangleIB;
+        RHI::Ptr<RHI::MultiDeviceBuffer> m_rectangleVB;
+        RHI::Ptr<RHI::MultiDeviceBuffer> m_rectangleIB;
 
         // ray tracing acceleration structures
         RHI::Ptr<RHI::SingleDeviceRayTracingBlas> m_triangleRayTracingBlas;
@@ -133,7 +133,7 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 6> m_indices;
         };
 
-        RHI::Ptr<RHI::SingleDeviceBuffer> m_fullScreenInputAssemblyBuffer;
+        RHI::Ptr<RHI::MultiDeviceBuffer> m_fullScreenInputAssemblyBuffer;
         AZStd::array<RHI::SingleDeviceStreamBufferView, 2> m_fullScreenStreamBufferViews;
         RHI::SingleDeviceIndexBufferView m_fullScreenIndexBufferView;
         RHI::InputStreamLayout m_fullScreenInputStreamLayout;

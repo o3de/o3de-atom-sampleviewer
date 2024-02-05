@@ -19,7 +19,7 @@
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 #include <Atom/RPI.Public/Shader/ShaderReloadNotificationBus.h>
 
-#include <Atom/RHI/SingleDeviceBufferPool.h>
+#include <Atom/RHI/MultiDeviceBufferPool.h>
 #include <Atom/RHI/SingleDeviceDrawItem.h>
 #include <Atom/RHI/Device.h>
 #include <Atom/RHI/Factory.h>
@@ -152,16 +152,16 @@ namespace AtomSampleViewer
 
         AZ::RHI::InputStreamLayout m_inputStreamLayout;
 
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferPool> m_inputAssemblyBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferPool> m_shaderBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferPool> m_instancesBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferPool> m_copyBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_inputAssemblyBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_shaderBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_instancesBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_copyBufferPool;
 
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_inputAssemblyBuffer;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_sourceIndirectBuffer;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_instancesDataBuffer;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_resetCounterBuffer;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_indirectDispatchBuffer;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_inputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_sourceIndirectBuffer;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_instancesDataBuffer;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_resetCounterBuffer;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_indirectDispatchBuffer;
 
         AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_drawPipelineState;
         AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_cullPipelineState;
@@ -176,8 +176,8 @@ namespace AtomSampleViewer
         AZ::RHI::SingleDeviceIndirectBufferView m_indirectDrawBufferView;
         AZ::RHI::SingleDeviceIndirectBufferView m_indirectDispatchBufferView;
 
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferView> m_sourceIndirectBufferView;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferView> m_instancesDataBufferView;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferView> m_sourceIndirectBufferView;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferView> m_instancesDataBufferView;
 
         AZ::RHI::IndirectBufferLayout m_indirectDrawBufferLayout;
         AZ::RHI::IndirectBufferLayout m_indirectDispatchBufferLayout;

@@ -12,7 +12,7 @@
 
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 
-#include <Atom/RHI/SingleDeviceBufferPool.h>
+#include <Atom/RHI/MultiDeviceBufferPool.h>
 #include <Atom/RHI/SingleDeviceDrawItem.h>
 #include <Atom/RHI.Reflect/SamplerState.h>
 
@@ -123,10 +123,10 @@ namespace AtomSampleViewer
 
 
         // ---------------- streaming buffer variables ----------------
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferPool> m_bufferPool;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_indexBuffer;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_positionBuffer;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_uvBuffer;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_bufferPool;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_indexBuffer;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_positionBuffer;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_uvBuffer;
 
         struct BufferData
         {

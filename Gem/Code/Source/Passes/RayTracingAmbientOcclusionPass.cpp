@@ -162,7 +162,7 @@ namespace AZ
             RHI::ShaderInputConstantIndex constantIndex;
 
             // Bind scene TLAS buffer
-            const RHI::Ptr<RHI::SingleDeviceBuffer> tlasBuffer = m_rayTracingFeatureProcessor->GetTlas()->GetTlasBuffer();
+            auto tlasBuffer = m_rayTracingFeatureProcessor->GetTlas()->GetTlasBuffer();
             if (tlasBuffer)
             {
                 // TLAS

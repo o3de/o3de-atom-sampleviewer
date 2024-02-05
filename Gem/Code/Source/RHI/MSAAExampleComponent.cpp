@@ -48,12 +48,12 @@ namespace AtomSampleViewer
     {
         using namespace AZ;
         RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
-        m_inputAssemblyBufferPool = RHI::Factory::Get().CreateBufferPool();
+        m_inputAssemblyBufferPool = aznew RHI::MultiDeviceBufferPool();
 
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-        m_inputAssemblyBufferPool->Init(*device, bufferPoolDesc);
+        m_inputAssemblyBufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
 
         AZStd::vector<RHI::SamplePosition> emptySamplePositions;
         AZStd::vector<RHI::SamplePosition> customSamplePositions = { RHI::SamplePosition(3, 3), RHI::SamplePosition(11, 3), RHI::SamplePosition(3, 11), RHI::SamplePosition(11, 11) };
@@ -136,9 +136,9 @@ namespace AtomSampleViewer
 
         SetVertexIndexIncreasing(bufferData.m_indices.data(), bufferData.m_indices.size());
 
-        m_triangleInputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
+        m_triangleInputAssemblyBuffer = aznew RHI::MultiDeviceBuffer();
 
-        RHI::SingleDeviceBufferInitRequest request;
+        RHI::MultiDeviceBufferInitRequest request;
         request.m_buffer = m_triangleInputAssemblyBuffer.get();
         request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, sizeof(bufferData) };
         request.m_initialData = &bufferData;
@@ -146,7 +146,7 @@ namespace AtomSampleViewer
 
         m_triangleStreamBufferViews[0] =
         {
-            *m_triangleInputAssemblyBuffer,
+            *m_triangleInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
             offsetof(TriangleBufferData, m_positions),
             sizeof(TriangleBufferData::m_positions),
             sizeof(VertexPosition)
@@ -154,7 +154,7 @@ namespace AtomSampleViewer
 
         m_triangleStreamBufferViews[1] =
         {
-            *m_triangleInputAssemblyBuffer,
+            *m_triangleInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
             offsetof(TriangleBufferData, m_colors),
             sizeof(TriangleBufferData::m_colors),
             sizeof(VertexColor)
@@ -189,10 +189,10 @@ namespace AtomSampleViewer
         QuadBufferData bufferData;
         SetFullScreenRect(bufferData.m_positions.data(), bufferData.m_uvs.data(), bufferData.m_indices.data());
 
-        m_quadInputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
+        m_quadInputAssemblyBuffer = aznew RHI::MultiDeviceBuffer();
 
         RHI::ResultCode result = RHI::ResultCode::Success;
-        RHI::SingleDeviceBufferInitRequest request;
+        RHI::MultiDeviceBufferInitRequest request;
 
         request.m_buffer = m_quadInputAssemblyBuffer.get();
         request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, sizeof(bufferData) };
@@ -206,14 +206,14 @@ namespace AtomSampleViewer
         }
 
         m_quadStreamBufferViews[0] = {
-            *m_quadInputAssemblyBuffer,
+            *m_quadInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
             offsetof(QuadBufferData, m_positions),
             sizeof(QuadBufferData::m_positions),
             sizeof(VertexPosition)
         };
 
         m_quadStreamBufferViews[1] = {
-            *m_quadInputAssemblyBuffer,
+            *m_quadInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
             offsetof(QuadBufferData, m_uvs),
             sizeof(QuadBufferData::m_uvs),
             sizeof(VertexUV)
@@ -341,7 +341,7 @@ namespace AtomSampleViewer
 
             const RHI::SingleDeviceIndexBufferView indexBufferView =
             {
-                *m_triangleInputAssemblyBuffer,
+                *m_triangleInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
                 offsetof(TriangleBufferData, m_indices),
                 sizeof(TriangleBufferData::m_indices),
                 RHI::IndexFormat::Uint16
@@ -454,7 +454,7 @@ namespace AtomSampleViewer
 
             const RHI::SingleDeviceIndexBufferView indexBufferView =
             {
-                *m_quadInputAssemblyBuffer,
+                *m_quadInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
                 offsetof(QuadBufferData, m_indices),
                 sizeof(QuadBufferData::m_indices),
                 RHI::IndexFormat::Uint16

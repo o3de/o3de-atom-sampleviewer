@@ -10,8 +10,8 @@
 
 #include <RHI/BasicRHIComponent.h>
 
-#include <Atom/RHI/SingleDeviceBuffer.h>
-#include <Atom/RHI/SingleDeviceBufferPool.h>
+#include <Atom/RHI/MultiDeviceBuffer.h>
+#include <Atom/RHI/MultiDeviceBufferPool.h>
 #include <Atom/RHI/SingleDeviceDrawItem.h>
 #include <Atom/RHI/SingleDevicePipelineState.h>
 #include <Atom/RPI.Public/Image/AttachmentImage.h>
@@ -91,8 +91,8 @@ namespace AtomSampleViewer
         
         static const int s_shadowMapSize = 1024;
 
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferPool> m_bufferPool;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_inputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_bufferPool;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_inputAssemblyBuffer;
 
         AZ::RHI::InputStreamLayout m_inputStreamLayout;
         AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState>, 2> m_pipelineStates;

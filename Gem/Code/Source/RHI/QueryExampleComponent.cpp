@@ -154,22 +154,22 @@ namespace AtomSampleViewer
     {
         using namespace AZ;
         RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
-        m_inputAssemblyBufferPool = RHI::Factory::Get().CreateBufferPool();
+        m_inputAssemblyBufferPool = aznew RHI::MultiDeviceBufferPool();
 
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-        m_inputAssemblyBufferPool->Init(*device, bufferPoolDesc);
+        m_inputAssemblyBufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
 
         {
             // Create quad buffer and views
             BufferData bufferData;
             SetFullScreenRect(bufferData.m_positions.data(), nullptr, bufferData.m_indices.data());
 
-            m_quadInputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
+            m_quadInputAssemblyBuffer = aznew RHI::MultiDeviceBuffer();
 
             RHI::ResultCode result = RHI::ResultCode::Success;
-            RHI::SingleDeviceBufferInitRequest request;
+            RHI::MultiDeviceBufferInitRequest request;
             request.m_buffer = m_quadInputAssemblyBuffer.get();
             request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, sizeof(bufferData) };
             request.m_initialData = &bufferData;
@@ -182,7 +182,7 @@ namespace AtomSampleViewer
             }
 
             m_quadStreamBufferView = {
-                *m_quadInputAssemblyBuffer,
+                *m_quadInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
                 offsetof(BufferData, m_positions),
                 sizeof(BufferData::m_positions),
                 sizeof(VertexPosition)
@@ -282,7 +282,7 @@ namespace AtomSampleViewer
                 return;
             }
             
-            [[maybe_unused]] RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportBuffer(RHI::AttachmentId{QueryExample::PredicationBufferId}, m_predicationBuffer);
+            [[maybe_unused]] RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportBuffer(RHI::AttachmentId{QueryExample::PredicationBufferId}, m_predicationBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex));
             AZ_Error(QueryExample::SampleName, result == RHI::ResultCode::Success, "Failed to import predication buffer with error %d", result);
 
             frameGraph.UseQueryPool(
@@ -309,7 +309,7 @@ namespace AtomSampleViewer
             descriptor.m_sourceQueryPool = m_occlusionQueryPool.get();
             descriptor.m_firstQuery = m_occlusionQueries[m_currentOcclusionQueryIndex].m_query->GetHandle();
             descriptor.m_queryCount = 1;
-            descriptor.m_destinationBuffer = m_predicationBuffer.get();
+            descriptor.m_destinationBuffer = m_predicationBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex).get();
             descriptor.m_destinationOffset = 0;
             descriptor.m_destinationStride = sizeof(uint64_t);
 
@@ -434,7 +434,7 @@ namespace AtomSampleViewer
             {
                 const RHI::SingleDeviceIndexBufferView quadIndexBufferView =
                 {
-                    *m_quadInputAssemblyBuffer,
+                    *m_quadInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
                     offsetof(BufferData, m_indices),
                     sizeof(BufferData::m_indices),
                     RHI::IndexFormat::Uint16
@@ -488,7 +488,7 @@ namespace AtomSampleViewer
                     }
                     case QueryType::Predication:
                     {
-                        commandList->BeginPredication(*m_predicationBuffer, 0, RHI::PredicationOp::EqualZero);
+                        commandList->BeginPredication(*m_predicationBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex), 0, RHI::PredicationOp::EqualZero);
                         commandList->Submit(drawItem, 0);
                         commandList->EndPredication();
                         break;
@@ -592,16 +592,16 @@ namespace AtomSampleViewer
             return;
         }
 
-        m_predicationBufferPool = RHI::Factory::Get().CreateBufferPool();
+        m_predicationBufferPool = aznew RHI::MultiDeviceBufferPool();
 
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::Predication | RHI::BufferBindFlags::CopyWrite;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-        m_predicationBufferPool->Init(*device, bufferPoolDesc);
+        m_predicationBufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
 
-        m_predicationBuffer = RHI::Factory::Get().CreateBuffer();
+        m_predicationBuffer = aznew RHI::MultiDeviceBuffer();
 
-        RHI::SingleDeviceBufferInitRequest request;
+        RHI::MultiDeviceBufferInitRequest request;
         request.m_buffer = m_predicationBuffer.get();
         request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::Predication | RHI::BufferBindFlags::CopyWrite, sizeof(uint64_t) };
         RHI::ResultCode result = m_predicationBufferPool->InitBuffer(request);

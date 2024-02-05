@@ -59,7 +59,7 @@ namespace AtomSampleViewer
 
             AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> GetSrg(const AZStd::string srgName);
             void CompileSrg(const AZStd::string srgName);
-            bool SetBufferView(const AZStd::string srgName, const AZStd::string srgId, const AZ::RHI::SingleDeviceBufferView* bufferView);
+            bool SetBufferView(const AZStd::string srgName, const AZStd::string srgId, const AZ::RHI::MultiDeviceBufferView* bufferView);
 
         private:
             AZStd::unordered_map<AZ::Name, AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>> m_srgMap;
@@ -90,7 +90,7 @@ namespace AtomSampleViewer
         {
             static const uint32_t FloatSizeInBytes = static_cast<uint32_t>(sizeof(float));
         public:
-            FloatBuffer(AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferPool> bufferPool, const uint32_t sizeInBytes);
+            FloatBuffer(AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> bufferPool, const uint32_t sizeInBytes);
             ~FloatBuffer();
 
             // Allocates data if the provided handle is empty, else it updates it
@@ -103,14 +103,14 @@ namespace AtomSampleViewer
             bool UpdateBuffer(const FloatBufferHandle& handle, const void* data, const uint32_t sizeInBytes);
 
             // Maps host data to the device
-            bool MapData(const AZ::RHI::SingleDeviceBufferMapRequest& mapRequest, const void* data);
+            bool MapData(const AZ::RHI::MultiDeviceBufferMapRequest& mapRequest, const void* data);
 
             // Create the buffer
             void CreateBufferFromPool(const uint32_t byteCount);
 
             // Buffer resource
-            AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferPool> m_bufferPool = nullptr;
-            AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_buffer = nullptr;
+            AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_bufferPool = nullptr;
+            AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_buffer = nullptr;
 
             // Number of bytes that are allocated
             uint32_t m_allocatedInBytes = 0;
@@ -180,14 +180,14 @@ namespace AtomSampleViewer
         void CreateColorBuffer(
             const AZ::Name& bufferName,
             const AZ::Vector4& colorVal,
-            AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer>& buffer,
-            AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferView>& bufferView);
+            AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer>& buffer,
+            AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferView>& bufferView);
 
         // Create indirect buffer that will contain index of the view into the bindless heap
         void CreateIndirectBuffer(
             const AZ::Name& bufferName,
-            AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer>& indirectionBuffer,
-            AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferView>& bufferView,
+            AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer>& indirectionBuffer,
+            AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferView>& bufferView,
             size_t byteSize);
 
         // Helper function to allocate or update data in the FloatBuffer
@@ -276,23 +276,23 @@ namespace AtomSampleViewer
         AZ::Data::Instance<AZ::RPI::Model> m_model = nullptr;
 
         // BufferPool used to allocate buffers in this example
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferPool> m_bufferPool = nullptr;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_bufferPool = nullptr;
 
         // Indirection buffer holding uint indices of texture resources
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_imageIndirectionBuffer = nullptr;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_imageIndirectionBuffer = nullptr;
         // Indirection buffer holding uint indices of buffer resources
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_bufferIndirectionBuffer = nullptr;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_bufferIndirectionBuffer = nullptr;
         // View associated with the buffer holding indices to bindless images
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferView> m_imageIndirectionBufferView = nullptr;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferView> m_imageIndirectionBufferView = nullptr;
         // View associated with the buffer holding indices to bindless buffers
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferView> m_bufferIndirectionBufferView = nullptr;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferView> m_bufferIndirectionBufferView = nullptr;
 
         // Color buffer holding color related floats
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_colorBuffer1 = nullptr;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_colorBuffer2 = nullptr;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_colorBuffer1 = nullptr;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_colorBuffer2 = nullptr;
         // Views related to the buffers declared above
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferView> m_colorBuffer1View = nullptr;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferView> m_colorBuffer2View = nullptr;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferView> m_colorBuffer1View = nullptr;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferView> m_colorBuffer2View = nullptr;
 
         // Thread count for compute shaders.
         int m_bufferNumThreadsX = 1;
@@ -332,9 +332,9 @@ namespace AtomSampleViewer
         AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_imageDispatchPipelineState;
         
         // Compute pass related buffer pool which will create a rwbuffer
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferPool> m_computeBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_computeBuffer;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferView> m_computeBufferView;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_computeBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_computeBuffer;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferView> m_computeBufferView;
         AZ::RHI::BufferViewDescriptor m_rwBufferViewDescriptor;
 
          // Compute pass related image pool which will create a rwimage

@@ -68,8 +68,8 @@ namespace AtomSampleViewer
         AZ::RHI::SingleDeviceStreamBufferView m_streamBufferView[2];
         AZ::RHI::InputStreamLayout m_inputStreamLayout;
 
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBufferPool> m_inputAssemblyBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceBuffer> m_inputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_inputAssemblyBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_inputAssemblyBuffer;
 
         // ----------------------
         // Pipeline state and SRG

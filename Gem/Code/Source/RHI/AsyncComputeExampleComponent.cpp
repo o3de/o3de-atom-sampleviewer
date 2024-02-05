@@ -171,11 +171,11 @@ namespace AtomSampleViewer
     {
         const RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
 
-        m_quadBufferPool = RHI::Factory::Get().CreateBufferPool();
+        m_quadBufferPool = aznew RHI::MultiDeviceBufferPool();
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-        m_quadBufferPool->Init(*device, bufferPoolDesc);
+        m_quadBufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
 
         struct BufferData
         {
@@ -193,9 +193,9 @@ namespace AtomSampleViewer
             uv.m_uv[1] = 1.0f - uv.m_uv[1];
         }
 
-        m_quadInputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
+        m_quadInputAssemblyBuffer = aznew RHI::MultiDeviceBuffer();
         RHI::ResultCode result = RHI::ResultCode::Success;
-        RHI::SingleDeviceBufferInitRequest request;
+        RHI::MultiDeviceBufferInitRequest request;
 
         request.m_buffer = m_quadInputAssemblyBuffer.get();
         request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, sizeof(bufferData) };
@@ -209,7 +209,7 @@ namespace AtomSampleViewer
 
         AZ::RHI::SingleDeviceStreamBufferView positionsBufferView =
         {
-            *m_quadInputAssemblyBuffer,
+            *m_quadInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
             offsetof(BufferData, m_positions),
             sizeof(BufferData::m_positions),
             sizeof(VertexPosition)
@@ -217,7 +217,7 @@ namespace AtomSampleViewer
 
         AZ::RHI::SingleDeviceStreamBufferView normalsBufferView =
         {
-            *m_quadInputAssemblyBuffer,
+            *m_quadInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
             offsetof(BufferData, m_normals),
             sizeof(BufferData::m_normals),
             sizeof(VertexNormal)
@@ -225,7 +225,7 @@ namespace AtomSampleViewer
 
         AZ::RHI::SingleDeviceStreamBufferView uvsBufferView =
         {
-            *m_quadInputAssemblyBuffer,
+            *m_quadInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
             offsetof(BufferData, m_uvs),
             sizeof(BufferData::m_uvs),
             sizeof(VertexUV)
@@ -240,7 +240,7 @@ namespace AtomSampleViewer
 
         m_quadIndexBufferView =
         {
-            *m_quadInputAssemblyBuffer,
+            *m_quadInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
             offsetof(BufferData, m_indices),
             sizeof(BufferData::m_indices),
             RHI::IndexFormat::Uint16
