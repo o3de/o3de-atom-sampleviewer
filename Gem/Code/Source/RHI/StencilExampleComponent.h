@@ -14,7 +14,6 @@
 #include <Atom/RHI/MultiDeviceBufferPool.h>
 #include <Atom/RHI/Device.h>
 #include <Atom/RHI/SingleDeviceDrawItem.h>
-#include <Atom/RHI/SingleDeviceImagePool.h>
 #include <Atom/RHI/SingleDevicePipelineState.h>
 
 namespace AtomSampleViewer

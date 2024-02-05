@@ -439,7 +439,7 @@ namespace AtomSampleViewer
 
         const auto compileFunction = [this](const AZ::RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
-            const AZ::RHI::SingleDeviceImageView* imageView = context.GetImageView(m_sampleProperties[static_cast<uint32_t>(MSAAType::MSAA4X_Custom_Resolve)].m_attachmentId);
+            const auto* imageView = context.GetImageView(m_sampleProperties[static_cast<uint32_t>(MSAAType::MSAA4X_Custom_Resolve)].m_attachmentId);
             m_customMSAAResolveShaderResourceGroup->SetImageView(m_customMSAAResolveTextureInputIndex, imageView);
             m_customMSAAResolveShaderResourceGroup->Compile();
         };

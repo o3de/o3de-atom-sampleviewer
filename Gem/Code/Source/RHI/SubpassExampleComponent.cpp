@@ -487,9 +487,9 @@ namespace AtomSampleViewer
 
         const auto compileFunction = [this](const RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
-            const AZ::RHI::SingleDeviceImageView* positionImageView = context.GetImageView(m_positionAttachmentId);
-            const AZ::RHI::SingleDeviceImageView* normalImageView = context.GetImageView(m_normalAttachmentId);
-            const AZ::RHI::SingleDeviceImageView* albedoImageView = context.GetImageView(m_albedoAttachmentId);
+            const auto* positionImageView = context.GetImageView(m_positionAttachmentId);
+            const auto* normalImageView = context.GetImageView(m_normalAttachmentId);
+            const auto* albedoImageView = context.GetImageView(m_albedoAttachmentId);
 
             m_compositionSubpassInputsSRG->SetImageView(m_subpassInputPosition, positionImageView);
             m_compositionSubpassInputsSRG->SetImageView(m_subpassInputNormal, normalImageView);

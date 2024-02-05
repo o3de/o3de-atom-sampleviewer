@@ -82,8 +82,8 @@ namespace AtomSampleViewer
             RHI::ImagePoolDescriptor imagePoolDesc;
             imagePoolDesc.m_bindFlags = RHI::ImageBindFlags::ShaderReadWrite;
 
-            m_imagePool = RHI::Factory::Get().CreateImagePool();
-            [[maybe_unused]] RHI::ResultCode result = m_imagePool->Init(*device, imagePoolDesc);
+            m_imagePool = aznew RHI::MultiDeviceImagePool();
+            [[maybe_unused]] RHI::ResultCode result = m_imagePool->Init(RHI::MultiDevice::DefaultDevice, imagePoolDesc);
             AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialize output image pool");
         }
 
@@ -202,21 +202,19 @@ namespace AtomSampleViewer
 
     void RayTracingExampleComponent::CreateOutputTexture()
     {
-        RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
-
         // create output image
-        m_outputImage = RHI::Factory::Get().CreateImage();
+        m_outputImage = aznew RHI::MultiDeviceImage();
 
-        RHI::SingleDeviceImageInitRequest request;
+        RHI::MultiDeviceImageInitRequest request;
         request.m_image = m_outputImage.get();
         request.m_descriptor = RHI::ImageDescriptor::Create2D(RHI::ImageBindFlags::ShaderReadWrite, m_imageWidth, m_imageHeight, RHI::Format::R8G8B8A8_UNORM);
         [[maybe_unused]] RHI::ResultCode result = m_imagePool->InitImage(request);
         AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialize output image");
 
         m_outputImageViewDescriptor = RHI::ImageViewDescriptor::Create(RHI::Format::R8G8B8A8_UNORM, 0, 0);
-        m_outputImageView = m_outputImage->GetImageView(m_outputImageViewDescriptor);
+        m_outputImageView = m_outputImage->BuildImageView(m_outputImageViewDescriptor);
         AZ_Assert(m_outputImageView.get(), "Failed to create output image view");
-        AZ_Assert(m_outputImageView->IsFullView(), "Image View initialization IsFullView() failed");
+        AZ_Assert(m_outputImageView->GetDeviceImageView(RHI::MultiDevice::DefaultDeviceIndex)->IsFullView(), "Image View initialization IsFullView() failed");
     }
 
     void RayTracingExampleComponent::CreateRayTracingAccelerationStructureObjects()
@@ -485,7 +483,7 @@ namespace AtomSampleViewer
         {
             // attach output image
             {
-                [[maybe_unused]] RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportImage(m_outputImageAttachmentId, m_outputImage);
+                [[maybe_unused]] RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportImage(m_outputImageAttachmentId, m_outputImage->GetDeviceImage(RHI::MultiDevice::DefaultDeviceIndex));
                 AZ_Error(RayTracingExampleName, result == RHI::ResultCode::Success, "Failed to import output image with error %d", result);
 
                 RHI::ImageScopeAttachmentDescriptor desc;
@@ -524,7 +522,7 @@ namespace AtomSampleViewer
 
                 RHI::ShaderInputImageIndex outputConstantIndex;
                 FindShaderInputIndex(&outputConstantIndex, m_globalSrg, AZ::Name{ "m_output" }, RayTracingExampleName);
-                m_globalSrg->SetImageView(outputConstantIndex, m_outputImageView.get());
+                m_globalSrg->SetImageView(outputConstantIndex, m_outputImageView->GetDeviceImageView(RHI::MultiDevice::DefaultDeviceIndex).get());
 
                 // set hit shader data, each array element corresponds to the InstanceIndex() of the geometry in the TLAS
                 // Note: this method is used instead of LocalRootSignatures for compatibility with non-DX12 platforms
@@ -652,7 +650,7 @@ namespace AtomSampleViewer
                 const Name outputImageId{ "m_output" };
                 RHI::ShaderInputImageIndex outputImageIndex = m_drawSRG->FindShaderInputImageIndex(outputImageId);
                 AZ_Error(RayTracingExampleName, outputImageIndex.IsValid(), "Failed to find shader input image %s.", outputImageId.GetCStr());
-                m_drawSRG->SetImageView(outputImageIndex, m_outputImageView.get());
+                m_drawSRG->SetImageView(outputImageIndex, m_outputImageView->GetDeviceImageView(RHI::MultiDevice::DefaultDeviceIndex).get());
                 m_drawSRG->Compile();
             }
 
