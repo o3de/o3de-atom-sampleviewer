@@ -7,8 +7,6 @@
  */
 
 
-#include <Atom/RHI/SingleDeviceImagePool.h>
-
 #include <Atom/RHI.Reflect/InputStreamLayoutBuilder.h>
 #include <Atom/RHI.Reflect/RenderAttachmentLayoutBuilder.h>
 #include <Atom/RPI.Reflect/Shader/ShaderAsset.h>
@@ -574,7 +572,7 @@ namespace AtomSampleViewer
 
         const auto compileFunction = [this, target](const AZ::RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
-            const AZ::RHI::SingleDeviceImageView* imageView = context.GetImageView(m_attachmentID[target]);
+            const auto* imageView = context.GetImageView(m_attachmentID[target]);
 
             m_screenSRGs[target]->SetImageView(m_shaderInputImageIndices[target], imageView);
             m_screenSRGs[target]->Compile();

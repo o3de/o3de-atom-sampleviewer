@@ -144,9 +144,9 @@ namespace AtomSampleViewer
         AZ::RHI::InputStreamLayout m_inputStreamLayout;
 
         // Image pool containing the shading rate images.
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceImagePool> m_imagePool;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceImagePool> m_imagePool;
         // List of shading rate images used as attachments.
-        AZStd::fixed_vector<AZ::RHI::Ptr<AZ::RHI::SingleDeviceImage>, AZ::RHI::Limits::Device::FrameCountMax> m_shadingRateImages;
+        AZStd::fixed_vector<AZ::RHI::Ptr<AZ::RHI::MultiDeviceImage>, AZ::RHI::Limits::Device::FrameCountMax> m_shadingRateImages;
 
         // Cursor position (mouse or touch)
         AZ::Vector2 m_cursorPos;

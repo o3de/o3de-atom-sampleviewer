@@ -10,8 +10,8 @@
 #include <Atom/RHI/CommandList.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/SingleDeviceImage.h>
-#include <Atom/RHI/SingleDeviceImagePool.h>
+#include <Atom/RHI/MultiDeviceImage.h>
+#include <Atom/RHI/MultiDeviceImagePool.h>
 #include <Atom/RHI/ScopeProducerFunction.h>
 #include <Atom/RHI.Reflect/InputStreamLayoutBuilder.h>
 
@@ -74,7 +74,7 @@ namespace AtomSampleViewer
         // Import non transient images
         for (uint32_t i = 0; i < m_sceneImages.size(); ++i)
         {
-            frameGraphBuilder.GetAttachmentDatabase().ImportImage(m_sceneIds[i], m_sceneImages[i]);
+            frameGraphBuilder.GetAttachmentDatabase().ImportImage(m_sceneIds[i], m_sceneImages[i]->GetDeviceImage(RHI::MultiDevice::DefaultDeviceIndex));
         }
 
         // Generate transient images
@@ -144,17 +144,15 @@ namespace AtomSampleViewer
 
     void AsyncComputeExampleComponent::CreateSceneRenderTargets()
     {
-        const RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
-
-        m_imagePool = RHI::Factory::Get().CreateImagePool();
+        m_imagePool = aznew RHI::MultiDeviceImagePool();
         RHI::ImagePoolDescriptor imagePoolDesc;
         imagePoolDesc.m_bindFlags = RHI::ImageBindFlags::Color | RHI::ImageBindFlags::ShaderReadWrite;
-        m_imagePool->Init(*device, imagePoolDesc);
+        m_imagePool->Init(RHI::MultiDevice::DefaultDevice, imagePoolDesc);
 
         for (auto& image : m_sceneImages)
         {
-            image = RHI::Factory::Get().CreateImage();
-            RHI::SingleDeviceImageInitRequest initImageRequest;
+            image = aznew RHI::MultiDeviceImage();
+            RHI::MultiDeviceImageInitRequest initImageRequest;
             RHI::ClearValue clearValue = RHI::ClearValue::CreateVector4Float(0, 0, 0, 0);
             initImageRequest.m_image = image.get();
             initImageRequest.m_descriptor = RHI::ImageDescriptor::Create2D(
@@ -169,8 +167,6 @@ namespace AtomSampleViewer
 
     void AsyncComputeExampleComponent::CreateQuad()
     {
-        const RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
-
         m_quadBufferPool = aznew RHI::MultiDeviceBufferPool();
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
@@ -795,7 +791,7 @@ namespace AtomSampleViewer
             auto& source = m_sceneIds[m_previousSceneImageIndex];
             auto& shaderResourceGroup = m_shaderResourceGroups[CopyTextureScope].front();
 
-            const RHI::SingleDeviceImageView* imageView = context.GetImageView(source);
+            const auto* imageView = context.GetImageView(source);
             shaderResourceGroup->SetImageView(m_copyTextureShaderInputImageIndex, imageView);
             shaderResourceGroup->Compile();
         };
@@ -967,7 +963,7 @@ namespace AtomSampleViewer
 
         const auto compileFunction = [this](const RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
-            const RHI::SingleDeviceImageView* imageView = context.GetImageView(m_shadowAttachmentId);
+            const auto* imageView = context.GetImageView(m_shadowAttachmentId);
 
             for (const auto& shaderResourceGroup : m_shaderResourceGroups[ForwardScope])
             {
@@ -1080,8 +1076,8 @@ namespace AtomSampleViewer
 
         const auto compileFunction = [this](const RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
-            const RHI::SingleDeviceImageView* hdrSceneView = context.GetImageView(m_sceneIds[m_previousSceneImageIndex]);
-            const RHI::SingleDeviceImageView* luminanceView = context.GetImageView(m_averageLuminanceAttachmentId);
+            const auto* hdrSceneView = context.GetImageView(m_sceneIds[m_previousSceneImageIndex]);
+            const auto* luminanceView = context.GetImageView(m_averageLuminanceAttachmentId);
 
             for (const auto& shaderResourceGroup : m_shaderResourceGroups[TonemappingScope])
             {
@@ -1154,7 +1150,7 @@ namespace AtomSampleViewer
 
         const auto compileFunction = [this](const RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
-            const RHI::SingleDeviceImageView* imageView = context.GetImageView(m_sceneIds[m_previousSceneImageIndex]);
+            const auto* imageView = context.GetImageView(m_sceneIds[m_previousSceneImageIndex]);
 
             for (const auto& shaderResourceGroup : m_shaderResourceGroups[LuminanceMapScope])
             {
@@ -1252,8 +1248,8 @@ namespace AtomSampleViewer
 
             const auto compileFunction = [this, inputAttachmentId, outputAttachmentId, i](const RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
             {
-                const RHI::SingleDeviceImageView* inputView = context.GetImageView(inputAttachmentId);
-                const RHI::SingleDeviceImageView* outputView = context.GetImageView(outputAttachmentId);
+                const auto* inputView = context.GetImageView(inputAttachmentId);
+                const auto* outputView = context.GetImageView(outputAttachmentId);
 
                 const auto& shaderResourceGroup = m_shaderResourceGroups[LuminanceReduceScope][i];
                 shaderResourceGroup->SetImageView(m_luminanceReduceShaderInputImageIndex, inputView);

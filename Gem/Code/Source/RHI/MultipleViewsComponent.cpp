@@ -497,7 +497,7 @@ namespace AtomSampleViewer
 
         const auto compileFunctionMainView = [this](const AZ::RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
-            const AZ::RHI::SingleDeviceImageView* imageView = context.GetImageView(m_transientImageDescriptor.m_attachmentId);
+            const auto* imageView = context.GetImageView(m_transientImageDescriptor.m_attachmentId);
 
             m_shaderResourceGroups[1]->SetImageView(m_shaderInputImageIndex, imageView);
             m_shaderResourceGroups[1]->Compile();

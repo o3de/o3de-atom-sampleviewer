@@ -95,11 +95,11 @@ namespace AtomSampleViewer
         {
             if (m_useImageShadingRate)
             {
-                frameGraphBuilder.GetAttachmentDatabase().ImportImage(RHI::AttachmentId{ VariableRateShading::ShadingRateAttachmentId }, m_shadingRateImages[m_frameCount % m_shadingRateImages.size()]);
+                frameGraphBuilder.GetAttachmentDatabase().ImportImage(RHI::AttachmentId{ VariableRateShading::ShadingRateAttachmentId }, m_shadingRateImages[m_frameCount % m_shadingRateImages.size()]->GetDeviceImage(RHI::MultiDevice::DefaultDeviceIndex));
                 if (!Utils::GetRHIDevice()->GetFeatures().m_dynamicShadingRateImage)
                 {
                     // We cannot update and use the same shading rate image because "m_dynamicShadingRateImage" is not supported.
-                    frameGraphBuilder.GetAttachmentDatabase().ImportImage(RHI::AttachmentId{ VariableRateShading::ShadingRateAttachmentUpdateId }, m_shadingRateImages[(m_frameCount + m_shadingRateImages.size() - 1) % m_shadingRateImages.size()]);
+                    frameGraphBuilder.GetAttachmentDatabase().ImportImage(RHI::AttachmentId{ VariableRateShading::ShadingRateAttachmentUpdateId }, m_shadingRateImages[(m_frameCount + m_shadingRateImages.size() - 1) % m_shadingRateImages.size()]->GetDeviceImage(RHI::MultiDevice::DefaultDeviceIndex));
                 }
             }
             m_frameCount++;
@@ -169,10 +169,10 @@ namespace AtomSampleViewer
         const auto& tileSize = device->GetLimits().m_shadingRateTileSize;
         m_shadingRateImageSize = Vector2(ceil(static_cast<float>(m_outputWidth) / tileSize.m_width), ceil(static_cast<float>(m_outputHeight) / tileSize.m_height));
 
-        m_imagePool = RHI::Factory::Get().CreateImagePool();
+        m_imagePool = aznew RHI::MultiDeviceImagePool();
         RHI::ImagePoolDescriptor imagePoolDesc;
         imagePoolDesc.m_bindFlags = RHI::ImageBindFlags::ShadingRate | RHI::ImageBindFlags::ShaderReadWrite;
-        m_imagePool->Init(*device, imagePoolDesc);
+        m_imagePool->Init(RHI::MultiDevice::DefaultDevice, imagePoolDesc);
 
         // Initialize the shading rate images with proper values. Invalid values may cause a crash.
         uint32_t width = static_cast<uint32_t>(m_shadingRateImageSize.GetX());
@@ -200,8 +200,8 @@ namespace AtomSampleViewer
         m_shadingRateImages.resize(device->GetFeatures().m_dynamicShadingRateImage ? 1 : device->GetDescriptor().m_frameCountMax+3);
         for (auto& image : m_shadingRateImages)
         {
-            image = RHI::Factory::Get().CreateImage();
-            RHI::SingleDeviceImageInitRequest initImageRequest;
+            image = aznew RHI::MultiDeviceImage();
+            RHI::MultiDeviceImageInitRequest initImageRequest;
             RHI::ClearValue clearValue = RHI::ClearValue::CreateVector4Float(1, 1, 1, 1);
             initImageRequest.m_image = image.get();
             initImageRequest.m_descriptor = RHI::ImageDescriptor::Create2D(
@@ -212,17 +212,17 @@ namespace AtomSampleViewer
             initImageRequest.m_optimizedClearValue = &clearValue;
             m_imagePool->InitImage(initImageRequest);
 
-            RHI::SingleDeviceImageUpdateRequest request;
+            RHI::MultiDeviceImageUpdateRequest request;
             request.m_image = image.get();
             request.m_sourceData = shadingRatePatternData.data();
-            request.m_sourceSubresourceLayout = RHI::SingleDeviceImageSubresourceLayout(
+            request.m_sourceSubresourceLayout = RHI::MultiDeviceImageSubresourceLayout();
+            request.m_sourceSubresourceLayout.Init(RHI::MultiDevice::DefaultDevice, {
                 RHI::Size(width, height, 1),
                 height,
                 width * formatSize,
                 bufferSize,
                 1,
-                1
-            );
+                1});
 
             m_imagePool->UpdateImageContents(request);
         }        
@@ -444,8 +444,6 @@ namespace AtomSampleViewer
 
     void VariableRateShadingExampleComponent::CreateInputAssemblyBuffersAndViews()
     {
-        const RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
-
         m_bufferPool = aznew RHI::MultiDeviceBufferPool();
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
@@ -630,7 +628,7 @@ namespace AtomSampleViewer
             if (m_useImageShadingRate)
             {
                 Vector2 center = m_cursorPos * m_shadingRateImageSize;
-                const RHI::SingleDeviceImageView* shadingRateImageView = context.GetImageView(RHI::AttachmentId(shadingRateAttachmentId));
+                const auto* shadingRateImageView = context.GetImageView(RHI::AttachmentId(shadingRateAttachmentId));
                 m_computeShaderResourceGroup->SetImageView(m_shadingRateIndex, shadingRateImageView);
                 m_computeShaderResourceGroup->SetConstant(m_centerIndex, center);
                 m_computeShaderResourceGroup->Compile();
@@ -717,7 +715,7 @@ namespace AtomSampleViewer
         {
             if (m_showShadingRateImage)
             {
-                const RHI::SingleDeviceImageView* shadingRateImageView = context.GetImageView(RHI::AttachmentId(VariableRateShading::ShadingRateAttachmentId));
+                const auto* shadingRateImageView = context.GetImageView(RHI::AttachmentId(VariableRateShading::ShadingRateAttachmentId));
                 m_imageShaderResourceGroup->SetImageView(m_shadingRateDisplayIndex, shadingRateImageView);
                 m_imageShaderResourceGroup->Compile();
             }

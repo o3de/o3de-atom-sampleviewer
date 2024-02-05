@@ -338,9 +338,9 @@ namespace AtomSampleViewer
         AZ::RHI::BufferViewDescriptor m_rwBufferViewDescriptor;
 
          // Compute pass related image pool which will create a rwimage
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceImagePool> m_rwImagePool;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceImage> m_computeImage;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceImageView> m_computeImageView;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceImagePool> m_rwImagePool;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceImage> m_computeImage;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceImageView> m_computeImageView;
         AZ::RHI::ImageViewDescriptor m_rwImageViewDescriptor;
 
         // Compute pass related SRGs
