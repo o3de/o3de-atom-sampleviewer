@@ -20,8 +20,8 @@
 #include <Atom/RHI/MultiDeviceBufferPool.h>
 #include <Atom/RHI/SingleDeviceDrawItem.h>
 #include <Atom/RHI/SingleDevicePipelineState.h>
-#include <Atom/RHI/SingleDeviceQueryPool.h>
-#include <Atom/RHI/SingleDeviceQuery.h>
+#include <Atom/RHI/MultiDeviceQueryPool.h>
+#include <Atom/RHI/MultiDeviceQuery.h>
 #include <Atom/RHI/SingleDeviceStreamBufferView.h>
 
 #include <RHI/BasicRHIComponent.h>
@@ -109,13 +109,13 @@ namespace AtomSampleViewer
         AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_quadPipelineState;
         AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_boudingBoxPipelineState;
 
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceQueryPool> m_occlusionQueryPool;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceQueryPool> m_timeStampQueryPool;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceQueryPool> m_statisticsQueryPool;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceQueryPool> m_occlusionQueryPool;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceQueryPool> m_timeStampQueryPool;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceQueryPool> m_statisticsQueryPool;
 
         struct QueryEntry
         {
-            AZ::RHI::Ptr<AZ::RHI::SingleDeviceQuery> m_query;
+            AZ::RHI::Ptr<AZ::RHI::MultiDeviceQuery> m_query;
             bool m_isValid = false; // Indicates if the query has been written at least once.
         };
 

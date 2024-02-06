@@ -286,7 +286,7 @@ namespace AtomSampleViewer
             AZ_Error(QueryExample::SampleName, result == RHI::ResultCode::Success, "Failed to import predication buffer with error %d", result);
 
             frameGraph.UseQueryPool(
-                m_occlusionQueryPool,
+                m_occlusionQueryPool->GetDeviceQueryPool(RHI::MultiDevice::DefaultDeviceIndex),
                 RHI::Interval(m_currentOcclusionQueryIndex, m_currentOcclusionQueryIndex),
                 RHI::QueryPoolScopeAttachmentType::Local,
                 RHI::ScopeAttachmentAccess::Read);
@@ -306,8 +306,8 @@ namespace AtomSampleViewer
             }
             
             RHI::SingleDeviceCopyQueryToBufferDescriptor descriptor;
-            descriptor.m_sourceQueryPool = m_occlusionQueryPool.get();
-            descriptor.m_firstQuery = m_occlusionQueries[m_currentOcclusionQueryIndex].m_query->GetHandle();
+            descriptor.m_sourceQueryPool = m_occlusionQueryPool->GetDeviceQueryPool(RHI::MultiDevice::DefaultDeviceIndex).get();
+            descriptor.m_firstQuery = m_occlusionQueries[m_currentOcclusionQueryIndex].m_query->GetHandle(RHI::MultiDevice::DefaultDeviceIndex);
             descriptor.m_queryCount = 1;
             descriptor.m_destinationBuffer = m_predicationBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex).get();
             descriptor.m_destinationOffset = 0;
@@ -376,7 +376,7 @@ namespace AtomSampleViewer
             // Query pools
             {
                 frameGraph.UseQueryPool(
-                    m_occlusionQueryPool,
+                    m_occlusionQueryPool->GetDeviceQueryPool(RHI::MultiDevice::DefaultDeviceIndex),
                     RHI::Interval(m_currentOcclusionQueryIndex, m_currentOcclusionQueryIndex),
                     m_currentType == QueryType::Predication ? RHI::QueryPoolScopeAttachmentType::Local : RHI::QueryPoolScopeAttachmentType::Global, 
                     RHI::ScopeAttachmentAccess::Write);
@@ -384,7 +384,7 @@ namespace AtomSampleViewer
                 if (m_timestampEnabled)
                 {
                     frameGraph.UseQueryPool(
-                        m_timeStampQueryPool,
+                        m_timeStampQueryPool->GetDeviceQueryPool(RHI::MultiDevice::DefaultDeviceIndex),
                         RHI::Interval(m_currentTimestampQueryIndex, m_currentTimestampQueryIndex + 1),
                         RHI::QueryPoolScopeAttachmentType::Global,
                         RHI::ScopeAttachmentAccess::Write);
@@ -393,7 +393,7 @@ namespace AtomSampleViewer
                 if (m_pipelineStatisticsEnabled)
                 {
                     frameGraph.UseQueryPool(
-                        m_statisticsQueryPool,
+                        m_statisticsQueryPool->GetDeviceQueryPool(RHI::MultiDevice::DefaultDeviceIndex),
                         RHI::Interval(m_currentStatisticsQueryIndex, m_currentStatisticsQueryIndex),
                         RHI::QueryPoolScopeAttachmentType::Global,
                         RHI::ScopeAttachmentAccess::Write);
@@ -455,13 +455,13 @@ namespace AtomSampleViewer
                 {
                     if (m_timestampEnabled)
                     {
-                        m_timestampQueries[m_currentTimestampQueryIndex].m_query->WriteTimestamp(*commandList);
+                        m_timestampQueries[m_currentTimestampQueryIndex].m_query->GetDeviceQuery(RHI::MultiDevice::DefaultDeviceIndex)->WriteTimestamp(*commandList);
                         m_timestampQueries[m_currentTimestampQueryIndex].m_isValid = true;
                     }
 
                     if (m_pipelineStatisticsEnabled)
                     {
-                        m_statisticsQueries[m_currentStatisticsQueryIndex].m_query->Begin(*commandList);
+                        m_statisticsQueries[m_currentStatisticsQueryIndex].m_query->GetDeviceQuery(RHI::MultiDevice::DefaultDeviceIndex)->Begin(*commandList);
                     }
 
                     switch (m_currentType)
@@ -493,13 +493,13 @@ namespace AtomSampleViewer
 
                     if (m_pipelineStatisticsEnabled)
                     {
-                        m_statisticsQueries[m_currentStatisticsQueryIndex].m_query->End(*commandList);
+                        m_statisticsQueries[m_currentStatisticsQueryIndex].m_query->GetDeviceQuery(RHI::MultiDevice::DefaultDeviceIndex)->End(*commandList);
                         m_statisticsQueries[m_currentStatisticsQueryIndex].m_isValid = true;
                     }
 
                     if (m_timestampEnabled)
                     {
-                        m_timestampQueries[m_currentTimestampQueryIndex + 1].m_query->WriteTimestamp(*commandList);
+                        m_timestampQueries[m_currentTimestampQueryIndex + 1].m_query->GetDeviceQuery(RHI::MultiDevice::DefaultDeviceIndex)->WriteTimestamp(*commandList);
                         m_timestampQueries[m_currentTimestampQueryIndex + 1].m_isValid = true;
                     }
                 }
@@ -512,9 +512,9 @@ namespace AtomSampleViewer
                 drawItem.m_pipelineState = m_boudingBoxPipelineState.get();
                 shaderResourceGroups[0] = m_shaderResourceGroups[2]->GetRHIShaderResourceGroup();
                 auto& queryEntry = m_occlusionQueries[m_currentOcclusionQueryIndex];
-                queryEntry.m_query->Begin(*commandList, m_precisionOcclusionEnabled ? RHI::QueryControlFlags::PreciseOcclusion : RHI::QueryControlFlags::None);
+                queryEntry.m_query->GetDeviceQuery(RHI::MultiDevice::DefaultDeviceIndex)->Begin(*commandList, m_precisionOcclusionEnabled ? RHI::QueryControlFlags::PreciseOcclusion : RHI::QueryControlFlags::None);
                 commandList->Submit(drawItem, 2);
-                queryEntry.m_query->End(*commandList);
+                queryEntry.m_query->GetDeviceQuery(RHI::MultiDevice::DefaultDeviceIndex)->End(*commandList);
                 queryEntry.m_isValid = true;
             }
         };
@@ -535,7 +535,7 @@ namespace AtomSampleViewer
     }
 
     template<class T>
-    void CreateQueries(AZ::RHI::Ptr<AZ::RHI::SingleDeviceQueryPool>& queryPool, T& queries, AZ::RHI::QueryType type, AZ::RHI::PipelineStatisticsFlags statisticsMask = AZ::RHI::PipelineStatisticsFlags::None)
+    void CreateQueries(AZ::RHI::Ptr<AZ::RHI::MultiDeviceQueryPool>& queryPool, T& queries, AZ::RHI::QueryType type, AZ::RHI::PipelineStatisticsFlags statisticsMask = AZ::RHI::PipelineStatisticsFlags::None)
     {
         using namespace AZ;
         RHI::Ptr<AZ::RHI::Device> device = Utils::GetRHIDevice();
@@ -552,8 +552,8 @@ namespace AtomSampleViewer
         queryPoolDesc.m_type = type;
         queryPoolDesc.m_pipelineStatisticsMask = statisticsMask;
 
-        queryPool = RHI::Factory::Get().CreateQueryPool();
-        auto result = queryPool->Init(*device, queryPoolDesc);
+        queryPool = aznew RHI::MultiDeviceQueryPool;
+        auto result = queryPool->Init(RHI::MultiDevice::DefaultDevice, queryPoolDesc);
         if (result != RHI::ResultCode::Success)
         {
             AZ_Assert(false, "Failed to createa query pool");
@@ -562,7 +562,7 @@ namespace AtomSampleViewer
 
         for (auto& queryEntry : queries)
         {
-            queryEntry.m_query = RHI::Factory::Get().CreateQuery();
+            queryEntry.m_query = aznew RHI::MultiDeviceQuery;
             queryPool->InitQuery(queryEntry.m_query.get());
         }
     }
@@ -681,7 +681,7 @@ namespace AtomSampleViewer
             uint64_t timestamps[2] = {};
             if (m_timestampQueries[beginIndex].m_isValid && m_timestampQueries[beginIndex + 1].m_isValid)
             {
-                AZ::RHI::SingleDeviceQuery* queries[] = { m_timestampQueries[beginIndex].m_query.get() , m_timestampQueries[beginIndex + 1].m_query.get() };
+                AZ::RHI::MultiDeviceQuery* queries[] = { m_timestampQueries[beginIndex].m_query.get() , m_timestampQueries[beginIndex + 1].m_query.get() };
                 m_timeStampQueryPool->GetResults(queries, 2, timestamps, 2, AZ::RHI::QueryResultFlagBits::Wait);
             }
             
