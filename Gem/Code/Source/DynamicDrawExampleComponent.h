@@ -18,7 +18,7 @@
 
 #include <Atom/RHI/SingleDeviceStreamBufferView.h>
 #include <Atom/RHI/SingleDeviceIndexBufferView.h>
-#include <Atom/RHI/SingleDevicePipelineState.h>
+#include <Atom/RHI/MultiDevicePipelineState.h>
 #include <Atom/RHI/DrawList.h>
 
 #include <Utils/ImGuiSidebar.h>

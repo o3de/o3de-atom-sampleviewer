@@ -22,7 +22,7 @@
 #include <Atom/RHI/Device.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/SingleDevicePipelineState.h>
+#include <Atom/RHI/MultiDevicePipelineState.h>
 #include <Atom/RHI/RHISystemInterface.h>
 
 #include <AzFramework/Entity/EntityContextBus.h>
@@ -73,7 +73,7 @@ namespace AtomSampleViewer
         struct ModelData
         {
             AZ::RPI::ModelLod::StreamBufferViewList m_streamBufferList;
-            AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_pipelineState;
+            AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_pipelineState;
             AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_shaderResourceGroup;
             ModelType m_modelType = ModelType_ShaderBall;
         };
@@ -125,6 +125,6 @@ namespace AtomSampleViewer
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_sceneShaderResourceGroup;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_compositionSubpassInputsSRG;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_viewShaderResourceGroup;
-        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_compositionPipeline;
+        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_compositionPipeline;
     };
 } // namespace AtomSampleViewer

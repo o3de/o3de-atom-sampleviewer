@@ -312,7 +312,7 @@ namespace AtomSampleViewer
 
                 RHI::SingleDeviceDrawPacketBuilder::SingleDeviceDrawRequest drawRequest;
                 drawRequest.m_listTag = m_drawListTag;
-                drawRequest.m_pipelineState = m_pipelineState.get();
+                drawRequest.m_pipelineState = m_pipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
                 drawRequest.m_streamBufferViews = m_modelStreamBufferViews[modelIndex][i];
                 drawRequest.m_sortKey = 0;
                 drawPacketBuilder.AddDrawItem(drawRequest);

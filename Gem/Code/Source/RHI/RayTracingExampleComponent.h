@@ -17,7 +17,7 @@
 #include <Atom/RHI/SingleDeviceDispatchRaysItem.h>
 #include <Atom/RHI/Device.h>
 #include <Atom/RHI/Factory.h>
-#include <Atom/RHI/SingleDevicePipelineState.h>
+#include <Atom/RHI/MultiDevicePipelineState.h>
 #include <Atom/RHI/MultiDeviceBufferPool.h>
 #include <RHI/BasicRHIComponent.h>
 #include <Atom/RHI/SingleDeviceRayTracingBufferPools.h>
@@ -105,7 +105,7 @@ namespace AtomSampleViewer
 
         // ray tracing global shader resource group and pipeline state
         Data::Instance<RPI::ShaderResourceGroup> m_globalSrg;
-        RHI::ConstPtr<RHI::SingleDevicePipelineState> m_globalPipelineState;
+        RHI::ConstPtr<RHI::MultiDevicePipelineState> m_globalPipelineState;
 
         // ray tracing local shader resource groups, one for each object in the scene
         enum LocalSrgs
@@ -138,7 +138,7 @@ namespace AtomSampleViewer
         RHI::SingleDeviceIndexBufferView m_fullScreenIndexBufferView;
         RHI::InputStreamLayout m_fullScreenInputStreamLayout;
 
-        RHI::ConstPtr<RHI::SingleDevicePipelineState> m_drawPipelineState;
+        RHI::ConstPtr<RHI::MultiDevicePipelineState> m_drawPipelineState;
         Data::Instance<RPI::ShaderResourceGroup> m_drawSRG;
         RHI::ShaderInputConstantIndex m_drawDimensionConstantIndex;
         RHI::SingleDeviceDrawItem m_drawItem;

@@ -208,7 +208,7 @@ namespace AtomSampleViewer
 
             RHI::SingleDeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;
-            drawItem.m_pipelineState = m_pipelineState.get();
+            drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
             drawItem.m_indexBufferView = &m_indexBufferView;
             drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
             drawItem.m_streamBufferViews = m_streamBufferViews.data();

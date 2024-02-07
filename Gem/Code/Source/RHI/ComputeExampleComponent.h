@@ -101,13 +101,13 @@ namespace AtomSampleViewer
         // ----------------------
 
         // Dispatch pipeline
-        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_dispatchPipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_dispatchPipelineState;
         AZStd::array< AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, s_numberOfSRGs> m_dispatchSRGs;
         AZ::RHI::ShaderInputConstantIndex m_dispatchDimensionConstantIndex;
         AZ::RHI::ShaderInputConstantIndex m_dispatchSeedConstantIndex;
 
         // Draw pipeline
-        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_drawPipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_drawPipelineState;
         AZStd::array< AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, s_numberOfSRGs> m_drawSRGs;
         AZ::RHI::ShaderInputConstantIndex m_drawDimensionConstantIndex;
 

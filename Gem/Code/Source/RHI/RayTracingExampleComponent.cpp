@@ -294,7 +294,7 @@ namespace AtomSampleViewer
         // build the ray tracing pipeline state descriptor
         RHI::SingleDeviceRayTracingPipelineStateDescriptor descriptor;
         descriptor.Build()
-            ->PipelineState(m_globalPipelineState.get())
+            ->PipelineState(m_globalPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get())
             ->ShaderLibrary(rayGenerationShaderDescriptor)
                 ->RayGenerationShaderName(AZ::Name("RayGenerationShader"))
             ->ShaderLibrary(missShaderDescriptor)
@@ -603,7 +603,7 @@ namespace AtomSampleViewer
             dispatchRaysItem.m_rayTracingShaderTable = m_rayTracingShaderTable.get();
             dispatchRaysItem.m_shaderResourceGroupCount = RHI::ArraySize(shaderResourceGroups);
             dispatchRaysItem.m_shaderResourceGroups = shaderResourceGroups;
-            dispatchRaysItem.m_globalPipelineState = m_globalPipelineState.get();
+            dispatchRaysItem.m_globalPipelineState = m_globalPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
 
             // submit the DispatchRays item
             commandList->Submit(dispatchRaysItem);
@@ -674,7 +674,7 @@ namespace AtomSampleViewer
 
             RHI::SingleDeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;
-            drawItem.m_pipelineState = m_drawPipelineState.get();
+            drawItem.m_pipelineState = m_drawPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
             drawItem.m_indexBufferView = &m_fullScreenIndexBufferView;
             drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_fullScreenStreamBufferViews.size());
             drawItem.m_streamBufferViews = m_fullScreenStreamBufferViews.data();
