@@ -298,7 +298,7 @@ namespace AtomSampleViewer
             dispatchArgs.m_totalNumberOfThreadsZ = 1;
 
             dispatchItem.m_arguments = dispatchArgs;
-            dispatchItem.m_pipelineState = m_dispatchPipelineState.get();
+            dispatchItem.m_pipelineState = m_dispatchPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
             dispatchItem.m_shaderResourceGroupCount = 1;
 
             for (uint32_t index = context.GetSubmitRange().m_startIndex; index < context.GetSubmitRange().m_endIndex; ++index)
@@ -402,7 +402,7 @@ namespace AtomSampleViewer
 
             RHI::SingleDeviceDrawItem drawItem;
             drawItem.m_arguments = drawLinear;
-            drawItem.m_pipelineState = m_drawPipelineState.get();
+            drawItem.m_pipelineState = m_drawPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
             drawItem.m_indexBufferView = nullptr;
             drawItem.m_streamBufferViewCount = 1;
             drawItem.m_shaderResourceGroupCount = 1;

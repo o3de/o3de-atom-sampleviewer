@@ -360,7 +360,7 @@ namespace AtomSampleViewer
         m_indirectDrawBufferSignature = RHI::Factory::Get().CreateIndirectBufferSignature();
         RHI::SingleDeviceIndirectBufferSignatureDescriptor signatureDescriptor;
         signatureDescriptor.m_layout = m_indirectDrawBufferLayout;
-        signatureDescriptor.m_pipelineState = m_drawPipelineState.get();
+        signatureDescriptor.m_pipelineState = m_drawPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
         result = m_indirectDrawBufferSignature->Init(*device, signatureDescriptor);
 
         if (result != RHI::ResultCode::Success)
@@ -741,7 +741,7 @@ namespace AtomSampleViewer
             RHI::DispatchIndirect dispatchArgs(1, m_indirectDispatchBufferView, 0);
 
             dispatchItem.m_arguments = dispatchArgs;
-            dispatchItem.m_pipelineState = m_cullPipelineState.get();
+            dispatchItem.m_pipelineState = m_cullPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
             dispatchItem.m_shaderResourceGroupCount = static_cast<uint8_t>(numSrgs);
 
             commandList->Submit(dispatchItem);
@@ -850,7 +850,7 @@ namespace AtomSampleViewer
 
                 RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = m_drawIndirect;
-                drawItem.m_pipelineState = m_drawPipelineState.get();
+                drawItem.m_pipelineState = m_drawPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
                 drawItem.m_indexBufferView = &m_indexBufferViews[0];
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;

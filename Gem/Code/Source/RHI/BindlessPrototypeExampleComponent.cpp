@@ -1059,7 +1059,7 @@ namespace AtomSampleViewer
             dispatchArgs.m_totalNumberOfThreadsZ = 1;
 
             dispatchItem.m_arguments = dispatchArgs;
-            dispatchItem.m_pipelineState = m_bufferDispatchPipelineState.get();
+            dispatchItem.m_pipelineState = m_bufferDispatchPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
             dispatchItem.m_shaderResourceGroupCount = 1;
             dispatchItem.m_shaderResourceGroups = shaderResourceGroups;
 
@@ -1132,7 +1132,7 @@ namespace AtomSampleViewer
             dispatchArgs.m_totalNumberOfThreadsZ = 1;
 
             dispatchItem.m_arguments = dispatchArgs;
-            dispatchItem.m_pipelineState = m_imageDispatchPipelineState.get();
+            dispatchItem.m_pipelineState = m_imageDispatchPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
             dispatchItem.m_shaderResourceGroupCount = 1;
             dispatchItem.m_shaderResourceGroups = shaderResourceGroups;
 
@@ -1269,7 +1269,7 @@ namespace AtomSampleViewer
                     };
                     RHI::SingleDeviceDrawItem drawItem;
                     drawItem.m_arguments = subMesh.m_mesh->m_drawArguments;
-                    drawItem.m_pipelineState = m_pipelineState.get();
+                    drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
                     drawItem.m_indexBufferView = &subMesh.m_mesh->m_indexBufferView;
                     drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                     drawItem.m_shaderResourceGroups = shaderResourceGroups;

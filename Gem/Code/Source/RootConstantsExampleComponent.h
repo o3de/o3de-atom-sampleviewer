@@ -13,7 +13,7 @@
 #include <Atom/Feature/CoreLights/DirectionalLightFeatureProcessorInterface.h>
 
 #include <Atom/RHI/SingleDeviceIndexBufferView.h>
-#include <Atom/RHI/SingleDevicePipelineState.h>
+#include <Atom/RHI/MultiDevicePipelineState.h>
 #include <Atom/RHI/DrawList.h>
 #include <Atom/RHI/ConstantsData.h>
 
@@ -75,7 +75,7 @@ namespace AtomSampleViewer
         AZ::Render::DirectionalLightFeatureProcessorInterface* m_directionalLightFeatureProcessor = nullptr;
 
         // Render related data
-        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_pipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_pipelineState;
         AZ::RHI::DrawListTag m_drawListTag;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_srg;
 

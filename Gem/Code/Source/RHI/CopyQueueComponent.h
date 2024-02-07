@@ -18,7 +18,7 @@
 #include <Atom/RHI/SingleDeviceDrawItem.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/SingleDevicePipelineState.h>
+#include <Atom/RHI/MultiDevicePipelineState.h>
 
 #include <RHI/BasicRHIComponent.h>
 
@@ -65,7 +65,7 @@ namespace AtomSampleViewer
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_positionBuffer;
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_uvBuffer;
 
-        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_pipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_pipelineState;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_shaderResourceGroup;
 
         AZ::RHI::ShaderInputConstantIndex m_objectMatrixConstantIndex;

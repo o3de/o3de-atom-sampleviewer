@@ -229,7 +229,7 @@ namespace AtomSampleViewer
 
                         // Draw color triangles
                         drawItem.m_arguments = drawIndexed;
-                        drawItem.m_pipelineState = m_pipelineStateBasePass.get();
+                        drawItem.m_pipelineState = m_pipelineStateBasePass->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
                         commandList->Submit(drawItem, i);
                     }
                     else
@@ -240,7 +240,7 @@ namespace AtomSampleViewer
                         drawItem.m_stencilRef = 1;
 
                         drawItem.m_arguments = drawIndexed;
-                        drawItem.m_pipelineState = m_pipelineStateStencil[i-1].get();
+                        drawItem.m_pipelineState = m_pipelineStateStencil[i-1]->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
                         commandList->Submit(drawItem, i);
 
                         drawIndexed.m_indexOffset += 3;

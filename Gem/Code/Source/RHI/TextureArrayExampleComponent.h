@@ -43,7 +43,7 @@ namespace AtomSampleViewer
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_rectangleInputAssemblyBuffer;
         AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> m_rectangleStreamBufferViews;
         AZ::RHI::InputStreamLayout m_rectangleInputStreamLayout;
-        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_pipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_pipelineState;
 
         // Srg related resources
         AZ::Data::Instance<AZ::RPI::Shader> m_shader;

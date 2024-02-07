@@ -91,7 +91,7 @@ namespace AZ
                         
             RHI::SingleDeviceRayTracingPipelineStateDescriptor descriptor;
             descriptor.Build()
-                ->PipelineState(m_globalPipelineState.get())
+                ->PipelineState(m_globalPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get())
                 ->ShaderLibrary(rayGenerationShaderDescriptor)
                 ->RayGenerationShaderName(AZ::Name("AoRayGen"))
                 ->ShaderLibrary(missShaderDescriptor)
@@ -233,7 +233,7 @@ namespace AZ
             dispatchRaysItem.m_rayTracingShaderTable = m_rayTracingShaderTable.get();
             dispatchRaysItem.m_shaderResourceGroupCount = 1;
             dispatchRaysItem.m_shaderResourceGroups = shaderResourceGroups;
-            dispatchRaysItem.m_globalPipelineState = m_globalPipelineState.get();
+            dispatchRaysItem.m_globalPipelineState = m_globalPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
 
             // submit the DispatchRays item
             context.GetCommandList()->Submit(dispatchRaysItem);

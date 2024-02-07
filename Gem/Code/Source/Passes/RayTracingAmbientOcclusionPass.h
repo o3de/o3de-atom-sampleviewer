@@ -69,7 +69,7 @@ namespace AZ
             RHI::Ptr<RHI::SingleDeviceRayTracingShaderTable> m_rayTracingShaderTable;
 
             // ray tracing global pipeline state
-            RHI::ConstPtr<RHI::SingleDevicePipelineState> m_globalPipelineState;
+            RHI::ConstPtr<RHI::MultiDevicePipelineState> m_globalPipelineState;
 
             Render::RayTracingFeatureProcessor* m_rayTracingFeatureProcessor = nullptr;
 

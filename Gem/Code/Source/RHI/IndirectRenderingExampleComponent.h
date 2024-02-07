@@ -27,7 +27,7 @@
 #include <Atom/RHI/FrameScheduler.h>
 #include <Atom/RHI/SingleDeviceIndirectBufferSignature.h>
 #include <Atom/RHI/SingleDeviceIndirectBufferWriter.h>
-#include <Atom/RHI/SingleDevicePipelineState.h>
+#include <Atom/RHI/MultiDevicePipelineState.h>
 
 #include <Atom/RHI.Reflect/IndirectBufferLayout.h>
 
@@ -163,8 +163,8 @@ namespace AtomSampleViewer
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_resetCounterBuffer;
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_indirectDispatchBuffer;
 
-        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_drawPipelineState;
-        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_cullPipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_drawPipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_cullPipelineState;
 
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_sceneShaderResourceGroup;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_cullShaderResourceGroup;
