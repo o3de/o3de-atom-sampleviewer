@@ -196,7 +196,7 @@ namespace AtomSampleViewer
         }
     }
 
-    const AZ::RHI::SingleDevicePipelineState* CreatePipelineState(
+    const AZ::RHI::MultiDevicePipelineState* CreatePipelineState(
         const AZ::RHI::InputStreamLayout& inputStreamLayout, 
         const AZ::Data::Instance<AZ::RPI::Shader>& shader, 
         const AZ::RHI::Format format,
@@ -444,7 +444,7 @@ namespace AtomSampleViewer
 
                 RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
-                drawItem.m_pipelineState = m_quadPipelineState.get();
+                drawItem.m_pipelineState = m_quadPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
                 drawItem.m_indexBufferView = &quadIndexBufferView;
                 drawItem.m_streamBufferViewCount = 1;
                 drawItem.m_streamBufferViews = &m_quadStreamBufferView;
@@ -509,7 +509,7 @@ namespace AtomSampleViewer
                 commandList->Submit(drawItem, 1);
 
                 // Draw quad to use for the oclussion query
-                drawItem.m_pipelineState = m_boudingBoxPipelineState.get();
+                drawItem.m_pipelineState = m_boudingBoxPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
                 shaderResourceGroups[0] = m_shaderResourceGroups[2]->GetRHIShaderResourceGroup();
                 auto& queryEntry = m_occlusionQueries[m_currentOcclusionQueryIndex];
                 queryEntry.m_query->GetDeviceQuery(RHI::MultiDevice::DefaultDeviceIndex)->Begin(*commandList, m_precisionOcclusionEnabled ? RHI::QueryControlFlags::PreciseOcclusion : RHI::QueryControlFlags::None);

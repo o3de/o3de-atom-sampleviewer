@@ -9,7 +9,7 @@
 
 #include <AzCore/Component/TickBus.h>
 
-#include <Atom/RHI/SingleDevicePipelineState.h>
+#include <Atom/RHI/MultiDevicePipelineState.h>
 #include <RHI/BasicRHIComponent.h>
 
 namespace AtomSampleViewer
@@ -70,7 +70,7 @@ namespace AtomSampleViewer
         // ----------------------------------
         // Pipeline and Shader Resource Group
         // ----------------------------------
-        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_pipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_pipelineState;
         AZ::Data::Instance < AZ::RPI::ShaderResourceGroup> m_shaderResourceGroup;
         AZ::RHI::ShaderInputConstantIndex m_blendFactorIndex;
 

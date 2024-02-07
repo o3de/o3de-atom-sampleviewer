@@ -63,7 +63,7 @@ namespace AtomSampleViewer
         AZStd::array<AZ::RHI::TransientImageDescriptor, 3> m_renderTargetImageDescriptors;
 
         AZ::RHI::InputStreamLayout m_inputStreamLayout;
-        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState>,2> m_pipelineStates;
+        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState>,2> m_pipelineStates;
         AZStd::array<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, 2> m_shaderResourceGroups;
 
         AZStd::array<AZ::RHI::ShaderInputConstantIndex, 3> m_shaderInputConstantIndices;

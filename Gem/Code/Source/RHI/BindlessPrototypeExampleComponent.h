@@ -9,7 +9,7 @@
 #pragma once
 
 #include <Atom/RHI.Reflect/Handle.h>
-#include <Atom/RHI/SingleDevicePipelineState.h>
+#include <Atom/RHI/MultiDevicePipelineState.h>
 
 #include <Atom/RPI.Public/Model/ModelLod.h>
 #include <Atom/RPI.Public/Model/Model.h>
@@ -241,7 +241,7 @@ namespace AtomSampleViewer
         AZStd::vector<ObjectInterval> m_objectIntervalArray;
 
         // NOTE: Assume the same pipeline for every draw item
-        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_pipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_pipelineState;
 
         // Handle holding the world matrix
         FloatBufferHandle m_worldToClipHandle;
@@ -328,8 +328,8 @@ namespace AtomSampleViewer
         static constexpr uint32_t m_objectCount = m_maxObjectPerAxis * m_maxObjectPerAxis * m_maxObjectPerAxis;
 
         // Compute pass related PSOs
-        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_bufferDispatchPipelineState;
-        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_imageDispatchPipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_bufferDispatchPipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_imageDispatchPipelineState;
         
         // Compute pass related buffer pool which will create a rwbuffer
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_computeBufferPool;

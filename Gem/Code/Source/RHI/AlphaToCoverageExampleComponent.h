@@ -21,7 +21,7 @@
 #include <Atom/RHI/MultiDeviceBuffer.h>
 #include <Atom/RHI/MultiDeviceBufferPool.h>
 #include <Atom/RHI/SingleDeviceDrawItem.h>
-#include <Atom/RHI/SingleDevicePipelineState.h>
+#include <Atom/RHI/MultiDevicePipelineState.h>
 #include <Atom/RHI/SingleDeviceStreamBufferView.h>
 
 #include <RHI/BasicRHIComponent.h>
@@ -105,7 +105,7 @@ namespace AtomSampleViewer
         AZStd::array<AZStd::array<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, s_numRectangles>, s_numBlendTypes> m_shaderResourceGroups;
 
         // Pipeline State and Shader
-        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState>, s_numBlendTypes> m_pipelineStates;
+        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState>, s_numBlendTypes> m_pipelineStates;
         AZ::Data::Instance<AZ::RPI::Shader> m_shader;
     };
 } // namespace AtomSampleViewer

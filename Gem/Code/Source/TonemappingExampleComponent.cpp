@@ -205,7 +205,7 @@ namespace AtomSampleViewer
             const char* srgName,
             Data::Asset<AZ::RPI::ShaderAsset>& shaderAsset,
             RHI::Ptr<AZ::RHI::ShaderResourceGroupLayout>& srgLayout,
-            RHI::ConstPtr<RHI::SingleDevicePipelineState>& pipelineState,
+            RHI::ConstPtr<RHI::MultiDevicePipelineState>& pipelineState,
             RHI::DrawListTag& drawListTag,
             RPI::Scene* scene)
         {
@@ -279,7 +279,7 @@ namespace AtomSampleViewer
 
         RHI::SingleDeviceDrawPacketBuilder::SingleDeviceDrawRequest drawRequest;
         drawRequest.m_listTag = m_drawListTag;
-        drawRequest.m_pipelineState = m_pipelineState.get();
+        drawRequest.m_pipelineState = m_pipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
         drawRequest.m_sortKey = 0;
         drawRequest.m_uniqueShaderResourceGroup = imageInfo->m_srg->GetRHIShaderResourceGroup();
         drawPacketBuilder.AddDrawItem(drawRequest);

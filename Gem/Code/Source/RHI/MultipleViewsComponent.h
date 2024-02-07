@@ -13,7 +13,7 @@
 #include <Atom/RHI/MultiDeviceBuffer.h>
 #include <Atom/RHI/MultiDeviceBufferPool.h>
 #include <Atom/RHI/SingleDeviceDrawItem.h>
-#include <Atom/RHI/SingleDevicePipelineState.h>
+#include <Atom/RHI/MultiDevicePipelineState.h>
 #include <Atom/RPI.Public/Image/AttachmentImage.h>
 
 #include <AzCore/Component/EntityBus.h>
@@ -95,7 +95,7 @@ namespace AtomSampleViewer
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_inputAssemblyBuffer;
 
         AZ::RHI::InputStreamLayout m_inputStreamLayout;
-        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState>, 2> m_pipelineStates;
+        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState>, 2> m_pipelineStates;
         AZStd::array<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, 2> m_shaderResourceGroups;
         AZStd::array<AZ::RHI::ShaderInputConstantIndex, 6> m_shaderInputConstantIndices;
         AZ::RHI::ShaderInputImageIndex m_shaderInputImageIndex;
