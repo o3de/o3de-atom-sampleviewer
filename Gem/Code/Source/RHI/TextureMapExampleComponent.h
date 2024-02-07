@@ -9,7 +9,7 @@
 
 #include <AzCore/Component/TickBus.h>
 #include <AzCore/Math/Matrix3x3.h>
-#include <Atom/RHI/SingleDevicePipelineState.h>
+#include <Atom/RHI/MultiDevicePipelineState.h>
 #include <RHI/BasicRHIComponent.h>
 
 namespace AtomSampleViewer
@@ -125,11 +125,11 @@ namespace AtomSampleViewer
         // ---------------------------------------
         // Pipeline state, SRG, shader input index
         // ---------------------------------------
-        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState>, s_numOfTargets> m_targetPipelineStates;
+        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState>, s_numOfTargets> m_targetPipelineStates;
         AZStd::array<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, s_numOfTargets> m_targetSRGs;
         AZStd::array<AZ::RHI::ShaderInputConstantIndex, s_numOfTargets> m_shaderInputConstantIndices;
 
-        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState>, s_numOfTargets> m_screenPipelineStates;
+        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState>, s_numOfTargets> m_screenPipelineStates;
         AZStd::array<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, s_numOfTargets> m_screenSRGs;
         AZStd::array<AZ::RHI::ShaderInputImageIndex, s_numOfTargets> m_shaderInputImageIndices;
 

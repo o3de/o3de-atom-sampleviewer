@@ -26,7 +26,7 @@
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/SingleDeviceCopyItem.h>
 #include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/SingleDevicePipelineState.h>
+#include <Atom/RHI/MultiDevicePipelineState.h>
 
 #include <RHI/BasicRHIComponent.h>
 #include <Utils/ImGuiSidebar.h>
@@ -107,11 +107,11 @@ namespace AtomSampleViewer
         AZ::RHI::ShadingRate m_shadingRate = AZ::RHI::ShadingRate::Rate1x1;
 
         // Pipelines used for rendering the full screen quad with and without a shading rate attachments.
-        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_modelPipelineState[2];
+        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_modelPipelineState[2];
         // Pipeline used for updating the shading rate image.
-        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_computePipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_computePipelineState;
         // Pipeline used for showing the shading rate image.
-        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_imagePipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_imagePipelineState;
         // Compute and graphics shaders.
         AZStd::vector<AZ::Data::Instance<AZ::RPI::Shader>> m_shaders;
         // SRG with information when rendering the full screen quad.

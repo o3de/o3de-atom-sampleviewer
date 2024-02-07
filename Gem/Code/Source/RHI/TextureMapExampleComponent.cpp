@@ -517,7 +517,7 @@ namespace AtomSampleViewer
 
             RHI::SingleDeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;
-            drawItem.m_pipelineState = m_targetPipelineStates[target].get();
+            drawItem.m_pipelineState = m_targetPipelineStates[target]->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
             drawItem.m_indexBufferView = &m_bufferViews[RenderTargetIndex::BufferViewIndex].m_indexBufferView;
             drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_bufferViews[RenderTargetIndex::BufferViewIndex].m_streamBufferViews.size());
             drawItem.m_streamBufferViews = m_bufferViews[RenderTargetIndex::BufferViewIndex].m_streamBufferViews.data();
@@ -594,7 +594,7 @@ namespace AtomSampleViewer
 
             RHI::SingleDeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;
-            drawItem.m_pipelineState = m_screenPipelineStates[target].get();
+            drawItem.m_pipelineState = m_screenPipelineStates[target]->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
             drawItem.m_indexBufferView = &m_bufferViews[target].m_indexBufferView;
             drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_bufferViews[target].m_streamBufferViews.size());
             drawItem.m_streamBufferViews = m_bufferViews[target].m_streamBufferViews.data();

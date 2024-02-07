@@ -11,7 +11,7 @@
 
 #include <Atom/RHI/MultiDeviceBuffer.h>
 #include <Atom/RHI/MultiDeviceBufferPool.h>
-#include <Atom/RHI/SingleDevicePipelineState.h>
+#include <Atom/RHI/MultiDevicePipelineState.h>
 #include <Atom/RHI.Reflect/InputStreamLayoutBuilder.h>
 #include <MultiThreadComponent_Traits_Platform.h>
 
@@ -79,7 +79,7 @@ namespace AtomSampleViewer
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_inputAssemblyBuffer;
 
         AZ::RHI::InputStreamLayout m_streamLayoutDescriptor;
-        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_pipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_pipelineState;
 
         AZStd::array<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, s_numberOfCubes> m_shaderResourceGroups;
         AZ::RHI::ShaderInputConstantIndex m_shaderIndexWorldMat;

@@ -19,7 +19,7 @@
 #include <Atom/RHI/MultiDeviceBuffer.h>
 #include <Atom/RHI/MultiDeviceBufferPool.h>
 #include <Atom/RHI/SingleDeviceDrawItem.h>
-#include <Atom/RHI/SingleDevicePipelineState.h>
+#include <Atom/RHI/MultiDevicePipelineState.h>
 #include <Atom/RHI/MultiDeviceQueryPool.h>
 #include <Atom/RHI/MultiDeviceQuery.h>
 #include <Atom/RHI/SingleDeviceStreamBufferView.h>
@@ -106,8 +106,8 @@ namespace AtomSampleViewer
         AZStd::array<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, 3> m_shaderResourceGroups;
         AZ::RHI::ShaderInputConstantIndex m_objectMatrixConstantIndex;
         AZ::RHI::ShaderInputConstantIndex m_colorConstantIndex;
-        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_quadPipelineState;
-        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_boudingBoxPipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_quadPipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_boudingBoxPipelineState;
 
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceQueryPool> m_occlusionQueryPool;
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceQueryPool> m_timeStampQueryPool;

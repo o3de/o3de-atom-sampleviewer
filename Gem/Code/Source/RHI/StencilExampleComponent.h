@@ -14,7 +14,7 @@
 #include <Atom/RHI/MultiDeviceBufferPool.h>
 #include <Atom/RHI/Device.h>
 #include <Atom/RHI/SingleDeviceDrawItem.h>
-#include <Atom/RHI/SingleDevicePipelineState.h>
+#include <Atom/RHI/MultiDevicePipelineState.h>
 
 namespace AtomSampleViewer
 {
@@ -49,8 +49,8 @@ namespace AtomSampleViewer
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_inputAssemblyBufferPool;
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_inputAssemblyBuffer;
 
-        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_pipelineStateBasePass;
-        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState>, 8> m_pipelineStateStencil;
+        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_pipelineStateBasePass;
+        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState>, 8> m_pipelineStateStencil;
 
         static const size_t s_numberOfVertices = 48;
 

@@ -392,7 +392,7 @@ namespace AtomSampleViewer
 
                 RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
-                drawItem.m_pipelineState = m_pipelineStates[typeIndex].get();
+                drawItem.m_pipelineState = m_pipelineStates[typeIndex]->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
 

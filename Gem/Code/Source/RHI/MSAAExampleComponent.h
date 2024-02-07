@@ -21,7 +21,7 @@
 #include <Atom/RHI/MultiDeviceBuffer.h>
 #include <Atom/RHI/MultiDeviceBufferPool.h>
 #include <Atom/RHI/SingleDeviceDrawItem.h>
-#include <Atom/RHI/SingleDevicePipelineState.h>
+#include <Atom/RHI/MultiDevicePipelineState.h>
 #include <Atom/RHI/SingleDeviceStreamBufferView.h>
 
 #include <RHI/BasicRHIComponent.h>
@@ -107,8 +107,8 @@ namespace AtomSampleViewer
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_triangleInputAssemblyBuffer;
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_quadInputAssemblyBuffer;
         
-        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState>, s_numMSAAExamples> m_pipelineStates;
-        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_customResolveMSAAPipelineState;
+        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState>, s_numMSAAExamples> m_pipelineStates;
+        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_customResolveMSAAPipelineState;
 
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_triangleShaderResourceGroup;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_customMSAAResolveShaderResourceGroup;

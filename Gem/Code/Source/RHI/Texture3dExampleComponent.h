@@ -53,7 +53,7 @@ namespace AtomSampleViewer
         AZ::Data::Instance<AZ::RHI::MultiDeviceImage> m_image = nullptr;
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceImageView> m_imageView = nullptr;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_shaderResourceGroup = nullptr;
-        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState> m_pipelineState = nullptr;
+        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_pipelineState = nullptr;
 
         // Shader Input indices
         AZ::RHI::ShaderInputImageIndex m_texture3dInputIndex;

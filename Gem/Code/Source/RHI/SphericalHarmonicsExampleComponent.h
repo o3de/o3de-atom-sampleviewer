@@ -59,7 +59,7 @@ namespace AtomSampleViewer
 
 
         // ------------------- demo mode variables -------------------
-        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState>        m_demoPipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState>        m_demoPipelineState;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_demoShaderResourceGroup;
 
         AZ::RHI::ShaderInputConstantIndex m_demoObjectMatrixInputIndex;
@@ -85,7 +85,7 @@ namespace AtomSampleViewer
 
 
         // ------------------- render mode variables -------------------
-        AZ::RHI::ConstPtr<AZ::RHI::SingleDevicePipelineState>        m_renderPipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState>        m_renderPipelineState;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_renderShaderResourceGroup;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_viewShaderResourceGroup;
 
