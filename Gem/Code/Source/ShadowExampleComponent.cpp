@@ -398,6 +398,7 @@ namespace AtomSampleViewer
 
         AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Lux> lightColor(DirectionalLightColor * m_directionalLightIntensity);
         featureProcessor->SetRgbIntensity(handle, lightColor);
+        featureProcessor->SetShadowEnabled(handle, m_shadowEnabled);
         featureProcessor->SetShadowmapSize(handle, s_shadowmapImageSizes[m_directionalLightImageSizeIndex]);
         featureProcessor->SetShadowFarClipDistance(handle, FarClipDistance);
         featureProcessor->SetCascadeCount(handle, static_cast<uint16_t>(m_cascadeCount));

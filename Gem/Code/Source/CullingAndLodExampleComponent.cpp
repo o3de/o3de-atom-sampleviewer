@@ -224,6 +224,7 @@ namespace AtomSampleViewer
             dirLightFP->SetDirection(handle, lightTransform.GetBasis(1));
 
             dirLightFP->SetRgbIntensity(handle, Render::PhotometricColor<Render::PhotometricUnit::Lux>(m_directionalLightIntensity * DirectionalLightColor));
+            dirLightFP->SetShadowEnabled(handle, m_dirShadowEnabled);
             dirLightFP->SetCascadeCount(handle, s_cascadesCountDefault);
             dirLightFP->SetShadowmapSize(handle, s_shadowmapSizes[s_shadowmapSizeIndexDefault]);
             dirLightFP->SetDebugFlags(handle,

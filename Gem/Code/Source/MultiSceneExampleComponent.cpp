@@ -252,6 +252,7 @@ namespace AtomSampleViewer
             const auto lightDir = Transform::CreateLookAt(
                 helperPosition,
                 Vector3::CreateZero());
+            m_directionalLightFeatureProcessor->SetShadowEnabled(m_directionalLightHandle, true);
             m_directionalLightFeatureProcessor->SetDirection(m_directionalLightHandle, lightDir.GetBasis(1));
 
             m_directionalLightFeatureProcessor->SetShadowmapSize(m_directionalLightHandle, Render::ShadowmapSize::Size512);

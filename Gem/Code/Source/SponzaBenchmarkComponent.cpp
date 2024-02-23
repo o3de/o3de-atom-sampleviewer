@@ -153,6 +153,7 @@ namespace AtomSampleViewer
 
         AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Lux> sunColor(AZ::Color(1.0f, 1.0f, 0.97f, 1.0f) * 20.f);
         m_directionalLightFeatureProcessor->SetRgbIntensity(handle, sunColor);
+        m_directionalLightFeatureProcessor->SetShadowEnabled(handle, true);
         m_directionalLightFeatureProcessor->SetCascadeCount(handle, 4);
         m_directionalLightFeatureProcessor->SetShadowmapSize(handle, AZ::Render::ShadowmapSizeNamespace::ShadowmapSize::Size2048);
         m_directionalLightFeatureProcessor->SetViewFrustumCorrectionEnabled(handle, true);
