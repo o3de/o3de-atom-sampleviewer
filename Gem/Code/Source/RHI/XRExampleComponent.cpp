@@ -87,8 +87,6 @@ namespace AtomSampleViewer
 
     void XRExampleComponent::OnFramePrepare(AZ::RHI::FrameGraphBuilder& frameGraphBuilder)
     {
-        AZ::Matrix4x4 projection = AZ::Matrix4x4::CreateIdentity();
-
         AZ::RPI::XRRenderingInterface* xrSystem = AZ::RPI::RPISystemInterface::Get()->GetXRSystem();
         if (xrSystem && xrSystem->ShouldRender())
         {
