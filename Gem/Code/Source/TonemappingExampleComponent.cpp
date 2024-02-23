@@ -297,7 +297,7 @@ namespace AtomSampleViewer
             "AcesOutputTransform",
             "AcesLutPass",
             "DisplayMapperPassthrough",
-            "DisplayMapperOnlyGammaCorrection",
+            "DisplayMapperSRGB",
             "OutputTransform"
         };
 
