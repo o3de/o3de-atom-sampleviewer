@@ -82,7 +82,7 @@ namespace AtomSampleViewer
             pipelineStateDescriptor.m_inputStreamLayout.Finalize();
 
             pipelineState = shader->AcquirePipelineState(pipelineStateDescriptor);
-            if (!pipelineState)
+            if (!pipelineState || !pipelineState->IsInitialized())
             {
                 AZ_Error("Render", false, "Failed to acquire default pipeline state for shader %s", shaderFilepath);
             }
