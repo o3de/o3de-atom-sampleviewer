@@ -10,9 +10,9 @@
 #include <Atom/RHI/ScopeProducer.h>
 #include <Atom/RPI.Public/Pass/RenderPass.h>
 #include <Atom/RPI.Public/Buffer/Buffer.h>
-#include <Atom/RHI/SingleDeviceRayTracingBufferPools.h>
-#include <Atom/RHI/SingleDeviceRayTracingPipelineState.h>
-#include <Atom/RHI/SingleDeviceRayTracingShaderTable.h>
+#include <Atom/RHI/MultiDeviceRayTracingBufferPools.h>
+#include <Atom/RHI/MultiDeviceRayTracingPipelineState.h>
+#include <Atom/RHI/MultiDeviceRayTracingShaderTable.h>
 #include <Atom/RPI.Public/RPIUtils.h>
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 #include <Atom/RPI.Public/Shader/Shader.h>
@@ -63,10 +63,10 @@ namespace AZ
             Data::Instance<RPI::Shader> m_rayGenerationShader;
             Data::Instance<RPI::Shader> m_missShader;
             Data::Instance<RPI::Shader> m_hitShader;
-            RHI::Ptr<RHI::SingleDeviceRayTracingPipelineState> m_rayTracingPipelineState;
+            RHI::Ptr<RHI::MultiDeviceRayTracingPipelineState> m_rayTracingPipelineState;
 
             // ray tracing shader table
-            RHI::Ptr<RHI::SingleDeviceRayTracingShaderTable> m_rayTracingShaderTable;
+            RHI::Ptr<RHI::MultiDeviceRayTracingShaderTable> m_rayTracingShaderTable;
 
             // ray tracing global pipeline state
             RHI::ConstPtr<RHI::MultiDevicePipelineState> m_globalPipelineState;

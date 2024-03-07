@@ -1270,7 +1270,8 @@ namespace AtomSampleViewer
                     RHI::SingleDeviceDrawItem drawItem;
                     drawItem.m_arguments = subMesh.m_mesh->m_drawArguments;
                     drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
-                    drawItem.m_indexBufferView = &subMesh.m_mesh->m_indexBufferView;
+                    auto deviceIndexBufferView{subMesh.m_mesh->m_indexBufferView.GetDeviceIndexBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+                    drawItem.m_indexBufferView = &deviceIndexBufferView;
                     drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                     drawItem.m_shaderResourceGroups = shaderResourceGroups;
                     drawItem.m_streamBufferViewCount = static_cast<uint8_t>(subMesh.bufferStreamViewArray.size());
