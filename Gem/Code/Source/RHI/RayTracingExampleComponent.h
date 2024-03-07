@@ -11,8 +11,8 @@
 #include <AzCore/Component/Component.h>
 #include <AzCore/Math/Matrix4x4.h>
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
-#include <Atom/RHI/SingleDeviceRayTracingPipelineState.h>
-#include <Atom/RHI/SingleDeviceRayTracingShaderTable.h>
+#include <Atom/RHI/MultiDeviceRayTracingPipelineState.h>
+#include <Atom/RHI/MultiDeviceRayTracingShaderTable.h>
 #include <Atom/RHI/FrameScheduler.h>
 #include <Atom/RHI/SingleDeviceDispatchRaysItem.h>
 #include <Atom/RHI/Device.h>
@@ -20,8 +20,8 @@
 #include <Atom/RHI/MultiDevicePipelineState.h>
 #include <Atom/RHI/MultiDeviceBufferPool.h>
 #include <RHI/BasicRHIComponent.h>
-#include <Atom/RHI/SingleDeviceRayTracingBufferPools.h>
-#include <Atom/RHI/SingleDeviceRayTracingAccelerationStructure.h>
+#include <Atom/RHI/MultiDeviceRayTracingBufferPools.h>
+#include <Atom/RHI/MultiDeviceRayTracingAccelerationStructure.h>
 
 namespace AtomSampleViewer
 {
@@ -68,7 +68,7 @@ namespace AtomSampleViewer
         // resource pools
         RHI::Ptr<RHI::MultiDeviceBufferPool> m_inputAssemblyBufferPool;
         RHI::Ptr<RHI::MultiDeviceImagePool> m_imagePool;
-        RHI::Ptr<RHI::SingleDeviceRayTracingBufferPools> m_rayTracingBufferPools;
+        RHI::Ptr<RHI::MultiDeviceRayTracingBufferPools> m_rayTracingBufferPools;
 
         // triangle vertex/index buffers
         AZStd::array<VertexPosition, 3> m_triangleVertices;
@@ -85,9 +85,9 @@ namespace AtomSampleViewer
         RHI::Ptr<RHI::MultiDeviceBuffer> m_rectangleIB;
 
         // ray tracing acceleration structures
-        RHI::Ptr<RHI::SingleDeviceRayTracingBlas> m_triangleRayTracingBlas;
-        RHI::Ptr<RHI::SingleDeviceRayTracingBlas> m_rectangleRayTracingBlas;
-        RHI::Ptr<RHI::SingleDeviceRayTracingTlas> m_rayTracingTlas;
+        RHI::Ptr<RHI::MultiDeviceRayTracingBlas> m_triangleRayTracingBlas;
+        RHI::Ptr<RHI::MultiDeviceRayTracingBlas> m_rectangleRayTracingBlas;
+        RHI::Ptr<RHI::MultiDeviceRayTracingTlas> m_rayTracingTlas;
         RHI::BufferViewDescriptor m_tlasBufferViewDescriptor;
         RHI::AttachmentId m_tlasBufferAttachmentId = RHI::AttachmentId("tlasBufferAttachmentId");
 
@@ -98,10 +98,10 @@ namespace AtomSampleViewer
         Data::Instance<RPI::Shader> m_closestHitSolidShader;
 
         // ray tracing pipeline state
-        RHI::Ptr<RHI::SingleDeviceRayTracingPipelineState> m_rayTracingPipelineState;
+        RHI::Ptr<RHI::MultiDeviceRayTracingPipelineState> m_rayTracingPipelineState;
 
         // ray tracing shader table
-        RHI::Ptr<RHI::SingleDeviceRayTracingShaderTable> m_rayTracingShaderTable;
+        RHI::Ptr<RHI::MultiDeviceRayTracingShaderTable> m_rayTracingShaderTable;
 
         // ray tracing global shader resource group and pipeline state
         Data::Instance<RPI::ShaderResourceGroup> m_globalSrg;

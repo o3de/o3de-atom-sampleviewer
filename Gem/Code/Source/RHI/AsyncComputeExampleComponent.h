@@ -129,7 +129,7 @@ namespace AtomSampleViewer
         AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState>, NumScopes> m_terrainPipelineStates;
 
         // Model related variables
-        AZStd::array<AZ::RPI::ModelLod::StreamBufferViewList, NumScopes> m_modelStreamBufferViews;
+        AZStd::array<AZ::RPI::ModelLod::TempStreamBufferViewList, NumScopes> m_modelStreamBufferViews;
         AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState>, NumScopes> m_modelPipelineStates;
         AZ::Data::Instance<AZ::RPI::Model> m_model;
 

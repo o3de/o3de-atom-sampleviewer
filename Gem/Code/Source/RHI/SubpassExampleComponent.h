@@ -72,7 +72,7 @@ namespace AtomSampleViewer
 
         struct ModelData
         {
-            AZ::RPI::ModelLod::StreamBufferViewList m_streamBufferList;
+            AZ::RPI::ModelLod::TempStreamBufferViewList m_streamBufferList;
             AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_pipelineState;
             AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_shaderResourceGroup;
             ModelType m_modelType = ModelType_ShaderBall;
