@@ -198,7 +198,7 @@ namespace AtomSampleViewer
                 const float ratioYtoX = m_windowSize.m_height / static_cast<float>(m_windowSize.m_width);
                 AZStd::array<float, 2> size = { {0.7f * ratioYtoX, 0.7f} };
 
-                m_shaderResourceGroup->SetImageView(m_texture3dInputIndex, m_imageView->GetDeviceImageView(RHI::MultiDevice::DefaultDeviceIndex).get());
+                m_shaderResourceGroup->SetImageView(m_texture3dInputIndex, m_imageView.get());
                 m_shaderResourceGroup->SetConstant<uint32_t>(m_sliceIndexInputIndex, static_cast<uint32_t>(m_sliceIndex));
                 m_shaderResourceGroup->SetConstant(m_positionInputIndex, position);
                 m_shaderResourceGroup->SetConstant(m_sizeInputIndex, size);
@@ -217,7 +217,7 @@ namespace AtomSampleViewer
                 drawIndexed.m_vertexCount = 4;
                 drawIndexed.m_instanceCount = 1;
 
-                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroup->GetRHIShaderResourceGroup() };
+                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() };
 
                 // Create the draw item
                 RHI::SingleDeviceDrawItem drawItem;
@@ -274,7 +274,7 @@ namespace AtomSampleViewer
         {
             ImGui::Text("3D image slice index");
 
-            for (int32_t i = 0; i < static_cast<int32_t>(m_imageLayout.GetDeviceImageSubresource(RHI::MultiDevice::DefaultDeviceIndex).m_size.m_depth); i++)
+            for (int32_t i = 0; i < static_cast<int32_t>(m_imageLayout.GetDeviceImageSubresource(AZ::RHI::MultiDevice::DefaultDeviceIndex).m_size.m_depth); i++)
             {
                 const AZStd::string label = AZStd::string::format("Image Slice %d", i);
                 ScriptableImGui::RadioButton(label.c_str(), &m_sliceIndex, i);

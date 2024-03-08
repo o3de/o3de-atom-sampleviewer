@@ -277,7 +277,7 @@ namespace AtomSampleViewer
         {
             // attach compute buffer
             {
-                [[maybe_unused]] RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportBuffer(m_bufferAttachmentId, m_computeBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex));
+                [[maybe_unused]] RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportBuffer(m_bufferAttachmentId, m_computeBuffer);
                 AZ_Error(s_computeExampleName, result == RHI::ResultCode::Success, "Failed to import compute buffer with error %d", result);
 
                 RHI::BufferScopeAttachmentDescriptor desc;
@@ -290,7 +290,7 @@ namespace AtomSampleViewer
                 const Name computeBufferId{ "m_computeBuffer" };
                 RHI::ShaderInputBufferIndex computeBufferIndex = m_dispatchSRGs[1]->FindShaderInputBufferIndex(computeBufferId);
                 AZ_Error(s_computeExampleName, computeBufferIndex.IsValid(), "Failed to find shader input buffer %s.", computeBufferId.GetCStr());
-                m_dispatchSRGs[1]->SetBufferView(computeBufferIndex, m_computeBufferView->GetDeviceBufferView(RHI::MultiDevice::DefaultDeviceIndex).get());
+                m_dispatchSRGs[1]->SetBufferView(computeBufferIndex, m_computeBufferView.get());
                 m_dispatchSRGs[1]->Compile();
             }
 
@@ -308,8 +308,8 @@ namespace AtomSampleViewer
             commandList->SetScissors(&m_scissor, 1);
 
             AZStd::array <const RHI::SingleDeviceShaderResourceGroup*, 8> shaderResourceGroups;
-            shaderResourceGroups[0] = m_dispatchSRGs[0]->GetRHIShaderResourceGroup();
-            shaderResourceGroups[1] = m_dispatchSRGs[1]->GetRHIShaderResourceGroup();
+            shaderResourceGroups[0] = m_dispatchSRGs[0]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get();
+            shaderResourceGroups[1] = m_dispatchSRGs[1]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get();
             
             RHI::SingleDeviceDispatchItem dispatchItem;
             RHI::DispatchDirect dispatchArgs;
@@ -374,7 +374,7 @@ namespace AtomSampleViewer
                 const Name computeBufferId{ "m_computeBuffer" };
                 RHI::ShaderInputBufferIndex computeBufferIndex = m_drawSRGs[1]->FindShaderInputBufferIndex(computeBufferId);
                 AZ_Error(s_computeExampleName, computeBufferIndex.IsValid(), "Failed to find shader input buffer %s.", computeBufferId.GetCStr());
-                m_drawSRGs[1]->SetBufferView(computeBufferIndex, m_computeBufferView->GetDeviceBufferView(RHI::MultiDevice::DefaultDeviceIndex).get());
+                m_drawSRGs[1]->SetBufferView(computeBufferIndex, m_computeBufferView.get());
                 m_drawSRGs[1]->Compile();
             }
 
@@ -396,7 +396,7 @@ namespace AtomSampleViewer
             drawIndexed.m_indexCount = 6;
             drawIndexed.m_instanceCount = 1;
 
-            const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_drawSRGs[0]->GetRHIShaderResourceGroup(), m_drawSRGs[1]->GetRHIShaderResourceGroup() };
+            const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_drawSRGs[0]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get(), m_drawSRGs[1]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() };
 
             RHI::SingleDeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;

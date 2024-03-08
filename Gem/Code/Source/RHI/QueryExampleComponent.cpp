@@ -282,7 +282,7 @@ namespace AtomSampleViewer
                 return;
             }
             
-            [[maybe_unused]] RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportBuffer(RHI::AttachmentId{QueryExample::PredicationBufferId}, m_predicationBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex));
+            [[maybe_unused]] RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportBuffer(RHI::AttachmentId{QueryExample::PredicationBufferId}, m_predicationBuffer);
             AZ_Error(QueryExample::SampleName, result == RHI::ResultCode::Success, "Failed to import predication buffer with error %d", result);
 
             frameGraph.UseQueryPool(
@@ -440,7 +440,7 @@ namespace AtomSampleViewer
                 drawIndexed.m_indexCount = 6;
                 drawIndexed.m_instanceCount = 1;
 
-                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[0]->GetRHIShaderResourceGroup() };
+                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[0]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() };
 
                 RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
@@ -505,12 +505,12 @@ namespace AtomSampleViewer
                 }
 
                 // Draw occluding quad
-                shaderResourceGroups[0] = m_shaderResourceGroups[1]->GetRHIShaderResourceGroup();
+                shaderResourceGroups[0] = m_shaderResourceGroups[1]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get();
                 commandList->Submit(drawItem, 1);
 
                 // Draw quad to use for the oclussion query
                 drawItem.m_pipelineState = m_boudingBoxPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
-                shaderResourceGroups[0] = m_shaderResourceGroups[2]->GetRHIShaderResourceGroup();
+                shaderResourceGroups[0] = m_shaderResourceGroups[2]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get();
                 auto& queryEntry = m_occlusionQueries[m_currentOcclusionQueryIndex];
                 queryEntry.m_query->GetDeviceQuery(RHI::MultiDevice::DefaultDeviceIndex)->Begin(*commandList, m_precisionOcclusionEnabled ? RHI::QueryControlFlags::PreciseOcclusion : RHI::QueryControlFlags::None);
                 commandList->Submit(drawItem, 2);
