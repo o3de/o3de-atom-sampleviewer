@@ -1176,10 +1176,10 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::ShowTransientAttachmentProfilerWindow()
     {
-        auto* transientStats = AZ::RHI::RHIMemoryStatisticsInterface::Get()->GetTransientAttachmentStatistics();
-        if (transientStats)
+        const auto& transientStats = AZ::RHI::RHIMemoryStatisticsInterface::Get()->GetTransientAttachmentStatistics();
+        if (!transientStats.empty())
         {
-            m_showTransientAttachmentProfiler = m_imguiTransientAttachmentProfiler.Draw(*transientStats);
+            m_showTransientAttachmentProfiler = m_imguiTransientAttachmentProfiler.Draw(transientStats);
         }
     }
 

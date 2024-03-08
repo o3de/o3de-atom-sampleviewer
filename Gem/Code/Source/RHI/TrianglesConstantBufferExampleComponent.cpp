@@ -218,7 +218,7 @@ namespace AtomSampleViewer
             RHI::ShaderInputBufferIndex trianglesBufferIndex;
             FindShaderInputIndex(&trianglesBufferIndex, m_shaderResourceGroup, trianglesBufferId, s_trianglesConstantBufferExampleName);
 
-            [[maybe_unused]] bool set = m_shaderResourceGroup->SetBufferView(trianglesBufferIndex, m_constantBufferView->GetDeviceBufferView(RHI::MultiDevice::DefaultDeviceIndex).get(), 0);
+            [[maybe_unused]] bool set = m_shaderResourceGroup->SetBufferView(trianglesBufferIndex, m_constantBufferView.get(), 0);
             AZ_Assert(set, "Failed to set the buffer view");
 
             // All SRG data has been set already, it only had the buffer view to be set, we can compile now.
@@ -260,7 +260,7 @@ namespace AtomSampleViewer
                 drawIndexed.m_indexCount = 3;
                 drawIndexed.m_instanceCount = s_numberOfTrianglesTotal;
 
-                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroup->GetRHIShaderResourceGroup() };
+                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() };
 
                 RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;

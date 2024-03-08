@@ -218,7 +218,7 @@ namespace AtomSampleViewer
                 drawIndexed.m_instanceCount = 1u;
 
                 const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = {
-                    m_textureArraySrg->GetRHIShaderResourceGroup(), m_textureIndexSrg->GetRHIShaderResourceGroup() };
+                    m_textureArraySrg->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get(), m_textureIndexSrg->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() };
 
                 RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;

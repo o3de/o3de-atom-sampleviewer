@@ -307,7 +307,7 @@ namespace AtomSampleViewer
                 commandList->SetScissors(&m_scissor, 1);
 
                 // Bind ViewSrg
-                commandList->SetShaderResourceGroupForDraw(*m_viewShaderResourceGroup->GetRHIShaderResourceGroup());
+                commandList->SetShaderResourceGroupForDraw(*m_viewShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get());
 
                 const RHI::SingleDeviceIndexBufferView indexBufferView =
                 {
@@ -322,10 +322,10 @@ namespace AtomSampleViewer
                 drawIndexed.m_instanceCount = 1;
 
                 const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = {
-                    (m_mode ? m_demoShaderResourceGroup->GetRHIShaderResourceGroup() :
-                              m_renderShaderResourceGroup->GetRHIShaderResourceGroup()
+                    (m_mode ? m_demoShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() :
+                              m_renderShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get()
                     ),
-                    m_viewShaderResourceGroup->GetRHIShaderResourceGroup()
+                    m_viewShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get()
                 };
 
                 RHI::SingleDeviceDrawItem drawItem;
