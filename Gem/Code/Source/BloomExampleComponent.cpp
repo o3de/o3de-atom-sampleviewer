@@ -382,7 +382,7 @@ namespace AtomSampleViewer
         drawRequest.m_listTag = m_drawListTag;
         drawRequest.m_pipelineState = m_pipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
         drawRequest.m_sortKey = 0;
-        drawRequest.m_uniqueShaderResourceGroup = imageInfo->m_srg->GetRHIShaderResourceGroup();
+        drawRequest.m_uniqueShaderResourceGroup = imageInfo->m_srg->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get();
         drawPacketBuilder.AddDrawItem(drawRequest);
 
         // Submit draw packet
