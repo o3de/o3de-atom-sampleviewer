@@ -558,7 +558,7 @@ namespace AtomSampleViewer
         {
             AZ::Data::Instance<AZ::RPI::StreamingImage> image = LoadStreamingImage(InternalBP::Images[textureIdx], InternalBP::SampleName);
             m_images.push_back(image);
-            m_imageViews.push_back(image->GetImageView()->GetDeviceImageView(RHI::MultiDevice::DefaultDeviceIndex).get());
+            m_imageViews.push_back(image->GetImageView());
         }
 
         // Load appropriate cubemap textures used by the unbounded texture array
@@ -746,32 +746,32 @@ namespace AtomSampleViewer
             RHI::MultiDeviceBufferMapResponse mapResponse;
             m_bufferPool->MapBuffer(mapRequest, mapResponse);
 
-            AZStd::vector<const RHI::SingleDeviceImageView*> views;
+            AZStd::vector<const RHI::MultiDeviceImageView*> views;
             AZStd::vector<bool> isViewReadOnly;
 
             //Add read only 2d texture views
             for (AZ::Data::Instance<AZ::RPI::StreamingImage> image : m_images)
             {
-                views.push_back(image->GetImageView()->GetDeviceImageView(RHI::MultiDevice::DefaultDeviceIndex).get());
+                views.push_back(image->GetImageView());
                 isViewReadOnly.push_back(true);
             }
 
             //Add read only cube map texture views
             for (AZ::Data::Instance<AZ::RPI::StreamingImage> image : m_cubemapImages)
             {
-                views.push_back(image->GetImageView()->GetDeviceImageView(RHI::MultiDevice::DefaultDeviceIndex).get());
+                views.push_back(image->GetImageView());
                 isViewReadOnly.push_back(true);
             }
 
             //Ad read write texture view
-            views.push_back(m_computeImageView->GetDeviceImageView(RHI::MultiDevice::DefaultDeviceIndex).get());
+            views.push_back(m_computeImageView.get());
             isViewReadOnly.push_back(false);
 
             // Populate the indirect buffer with indices of the views that reside within the bindless heap
             uint32_t arrayIndex = 0;
             auto indirectionBufferIndex = indirectionBufferSrg->FindShaderInputBufferIndex(AZ::Name{ "m_imageIndirectionBuffer" });
             indirectionBufferSrg->SetBindlessViews(
-                indirectionBufferIndex, m_imageIndirectionBufferView->GetDeviceBufferView(RHI::MultiDevice::DefaultDeviceIndex).get(), views, static_cast<uint32_t*>(mapResponse.m_data[RHI::MultiDevice::DefaultDeviceIndex]),
+                indirectionBufferIndex, m_imageIndirectionBufferView.get(), views, static_cast<uint32_t*>(mapResponse.m_data[RHI::MultiDevice::DefaultDeviceIndex]),
                 isViewReadOnly, arrayIndex);
 
             m_bufferPool->UnmapBuffer(*m_imageIndirectionBuffer);
@@ -783,24 +783,24 @@ namespace AtomSampleViewer
             RHI::MultiDeviceBufferMapResponse mapResponse;
             m_bufferPool->MapBuffer(mapRequest, mapResponse);
 
-            AZStd::vector<const RHI::SingleDeviceBufferView*> views;
+            AZStd::vector<const RHI::MultiDeviceBufferView*> views;
             AZStd::vector<bool> isViewReadOnly;
            
             // Add read only buffer views
-            views.push_back(m_colorBuffer1View->GetDeviceBufferView(RHI::MultiDevice::DefaultDeviceIndex).get());
+            views.push_back(m_colorBuffer1View.get());
             isViewReadOnly.push_back(true);
-            views.push_back(m_colorBuffer2View->GetDeviceBufferView(RHI::MultiDevice::DefaultDeviceIndex).get());
+            views.push_back(m_colorBuffer2View.get());
             isViewReadOnly.push_back(true);
 
             //Add read write buffer view
-            views.push_back(m_computeBufferView->GetDeviceBufferView(RHI::MultiDevice::DefaultDeviceIndex).get());
+            views.push_back(m_computeBufferView.get());
             isViewReadOnly.push_back(false);
 
             //Populate the indirect buffer with indices of the views that reside within the bindless heap
             uint32_t arrayIndex = 0;
             auto indirectionBufferIndex = indirectionBufferSrg->FindShaderInputBufferIndex(AZ::Name{ "m_bufferIndirectionBuffer" });
             indirectionBufferSrg->SetBindlessViews(
-                indirectionBufferIndex, m_bufferIndirectionBufferView->GetDeviceBufferView(RHI::MultiDevice::DefaultDeviceIndex).get(), views, static_cast<uint32_t*>(mapResponse.m_data[RHI::MultiDevice::DefaultDeviceIndex]),
+                indirectionBufferIndex, m_bufferIndirectionBufferView.get(), views, static_cast<uint32_t*>(mapResponse.m_data[RHI::MultiDevice::DefaultDeviceIndex]),
                 isViewReadOnly, arrayIndex);
 
             m_bufferPool->UnmapBuffer(*m_bufferIndirectionBuffer);
@@ -845,7 +845,7 @@ namespace AtomSampleViewer
     {
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> srg = GetSrg(srgName);
         const AZ::RHI::ShaderInputBufferIndex inputIndex = srg->FindShaderInputBufferIndex(AZ::Name(srgId));
-        [[maybe_unused]] bool set = srg->SetBufferView(inputIndex, bufferView->GetDeviceBufferView(RHI::MultiDevice::DefaultDeviceIndex).get());
+        [[maybe_unused]] bool set = srg->SetBufferView(inputIndex, bufferView);
         AZ_Assert(set, "Failed to set the buffer view");
 
         return false;
@@ -1012,7 +1012,7 @@ namespace AtomSampleViewer
             // attach compute buffer
             {
                 [[maybe_unused]] RHI::ResultCode result =
-                    frameGraph.GetAttachmentDatabase().ImportBuffer(m_bufferAttachmentId, m_computeBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex));
+                    frameGraph.GetAttachmentDatabase().ImportBuffer(m_bufferAttachmentId, m_computeBuffer);
                 AZ_Error(
                     InternalBP::SampleName, result == RHI::ResultCode::Success, "Failed to import compute buffer with error %d", result);
 
@@ -1028,7 +1028,7 @@ namespace AtomSampleViewer
                 AZ_Error(
                     InternalBP::SampleName, computeBufferIndex.IsValid(), "Failed to find shader input buffer %s.",
                     computeBufferId.GetCStr());
-                m_bufferDispatchSRG->SetBufferView(computeBufferIndex, m_computeBufferView->GetDeviceBufferView(RHI::MultiDevice::DefaultDeviceIndex).get());
+                m_bufferDispatchSRG->SetBufferView(computeBufferIndex, m_computeBufferView.get());
                 m_bufferDispatchSRG->Compile();
             }
 
@@ -1046,7 +1046,7 @@ namespace AtomSampleViewer
             commandList->SetScissors(&m_scissor, 1);
 
             AZStd::array<const RHI::SingleDeviceShaderResourceGroup*, 8> shaderResourceGroups;
-            shaderResourceGroups[0] = m_bufferDispatchSRG->GetRHIShaderResourceGroup();
+            shaderResourceGroups[0] = m_bufferDispatchSRG->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get();
 
             RHI::SingleDeviceDispatchItem dispatchItem;
             RHI::DispatchDirect dispatchArgs;
@@ -1085,7 +1085,7 @@ namespace AtomSampleViewer
             // attach compute buffer
             {
                 [[maybe_unused]] RHI::ResultCode result =
-                    frameGraph.GetAttachmentDatabase().ImportImage(m_imageAttachmentId, m_computeImage->GetDeviceImage(RHI::MultiDevice::DefaultDeviceIndex));
+                    frameGraph.GetAttachmentDatabase().ImportImage(m_imageAttachmentId, m_computeImage);
                 AZ_Error(
                     InternalBP::SampleName, result == RHI::ResultCode::Success, "Failed to import compute buffer with error %d", result);
 
@@ -1101,7 +1101,7 @@ namespace AtomSampleViewer
                 AZ_Error(
                     InternalBP::SampleName, computeBufferIndex.IsValid(), "Failed to find shader input buffer %s.",
                     computeBufferId.GetCStr());
-                m_imageDispatchSRG->SetImageView(computeBufferIndex, m_computeImageView->GetDeviceImageView(RHI::MultiDevice::DefaultDeviceIndex).get());
+                m_imageDispatchSRG->SetImageView(computeBufferIndex, m_computeImageView.get());
                 m_imageDispatchSRG->Compile();
             }
 
@@ -1119,7 +1119,7 @@ namespace AtomSampleViewer
             commandList->SetScissors(&m_scissor, 1);
 
             AZStd::array<const RHI::SingleDeviceShaderResourceGroup*, 8> shaderResourceGroups;
-            shaderResourceGroups[0] = m_imageDispatchSRG->GetRHIShaderResourceGroup();
+            shaderResourceGroups[0] = m_imageDispatchSRG->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get();
 
             RHI::SingleDeviceDispatchItem dispatchItem;
             RHI::DispatchDirect dispatchArgs;
@@ -1259,13 +1259,13 @@ namespace AtomSampleViewer
 
                     const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] =
                     {
-                        m_bindlessSrg->GetSrg(m_samplerSrgName)->GetRHIShaderResourceGroup(),
-                        subMesh.m_perSubMeshSrg->GetRHIShaderResourceGroup(),
-                        m_bindlessSrg->GetSrg(m_floatBufferSrgName)->GetRHIShaderResourceGroup(),
+                        m_bindlessSrg->GetSrg(m_samplerSrgName)->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get(),
+                        subMesh.m_perSubMeshSrg->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get(),
+                        m_bindlessSrg->GetSrg(m_floatBufferSrgName)->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get(),
 #if ATOMSAMPLEVIEWER_TRAIT_BINDLESS_PROTOTYPE_SUPPORTS_DIRECT_BOUND_UNBOUNDED_ARRAY
-                        m_bindlessSrg->GetSrg(m_imageSrgName)->GetRHIShaderResourceGroup(),
+                        m_bindlessSrg->GetSrg(m_imageSrgName)->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get(),
 #endif
-                        m_bindlessSrg->GetSrg(m_indirectionBufferSrgName)->GetRHIShaderResourceGroup(),
+                        m_bindlessSrg->GetSrg(m_indirectionBufferSrgName)->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get(),
                     };
                     RHI::SingleDeviceDrawItem drawItem;
                     drawItem.m_arguments = subMesh.m_mesh->m_drawArguments;

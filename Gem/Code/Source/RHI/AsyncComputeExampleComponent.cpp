@@ -74,7 +74,7 @@ namespace AtomSampleViewer
         // Import non transient images
         for (uint32_t i = 0; i < m_sceneImages.size(); ++i)
         {
-            frameGraphBuilder.GetAttachmentDatabase().ImportImage(m_sceneIds[i], m_sceneImages[i]->GetDeviceImage(RHI::MultiDevice::DefaultDeviceIndex));
+            frameGraphBuilder.GetAttachmentDatabase().ImportImage(m_sceneIds[i], m_sceneImages[i]);
         }
 
         // Generate transient images
@@ -808,7 +808,7 @@ namespace AtomSampleViewer
                 drawIndexed.m_indexCount = 6;
                 drawIndexed.m_instanceCount = 1;
 
-                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[CopyTextureScope].front()->GetRHIShaderResourceGroup() };
+                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[CopyTextureScope].front()->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() };
 
                 RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
@@ -878,7 +878,7 @@ namespace AtomSampleViewer
                     drawIndexed.m_indexCount = 6;
                     drawIndexed.m_instanceCount = 1;
 
-                    const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[ShadowScope][0]->GetRHIShaderResourceGroup() };
+                    const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[ShadowScope][0]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() };
 
                     RHI::SingleDeviceDrawItem drawItem;
                     drawItem.m_arguments = drawIndexed;
@@ -893,7 +893,7 @@ namespace AtomSampleViewer
                 else
                 {
                     // Models
-                    const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[ShadowScope][i]->GetRHIShaderResourceGroup() };
+                    const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[ShadowScope][i]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() };
                     for (const auto& mesh : m_model->GetLods()[0]->GetMeshes())
                     {
                         RHI::SingleDeviceDrawItem drawItem;
@@ -978,7 +978,7 @@ namespace AtomSampleViewer
             RHI::CommandList* commandList = context.GetCommandList();
 
             // Bind ViewSrg
-            commandList->SetShaderResourceGroupForDraw(*m_viewShaderResourceGroup->GetRHIShaderResourceGroup());
+            commandList->SetShaderResourceGroupForDraw(*m_viewShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get());
 
             // Set persistent viewport and scissor state.
             const auto& imageSize = m_sceneImages[m_currentSceneImageIndex]->GetDescriptor().m_size;
@@ -994,8 +994,8 @@ namespace AtomSampleViewer
                     // Terrain
                     const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] =
                     {
-                        m_shaderResourceGroups[ForwardScope][0]->GetRHIShaderResourceGroup(),
-                        m_viewShaderResourceGroup->GetRHIShaderResourceGroup()
+                        m_shaderResourceGroups[ForwardScope][0]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get(),
+                        m_viewShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get()
                     };
 
                     RHI::DrawIndexed drawIndexed;
@@ -1018,8 +1018,8 @@ namespace AtomSampleViewer
                     // Model
                     const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] =
                     {
-                        m_shaderResourceGroups[ForwardScope][i]->GetRHIShaderResourceGroup(),
-                        m_viewShaderResourceGroup->GetRHIShaderResourceGroup()
+                        m_shaderResourceGroups[ForwardScope][i]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get(),
+                        m_viewShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get()
                     };
 
                     for (const auto& mesh : m_model->GetLods()[0]->GetMeshes())
@@ -1094,7 +1094,7 @@ namespace AtomSampleViewer
             RHI::CommandList* commandList = context.GetCommandList();
 
             RHI::SingleDeviceDispatchItem dispatchItem;
-            decltype(dispatchItem.m_shaderResourceGroups) shaderResourceGroups = { { m_shaderResourceGroups[TonemappingScope][0]->GetRHIShaderResourceGroup() } };
+            decltype(dispatchItem.m_shaderResourceGroups) shaderResourceGroups = { { m_shaderResourceGroups[TonemappingScope][0]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() } };
 
             RHI::DispatchDirect dispatchArgs;
 
@@ -1176,7 +1176,7 @@ namespace AtomSampleViewer
                 drawIndexed.m_indexCount = 6;
                 drawIndexed.m_instanceCount = 1;
 
-                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[LuminanceMapScope][0]->GetRHIShaderResourceGroup() };
+                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[LuminanceMapScope][0]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() };
 
                 RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
@@ -1264,7 +1264,7 @@ namespace AtomSampleViewer
                 RHI::CommandList* commandList = context.GetCommandList();
 
                 RHI::SingleDeviceDispatchItem dispatchItem;
-                decltype(dispatchItem.m_shaderResourceGroups) shaderResourceGroups = { { m_shaderResourceGroups[LuminanceReduceScope][i]->GetRHIShaderResourceGroup() } };
+                decltype(dispatchItem.m_shaderResourceGroups) shaderResourceGroups = { { m_shaderResourceGroups[LuminanceReduceScope][i]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() } };
 
                 RHI::DispatchDirect dispatchArgs;
 

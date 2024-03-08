@@ -391,7 +391,7 @@ namespace AtomSampleViewer
             RHI::CommandList* commandList = context.GetCommandList();
 
             // Bind ViewSrg
-            commandList->SetShaderResourceGroupForDraw(*m_viewShaderResourceGroup->GetRHIShaderResourceGroup());
+            commandList->SetShaderResourceGroupForDraw(*m_viewShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get());
 
             // Set persistent viewport and scissor state.
             commandList->SetViewports(&m_viewport, 1);
@@ -403,7 +403,7 @@ namespace AtomSampleViewer
                 const auto& modelData = m_opaqueModelsData[i];
                 const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] =
                 {
-                    modelData.m_shaderResourceGroup->GetRHIShaderResourceGroup()
+                    modelData.m_shaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get()
                 };
 
                 for (const auto& mesh : m_models[modelData.m_modelType]->GetLods()[0]->GetMeshes())
@@ -507,7 +507,7 @@ namespace AtomSampleViewer
             RHI::CommandList* commandList = context.GetCommandList();
 
             // Bind ViewSrg
-            commandList->SetShaderResourceGroupForDraw(*m_viewShaderResourceGroup->GetRHIShaderResourceGroup());
+            commandList->SetShaderResourceGroupForDraw(*m_viewShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get());
 
             // Set persistent viewport and scissor state.
             commandList->SetViewports(&m_viewport, 1);
@@ -515,8 +515,8 @@ namespace AtomSampleViewer
 
             const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] =
             {
-                m_compositionSubpassInputsSRG->GetRHIShaderResourceGroup(),
-                m_sceneShaderResourceGroup->GetRHIShaderResourceGroup(),
+                m_compositionSubpassInputsSRG->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get(),
+                m_sceneShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get(),
             };
 
             RHI::DrawLinear drawArguments;

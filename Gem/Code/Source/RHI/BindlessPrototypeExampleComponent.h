@@ -254,7 +254,7 @@ namespace AtomSampleViewer
         // Image array holding all of the Stream cubemap images
         AZStd::vector<AZ::Data::Instance<AZ::RPI::StreamingImage>> m_cubemapImages;
 
-        AZStd::vector<const AZ::RHI::SingleDeviceImageView*> m_imageViews;
+        AZStd::vector<const AZ::RHI::MultiDeviceImageView*> m_imageViews;
 
         // Light direction handle
         FloatBufferHandle m_lightDirectionHandle;

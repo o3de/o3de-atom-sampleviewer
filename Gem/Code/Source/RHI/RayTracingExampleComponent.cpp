@@ -431,7 +431,7 @@ namespace AtomSampleViewer
 
             m_tlasBufferViewDescriptor = RHI::BufferViewDescriptor::CreateRaw(0, (uint32_t)m_rayTracingTlas->GetTlasBuffer()->GetDescriptor().m_byteCount);
 
-            [[maybe_unused]] RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportBuffer(m_tlasBufferAttachmentId, m_rayTracingTlas->GetTlasBuffer()->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex));
+            [[maybe_unused]] RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportBuffer(m_tlasBufferAttachmentId, m_rayTracingTlas->GetTlasBuffer());
             AZ_Error(RayTracingExampleName, result == RHI::ResultCode::Success, "Failed to import TLAS buffer with error %d", result);
 
             RHI::BufferScopeAttachmentDescriptor desc;
@@ -477,7 +477,7 @@ namespace AtomSampleViewer
         {
             // attach output image
             {
-                [[maybe_unused]] RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportImage(m_outputImageAttachmentId, m_outputImage->GetDeviceImage(RHI::MultiDevice::DefaultDeviceIndex));
+                [[maybe_unused]] RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportImage(m_outputImageAttachmentId, m_outputImage);
                 AZ_Error(RayTracingExampleName, result == RHI::ResultCode::Success, "Failed to import output image with error %d", result);
 
                 RHI::ImageScopeAttachmentDescriptor desc;
@@ -512,11 +512,11 @@ namespace AtomSampleViewer
 
                 uint32_t tlasBufferByteCount = aznumeric_cast<uint32_t>(m_rayTracingTlas->GetTlasBuffer()->GetDescriptor().m_byteCount);
                 RHI::BufferViewDescriptor bufferViewDescriptor = RHI::BufferViewDescriptor::CreateRayTracingTLAS(tlasBufferByteCount);
-                m_globalSrg->SetBufferView(tlasConstantIndex, m_rayTracingTlas->GetTlasBuffer()->BuildBufferView(bufferViewDescriptor)->GetDeviceBufferView(RHI::MultiDevice::DefaultDeviceIndex).get());
+                m_globalSrg->SetBufferView(tlasConstantIndex, m_rayTracingTlas->GetTlasBuffer()->BuildBufferView(bufferViewDescriptor).get());
 
                 RHI::ShaderInputImageIndex outputConstantIndex;
                 FindShaderInputIndex(&outputConstantIndex, m_globalSrg, AZ::Name{ "m_output" }, RayTracingExampleName);
-                m_globalSrg->SetImageView(outputConstantIndex, m_outputImageView->GetDeviceImageView(RHI::MultiDevice::DefaultDeviceIndex).get());
+                m_globalSrg->SetImageView(outputConstantIndex, m_outputImageView.get());
 
                 // set hit shader data, each array element corresponds to the InstanceIndex() of the geometry in the TLAS
                 // Note: this method is used instead of LocalRootSignatures for compatibility with non-DX12 platforms
@@ -586,7 +586,7 @@ namespace AtomSampleViewer
             RHI::CommandList* commandList = context.GetCommandList();
 
             const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = {
-                m_globalSrg->GetRHIShaderResourceGroup()
+                m_globalSrg->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get()
             };
 
             RHI::SingleDeviceDispatchRaysItem dispatchRaysItem;
@@ -644,7 +644,7 @@ namespace AtomSampleViewer
                 const Name outputImageId{ "m_output" };
                 RHI::ShaderInputImageIndex outputImageIndex = m_drawSRG->FindShaderInputImageIndex(outputImageId);
                 AZ_Error(RayTracingExampleName, outputImageIndex.IsValid(), "Failed to find shader input image %s.", outputImageId.GetCStr());
-                m_drawSRG->SetImageView(outputImageIndex, m_outputImageView->GetDeviceImageView(RHI::MultiDevice::DefaultDeviceIndex).get());
+                m_drawSRG->SetImageView(outputImageIndex, m_outputImageView.get());
                 m_drawSRG->Compile();
             }
 
@@ -664,7 +664,7 @@ namespace AtomSampleViewer
             drawIndexed.m_indexCount = 6;
             drawIndexed.m_instanceCount = 1;
 
-            const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_drawSRG->GetRHIShaderResourceGroup() };
+            const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_drawSRG->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() };
 
             RHI::SingleDeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;

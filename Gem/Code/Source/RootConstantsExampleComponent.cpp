@@ -308,7 +308,7 @@ namespace AtomSampleViewer
                 drawPacketBuilder.SetDrawArguments(mesh.m_drawArguments);
                 drawPacketBuilder.SetIndexBufferView(mesh.m_indexBufferView.GetDeviceIndexBufferView(RHI::MultiDevice::DefaultDeviceIndex));
                 drawPacketBuilder.SetRootConstants(m_rootConstantData.GetConstantData());
-                drawPacketBuilder.AddShaderResourceGroup(m_srg->GetRHIShaderResourceGroup());
+                drawPacketBuilder.AddShaderResourceGroup(m_srg->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get());
 
                 RHI::SingleDeviceDrawPacketBuilder::SingleDeviceDrawRequest drawRequest;
                 drawRequest.m_listTag = m_drawListTag;

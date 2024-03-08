@@ -375,7 +375,7 @@ namespace AtomSampleViewer
 
             for (uint32_t i = indexStart; i < indexEnd; ++i)
             {
-                const AZ::RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[i]->GetRHIShaderResourceGroup() };
+                const AZ::RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[i]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() };
 
                 AZ::RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;

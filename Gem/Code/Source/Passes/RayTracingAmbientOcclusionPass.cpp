@@ -167,7 +167,7 @@ namespace AZ
                 RHI::BufferViewDescriptor bufferViewDescriptor = RHI::BufferViewDescriptor::CreateRayTracingTLAS(tlasBufferByteCount);
 
                 bufferIndex = srgLayout->FindShaderInputBufferIndex(AZ::Name("m_scene"));
-                m_shaderResourceGroup->SetBufferView(bufferIndex, tlasBuffer->BuildBufferView(bufferViewDescriptor)->GetDeviceBufferView(RHI::MultiDevice::DefaultDeviceIndex).get());
+                m_shaderResourceGroup->SetBufferView(bufferIndex, tlasBuffer->BuildBufferView(bufferViewDescriptor).get());
             }
 
             // Bind constants
@@ -219,7 +219,7 @@ namespace AZ
 
             const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] =
             {
-                m_shaderResourceGroup->GetRHIShaderResourceGroup()
+                m_shaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get()
             };
 
             RHI::SingleDeviceDispatchRaysItem dispatchRaysItem;

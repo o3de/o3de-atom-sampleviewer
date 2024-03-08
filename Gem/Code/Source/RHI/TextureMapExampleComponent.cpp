@@ -513,7 +513,7 @@ namespace AtomSampleViewer
             drawIndexed.m_indexCount = 6;
             drawIndexed.m_instanceCount = 1;
 
-            const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_targetSRGs[target]->GetRHIShaderResourceGroup() };
+            const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_targetSRGs[target]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() };
 
             RHI::SingleDeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;
@@ -590,7 +590,7 @@ namespace AtomSampleViewer
             drawIndexed.m_indexCount = m_bufferViews[target].m_indexBufferView.GetByteCount() / sizeof(uint16_t);
             drawIndexed.m_instanceCount = 1;
 
-            const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_screenSRGs[target]->GetRHIShaderResourceGroup() };
+            const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_screenSRGs[target]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() };
 
             RHI::SingleDeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;

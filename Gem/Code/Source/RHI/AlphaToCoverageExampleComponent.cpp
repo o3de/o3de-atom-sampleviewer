@@ -390,7 +390,7 @@ namespace AtomSampleViewer
 
             for (uint32_t rectIndex = context.GetSubmitRange().m_startIndex; rectIndex < context.GetSubmitRange().m_endIndex; ++rectIndex)
             {
-                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = {m_shaderResourceGroups[typeIndex][rectIndex]->GetRHIShaderResourceGroup()};
+                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = {m_shaderResourceGroups[typeIndex][rectIndex]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get()};
 
                 RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;

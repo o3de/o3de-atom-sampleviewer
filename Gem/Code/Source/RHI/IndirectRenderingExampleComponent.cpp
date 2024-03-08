@@ -586,14 +586,14 @@ namespace AtomSampleViewer
             FindShaderInputIndex(&m_sceneInstancesDataBufferIndex, m_sceneShaderResourceGroup, instancesDataId, IndirectRendering::SampleName);
             FindShaderInputIndex(&m_sceneMatrixInputIndex, m_sceneShaderResourceGroup, matrixId, IndirectRendering::SampleName);
             float screenAspect = GetViewportWidth() / GetViewportHeight();
-            m_sceneShaderResourceGroup->SetBufferView(m_sceneInstancesDataBufferIndex, m_instancesDataBufferView->GetDeviceBufferView(RHI::MultiDevice::DefaultDeviceIndex).get());
+            m_sceneShaderResourceGroup->SetBufferView(m_sceneInstancesDataBufferIndex, m_instancesDataBufferView.get());
             m_sceneShaderResourceGroup->SetConstant(m_sceneMatrixInputIndex, AZ::Matrix4x4::CreateScale(AZ::Vector3(1.f/ screenAspect, 1.f, 1.f)));
             m_sceneShaderResourceGroup->Compile();
         }
 
         {
             uint32_t sequenceTypeIndex = static_cast<uint32_t>(m_mode);
-            m_indirectCommandsShaderResourceGroups[sequenceTypeIndex]->SetBufferView(m_cullingInputIndirectBufferIndices[sequenceTypeIndex], m_sourceIndirectBufferView->GetDeviceBufferView(RHI::MultiDevice::DefaultDeviceIndex).get());
+            m_indirectCommandsShaderResourceGroups[sequenceTypeIndex]->SetBufferView(m_cullingInputIndirectBufferIndices[sequenceTypeIndex], m_sourceIndirectBufferView.get());
         }
     }
 
@@ -622,7 +622,7 @@ namespace AtomSampleViewer
             const auto* countBufferView = context.GetBufferView(RHI::AttachmentId{ IndirectRendering::CountBufferAttachmentId });
             m_copyDescriptor.m_sourceBuffer = m_resetCounterBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex).get();
             m_copyDescriptor.m_sourceOffset = 0;
-            m_copyDescriptor.m_destinationBuffer = &countBufferView->GetBuffer();
+            m_copyDescriptor.m_destinationBuffer = countBufferView->GetBuffer()->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex).get();
             m_copyDescriptor.m_destinationOffset = 0;
             m_copyDescriptor.m_size = static_cast<uint32_t>(m_resetCounterBuffer->GetDescriptor().m_byteCount);
         };
@@ -699,7 +699,7 @@ namespace AtomSampleViewer
                 const auto* countBufferView = context.GetBufferView(RHI::AttachmentId{ IndirectRendering::CountBufferAttachmentId });
 
                 m_cullShaderResourceGroup->SetBufferView(m_cullingCountBufferIndex, countBufferView);
-                m_drawIndirect.m_countBuffer = &countBufferView->GetBuffer();
+                m_drawIndirect.m_countBuffer = countBufferView->GetBuffer()->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex).get();
                 m_drawIndirect.m_countBufferByteOffset = 0;
             }
 
@@ -714,7 +714,7 @@ namespace AtomSampleViewer
             uint32_t stride = m_indirectDrawBufferSignature->GetByteStride();
             m_indirectDrawBufferView =
             {
-                culledBufferView->GetBuffer(),
+                *(culledBufferView->GetBuffer()->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex).get()),
                 *m_indirectDrawBufferSignature,
                 0,
                 stride * m_numObjects,
@@ -728,12 +728,12 @@ namespace AtomSampleViewer
 
             RHI::SingleDeviceDispatchItem dispatchItem;
             uint32_t numSrgs = 0;
-            dispatchItem.m_shaderResourceGroups[numSrgs++] = m_cullShaderResourceGroup->GetRHIShaderResourceGroup();
-            dispatchItem.m_shaderResourceGroups[numSrgs++] = m_sceneShaderResourceGroup->GetRHIShaderResourceGroup();
+            dispatchItem.m_shaderResourceGroups[numSrgs++] = m_cullShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get();
+            dispatchItem.m_shaderResourceGroups[numSrgs++] = m_sceneShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get();
 
             for (const auto& srg : m_indirectCommandsShaderResourceGroups)
             {
-                dispatchItem.m_shaderResourceGroups[numSrgs++] = srg->GetRHIShaderResourceGroup();
+                dispatchItem.m_shaderResourceGroups[numSrgs++] = srg->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get();
             }
 
             // Submit the dispatch in an indirect manner.
@@ -834,7 +834,7 @@ namespace AtomSampleViewer
             commandList->SetViewports(&m_viewport, 1);
             commandList->SetScissors(&m_scissor, 1);
 
-            const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_sceneShaderResourceGroup->GetRHIShaderResourceGroup() };
+            const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_sceneShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() };
 
             // In case multi indirect drawing is not supported
             // we need to emit multiple indirect draw calls.

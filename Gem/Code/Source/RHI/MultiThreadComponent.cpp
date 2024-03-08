@@ -153,7 +153,7 @@ namespace AtomSampleViewer
         AZ::RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = AZ::RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = AZ::RHI::HeapMemoryLevel::Device;
-        result = m_bufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
+        result = m_bufferPool->Init(AZ::RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
         if (result != AZ::RHI::ResultCode::Success)
         {
             AZ_Error("MultiThreadComponent", false, "Failed to initialize buffer pool with error code %d", result);
@@ -177,7 +177,7 @@ namespace AtomSampleViewer
 
         m_streamBufferViews[0] =
         {
-            *m_inputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+            *m_inputAssemblyBuffer->GetDeviceBuffer(AZ::RHI::MultiDevice::DefaultDeviceIndex),
             offsetof(SingleCubeBufferData, m_positions),
             sizeof(SingleCubeBufferData::m_positions),
             sizeof(VertexPosition)
@@ -185,7 +185,7 @@ namespace AtomSampleViewer
 
         m_streamBufferViews[1] =
         {
-            *m_inputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+            *m_inputAssemblyBuffer->GetDeviceBuffer(AZ::RHI::MultiDevice::DefaultDeviceIndex),
             offsetof(SingleCubeBufferData, m_colors),
             sizeof(SingleCubeBufferData::m_colors),
             sizeof(VertexColor)
@@ -193,7 +193,7 @@ namespace AtomSampleViewer
 
         m_indexBufferView =
         {
-            *m_inputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+            *m_inputAssemblyBuffer->GetDeviceBuffer(AZ::RHI::MultiDevice::DefaultDeviceIndex),
             offsetof(SingleCubeBufferData, m_indices),
             sizeof(SingleCubeBufferData::m_indices),
             AZ::RHI::IndexFormat::Uint16
@@ -328,11 +328,11 @@ namespace AtomSampleViewer
             
             for (uint32_t i = context.GetSubmitRange().m_startIndex; i < context.GetSubmitRange().m_endIndex; ++i)
             {
-                const AZ::RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[i]->GetRHIShaderResourceGroup() };
+                const AZ::RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[i]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(AZ::RHI::MultiDevice::DefaultDeviceIndex).get() };
 
                 AZ::RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
-                drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
+                drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(AZ::RHI::MultiDevice::DefaultDeviceIndex).get();
                 drawItem.m_indexBufferView = &m_indexBufferView;
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(AZ::RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
