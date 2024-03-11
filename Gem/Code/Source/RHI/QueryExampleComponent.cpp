@@ -182,7 +182,7 @@ namespace AtomSampleViewer
             }
 
             m_quadStreamBufferView = {
-                *m_quadInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+                *m_quadInputAssemblyBuffer,
                 offsetof(BufferData, m_positions),
                 sizeof(BufferData::m_positions),
                 sizeof(VertexPosition)
@@ -192,7 +192,7 @@ namespace AtomSampleViewer
             layoutBuilder.AddBuffer()->Channel("POSITION", RHI::Format::R32G32B32_FLOAT);
             m_quadInputStreamLayout = layoutBuilder.End();
 
-            RHI::ValidateStreamBufferViews(m_quadInputStreamLayout, AZStd::span<const RHI::SingleDeviceStreamBufferView>(&m_quadStreamBufferView, 1));
+            RHI::ValidateStreamBufferViews(m_quadInputStreamLayout, AZStd::span<const RHI::MultiDeviceStreamBufferView>(&m_quadStreamBufferView, 1));
         }
     }
 
@@ -451,7 +451,8 @@ namespace AtomSampleViewer
                 drawItem.m_pipelineState = m_quadPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
                 drawItem.m_indexBufferView = &quadIndexBufferView;
                 drawItem.m_streamBufferViewCount = 1;
-                drawItem.m_streamBufferViews = &m_quadStreamBufferView;
+                auto deviceStreamBufferView{m_quadStreamBufferView.GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+                drawItem.m_streamBufferViews = &deviceStreamBufferView;
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
 

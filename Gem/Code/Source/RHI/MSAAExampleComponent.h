@@ -20,9 +20,9 @@
 
 #include <Atom/RHI/MultiDeviceBuffer.h>
 #include <Atom/RHI/MultiDeviceBufferPool.h>
-#include <Atom/RHI/SingleDeviceDrawItem.h>
+#include <Atom/RHI/MultiDeviceDrawItem.h>
 #include <Atom/RHI/MultiDevicePipelineState.h>
-#include <Atom/RHI/SingleDeviceStreamBufferView.h>
+#include <Atom/RHI/MultiDeviceStreamBufferView.h>
 
 #include <RHI/BasicRHIComponent.h>
 
@@ -133,8 +133,8 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 6> m_indices;
         };
 
-        AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> m_triangleStreamBufferViews;
-        AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> m_quadStreamBufferViews;
+        AZStd::array<AZ::RHI::MultiDeviceStreamBufferView, 2> m_triangleStreamBufferViews;
+        AZStd::array<AZ::RHI::MultiDeviceStreamBufferView, 2> m_quadStreamBufferViews;
         AZ::RHI::InputStreamLayout m_triangleInputStreamLayout;
         AZ::RHI::InputStreamLayout m_quadInputStreamLayout;
 

@@ -148,14 +148,14 @@ namespace AtomSampleViewer
             }
 
             m_rectangleStreamBufferViews[0u] = {
-                *m_rectangleInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+                *m_rectangleInputAssemblyBuffer,
                 offsetof(RectangleBufferData, m_positions),
                 sizeof(RectangleBufferData::m_positions),
                 sizeof(VertexPosition)
             };
 
             m_rectangleStreamBufferViews[1u] = {
-                *m_rectangleInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+                *m_rectangleInputAssemblyBuffer,
                 offsetof(RectangleBufferData, m_uvs),
                 sizeof(RectangleBufferData::m_uvs),
                 sizeof(VertexUV)
@@ -227,7 +227,9 @@ namespace AtomSampleViewer
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
                 drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_rectangleStreamBufferViews.size());
-                drawItem.m_streamBufferViews = m_rectangleStreamBufferViews.data();
+                AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> deviceStreamBufferViews{m_rectangleStreamBufferViews[0].GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex), 
+                    m_rectangleStreamBufferViews[1].GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+                drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
 
                 // Submit the triangle draw item.
                 commandList->Submit(drawItem);

@@ -12,7 +12,7 @@
 #include <SampleComponentManager.h>
 
 #include <Atom/RHI/CommandList.h>
-#include <Atom/RHI/SingleDeviceIndirectBufferWriter.h>
+#include <Atom/RHI/MultiDeviceIndirectBufferWriter.h>
 #include <Atom/RHI.Reflect/InputStreamLayoutBuilder.h>
 #include <Atom/RHI.Reflect/RenderAttachmentLayoutBuilder.h>
 #include <Atom/RPI.Public/Shader/Shader.h>
@@ -116,12 +116,12 @@ namespace AtomSampleViewer
     {
         RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
 
-        RHI::SingleDeviceStreamBufferView& triangleStreamBufferView = m_streamBufferViews[0];
-        RHI::SingleDeviceStreamBufferView& instancesIndicesStreamBufferView = m_streamBufferViews[1];
-        RHI::SingleDeviceStreamBufferView& quadStreamBufferView = m_streamBufferViews[2];
+        RHI::MultiDeviceStreamBufferView& triangleStreamBufferView = m_streamBufferViews[0];
+        RHI::MultiDeviceStreamBufferView& instancesIndicesStreamBufferView = m_streamBufferViews[1];
+        RHI::MultiDeviceStreamBufferView& quadStreamBufferView = m_streamBufferViews[2];
 
-        RHI::SingleDeviceIndexBufferView& triangleIndexBufferView = m_indexBufferViews[0];
-        RHI::SingleDeviceIndexBufferView& quadIndexBufferView = m_indexBufferViews[1];
+        RHI::MultiDeviceIndexBufferView& triangleIndexBufferView = m_indexBufferViews[0];
+        RHI::MultiDeviceIndexBufferView& quadIndexBufferView = m_indexBufferViews[1];
 
         // We use an index to identify an object at draw time.
         // On platforms that support setting inline constant through indirect commands we use an inline constant to set
@@ -176,7 +176,7 @@ namespace AtomSampleViewer
             {
                 triangleStreamBufferView =
                 {
-                    *m_inputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+                    *m_inputAssemblyBuffer,
                     offsetof(BufferData, m_trianglePositions),
                     sizeof(BufferData::m_trianglePositions),
                     sizeof(VertexPosition)
@@ -184,7 +184,7 @@ namespace AtomSampleViewer
 
                 triangleIndexBufferView =
                 {
-                    *m_inputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+                    *m_inputAssemblyBuffer,
                     offsetof(BufferData, m_triangleIndices),
                     sizeof(BufferData::m_triangleIndices),
                     RHI::IndexFormat::Uint16
@@ -192,7 +192,7 @@ namespace AtomSampleViewer
 
                 quadStreamBufferView =
                 {
-                    *m_inputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+                    *m_inputAssemblyBuffer,
                     offsetof(BufferData, m_quadPositions),
                     sizeof(BufferData::m_quadPositions),
                     sizeof(VertexPosition)
@@ -200,7 +200,7 @@ namespace AtomSampleViewer
 
                 quadIndexBufferView =
                 {
-                    *m_inputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+                    *m_inputAssemblyBuffer,
                     offsetof(BufferData, m_quadIndices),
                     sizeof(BufferData::m_quadIndices),
                     RHI::IndexFormat::Uint16
@@ -211,7 +211,7 @@ namespace AtomSampleViewer
             {
                 m_streamBufferViews[0] =
                 {
-                    *m_inputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+                    *m_inputAssemblyBuffer,
                     offsetof(BufferData, m_trianglePositions),
                     sizeof(BufferData::m_trianglePositions) + sizeof(BufferData::m_quadPositions),
                     sizeof(VertexPosition)
@@ -219,7 +219,7 @@ namespace AtomSampleViewer
 
                 m_indexBufferViews[0] =
                 {
-                    *m_inputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+                    *m_inputAssemblyBuffer,
                     offsetof(BufferData, m_triangleIndices), // Need to offset the index buffer to the proper location
                     sizeof(BufferData::m_triangleIndices) + sizeof(BufferData::m_quadIndices),
                     RHI::IndexFormat::Uint16
@@ -233,13 +233,13 @@ namespace AtomSampleViewer
 
             instancesIndicesStreamBufferView =
             {
-                *m_inputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+                *m_inputAssemblyBuffer,
                 offsetof(BufferData, m_instanceIndices),
                 sizeof(BufferData::m_instanceIndices),
                 sizeof(uint32_t)
             };
 
-            RHI::ValidateStreamBufferViews(m_inputStreamLayout, AZStd::span<const RHI::SingleDeviceStreamBufferView>(m_streamBufferViews.data(), 2));
+            RHI::ValidateStreamBufferViews(m_inputStreamLayout, AZStd::span<const RHI::MultiDeviceStreamBufferView>(m_streamBufferViews.data(), 2));
         }
     }
 
@@ -357,11 +357,11 @@ namespace AtomSampleViewer
 
         // Create the signature and pass the pipeline state since we may have
         // an inline constants command.
-        m_indirectDrawBufferSignature = RHI::Factory::Get().CreateIndirectBufferSignature();
-        RHI::SingleDeviceIndirectBufferSignatureDescriptor signatureDescriptor;
+        m_indirectDrawBufferSignature = aznew RHI::MultiDeviceIndirectBufferSignature;
+        RHI::MultiDeviceIndirectBufferSignatureDescriptor signatureDescriptor;
         signatureDescriptor.m_layout = m_indirectDrawBufferLayout;
-        signatureDescriptor.m_pipelineState = m_drawPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
-        result = m_indirectDrawBufferSignature->Init(*device, signatureDescriptor);
+        signatureDescriptor.m_pipelineState = m_drawPipelineState.get();
+        result = m_indirectDrawBufferSignature->Init(RHI::MultiDevice::DefaultDevice, signatureDescriptor);
 
         if (result != RHI::ResultCode::Success)
         {
@@ -380,19 +380,19 @@ namespace AtomSampleViewer
         m_shaderBufferPool->InitBuffer(request);
 
         // Create a writer to populate the buffer with the commands.
-        auto indirectBufferWriter = RHI::Factory::Get().CreateIndirectBufferWriter();
-        result = indirectBufferWriter->Init(*m_sourceIndirectBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex), 0, commandsStride, s_maxNumberOfObjects, *m_indirectDrawBufferSignature);
+        RHI::Ptr<RHI::MultiDeviceIndirectBufferWriter> indirectBufferWriter = aznew RHI::MultiDeviceIndirectBufferWriter;
+        result = indirectBufferWriter->Init(*m_sourceIndirectBuffer, 0, commandsStride, s_maxNumberOfObjects, *m_indirectDrawBufferSignature);
         if (result != RHI::ResultCode::Success)
         {
             AZ_Assert(false, "Fail to initialize Indirect Buffer Writer");
             return;
         }
 
-        RHI::SingleDeviceStreamBufferView& triangleStreamBufferView = m_streamBufferViews[0];
-        RHI::SingleDeviceStreamBufferView& quadStreamBufferView = m_streamBufferViews[2];
+        RHI::MultiDeviceStreamBufferView& triangleStreamBufferView = m_streamBufferViews[0];
+        RHI::MultiDeviceStreamBufferView& quadStreamBufferView = m_streamBufferViews[2];
 
-        RHI::SingleDeviceIndexBufferView& triangleIndexBufferView = m_indexBufferViews[0];
-        RHI::SingleDeviceIndexBufferView& quadIndexBufferView = m_indexBufferViews[1];
+        RHI::MultiDeviceIndexBufferView& triangleIndexBufferView = m_indexBufferViews[0];
+        RHI::MultiDeviceIndexBufferView& quadIndexBufferView = m_indexBufferViews[1];
 
         // Write the commands using the IndirectBufferWriter
         // We alternate between drawing a triangle and a quad.
@@ -469,10 +469,10 @@ namespace AtomSampleViewer
                 return;
             }
 
-            m_indirectDispatchBufferSignature = RHI::Factory::Get().CreateIndirectBufferSignature();
+            m_indirectDispatchBufferSignature = aznew RHI::MultiDeviceIndirectBufferSignature;
             signatureDescriptor = {};
             signatureDescriptor.m_layout = m_indirectDispatchBufferLayout;
-            result = m_indirectDispatchBufferSignature->Init(*device, signatureDescriptor);
+            result = m_indirectDispatchBufferSignature->Init(RHI::MultiDevice::DefaultDevice, signatureDescriptor);
 
             if (result != RHI::ResultCode::Success)
             {
@@ -490,15 +490,15 @@ namespace AtomSampleViewer
 
             m_indirectDispatchBufferView =
             {
-                *m_indirectDispatchBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+                *m_indirectDispatchBuffer,
                 *m_indirectDispatchBufferSignature,
                 0,
                 indirectDispatchStride,
                 indirectDispatchStride
             };
 
-            m_indirectDispatchWriter = RHI::Factory::Get().CreateIndirectBufferWriter();
-            result = m_indirectDispatchWriter->Init(*m_indirectDispatchBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex), 0, indirectDispatchStride, 1, *m_indirectDispatchBufferSignature);
+            m_indirectDispatchWriter = aznew RHI::MultiDeviceIndirectBufferWriter;
+            result = m_indirectDispatchWriter->Init(*m_indirectDispatchBuffer, 0, indirectDispatchStride, 1, *m_indirectDispatchBufferSignature);
             if (result != RHI::ResultCode::Success)
             {
                 AZ_Assert(false, "Fail to initialize Indirect Buffer Writer");
@@ -714,7 +714,7 @@ namespace AtomSampleViewer
             uint32_t stride = m_indirectDrawBufferSignature->GetByteStride();
             m_indirectDrawBufferView =
             {
-                *(culledBufferView->GetBuffer()->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex).get()),
+                *(culledBufferView->GetBuffer()),
                 *m_indirectDrawBufferSignature,
                 0,
                 stride * m_numObjects,
@@ -738,7 +738,7 @@ namespace AtomSampleViewer
 
             // Submit the dispatch in an indirect manner.
             // Not really needed but it tests the indirect dispatch code.
-            RHI::DispatchIndirect dispatchArgs(1, m_indirectDispatchBufferView, 0);
+            RHI::DispatchIndirect dispatchArgs(1, m_indirectDispatchBufferView.GetDeviceIndirectBufferView(RHI::MultiDevice::DefaultDeviceIndex), 0);
 
             dispatchItem.m_arguments = dispatchArgs;
             dispatchItem.m_pipelineState = m_cullPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
@@ -846,16 +846,20 @@ namespace AtomSampleViewer
                 // Offset the indirect buffer depending on the number of indirect draw calls that we can do.
                 m_drawIndirect.m_maxSequenceCount = AZStd::min(m_numObjects - i, maxIndirectDrawCount);
                 m_drawIndirect.m_indirectBufferByteOffset = i * m_indirectDrawBufferView.GetByteStride();
-                m_drawIndirect.m_indirectBufferView = &m_indirectDrawBufferView;
+                auto deviceIndirectBufferView{m_indirectDrawBufferView.GetDeviceIndirectBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+                m_drawIndirect.m_indirectBufferView = &deviceIndirectBufferView;
 
                 RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = m_drawIndirect;
                 drawItem.m_pipelineState = m_drawPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
-                drawItem.m_indexBufferView = &m_indexBufferViews[0];
+                auto deviceIndexBufferView{m_indexBufferViews[0].GetDeviceIndexBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+                drawItem.m_indexBufferView = &deviceIndexBufferView;
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
-                drawItem.m_streamBufferViewCount = 2;
-                drawItem.m_streamBufferViews = m_streamBufferViews.data();
+                drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
+                AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> deviceStreamBufferViews{m_streamBufferViews[0].GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex), 
+                    m_streamBufferViews[1].GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+                drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
 
                 // Submit the indirect draw item.
                 commandList->Submit(drawItem);

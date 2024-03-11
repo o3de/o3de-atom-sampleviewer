@@ -18,7 +18,6 @@
 
 #include <Atom/RHI/ScopeProducer.h>
 #include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/SingleDeviceDrawItem.h>
 #include <Atom/RHI/Device.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/MultiDevicePipelineState.h>
@@ -77,8 +76,6 @@ namespace AtomSampleViewer
         void UploadDataToConstantBuffer(InstanceInfo* data, uint32_t elementSize, uint32_t elementCount);
         void CreateConstantBufferView();
         
-        AZ::RHI::SingleDeviceDrawItem m_drawItem;
-
         float m_time = 0.0f;
 
         // -------------------------------------------------
@@ -94,8 +91,8 @@ namespace AtomSampleViewer
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_inputAssemblyBufferPool;
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_inputAssemblyBuffer;
 
-        AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> m_streamBufferViews;
-        AZ::RHI::SingleDeviceIndexBufferView m_indexBufferView;
+        AZStd::array<AZ::RHI::MultiDeviceStreamBufferView, 2> m_streamBufferViews;
+        AZ::RHI::MultiDeviceIndexBufferView m_indexBufferView;
 
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_constantBufferPool;
 

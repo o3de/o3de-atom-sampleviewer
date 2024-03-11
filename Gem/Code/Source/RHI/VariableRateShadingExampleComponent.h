@@ -21,7 +21,7 @@
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 
 #include <Atom/RHI/MultiDeviceBufferPool.h>
-#include <Atom/RHI/SingleDeviceDrawItem.h>
+#include <Atom/RHI/MultiDeviceDrawItem.h>
 #include <Atom/RHI/Device.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/SingleDeviceCopyItem.h>
@@ -137,9 +137,9 @@ namespace AtomSampleViewer
         // Buffer for the IA of the full screen quad.
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_inputAssemblyBuffer;
         // Bufferviews into the full screen quad IA
-        AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> m_streamBufferViews;
+        AZStd::array<AZ::RHI::MultiDeviceStreamBufferView, 2> m_streamBufferViews;
         // Indexview of the full screen quad index buffer
-        AZ::RHI::SingleDeviceIndexBufferView m_indexBufferView;
+        AZ::RHI::MultiDeviceIndexBufferView m_indexBufferView;
         // Layout of the full screen quad.
         AZ::RHI::InputStreamLayout m_inputStreamLayout;
 

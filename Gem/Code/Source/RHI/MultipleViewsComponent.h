@@ -12,7 +12,6 @@
 
 #include <Atom/RHI/MultiDeviceBuffer.h>
 #include <Atom/RHI/MultiDeviceBufferPool.h>
-#include <Atom/RHI/SingleDeviceDrawItem.h>
 #include <Atom/RHI/MultiDevicePipelineState.h>
 #include <Atom/RPI.Public/Image/AttachmentImage.h>
 
@@ -100,12 +99,11 @@ namespace AtomSampleViewer
         AZStd::array<AZ::RHI::ShaderInputConstantIndex, 6> m_shaderInputConstantIndices;
         AZ::RHI::ShaderInputImageIndex m_shaderInputImageIndex;
 
-        AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 3> m_streamBufferViews;
-        AZ::RHI::SingleDeviceIndexBufferView m_indexBufferView;
+        AZStd::array<AZ::RHI::MultiDeviceStreamBufferView, 3> m_streamBufferViews;
+        AZ::RHI::MultiDeviceIndexBufferView m_indexBufferView;
         AZ::RHI::AttachmentId m_depthMapID;
         AZ::RHI::AttachmentId m_depthStencilID;
         AZ::RHI::ClearValue m_depthClearValue;
-        AZ::RHI::SingleDeviceDrawItem m_drawItem;
 
         AZ::RHI::TransientImageDescriptor m_transientImageDescriptor;
     };

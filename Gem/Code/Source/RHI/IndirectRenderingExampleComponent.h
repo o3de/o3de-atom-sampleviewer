@@ -20,13 +20,13 @@
 #include <Atom/RPI.Public/Shader/ShaderReloadNotificationBus.h>
 
 #include <Atom/RHI/MultiDeviceBufferPool.h>
-#include <Atom/RHI/SingleDeviceDrawItem.h>
+#include <Atom/RHI/MultiDeviceDrawItem.h>
 #include <Atom/RHI/Device.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/SingleDeviceCopyItem.h>
 #include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/SingleDeviceIndirectBufferSignature.h>
-#include <Atom/RHI/SingleDeviceIndirectBufferWriter.h>
+#include <Atom/RHI/MultiDeviceIndirectBufferSignature.h>
+#include <Atom/RHI/MultiDeviceIndirectBufferWriter.h>
 #include <Atom/RHI/MultiDevicePipelineState.h>
 
 #include <Atom/RHI.Reflect/IndirectBufferLayout.h>
@@ -171,18 +171,18 @@ namespace AtomSampleViewer
 
         AZStd::array<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, NumSequencesType> m_indirectCommandsShaderResourceGroups;
 
-        AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 3> m_streamBufferViews;
-        AZStd::array<AZ::RHI::SingleDeviceIndexBufferView, 2> m_indexBufferViews;
-        AZ::RHI::SingleDeviceIndirectBufferView m_indirectDrawBufferView;
-        AZ::RHI::SingleDeviceIndirectBufferView m_indirectDispatchBufferView;
+        AZStd::array<AZ::RHI::MultiDeviceStreamBufferView, 3> m_streamBufferViews;
+        AZStd::array<AZ::RHI::MultiDeviceIndexBufferView, 2> m_indexBufferViews;
+        AZ::RHI::MultiDeviceIndirectBufferView m_indirectDrawBufferView;
+        AZ::RHI::MultiDeviceIndirectBufferView m_indirectDispatchBufferView;
 
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferView> m_sourceIndirectBufferView;
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferView> m_instancesDataBufferView;
 
         AZ::RHI::IndirectBufferLayout m_indirectDrawBufferLayout;
         AZ::RHI::IndirectBufferLayout m_indirectDispatchBufferLayout;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceIndirectBufferSignature> m_indirectDrawBufferSignature;
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceIndirectBufferSignature> m_indirectDispatchBufferSignature;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceIndirectBufferSignature> m_indirectDrawBufferSignature;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceIndirectBufferSignature> m_indirectDispatchBufferSignature;
 
         AZ::RHI::ShaderInputBufferIndex m_sceneInstancesDataBufferIndex;
         AZ::RHI::ShaderInputConstantIndex m_sceneMatrixInputIndex;
@@ -194,7 +194,7 @@ namespace AtomSampleViewer
         AZStd::array<AZ::RHI::ShaderInputBufferIndex, NumSequencesType> m_cullingInputIndirectBufferIndices;
         AZStd::array<AZ::RHI::ShaderInputBufferIndex, NumSequencesType> m_cullingOutputIndirectBufferIndices;
 
-        AZ::RHI::Ptr<AZ::RHI::SingleDeviceIndirectBufferWriter> m_indirectDispatchWriter;
+        AZ::RHI::Ptr<AZ::RHI::MultiDeviceIndirectBufferWriter> m_indirectDispatchWriter;
 
         AZ::RHI::DrawIndirect m_drawIndirect;
         AZ::RHI::SingleDeviceCopyBufferDescriptor m_copyDescriptor;

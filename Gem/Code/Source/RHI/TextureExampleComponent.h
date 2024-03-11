@@ -13,7 +13,6 @@
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 
 #include <Atom/RHI/MultiDeviceBufferPool.h>
-#include <Atom/RHI/SingleDeviceDrawItem.h>
 #include <Atom/RHI.Reflect/SamplerState.h>
 
 #include <AzCore/Component/TickBus.h>
@@ -69,7 +68,7 @@ namespace AtomSampleViewer
         };
 
         AZ::RHI::SingleDeviceDrawItem m_drawItem;
-        AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> m_streamBufferViews;
+        AZStd::array<AZ::RHI::MultiDeviceStreamBufferView, 2> m_streamBufferViews;
 
         AZ::RHI::SamplerState m_samplerState;
         bool m_useStaticSampler = true;

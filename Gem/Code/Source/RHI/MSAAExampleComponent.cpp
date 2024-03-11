@@ -146,7 +146,7 @@ namespace AtomSampleViewer
 
         m_triangleStreamBufferViews[0] =
         {
-            *m_triangleInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+            *m_triangleInputAssemblyBuffer,
             offsetof(TriangleBufferData, m_positions),
             sizeof(TriangleBufferData::m_positions),
             sizeof(VertexPosition)
@@ -154,7 +154,7 @@ namespace AtomSampleViewer
 
         m_triangleStreamBufferViews[1] =
         {
-            *m_triangleInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+            *m_triangleInputAssemblyBuffer,
             offsetof(TriangleBufferData, m_colors),
             sizeof(TriangleBufferData::m_colors),
             sizeof(VertexColor)
@@ -206,14 +206,14 @@ namespace AtomSampleViewer
         }
 
         m_quadStreamBufferViews[0] = {
-            *m_quadInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+            *m_quadInputAssemblyBuffer,
             offsetof(QuadBufferData, m_positions),
             sizeof(QuadBufferData::m_positions),
             sizeof(VertexPosition)
         };
 
         m_quadStreamBufferViews[1] = {
-            *m_quadInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+            *m_quadInputAssemblyBuffer,
             offsetof(QuadBufferData, m_uvs),
             sizeof(QuadBufferData::m_uvs),
             sizeof(VertexUV)
@@ -360,7 +360,9 @@ namespace AtomSampleViewer
             drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
             drawItem.m_shaderResourceGroups = shaderResourceGroups;
             drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_triangleStreamBufferViews.size());
-            drawItem.m_streamBufferViews = m_triangleStreamBufferViews.data();
+            AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> deviceStreamBufferViews{m_triangleStreamBufferViews[0].GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex), 
+                    m_triangleStreamBufferViews[1].GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+            drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
 
             // Submit the triangle draw item.
             commandList->Submit(drawItem);
@@ -473,7 +475,9 @@ namespace AtomSampleViewer
             drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
             drawItem.m_shaderResourceGroups = shaderResourceGroups;
             drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_quadStreamBufferViews.size());
-            drawItem.m_streamBufferViews = m_quadStreamBufferViews.data();
+            AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> deviceStreamBufferViews{m_quadStreamBufferViews[0].GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex), 
+                    m_quadStreamBufferViews[1].GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+            drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
 
             // Submit the triangle draw item.
             commandList->Submit(drawItem);
