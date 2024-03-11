@@ -170,7 +170,7 @@ namespace AtomSampleViewer
 
         m_fullScreenStreamBufferViews[0] =
         {
-            *m_fullScreenInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+            *m_fullScreenInputAssemblyBuffer,
             offsetof(FullScreenBufferData, m_positions),
             sizeof(FullScreenBufferData::m_positions),
             sizeof(VertexPosition)
@@ -178,7 +178,7 @@ namespace AtomSampleViewer
 
         m_fullScreenStreamBufferViews[1] =
         {
-            *m_fullScreenInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+            *m_fullScreenInputAssemblyBuffer,
             offsetof(FullScreenBufferData, m_uvs),
             sizeof(FullScreenBufferData::m_uvs),
             sizeof(VertexUV)
@@ -186,7 +186,7 @@ namespace AtomSampleViewer
 
         m_fullScreenIndexBufferView =
         {
-            *m_fullScreenInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+            *m_fullScreenInputAssemblyBuffer,
             offsetof(FullScreenBufferData, m_indices),
             sizeof(FullScreenBufferData::m_indices),
             RHI::IndexFormat::Uint16
@@ -668,9 +668,12 @@ namespace AtomSampleViewer
             RHI::SingleDeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;
             drawItem.m_pipelineState = m_drawPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
-            drawItem.m_indexBufferView = &m_fullScreenIndexBufferView;
+            auto deviceIndexBufferView{m_fullScreenIndexBufferView.GetDeviceIndexBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+            drawItem.m_indexBufferView = &deviceIndexBufferView;
             drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_fullScreenStreamBufferViews.size());
-            drawItem.m_streamBufferViews = m_fullScreenStreamBufferViews.data();
+            AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> deviceStreamBufferViews{m_fullScreenStreamBufferViews[0].GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex), 
+                    m_fullScreenStreamBufferViews[1].GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+            drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
             drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
             drawItem.m_shaderResourceGroups = shaderResourceGroups;
 

@@ -13,7 +13,6 @@
 
 #include <Atom/RHI/MultiDeviceBufferPool.h>
 #include <Atom/RHI/Device.h>
-#include <Atom/RHI/SingleDeviceDrawItem.h>
 #include <Atom/RHI/MultiDevicePipelineState.h>
 
 namespace AtomSampleViewer
@@ -61,8 +60,7 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, s_numberOfVertices> m_indices;
         };
 
-        AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> m_streamBufferViews;
-        AZ::RHI::SingleDeviceDrawItem m_drawItem;
+        AZStd::array<AZ::RHI::MultiDeviceStreamBufferView, 2> m_streamBufferViews;
 
         AZ::RHI::AttachmentId m_depthStencilID;
         AZ::RHI::ClearValue m_depthClearValue;

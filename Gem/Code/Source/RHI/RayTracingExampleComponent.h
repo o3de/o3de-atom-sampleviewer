@@ -134,14 +134,13 @@ namespace AtomSampleViewer
         };
 
         RHI::Ptr<RHI::MultiDeviceBuffer> m_fullScreenInputAssemblyBuffer;
-        AZStd::array<RHI::SingleDeviceStreamBufferView, 2> m_fullScreenStreamBufferViews;
-        RHI::SingleDeviceIndexBufferView m_fullScreenIndexBufferView;
+        AZStd::array<RHI::MultiDeviceStreamBufferView, 2> m_fullScreenStreamBufferViews;
+        RHI::MultiDeviceIndexBufferView m_fullScreenIndexBufferView;
         RHI::InputStreamLayout m_fullScreenInputStreamLayout;
 
         RHI::ConstPtr<RHI::MultiDevicePipelineState> m_drawPipelineState;
         Data::Instance<RPI::ShaderResourceGroup> m_drawSRG;
         RHI::ShaderInputConstantIndex m_drawDimensionConstantIndex;
-        RHI::SingleDeviceDrawItem m_drawItem;
 
         // time variable for moving the triangles and rectangle each frame
         float m_time = 0.0f;

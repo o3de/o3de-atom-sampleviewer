@@ -9,7 +9,7 @@
 #pragma once
 
 #include <Atom/RHI/MultiDeviceBufferPool.h>
-#include <Atom/RHI/SingleDeviceDrawItem.h>
+#include <Atom/RHI/MultiDeviceDrawItem.h>
 #include <Atom/RHI/ScopeProducer.h>
 
 #include <Atom/RHI/RHISystemInterface.h>
@@ -122,14 +122,14 @@ namespace AtomSampleViewer
         // Quad related variables
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_quadBufferPool;
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_quadInputAssemblyBuffer;
-        AZ::RHI::SingleDeviceIndexBufferView m_quadIndexBufferView;
-        AZStd::array<AZStd::vector<AZ::RHI::SingleDeviceStreamBufferView>, NumScopes> m_quadStreamBufferViews;
+        AZ::RHI::MultiDeviceIndexBufferView m_quadIndexBufferView;
+        AZStd::array<AZStd::vector<AZ::RHI::MultiDeviceStreamBufferView>, NumScopes> m_quadStreamBufferViews;
 
         // Terrain related variables
         AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState>, NumScopes> m_terrainPipelineStates;
 
         // Model related variables
-        AZStd::array<AZ::RPI::ModelLod::TempStreamBufferViewList, NumScopes> m_modelStreamBufferViews;
+        AZStd::array<AZ::RPI::ModelLod::StreamBufferViewList, NumScopes> m_modelStreamBufferViews;
         AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState>, NumScopes> m_modelPipelineStates;
         AZ::Data::Instance<AZ::RPI::Model> m_model;
 

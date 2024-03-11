@@ -12,7 +12,7 @@
 
 #include <Atom/Feature/CoreLights/DirectionalLightFeatureProcessorInterface.h>
 
-#include <Atom/RHI/SingleDeviceIndexBufferView.h>
+#include <Atom/RHI/MultiDeviceIndexBufferView.h>
 #include <Atom/RHI/MultiDevicePipelineState.h>
 #include <Atom/RHI/DrawList.h>
 #include <Atom/RHI/ConstantsData.h>
@@ -68,7 +68,7 @@ namespace AtomSampleViewer
        
         // Models
         AZStd::vector<AZ::Data::Instance<AZ::RPI::Model>> m_models;
-        AZStd::vector<AZStd::vector<AZ::RPI::ModelLod::TempStreamBufferViewList>> m_modelStreamBufferViews;
+        AZStd::vector<AZStd::vector<AZ::RPI::ModelLod::StreamBufferViewList>> m_modelStreamBufferViews;
 
         // Cache interfaces
         AZ::RPI::DynamicDrawInterface* m_dynamicDraw = nullptr;

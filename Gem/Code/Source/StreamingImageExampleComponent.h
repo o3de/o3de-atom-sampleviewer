@@ -10,7 +10,7 @@
 
 #include <CommonSampleComponentBase.h>
 
-#include <Atom/RHI/SingleDeviceIndexBufferView.h>
+#include <Atom/RHI/MultiDeviceIndexBufferView.h>
 #include <Atom/RHI/MultiDevicePipelineState.h>
 #include <Atom/RHI/DrawList.h>
 
