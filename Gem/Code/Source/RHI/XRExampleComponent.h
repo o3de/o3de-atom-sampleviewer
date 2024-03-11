@@ -14,7 +14,6 @@
 #include <Atom/RPI.Public/XR/XRSpaceNotificationBus.h>
 
 #include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/SingleDeviceDrawItem.h>
 #include <Atom/RHI/Device.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/MultiDevicePipelineState.h>
@@ -95,7 +94,7 @@ namespace AtomSampleViewer
         void CreateScope();
 
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_bufferPool;
-        AZ::RHI::SingleDeviceIndexBufferView m_indexBufferView;
+        AZ::RHI::MultiDeviceIndexBufferView m_indexBufferView;
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_inputAssemblyBuffer;
         AZ::RHI::InputStreamLayout m_streamLayoutDescriptor;
         AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_pipelineState;
@@ -107,8 +106,7 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 3> m_indices;
         };
 
-        AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> m_streamBufferViews;
-        AZ::RHI::SingleDeviceDrawItem m_drawItem;
+        AZStd::array<AZ::RHI::MultiDeviceStreamBufferView, 2> m_streamBufferViews;
         float m_time = 0.0f;
         AZStd::array<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, NumberOfCubes> m_shaderResourceGroups;
         AZStd::array<AZ::Matrix4x4, NumberOfCubes> m_modelMatrices;

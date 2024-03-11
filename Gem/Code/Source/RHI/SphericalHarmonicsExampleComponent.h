@@ -13,7 +13,6 @@
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 
 #include <Atom/RHI/MultiDeviceBufferPool.h>
-#include <Atom/RHI/SingleDeviceDrawItem.h>
 #include <Atom/RHI.Reflect/SamplerState.h>
 
 #include <AzCore/Component/TickBus.h>
@@ -135,8 +134,7 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 6> m_indices;
         };
 
-        AZ::RHI::SingleDeviceDrawItem m_drawItem;
-        AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> m_streamBufferViews;
+        AZStd::array<AZ::RHI::MultiDeviceStreamBufferView, 2> m_streamBufferViews;
         // ------------------------------------------------------------
 
         AZ::EntityId m_cameraEntityId;

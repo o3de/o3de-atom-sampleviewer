@@ -15,7 +15,7 @@
 
 #include <Atom/RHI/MultiDeviceBufferPool.h>
 #include <Atom/RHI/Device.h>
-#include <Atom/RHI/SingleDeviceDrawItem.h>
+#include <Atom/RHI/MultiDeviceDrawItem.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/FrameScheduler.h>
 #include <Atom/RHI/MultiDevicePipelineState.h>
@@ -93,8 +93,7 @@ namespace AtomSampleViewer
 
         BufferData m_bufferData;
 
-        AZ::RHI::SingleDeviceDrawItem m_drawItem;
-        AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> m_streamBufferViews;
+        AZStd::array<AZ::RHI::MultiDeviceStreamBufferView, 2> m_streamBufferViews;
 
         static const int numberOfPaths = 3;
         const char* m_filePaths[numberOfPaths] = {

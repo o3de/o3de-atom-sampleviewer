@@ -20,8 +20,8 @@
 #include <Atom/Component/DebugCamera/NoClipControllerComponent.h>
 #include <Atom/Feature/CoreLights/CoreLightsConstants.h>
 
-#include <Atom/RHI/SingleDeviceDrawPacket.h>
-#include <Atom/RHI/SingleDeviceDrawPacketBuilder.h>
+#include <Atom/RHI/MultiDeviceDrawPacket.h>
+#include <Atom/RHI/MultiDeviceDrawPacketBuilder.h>
 #include <Atom/RHI.Reflect/InputStreamLayoutBuilder.h>
 #include <Atom/RPI.Reflect/Asset/AssetUtils.h>
 
@@ -303,21 +303,21 @@ namespace AtomSampleViewer
                 auto const& mesh = meshes[i];
 
                 // Build draw packet and set the values of the inline constants.
-                RHI::SingleDeviceDrawPacketBuilder drawPacketBuilder;
+                RHI::MultiDeviceDrawPacketBuilder drawPacketBuilder{RHI::MultiDevice::DefaultDevice};
                 drawPacketBuilder.Begin(nullptr);
                 drawPacketBuilder.SetDrawArguments(mesh.m_drawArguments);
-                drawPacketBuilder.SetIndexBufferView(mesh.m_indexBufferView.GetDeviceIndexBufferView(RHI::MultiDevice::DefaultDeviceIndex));
+                drawPacketBuilder.SetIndexBufferView(mesh.m_indexBufferView);
                 drawPacketBuilder.SetRootConstants(m_rootConstantData.GetConstantData());
-                drawPacketBuilder.AddShaderResourceGroup(m_srg->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get());
+                drawPacketBuilder.AddShaderResourceGroup(m_srg->GetRHIShaderResourceGroup());
 
-                RHI::SingleDeviceDrawPacketBuilder::SingleDeviceDrawRequest drawRequest;
+                RHI::MultiDeviceDrawPacketBuilder::MultiDeviceDrawRequest drawRequest;
                 drawRequest.m_listTag = m_drawListTag;
-                drawRequest.m_pipelineState = m_pipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
+                drawRequest.m_pipelineState = m_pipelineState.get();
                 drawRequest.m_streamBufferViews = m_modelStreamBufferViews[modelIndex][i];
                 drawRequest.m_sortKey = 0;
                 drawPacketBuilder.AddDrawItem(drawRequest);
 
-                AZStd::unique_ptr<const RHI::SingleDeviceDrawPacket> drawPacket(drawPacketBuilder.End());
+                auto drawPacket{drawPacketBuilder.End()};
                 m_dynamicDraw->AddDrawPacket(m_scene, AZStd::move(drawPacket));
             }
         }
