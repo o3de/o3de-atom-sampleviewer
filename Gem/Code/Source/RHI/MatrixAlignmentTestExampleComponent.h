@@ -14,7 +14,6 @@
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 
 #include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/SingleDeviceDrawItem.h>
 #include <Atom/RHI/Device.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/MultiDevicePipelineState.h>
@@ -176,8 +175,7 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 6> m_indices;
         };
 
-        AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> m_streamBufferViews;
-        AZ::RHI::SingleDeviceDrawItem m_drawItem;
+        AZStd::array<AZ::RHI::MultiDeviceStreamBufferView, 2> m_streamBufferViews;
 
         // ImGui stuff.
         ImGuiSidebar m_imguiSidebar;

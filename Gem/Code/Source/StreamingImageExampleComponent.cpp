@@ -6,8 +6,8 @@
  *
  */
 
-#include <Atom/RHI/SingleDeviceDrawPacket.h>
-#include <Atom/RHI/SingleDeviceDrawPacketBuilder.h>
+#include <Atom/RHI/MultiDeviceDrawPacket.h>
+#include <Atom/RHI/MultiDeviceDrawPacketBuilder.h>
 #include <Atom/RHI.Reflect/InputStreamLayoutBuilder.h>
 
 #include <Atom/RPI.Public/Image/ImageSystemInterface.h>
@@ -490,22 +490,22 @@ namespace AtomSampleViewer
         for (Image3dToDraw& image3d : m_3dImages)
         {
             // Build draw packet...
-            RHI::SingleDeviceDrawPacketBuilder drawPacketBuilder;
+            RHI::MultiDeviceDrawPacketBuilder drawPacketBuilder{RHI::MultiDevice::DefaultDevice};
             drawPacketBuilder.Begin(nullptr);
             RHI::DrawLinear drawLinear;
             drawLinear.m_vertexCount = 4;
             drawLinear.m_instanceCount = image3d.m_sliceCount;
             drawPacketBuilder.SetDrawArguments(drawLinear);
 
-            RHI::SingleDeviceDrawPacketBuilder::SingleDeviceDrawRequest drawRequest;
+            RHI::MultiDeviceDrawPacketBuilder::MultiDeviceDrawRequest drawRequest;
             drawRequest.m_listTag = m_image3dDrawListTag;
-            drawRequest.m_pipelineState = m_image3dPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
+            drawRequest.m_pipelineState = m_image3dPipelineState.get();
             drawRequest.m_sortKey = 0;
-            drawRequest.m_uniqueShaderResourceGroup = image3d.m_srg->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get();
+            drawRequest.m_uniqueShaderResourceGroup = image3d.m_srg->GetRHIShaderResourceGroup();
             drawPacketBuilder.AddDrawItem(drawRequest);
 
             // Submit draw packet...
-            AZStd::unique_ptr<const RHI::SingleDeviceDrawPacket> drawPacket(drawPacketBuilder.End());
+            auto drawPacket{drawPacketBuilder.End()};
             m_dynamicDraw->AddDrawPacket(m_scene, AZStd::move(drawPacket));
         }
     }
@@ -513,22 +513,22 @@ namespace AtomSampleViewer
     void StreamingImageExampleComponent::DrawImage(const ImageToDraw* imageInfo)
     {
         // Build draw packet...
-        RHI::SingleDeviceDrawPacketBuilder drawPacketBuilder;
+        RHI::MultiDeviceDrawPacketBuilder drawPacketBuilder{RHI::MultiDevice::DefaultDevice};
         drawPacketBuilder.Begin(nullptr);
         RHI::DrawLinear drawLinear;
         drawLinear.m_vertexCount = 4;
         drawLinear.m_instanceCount = imageInfo->m_image->GetMipLevelCount();
         drawPacketBuilder.SetDrawArguments(drawLinear);
 
-        RHI::SingleDeviceDrawPacketBuilder::SingleDeviceDrawRequest drawRequest;
+        RHI::MultiDeviceDrawPacketBuilder::MultiDeviceDrawRequest drawRequest;
         drawRequest.m_listTag = m_drawListTag;
-        drawRequest.m_pipelineState = m_pipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
+        drawRequest.m_pipelineState = m_pipelineState.get();
         drawRequest.m_sortKey = 0;
-        drawRequest.m_uniqueShaderResourceGroup = imageInfo->m_srg->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get();
+        drawRequest.m_uniqueShaderResourceGroup = imageInfo->m_srg->GetRHIShaderResourceGroup();
         drawPacketBuilder.AddDrawItem(drawRequest);
 
         // Submit draw packet...
-        AZStd::unique_ptr<const RHI::SingleDeviceDrawPacket> drawPacket(drawPacketBuilder.End());
+        auto drawPacket{drawPacketBuilder.End()};
         m_dynamicDraw->AddDrawPacket(m_scene, AZStd::move(drawPacket));
     }
 

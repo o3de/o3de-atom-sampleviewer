@@ -106,7 +106,7 @@ namespace AtomSampleViewer
 
             m_streamBufferViews[0] =
             {
-                *m_inputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+                *m_inputAssemblyBuffer,
                 offsetof(BufferData, m_positions),
                 sizeof(BufferData::m_positions),
                 sizeof(VertexPosition)
@@ -114,7 +114,7 @@ namespace AtomSampleViewer
 
             m_streamBufferViews[1] =
             {
-                *m_inputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+                *m_inputAssemblyBuffer,
                 offsetof(BufferData, m_colors),
                 sizeof(BufferData::m_colors),
                 sizeof(VertexColor)
@@ -217,7 +217,9 @@ namespace AtomSampleViewer
                 RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_indexBufferView = &indexBufferView;
                 drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
-                drawItem.m_streamBufferViews = m_streamBufferViews.data();
+                AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> deviceStreamBufferViews{m_streamBufferViews[0].GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex), 
+                    m_streamBufferViews[1].GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+                drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
 
                 for (uint32_t i = context.GetSubmitRange().m_startIndex; i < context.GetSubmitRange().m_endIndex; ++i)
                 {

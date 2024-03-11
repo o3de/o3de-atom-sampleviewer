@@ -86,7 +86,7 @@ namespace AtomSampleViewer
         AZ::RHI::ShaderInputConstantIndex m_shaderIndexViewProj;
 
         AZ::RHI::AttachmentId m_depthStencilID;
-        AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> m_streamBufferViews;
-        AZ::RHI::SingleDeviceIndexBufferView m_indexBufferView;
+        AZStd::array<AZ::RHI::MultiDeviceStreamBufferView, 2> m_streamBufferViews;
+        AZ::RHI::MultiDeviceIndexBufferView m_indexBufferView;
     };
 } // namespace AtomSampleViewer

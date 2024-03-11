@@ -18,7 +18,7 @@
 #include <Atom/RPI.Public/Model/ModelLod.h>
 
 #include <Atom/RHI/MultiDeviceBufferPool.h>
-#include <Atom/RHI/SingleDeviceDrawItem.h>
+#include <Atom/RHI/MultiDeviceDrawItem.h>
 #include <Atom/RHI/Device.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/FrameScheduler.h>
@@ -72,7 +72,7 @@ namespace AtomSampleViewer
 
         struct ModelData
         {
-            AZ::RPI::ModelLod::TempStreamBufferViewList m_streamBufferList;
+            AZ::RPI::ModelLod::StreamBufferViewList m_streamBufferList;
             AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_pipelineState;
             AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_shaderResourceGroup;
             ModelType m_modelType = ModelType_ShaderBall;

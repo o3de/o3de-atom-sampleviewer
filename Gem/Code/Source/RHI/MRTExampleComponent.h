@@ -9,7 +9,6 @@
 #pragma once
 
 #include <Atom/RHI/MultiDeviceBufferPool.h>
-#include <Atom/RHI/SingleDeviceDrawItem.h>
 #include <Atom/RHI/ScopeProducer.h>
 
 #include <Atom/RPI.Public/Image/AttachmentImage.h>
@@ -80,10 +79,9 @@ namespace AtomSampleViewer
             AZStd::array<VertexUV, 4> m_uvs;
             AZStd::array<uint16_t, 6> m_indices;
         };
-        AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> m_streamBufferViews;
-        AZ::RHI::SingleDeviceIndexBufferView m_indexBufferView;
+        AZStd::array<AZ::RHI::MultiDeviceStreamBufferView, 2> m_streamBufferViews;
+        AZ::RHI::MultiDeviceIndexBufferView m_indexBufferView;
 
-        AZ::RHI::SingleDeviceDrawItem m_drawItem;
         AZStd::array<AZ::RHI::AttachmentId, 3> m_attachmentID;
         AZ::RHI::ClearValue m_clearValue;
         float m_time;

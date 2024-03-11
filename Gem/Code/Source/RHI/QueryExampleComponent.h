@@ -18,11 +18,11 @@
 
 #include <Atom/RHI/MultiDeviceBuffer.h>
 #include <Atom/RHI/MultiDeviceBufferPool.h>
-#include <Atom/RHI/SingleDeviceDrawItem.h>
+#include <Atom/RHI/MultiDeviceDrawItem.h>
 #include <Atom/RHI/MultiDevicePipelineState.h>
 #include <Atom/RHI/MultiDeviceQueryPool.h>
 #include <Atom/RHI/MultiDeviceQuery.h>
-#include <Atom/RHI/SingleDeviceStreamBufferView.h>
+#include <Atom/RHI/MultiDeviceStreamBufferView.h>
 
 #include <RHI/BasicRHIComponent.h>
 #include <ExampleComponentBus.h>
@@ -100,7 +100,7 @@ namespace AtomSampleViewer
             AZStd::array<VertexPosition, 4> m_positions;
             AZStd::array<uint16_t, 6> m_indices;
         };
-        AZ::RHI::SingleDeviceStreamBufferView m_quadStreamBufferView;
+        AZ::RHI::MultiDeviceStreamBufferView m_quadStreamBufferView;
         AZ::RHI::InputStreamLayout m_quadInputStreamLayout;
 
         AZStd::array<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, 3> m_shaderResourceGroups;

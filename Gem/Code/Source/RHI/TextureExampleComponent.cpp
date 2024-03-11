@@ -106,14 +106,14 @@ namespace AtomSampleViewer
             }
 
             m_streamBufferViews[0] = {
-                *m_positionBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+                *m_positionBuffer,
                 0,
                 positionBufSize,
                 sizeof(VertexPosition)
             };
 
             m_streamBufferViews[1] = {
-                *m_uvBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+                *m_uvBuffer,
                 0,
                 uvBufSize,
                 sizeof(VertexUV)
@@ -245,7 +245,9 @@ namespace AtomSampleViewer
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
                 drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
-                drawItem.m_streamBufferViews = m_streamBufferViews.data();
+                AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> deviceStreamBufferViews{m_streamBufferViews[0].GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex), 
+                    m_streamBufferViews[1].GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+                drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
 
                 commandList->Submit(drawItem);
             };
