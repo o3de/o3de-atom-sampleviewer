@@ -217,12 +217,12 @@ namespace AtomSampleViewer
                 drawIndexed.m_vertexCount = 4;
                 drawIndexed.m_instanceCount = 1;
 
-                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() };
+                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get() };
 
                 // Create the draw item
                 RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
-                drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
+                drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
                 drawItem.m_indexBufferView = nullptr;
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;

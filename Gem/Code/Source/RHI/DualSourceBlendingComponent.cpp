@@ -204,16 +204,16 @@ namespace AtomSampleViewer
             drawIndexed.m_indexCount = 3;
             drawIndexed.m_instanceCount = 1;
 
-            const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() };
+            const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get() };
 
             RHI::SingleDeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;
-            drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
-            auto deviceIndexBufferView{m_indexBufferView.GetDeviceIndexBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+            drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
+            auto deviceIndexBufferView{m_indexBufferView.GetDeviceIndexBufferView(context.GetDeviceIndex())};
             drawItem.m_indexBufferView = &deviceIndexBufferView;
             drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
-            AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> deviceStreamBufferViews{m_streamBufferViews[0].GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex), 
-                    m_streamBufferViews[1].GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+            AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> deviceStreamBufferViews{m_streamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()), 
+                    m_streamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())};
             drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
             drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
             drawItem.m_shaderResourceGroups = shaderResourceGroups;
