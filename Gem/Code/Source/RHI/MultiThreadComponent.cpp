@@ -326,18 +326,18 @@ namespace AtomSampleViewer
             
             for (uint32_t i = context.GetSubmitRange().m_startIndex; i < context.GetSubmitRange().m_endIndex; ++i)
             {
-                const AZ::RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[i]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(AZ::RHI::MultiDevice::DefaultDeviceIndex).get() };
+                const AZ::RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[i]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get() };
 
                 AZ::RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
-                drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(AZ::RHI::MultiDevice::DefaultDeviceIndex).get();
-                auto deviceIndexBufferView{m_indexBufferView.GetDeviceIndexBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+                drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
+                auto deviceIndexBufferView{m_indexBufferView.GetDeviceIndexBufferView(context.GetDeviceIndex())};
                 drawItem.m_indexBufferView = &deviceIndexBufferView;
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(AZ::RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
                 drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
-                AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> deviceStreamBufferViews{m_streamBufferViews[0].GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex), 
-                    m_streamBufferViews[1].GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+                AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> deviceStreamBufferViews{m_streamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()), 
+                    m_streamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())};
                 drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
 
                 commandList->Submit(drawItem, i);

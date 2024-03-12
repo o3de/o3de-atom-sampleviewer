@@ -448,9 +448,9 @@ namespace AtomSampleViewer
         {
             RHI::CommandList* commandList = context.GetCommandList();
 
-            commandList->BuildBottomLevelAccelerationStructure(*m_triangleRayTracingBlas->GetDeviceRayTracingBlas(RHI::MultiDevice::DefaultDeviceIndex));
-            commandList->BuildBottomLevelAccelerationStructure(*m_rectangleRayTracingBlas->GetDeviceRayTracingBlas(RHI::MultiDevice::DefaultDeviceIndex));
-            commandList->BuildTopLevelAccelerationStructure(*m_rayTracingTlas->GetDeviceRayTracingTlas(RHI::MultiDevice::DefaultDeviceIndex), {});
+            commandList->BuildBottomLevelAccelerationStructure(*m_triangleRayTracingBlas->GetDeviceRayTracingBlas(context.GetDeviceIndex()));
+            commandList->BuildBottomLevelAccelerationStructure(*m_rectangleRayTracingBlas->GetDeviceRayTracingBlas(context.GetDeviceIndex()));
+            commandList->BuildTopLevelAccelerationStructure(*m_rayTracingTlas->GetDeviceRayTracingTlas(context.GetDeviceIndex()), {});
         };
 
         m_scopeProducers.emplace_back(
@@ -585,18 +585,18 @@ namespace AtomSampleViewer
             RHI::CommandList* commandList = context.GetCommandList();
 
             const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = {
-                m_globalSrg->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get()
+                m_globalSrg->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
             };
 
             RHI::SingleDeviceDispatchRaysItem dispatchRaysItem;
             dispatchRaysItem.m_arguments.m_direct.m_width = m_imageWidth;
             dispatchRaysItem.m_arguments.m_direct.m_height = m_imageHeight;
             dispatchRaysItem.m_arguments.m_direct.m_depth = 1;
-            dispatchRaysItem.m_rayTracingPipelineState = m_rayTracingPipelineState->GetDeviceRayTracingPipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
-            dispatchRaysItem.m_rayTracingShaderTable = m_rayTracingShaderTable->GetDeviceRayTracingShaderTable(RHI::MultiDevice::DefaultDeviceIndex).get();
+            dispatchRaysItem.m_rayTracingPipelineState = m_rayTracingPipelineState->GetDeviceRayTracingPipelineState(context.GetDeviceIndex()).get();
+            dispatchRaysItem.m_rayTracingShaderTable = m_rayTracingShaderTable->GetDeviceRayTracingShaderTable(context.GetDeviceIndex()).get();
             dispatchRaysItem.m_shaderResourceGroupCount = RHI::ArraySize(shaderResourceGroups);
             dispatchRaysItem.m_shaderResourceGroups = shaderResourceGroups;
-            dispatchRaysItem.m_globalPipelineState = m_globalPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
+            dispatchRaysItem.m_globalPipelineState = m_globalPipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
 
             // submit the DispatchRays item
             commandList->Submit(dispatchRaysItem);
@@ -663,16 +663,16 @@ namespace AtomSampleViewer
             drawIndexed.m_indexCount = 6;
             drawIndexed.m_instanceCount = 1;
 
-            const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_drawSRG->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() };
+            const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_drawSRG->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get() };
 
             RHI::SingleDeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;
-            drawItem.m_pipelineState = m_drawPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
-            auto deviceIndexBufferView{m_fullScreenIndexBufferView.GetDeviceIndexBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+            drawItem.m_pipelineState = m_drawPipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
+            auto deviceIndexBufferView{m_fullScreenIndexBufferView.GetDeviceIndexBufferView(context.GetDeviceIndex())};
             drawItem.m_indexBufferView = &deviceIndexBufferView;
             drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_fullScreenStreamBufferViews.size());
-            AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> deviceStreamBufferViews{m_fullScreenStreamBufferViews[0].GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex), 
-                    m_fullScreenStreamBufferViews[1].GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+            AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> deviceStreamBufferViews{m_fullScreenStreamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()), 
+                    m_fullScreenStreamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())};
             drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
             drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
             drawItem.m_shaderResourceGroups = shaderResourceGroups;
