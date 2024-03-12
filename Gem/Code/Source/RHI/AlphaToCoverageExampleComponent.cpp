@@ -390,24 +390,24 @@ namespace AtomSampleViewer
 
             for (uint32_t rectIndex = context.GetSubmitRange().m_startIndex; rectIndex < context.GetSubmitRange().m_endIndex; ++rectIndex)
             {
-                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = {m_shaderResourceGroups[typeIndex][rectIndex]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get()};
+                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = {m_shaderResourceGroups[typeIndex][rectIndex]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()};
 
                 RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
-                drawItem.m_pipelineState = m_pipelineStates[typeIndex]->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
+                drawItem.m_pipelineState = m_pipelineStates[typeIndex]->GetDevicePipelineState(context.GetDeviceIndex()).get();
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
 
                 const RHI::SingleDeviceIndexBufferView indexBufferView =
                 {
-                    *m_rectangleInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+                    *m_rectangleInputAssemblyBuffer->GetDeviceBuffer(context.GetDeviceIndex()),
                     offsetof(RectangleBufferData, m_indices),
                     sizeof(RectangleBufferData::m_indices),
                     RHI::IndexFormat::Uint16
                 };
                 drawItem.m_indexBufferView = &indexBufferView;
 
-                AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> streamBufferViews{m_rectangleStreamBufferViews[0].GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex),m_rectangleStreamBufferViews[1].GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+                AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> streamBufferViews{m_rectangleStreamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()),m_rectangleStreamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())};
                 drawItem.m_streamBufferViewCount = static_cast<uint8_t>(streamBufferViews.size());
                 drawItem.m_streamBufferViews = streamBufferViews.data();
 

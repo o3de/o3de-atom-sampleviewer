@@ -391,7 +391,7 @@ namespace AtomSampleViewer
             RHI::CommandList* commandList = context.GetCommandList();
 
             // Bind ViewSrg
-            commandList->SetShaderResourceGroupForDraw(*m_viewShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get());
+            commandList->SetShaderResourceGroupForDraw(*m_viewShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get());
 
             // Set persistent viewport and scissor state.
             commandList->SetViewports(&m_viewport, 1);
@@ -403,15 +403,15 @@ namespace AtomSampleViewer
                 const auto& modelData = m_opaqueModelsData[i];
                 const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] =
                 {
-                    modelData.m_shaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get()
+                    modelData.m_shaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
                 };
 
                 for (const auto& mesh : m_models[modelData.m_modelType]->GetLods()[0]->GetMeshes())
                 {
                     RHI::SingleDeviceDrawItem drawItem;
-                    drawItem.m_arguments = mesh.m_drawArguments.GetDeviceDrawArguments(RHI::MultiDevice::DefaultDeviceIndex);
-                    drawItem.m_pipelineState = modelData.m_pipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
-                    auto deviceIndexBufferView{mesh.m_indexBufferView.GetDeviceIndexBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+                    drawItem.m_arguments = mesh.m_drawArguments.GetDeviceDrawArguments(context.GetDeviceIndex());
+                    drawItem.m_pipelineState = modelData.m_pipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
+                    auto deviceIndexBufferView{mesh.m_indexBufferView.GetDeviceIndexBufferView(context.GetDeviceIndex())};
                     drawItem.m_indexBufferView = &deviceIndexBufferView;
                     drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                     drawItem.m_shaderResourceGroups = shaderResourceGroups;
@@ -419,7 +419,7 @@ namespace AtomSampleViewer
                     AZStd::vector<AZ::RHI::SingleDeviceStreamBufferView> deviceStreamBufferViews;
                     for(const auto& streamBufferView : modelData.m_streamBufferList)
                     {
-                        deviceStreamBufferViews.emplace_back(streamBufferView.GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex));
+                        deviceStreamBufferViews.emplace_back(streamBufferView.GetDeviceStreamBufferView(context.GetDeviceIndex()));
                     }
                     drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
 
@@ -512,7 +512,7 @@ namespace AtomSampleViewer
             RHI::CommandList* commandList = context.GetCommandList();
 
             // Bind ViewSrg
-            commandList->SetShaderResourceGroupForDraw(*m_viewShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get());
+            commandList->SetShaderResourceGroupForDraw(*m_viewShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get());
 
             // Set persistent viewport and scissor state.
             commandList->SetViewports(&m_viewport, 1);
@@ -520,8 +520,8 @@ namespace AtomSampleViewer
 
             const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] =
             {
-                m_compositionSubpassInputsSRG->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get(),
-                m_sceneShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get(),
+                m_compositionSubpassInputsSRG->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get(),
+                m_sceneShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get(),
             };
 
             RHI::DrawLinear drawArguments;
@@ -532,7 +532,7 @@ namespace AtomSampleViewer
 
             RHI::SingleDeviceDrawItem drawItem;
             drawItem.m_arguments = RHI::SingleDeviceDrawArguments(drawArguments);
-            drawItem.m_pipelineState = m_compositionPipeline->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
+            drawItem.m_pipelineState = m_compositionPipeline->GetDevicePipelineState(context.GetDeviceIndex()).get();
             drawItem.m_indexBufferView = nullptr;
             drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
             drawItem.m_shaderResourceGroups = shaderResourceGroups;

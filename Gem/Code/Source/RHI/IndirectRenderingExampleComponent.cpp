@@ -620,16 +620,16 @@ namespace AtomSampleViewer
         const auto compileFunction = [this](const RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
             const auto* countBufferView = context.GetBufferView(RHI::AttachmentId{ IndirectRendering::CountBufferAttachmentId });
-            m_copyDescriptor.m_sourceBuffer = m_resetCounterBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex).get();
+            m_copyDescriptor.m_mdSourceBuffer = m_resetCounterBuffer.get();
             m_copyDescriptor.m_sourceOffset = 0;
-            m_copyDescriptor.m_destinationBuffer = countBufferView->GetBuffer()->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex).get();
+            m_copyDescriptor.m_mdDestinationBuffer = countBufferView->GetBuffer();
             m_copyDescriptor.m_destinationOffset = 0;
             m_copyDescriptor.m_size = static_cast<uint32_t>(m_resetCounterBuffer->GetDescriptor().m_byteCount);
         };
 
         const auto executeFunction = [this](const RHI::FrameGraphExecuteContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
-            RHI::SingleDeviceCopyItem copyItem(m_copyDescriptor);
+            RHI::SingleDeviceCopyItem copyItem(m_copyDescriptor.GetDeviceCopyBufferDescriptor(context.GetDeviceIndex()));
             context.GetCommandList()->Submit(copyItem);
         };
 
@@ -699,7 +699,7 @@ namespace AtomSampleViewer
                 const auto* countBufferView = context.GetBufferView(RHI::AttachmentId{ IndirectRendering::CountBufferAttachmentId });
 
                 m_cullShaderResourceGroup->SetBufferView(m_cullingCountBufferIndex, countBufferView);
-                m_drawIndirect.m_countBuffer = countBufferView->GetBuffer()->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex).get();
+                m_drawIndirect.m_countBuffer = countBufferView->GetBuffer();
                 m_drawIndirect.m_countBufferByteOffset = 0;
             }
 
@@ -728,20 +728,20 @@ namespace AtomSampleViewer
 
             RHI::SingleDeviceDispatchItem dispatchItem;
             uint32_t numSrgs = 0;
-            dispatchItem.m_shaderResourceGroups[numSrgs++] = m_cullShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get();
-            dispatchItem.m_shaderResourceGroups[numSrgs++] = m_sceneShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get();
+            dispatchItem.m_shaderResourceGroups[numSrgs++] = m_cullShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get();
+            dispatchItem.m_shaderResourceGroups[numSrgs++] = m_sceneShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get();
 
             for (const auto& srg : m_indirectCommandsShaderResourceGroups)
             {
-                dispatchItem.m_shaderResourceGroups[numSrgs++] = srg->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get();
+                dispatchItem.m_shaderResourceGroups[numSrgs++] = srg->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get();
             }
 
             // Submit the dispatch in an indirect manner.
             // Not really needed but it tests the indirect dispatch code.
-            RHI::DispatchIndirect dispatchArgs(1, m_indirectDispatchBufferView.GetDeviceIndirectBufferView(RHI::MultiDevice::DefaultDeviceIndex), 0);
+            RHI::DispatchIndirect dispatchArgs(1, m_indirectDispatchBufferView.GetDeviceIndirectBufferView(context.GetDeviceIndex()), 0);
 
             dispatchItem.m_arguments = dispatchArgs;
-            dispatchItem.m_pipelineState = m_cullPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
+            dispatchItem.m_pipelineState = m_cullPipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
             dispatchItem.m_shaderResourceGroupCount = static_cast<uint8_t>(numSrgs);
 
             commandList->Submit(dispatchItem);
@@ -834,7 +834,7 @@ namespace AtomSampleViewer
             commandList->SetViewports(&m_viewport, 1);
             commandList->SetScissors(&m_scissor, 1);
 
-            const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_sceneShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() };
+            const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_sceneShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get() };
 
             // In case multi indirect drawing is not supported
             // we need to emit multiple indirect draw calls.
@@ -846,19 +846,18 @@ namespace AtomSampleViewer
                 // Offset the indirect buffer depending on the number of indirect draw calls that we can do.
                 m_drawIndirect.m_maxSequenceCount = AZStd::min(m_numObjects - i, maxIndirectDrawCount);
                 m_drawIndirect.m_indirectBufferByteOffset = i * m_indirectDrawBufferView.GetByteStride();
-                auto deviceIndirectBufferView{m_indirectDrawBufferView.GetDeviceIndirectBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
-                m_drawIndirect.m_indirectBufferView = &deviceIndirectBufferView;
+                m_drawIndirect.m_indirectBufferView = &m_indirectDrawBufferView;
 
                 RHI::SingleDeviceDrawItem drawItem;
-                drawItem.m_arguments = m_drawIndirect;
-                drawItem.m_pipelineState = m_drawPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
-                auto deviceIndexBufferView{m_indexBufferViews[0].GetDeviceIndexBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+                drawItem.m_arguments = AZ::RHI::MultiDeviceDrawArguments(m_drawIndirect).GetDeviceDrawArguments(context.GetDeviceIndex());
+                drawItem.m_pipelineState = m_drawPipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
+                auto deviceIndexBufferView{m_indexBufferViews[0].GetDeviceIndexBufferView(context.GetDeviceIndex())};
                 drawItem.m_indexBufferView = &deviceIndexBufferView;
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
                 drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
-                AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> deviceStreamBufferViews{m_streamBufferViews[0].GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex), 
-                    m_streamBufferViews[1].GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+                AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> deviceStreamBufferViews{m_streamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()), 
+                    m_streamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())};
                 drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
 
                 // Submit the indirect draw item.
@@ -1039,7 +1038,10 @@ namespace AtomSampleViewer
         m_instancesBufferPool->MapBuffer(request, response);
         if (!response.m_data.empty())
         {
-            ::memcpy(response.m_data[RHI::MultiDevice::DefaultDeviceIndex], m_instancesData.data(), request.m_byteCount);
+            for(auto& responseData : response.m_data)
+            {
+                ::memcpy(responseData, m_instancesData.data(), request.m_byteCount);
+            }
             m_instancesBufferPool->UnmapBuffer(*m_instancesDataBuffer);
         }
     }

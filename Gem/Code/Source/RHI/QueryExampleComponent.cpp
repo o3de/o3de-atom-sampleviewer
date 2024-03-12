@@ -306,10 +306,10 @@ namespace AtomSampleViewer
             }
             
             RHI::SingleDeviceCopyQueryToBufferDescriptor descriptor;
-            descriptor.m_sourceQueryPool = m_occlusionQueryPool->GetDeviceQueryPool(RHI::MultiDevice::DefaultDeviceIndex).get();
-            descriptor.m_firstQuery = m_occlusionQueries[m_currentOcclusionQueryIndex].m_query->GetHandle(RHI::MultiDevice::DefaultDeviceIndex);
+            descriptor.m_sourceQueryPool = m_occlusionQueryPool->GetDeviceQueryPool(context.GetDeviceIndex()).get();
+            descriptor.m_firstQuery = m_occlusionQueries[m_currentOcclusionQueryIndex].m_query->GetHandle(context.GetDeviceIndex());
             descriptor.m_queryCount = 1;
-            descriptor.m_destinationBuffer = m_predicationBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex).get();
+            descriptor.m_destinationBuffer = m_predicationBuffer->GetDeviceBuffer(context.GetDeviceIndex()).get();
             descriptor.m_destinationOffset = 0;
             descriptor.m_destinationStride = sizeof(uint64_t);
 
@@ -434,7 +434,7 @@ namespace AtomSampleViewer
             {
                 const RHI::SingleDeviceIndexBufferView quadIndexBufferView =
                 {
-                    *m_quadInputAssemblyBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex),
+                    *m_quadInputAssemblyBuffer->GetDeviceBuffer(context.GetDeviceIndex()),
                     offsetof(BufferData, m_indices),
                     sizeof(BufferData::m_indices),
                     RHI::IndexFormat::Uint16
@@ -444,14 +444,14 @@ namespace AtomSampleViewer
                 drawIndexed.m_indexCount = 6;
                 drawIndexed.m_instanceCount = 1;
 
-                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[0]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() };
+                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[0]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get() };
 
                 RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
-                drawItem.m_pipelineState = m_quadPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
+                drawItem.m_pipelineState = m_quadPipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
                 drawItem.m_indexBufferView = &quadIndexBufferView;
                 drawItem.m_streamBufferViewCount = 1;
-                auto deviceStreamBufferView{m_quadStreamBufferView.GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+                auto deviceStreamBufferView{m_quadStreamBufferView.GetDeviceStreamBufferView(context.GetDeviceIndex())};
                 drawItem.m_streamBufferViews = &deviceStreamBufferView;
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
@@ -460,13 +460,13 @@ namespace AtomSampleViewer
                 {
                     if (m_timestampEnabled)
                     {
-                        m_timestampQueries[m_currentTimestampQueryIndex].m_query->GetDeviceQuery(RHI::MultiDevice::DefaultDeviceIndex)->WriteTimestamp(*commandList);
+                        m_timestampQueries[m_currentTimestampQueryIndex].m_query->GetDeviceQuery(context.GetDeviceIndex())->WriteTimestamp(*commandList);
                         m_timestampQueries[m_currentTimestampQueryIndex].m_isValid = true;
                     }
 
                     if (m_pipelineStatisticsEnabled)
                     {
-                        m_statisticsQueries[m_currentStatisticsQueryIndex].m_query->GetDeviceQuery(RHI::MultiDevice::DefaultDeviceIndex)->Begin(*commandList);
+                        m_statisticsQueries[m_currentStatisticsQueryIndex].m_query->GetDeviceQuery(context.GetDeviceIndex())->Begin(*commandList);
                     }
 
                     switch (m_currentType)
@@ -489,7 +489,7 @@ namespace AtomSampleViewer
                     }
                     case QueryType::Predication:
                     {
-                        commandList->BeginPredication(*m_predicationBuffer->GetDeviceBuffer(RHI::MultiDevice::DefaultDeviceIndex), 0, RHI::PredicationOp::EqualZero);
+                        commandList->BeginPredication(*m_predicationBuffer->GetDeviceBuffer(context.GetDeviceIndex()), 0, RHI::PredicationOp::EqualZero);
                         commandList->Submit(drawItem, 0);
                         commandList->EndPredication();
                         break;
@@ -498,28 +498,28 @@ namespace AtomSampleViewer
 
                     if (m_pipelineStatisticsEnabled)
                     {
-                        m_statisticsQueries[m_currentStatisticsQueryIndex].m_query->GetDeviceQuery(RHI::MultiDevice::DefaultDeviceIndex)->End(*commandList);
+                        m_statisticsQueries[m_currentStatisticsQueryIndex].m_query->GetDeviceQuery(context.GetDeviceIndex())->End(*commandList);
                         m_statisticsQueries[m_currentStatisticsQueryIndex].m_isValid = true;
                     }
 
                     if (m_timestampEnabled)
                     {
-                        m_timestampQueries[m_currentTimestampQueryIndex + 1].m_query->GetDeviceQuery(RHI::MultiDevice::DefaultDeviceIndex)->WriteTimestamp(*commandList);
+                        m_timestampQueries[m_currentTimestampQueryIndex + 1].m_query->GetDeviceQuery(context.GetDeviceIndex())->WriteTimestamp(*commandList);
                         m_timestampQueries[m_currentTimestampQueryIndex + 1].m_isValid = true;
                     }
                 }
 
                 // Draw occluding quad
-                shaderResourceGroups[0] = m_shaderResourceGroups[1]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get();
+                shaderResourceGroups[0] = m_shaderResourceGroups[1]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get();
                 commandList->Submit(drawItem, 1);
 
                 // Draw quad to use for the oclussion query
-                drawItem.m_pipelineState = m_boudingBoxPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
-                shaderResourceGroups[0] = m_shaderResourceGroups[2]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get();
+                drawItem.m_pipelineState = m_boudingBoxPipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
+                shaderResourceGroups[0] = m_shaderResourceGroups[2]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get();
                 auto& queryEntry = m_occlusionQueries[m_currentOcclusionQueryIndex];
-                queryEntry.m_query->GetDeviceQuery(RHI::MultiDevice::DefaultDeviceIndex)->Begin(*commandList, m_precisionOcclusionEnabled ? RHI::QueryControlFlags::PreciseOcclusion : RHI::QueryControlFlags::None);
+                queryEntry.m_query->GetDeviceQuery(context.GetDeviceIndex())->Begin(*commandList, m_precisionOcclusionEnabled ? RHI::QueryControlFlags::PreciseOcclusion : RHI::QueryControlFlags::None);
                 commandList->Submit(drawItem, 2);
-                queryEntry.m_query->GetDeviceQuery(RHI::MultiDevice::DefaultDeviceIndex)->End(*commandList);
+                queryEntry.m_query->GetDeviceQuery(context.GetDeviceIndex())->End(*commandList);
                 queryEntry.m_isValid = true;
             }
         };
