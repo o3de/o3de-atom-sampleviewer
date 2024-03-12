@@ -916,7 +916,10 @@ namespace AtomSampleViewer
         AZ_Assert(result == RHI::ResultCode::Success || result == RHI::ResultCode::Unimplemented, "Failed to map object buffer]");
         if (!response.m_data.empty())
         {
-            memcpy(response.m_data[RHI::MultiDevice::DefaultDeviceIndex], data, mapRequest.m_byteCount);
+            for(auto& responseData : response.m_data)
+            {
+                memcpy(responseData, data, mapRequest.m_byteCount);
+            }
             m_bufferPool->UnmapBuffer(*m_buffer);
             return true;
         }
@@ -1046,7 +1049,7 @@ namespace AtomSampleViewer
             commandList->SetScissors(&m_scissor, 1);
 
             AZStd::array<const RHI::SingleDeviceShaderResourceGroup*, 8> shaderResourceGroups;
-            shaderResourceGroups[0] = m_bufferDispatchSRG->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get();
+            shaderResourceGroups[0] = m_bufferDispatchSRG->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get();
 
             RHI::SingleDeviceDispatchItem dispatchItem;
             RHI::DispatchDirect dispatchArgs;
@@ -1059,7 +1062,7 @@ namespace AtomSampleViewer
             dispatchArgs.m_totalNumberOfThreadsZ = 1;
 
             dispatchItem.m_arguments = dispatchArgs;
-            dispatchItem.m_pipelineState = m_bufferDispatchPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
+            dispatchItem.m_pipelineState = m_bufferDispatchPipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
             dispatchItem.m_shaderResourceGroupCount = 1;
             dispatchItem.m_shaderResourceGroups = shaderResourceGroups;
 
@@ -1119,7 +1122,7 @@ namespace AtomSampleViewer
             commandList->SetScissors(&m_scissor, 1);
 
             AZStd::array<const RHI::SingleDeviceShaderResourceGroup*, 8> shaderResourceGroups;
-            shaderResourceGroups[0] = m_imageDispatchSRG->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get();
+            shaderResourceGroups[0] = m_imageDispatchSRG->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get();
 
             RHI::SingleDeviceDispatchItem dispatchItem;
             RHI::DispatchDirect dispatchArgs;
@@ -1132,7 +1135,7 @@ namespace AtomSampleViewer
             dispatchArgs.m_totalNumberOfThreadsZ = 1;
 
             dispatchItem.m_arguments = dispatchArgs;
-            dispatchItem.m_pipelineState = m_imageDispatchPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
+            dispatchItem.m_pipelineState = m_imageDispatchPipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
             dispatchItem.m_shaderResourceGroupCount = 1;
             dispatchItem.m_shaderResourceGroups = shaderResourceGroups;
 
@@ -1255,18 +1258,18 @@ namespace AtomSampleViewer
 
                     const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] =
                     {
-                        m_bindlessSrg->GetSrg(m_samplerSrgName)->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get(),
-                        subMesh.m_perSubMeshSrg->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get(),
-                        m_bindlessSrg->GetSrg(m_floatBufferSrgName)->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get(),
+                        m_bindlessSrg->GetSrg(m_samplerSrgName)->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get(),
+                        subMesh.m_perSubMeshSrg->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get(),
+                        m_bindlessSrg->GetSrg(m_floatBufferSrgName)->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get(),
 #if ATOMSAMPLEVIEWER_TRAIT_BINDLESS_PROTOTYPE_SUPPORTS_DIRECT_BOUND_UNBOUNDED_ARRAY
-                        m_bindlessSrg->GetSrg(m_imageSrgName)->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get(),
+                        m_bindlessSrg->GetSrg(m_imageSrgName)->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get(),
 #endif
-                        m_bindlessSrg->GetSrg(m_indirectionBufferSrgName)->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get(),
+                        m_bindlessSrg->GetSrg(m_indirectionBufferSrgName)->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get(),
                     };
                     RHI::SingleDeviceDrawItem drawItem;
-                    drawItem.m_arguments = subMesh.m_mesh->m_drawArguments.GetDeviceDrawArguments(RHI::MultiDevice::DefaultDeviceIndex);
-                    drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
-                    auto deviceIndexBufferView{subMesh.m_mesh->m_indexBufferView.GetDeviceIndexBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+                    drawItem.m_arguments = subMesh.m_mesh->m_drawArguments.GetDeviceDrawArguments(context.GetDeviceIndex());
+                    drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
+                    auto deviceIndexBufferView{subMesh.m_mesh->m_indexBufferView.GetDeviceIndexBufferView(context.GetDeviceIndex())};
                     drawItem.m_indexBufferView = &deviceIndexBufferView;
                     drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                     drawItem.m_shaderResourceGroups = shaderResourceGroups;
@@ -1274,7 +1277,7 @@ namespace AtomSampleViewer
                     AZStd::vector<RHI::SingleDeviceStreamBufferView> deviceQuadStreamBufferViews;
                     for(const auto& streamBufferView : subMesh.bufferStreamViewArray)
                     {
-                        deviceQuadStreamBufferViews.emplace_back(streamBufferView.GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex));
+                        deviceQuadStreamBufferViews.emplace_back(streamBufferView.GetDeviceStreamBufferView(context.GetDeviceIndex()));
                     }
                     drawItem.m_streamBufferViews = deviceQuadStreamBufferViews.data();
 

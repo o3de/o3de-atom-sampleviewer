@@ -23,7 +23,7 @@
 #include <Atom/RHI/MultiDeviceDrawItem.h>
 #include <Atom/RHI/Device.h>
 #include <Atom/RHI/Factory.h>
-#include <Atom/RHI/SingleDeviceCopyItem.h>
+#include <Atom/RHI/MultiDeviceCopyItem.h>
 #include <Atom/RHI/FrameScheduler.h>
 #include <Atom/RHI/MultiDeviceIndirectBufferSignature.h>
 #include <Atom/RHI/MultiDeviceIndirectBufferWriter.h>
@@ -196,8 +196,8 @@ namespace AtomSampleViewer
 
         AZ::RHI::Ptr<AZ::RHI::MultiDeviceIndirectBufferWriter> m_indirectDispatchWriter;
 
-        AZ::RHI::DrawIndirect m_drawIndirect;
-        AZ::RHI::SingleDeviceCopyBufferDescriptor m_copyDescriptor;
+        AZ::RHI::MultiDeviceDrawIndirect m_drawIndirect;
+        AZ::RHI::MultiDeviceCopyBufferDescriptor m_copyDescriptor;
 
         ImGuiSidebar m_imguiSidebar;
         float m_cullOffset = 1.0f;

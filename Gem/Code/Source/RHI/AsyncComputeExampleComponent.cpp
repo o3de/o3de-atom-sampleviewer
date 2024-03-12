@@ -808,12 +808,12 @@ namespace AtomSampleViewer
                 drawIndexed.m_indexCount = 6;
                 drawIndexed.m_instanceCount = 1;
 
-                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[CopyTextureScope].front()->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() };
+                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[CopyTextureScope].front()->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get() };
 
                 RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
-                drawItem.m_pipelineState = m_copyTexturePipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
-                auto deviceIndexBufferView{m_quadIndexBufferView.GetDeviceIndexBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+                drawItem.m_pipelineState = m_copyTexturePipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
+                auto deviceIndexBufferView{m_quadIndexBufferView.GetDeviceIndexBufferView(context.GetDeviceIndex())};
                 drawItem.m_indexBufferView = &deviceIndexBufferView;
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
@@ -821,7 +821,7 @@ namespace AtomSampleViewer
                 AZStd::vector<RHI::SingleDeviceStreamBufferView> deviceQuadStreamBufferViews;
                 for(const auto& streamBufferView : m_quadStreamBufferViews[CopyTextureScope])
                 {
-                    deviceQuadStreamBufferViews.emplace_back(streamBufferView.GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex));
+                    deviceQuadStreamBufferViews.emplace_back(streamBufferView.GetDeviceStreamBufferView(context.GetDeviceIndex()));
                 }
                 drawItem.m_streamBufferViews = deviceQuadStreamBufferViews.data();
                 commandList->Submit(drawItem);
@@ -882,12 +882,12 @@ namespace AtomSampleViewer
                     drawIndexed.m_indexCount = 6;
                     drawIndexed.m_instanceCount = 1;
 
-                    const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[ShadowScope][0]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() };
+                    const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[ShadowScope][0]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get() };
 
                     RHI::SingleDeviceDrawItem drawItem;
                     drawItem.m_arguments = drawIndexed;
-                    drawItem.m_pipelineState = m_terrainPipelineStates[ShadowScope]->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
-                    auto deviceIndexBufferView{m_quadIndexBufferView.GetDeviceIndexBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+                    drawItem.m_pipelineState = m_terrainPipelineStates[ShadowScope]->GetDevicePipelineState(context.GetDeviceIndex()).get();
+                    auto deviceIndexBufferView{m_quadIndexBufferView.GetDeviceIndexBufferView(context.GetDeviceIndex())};
                     drawItem.m_indexBufferView = &deviceIndexBufferView;
                     drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                     drawItem.m_shaderResourceGroups = shaderResourceGroups;
@@ -895,7 +895,7 @@ namespace AtomSampleViewer
                     AZStd::vector<RHI::SingleDeviceStreamBufferView> deviceQuadStreamBufferViews;
                     for(const auto& streamBufferView : m_quadStreamBufferViews[ShadowScope])
                     {
-                        deviceQuadStreamBufferViews.emplace_back(streamBufferView.GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex));
+                        deviceQuadStreamBufferViews.emplace_back(streamBufferView.GetDeviceStreamBufferView(context.GetDeviceIndex()));
                     }
                     drawItem.m_streamBufferViews = deviceQuadStreamBufferViews.data();
                     commandList->Submit(drawItem, i);
@@ -903,13 +903,13 @@ namespace AtomSampleViewer
                 else
                 {
                     // Models
-                    const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[ShadowScope][i]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() };
+                    const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[ShadowScope][i]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get() };
                     for (const auto& mesh : m_model->GetLods()[0]->GetMeshes())
                     {
                         RHI::SingleDeviceDrawItem drawItem;
-                        drawItem.m_arguments = mesh.m_drawArguments.GetDeviceDrawArguments(RHI::MultiDevice::DefaultDeviceIndex);
-                        drawItem.m_pipelineState = m_modelPipelineStates[ShadowScope]->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
-                        auto deviceIndexBufferView{mesh.m_indexBufferView.GetDeviceIndexBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+                        drawItem.m_arguments = mesh.m_drawArguments.GetDeviceDrawArguments(context.GetDeviceIndex());
+                        drawItem.m_pipelineState = m_modelPipelineStates[ShadowScope]->GetDevicePipelineState(context.GetDeviceIndex()).get();
+                        auto deviceIndexBufferView{mesh.m_indexBufferView.GetDeviceIndexBufferView(context.GetDeviceIndex())};
                         drawItem.m_indexBufferView = &deviceIndexBufferView;
                         drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                         drawItem.m_shaderResourceGroups = shaderResourceGroups;
@@ -917,7 +917,7 @@ namespace AtomSampleViewer
                         AZStd::vector<RHI::SingleDeviceStreamBufferView> deviceQuadStreamBufferViews;
                         for(const auto& streamBufferView : m_modelStreamBufferViews[ShadowScope])
                         {
-                            deviceQuadStreamBufferViews.emplace_back(streamBufferView.GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex));
+                            deviceQuadStreamBufferViews.emplace_back(streamBufferView.GetDeviceStreamBufferView(context.GetDeviceIndex()));
                         }
                         drawItem.m_streamBufferViews = deviceQuadStreamBufferViews.data();
                         commandList->Submit(drawItem, i);
@@ -989,7 +989,7 @@ namespace AtomSampleViewer
             RHI::CommandList* commandList = context.GetCommandList();
 
             // Bind ViewSrg
-            commandList->SetShaderResourceGroupForDraw(*m_viewShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get());
+            commandList->SetShaderResourceGroupForDraw(*m_viewShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get());
 
             // Set persistent viewport and scissor state.
             const auto& imageSize = m_sceneImages[m_currentSceneImageIndex]->GetDescriptor().m_size;
@@ -1005,8 +1005,8 @@ namespace AtomSampleViewer
                     // Terrain
                     const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] =
                     {
-                        m_shaderResourceGroups[ForwardScope][0]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get(),
-                        m_viewShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get()
+                        m_shaderResourceGroups[ForwardScope][0]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get(),
+                        m_viewShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
                     };
 
                     RHI::DrawIndexed drawIndexed;
@@ -1015,8 +1015,8 @@ namespace AtomSampleViewer
 
                     RHI::SingleDeviceDrawItem drawItem;
                     drawItem.m_arguments = drawIndexed;
-                    drawItem.m_pipelineState = m_terrainPipelineStates[ForwardScope]->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
-                    auto deviceIndexBufferView{m_quadIndexBufferView.GetDeviceIndexBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+                    drawItem.m_pipelineState = m_terrainPipelineStates[ForwardScope]->GetDevicePipelineState(context.GetDeviceIndex()).get();
+                    auto deviceIndexBufferView{m_quadIndexBufferView.GetDeviceIndexBufferView(context.GetDeviceIndex())};
                     drawItem.m_indexBufferView = &deviceIndexBufferView;
                     drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                     drawItem.m_shaderResourceGroups = shaderResourceGroups;
@@ -1024,7 +1024,7 @@ namespace AtomSampleViewer
                     AZStd::vector<RHI::SingleDeviceStreamBufferView> deviceQuadStreamBufferViews;
                     for(const auto& streamBufferView : m_quadStreamBufferViews[ForwardScope])
                     {
-                        deviceQuadStreamBufferViews.emplace_back(streamBufferView.GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex));
+                        deviceQuadStreamBufferViews.emplace_back(streamBufferView.GetDeviceStreamBufferView(context.GetDeviceIndex()));
                     }
                     drawItem.m_streamBufferViews = deviceQuadStreamBufferViews.data();
 
@@ -1035,16 +1035,16 @@ namespace AtomSampleViewer
                     // Model
                     const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] =
                     {
-                        m_shaderResourceGroups[ForwardScope][i]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get(),
-                        m_viewShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get()
+                        m_shaderResourceGroups[ForwardScope][i]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get(),
+                        m_viewShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
                     };
 
                     for (const auto& mesh : m_model->GetLods()[0]->GetMeshes())
                     {
                         RHI::SingleDeviceDrawItem drawItem;
-                        drawItem.m_arguments = mesh.m_drawArguments.GetDeviceDrawArguments(RHI::MultiDevice::DefaultDeviceIndex);
-                        drawItem.m_pipelineState = m_modelPipelineStates[ForwardScope]->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
-                        auto deviceIndexBufferView{mesh.m_indexBufferView.GetDeviceIndexBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+                        drawItem.m_arguments = mesh.m_drawArguments.GetDeviceDrawArguments(context.GetDeviceIndex());
+                        drawItem.m_pipelineState = m_modelPipelineStates[ForwardScope]->GetDevicePipelineState(context.GetDeviceIndex()).get();
+                        auto deviceIndexBufferView{mesh.m_indexBufferView.GetDeviceIndexBufferView(context.GetDeviceIndex())};
                         drawItem.m_indexBufferView = &deviceIndexBufferView;
                         drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                         drawItem.m_shaderResourceGroups = shaderResourceGroups;
@@ -1052,7 +1052,7 @@ namespace AtomSampleViewer
                         AZStd::vector<RHI::SingleDeviceStreamBufferView> deviceQuadStreamBufferViews;
                         for(const auto& streamBufferView : m_modelStreamBufferViews[ForwardScope])
                         {
-                            deviceQuadStreamBufferViews.emplace_back(streamBufferView.GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex));
+                            deviceQuadStreamBufferViews.emplace_back(streamBufferView.GetDeviceStreamBufferView(context.GetDeviceIndex()));
                         }
                         drawItem.m_streamBufferViews = deviceQuadStreamBufferViews.data();
 
@@ -1114,7 +1114,7 @@ namespace AtomSampleViewer
             RHI::CommandList* commandList = context.GetCommandList();
 
             RHI::SingleDeviceDispatchItem dispatchItem;
-            decltype(dispatchItem.m_shaderResourceGroups) shaderResourceGroups = { { m_shaderResourceGroups[TonemappingScope][0]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() } };
+            decltype(dispatchItem.m_shaderResourceGroups) shaderResourceGroups = { { m_shaderResourceGroups[TonemappingScope][0]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get() } };
 
             RHI::DispatchDirect dispatchArgs;
 
@@ -1129,7 +1129,7 @@ namespace AtomSampleViewer
             AZ_Assert(dispatchArgs.m_threadsPerGroupZ == 1, "If the shader source changes, this logic should change too.");
 
             dispatchItem.m_arguments = dispatchArgs;
-            dispatchItem.m_pipelineState = m_tonemappingPipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
+            dispatchItem.m_pipelineState = m_tonemappingPipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
             dispatchItem.m_shaderResourceGroupCount = 1;
             dispatchItem.m_shaderResourceGroups = shaderResourceGroups;
 
@@ -1196,12 +1196,12 @@ namespace AtomSampleViewer
                 drawIndexed.m_indexCount = 6;
                 drawIndexed.m_instanceCount = 1;
 
-                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[LuminanceMapScope][0]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() };
+                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[LuminanceMapScope][0]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get() };
 
                 RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
-                drawItem.m_pipelineState = m_luminancePipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
-                auto deviceIndexBufferView{m_quadIndexBufferView.GetDeviceIndexBufferView(RHI::MultiDevice::DefaultDeviceIndex)};
+                drawItem.m_pipelineState = m_luminancePipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
+                auto deviceIndexBufferView{m_quadIndexBufferView.GetDeviceIndexBufferView(context.GetDeviceIndex())};
                 drawItem.m_indexBufferView = &deviceIndexBufferView;
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
@@ -1209,7 +1209,7 @@ namespace AtomSampleViewer
                 AZStd::vector<AZ::RHI::SingleDeviceStreamBufferView> singleDeviceQuadStreamBufferViews;
                 for(const auto& streamBufferView : m_quadStreamBufferViews[LuminanceMapScope])
                 {
-                    singleDeviceQuadStreamBufferViews.emplace_back(streamBufferView.GetDeviceStreamBufferView(RHI::MultiDevice::DefaultDeviceIndex));
+                    singleDeviceQuadStreamBufferViews.emplace_back(streamBufferView.GetDeviceStreamBufferView(context.GetDeviceIndex()));
                 }
                 drawItem.m_streamBufferViews = singleDeviceQuadStreamBufferViews.data();
                 commandList->Submit(drawItem);
@@ -1288,7 +1288,7 @@ namespace AtomSampleViewer
                 RHI::CommandList* commandList = context.GetCommandList();
 
                 RHI::SingleDeviceDispatchItem dispatchItem;
-                decltype(dispatchItem.m_shaderResourceGroups) shaderResourceGroups = { { m_shaderResourceGroups[LuminanceReduceScope][i]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(RHI::MultiDevice::DefaultDeviceIndex).get() } };
+                decltype(dispatchItem.m_shaderResourceGroups) shaderResourceGroups = { { m_shaderResourceGroups[LuminanceReduceScope][i]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get() } };
 
                 RHI::DispatchDirect dispatchArgs;
 
@@ -1302,7 +1302,7 @@ namespace AtomSampleViewer
                 dispatchArgs.m_totalNumberOfThreadsZ = 1;
 
                 dispatchItem.m_arguments = dispatchArgs;
-                dispatchItem.m_pipelineState = m_luminanceReducePipelineState->GetDevicePipelineState(RHI::MultiDevice::DefaultDeviceIndex).get();
+                dispatchItem.m_pipelineState = m_luminanceReducePipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
                 dispatchItem.m_shaderResourceGroupCount = 1;
                 dispatchItem.m_shaderResourceGroups = shaderResourceGroups;
 
