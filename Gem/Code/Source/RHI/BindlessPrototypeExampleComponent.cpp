@@ -916,7 +916,7 @@ namespace AtomSampleViewer
         AZ_Assert(result == RHI::ResultCode::Success || result == RHI::ResultCode::Unimplemented, "Failed to map object buffer]");
         if (!response.m_data.empty())
         {
-            for(auto& responseData : response.m_data)
+            for(auto& [_, responseData] : response.m_data)
             {
                 memcpy(responseData, data, mapRequest.m_byteCount);
             }

@@ -286,7 +286,7 @@ namespace AtomSampleViewer
             AZ_Error(QueryExample::SampleName, result == RHI::ResultCode::Success, "Failed to import predication buffer with error %d", result);
 
             frameGraph.UseQueryPool(
-                m_occlusionQueryPool->GetDeviceQueryPool(RHI::MultiDevice::DefaultDeviceIndex),
+                m_occlusionQueryPool,
                 RHI::Interval(m_currentOcclusionQueryIndex, m_currentOcclusionQueryIndex),
                 RHI::QueryPoolScopeAttachmentType::Local,
                 RHI::ScopeAttachmentAccess::Read);
@@ -376,7 +376,7 @@ namespace AtomSampleViewer
             // Query pools
             {
                 frameGraph.UseQueryPool(
-                    m_occlusionQueryPool->GetDeviceQueryPool(RHI::MultiDevice::DefaultDeviceIndex),
+                    m_occlusionQueryPool,
                     RHI::Interval(m_currentOcclusionQueryIndex, m_currentOcclusionQueryIndex),
                     m_currentType == QueryType::Predication ? RHI::QueryPoolScopeAttachmentType::Local : RHI::QueryPoolScopeAttachmentType::Global, 
                     RHI::ScopeAttachmentAccess::Write);
@@ -384,7 +384,7 @@ namespace AtomSampleViewer
                 if (m_timestampEnabled)
                 {
                     frameGraph.UseQueryPool(
-                        m_timeStampQueryPool->GetDeviceQueryPool(RHI::MultiDevice::DefaultDeviceIndex),
+                        m_timeStampQueryPool,
                         RHI::Interval(m_currentTimestampQueryIndex, m_currentTimestampQueryIndex + 1),
                         RHI::QueryPoolScopeAttachmentType::Global,
                         RHI::ScopeAttachmentAccess::Write);
@@ -393,7 +393,7 @@ namespace AtomSampleViewer
                 if (m_pipelineStatisticsEnabled)
                 {
                     frameGraph.UseQueryPool(
-                        m_statisticsQueryPool->GetDeviceQueryPool(RHI::MultiDevice::DefaultDeviceIndex),
+                        m_statisticsQueryPool,
                         RHI::Interval(m_currentStatisticsQueryIndex, m_currentStatisticsQueryIndex),
                         RHI::QueryPoolScopeAttachmentType::Global,
                         RHI::ScopeAttachmentAccess::Write);

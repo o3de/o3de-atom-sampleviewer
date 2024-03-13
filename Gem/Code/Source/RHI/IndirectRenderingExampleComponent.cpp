@@ -1030,7 +1030,7 @@ namespace AtomSampleViewer
         m_instancesBufferPool->MapBuffer(request, response);
         if (!response.m_data.empty())
         {
-            for(auto& responseData : response.m_data)
+            for(auto& [_, responseData] : response.m_data)
             {
                 ::memcpy(responseData, m_instancesData.data(), request.m_byteCount);
             }
