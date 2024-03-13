@@ -102,7 +102,7 @@ namespace AtomSampleViewer
         AZ::RHI::ResultCode resultCode = m_constantBufferPool->MapBuffer(mapRequest, mapResponse);
         if (resultCode == AZ::RHI::ResultCode::Success)
         {
-            for(const auto& bufferData : mapResponse.m_data)
+            for(const auto& [_, bufferData] : mapResponse.m_data)
             {
                 memcpy(bufferData, data, sizeof(InstanceInfo) * elementCount);
             }
