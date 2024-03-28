@@ -143,6 +143,8 @@ set(FILES
     Source/MeshExampleComponent.h
     Source/MSAA_RPI_ExampleComponent.cpp
     Source/MSAA_RPI_ExampleComponent.h
+    Source/MultiGPURPIExampleComponent.cpp
+    Source/MultiGPURPIExampleComponent.h
     Source/MultiRenderPipelineExampleComponent.cpp
     Source/MultiRenderPipelineExampleComponent.h
     Source/MultiSceneExampleComponent.cpp
