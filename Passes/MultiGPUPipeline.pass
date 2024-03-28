@@ -1,0 +1,180 @@
+{
+    "Type": "JsonSerialization",
+    "Version": 1,
+    "ClassName": "PassAsset",
+    "ClassData": {
+        "PassTemplate": {
+            "Name": "MultiGPUPipeline",
+            "PassClass": "ParentPass",
+            "Slots": [
+                {
+                    "Name": "PipelineOutput",
+                    "SlotType": "InputOutput",
+                    "ScopeAttachmentUsage": "RenderTarget"
+                }
+            ],
+            "PassRequests": [
+                {
+                    "Name": "TrianglePass1",
+                    "TemplateName": "MultiGPUTrianglePassTemplate",
+                    "PassData": {
+                        "$type": "FullscreenTrianglePassData",
+                        "ShaderAsset": {
+                            "FilePath": "Shaders/MultiGPURPIExample/Triangle.shader"
+                        },
+                        "ShaderDataMappings": {
+                            "Matrix4x4Mappings": [
+                                {
+                                    "Name": "m_objectMatrix",
+                                    "Value": [
+                                        2.0,
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0,
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0,
+                                        0.0,
+                                        1.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "Name": "TrianglePass2",
+                    "TemplateName": "MultiGPUTrianglePassTemplate",
+                    "PassData": {
+                        "$type": "FullscreenTrianglePassData",
+                        "ShaderAsset": {
+                            "FilePath": "Shaders/MultiGPURPIExample/Triangle.shader"
+                        },
+                        "DeviceIndex": 1,
+                        "ShaderDataMappings": {
+                            "Matrix4x4Mappings": [
+                                {
+                                    "Name": "m_objectMatrix",
+                                    "Value": [
+                                        2.0,
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0,
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0,
+                                        0.0,
+                                        -1.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "Name": "CopyPass",
+                    "TemplateName": "CopyPassTemplate",
+                    "Connections": [
+                        {
+                            "LocalSlot": "Input",
+                            "AttachmentRef": {
+                                "Pass": "TrianglePass2",
+                                "Attachment": "Output"
+                            }
+                        },
+                        {
+                            "LocalSlot": "Output",
+                            "AttachmentRef": {
+                                "Pass": "TrianglePass2",
+                                "Attachment": "Output"
+                            }
+                        }
+                    ],
+                    "PassData": {
+                        "$type": "CopyPassData",
+                        "DestinationDeviceIndex": 0,
+                        "SourceDeviceIndex": 1
+                    }
+                },
+                {
+                    "Name": "CompositePass",
+                    "TemplateName": "MultiGPUCompositePassTemplate",
+                    "Connections": [
+                        {
+                            "LocalSlot": "Input1",
+                            "AttachmentRef": {
+                                "Pass": "TrianglePass1",
+                                "Attachment": "Output"
+                            }
+                        },
+                        {
+                            "LocalSlot": "Input2",
+                            "AttachmentRef": {
+                                "Pass": "CopyPass",
+                                "Attachment": "Output"
+                            }
+                        }
+                    ],
+                    "PassData": {
+                        "$type": "FullscreenTrianglePassData",
+                        "ShaderAsset": {
+                            "FilePath": "Shaders/MultiGPURPIExample/Composite.shader"
+                        }
+                    }
+                },
+                {
+                    "Name": "ImGuiPass",
+                    "TemplateName": "ImGuiPassTemplate",
+                    "Enabled": true,
+                    "Connections": [
+                        {
+                            "LocalSlot": "InputOutput",
+                            "AttachmentRef": {
+                                "Pass": "CompositePass",
+                                "Attachment": "Output"
+                            }
+                        }
+                    ],
+                    "PassData": {
+                        "$type": "ImGuiPassData",
+                        "IsDefaultImGui": true
+                    }
+                },
+                {
+                    "Name": "CopyToSwapChain",
+                    "TemplateName": "FullscreenCopyTemplate",
+                    "Connections": [
+                        {
+                            "LocalSlot": "Input",
+                            "AttachmentRef": {
+                                "Pass": "ImGuiPass",
+                                "Attachment": "InputOutput"
+                            }
+                        },
+                        {
+                            "LocalSlot": "Output",
+                            "AttachmentRef": {
+                                "Pass": "Parent",
+                                "Attachment": "PipelineOutput"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

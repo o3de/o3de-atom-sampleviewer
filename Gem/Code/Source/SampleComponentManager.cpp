@@ -92,6 +92,7 @@
 #include <LightCullingExampleComponent.h>
 #include <MeshExampleComponent.h>
 #include <MSAA_RPI_ExampleComponent.h>
+#include <MultiGPURPIExampleComponent.h>
 #include <MultiRenderPipelineExampleComponent.h>
 #include <MultiSceneExampleComponent.h>
 #include <ParallaxMappingExampleComponent.h>
@@ -308,6 +309,7 @@ namespace AtomSampleViewer
             NewRPISample<DynamicMaterialTestComponent>("DynamicMaterialTest"),
             NewRPISample<MeshExampleComponent>("Mesh"),
             NewRPISample<MSAA_RPI_ExampleComponent>("MSAA"),
+            NewRPISample<MultiGPURPIExampleComponent>("MultiGPU", []() { return AZ::RHI::RHISystemInterface::Get()->GetDeviceCount() >= 2; }),
             NewRPISample<MultiRenderPipelineExampleComponent>("MultiRenderPipeline"),
             NewRPISample<MultiSceneExampleComponent>("MultiScene"),
             NewRPISample<MultiViewSingleSceneAuxGeomExampleComponent>("MultiViewSingleSceneAuxGeom"),

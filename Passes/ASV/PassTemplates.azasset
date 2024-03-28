@@ -65,6 +65,18 @@
                 "Path": "Passes/FullscreenPipeline.pass"
             },
             {
+                "Name": "MultiGPUPipeline",
+                "Path": "Passes/MultiGPUPipeline.pass"
+            },
+            {
+                "Name": "MultiGPUCompositePassTemplate",
+                "Path": "Passes/MultiGPUCompositePass.pass"
+            },
+            {
+                "Name": "MultiGPUTrianglePassTemplate",
+                "Path": "Passes/MultiGPUTrianglePass.pass"
+            },
+            {
                 "Name": "ReadbackFillerPassTemplate",
                 "Path": "Passes/ReadbackFiller.pass"
             },
