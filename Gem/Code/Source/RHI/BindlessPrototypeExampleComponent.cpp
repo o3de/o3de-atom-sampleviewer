@@ -1221,7 +1221,7 @@ namespace AtomSampleViewer
                         // Update the constant data
                         SubMeshInstance& subMesh = m_subMeshInstanceArray[subMeshIdx];
                         // Set the view handle
-                        bool set = subMesh.m_perSubMeshSrg->SetConstant(subMesh.m_viewHandleIndex, m_worldToClipHandle);
+                        [[maybe_unused]] bool set = subMesh.m_perSubMeshSrg->SetConstant(subMesh.m_viewHandleIndex, m_worldToClipHandle);
                         AZ_Assert(set, "Failed to set the view constant");
                         // Set the light handle
                         set = subMesh.m_perSubMeshSrg->SetConstant(subMesh.m_lightHandleIndex, m_lightDirectionHandle);
