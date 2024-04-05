@@ -323,8 +323,8 @@ namespace AtomSampleViewer
 
     const ImageComparisonToleranceLevel* ScriptReporter::FindBestToleranceLevel(float diffScore, bool filterImperceptibleDiffs) const
     {
-        float thresholdChecked = 0.0f;
-        bool ignoringMinorDiffs = false;
+        [[maybe_unused]] float thresholdChecked = 0.0f;
+        [[maybe_unused]] bool ignoringMinorDiffs = false;
         for (const ImageComparisonToleranceLevel& level : m_availableToleranceLevels)
         {
             AZ_Assert(level.m_threshold > thresholdChecked || thresholdChecked == 0.0f, "Threshold values are not sequential");

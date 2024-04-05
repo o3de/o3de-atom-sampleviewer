@@ -142,7 +142,7 @@ namespace AtomSampleViewer
         }
         // Always set the float first, this way if there are alignment issues We'll notice the unexpected
         // colors
-        bool success = false;
+        [[maybe_unused]] bool success = false;
 
         if (m_numFloatsAfterMatrix == 1)
         {
