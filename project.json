@@ -35,6 +35,7 @@
         "UiBasics",
         "StreamerProfiler",
         "DiffuseProbeGrid",
+        "DebugDraw",
         "Atom_TestData",
         {
             "name": "OpenXRVk>=1.0.1",

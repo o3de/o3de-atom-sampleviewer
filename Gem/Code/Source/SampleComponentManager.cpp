@@ -94,6 +94,7 @@
 #include <MultiRenderPipelineExampleComponent.h>
 #include <MultiSceneExampleComponent.h>
 #include <ParallaxMappingExampleComponent.h>
+#include <RayTracingIntersectionShaderExampleComponent.h>
 #include <RenderTargetTextureExampleComponent.h>
 #include <SceneReloadSoakTestComponent.h>
 #include <ShadowExampleComponent.h>
@@ -323,6 +324,7 @@ namespace AtomSampleViewer
             NewFeaturesSample<EyeMaterialExampleComponent>("EyeMaterial"),
             NewFeaturesSample<LightCullingExampleComponent>("LightCulling"),
             NewFeaturesSample<ParallaxMappingExampleComponent>("Parallax"),
+            NewFeaturesSample<RayTracingIntersectionShaderExampleComponent>("RayTracingIntersectionShader", []() { return Utils::GetRHIDevice()->GetFeatures().m_rayTracing; }),
             NewFeaturesSample<ShadowExampleComponent>("Shadow"),
             NewFeaturesSample<ShadowedSponzaExampleComponent>("ShadowedSponza"),
             NewFeaturesSample<SkinnedMeshExampleComponent>("SkinnedMesh"),
