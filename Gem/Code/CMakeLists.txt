@@ -29,6 +29,7 @@ ly_add_target(
             Gem::Atom_Component_DebugCamera.Static
             Gem::Profiler.Static
             Gem::DiffuseProbeGrid.Static
+            Gem::DebugDraw.Static
 )
 
 ly_add_target(

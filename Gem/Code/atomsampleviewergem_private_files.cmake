@@ -162,6 +162,8 @@ set(FILES
     Source/RenderTargetTextureExampleComponent.h
     Source/RootConstantsExampleComponent.h
     Source/RootConstantsExampleComponent.cpp
+    Source/RayTracingIntersectionShaderExampleComponent.cpp
+    Source/RayTracingIntersectionShaderExampleComponent.h
     Source/SceneReloadSoakTestComponent.cpp
     Source/SceneReloadSoakTestComponent.h
     Source/ShadowExampleComponent.cpp
