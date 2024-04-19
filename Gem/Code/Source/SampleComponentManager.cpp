@@ -454,7 +454,7 @@ namespace AtomSampleViewer
 
             if (i < 9)
             {
-                printStr += AZStd::string::format("\tctrl+%lu", i + 1);
+                printStr += AZStd::string::format("\tctrl+%zu", i + 1);
             }
 
             printStr += "\n";
