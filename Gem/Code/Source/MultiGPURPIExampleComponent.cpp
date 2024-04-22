@@ -85,6 +85,12 @@ namespace AtomSampleViewer
         m_pipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
         m_scene->AddRenderPipeline(m_pipeline);
 
+        const AZStd::string copyPipelineName("MultiGPUCopyTestPipeline");
+        AZ::RPI::RenderPipelineDescriptor copyPipelineDesc;
+        copyPipelineDesc.m_name = copyPipelineName;
+        copyPipelineDesc.m_rootPassTemplate = "MultiGPUCopyTestPipeline";
+        m_copyPipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(copyPipelineDesc, *m_windowContext);
+
         m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass({ "MultiGPUPipeline", "ImGuiPass" });
     }
 
@@ -102,6 +108,9 @@ namespace AtomSampleViewer
         m_scene->AddRenderPipeline(m_originalPipeline);
 
         m_pipeline = nullptr;
+        m_copyPipeline = nullptr;
+        m_useCopyPipeline = false;
+        m_currentlyUsingCopyPipline = false;
 
         AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusDisconnect();
 
@@ -110,6 +119,43 @@ namespace AtomSampleViewer
 
     void MultiGPURPIExampleComponent::OnTick([[maybe_unused]] float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint timePoint)
     {
+        if (m_currentlyUsingCopyPipline != m_useCopyPipeline)
+        {
+            AZ::RPI::RenderPipelinePtr prevPipeline = m_scene->GetDefaultRenderPipeline();
+            if (m_useCopyPipeline)
+            {
+                m_copyPipeline->GetRootPass()->SetEnabled(true);
+                m_scene->AddRenderPipeline(m_copyPipeline);
+                m_scene->RemoveRenderPipeline(prevPipeline->GetId());
+
+                m_imguiScope = {};
+                m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass({ m_copyPipeline->GetId().GetCStr(), "ImGuiPass" });
+            }
+            else
+            {
+                m_pipeline->GetRootPass()->SetEnabled(true);
+                m_scene->AddRenderPipeline(m_pipeline);
+                m_scene->RemoveRenderPipeline(prevPipeline->GetId());
+
+                m_imguiScope = {};
+                m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass({ m_pipeline->GetId().GetCStr(), "ImGuiPass" });
+            }
+            m_currentlyUsingCopyPipline = m_useCopyPipeline;
+        }
+        if (m_imguiSidebar.Begin())
+        {
+            ImGui::Spacing();
+            ImGui::Checkbox("Use copy test pipeline", &m_useCopyPipeline);
+            if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+            {
+                ImGui::SetTooltip("Add additional device to device copy passes to test the modes of the copy pass:\n"
+                                  "image to buffer\n"
+                                  "buffer to buffer\n"
+                                  "buffer to image\n"
+                                  "image to image\n");
+            }
+            m_imguiSidebar.End();
+        }
     }
 
     void MultiGPURPIExampleComponent::OnAllAssetsReadyActivate()

@@ -69,6 +69,22 @@
                 "Path": "Passes/MultiGPUPipeline.pass"
             },
             {
+                "Name": "MultiGPUCopyTestPipeline",
+                "Path": "Passes/MultiGPUCopyTestPipeline.pass"
+            },
+            {
+                "Name": "MultiGPUCopyImageToBufferPassTemplate",
+                "Path": "Passes/MultiGPUCopyImageToBuffer.pass"
+            },
+            {
+                "Name": "MultiGPUCopyBufferToBufferPassTemplate",
+                "Path": "Passes/MultiGPUCopyBufferToBuffer.pass"
+            },
+            {
+                "Name": "MultiGPUCopyBufferToImagePassTemplate",
+                "Path": "Passes/MultiGPUCopyBufferToImage.pass"
+            },
+            {
                 "Name": "MultiGPUCompositePassTemplate",
                 "Path": "Passes/MultiGPUCompositePass.pass"
             },
