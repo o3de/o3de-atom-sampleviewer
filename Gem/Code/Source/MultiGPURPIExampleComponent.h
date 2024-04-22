@@ -68,10 +68,15 @@ namespace AtomSampleViewer
         AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_meshHandle;
 
         AZ::RPI::RenderPipelinePtr m_pipeline;
+        AZ::RPI::RenderPipelinePtr m_copyPipeline;
         AZ::RPI::RenderPipelinePtr m_originalPipeline;
         AZStd::shared_ptr<AZ::RPI::WindowContext> m_windowContext;
 
         AZ::Render::ImGuiActiveContextScope m_imguiScope;
+        ImGuiSidebar m_imguiSidebar;
+
+        bool m_useCopyPipeline = false;
+        bool m_currentlyUsingCopyPipline = false;
     };
 
 } // namespace AtomSampleViewer
