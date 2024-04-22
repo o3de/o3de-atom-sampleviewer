@@ -41,6 +41,8 @@ namespace AtomSampleViewer
         , m_depthStencilAttachmentId("depthAttachmentId")
     {
         m_supportRHISamplePipeline = true;
+        m_gbufferScopeId = AZ::RHI::ScopeId("GBufferScope");
+        m_compositionScopeId = AZ::RHI::ScopeId("CompositionScope");
     }
 
     void SubpassExampleComponent::Reflect(AZ::ReflectContext* context)
@@ -223,14 +225,14 @@ namespace AtomSampleViewer
         // Build the render attachment layout with the 2 subpasses.
         RHI::RenderAttachmentLayoutBuilder attachmentsBuilder;
         // GBuffer Subpass
-        attachmentsBuilder.AddSubpass()
+        attachmentsBuilder.AddSubpass(&m_gbufferScopeId)
             ->RenderTargetAttachment(RHI::Format::R16G16B16A16_FLOAT, m_positionAttachmentId)
             ->RenderTargetAttachment(RHI::Format::R16G16B16A16_FLOAT, m_normalAttachmentId)
             ->RenderTargetAttachment(RHI::Format::R8G8B8A8_UNORM, m_albedoAttachmentId)
             ->RenderTargetAttachment(m_outputFormat, m_outputAttachmentId)
             ->DepthStencilAttachment(AZ::RHI::Format::D32_FLOAT, m_depthStencilAttachmentId);
         // Composition Subpass
-        attachmentsBuilder.AddSubpass()
+        attachmentsBuilder.AddSubpass(&m_compositionScopeId)
             ->SubpassInputAttachment(m_positionAttachmentId, RHI::ImageAspectFlags::Color)
             ->SubpassInputAttachment(m_normalAttachmentId, RHI::ImageAspectFlags::Color)
             ->SubpassInputAttachment(m_albedoAttachmentId, RHI::ImageAspectFlags::Color)
@@ -241,10 +243,6 @@ namespace AtomSampleViewer
         [[maybe_unused]] RHI::ResultCode result = attachmentsBuilder.End(renderAttachmentLayout);
         AZ_Assert(result == RHI::ResultCode::Success, "Failed to create render attachment layout");
         {
-            // Hold a reference to the subpass dependencies so we can give it to the FrameGraph later.
-            m_subpassDependencies = attachmentsBuilder.GetSubpassDependencies();
-            AZ_Assert(m_subpassDependencies != nullptr, "Need subpass dependencies data");
-
             // GBuffer Scope Pipelines
             const auto& shader = m_shaders[GBufferScope];
             auto& variant = shader->GetVariant(AZ::RPI::ShaderAsset::RootShaderVariantStableId);
@@ -339,8 +337,6 @@ namespace AtomSampleViewer
 
         const auto prepareFunction = [this](RHI::FrameGraphInterface frameGraph, [[maybe_unused]] ScopeData& scopeData)
         {
-            frameGraph.UseSubpassDependencies(m_subpassDependencies);
-
             // Bind the position GBuffer
             {
                 RHI::ImageScopeAttachmentDescriptor descriptor;
@@ -431,14 +427,13 @@ namespace AtomSampleViewer
             }
         };
 
-        const RHI::ScopeId forwardScope("GBufferScope");
         m_scopeProducers.emplace_back(
             aznew RHI::ScopeProducerFunction<
             ScopeData,
             decltype(prepareFunction),
             decltype(compileFunction),
             decltype(executeFunction)>(
-                forwardScope,
+                m_gbufferScopeId,
                 ScopeData{},
                 prepareFunction,
                 compileFunction,
@@ -453,8 +448,6 @@ namespace AtomSampleViewer
 
         const auto prepareFunction = [this](RHI::FrameGraphInterface frameGraph, [[maybe_unused]] ScopeData& scopeData)
         {
-            frameGraph.UseSubpassDependencies(m_subpassDependencies);
-
             // Bind the position GBuffer
             {
                 RHI::ImageScopeAttachmentDescriptor descriptor;
@@ -549,14 +542,13 @@ namespace AtomSampleViewer
             commandList->Submit(drawItem);
         };
 
-        const RHI::ScopeId forwardScope("CompositionScope");
         m_scopeProducers.emplace_back(
             aznew RHI::ScopeProducerFunction<
             ScopeData,
             decltype(prepareFunction),
             decltype(compileFunction),
             decltype(executeFunction)>(
-                forwardScope,
+                m_compositionScopeId,
                 ScopeData{},
                 prepareFunction,
                 compileFunction,

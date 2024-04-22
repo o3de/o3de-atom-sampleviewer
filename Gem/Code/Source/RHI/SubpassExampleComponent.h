@@ -127,10 +127,7 @@ namespace AtomSampleViewer
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_viewShaderResourceGroup;
         AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_compositionPipeline;
 
-        //! We need to hold a reference to the Subpass Dependencies, so the dummy VkRenderPass
-        //! created during PSO initialization, uses the same Subpass Dependencies as the VkRenderPass
-        //! created by the FrameGraph. By forcing both VkRenderPasses to have the exact same subpass
-        //! dependencies we guarantee that they are truly compatible and this avoids validation errors.
-        AZStd::shared_ptr<AZ::RHI::SubpassDependencies> m_subpassDependencies;
+        AZ::RHI::ScopeId m_gbufferScopeId;
+        AZ::RHI::ScopeId m_compositionScopeId;
     };
 } // namespace AtomSampleViewer
