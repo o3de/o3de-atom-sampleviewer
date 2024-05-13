@@ -126,5 +126,8 @@ namespace AtomSampleViewer
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_compositionSubpassInputsSRG;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_viewShaderResourceGroup;
         AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_compositionPipeline;
+
+        AZ::RHI::ScopeId m_gbufferScopeId;
+        AZ::RHI::ScopeId m_compositionScopeId;
     };
 } // namespace AtomSampleViewer
