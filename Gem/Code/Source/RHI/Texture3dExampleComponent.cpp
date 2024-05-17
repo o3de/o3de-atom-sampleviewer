@@ -14,8 +14,8 @@
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/CommandList.h>
 #include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/Image.h>
-#include <Atom/RHI/ImagePool.h>
+#include <Atom/RHI/SingleDeviceImage.h>
+#include <Atom/RHI/SingleDeviceImagePool.h>
 #include <Atom/RHI.Reflect/InputStreamLayoutBuilder.h>
 #include <Atom/RHI.Reflect/RenderAttachmentLayoutBuilder.h>
 
@@ -96,7 +96,7 @@ namespace AtomSampleViewer
             m_image = RHI::Factory::Get().CreateImage();
             m_image->SetName(Name("Texture3D"));
 
-            RHI::ImageInitRequest imageRequest;
+            RHI::SingleDeviceImageInitRequest imageRequest;
             imageRequest.m_image = m_image.get();
             imageRequest.m_descriptor = RHI::ImageDescriptor::Create3D(RHI::ImageBindFlags::ShaderRead, m_imageLayout.m_size.m_width, m_imageLayout.m_size.m_height, m_imageLayout.m_size.m_depth, format);
             RHI::ResultCode resultCode = m_imagePool->InitImage(imageRequest);
@@ -120,11 +120,11 @@ namespace AtomSampleViewer
             }
 
             // Update/stage the image with data
-            RHI::ImageSubresourceLayout imageSubresourceLayout;
+            RHI::SingleDeviceImageSubresourceLayout imageSubresourceLayout;
             RHI::ImageSubresourceRange range(0, 0, 0, 0);
             m_image->GetSubresourceLayouts(range, &imageSubresourceLayout, nullptr);
 
-            RHI::ImageUpdateRequest updateRequest;
+            RHI::SingleDeviceImageUpdateRequest updateRequest;
             updateRequest.m_image = m_image.get();
             updateRequest.m_sourceSubresourceLayout = imageSubresourceLayout;
             updateRequest.m_sourceData = imageData.data();
@@ -220,10 +220,10 @@ namespace AtomSampleViewer
                 drawIndexed.m_vertexCount = 4;
                 drawIndexed.m_instanceCount = 1;
 
-                const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroup->GetRHIShaderResourceGroup() };
+                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroup->GetRHIShaderResourceGroup() };
 
                 // Create the draw item
-                RHI::DrawItem drawItem;
+                RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
                 drawItem.m_pipelineState = m_pipelineState.get();
                 drawItem.m_indexBufferView = nullptr;

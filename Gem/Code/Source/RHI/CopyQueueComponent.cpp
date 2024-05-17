@@ -99,7 +99,7 @@ namespace AtomSampleViewer
             m_uvBuffer = RHI::Factory::Get().CreateBuffer();
 
             RHI::ResultCode result = RHI::ResultCode::Success;
-            RHI::BufferInitRequest request;
+            RHI::SingleDeviceBufferInitRequest request;
             
             request.m_buffer = m_indexBuffer.get();
             request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, indexBufSize };
@@ -226,7 +226,7 @@ namespace AtomSampleViewer
                 commandList->SetViewports(&m_viewport, 1);
                 commandList->SetScissors(&m_scissor, 1);
 
-                const RHI::IndexBufferView indexBufferView =
+                const RHI::SingleDeviceIndexBufferView indexBufferView =
                 {
                     *m_indexBuffer,
                     0,
@@ -238,9 +238,9 @@ namespace AtomSampleViewer
                 drawIndexed.m_indexCount = 6;
                 drawIndexed.m_instanceCount = 1;
 
-                const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroup->GetRHIShaderResourceGroup() };
+                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroup->GetRHIShaderResourceGroup() };
 
-                RHI::DrawItem drawItem;
+                RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
                 drawItem.m_pipelineState = m_pipelineState.get();
                 drawItem.m_indexBufferView = &indexBufferView;
@@ -328,7 +328,7 @@ namespace AtomSampleViewer
 
     void CopyQueueComponent::UploadVertexBuffer()
     {
-        AZ::RHI::BufferStreamRequest request;
+        AZ::RHI::SingleDeviceBufferStreamRequest request;
         request.m_buffer = m_positionBuffer.get();
         request.m_byteCount = static_cast<uint32_t>(m_bufferData.m_positions.size() * sizeof(VertexPosition));
         request.m_sourceData = m_bufferData.m_positions.data();
