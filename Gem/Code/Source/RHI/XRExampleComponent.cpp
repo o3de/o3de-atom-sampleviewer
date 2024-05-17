@@ -208,7 +208,7 @@ namespace AtomSampleViewer
         SingleCubeBufferData bufferData = CreateSingleCubeBufferData();
 
         m_inputAssemblyBuffer = AZ::RHI::Factory::Get().CreateBuffer();
-        AZ::RHI::BufferInitRequest request;
+        AZ::RHI::SingleDeviceBufferInitRequest request;
 
         request.m_buffer = m_inputAssemblyBuffer.get();
         request.m_descriptor = AZ::RHI::BufferDescriptor{ AZ::RHI::BufferBindFlags::InputAssembly, sizeof(SingleCubeBufferData) };
@@ -375,9 +375,9 @@ namespace AtomSampleViewer
 
             for (uint32_t i = indexStart; i < indexEnd; ++i)
             {
-                const AZ::RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[i]->GetRHIShaderResourceGroup() };
+                const AZ::RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[i]->GetRHIShaderResourceGroup() };
 
-                AZ::RHI::DrawItem drawItem;
+                AZ::RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
                 drawItem.m_pipelineState = m_pipelineState.get();
                 drawItem.m_indexBufferView = &m_indexBufferView;

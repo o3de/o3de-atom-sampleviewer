@@ -243,7 +243,7 @@ namespace AtomSampleViewer
 
             m_inputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
 
-            RHI::BufferInitRequest request;
+            RHI::SingleDeviceBufferInitRequest request;
             request.m_buffer = m_inputAssemblyBuffer.get();
             request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, sizeof(bufferData) };
             request.m_initialData = &bufferData;
@@ -457,7 +457,7 @@ namespace AtomSampleViewer
                 commandList->SetViewports(&m_viewport, 1);
                 commandList->SetScissors(&m_scissor, 1);
 
-                const RHI::IndexBufferView indexBufferView =
+                const RHI::SingleDeviceIndexBufferView indexBufferView =
                 {
                     *m_inputAssemblyBuffer,
                     offsetof(BufferData, m_indices),
@@ -469,9 +469,9 @@ namespace AtomSampleViewer
                 drawIndexed.m_indexCount = 6;
                 drawIndexed.m_instanceCount = 2;
 
-                const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroup->GetRHIShaderResourceGroup() };
+                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroup->GetRHIShaderResourceGroup() };
 
-                RHI::DrawItem drawItem;
+                RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
                 drawItem.m_pipelineState = m_pipelineState.get();
                 drawItem.m_indexBufferView = &indexBufferView;

@@ -8,7 +8,7 @@
 
 #include <Passes/RayTracingAmbientOcclusionPass.h>
 #include <Atom/RHI/CommandList.h>
-#include <Atom/RHI/DispatchRaysItem.h>
+#include <Atom/RHI/SingleDeviceDispatchRaysItem.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/FrameScheduler.h>
 #include <Atom/RHI/RHISystemInterface.h>
@@ -89,7 +89,7 @@ namespace AZ
             AZ_Assert(m_shaderResourceGroup, "[RayTracingAmbientOcclusionPass '%s']: Failed to create SRG from shader asset '%s'",
                 GetPathName().GetCStr(), rayGenerationShaderFilePath);
                         
-            RHI::RayTracingPipelineStateDescriptor descriptor;
+            RHI::SingleDeviceRayTracingPipelineStateDescriptor descriptor;
             descriptor.Build()
                 ->PipelineState(m_globalPipelineState.get())
                 ->ShaderLibrary(rayGenerationShaderDescriptor)
@@ -121,13 +121,13 @@ namespace AZ
             if (!m_rayTracingShaderTable)
             {
                 RHI::Ptr<RHI::Device> device = RHI::RHISystemInterface::Get()->GetDevice();
-                RHI::RayTracingBufferPools& rayTracingBufferPools = m_rayTracingFeatureProcessor->GetBufferPools();
+                RHI::SingleDeviceRayTracingBufferPools& rayTracingBufferPools = m_rayTracingFeatureProcessor->GetBufferPools();
 
                 // Build shader table once. Since we are not using local srg so we don't need to rebuild it even when scene changed 
                 m_rayTracingShaderTable = RHI::Factory::Get().CreateRayTracingShaderTable();
                 m_rayTracingShaderTable->Init(*device.get(), rayTracingBufferPools);
 
-                AZStd::shared_ptr<RHI::RayTracingShaderTableDescriptor> descriptor = AZStd::make_shared<RHI::RayTracingShaderTableDescriptor>();
+                AZStd::shared_ptr<RHI::SingleDeviceRayTracingShaderTableDescriptor> descriptor = AZStd::make_shared<RHI::SingleDeviceRayTracingShaderTableDescriptor>();
                 descriptor->Build(AZ::Name("RayTracingAOShaderTable"), m_rayTracingPipelineState)
                     ->RayGenerationRecord(AZ::Name("AoRayGen"))
                     ->MissRecord(AZ::Name("AoMiss"))
@@ -162,7 +162,7 @@ namespace AZ
             RHI::ShaderInputConstantIndex constantIndex;
 
             // Bind scene TLAS buffer
-            const RHI::Ptr<RHI::Buffer> tlasBuffer = m_rayTracingFeatureProcessor->GetTlas()->GetTlasBuffer();
+            const RHI::Ptr<RHI::SingleDeviceBuffer> tlasBuffer = m_rayTracingFeatureProcessor->GetTlas()->GetTlasBuffer();
             if (tlasBuffer)
             {
                 // TLAS
@@ -220,12 +220,12 @@ namespace AZ
             RPI::PassAttachment* outputAttachment = GetOutputBinding(0).GetAttachment().get();
             RHI::Size targetImageSize = outputAttachment->m_descriptor.m_image.m_size;
 
-            const RHI::ShaderResourceGroup* shaderResourceGroups[] =
+            const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] =
             {
                 m_shaderResourceGroup->GetRHIShaderResourceGroup()
             };
 
-            RHI::DispatchRaysItem dispatchRaysItem;
+            RHI::SingleDeviceDispatchRaysItem dispatchRaysItem;
             dispatchRaysItem.m_arguments.m_direct.m_width = targetImageSize.m_width;
             dispatchRaysItem.m_arguments.m_direct.m_height = targetImageSize.m_height;
             dispatchRaysItem.m_arguments.m_direct.m_depth = 1;

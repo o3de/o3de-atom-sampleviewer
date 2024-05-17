@@ -148,7 +148,7 @@ namespace AtomSampleViewer
         m_rectangleInputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
 
         RHI::ResultCode result = RHI::ResultCode::Success;
-        RHI::BufferInitRequest request;
+        RHI::SingleDeviceBufferInitRequest request;
         request.m_buffer = m_rectangleInputAssemblyBuffer.get();
         request.m_descriptor = RHI::BufferDescriptor{RHI::BufferBindFlags::InputAssembly, sizeof(bufferData)};
         request.m_initialData = &bufferData;
@@ -390,15 +390,15 @@ namespace AtomSampleViewer
 
             for (uint32_t rectIndex = context.GetSubmitRange().m_startIndex; rectIndex < context.GetSubmitRange().m_endIndex; ++rectIndex)
             {
-                const RHI::ShaderResourceGroup* shaderResourceGroups[] = {m_shaderResourceGroups[typeIndex][rectIndex]->GetRHIShaderResourceGroup()};
+                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = {m_shaderResourceGroups[typeIndex][rectIndex]->GetRHIShaderResourceGroup()};
 
-                RHI::DrawItem drawItem;
+                RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
                 drawItem.m_pipelineState = m_pipelineStates[typeIndex].get();
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
 
-                const RHI::IndexBufferView indexBufferView =
+                const RHI::SingleDeviceIndexBufferView indexBufferView =
                 {
                     *m_rectangleInputAssemblyBuffer,
                     offsetof(RectangleBufferData, m_indices),
@@ -407,7 +407,7 @@ namespace AtomSampleViewer
                 };
                 drawItem.m_indexBufferView = &indexBufferView;
 
-                AZStd::array<AZ::RHI::StreamBufferView, 2>& streamBufferViews = m_rectangleStreamBufferViews;
+                AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2>& streamBufferViews = m_rectangleStreamBufferViews;
                 drawItem.m_streamBufferViewCount = static_cast<uint8_t>(streamBufferViews.size());
                 drawItem.m_streamBufferViews = streamBufferViews.data();
 

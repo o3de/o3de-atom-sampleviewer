@@ -169,7 +169,7 @@ namespace AtomSampleViewer
             m_quadInputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
 
             RHI::ResultCode result = RHI::ResultCode::Success;
-            RHI::BufferInitRequest request;
+            RHI::SingleDeviceBufferInitRequest request;
             request.m_buffer = m_quadInputAssemblyBuffer.get();
             request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, sizeof(bufferData) };
             request.m_initialData = &bufferData;
@@ -192,11 +192,11 @@ namespace AtomSampleViewer
             layoutBuilder.AddBuffer()->Channel("POSITION", RHI::Format::R32G32B32_FLOAT);
             m_quadInputStreamLayout = layoutBuilder.End();
 
-            RHI::ValidateStreamBufferViews(m_quadInputStreamLayout, AZStd::span<const RHI::StreamBufferView>(&m_quadStreamBufferView, 1));
+            RHI::ValidateStreamBufferViews(m_quadInputStreamLayout, AZStd::span<const RHI::SingleDeviceStreamBufferView>(&m_quadStreamBufferView, 1));
         }
     }
 
-    const AZ::RHI::PipelineState* CreatePipelineState(
+    const AZ::RHI::SingleDevicePipelineState* CreatePipelineState(
         const AZ::RHI::InputStreamLayout& inputStreamLayout, 
         const AZ::Data::Instance<AZ::RPI::Shader>& shader, 
         const AZ::RHI::Format format,
@@ -305,7 +305,7 @@ namespace AtomSampleViewer
                 return;
             }
             
-            RHI::CopyQueryToBufferDescriptor descriptor;
+            RHI::SingleDeviceCopyQueryToBufferDescriptor descriptor;
             descriptor.m_sourceQueryPool = m_occlusionQueryPool.get();
             descriptor.m_firstQuery = m_occlusionQueries[m_currentOcclusionQueryIndex].m_query->GetHandle();
             descriptor.m_queryCount = 1;
@@ -313,7 +313,7 @@ namespace AtomSampleViewer
             descriptor.m_destinationOffset = 0;
             descriptor.m_destinationStride = sizeof(uint64_t);
 
-            RHI::CopyItem copyItem(descriptor);
+            RHI::SingleDeviceCopyItem copyItem(descriptor);
 
             context.GetCommandList()->Submit(copyItem);
         };
@@ -432,7 +432,7 @@ namespace AtomSampleViewer
             commandList->SetScissors(&m_scissor, 1);
 
             {
-                const RHI::IndexBufferView quadIndexBufferView =
+                const RHI::SingleDeviceIndexBufferView quadIndexBufferView =
                 {
                     *m_quadInputAssemblyBuffer,
                     offsetof(BufferData, m_indices),
@@ -444,9 +444,9 @@ namespace AtomSampleViewer
                 drawIndexed.m_indexCount = 6;
                 drawIndexed.m_instanceCount = 1;
 
-                const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[0]->GetRHIShaderResourceGroup() };
+                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[0]->GetRHIShaderResourceGroup() };
 
-                RHI::DrawItem drawItem;
+                RHI::SingleDeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
                 drawItem.m_pipelineState = m_quadPipelineState.get();
                 drawItem.m_indexBufferView = &quadIndexBufferView;
@@ -539,7 +539,7 @@ namespace AtomSampleViewer
     }
 
     template<class T>
-    void CreateQueries(AZ::RHI::Ptr<AZ::RHI::QueryPool>& queryPool, T& queries, AZ::RHI::QueryType type, AZ::RHI::PipelineStatisticsFlags statisticsMask = AZ::RHI::PipelineStatisticsFlags::None)
+    void CreateQueries(AZ::RHI::Ptr<AZ::RHI::SingleDeviceQueryPool>& queryPool, T& queries, AZ::RHI::QueryType type, AZ::RHI::PipelineStatisticsFlags statisticsMask = AZ::RHI::PipelineStatisticsFlags::None)
     {
         using namespace AZ;
         RHI::Ptr<AZ::RHI::Device> device = Utils::GetRHIDevice();
@@ -601,7 +601,7 @@ namespace AtomSampleViewer
 
         m_predicationBuffer = RHI::Factory::Get().CreateBuffer();
 
-        RHI::BufferInitRequest request;
+        RHI::SingleDeviceBufferInitRequest request;
         request.m_buffer = m_predicationBuffer.get();
         request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::Predication | RHI::BufferBindFlags::CopyWrite, sizeof(uint64_t) };
         RHI::ResultCode result = m_predicationBufferPool->InitBuffer(request);
@@ -685,7 +685,7 @@ namespace AtomSampleViewer
             uint64_t timestamps[2] = {};
             if (m_timestampQueries[beginIndex].m_isValid && m_timestampQueries[beginIndex + 1].m_isValid)
             {
-                AZ::RHI::Query* queries[] = { m_timestampQueries[beginIndex].m_query.get() , m_timestampQueries[beginIndex + 1].m_query.get() };
+                AZ::RHI::SingleDeviceQuery* queries[] = { m_timestampQueries[beginIndex].m_query.get() , m_timestampQueries[beginIndex + 1].m_query.get() };
                 m_timeStampQueryPool->GetResults(queries, 2, timestamps, 2, AZ::RHI::QueryResultFlagBits::Wait);
             }
             

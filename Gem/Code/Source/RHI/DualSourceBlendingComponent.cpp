@@ -93,7 +93,7 @@ namespace AtomSampleViewer
         SetVertexIndexIncreasing(bufferData.m_indices.data(), bufferData.m_indices.size());
         m_inputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
 
-        RHI::BufferInitRequest request;
+        RHI::SingleDeviceBufferInitRequest request;
         request.m_buffer = m_inputAssemblyBuffer.get();
         request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, sizeof(bufferData) };
         request.m_initialData = &bufferData;
@@ -204,9 +204,9 @@ namespace AtomSampleViewer
             drawIndexed.m_indexCount = 3;
             drawIndexed.m_instanceCount = 1;
 
-            const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroup->GetRHIShaderResourceGroup() };
+            const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroup->GetRHIShaderResourceGroup() };
 
-            RHI::DrawItem drawItem;
+            RHI::SingleDeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;
             drawItem.m_pipelineState = m_pipelineState.get();
             drawItem.m_indexBufferView = &m_indexBufferView;
