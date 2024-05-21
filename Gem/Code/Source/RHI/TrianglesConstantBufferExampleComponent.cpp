@@ -125,7 +125,7 @@ namespace AtomSampleViewer
             RHI::BufferPoolDescriptor bufferPoolDesc;
             bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
             bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-            m_inputAssemblyBufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
+            m_inputAssemblyBufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
 
             IABufferData bufferData;
 
@@ -186,7 +186,7 @@ namespace AtomSampleViewer
             constantBufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::Constant;
             constantBufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
             constantBufferPoolDesc.m_hostMemoryAccess = RHI::HostMemoryAccess::Write;
-            [[maybe_unused]] RHI::ResultCode result = m_constantBufferPool->Init(RHI::MultiDevice::DefaultDevice, constantBufferPoolDesc);
+            [[maybe_unused]] RHI::ResultCode result = m_constantBufferPool->Init(RHI::MultiDevice::AllDevices, constantBufferPoolDesc);
             AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialized constant buffer pool");
         }
 

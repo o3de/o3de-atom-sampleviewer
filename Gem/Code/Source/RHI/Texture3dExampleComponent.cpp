@@ -68,7 +68,7 @@ namespace AtomSampleViewer
             const uint64_t imagePoolBudget = 1 << 24; // 16 Megabyte
             imagePoolDesc.m_budgetInBytes = imagePoolBudget;
 
-            const RHI::ResultCode resultCode = m_imagePool->Init(RHI::MultiDevice::DefaultDevice, imagePoolDesc);
+            const RHI::ResultCode resultCode = m_imagePool->Init(RHI::MultiDevice::AllDevices, imagePoolDesc);
             if (resultCode != RHI::ResultCode::Success)
             {
                 AZ_Error("Texture3dExampleComponent", false, "Failed to initialize image pool.");

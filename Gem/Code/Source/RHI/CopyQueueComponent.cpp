@@ -83,7 +83,7 @@ namespace AtomSampleViewer
             RHI::BufferPoolDescriptor bufferPoolDesc;
             bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
             bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-            m_bufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
+            m_bufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
 
             UpdateVertexPositions(0);
 

@@ -61,8 +61,6 @@ namespace AtomSampleViewer
     {
         using namespace AZ;
 
-        RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
-
         AZ::RHI::PipelineStateDescriptorForDraw pipelineStateDescriptor;
 
         {
@@ -71,7 +69,7 @@ namespace AtomSampleViewer
             RHI::BufferPoolDescriptor bufferPoolDesc;
             bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
             bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-            m_inputAssemblyBufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
+            m_inputAssemblyBufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
 
             BufferData bufferData;
 

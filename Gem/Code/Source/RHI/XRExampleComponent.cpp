@@ -198,7 +198,7 @@ namespace AtomSampleViewer
         AZ::RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = AZ::RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = AZ::RHI::HeapMemoryLevel::Device;
-        result = m_bufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
+        result = m_bufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
         if (result != AZ::RHI::ResultCode::Success)
         {
             AZ_Error("XRExampleComponent", false, "Failed to initialize buffer pool with error code %d", result);

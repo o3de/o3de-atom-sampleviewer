@@ -226,7 +226,7 @@ namespace AtomSampleViewer
             bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
             bufferPoolDesc.m_hostMemoryAccess = RHI::HostMemoryAccess::Write;
             bufferPoolDesc.m_budgetInBytes = m_poolSizeInBytes;
-            [[maybe_unused]] RHI::ResultCode resultCode = m_bufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
+            [[maybe_unused]] RHI::ResultCode resultCode = m_bufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
             AZ_Assert(resultCode == RHI::ResultCode::Success, "Failed to create Material Buffer Pool");
         }
 
@@ -237,7 +237,7 @@ namespace AtomSampleViewer
             bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::ShaderReadWrite;
             bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
             bufferPoolDesc.m_hostMemoryAccess = RHI::HostMemoryAccess::Write;
-            [[maybe_unused]] RHI::ResultCode result = m_computeBufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
+            [[maybe_unused]] RHI::ResultCode result = m_computeBufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
             AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialized compute buffer pool");
         }
 
@@ -246,7 +246,7 @@ namespace AtomSampleViewer
             RHI::ImagePoolDescriptor imagePoolDesc;
             imagePoolDesc.m_bindFlags = RHI::ImageBindFlags::ShaderReadWrite;
             m_rwImagePool = aznew RHI::MultiDeviceImagePool();
-            [[maybe_unused]] RHI::ResultCode result = m_rwImagePool->Init(RHI::MultiDevice::DefaultDevice, imagePoolDesc);
+            [[maybe_unused]] RHI::ResultCode result = m_rwImagePool->Init(RHI::MultiDevice::AllDevices, imagePoolDesc);
             AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialize output image pool");
         }
     }
