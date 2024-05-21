@@ -172,7 +172,7 @@ namespace AtomSampleViewer
         m_imagePool = aznew RHI::MultiDeviceImagePool();
         RHI::ImagePoolDescriptor imagePoolDesc;
         imagePoolDesc.m_bindFlags = RHI::ImageBindFlags::ShadingRate | RHI::ImageBindFlags::ShaderReadWrite;
-        m_imagePool->Init(RHI::MultiDevice::DefaultDevice, imagePoolDesc);
+        m_imagePool->Init(RHI::MultiDevice::AllDevices, imagePoolDesc);
 
         // Initialize the shading rate images with proper values. Invalid values may cause a crash.
         uint32_t width = static_cast<uint32_t>(m_shadingRateImageSize.GetX());
@@ -216,13 +216,8 @@ namespace AtomSampleViewer
             request.m_image = image.get();
             request.m_sourceData = shadingRatePatternData.data();
             request.m_sourceSubresourceLayout = RHI::MultiDeviceImageSubresourceLayout();
-            request.m_sourceSubresourceLayout.Init(RHI::MultiDevice::DefaultDevice, {
-                RHI::Size(width, height, 1),
-                height,
-                width * formatSize,
-                bufferSize,
-                1,
-                1});
+            request.m_sourceSubresourceLayout.Init(
+                RHI::MultiDevice::AllDevices, { RHI::Size(width, height, 1), height, width * formatSize, bufferSize, 1, 1 });
 
             m_imagePool->UpdateImageContents(request);
         }        
@@ -448,7 +443,7 @@ namespace AtomSampleViewer
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-        m_bufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
+        m_bufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
 
         struct BufferData
         {

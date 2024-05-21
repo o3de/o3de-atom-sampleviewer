@@ -139,7 +139,7 @@ namespace AtomSampleViewer
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-        m_inputAssemblyBufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
+        m_inputAssemblyBufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
 
         {
             BufferData bufferData;
@@ -337,7 +337,7 @@ namespace AtomSampleViewer
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::ShaderRead | RHI::BufferBindFlags::Indirect;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-        m_shaderBufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
+        m_shaderBufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
 
         // Create the layout depending on which commands are supported by the device.
         m_indirectDrawBufferLayout = RHI::IndirectBufferLayout();
@@ -361,7 +361,7 @@ namespace AtomSampleViewer
         RHI::MultiDeviceIndirectBufferSignatureDescriptor signatureDescriptor;
         signatureDescriptor.m_layout = m_indirectDrawBufferLayout;
         signatureDescriptor.m_pipelineState = m_drawPipelineState.get();
-        result = m_indirectDrawBufferSignature->Init(RHI::MultiDevice::DefaultDevice, signatureDescriptor);
+        result = m_indirectDrawBufferSignature->Init(RHI::MultiDevice::AllDevices, signatureDescriptor);
 
         if (result != RHI::ResultCode::Success)
         {
@@ -472,7 +472,7 @@ namespace AtomSampleViewer
             m_indirectDispatchBufferSignature = aznew RHI::MultiDeviceIndirectBufferSignature;
             signatureDescriptor = {};
             signatureDescriptor.m_layout = m_indirectDispatchBufferLayout;
-            result = m_indirectDispatchBufferSignature->Init(RHI::MultiDevice::DefaultDevice, signatureDescriptor);
+            result = m_indirectDispatchBufferSignature->Init(RHI::MultiDevice::AllDevices, signatureDescriptor);
 
             if (result != RHI::ResultCode::Success)
             {
@@ -530,7 +530,7 @@ namespace AtomSampleViewer
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::ShaderRead;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Host;
-        m_instancesBufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
+        m_instancesBufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
 
         m_instancesDataBuffer = aznew RHI::MultiDeviceBuffer();
 
@@ -561,7 +561,7 @@ namespace AtomSampleViewer
             bufferPoolDesc = {};
             bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::CopyRead;
             bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Host;
-            m_copyBufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
+            m_copyBufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
 
             m_resetCounterBuffer = aznew RHI::MultiDeviceBuffer();
 
@@ -847,7 +847,7 @@ namespace AtomSampleViewer
                 drawItem.m_indexBufferView = &deviceIndexBufferView;
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
-                drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
+                drawItem.m_streamBufferViewCount = 2;
                 AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> deviceStreamBufferViews{m_streamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()), 
                     m_streamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())};
                 drawItem.m_streamBufferViews = deviceStreamBufferViews.data();

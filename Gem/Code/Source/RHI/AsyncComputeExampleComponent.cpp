@@ -147,7 +147,7 @@ namespace AtomSampleViewer
         m_imagePool = aznew RHI::MultiDeviceImagePool();
         RHI::ImagePoolDescriptor imagePoolDesc;
         imagePoolDesc.m_bindFlags = RHI::ImageBindFlags::Color | RHI::ImageBindFlags::ShaderReadWrite;
-        m_imagePool->Init(RHI::MultiDevice::DefaultDevice, imagePoolDesc);
+        m_imagePool->Init(RHI::MultiDevice::AllDevices, imagePoolDesc);
 
         for (auto& image : m_sceneImages)
         {
@@ -171,7 +171,7 @@ namespace AtomSampleViewer
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-        m_quadBufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
+        m_quadBufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
 
         struct BufferData
         {

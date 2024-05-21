@@ -174,7 +174,7 @@ namespace AtomSampleViewer
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-        m_bufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
+        m_bufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
 
         BufferData bufferData;
         SetFullScreenRect(bufferData.m_positions.data(), bufferData.m_uvs.data(), bufferData.m_indices.data());

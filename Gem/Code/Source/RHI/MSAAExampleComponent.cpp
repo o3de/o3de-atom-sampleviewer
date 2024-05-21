@@ -53,7 +53,7 @@ namespace AtomSampleViewer
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-        m_inputAssemblyBufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
+        m_inputAssemblyBufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
 
         AZStd::vector<RHI::SamplePosition> emptySamplePositions;
         AZStd::vector<RHI::SamplePosition> customSamplePositions = { RHI::SamplePosition(3, 3), RHI::SamplePosition(11, 3), RHI::SamplePosition(3, 11), RHI::SamplePosition(11, 11) };

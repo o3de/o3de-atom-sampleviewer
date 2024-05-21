@@ -239,7 +239,7 @@ namespace AtomSampleViewer
         AZ::RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = AZ::RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = AZ::RHI::HeapMemoryLevel::Device;
-        m_bufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
+        m_bufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
 
         BufferData bufferData = CreateBufferData();
 

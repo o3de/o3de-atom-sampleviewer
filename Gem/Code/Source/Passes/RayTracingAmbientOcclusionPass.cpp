@@ -102,7 +102,7 @@ namespace AZ
 
             // create the ray tracing pipeline state object
             m_rayTracingPipelineState = aznew RHI::MultiDeviceRayTracingPipelineState;
-            m_rayTracingPipelineState->Init(RHI::MultiDevice::DefaultDevice, descriptor);
+            m_rayTracingPipelineState->Init(RHI::MultiDevice::AllDevices, descriptor);
         }
 
         void RayTracingAmbientOcclusionPass::FrameBeginInternal(FramePrepareParams params)
@@ -122,7 +122,7 @@ namespace AZ
 
                 // Build shader table once. Since we are not using local srg so we don't need to rebuild it even when scene changed 
                 m_rayTracingShaderTable = aznew RHI::MultiDeviceRayTracingShaderTable;
-                m_rayTracingShaderTable->Init(RHI::MultiDevice::DefaultDevice, rayTracingBufferPools);
+                m_rayTracingShaderTable->Init(RHI::MultiDevice::AllDevices, rayTracingBufferPools);
 
                 AZStd::shared_ptr<RHI::MultiDeviceRayTracingShaderTableDescriptor> descriptor = AZStd::make_shared<RHI::MultiDeviceRayTracingShaderTableDescriptor>();
                 descriptor->Build(AZ::Name("RayTracingAOShaderTable"), m_rayTracingPipelineState)

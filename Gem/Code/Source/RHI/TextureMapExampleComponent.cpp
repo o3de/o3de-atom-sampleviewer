@@ -209,7 +209,7 @@ namespace AtomSampleViewer
         AZ::RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = AZ::RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = AZ::RHI::HeapMemoryLevel::Device;
-        m_inputAssemblyBufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
+        m_inputAssemblyBufferPool->Init(AZ::RHI::MultiDevice::AllDevices, bufferPoolDesc);
     }
 
     void TextureMapExampleComponent::InitRenderTargetBufferView()

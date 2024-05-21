@@ -71,7 +71,7 @@ namespace AtomSampleViewer
             RHI::BufferPoolDescriptor bufferPoolDesc;
             bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
             bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Host;
-            [[maybe_unused]] RHI::ResultCode resultCode = m_inputAssemblyBufferPool->Init(RHI::MultiDevice::DefaultDevice, bufferPoolDesc);
+            [[maybe_unused]] RHI::ResultCode resultCode = m_inputAssemblyBufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
             AZ_Assert(resultCode == RHI::ResultCode::Success, "Failed to initialize input assembly buffer pool");
         }
 
@@ -81,13 +81,13 @@ namespace AtomSampleViewer
             imagePoolDesc.m_bindFlags = RHI::ImageBindFlags::ShaderReadWrite;
 
             m_imagePool = aznew RHI::MultiDeviceImagePool();
-            [[maybe_unused]] RHI::ResultCode result = m_imagePool->Init(RHI::MultiDevice::DefaultDevice, imagePoolDesc);
+            [[maybe_unused]] RHI::ResultCode result = m_imagePool->Init(RHI::MultiDevice::AllDevices, imagePoolDesc);
             AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialize output image pool");
         }
 
         // initialize ray tracing buffer pools
         m_rayTracingBufferPools = aznew RHI::MultiDeviceRayTracingBufferPools;
-        m_rayTracingBufferPools->Init(RHI::MultiDevice::DefaultDevice);
+        m_rayTracingBufferPools->Init(RHI::MultiDevice::AllDevices);
     }
 
     void RayTracingExampleComponent::CreateGeometry()
@@ -306,13 +306,13 @@ namespace AtomSampleViewer
     
         // create the ray tracing pipeline state object
         m_rayTracingPipelineState = aznew RHI::MultiDeviceRayTracingPipelineState;
-        m_rayTracingPipelineState->Init(RHI::MultiDevice::DefaultDevice, descriptor);
+        m_rayTracingPipelineState->Init(RHI::MultiDevice::AllDevices, descriptor);
     }
 
     void RayTracingExampleComponent::CreateRayTracingShaderTable()
     {
         m_rayTracingShaderTable = aznew RHI::MultiDeviceRayTracingShaderTable;
-        m_rayTracingShaderTable->Init(RHI::MultiDevice::DefaultDevice, *m_rayTracingBufferPools);
+        m_rayTracingShaderTable->Init(RHI::MultiDevice::AllDevices, *m_rayTracingBufferPools);
     }
 
     void RayTracingExampleComponent::CreateRayTracingAccelerationTableScope()
@@ -350,7 +350,7 @@ namespace AtomSampleViewer
                         ->IndexBuffer(triangleIndexBufferView)
                 ;
 
-                m_triangleRayTracingBlas->CreateBuffers(RHI::MultiDevice::DefaultDevice, &triangleBlasDescriptor, *m_rayTracingBufferPools);
+                m_triangleRayTracingBlas->CreateBuffers(RHI::MultiDevice::AllDevices, &triangleBlasDescriptor, *m_rayTracingBufferPools);
             }
 
             // create rectangle BLAS if necessary
@@ -380,7 +380,7 @@ namespace AtomSampleViewer
                         ->IndexBuffer(rectangleIndexBufferView)
                 ;
 
-                m_rectangleRayTracingBlas->CreateBuffers(RHI::MultiDevice::DefaultDevice, &rectangleBlasDescriptor, *m_rayTracingBufferPools);
+                m_rectangleRayTracingBlas->CreateBuffers(RHI::MultiDevice::AllDevices, &rectangleBlasDescriptor, *m_rayTracingBufferPools);
             }
 
             m_time += 0.005f;
@@ -427,7 +427,7 @@ namespace AtomSampleViewer
                     ->Transform(rectangleTransform)
                 ;
 
-            m_rayTracingTlas->CreateBuffers(RHI::MultiDevice::DefaultDevice, &tlasDescriptor, *m_rayTracingBufferPools);
+            m_rayTracingTlas->CreateBuffers(RHI::MultiDevice::AllDevices, &tlasDescriptor, *m_rayTracingBufferPools);
 
             m_tlasBufferViewDescriptor = RHI::BufferViewDescriptor::CreateRaw(0, (uint32_t)m_rayTracingTlas->GetTlasBuffer()->GetDescriptor().m_byteCount);
 
