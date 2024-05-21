@@ -117,6 +117,8 @@ set(FILES
     Shaders/RHI/MRTTarget.shader
     Shaders/RHI/MSAAResolve.azsl
     Shaders/RHI/MSAAResolve.shader
+    Shaders/RHI/MultiGPUComposite.azsl
+    Shaders/RHI/MultiGPUComposite.shader
     Shaders/RHI/MultipleViewsDepth.azsl
     Shaders/RHI/MultipleViewsDepth.shader
     Shaders/RHI/MultipleViewsShadow.azsl

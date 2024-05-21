@@ -53,6 +53,8 @@ set(FILES
     Source/RHI/MRTExampleComponent.cpp
     Source/RHI/MSAAExampleComponent.h
     Source/RHI/MSAAExampleComponent.cpp
+    Source/RHI/MultiGPUExampleComponent.cpp
+    Source/RHI/MultiGPUExampleComponent.h
     Source/RHI/MultiThreadComponent.cpp
     Source/RHI/MultiThreadComponent.h
     Source/RHI/MultipleViewsComponent.cpp
