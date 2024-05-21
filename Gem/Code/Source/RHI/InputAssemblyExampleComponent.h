@@ -8,7 +8,7 @@
 
 #pragma once
 
-#include <Atom/RHI/MultiDeviceDrawItem.h>
+#include <Atom/RHI/DrawItem.h>
 #include <Atom/RHI/ScopeProducer.h>
 
 #include <Atom/RHI/RHISystemInterface.h>
@@ -65,24 +65,24 @@ namespace AtomSampleViewer
         // -------------------------------------------------
         // Input Assembly buffer and its Streams/Index Views
         // -------------------------------------------------
-        AZ::RHI::MultiDeviceStreamBufferView m_streamBufferView[2];
+        AZ::RHI::StreamBufferView m_streamBufferView[2];
         AZ::RHI::InputStreamLayout m_inputStreamLayout;
 
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_inputAssemblyBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_inputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_inputAssemblyBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_inputAssemblyBuffer;
 
         // ----------------------
         // Pipeline state and SRG
         // ----------------------
 
         // Dispatch pipeline
-        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_dispatchPipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_dispatchPipelineState;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_dispatchSRG[2];
         AZ::RHI::ShaderInputConstantIndex m_dispatchTimeConstantIndex;
         AZ::RHI::ShaderInputBufferIndex m_dispatchIABufferIndex;
 
         // Draw pipeline
-        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_drawPipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_drawPipelineState;
         AZ::RHI::ShaderInputConstantIndex m_drawMatrixIndex;
         AZ::RHI::ShaderInputConstantIndex m_drawColorIndex;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_drawSRG[2];

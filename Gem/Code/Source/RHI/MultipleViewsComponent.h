@@ -10,9 +10,9 @@
 
 #include <RHI/BasicRHIComponent.h>
 
-#include <Atom/RHI/MultiDeviceBuffer.h>
-#include <Atom/RHI/MultiDeviceBufferPool.h>
-#include <Atom/RHI/MultiDevicePipelineState.h>
+#include <Atom/RHI/Buffer.h>
+#include <Atom/RHI/BufferPool.h>
+#include <Atom/RHI/PipelineState.h>
 #include <Atom/RPI.Public/Image/AttachmentImage.h>
 
 #include <AzCore/Component/EntityBus.h>
@@ -90,17 +90,17 @@ namespace AtomSampleViewer
         
         static const int s_shadowMapSize = 1024;
 
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_bufferPool;
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_inputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_bufferPool;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_inputAssemblyBuffer;
 
         AZ::RHI::InputStreamLayout m_inputStreamLayout;
-        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState>, 2> m_pipelineStates;
+        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::PipelineState>, 2> m_pipelineStates;
         AZStd::array<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, 2> m_shaderResourceGroups;
         AZStd::array<AZ::RHI::ShaderInputConstantIndex, 6> m_shaderInputConstantIndices;
         AZ::RHI::ShaderInputImageIndex m_shaderInputImageIndex;
 
-        AZStd::array<AZ::RHI::MultiDeviceStreamBufferView, 3> m_streamBufferViews;
-        AZ::RHI::MultiDeviceIndexBufferView m_indexBufferView;
+        AZStd::array<AZ::RHI::StreamBufferView, 3> m_streamBufferViews;
+        AZ::RHI::IndexBufferView m_indexBufferView;
         AZ::RHI::AttachmentId m_depthMapID;
         AZ::RHI::AttachmentId m_depthStencilID;
         AZ::RHI::ClearValue m_depthClearValue;

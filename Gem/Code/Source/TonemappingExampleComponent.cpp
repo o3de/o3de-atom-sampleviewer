@@ -20,7 +20,7 @@
 
 #include <Atom/Feature/Utils/FrameCaptureBus.h>
 
-#include <Atom/RHI/MultiDeviceDrawPacketBuilder.h>
+#include <Atom/RHI/DrawPacketBuilder.h>
 
 #include <Atom/RPI.Public/RPISystemInterface.h>
 #include <Atom/RPI.Public/Shader/Shader.h>
@@ -205,7 +205,7 @@ namespace AtomSampleViewer
             const char* srgName,
             Data::Asset<AZ::RPI::ShaderAsset>& shaderAsset,
             RHI::Ptr<AZ::RHI::ShaderResourceGroupLayout>& srgLayout,
-            RHI::ConstPtr<RHI::MultiDevicePipelineState>& pipelineState,
+            RHI::ConstPtr<RHI::PipelineState>& pipelineState,
             RHI::DrawListTag& drawListTag,
             RPI::Scene* scene)
         {
@@ -271,13 +271,13 @@ namespace AtomSampleViewer
     void TonemappingExampleComponent::DrawImage(const ImageToDraw* imageInfo)
     {
         // Build draw packet
-        RHI::MultiDeviceDrawPacketBuilder drawPacketBuilder{RHI::MultiDevice::DefaultDevice};
+        RHI::DrawPacketBuilder drawPacketBuilder{RHI::MultiDevice::DefaultDevice};
         drawPacketBuilder.Begin(nullptr);
         RHI::DrawLinear drawLinear;
         drawLinear.m_vertexCount = 4;
         drawPacketBuilder.SetDrawArguments(drawLinear);
 
-        RHI::MultiDeviceDrawPacketBuilder::MultiDeviceDrawRequest drawRequest;
+        RHI::DrawPacketBuilder::DrawRequest drawRequest;
         drawRequest.m_listTag = m_drawListTag;
         drawRequest.m_pipelineState = m_pipelineState.get();
         drawRequest.m_sortKey = 0;

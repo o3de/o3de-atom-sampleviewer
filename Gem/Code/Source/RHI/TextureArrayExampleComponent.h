@@ -39,11 +39,11 @@ namespace AtomSampleViewer
         // AZ::TickBus::Handler overrides...
         void OnTick(float deltaTime, AZ::ScriptTimePoint scriptTime);
 
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_inputAssemblyBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_rectangleInputAssemblyBuffer;
-        AZStd::array<AZ::RHI::MultiDeviceStreamBufferView, 2> m_rectangleStreamBufferViews;
+        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_inputAssemblyBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_rectangleInputAssemblyBuffer;
+        AZStd::array<AZ::RHI::StreamBufferView, 2> m_rectangleStreamBufferViews;
         AZ::RHI::InputStreamLayout m_rectangleInputStreamLayout;
-        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_pipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_pipelineState;
 
         // Srg related resources
         AZ::Data::Instance<AZ::RPI::Shader> m_shader;

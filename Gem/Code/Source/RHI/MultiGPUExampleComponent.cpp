@@ -18,8 +18,8 @@
 #include <Atom/RHI.Reflect/ImageScopeAttachmentDescriptor.h>
 #include <Atom/RPI.Reflect/Shader/ShaderAsset.h>
 #include <AzCore/Serialization/SerializeContext.h>
-#include <Atom/RHI/MultiDeviceDrawItem.h>
-#include <Atom/RHI/MultiDeviceCopyItem.h>
+#include <Atom/RHI/DrawItem.h>
+#include <Atom/RHI/CopyItem.h>
 #include <Atom/RHI.Reflect/BufferDescriptor.h>
 
 using namespace AZ;
@@ -62,20 +62,20 @@ namespace AtomSampleViewer
     {
         if (m_outputWidth != m_imageWidth || m_outputHeight != m_imageHeight)
         {
-            // MultiDeviceImage used as color attachment
+            // Image used as color attachment
             {
-                m_image = aznew RHI::MultiDeviceImage;
-                RHI::MultiDeviceImageInitRequest initImageRequest;
+                m_image = aznew RHI::Image;
+                RHI::ImageInitRequest initImageRequest;
                 initImageRequest.m_image = m_image.get();
                 initImageRequest.m_descriptor = RHI::ImageDescriptor::Create2D(
                     RHI::ImageBindFlags::Color | RHI::ImageBindFlags::ShaderReadWrite | RHI::ImageBindFlags::CopyRead, m_outputWidth, m_outputHeight, m_outputFormat);
                 m_imagePool->InitImage(initImageRequest);
             }
 
-            // MultiDeviceImage holds rendered texture from GPU1 (on GPU0)
+            // Image holds rendered texture from GPU1 (on GPU0)
             {
-                m_transferImage = aznew RHI::MultiDeviceImage;
-                RHI::MultiDeviceImageInitRequest initImageRequest;
+                m_transferImage = aznew RHI::Image;
+                RHI::ImageInitRequest initImageRequest;
                 initImageRequest.m_image = m_transferImage.get();
                 initImageRequest.m_descriptor = RHI::ImageDescriptor::Create2D(
                     RHI::ImageBindFlags::Color | RHI::ImageBindFlags::ShaderRead | RHI::ImageBindFlags::CopyWrite, m_outputWidth, m_outputHeight,
@@ -86,10 +86,10 @@ namespace AtomSampleViewer
             RHI::BufferBindFlags stagingBufferBindFlags{ RHI::BufferBindFlags::CopyWrite | RHI::BufferBindFlags::CopyRead };
 
             {
-                m_stagingBufferToGPU = aznew RHI::MultiDeviceBuffer;
+                m_stagingBufferToGPU = aznew RHI::Buffer;
                 AZStd::vector<unsigned int> initialData(m_outputWidth * m_outputHeight, 0xFFFF00FFu);
 
-                RHI::MultiDeviceBufferInitRequest request;
+                RHI::BufferInitRequest request;
                 request.m_buffer = m_stagingBufferToGPU.get();
                 request.m_descriptor = RHI::BufferDescriptor{stagingBufferBindFlags, initialData.size() * sizeof(unsigned int)};
                 //? Check BindFlags
@@ -101,8 +101,8 @@ namespace AtomSampleViewer
             }
 
             {
-                m_stagingBufferToCPU = aznew RHI::MultiDeviceBuffer;
-                RHI::MultiDeviceBufferInitRequest request;
+                m_stagingBufferToCPU = aznew RHI::Buffer;
+                RHI::BufferInitRequest request;
                 request.m_buffer = m_stagingBufferToCPU.get();
                 request.m_descriptor =
                     RHI::BufferDescriptor{ stagingBufferBindFlags, m_outputWidth * m_outputHeight * sizeof(unsigned int) }; //? Check BindFlags
@@ -132,11 +132,11 @@ namespace AtomSampleViewer
         frameGraphBuilder.GetAttachmentDatabase().ImportBuffer(
             m_bufferAttachmentIds[1], m_stagingBufferToCPU);
 
-        RHI::SingleDeviceBufferMapRequest request{};
+        RHI::DeviceBufferMapRequest request{};
         request.m_buffer = m_stagingBufferToCPU->GetDeviceBuffer(1).get();
         request.m_byteCount = m_imageWidth * m_imageHeight * sizeof(uint32_t);
 
-        RHI::SingleDeviceBufferMapResponse response{};
+        RHI::DeviceBufferMapResponse response{};
 
         m_stagingBufferPoolToCPU->GetDeviceBufferPool(1)->MapBuffer(request, response);
 
@@ -177,9 +177,9 @@ namespace AtomSampleViewer
 
         // Create multi-device resources
 
-        // MultiDeviceImagePool for the render target texture
+        // ImagePool for the render target texture
         {
-            m_imagePool = aznew RHI::MultiDeviceImagePool;
+            m_imagePool = aznew RHI::ImagePool;
             m_imagePool->SetName(Name("RenderTexturePool"));
 
             RHI::ImagePoolDescriptor imagePoolDescriptor{};
@@ -193,9 +193,9 @@ namespace AtomSampleViewer
             }
         }
 
-        // MultiDeviceImagePool used to transfer the rendered texture from GPU 1 -> GPU 0
+        // ImagePool used to transfer the rendered texture from GPU 1 -> GPU 0
         {
-            m_transferImagePool = aznew RHI::MultiDeviceImagePool;
+            m_transferImagePool = aznew RHI::ImagePool;
             m_transferImagePool->SetName(Name("TransferImagePool"));
 
             RHI::ImagePoolDescriptor imagePoolDescriptor{};
@@ -213,7 +213,7 @@ namespace AtomSampleViewer
 
         // Create staging buffer pool for buffer copy to the GPU
         {
-            m_stagingBufferPoolToGPU = aznew RHI::MultiDeviceBufferPool;
+            m_stagingBufferPoolToGPU = aznew RHI::BufferPool;
 
             RHI::BufferPoolDescriptor bufferPoolDesc;
             bufferPoolDesc.m_bindFlags = stagingBufferBindFlags;
@@ -227,7 +227,7 @@ namespace AtomSampleViewer
 
         // Create staging buffer pools for buffer copy to the CPU
         {
-            m_stagingBufferPoolToCPU = aznew RHI::MultiDeviceBufferPool;
+            m_stagingBufferPoolToCPU = aznew RHI::BufferPool;
 
             RHI::BufferPoolDescriptor bufferPoolDesc;
             bufferPoolDesc.m_bindFlags = stagingBufferBindFlags;
@@ -261,7 +261,7 @@ namespace AtomSampleViewer
         m_inputAssemblyBufferComposite = nullptr;
         m_pipelineStateComposite = nullptr;
         m_shaderResourceGroupComposite = nullptr;
-        m_shaderResourceGroupDataComposite = RHI::MultiDeviceShaderResourceGroupData{};
+        m_shaderResourceGroupDataComposite = RHI::ShaderResourceGroupData{};
         m_shaderResourceGroupPoolComposite = nullptr;
 
         m_stagingBufferPoolToCPU = nullptr;
@@ -278,7 +278,7 @@ namespace AtomSampleViewer
         RHI::PipelineStateDescriptorForDraw pipelineStateDescriptor;
 
         {
-            m_inputAssemblyBufferPool = aznew RHI::MultiDeviceBufferPool;
+            m_inputAssemblyBufferPool = aznew RHI::BufferPool;
 
             RHI::BufferPoolDescriptor bufferPoolDesc;
             bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
@@ -297,9 +297,9 @@ namespace AtomSampleViewer
 
             SetVertexIndexIncreasing(bufferData.m_indices.data(), bufferData.m_indices.size());
 
-            m_inputAssemblyBuffer = aznew RHI::MultiDeviceBuffer;
+            m_inputAssemblyBuffer = aznew RHI::Buffer;
 
-            RHI::MultiDeviceBufferInitRequest request;
+            RHI::BufferInitRequest request;
             request.m_buffer = m_inputAssemblyBuffer.get();
             request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, sizeof(bufferData) };
             request.m_initialData = &bufferData;
@@ -403,25 +403,26 @@ namespace AtomSampleViewer
                 commandList->SetViewports(&m_viewport, 1);
                 commandList->SetScissors(&m_scissors[int(scopeData.second)], 1);
 
-                const RHI::SingleDeviceIndexBufferView indexBufferView = {
-                    *m_inputAssemblyBuffer->GetDeviceBuffer(context.GetDeviceIndex()),
-                    offsetof(BufferDataTrianglePass, m_indices), sizeof(BufferDataTrianglePass::m_indices), RHI::IndexFormat::Uint16
-                };
+                const RHI::DeviceIndexBufferView indexBufferView = { *m_inputAssemblyBuffer->GetDeviceBuffer(context.GetDeviceIndex()),
+                                                                     offsetof(BufferDataTrianglePass, m_indices),
+                                                                     sizeof(BufferDataTrianglePass::m_indices), RHI::IndexFormat::Uint16 };
 
                 RHI::DrawIndexed drawIndexed;
                 drawIndexed.m_indexCount = 3;
                 drawIndexed.m_instanceCount = 1;
 
-                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroupShared->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get() };
+                const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
+                    m_shaderResourceGroupShared->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
+                };
 
-                RHI::SingleDeviceDrawItem drawItem;
+                RHI::DeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
                 drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
                 drawItem.m_indexBufferView = &indexBufferView;
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
                 drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
-                AZStd::array<RHI::SingleDeviceStreamBufferView, 2> deviceStreamBufferViews{
+                AZStd::array<RHI::DeviceStreamBufferView, 2> deviceStreamBufferViews{
                     m_streamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()),
                     m_streamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())
                 };
@@ -450,7 +451,7 @@ namespace AtomSampleViewer
 
         // Setup input assembly for fullscreen pass
         {
-            m_inputAssemblyBufferPoolComposite = aznew RHI::MultiDeviceBufferPool();
+            m_inputAssemblyBufferPoolComposite = aznew RHI::BufferPool();
 
             RHI::BufferPoolDescriptor bufferPoolDesc;
             bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
@@ -459,9 +460,9 @@ namespace AtomSampleViewer
 
             SetFullScreenRect(bufferData.m_positions.data(), bufferData.m_uvs.data(), bufferData.m_indices.data());
 
-            m_inputAssemblyBufferComposite = aznew RHI::MultiDeviceBuffer;
+            m_inputAssemblyBufferComposite = aznew RHI::Buffer;
 
-            RHI::MultiDeviceBufferInitRequest request;
+            RHI::BufferInitRequest request;
             request.m_buffer = m_inputAssemblyBufferComposite.get();
             request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, sizeof(bufferData) };
             request.m_initialData = &bufferData;
@@ -514,13 +515,13 @@ namespace AtomSampleViewer
             RHI::ShaderResourceGroupPoolDescriptor srgPoolDescriptor{};
             srgPoolDescriptor.m_layout = shader->GetAsset()->FindShaderResourceGroupLayout(AZ::Name { "CompositeSrg" }, shader->GetSupervariantIndex()).get();
 
-            m_shaderResourceGroupPoolComposite = aznew RHI::MultiDeviceShaderResourceGroupPool;
+            m_shaderResourceGroupPoolComposite = aznew RHI::ShaderResourceGroupPool;
             m_shaderResourceGroupPoolComposite->Init(m_deviceMask_1, srgPoolDescriptor);
 
-            m_shaderResourceGroupComposite = aznew RHI::MultiDeviceShaderResourceGroup;
+            m_shaderResourceGroupComposite = aznew RHI::ShaderResourceGroup;
             m_shaderResourceGroupPoolComposite->InitGroup(*m_shaderResourceGroupComposite);
 
-            m_shaderResourceGroupDataComposite = RHI::MultiDeviceShaderResourceGroupData{*m_shaderResourceGroupPoolComposite};
+            m_shaderResourceGroupDataComposite = RHI::ShaderResourceGroupData{*m_shaderResourceGroupPoolComposite};
 
             {
                 const AZ::Name inputTextureShaderInput{ "m_inputTextureLeft" };
@@ -583,7 +584,7 @@ namespace AtomSampleViewer
                 commandList->SetViewports(&m_viewport, 1);
                 commandList->SetScissors(&m_scissor, 1);
 
-                const RHI::SingleDeviceIndexBufferView indexBufferView = {
+                const RHI::DeviceIndexBufferView indexBufferView = {
                     *m_inputAssemblyBufferComposite->GetDeviceBuffer(context.GetDeviceIndex()),
                     offsetof(BufferDataCompositePass, m_indices), sizeof(BufferDataCompositePass::m_indices), RHI::IndexFormat::Uint16
                 };
@@ -592,16 +593,18 @@ namespace AtomSampleViewer
                 drawIndexed.m_indexCount = 6;
                 drawIndexed.m_instanceCount = 1;
 
-                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroupComposite->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get() };
+                const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
+                    m_shaderResourceGroupComposite->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
+                };
 
-                RHI::SingleDeviceDrawItem drawItem;
+                RHI::DeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
                 drawItem.m_pipelineState = m_pipelineStateComposite->GetDevicePipelineState(context.GetDeviceIndex()).get();
                 drawItem.m_indexBufferView = &indexBufferView;
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
                 drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViewsComposite.size());
-                AZStd::array<RHI::SingleDeviceStreamBufferView, 2> deviceStreamBufferViews{
+                AZStd::array<RHI::DeviceStreamBufferView, 2> deviceStreamBufferViews{
                     m_streamBufferViewsComposite[0].GetDeviceStreamBufferView(context.GetDeviceIndex()),
                     m_streamBufferViewsComposite[1].GetDeviceStreamBufferView(context.GetDeviceIndex())
                 };
@@ -640,7 +643,7 @@ namespace AtomSampleViewer
 
         const auto executeFunction = [this](const RHI::FrameGraphExecuteContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
-            RHI::SingleDeviceCopyBufferToImageDescriptor copyDescriptor{};
+            RHI::DeviceCopyBufferToImageDescriptor copyDescriptor{};
             copyDescriptor.m_sourceBuffer = m_stagingBufferToGPU->GetDeviceBuffer(context.GetDeviceIndex()).get();
             copyDescriptor.m_sourceOffset = 0;
             copyDescriptor.m_sourceBytesPerRow = m_imageWidth * sizeof(uint32_t);
@@ -648,7 +651,7 @@ namespace AtomSampleViewer
             copyDescriptor.m_sourceSize = RHI::Size{ m_imageWidth, m_imageHeight, 1 };
             copyDescriptor.m_destinationImage = m_transferImage->GetDeviceImage(context.GetDeviceIndex()).get();
 
-            RHI::SingleDeviceCopyItem copyItem(copyDescriptor);
+            RHI::DeviceCopyItem copyItem(copyDescriptor);
             context.GetCommandList()->Submit(copyItem);
         };
 
@@ -691,7 +694,7 @@ namespace AtomSampleViewer
 
         const auto executeFunction = [this](const RHI::FrameGraphExecuteContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
-            RHI::SingleDeviceCopyImageToBufferDescriptor copyDescriptor{};
+            RHI::DeviceCopyImageToBufferDescriptor copyDescriptor{};
             copyDescriptor.m_sourceImage = m_image->GetDeviceImage(context.GetDeviceIndex()).get();
             copyDescriptor.m_sourceSize = RHI::Size{ m_imageWidth, m_imageHeight, 1 };
             copyDescriptor.m_destinationBuffer = m_stagingBufferToCPU->GetDeviceBuffer(context.GetDeviceIndex()).get();
@@ -700,7 +703,7 @@ namespace AtomSampleViewer
             copyDescriptor.m_destinationBytesPerImage = static_cast<uint32_t>(m_stagingBufferToCPU->GetDescriptor().m_byteCount);
             copyDescriptor.m_destinationFormat = m_outputFormat;
 
-            RHI::SingleDeviceCopyItem copyItem(copyDescriptor);
+            RHI::DeviceCopyItem copyItem(copyDescriptor);
             context.GetCommandList()->Submit(copyItem);
         };
 

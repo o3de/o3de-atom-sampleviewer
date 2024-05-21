@@ -12,7 +12,7 @@
 
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 
-#include <Atom/RHI/MultiDeviceBufferPool.h>
+#include <Atom/RHI/BufferPool.h>
 #include <Atom/RHI.Reflect/SamplerState.h>
 
 #include <AzCore/Component/TickBus.h>
@@ -52,12 +52,12 @@ namespace AtomSampleViewer
         AZ::RHI::ShaderInputConstantIndex m_objectMatrixInputIndex;
         AZ::RHI::ShaderInputConstantIndex m_uvMatrixInputIndex;
 
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_bufferPool;
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_indexBuffer;
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_positionBuffer;
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_uvBuffer;
+        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_bufferPool;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_indexBuffer;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_positionBuffer;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_uvBuffer;
 
-        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_pipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_pipelineState;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_shaderResourceGroup;
 
         struct BufferData
@@ -67,8 +67,8 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 6> m_indices;
         };
 
-        AZ::RHI::SingleDeviceDrawItem m_drawItem;
-        AZStd::array<AZ::RHI::MultiDeviceStreamBufferView, 2> m_streamBufferViews;
+        AZ::RHI::DeviceDrawItem m_drawItem;
+        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
 
         AZ::RHI::SamplerState m_samplerState;
         bool m_useStaticSampler = true;

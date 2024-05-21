@@ -20,13 +20,13 @@
 #include <Atom/RPI.Public/Shader/Shader.h>
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 
-#include <Atom/RHI/MultiDeviceBufferPool.h>
-#include <Atom/RHI/MultiDeviceDrawItem.h>
+#include <Atom/RHI/BufferPool.h>
 #include <Atom/RHI/Device.h>
+#include <Atom/RHI/DeviceCopyItem.h>
+#include <Atom/RHI/DrawItem.h>
 #include <Atom/RHI/Factory.h>
-#include <Atom/RHI/SingleDeviceCopyItem.h>
 #include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/MultiDevicePipelineState.h>
+#include <Atom/RHI/PipelineState.h>
 
 #include <RHI/BasicRHIComponent.h>
 #include <Utils/ImGuiSidebar.h>
@@ -107,11 +107,11 @@ namespace AtomSampleViewer
         AZ::RHI::ShadingRate m_shadingRate = AZ::RHI::ShadingRate::Rate1x1;
 
         // Pipelines used for rendering the full screen quad with and without a shading rate attachments.
-        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_modelPipelineState[2];
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_modelPipelineState[2];
         // Pipeline used for updating the shading rate image.
-        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_computePipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_computePipelineState;
         // Pipeline used for showing the shading rate image.
-        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_imagePipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_imagePipelineState;
         // Compute and graphics shaders.
         AZStd::vector<AZ::Data::Instance<AZ::RPI::Shader>> m_shaders;
         // SRG with information when rendering the full screen quad.
@@ -133,20 +133,20 @@ namespace AtomSampleViewer
         int m_numThreadsZ = 1;
 
         // Bufferpool for creating the IA buffer
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_bufferPool;
+        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_bufferPool;
         // Buffer for the IA of the full screen quad.
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_inputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_inputAssemblyBuffer;
         // Bufferviews into the full screen quad IA
-        AZStd::array<AZ::RHI::MultiDeviceStreamBufferView, 2> m_streamBufferViews;
+        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
         // Indexview of the full screen quad index buffer
-        AZ::RHI::MultiDeviceIndexBufferView m_indexBufferView;
+        AZ::RHI::IndexBufferView m_indexBufferView;
         // Layout of the full screen quad.
         AZ::RHI::InputStreamLayout m_inputStreamLayout;
 
         // Image pool containing the shading rate images.
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceImagePool> m_imagePool;
+        AZ::RHI::Ptr<AZ::RHI::ImagePool> m_imagePool;
         // List of shading rate images used as attachments.
-        AZStd::fixed_vector<AZ::RHI::Ptr<AZ::RHI::MultiDeviceImage>, AZ::RHI::Limits::Device::FrameCountMax> m_shadingRateImages;
+        AZStd::fixed_vector<AZ::RHI::Ptr<AZ::RHI::Image>, AZ::RHI::Limits::Device::FrameCountMax> m_shadingRateImages;
 
         // Cursor position (mouse or touch)
         AZ::Vector2 m_cursorPos;

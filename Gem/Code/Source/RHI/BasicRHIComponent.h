@@ -100,7 +100,11 @@ namespace AtomSampleViewer
         ~BasicRHIComponent() override = default;
 
         // Creates a 3D image from 2D images. All 2D images are required to have the same format and layout
-        static void CreateImage3dData(AZStd::vector<uint8_t>& data, AZ::RHI::SingleDeviceImageSubresourceLayout& layout, AZ::RHI::Format& format, AZStd::vector<const char*>&& imageAssetPaths);
+        static void CreateImage3dData(
+            AZStd::vector<uint8_t>& data,
+            AZ::RHI::DeviceImageSubresourceLayout& layout,
+            AZ::RHI::Format& format,
+            AZStd::vector<const char*>&& imageAssetPaths);
 
         void SetOutputInfo(uint32_t width, uint32_t height, AZ::RHI::Format format, AZ::RHI::AttachmentId attachmentId);
 

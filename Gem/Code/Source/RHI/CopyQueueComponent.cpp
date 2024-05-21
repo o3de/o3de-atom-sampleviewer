@@ -78,7 +78,7 @@ namespace AtomSampleViewer
         AZ::RHI::PipelineStateDescriptorForDraw pipelineStateDescriptor;
 
         {
-            m_bufferPool = aznew RHI::MultiDeviceBufferPool();
+            m_bufferPool = aznew RHI::BufferPool();
 
             RHI::BufferPoolDescriptor bufferPoolDesc;
             bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
@@ -94,12 +94,12 @@ namespace AtomSampleViewer
             SetVertexUV(m_bufferData.m_uvs.data(), 2, 1.0f, 1.0f);
             SetVertexUV(m_bufferData.m_uvs.data(), 3, 1.0f, 0.0f);
 
-            m_positionBuffer = aznew RHI::MultiDeviceBuffer();
-            m_indexBuffer = aznew RHI::MultiDeviceBuffer();
-            m_uvBuffer = aznew RHI::MultiDeviceBuffer();
+            m_positionBuffer = aznew RHI::Buffer();
+            m_indexBuffer = aznew RHI::Buffer();
+            m_uvBuffer = aznew RHI::Buffer();
 
             RHI::ResultCode result = RHI::ResultCode::Success;
-            RHI::MultiDeviceBufferInitRequest request;
+            RHI::BufferInitRequest request;
             
             request.m_buffer = m_indexBuffer.get();
             request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, indexBufSize };
@@ -226,29 +226,28 @@ namespace AtomSampleViewer
                 commandList->SetViewports(&m_viewport, 1);
                 commandList->SetScissors(&m_scissor, 1);
 
-                const RHI::SingleDeviceIndexBufferView indexBufferView =
-                {
-                    *m_indexBuffer->GetDeviceBuffer(context.GetDeviceIndex()),
-                    0,
-                    indexBufSize,
-                    RHI::IndexFormat::Uint16
-                };
+                const RHI::DeviceIndexBufferView indexBufferView = { *m_indexBuffer->GetDeviceBuffer(context.GetDeviceIndex()), 0,
+                                                                     indexBufSize, RHI::IndexFormat::Uint16 };
 
                 RHI::DrawIndexed drawIndexed;
                 drawIndexed.m_indexCount = 6;
                 drawIndexed.m_instanceCount = 1;
 
-                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get() };
+                const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
+                    m_shaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
+                };
 
-                RHI::SingleDeviceDrawItem drawItem;
+                RHI::DeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
                 drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
                 drawItem.m_indexBufferView = &indexBufferView;
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
                 drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
-                AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> deviceStreamBufferViews{m_streamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()), 
-                    m_streamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())};
+                AZStd::array<AZ::RHI::DeviceStreamBufferView, 2> deviceStreamBufferViews{
+                    m_streamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()),
+                    m_streamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())
+                };
                 drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
 
                 commandList->Submit(drawItem);
@@ -330,7 +329,7 @@ namespace AtomSampleViewer
 
     void CopyQueueComponent::UploadVertexBuffer()
     {
-        AZ::RHI::MultiDeviceBufferStreamRequest request;
+        AZ::RHI::BufferStreamRequest request;
         request.m_buffer = m_positionBuffer.get();
         request.m_byteCount = static_cast<uint32_t>(m_bufferData.m_positions.size() * sizeof(VertexPosition));
         request.m_sourceData = m_bufferData.m_positions.data();

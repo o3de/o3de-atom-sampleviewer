@@ -18,11 +18,11 @@
 #include <Atom/RHI.Reflect/ShaderResourceGroupLayoutDescriptor.h>
 #include <Atom/RHI.Reflect/ScopeId.h>
 
-#include <Atom/RHI/MultiDeviceBuffer.h>
-#include <Atom/RHI/MultiDeviceBufferPool.h>
-#include <Atom/RHI/MultiDeviceDrawItem.h>
-#include <Atom/RHI/MultiDevicePipelineState.h>
-#include <Atom/RHI/MultiDeviceStreamBufferView.h>
+#include <Atom/RHI/Buffer.h>
+#include <Atom/RHI/BufferPool.h>
+#include <Atom/RHI/DrawItem.h>
+#include <Atom/RHI/PipelineState.h>
+#include <Atom/RHI/StreamBufferView.h>
 
 #include <RHI/BasicRHIComponent.h>
 
@@ -91,9 +91,9 @@ namespace AtomSampleViewer
             AZStd::array<VertexUV, 4> m_uvs;
             AZStd::array<uint16_t, 6> m_indices;
         };
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_inputAssemblyBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_rectangleInputAssemblyBuffer;
-        AZStd::array<AZ::RHI::MultiDeviceStreamBufferView, 2> m_rectangleStreamBufferViews;
+        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_inputAssemblyBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_rectangleInputAssemblyBuffer;
+        AZStd::array<AZ::RHI::StreamBufferView, 2> m_rectangleStreamBufferViews;
         AZ::RHI::InputStreamLayout m_rectangleInputStreamLayout;
 
         // Shader Resource
@@ -105,7 +105,7 @@ namespace AtomSampleViewer
         AZStd::array<AZStd::array<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, s_numRectangles>, s_numBlendTypes> m_shaderResourceGroups;
 
         // Pipeline State and Shader
-        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState>, s_numBlendTypes> m_pipelineStates;
+        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::PipelineState>, s_numBlendTypes> m_pipelineStates;
         AZ::Data::Instance<AZ::RPI::Shader> m_shader;
     };
 } // namespace AtomSampleViewer

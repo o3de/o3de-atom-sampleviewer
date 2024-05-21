@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include <Atom/RHI/MultiDeviceBufferPool.h>
-#include <Atom/RHI/MultiDeviceDrawItem.h>
+#include <Atom/RHI/BufferPool.h>
+#include <Atom/RHI/DrawItem.h>
 #include <Atom/RHI/ScopeProducer.h>
 
 #include <Atom/RHI/RHISystemInterface.h>
@@ -80,19 +80,19 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 6> m_indices;
         };
 
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_inputAssemblyBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_inputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_inputAssemblyBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_inputAssemblyBuffer;
 
-        AZStd::array<AZ::RHI::MultiDeviceStreamBufferView, 2> m_streamBufferViews;
-        AZ::RHI::MultiDeviceIndexBufferView m_indexBufferView;
+        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
+        AZ::RHI::IndexBufferView m_indexBufferView;
         AZ::RHI::InputStreamLayout m_inputStreamLayout;
 
         // ----------------------------
         // Compute Buffer
         // ----------------------------
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_computeBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_computeBuffer;
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferView> m_computeBufferView;
+        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_computeBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_computeBuffer;
+        AZ::RHI::Ptr<AZ::RHI::BufferView> m_computeBufferView;
         AZ::RHI::BufferViewDescriptor m_bufferViewDescriptor;
         AZ::RHI::AttachmentId m_bufferAttachmentId = AZ::RHI::AttachmentId("bufferAttachmentId");
 
@@ -101,13 +101,13 @@ namespace AtomSampleViewer
         // ----------------------
 
         // Dispatch pipeline
-        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_dispatchPipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_dispatchPipelineState;
         AZStd::array< AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, s_numberOfSRGs> m_dispatchSRGs;
         AZ::RHI::ShaderInputConstantIndex m_dispatchDimensionConstantIndex;
         AZ::RHI::ShaderInputConstantIndex m_dispatchSeedConstantIndex;
 
         // Draw pipeline
-        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_drawPipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_drawPipelineState;
         AZStd::array< AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, s_numberOfSRGs> m_drawSRGs;
         AZ::RHI::ShaderInputConstantIndex m_drawDimensionConstantIndex;
 

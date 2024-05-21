@@ -8,8 +8,8 @@
 
 #pragma once
 
-#include <Atom/RHI/MultiDeviceBufferPool.h>
-#include <Atom/RHI/MultiDeviceDrawItem.h>
+#include <Atom/RHI/BufferPool.h>
+#include <Atom/RHI/DrawItem.h>
 #include <Atom/RHI/ScopeProducer.h>
 
 #include <Atom/RHI/RHISystemInterface.h>
@@ -120,30 +120,30 @@ namespace AtomSampleViewer
         };
        
         // Quad related variables
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_quadBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_quadInputAssemblyBuffer;
-        AZ::RHI::MultiDeviceIndexBufferView m_quadIndexBufferView;
-        AZStd::array<AZStd::vector<AZ::RHI::MultiDeviceStreamBufferView>, NumScopes> m_quadStreamBufferViews;
+        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_quadBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_quadInputAssemblyBuffer;
+        AZ::RHI::IndexBufferView m_quadIndexBufferView;
+        AZStd::array<AZStd::vector<AZ::RHI::StreamBufferView>, NumScopes> m_quadStreamBufferViews;
 
         // Terrain related variables
-        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState>, NumScopes> m_terrainPipelineStates;
+        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::PipelineState>, NumScopes> m_terrainPipelineStates;
 
         // Model related variables
         AZStd::array<AZ::RPI::ModelLod::StreamBufferViewList, NumScopes> m_modelStreamBufferViews;
-        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState>, NumScopes> m_modelPipelineStates;
+        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::PipelineState>, NumScopes> m_modelPipelineStates;
         AZ::Data::Instance<AZ::RPI::Model> m_model;
 
         // Copy Texture related variables
-        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_copyTexturePipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_copyTexturePipelineState;
 
         // Luminance map related variables
-        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_luminancePipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_luminancePipelineState;
         
         // Luminance reduce related variables
-        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_luminanceReducePipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_luminanceReducePipelineState;
 
         // Tonemapping related variables
-        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_tonemappingPipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_tonemappingPipelineState;
 
         // Camera projection matrix
         AZ::Matrix4x4 m_projectionMatrix;
@@ -165,8 +165,8 @@ namespace AtomSampleViewer
         // Scene images
         static constexpr uint32_t NumSceneImages = 2;
         AZStd::array<AZ::RHI::AttachmentId, NumSceneImages> m_sceneIds = { { AZ::RHI::AttachmentId("SceneId1"), AZ::RHI::AttachmentId("SceneId2") } };
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceImagePool> m_imagePool;
-        AZStd::array<AZ::RHI::Ptr<AZ::RHI::MultiDeviceImage>, NumSceneImages> m_sceneImages;
+        AZ::RHI::Ptr<AZ::RHI::ImagePool> m_imagePool;
+        AZStd::array<AZ::RHI::Ptr<AZ::RHI::Image>, NumSceneImages> m_sceneImages;
         uint32_t m_currentSceneImageIndex = 0;
         uint32_t m_previousSceneImageIndex = 1;
 
