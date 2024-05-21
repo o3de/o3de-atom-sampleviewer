@@ -214,7 +214,7 @@ namespace AtomSampleViewer
 
             uint32_t pitch = width * pixelSize;
 
-            AZ::RHI::SingleDeviceImageSubresourceLayout layout;
+            AZ::RHI::DeviceImageSubresourceLayout layout;
             layout.m_bytesPerImage = pixelDataSize;
             layout.m_rowCount = layout.m_bytesPerImage / pitch;
             layout.m_size = AZ::RHI::Size(width, height, 1);

@@ -154,7 +154,7 @@ namespace AtomSampleViewer
     {
         using namespace AZ;
         RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
-        m_inputAssemblyBufferPool = aznew RHI::MultiDeviceBufferPool();
+        m_inputAssemblyBufferPool = aznew RHI::BufferPool();
 
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
@@ -166,10 +166,10 @@ namespace AtomSampleViewer
             BufferData bufferData;
             SetFullScreenRect(bufferData.m_positions.data(), nullptr, bufferData.m_indices.data());
 
-            m_quadInputAssemblyBuffer = aznew RHI::MultiDeviceBuffer();
+            m_quadInputAssemblyBuffer = aznew RHI::Buffer();
 
             RHI::ResultCode result = RHI::ResultCode::Success;
-            RHI::MultiDeviceBufferInitRequest request;
+            RHI::BufferInitRequest request;
             request.m_buffer = m_quadInputAssemblyBuffer.get();
             request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, sizeof(bufferData) };
             request.m_initialData = &bufferData;
@@ -192,11 +192,11 @@ namespace AtomSampleViewer
             layoutBuilder.AddBuffer()->Channel("POSITION", RHI::Format::R32G32B32_FLOAT);
             m_quadInputStreamLayout = layoutBuilder.End();
 
-            RHI::ValidateStreamBufferViews(m_quadInputStreamLayout, AZStd::span<const RHI::MultiDeviceStreamBufferView>(&m_quadStreamBufferView, 1));
+            RHI::ValidateStreamBufferViews(m_quadInputStreamLayout, AZStd::span<const RHI::StreamBufferView>(&m_quadStreamBufferView, 1));
         }
     }
 
-    const AZ::RHI::MultiDevicePipelineState* CreatePipelineState(
+    const AZ::RHI::PipelineState* CreatePipelineState(
         const AZ::RHI::InputStreamLayout& inputStreamLayout, 
         const AZ::Data::Instance<AZ::RPI::Shader>& shader, 
         const AZ::RHI::Format format,
@@ -304,8 +304,8 @@ namespace AtomSampleViewer
             {
                 return;
             }
-            
-            RHI::SingleDeviceCopyQueryToBufferDescriptor descriptor;
+
+            RHI::DeviceCopyQueryToBufferDescriptor descriptor;
             descriptor.m_sourceQueryPool = m_occlusionQueryPool->GetDeviceQueryPool(context.GetDeviceIndex()).get();
             descriptor.m_firstQuery = m_occlusionQueries[m_currentOcclusionQueryIndex].m_query->GetHandle(context.GetDeviceIndex());
             descriptor.m_queryCount = 1;
@@ -313,7 +313,7 @@ namespace AtomSampleViewer
             descriptor.m_destinationOffset = 0;
             descriptor.m_destinationStride = sizeof(uint64_t);
 
-            RHI::SingleDeviceCopyItem copyItem(descriptor);
+            RHI::DeviceCopyItem copyItem(descriptor);
 
             context.GetCommandList()->Submit(copyItem);
         };
@@ -428,21 +428,20 @@ namespace AtomSampleViewer
             commandList->SetScissors(&m_scissor, 1);
 
             {
-                const RHI::SingleDeviceIndexBufferView quadIndexBufferView =
-                {
-                    *m_quadInputAssemblyBuffer->GetDeviceBuffer(context.GetDeviceIndex()),
-                    offsetof(BufferData, m_indices),
-                    sizeof(BufferData::m_indices),
-                    RHI::IndexFormat::Uint16
+                const RHI::DeviceIndexBufferView quadIndexBufferView = {
+                    *m_quadInputAssemblyBuffer->GetDeviceBuffer(context.GetDeviceIndex()), offsetof(BufferData, m_indices),
+                    sizeof(BufferData::m_indices), RHI::IndexFormat::Uint16
                 };
 
                 RHI::DrawIndexed drawIndexed;
                 drawIndexed.m_indexCount = 6;
                 drawIndexed.m_instanceCount = 1;
 
-                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[0]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get() };
+                const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
+                    m_shaderResourceGroups[0]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
+                };
 
-                RHI::SingleDeviceDrawItem drawItem;
+                RHI::DeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
                 drawItem.m_pipelineState = m_quadPipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
                 drawItem.m_indexBufferView = &quadIndexBufferView;
@@ -536,7 +535,7 @@ namespace AtomSampleViewer
     }
 
     template<class T>
-    void CreateQueries(AZ::RHI::Ptr<AZ::RHI::MultiDeviceQueryPool>& queryPool, T& queries, AZ::RHI::QueryType type, AZ::RHI::PipelineStatisticsFlags statisticsMask = AZ::RHI::PipelineStatisticsFlags::None)
+    void CreateQueries(AZ::RHI::Ptr<AZ::RHI::QueryPool>& queryPool, T& queries, AZ::RHI::QueryType type, AZ::RHI::PipelineStatisticsFlags statisticsMask = AZ::RHI::PipelineStatisticsFlags::None)
     {
         using namespace AZ;
         RHI::Ptr<AZ::RHI::Device> device = Utils::GetRHIDevice();
@@ -553,7 +552,7 @@ namespace AtomSampleViewer
         queryPoolDesc.m_type = type;
         queryPoolDesc.m_pipelineStatisticsMask = statisticsMask;
 
-        queryPool = aznew RHI::MultiDeviceQueryPool;
+        queryPool = aznew RHI::QueryPool;
         auto result = queryPool->Init(RHI::MultiDevice::AllDevices, queryPoolDesc);
         if (result != RHI::ResultCode::Success)
         {
@@ -563,7 +562,7 @@ namespace AtomSampleViewer
 
         for (auto& queryEntry : queries)
         {
-            queryEntry.m_query = aznew RHI::MultiDeviceQuery;
+            queryEntry.m_query = aznew RHI::Query;
             queryPool->InitQuery(queryEntry.m_query.get());
         }
     }
@@ -589,16 +588,16 @@ namespace AtomSampleViewer
             return;
         }
 
-        m_predicationBufferPool = aznew RHI::MultiDeviceBufferPool();
+        m_predicationBufferPool = aznew RHI::BufferPool();
 
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::Predication | RHI::BufferBindFlags::CopyWrite;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
         m_predicationBufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
 
-        m_predicationBuffer = aznew RHI::MultiDeviceBuffer();
+        m_predicationBuffer = aznew RHI::Buffer();
 
-        RHI::MultiDeviceBufferInitRequest request;
+        RHI::BufferInitRequest request;
         request.m_buffer = m_predicationBuffer.get();
         request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::Predication | RHI::BufferBindFlags::CopyWrite, sizeof(uint64_t) };
         RHI::ResultCode result = m_predicationBufferPool->InitBuffer(request);
@@ -682,7 +681,7 @@ namespace AtomSampleViewer
             uint64_t timestamps[2] = {};
             if (m_timestampQueries[beginIndex].m_isValid && m_timestampQueries[beginIndex + 1].m_isValid)
             {
-                AZ::RHI::MultiDeviceQuery* queries[] = { m_timestampQueries[beginIndex].m_query.get() , m_timestampQueries[beginIndex + 1].m_query.get() };
+                AZ::RHI::Query* queries[] = { m_timestampQueries[beginIndex].m_query.get() , m_timestampQueries[beginIndex + 1].m_query.get() };
                 m_timeStampQueryPool->GetResults(queries, 2, timestamps, 2, AZ::RHI::QueryResultFlagBits::Wait);
             }
             

@@ -9,7 +9,7 @@
 
 #include <AzCore/Component/TickBus.h>
 #include <AzCore/Math/Matrix3x3.h>
-#include <Atom/RHI/MultiDevicePipelineState.h>
+#include <Atom/RHI/PipelineState.h>
 #include <RHI/BasicRHIComponent.h>
 
 namespace AtomSampleViewer
@@ -56,8 +56,8 @@ namespace AtomSampleViewer
 
         struct BufferViewData
         {
-            AZStd::array<AZ::RHI::MultiDeviceStreamBufferView, 2> m_streamBufferViews;
-            AZ::RHI::MultiDeviceIndexBufferView m_indexBufferView;
+            AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
+            AZ::RHI::IndexBufferView m_indexBufferView;
             AZ::RHI::InputStreamLayout m_inputStreamLayout;
         };
         
@@ -115,21 +115,21 @@ namespace AtomSampleViewer
         // -------------------------------------
         // Input Assembly buffer and buffer view
         // -------------------------------------
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_inputAssemblyBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_inputAssemblyBufferPool;
         // array for buffer and buffer view ( all render targets + screen)
-        AZStd::array< AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer>, s_numOfTargets + 1> m_positionBuffer;
-        AZStd::array< AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer>, s_numOfTargets + 1> m_uvBuffer;
-        AZStd::array< AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer>, s_numOfTargets + 1> m_indexBuffer;
+        AZStd::array< AZ::RHI::Ptr<AZ::RHI::Buffer>, s_numOfTargets + 1> m_positionBuffer;
+        AZStd::array< AZ::RHI::Ptr<AZ::RHI::Buffer>, s_numOfTargets + 1> m_uvBuffer;
+        AZStd::array< AZ::RHI::Ptr<AZ::RHI::Buffer>, s_numOfTargets + 1> m_indexBuffer;
         AZStd::array<BufferViewData, s_numOfTargets + 1> m_bufferViews;
 
         // ---------------------------------------
         // Pipeline state, SRG, shader input index
         // ---------------------------------------
-        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState>, s_numOfTargets> m_targetPipelineStates;
+        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::PipelineState>, s_numOfTargets> m_targetPipelineStates;
         AZStd::array<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, s_numOfTargets> m_targetSRGs;
         AZStd::array<AZ::RHI::ShaderInputConstantIndex, s_numOfTargets> m_shaderInputConstantIndices;
 
-        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState>, s_numOfTargets> m_screenPipelineStates;
+        AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::PipelineState>, s_numOfTargets> m_screenPipelineStates;
         AZStd::array<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, s_numOfTargets> m_screenSRGs;
         AZStd::array<AZ::RHI::ShaderInputImageIndex, s_numOfTargets> m_shaderInputImageIndices;
 

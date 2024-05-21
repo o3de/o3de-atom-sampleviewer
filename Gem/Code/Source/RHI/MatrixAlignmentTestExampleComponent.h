@@ -16,8 +16,8 @@
 #include <Atom/RHI/FrameScheduler.h>
 #include <Atom/RHI/Device.h>
 #include <Atom/RHI/Factory.h>
-#include <Atom/RHI/MultiDevicePipelineState.h>
-#include <Atom/RHI/MultiDeviceBufferPool.h>
+#include <Atom/RHI/PipelineState.h>
+#include <Atom/RHI/BufferPool.h>
 
 #include <RHI/BasicRHIComponent.h>
 
@@ -81,10 +81,10 @@ namespace AtomSampleViewer
             const AZ::RHI::ShaderInputConstantIndex& matrixConstantId);
 
 
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_inputAssemblyBufferPool;
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_inputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_inputAssemblyBufferPool;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_inputAssemblyBuffer;
 
-        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_pipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_pipelineState;
 
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_shaderResourceGroup;
 
@@ -175,7 +175,7 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 6> m_indices;
         };
 
-        AZStd::array<AZ::RHI::MultiDeviceStreamBufferView, 2> m_streamBufferViews;
+        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
 
         // ImGui stuff.
         ImGuiSidebar m_imguiSidebar;

@@ -48,7 +48,7 @@ namespace AtomSampleViewer
     {
         using namespace AZ;
         RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
-        m_inputAssemblyBufferPool = aznew RHI::MultiDeviceBufferPool();
+        m_inputAssemblyBufferPool = aznew RHI::BufferPool();
 
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
@@ -136,9 +136,9 @@ namespace AtomSampleViewer
 
         SetVertexIndexIncreasing(bufferData.m_indices.data(), bufferData.m_indices.size());
 
-        m_triangleInputAssemblyBuffer = aznew RHI::MultiDeviceBuffer();
+        m_triangleInputAssemblyBuffer = aznew RHI::Buffer();
 
-        RHI::MultiDeviceBufferInitRequest request;
+        RHI::BufferInitRequest request;
         request.m_buffer = m_triangleInputAssemblyBuffer.get();
         request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, sizeof(bufferData) };
         request.m_initialData = &bufferData;
@@ -189,10 +189,10 @@ namespace AtomSampleViewer
         QuadBufferData bufferData;
         SetFullScreenRect(bufferData.m_positions.data(), bufferData.m_uvs.data(), bufferData.m_indices.data());
 
-        m_quadInputAssemblyBuffer = aznew RHI::MultiDeviceBuffer();
+        m_quadInputAssemblyBuffer = aznew RHI::Buffer();
 
         RHI::ResultCode result = RHI::ResultCode::Success;
-        RHI::MultiDeviceBufferInitRequest request;
+        RHI::BufferInitRequest request;
 
         request.m_buffer = m_quadInputAssemblyBuffer.get();
         request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::InputAssembly, sizeof(bufferData) };
@@ -339,29 +339,29 @@ namespace AtomSampleViewer
             commandList->SetViewports(&m_viewport, 1);
             commandList->SetScissors(&m_scissor, 1);
 
-            const RHI::SingleDeviceIndexBufferView indexBufferView =
-            {
-                *m_triangleInputAssemblyBuffer->GetDeviceBuffer(context.GetDeviceIndex()),
-                offsetof(TriangleBufferData, m_indices),
-                sizeof(TriangleBufferData::m_indices),
-                RHI::IndexFormat::Uint16
-            };
+            const RHI::DeviceIndexBufferView indexBufferView = { *m_triangleInputAssemblyBuffer->GetDeviceBuffer(context.GetDeviceIndex()),
+                                                                 offsetof(TriangleBufferData, m_indices),
+                                                                 sizeof(TriangleBufferData::m_indices), RHI::IndexFormat::Uint16 };
 
             RHI::DrawIndexed drawIndexed;
             drawIndexed.m_indexCount = 3;
             drawIndexed.m_instanceCount = 1;
 
-            const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_triangleShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get() };
+            const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
+                m_triangleShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
+            };
 
-            RHI::SingleDeviceDrawItem drawItem;
+            RHI::DeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;
             drawItem.m_pipelineState = m_pipelineStates[msaaTypeIndex]->GetDevicePipelineState(context.GetDeviceIndex()).get();
             drawItem.m_indexBufferView = &indexBufferView;
             drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
             drawItem.m_shaderResourceGroups = shaderResourceGroups;
             drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_triangleStreamBufferViews.size());
-            AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> deviceStreamBufferViews{m_triangleStreamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()), 
-                    m_triangleStreamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())};
+            AZStd::array<AZ::RHI::DeviceStreamBufferView, 2> deviceStreamBufferViews{
+                m_triangleStreamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()),
+                m_triangleStreamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())
+            };
             drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
 
             // Submit the triangle draw item.
@@ -454,29 +454,30 @@ namespace AtomSampleViewer
             commandList->SetViewports(&m_viewport, 1);
             commandList->SetScissors(&m_scissor, 1);
 
-            const RHI::SingleDeviceIndexBufferView indexBufferView =
-            {
-                *m_quadInputAssemblyBuffer->GetDeviceBuffer(context.GetDeviceIndex()),
-                offsetof(QuadBufferData, m_indices),
-                sizeof(QuadBufferData::m_indices),
-                RHI::IndexFormat::Uint16
-            };
+            const RHI::DeviceIndexBufferView indexBufferView = { *m_quadInputAssemblyBuffer->GetDeviceBuffer(context.GetDeviceIndex()),
+                                                                 offsetof(QuadBufferData, m_indices), sizeof(QuadBufferData::m_indices),
+                                                                 RHI::IndexFormat::Uint16 };
 
             RHI::DrawIndexed drawIndexed;
             drawIndexed.m_indexCount = 6;
             drawIndexed.m_instanceCount = 1;
 
-            const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_customMSAAResolveShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get() };
+            const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = { m_customMSAAResolveShaderResourceGroup
+                                                                                 ->GetRHIShaderResourceGroup()
+                                                                                 ->GetDeviceShaderResourceGroup(context.GetDeviceIndex())
+                                                                                 .get() };
 
-            RHI::SingleDeviceDrawItem drawItem;
+            RHI::DeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;
             drawItem.m_pipelineState = m_customResolveMSAAPipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
             drawItem.m_indexBufferView = &indexBufferView;
             drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
             drawItem.m_shaderResourceGroups = shaderResourceGroups;
             drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_quadStreamBufferViews.size());
-            AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> deviceStreamBufferViews{m_quadStreamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()), 
-                    m_quadStreamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())};
+            AZStd::array<AZ::RHI::DeviceStreamBufferView, 2> deviceStreamBufferViews{
+                m_quadStreamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()),
+                m_quadStreamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())
+            };
             drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
 
             // Submit the triangle draw item.

@@ -6,8 +6,8 @@
  *
  */
 
-#include <Atom/RHI/MultiDeviceDrawPacket.h>
-#include <Atom/RHI/MultiDeviceDrawPacketBuilder.h>
+#include <Atom/RHI/DrawPacket.h>
+#include <Atom/RHI/DrawPacketBuilder.h>
 #include <Atom/RHI.Reflect/InputStreamLayoutBuilder.h>
 
 #include <Atom/RPI.Public/Image/ImageSystemInterface.h>
@@ -55,7 +55,7 @@ namespace AtomSampleViewer
             const char* srgName,
             Data::Asset<AZ::RPI::ShaderAsset>& shaderAsset,
             RHI::Ptr<AZ::RHI::ShaderResourceGroupLayout>& srgLayout,
-            RHI::ConstPtr<RHI::MultiDevicePipelineState>& pipelineState,
+            RHI::ConstPtr<RHI::PipelineState>& pipelineState,
             RHI::DrawListTag& drawListTag,
             RPI::Scene* scene)
         {
@@ -390,7 +390,7 @@ namespace AtomSampleViewer
             size_t budgetInBytes = memoryUsage.m_budgetInBytes;
             int budgetInMB = aznumeric_cast<int>(budgetInBytes/MB);
             ImGui::Text("GPU memory budget: %d MB", budgetInMB);
-            if (ScriptableImGui::SliderInt("MB", &budgetInMB, RHI::SingleDeviceStreamingImagePool::ImagePoolMininumSizeInBytes/MB, 512))
+            if (ScriptableImGui::SliderInt("MB", &budgetInMB, RHI::DeviceStreamingImagePool::ImagePoolMininumSizeInBytes / MB, 512))
             {
                 streamingImagePool->SetMemoryBudget(budgetInMB * (1024*1024));
             }
@@ -490,14 +490,14 @@ namespace AtomSampleViewer
         for (Image3dToDraw& image3d : m_3dImages)
         {
             // Build draw packet...
-            RHI::MultiDeviceDrawPacketBuilder drawPacketBuilder{RHI::MultiDevice::DefaultDevice};
+            RHI::DrawPacketBuilder drawPacketBuilder{RHI::MultiDevice::DefaultDevice};
             drawPacketBuilder.Begin(nullptr);
             RHI::DrawLinear drawLinear;
             drawLinear.m_vertexCount = 4;
             drawLinear.m_instanceCount = image3d.m_sliceCount;
             drawPacketBuilder.SetDrawArguments(drawLinear);
 
-            RHI::MultiDeviceDrawPacketBuilder::MultiDeviceDrawRequest drawRequest;
+            RHI::DrawPacketBuilder::DrawRequest drawRequest;
             drawRequest.m_listTag = m_image3dDrawListTag;
             drawRequest.m_pipelineState = m_image3dPipelineState.get();
             drawRequest.m_sortKey = 0;
@@ -513,14 +513,14 @@ namespace AtomSampleViewer
     void StreamingImageExampleComponent::DrawImage(const ImageToDraw* imageInfo)
     {
         // Build draw packet...
-        RHI::MultiDeviceDrawPacketBuilder drawPacketBuilder{RHI::MultiDevice::DefaultDevice};
+        RHI::DrawPacketBuilder drawPacketBuilder{RHI::MultiDevice::DefaultDevice};
         drawPacketBuilder.Begin(nullptr);
         RHI::DrawLinear drawLinear;
         drawLinear.m_vertexCount = 4;
         drawLinear.m_instanceCount = imageInfo->m_image->GetMipLevelCount();
         drawPacketBuilder.SetDrawArguments(drawLinear);
 
-        RHI::MultiDeviceDrawPacketBuilder::MultiDeviceDrawRequest drawRequest;
+        RHI::DrawPacketBuilder::DrawRequest drawRequest;
         drawRequest.m_listTag = m_drawListTag;
         drawRequest.m_pipelineState = m_pipelineState.get();
         drawRequest.m_sortKey = 0;
@@ -653,7 +653,7 @@ namespace AtomSampleViewer
         // will be uploaded with a single command
         {
             AZStd::vector<uint8_t> imageData;
-            RHI::SingleDeviceImageSubresourceLayout layout;
+            RHI::DeviceImageSubresourceLayout layout;
             RHI::Format format = {};
             BasicRHIComponent::CreateImage3dData(imageData, layout, format, {
                                                             "textures/streaming/streaming13.dds.streamingimage",

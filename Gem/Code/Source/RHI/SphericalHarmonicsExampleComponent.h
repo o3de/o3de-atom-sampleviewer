@@ -12,7 +12,7 @@
 
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 
-#include <Atom/RHI/MultiDeviceBufferPool.h>
+#include <Atom/RHI/BufferPool.h>
 #include <Atom/RHI.Reflect/SamplerState.h>
 
 #include <AzCore/Component/TickBus.h>
@@ -58,7 +58,7 @@ namespace AtomSampleViewer
 
 
         // ------------------- demo mode variables -------------------
-        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState>        m_demoPipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState>        m_demoPipelineState;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_demoShaderResourceGroup;
 
         AZ::RHI::ShaderInputConstantIndex m_demoObjectMatrixInputIndex;
@@ -84,7 +84,7 @@ namespace AtomSampleViewer
 
 
         // ------------------- render mode variables -------------------
-        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState>        m_renderPipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState>        m_renderPipelineState;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_renderShaderResourceGroup;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_viewShaderResourceGroup;
 
@@ -122,10 +122,10 @@ namespace AtomSampleViewer
 
 
         // ---------------- streaming buffer variables ----------------
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_bufferPool;
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_indexBuffer;
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_positionBuffer;
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_uvBuffer;
+        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_bufferPool;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_indexBuffer;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_positionBuffer;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_uvBuffer;
 
         struct BufferData
         {
@@ -134,7 +134,7 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 6> m_indices;
         };
 
-        AZStd::array<AZ::RHI::MultiDeviceStreamBufferView, 2> m_streamBufferViews;
+        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
         // ------------------------------------------------------------
 
         AZ::EntityId m_cameraEntityId;

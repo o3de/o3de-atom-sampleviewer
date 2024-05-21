@@ -9,9 +9,9 @@
 
 #include <RHI/BasicRHIComponent.h>
 
-#include <Atom/RHI/MultiDeviceBuffer.h>
-#include <Atom/RHI/MultiDeviceBufferPool.h>
-#include <Atom/RHI/MultiDevicePipelineState.h>
+#include <Atom/RHI/Buffer.h>
+#include <Atom/RHI/BufferPool.h>
+#include <Atom/RHI/PipelineState.h>
 #include <Atom/RHI.Reflect/InputStreamLayoutBuilder.h>
 #include <MultiThreadComponent_Traits_Platform.h>
 
@@ -75,18 +75,18 @@ namespace AtomSampleViewer
 
         AZStd::array<AZ::Matrix4x4, s_numberOfCubes> m_cubeTransforms;
 
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_bufferPool;
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_inputAssemblyBuffer;
+        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_bufferPool;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_inputAssemblyBuffer;
 
         AZ::RHI::InputStreamLayout m_streamLayoutDescriptor;
-        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_pipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_pipelineState;
 
         AZStd::array<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, s_numberOfCubes> m_shaderResourceGroups;
         AZ::RHI::ShaderInputConstantIndex m_shaderIndexWorldMat;
         AZ::RHI::ShaderInputConstantIndex m_shaderIndexViewProj;
 
         AZ::RHI::AttachmentId m_depthStencilID;
-        AZStd::array<AZ::RHI::MultiDeviceStreamBufferView, 2> m_streamBufferViews;
-        AZ::RHI::MultiDeviceIndexBufferView m_indexBufferView;
+        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
+        AZ::RHI::IndexBufferView m_indexBufferView;
     };
 } // namespace AtomSampleViewer

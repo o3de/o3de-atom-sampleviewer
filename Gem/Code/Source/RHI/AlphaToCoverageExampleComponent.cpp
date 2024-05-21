@@ -50,7 +50,7 @@ namespace AtomSampleViewer
     {
         using namespace AZ;
         RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
-        m_inputAssemblyBufferPool = aznew RHI::MultiDeviceBufferPool();
+        m_inputAssemblyBufferPool = aznew RHI::BufferPool();
 
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
@@ -145,10 +145,10 @@ namespace AtomSampleViewer
         RectangleBufferData bufferData;
         SetFullScreenRect(bufferData.m_positions.data(), bufferData.m_uvs.data(), bufferData.m_indices.data());
 
-        m_rectangleInputAssemblyBuffer = aznew RHI::MultiDeviceBuffer();
+        m_rectangleInputAssemblyBuffer = aznew RHI::Buffer();
 
         RHI::ResultCode result = RHI::ResultCode::Success;
-        RHI::MultiDeviceBufferInitRequest request;
+        RHI::BufferInitRequest request;
         request.m_buffer = m_rectangleInputAssemblyBuffer.get();
         request.m_descriptor = RHI::BufferDescriptor{RHI::BufferBindFlags::InputAssembly, sizeof(bufferData)};
         request.m_initialData = &bufferData;
@@ -388,24 +388,28 @@ namespace AtomSampleViewer
 
             for (uint32_t rectIndex = context.GetSubmitRange().m_startIndex; rectIndex < context.GetSubmitRange().m_endIndex; ++rectIndex)
             {
-                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = {m_shaderResourceGroups[typeIndex][rectIndex]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()};
+                const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[typeIndex][rectIndex]
+                                                                                     ->GetRHIShaderResourceGroup()
+                                                                                     ->GetDeviceShaderResourceGroup(
+                                                                                         context.GetDeviceIndex())
+                                                                                     .get() };
 
-                RHI::SingleDeviceDrawItem drawItem;
+                RHI::DeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
                 drawItem.m_pipelineState = m_pipelineStates[typeIndex]->GetDevicePipelineState(context.GetDeviceIndex()).get();
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
 
-                const RHI::SingleDeviceIndexBufferView indexBufferView =
-                {
-                    *m_rectangleInputAssemblyBuffer->GetDeviceBuffer(context.GetDeviceIndex()),
-                    offsetof(RectangleBufferData, m_indices),
-                    sizeof(RectangleBufferData::m_indices),
-                    RHI::IndexFormat::Uint16
+                const RHI::DeviceIndexBufferView indexBufferView = {
+                    *m_rectangleInputAssemblyBuffer->GetDeviceBuffer(context.GetDeviceIndex()), offsetof(RectangleBufferData, m_indices),
+                    sizeof(RectangleBufferData::m_indices), RHI::IndexFormat::Uint16
                 };
                 drawItem.m_indexBufferView = &indexBufferView;
 
-                AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> streamBufferViews{m_rectangleStreamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()),m_rectangleStreamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())};
+                AZStd::array<AZ::RHI::DeviceStreamBufferView, 2> streamBufferViews{
+                    m_rectangleStreamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()),
+                    m_rectangleStreamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())
+                };
                 drawItem.m_streamBufferViewCount = static_cast<uint8_t>(streamBufferViews.size());
                 drawItem.m_streamBufferViews = streamBufferViews.data();
 

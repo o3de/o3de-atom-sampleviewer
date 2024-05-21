@@ -194,7 +194,7 @@ namespace AtomSampleViewer
         const AZ::RHI::Ptr<AZ::RHI::Device> device = Utils::GetRHIDevice();
         AZ::RHI::ResultCode result = AZ::RHI::ResultCode::Success;
 
-        m_bufferPool = aznew AZ::RHI::MultiDeviceBufferPool();
+        m_bufferPool = aznew AZ::RHI::BufferPool();
         AZ::RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = AZ::RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = AZ::RHI::HeapMemoryLevel::Device;
@@ -207,8 +207,8 @@ namespace AtomSampleViewer
 
         SingleCubeBufferData bufferData = CreateSingleCubeBufferData();
 
-        m_inputAssemblyBuffer = aznew AZ::RHI::MultiDeviceBuffer();
-        AZ::RHI::MultiDeviceBufferInitRequest request;
+        m_inputAssemblyBuffer = aznew AZ::RHI::Buffer();
+        AZ::RHI::BufferInitRequest request;
 
         request.m_buffer = m_inputAssemblyBuffer.get();
         request.m_descriptor = AZ::RHI::BufferDescriptor{ AZ::RHI::BufferBindFlags::InputAssembly, sizeof(SingleCubeBufferData) };
@@ -373,9 +373,11 @@ namespace AtomSampleViewer
 
             for (uint32_t i = indexStart; i < indexEnd; ++i)
             {
-                const AZ::RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[i]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get() };
+                const AZ::RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
+                    m_shaderResourceGroups[i]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
+                };
 
-                AZ::RHI::SingleDeviceDrawItem drawItem;
+                AZ::RHI::DeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
                 drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
                 auto deviceIndexBufferView{m_indexBufferView.GetDeviceIndexBufferView(context.GetDeviceIndex())};
@@ -383,8 +385,10 @@ namespace AtomSampleViewer
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(AZ::RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
                 drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
-                AZStd::array<AZ::RHI::SingleDeviceStreamBufferView, 2> deviceStreamBufferViews{m_streamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()), 
-                    m_streamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())};
+                AZStd::array<AZ::RHI::DeviceStreamBufferView, 2> deviceStreamBufferViews{
+                    m_streamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()),
+                    m_streamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())
+                };
                 drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
 
                 commandList->Submit(drawItem);

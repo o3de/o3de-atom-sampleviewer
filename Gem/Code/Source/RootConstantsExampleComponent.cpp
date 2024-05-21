@@ -20,8 +20,8 @@
 #include <Atom/Component/DebugCamera/NoClipControllerComponent.h>
 #include <Atom/Feature/CoreLights/CoreLightsConstants.h>
 
-#include <Atom/RHI/MultiDeviceDrawPacket.h>
-#include <Atom/RHI/MultiDeviceDrawPacketBuilder.h>
+#include <Atom/RHI/DrawPacket.h>
+#include <Atom/RHI/DrawPacketBuilder.h>
 #include <Atom/RHI.Reflect/InputStreamLayoutBuilder.h>
 #include <Atom/RPI.Reflect/Asset/AssetUtils.h>
 
@@ -303,14 +303,14 @@ namespace AtomSampleViewer
                 auto const& mesh = meshes[i];
 
                 // Build draw packet and set the values of the inline constants.
-                RHI::MultiDeviceDrawPacketBuilder drawPacketBuilder{RHI::MultiDevice::DefaultDevice};
+                RHI::DrawPacketBuilder drawPacketBuilder{RHI::MultiDevice::DefaultDevice};
                 drawPacketBuilder.Begin(nullptr);
                 drawPacketBuilder.SetDrawArguments(mesh.m_drawArguments);
                 drawPacketBuilder.SetIndexBufferView(mesh.m_indexBufferView);
                 drawPacketBuilder.SetRootConstants(m_rootConstantData.GetConstantData());
                 drawPacketBuilder.AddShaderResourceGroup(m_srg->GetRHIShaderResourceGroup());
 
-                RHI::MultiDeviceDrawPacketBuilder::MultiDeviceDrawRequest drawRequest;
+                RHI::DrawPacketBuilder::DrawRequest drawRequest;
                 drawRequest.m_listTag = m_drawListTag;
                 drawRequest.m_pipelineState = m_pipelineState.get();
                 drawRequest.m_streamBufferViews = m_modelStreamBufferViews[modelIndex][i];

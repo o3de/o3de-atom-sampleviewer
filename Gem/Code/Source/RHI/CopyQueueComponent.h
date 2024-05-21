@@ -13,12 +13,12 @@
 #include <Atom/RPI.Public/Image/StreamingImage.h>
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 
-#include <Atom/RHI/MultiDeviceBufferPool.h>
+#include <Atom/RHI/BufferPool.h>
 #include <Atom/RHI/Device.h>
-#include <Atom/RHI/MultiDeviceDrawItem.h>
+#include <Atom/RHI/DrawItem.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/MultiDevicePipelineState.h>
+#include <Atom/RHI/PipelineState.h>
 
 #include <RHI/BasicRHIComponent.h>
 
@@ -60,12 +60,12 @@ namespace AtomSampleViewer
 
         AZ::RHI::ShaderInputImageIndex m_textureInputIndex;
 
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBufferPool> m_bufferPool;
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_indexBuffer;
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_positionBuffer;
-        AZ::RHI::Ptr<AZ::RHI::MultiDeviceBuffer> m_uvBuffer;
+        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_bufferPool;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_indexBuffer;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_positionBuffer;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_uvBuffer;
 
-        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_pipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_pipelineState;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_shaderResourceGroup;
 
         AZ::RHI::ShaderInputConstantIndex m_objectMatrixConstantIndex;
@@ -93,7 +93,7 @@ namespace AtomSampleViewer
 
         BufferData m_bufferData;
 
-        AZStd::array<AZ::RHI::MultiDeviceStreamBufferView, 2> m_streamBufferViews;
+        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
 
         static const int numberOfPaths = 3;
         const char* m_filePaths[numberOfPaths] = {

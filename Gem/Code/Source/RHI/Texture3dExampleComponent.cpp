@@ -14,8 +14,8 @@
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/CommandList.h>
 #include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/MultiDeviceImage.h>
-#include <Atom/RHI/MultiDeviceImagePool.h>
+#include <Atom/RHI/Image.h>
+#include <Atom/RHI/ImagePool.h>
 #include <Atom/RHI.Reflect/InputStreamLayoutBuilder.h>
 #include <Atom/RHI.Reflect/RenderAttachmentLayoutBuilder.h>
 
@@ -60,7 +60,7 @@ namespace AtomSampleViewer
 
         // Create image pool
         {
-            m_imagePool = aznew RHI::MultiDeviceImagePool;
+            m_imagePool = aznew RHI::ImagePool;
             m_imagePool->SetName(Name("Texture3DPool"));
 
             RHI::ImagePoolDescriptor imagePoolDesc = {};
@@ -91,10 +91,10 @@ namespace AtomSampleViewer
                                                             "textures/streaming/streaming19.dds.streamingimage" });
 
             // Create the image resource
-            m_image = aznew RHI::MultiDeviceImage();
+            m_image = aznew RHI::Image();
             m_image->SetName(Name("Texture3D"));
 
-            RHI::MultiDeviceImageInitRequest imageRequest;
+            RHI::ImageInitRequest imageRequest;
             imageRequest.m_image = m_image.get();
             imageRequest.m_descriptor = RHI::ImageDescriptor::Create3D(RHI::ImageBindFlags::ShaderRead, deviceImageLayout.m_size.m_width, deviceImageLayout.m_size.m_height, deviceImageLayout.m_size.m_depth, format);
             RHI::ResultCode resultCode = m_imagePool->InitImage(imageRequest);
@@ -118,10 +118,10 @@ namespace AtomSampleViewer
             }
 
             // Update/stage the image with data
-            RHI::MultiDeviceImageSubresourceLayout imageSubresourceLayout;
+            RHI::ImageSubresourceLayout imageSubresourceLayout;
             m_image->GetSubresourceLayout(imageSubresourceLayout);
 
-            RHI::MultiDeviceImageUpdateRequest updateRequest;
+            RHI::ImageUpdateRequest updateRequest;
             updateRequest.m_image = m_image.get();
             updateRequest.m_sourceSubresourceLayout = imageSubresourceLayout;
             updateRequest.m_sourceData = imageData.data();
@@ -217,10 +217,12 @@ namespace AtomSampleViewer
                 drawIndexed.m_vertexCount = 4;
                 drawIndexed.m_instanceCount = 1;
 
-                const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get() };
+                const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
+                    m_shaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
+                };
 
                 // Create the draw item
-                RHI::SingleDeviceDrawItem drawItem;
+                RHI::DeviceDrawItem drawItem;
                 drawItem.m_arguments = drawIndexed;
                 drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
                 drawItem.m_indexBufferView = nullptr;

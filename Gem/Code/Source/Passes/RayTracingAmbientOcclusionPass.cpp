@@ -6,21 +6,21 @@
  *
  */
 
-#include <Passes/RayTracingAmbientOcclusionPass.h>
+#include <Atom/Feature/TransformService/TransformServiceFeatureProcessor.h>
 #include <Atom/RHI/CommandList.h>
-#include <Atom/RHI/SingleDeviceDispatchRaysItem.h>
+#include <Atom/RHI/DeviceDispatchRaysItem.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/FrameScheduler.h>
 #include <Atom/RHI/RHISystemInterface.h>
 #include <Atom/RHI/ScopeProducerFunction.h>
-#include <Atom/RPI.Public/Buffer/BufferSystemInterface.h>
 #include <Atom/RPI.Public/Buffer/Buffer.h>
-#include <Atom/RPI.Public/RenderPipeline.h>
-#include <Atom/RPI.Public/Scene.h>
+#include <Atom/RPI.Public/Buffer/BufferSystemInterface.h>
 #include <Atom/RPI.Public/Pass/PassUtils.h>
 #include <Atom/RPI.Public/RPIUtils.h>
+#include <Atom/RPI.Public/RenderPipeline.h>
+#include <Atom/RPI.Public/Scene.h>
 #include <Atom/RPI.Public/View.h>
-#include <Atom/Feature/TransformService/TransformServiceFeatureProcessor.h>
+#include <Passes/RayTracingAmbientOcclusionPass.h>
 
 namespace AZ
 {
@@ -87,7 +87,7 @@ namespace AZ
             AZ_Assert(m_shaderResourceGroup, "[RayTracingAmbientOcclusionPass '%s']: Failed to create SRG from shader asset '%s'",
                 GetPathName().GetCStr(), rayGenerationShaderFilePath);
                         
-            RHI::MultiDeviceRayTracingPipelineStateDescriptor descriptor;
+            RHI::RayTracingPipelineStateDescriptor descriptor;
             descriptor.Build()
                 ->PipelineState(m_globalPipelineState.get())
                 ->ShaderLibrary(rayGenerationShaderDescriptor)
@@ -101,7 +101,7 @@ namespace AZ
                 ;
 
             // create the ray tracing pipeline state object
-            m_rayTracingPipelineState = aznew RHI::MultiDeviceRayTracingPipelineState;
+            m_rayTracingPipelineState = aznew RHI::RayTracingPipelineState;
             m_rayTracingPipelineState->Init(RHI::MultiDevice::AllDevices, descriptor);
         }
 
@@ -118,13 +118,13 @@ namespace AZ
 
             if (!m_rayTracingShaderTable)
             {
-                RHI::MultiDeviceRayTracingBufferPools& rayTracingBufferPools = m_rayTracingFeatureProcessor->GetBufferPools();
+                RHI::RayTracingBufferPools& rayTracingBufferPools = m_rayTracingFeatureProcessor->GetBufferPools();
 
                 // Build shader table once. Since we are not using local srg so we don't need to rebuild it even when scene changed 
-                m_rayTracingShaderTable = aznew RHI::MultiDeviceRayTracingShaderTable;
+                m_rayTracingShaderTable = aznew RHI::RayTracingShaderTable;
                 m_rayTracingShaderTable->Init(RHI::MultiDevice::AllDevices, rayTracingBufferPools);
 
-                AZStd::shared_ptr<RHI::MultiDeviceRayTracingShaderTableDescriptor> descriptor = AZStd::make_shared<RHI::MultiDeviceRayTracingShaderTableDescriptor>();
+                AZStd::shared_ptr<RHI::RayTracingShaderTableDescriptor> descriptor = AZStd::make_shared<RHI::RayTracingShaderTableDescriptor>();
                 descriptor->Build(AZ::Name("RayTracingAOShaderTable"), m_rayTracingPipelineState)
                     ->RayGenerationRecord(AZ::Name("AoRayGen"))
                     ->MissRecord(AZ::Name("AoMiss"))
@@ -217,12 +217,11 @@ namespace AZ
             RPI::PassAttachment* outputAttachment = GetOutputBinding(0).GetAttachment().get();
             RHI::Size targetImageSize = outputAttachment->m_descriptor.m_image.m_size;
 
-            const RHI::SingleDeviceShaderResourceGroup* shaderResourceGroups[] =
-            {
+            const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
                 m_shaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
             };
 
-            RHI::SingleDeviceDispatchRaysItem dispatchRaysItem;
+            RHI::DeviceDispatchRaysItem dispatchRaysItem;
             dispatchRaysItem.m_arguments.m_direct.m_width = targetImageSize.m_width;
             dispatchRaysItem.m_arguments.m_direct.m_height = targetImageSize.m_height;
             dispatchRaysItem.m_arguments.m_direct.m_depth = 1;

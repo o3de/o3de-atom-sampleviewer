@@ -10,8 +10,8 @@
 
 #include <CommonSampleComponentBase.h>
 
-#include <Atom/RHI/MultiDeviceIndexBufferView.h>
-#include <Atom/RHI/MultiDevicePipelineState.h>
+#include <Atom/RHI/IndexBufferView.h>
+#include <Atom/RHI/PipelineState.h>
 #include <Atom/RHI/DrawList.h>
 
 #include <Atom/RPI.Public/DynamicDraw/DynamicDrawInterface.h>
@@ -171,8 +171,8 @@ namespace AtomSampleViewer
         AZ::RPI::DynamicDrawInterface* m_dynamicDraw = nullptr;
 
         // render related data
-        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_pipelineState;
-        AZ::RHI::ConstPtr<AZ::RHI::MultiDevicePipelineState> m_image3dPipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_pipelineState;
+        AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_image3dPipelineState;
 
         AZ::RHI::DrawListTag m_drawListTag;
         AZ::RHI::DrawListTag m_image3dDrawListTag;
