@@ -77,7 +77,7 @@ namespace AtomSampleViewer
         m_originalPipeline = m_scene->GetDefaultRenderPipeline();
         m_scene->RemoveRenderPipeline(m_originalPipeline->GetId());
 
-        // add the checker board pipeline
+        // add the multi-GPU pipeline
         const AZStd::string pipelineName("MultiGPUPipeline");
         AZ::RPI::RenderPipelineDescriptor pipelineDesc;
         pipelineDesc.m_name = pipelineName;
@@ -162,17 +162,13 @@ namespace AtomSampleViewer
     {
         auto meshFeatureProcessor = GetMeshFeatureProcessor();
 
-        /*
-        auto asset = RPI::AssetUtils::LoadAssetByProductPath<RPI::ModelAsset>(BunnyModelFilePath,
-                                                                              RPI::AssetUtils::TraceLevel::Assert); //*/
         auto asset = RPI::AssetUtils::LoadAssetByProductPath<RPI::ModelAsset>(CubeModelFilePath,
                                                                               RPI::AssetUtils::TraceLevel::Assert);
         m_meshHandle = meshFeatureProcessor->AcquireMesh(Render::MeshHandleDescriptor(asset));
 
-        //const Vector3 nonUniformScale{ 12.f, 12.f, 0.1f };
         const Vector3 translation{ 0.f, 0.f, -1.0f };
         Transform transform = Transform::CreateTranslation(translation);
-        meshFeatureProcessor->SetTransform(m_meshHandle, transform);//, nonUniformScale);
+        meshFeatureProcessor->SetTransform(m_meshHandle, transform);
     }
 
     void MultiGPURPIExampleComponent::DefaultWindowCreated()

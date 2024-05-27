@@ -148,12 +148,7 @@ namespace AtomSampleViewer
 
         uint32_t* destination = reinterpret_cast<uint32_t*>(response.m_data);
 
-        //memset(destination, 0x80, request.m_byteCount);
-
         memcpy(destination, source, request.m_byteCount);
-
-        /*for (auto i= 0 ; i < 1920 * 8; i++)
-            destination[i + 1080/2*1920] = 0xFFFFFFFF;*/
 
         m_stagingBufferPoolToCPU->GetDeviceBufferPool(1)->UnmapBuffer(*m_stagingBufferToCPU->GetDeviceBuffer(1));
         m_stagingBufferPoolToGPU->GetDeviceBufferPool(0)->UnmapBuffer(*m_stagingBufferToGPU->GetDeviceBuffer(0));

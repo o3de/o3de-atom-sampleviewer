@@ -29,6 +29,10 @@
 
 namespace AtomSampleViewer
 {
+    // MultiGPU RHI example.
+    // Renders a rotating triangle to the screen similar to the TriangleExampleComponent, except, the left half of the screen is rendered by
+    // GPU 0 and the right half by GPU 1, which is then copied to GPU 0 to composite and show the final output on GPU 0.
+    // At least two devices need to be initialized (by passing "--device-count 2") to run this example.
     class MultiGPUExampleComponent final
         : public BasicRHIComponent
     {
