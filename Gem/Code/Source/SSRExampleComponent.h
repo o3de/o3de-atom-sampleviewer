@@ -12,6 +12,7 @@
 #include <AzCore/Component/TickBus.h>
 #include <Atom/Feature/Mesh/MeshFeatureProcessorInterface.h>
 #include <Atom/Feature/ImGui/ImGuiUtils.h>
+#include <Atom/Feature/SpecularReflections/SpecularReflectionsFeatureProcessorInterface.h>
 #include <Utils/ImGuiSidebar.h>
 #include <Utils/Utils.h>
 
@@ -64,8 +65,7 @@ namespace AtomSampleViewer
 
         ImGuiSidebar m_imguiSidebar;
         bool m_enableSSR = true;
-        bool m_rayTracing = false;
-        bool m_rayTraceFallbackData = true;
+        AZ::Render::SSROptions::ReflectionMethod m_reflectionMethod = AZ::Render::SSROptions::ReflectionMethod::ScreenSpace;
         bool m_resetCamera = true;
         float m_originalFarClipDistance = 0.0f;
         float m_maxDepthThreshold = 0.4f;

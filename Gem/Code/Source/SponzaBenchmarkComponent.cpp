@@ -379,7 +379,7 @@ namespace AtomSampleViewer
 
         FinalizeLoadBenchmarkData();
 
-        const AZStd::string unresolvedPath = AZStd::string::format("@user@/benchmarks/sponzaLoad_%ld.xml", time(0));
+        const AZStd::string unresolvedPath = "@user@/benchmarks/sponzaLoad_" + AZStd::to_string(time(0)) + ".xml";
         char sponzaLoadBenchmarkDataFilePath[AZ_MAX_PATH_LEN] = { 0 };
         AZ::IO::FileIOBase::GetInstance()->ResolvePath(unresolvedPath.c_str(), sponzaLoadBenchmarkDataFilePath, AZ_MAX_PATH_LEN);
 
@@ -477,7 +477,7 @@ namespace AtomSampleViewer
 
         FinalizeRunBenchmarkData();
 
-        const AZStd::string unresolvedPath = AZStd::string::format("@user@/benchmarks/sponzaRun_%ld.xml", time(0));
+        const AZStd::string unresolvedPath = "@user@/benchmarks/sponzaRun_" + AZStd::to_string(time(0)) + ".xml";
 
         char sponzaRunBenchmarkDataFilePath[AZ_MAX_PATH_LEN] = { 0 };
         AZ::IO::FileIOBase::GetInstance()->ResolvePath(unresolvedPath.c_str(), sponzaRunBenchmarkDataFilePath, AZ_MAX_PATH_LEN);

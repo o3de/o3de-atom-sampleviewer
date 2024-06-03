@@ -94,6 +94,7 @@
 #include <MultiRenderPipelineExampleComponent.h>
 #include <MultiSceneExampleComponent.h>
 #include <ParallaxMappingExampleComponent.h>
+#include <RayTracingIntersectionShaderExampleComponent.h>
 #include <RenderTargetTextureExampleComponent.h>
 #include <SceneReloadSoakTestComponent.h>
 #include <ShadowExampleComponent.h>
@@ -323,6 +324,7 @@ namespace AtomSampleViewer
             NewFeaturesSample<EyeMaterialExampleComponent>("EyeMaterial"),
             NewFeaturesSample<LightCullingExampleComponent>("LightCulling"),
             NewFeaturesSample<ParallaxMappingExampleComponent>("Parallax"),
+            NewFeaturesSample<RayTracingIntersectionShaderExampleComponent>("RayTracingIntersectionShader", []() { return Utils::GetRHIDevice()->GetFeatures().m_rayTracing; }),
             NewFeaturesSample<ShadowExampleComponent>("Shadow"),
             NewFeaturesSample<ShadowedSponzaExampleComponent>("ShadowedSponza"),
             NewFeaturesSample<SkinnedMeshExampleComponent>("SkinnedMesh"),
@@ -452,7 +454,7 @@ namespace AtomSampleViewer
 
             if (i < 9)
             {
-                printStr += AZStd::string::format("\tctrl+%lu", i + 1);
+                printStr += AZStd::string::format("\tctrl+%zu", i + 1);
             }
 
             printStr += "\n";
@@ -463,7 +465,7 @@ namespace AtomSampleViewer
         AzFramework::InputChannelEventListener::BusConnect();
         TickBus::Handler::BusConnect();
 
-        bool targetSampleFound = false;
+        [[maybe_unused]] bool targetSampleFound = false;
 
         if (AZStd::string targetSampleName = GetTargetSampleName();
             !targetSampleName.empty())

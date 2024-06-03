@@ -18,7 +18,12 @@ namespace AtomSampleViewer
             return false;
         }
 
-        bool RunDiffTool(const AZStd::string& filePathA, const AZStd::string& filePathB)
+        AZStd::string GetDefaultDiffToolPath_Impl()
+        {
+            return AZStd::string("");
+        }
+
+        bool RunDiffTool_Impl(const AZStd::string& diffToolPath, const AZStd::string& filePathA, const AZStd::string& filePathB)
         {
             return false;
         }

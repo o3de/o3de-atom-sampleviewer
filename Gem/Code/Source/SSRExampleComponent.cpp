@@ -188,11 +188,10 @@ namespace AtomSampleViewer
 
         if (rayTracingSupported)
         {
-            optionsChanged |= ImGui::Checkbox("Hardware Ray Tracing", &m_rayTracing);
-            if (m_rayTracing)
-            {
-                optionsChanged |= ImGui::Checkbox("Ray Trace Fallback Data", &m_rayTraceFallbackData);
-            }
+            optionsChanged |= ImGui::Combo(
+                "Reflection Method",
+                reinterpret_cast<AZStd::underlying_type_t<AZ::Render::SSROptions::ReflectionMethod>*>(&m_reflectionMethod),
+                "Screen Space\0Hybrid SSR-RT\0Hybrid SSR-RT + Ray Tracing fallback\0Ray Tracing\0");
         }
 
         ImGui::NewLine();
@@ -228,17 +227,11 @@ namespace AtomSampleViewer
 
         AZ::Render::SSROptions ssrOptions = specularReflectionsFeatureProcessor->GetSSROptions();
         ssrOptions.m_enable = m_enableSSR;
-        ssrOptions.m_reflectionMethod = AZ::Render::SSROptions::ReflectionMethod::ScreenSpace;
+        ssrOptions.m_reflectionMethod = m_reflectionMethod;
         ssrOptions.m_coneTracing = false;
         ssrOptions.m_maxRoughness = 0.5f;
         ssrOptions.m_maxDepthThreshold = m_maxDepthThreshold;
         ssrOptions.m_temporalFilteringStrength = m_temporalFilteringStrength;
-
-        if (m_rayTracing)
-        {
-            ssrOptions.m_reflectionMethod = m_rayTraceFallbackData ? AZ::Render::SSROptions::ReflectionMethod::HybridWithFallback
-                                                                   : AZ::Render::SSROptions::ReflectionMethod::RayTracing;
-        }
 
         specularReflectionsFeatureProcessor->SetSSROptions(ssrOptions);
     }
