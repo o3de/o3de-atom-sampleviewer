@@ -333,9 +333,15 @@ namespace AtomSampleViewer
 
             // Bind shader attachments which are rendered by RenderTargetScope.
             {
-                frameGraph.UseShaderAttachment(RHI::ImageScopeAttachmentDescriptor(m_attachmentID[0]), RHI::ScopeAttachmentAccess::Read);
-                frameGraph.UseShaderAttachment(RHI::ImageScopeAttachmentDescriptor(m_attachmentID[1]), RHI::ScopeAttachmentAccess::Read);
-                frameGraph.UseShaderAttachment(RHI::ImageScopeAttachmentDescriptor(m_attachmentID[2]), RHI::ScopeAttachmentAccess::Read);
+                frameGraph.UseShaderAttachment(
+                    RHI::ImageScopeAttachmentDescriptor(m_attachmentID[0]), RHI::ScopeAttachmentAccess::Read,
+                    RHI::ScopeAttachmentStage::FragmentShader);
+                frameGraph.UseShaderAttachment(
+                    RHI::ImageScopeAttachmentDescriptor(m_attachmentID[1]), RHI::ScopeAttachmentAccess::Read,
+                    RHI::ScopeAttachmentStage::FragmentShader);
+                frameGraph.UseShaderAttachment(
+                    RHI::ImageScopeAttachmentDescriptor(m_attachmentID[2]), RHI::ScopeAttachmentAccess::Read,
+                    RHI::ScopeAttachmentStage::FragmentShader);
             }
 
             // We will submit a single draw item.

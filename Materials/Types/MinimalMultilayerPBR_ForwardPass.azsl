@@ -130,7 +130,7 @@ ForwardPassOutput MinimalMultilayerPBR_MainPassPS(VSOutput IN)
 
     // Light iterator
     lightingData.tileIterator.Init(IN.m_position, PassSrg::m_lightListRemapped, PassSrg::m_tileLightData);
-    lightingData.Init(surface.position, surface.normal, surface.roughnessLinear);
+    lightingData.Init(surface.position, surface.normal, surface.roughnessLinear, ViewSrg::m_worldPosition.xyz);
 
     // Diffuse and Specular response
     lightingData.specularResponse = FresnelSchlickWithRoughness(lightingData.NdotV, surface.specularF0, surface.roughnessLinear);

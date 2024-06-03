@@ -370,7 +370,9 @@ namespace AtomSampleViewer
                 dsDesc.m_imageViewDescriptor.m_overrideFormat = AZ::RHI::Format::D32_FLOAT;
                 dsDesc.m_loadStoreAction.m_clearValue = AZ::RHI::ClearValue::CreateDepth(1.f);
                 dsDesc.m_loadStoreAction.m_loadAction = AZ::RHI::AttachmentLoadAction::Clear;
-                frameGraph.UseDepthStencilAttachment(dsDesc, AZ::RHI::ScopeAttachmentAccess::Write);
+                frameGraph.UseDepthStencilAttachment(
+                    dsDesc, AZ::RHI::ScopeAttachmentAccess::Write,
+                    AZ::RHI::ScopeAttachmentStage::EarlyFragmentTest | AZ::RHI::ScopeAttachmentStage::LateFragmentTest);
             }
 
             // Query pools
@@ -403,7 +405,9 @@ namespace AtomSampleViewer
             // Add the predication buffer if necessary
             if (m_currentType == QueryType::Predication)
             {
-                frameGraph.UseAttachment(m_predicationBufferAttachmentDescriptor, RHI::ScopeAttachmentAccess::Read, RHI::ScopeAttachmentUsage::Predication);
+                frameGraph.UseAttachment(
+                    m_predicationBufferAttachmentDescriptor, RHI::ScopeAttachmentAccess::Read, RHI::ScopeAttachmentUsage::Predication,
+                    RHI::ScopeAttachmentStage::Predication);
             }
 
             // We will submit a single draw item.

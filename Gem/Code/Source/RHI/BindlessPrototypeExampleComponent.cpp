@@ -1028,7 +1028,7 @@ namespace AtomSampleViewer
                 desc.m_bufferViewDescriptor = m_rwBufferViewDescriptor;
                 desc.m_loadStoreAction.m_clearValue = AZ::RHI::ClearValue::CreateVector4Float(0.0f, 0.0f, 0.0f, 0.0f);
 
-                frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::ReadWrite);
+                frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::ReadWrite, RHI::ScopeAttachmentStage::ComputeShader);
 
                 const Name computeBufferId{ "m_colorBufferMultiplier" };
                 RHI::ShaderInputBufferIndex computeBufferIndex = m_bufferDispatchSRG->FindShaderInputBufferIndex(computeBufferId);
@@ -1101,7 +1101,7 @@ namespace AtomSampleViewer
                 desc.m_imageViewDescriptor = m_rwImageViewDescriptor;
                 desc.m_loadStoreAction.m_clearValue = AZ::RHI::ClearValue::CreateVector4Float(0.0f, 0.0f, 0.0f, 0.0f);
 
-                frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::ReadWrite);
+                frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::ReadWrite, RHI::ScopeAttachmentStage::ComputeShader);
 
                 const Name computeBufferId{ "m_colorImageMultiplier" };
                 RHI::ShaderInputImageIndex computeBufferIndex = m_imageDispatchSRG->FindShaderInputImageIndex(computeBufferId);
@@ -1186,7 +1186,9 @@ namespace AtomSampleViewer
                     depthStencilDescriptor.m_loadStoreAction.m_clearValue = AZ::RHI::ClearValue::CreateDepth(0.0f);
                     depthStencilDescriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Clear;
                     depthStencilDescriptor.m_loadStoreAction.m_loadActionStencil = RHI::AttachmentLoadAction::Clear;
-                    frameGraph.UseDepthStencilAttachment(depthStencilDescriptor, RHI::ScopeAttachmentAccess::ReadWrite);
+                    frameGraph.UseDepthStencilAttachment(
+                        depthStencilDescriptor, RHI::ScopeAttachmentAccess::ReadWrite,
+                        RHI::ScopeAttachmentStage::EarlyFragmentTest | RHI::ScopeAttachmentStage::LateFragmentTest);
                 }
 
                 {
@@ -1195,7 +1197,9 @@ namespace AtomSampleViewer
                     desc.m_bufferViewDescriptor = m_rwBufferViewDescriptor;
                     desc.m_loadStoreAction.m_clearValue = AZ::RHI::ClearValue::CreateVector4Float(0.0f, 0.0f, 0.0f, 0.0f);
 
-                    frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::ReadWrite);
+                    frameGraph.UseShaderAttachment(
+                        desc, RHI::ScopeAttachmentAccess::ReadWrite,
+                        RHI::ScopeAttachmentStage::VertexShader | RHI::ScopeAttachmentStage::FragmentShader);
                 }
 
                 {
@@ -1204,7 +1208,7 @@ namespace AtomSampleViewer
                     desc.m_imageViewDescriptor = m_rwImageViewDescriptor;
                     desc.m_loadStoreAction.m_clearValue = AZ::RHI::ClearValue::CreateVector4Float(0.0f, 0.0f, 0.0f, 0.0f);
 
-                    frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::ReadWrite);
+                    frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::ReadWrite, RHI::ScopeAttachmentStage::FragmentShader);
                 }
                 // Submit the sub mesh count
                 frameGraph.SetEstimatedItemCount(static_cast<uint32_t>(m_subMeshInstanceArray.size()));

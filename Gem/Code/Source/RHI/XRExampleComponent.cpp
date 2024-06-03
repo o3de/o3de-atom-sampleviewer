@@ -341,7 +341,9 @@ namespace AtomSampleViewer
                 dsDesc.m_loadStoreAction.m_clearValue = AZ::RHI::ClearValue::CreateDepthStencil(1.0f, 0);
                 dsDesc.m_loadStoreAction.m_loadAction = AZ::RHI::AttachmentLoadAction::Clear;
                 dsDesc.m_loadStoreAction.m_loadActionStencil = AZ::RHI::AttachmentLoadAction::DontCare;
-                frameGraph.UseDepthStencilAttachment(dsDesc, AZ::RHI::ScopeAttachmentAccess::Write);
+                frameGraph.UseDepthStencilAttachment(
+                    dsDesc, AZ::RHI::ScopeAttachmentAccess::Write,
+                    AZ::RHI::ScopeAttachmentStage::EarlyFragmentTest | AZ::RHI::ScopeAttachmentStage::LateFragmentTest);
             }
 
             // We will submit NumberOfCubes draw items.

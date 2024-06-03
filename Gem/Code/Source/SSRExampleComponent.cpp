@@ -228,12 +228,17 @@ namespace AtomSampleViewer
 
         AZ::Render::SSROptions ssrOptions = specularReflectionsFeatureProcessor->GetSSROptions();
         ssrOptions.m_enable = m_enableSSR;
-        ssrOptions.m_rayTracing = m_rayTracing;
-        ssrOptions.m_rayTraceFallbackData = m_rayTraceFallbackData;
+        ssrOptions.m_reflectionMethod = AZ::Render::SSROptions::ReflectionMethod::ScreenSpace;
         ssrOptions.m_coneTracing = false;
         ssrOptions.m_maxRoughness = 0.5f;
         ssrOptions.m_maxDepthThreshold = m_maxDepthThreshold;
         ssrOptions.m_temporalFilteringStrength = m_temporalFilteringStrength;
+
+        if (m_rayTracing)
+        {
+            ssrOptions.m_reflectionMethod = m_rayTraceFallbackData ? AZ::Render::SSROptions::ReflectionMethod::HybridWithFallback
+                                                                   : AZ::Render::SSROptions::ReflectionMethod::RayTracing;
+        }
 
         specularReflectionsFeatureProcessor->SetSSROptions(ssrOptions);
     }

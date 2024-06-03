@@ -287,7 +287,7 @@ namespace AtomSampleViewer
                 desc.m_bufferViewDescriptor = m_bufferViewDescriptor;
                 desc.m_loadStoreAction.m_clearValue = AZ::RHI::ClearValue::CreateVector4Float(0.0f, 0.0f, 0.0f, 0.0f);
 
-                frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::ReadWrite);
+                frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::ReadWrite, RHI::ScopeAttachmentStage::ComputeShader);
 
                 const Name computeBufferId{ "m_computeBuffer" };
                 RHI::ShaderInputBufferIndex computeBufferIndex = m_dispatchSRGs[1]->FindShaderInputBufferIndex(computeBufferId);
@@ -371,7 +371,7 @@ namespace AtomSampleViewer
                 desc.m_bufferViewDescriptor = m_bufferViewDescriptor;
                 desc.m_loadStoreAction.m_clearValue = AZ::RHI::ClearValue::CreateVector4Float(0.0f, 0.0f, 0.0f, 0.0f);
 
-                frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::ReadWrite);
+                frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::ReadWrite, RHI::ScopeAttachmentStage::FragmentShader);
 
                 const Name computeBufferId{ "m_computeBuffer" };
                 RHI::ShaderInputBufferIndex computeBufferIndex = m_drawSRGs[1]->FindShaderInputBufferIndex(computeBufferId);

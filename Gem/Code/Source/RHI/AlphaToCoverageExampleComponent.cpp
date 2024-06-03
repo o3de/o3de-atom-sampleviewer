@@ -353,7 +353,9 @@ namespace AtomSampleViewer
                 descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Clear;
                 descriptor.m_loadStoreAction.m_clearValue = RHI::ClearValue::CreateDepth(1.f);
                 descriptor.m_loadStoreAction.m_storeAction = RHI::AttachmentStoreAction::Store;
-                frameGraph.UseDepthStencilAttachment(descriptor, RHI::ScopeAttachmentAccess::ReadWrite);
+                frameGraph.UseDepthStencilAttachment(
+                    descriptor, RHI::ScopeAttachmentAccess::ReadWrite,
+                    AZ::RHI::ScopeAttachmentStage::EarlyFragmentTest | AZ::RHI::ScopeAttachmentStage::LateFragmentTest);
             }
 
             // Bind the resolve attachment

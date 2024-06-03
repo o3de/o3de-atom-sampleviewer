@@ -421,7 +421,7 @@ namespace AtomSampleViewer
                 RHI::ImageScopeAttachmentDescriptor descriptor;
                 descriptor.m_attachmentId = m_sampleProperties[static_cast<uint32_t>(MSAAType::MSAA4X_Custom_Resolve)].m_attachmentId;
                 descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
-                frameGraph.UseShaderAttachment(descriptor, RHI::ScopeAttachmentAccess::Read);
+                frameGraph.UseShaderAttachment(descriptor, RHI::ScopeAttachmentAccess::Read, RHI::ScopeAttachmentStage::FragmentShader);
             }
 
             // Binds the swap chain as a color attachment.

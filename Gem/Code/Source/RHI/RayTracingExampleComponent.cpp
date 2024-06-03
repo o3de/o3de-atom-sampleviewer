@@ -448,7 +448,7 @@ namespace AtomSampleViewer
             desc.m_bufferViewDescriptor = m_tlasBufferViewDescriptor;
             desc.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
 
-            frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::ReadWrite);
+            frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::ReadWrite, RHI::ScopeAttachmentStage::AnyGraphics);
         };
 
         RHI::EmptyCompileFunction<ScopeData> compileFunction;
@@ -493,7 +493,7 @@ namespace AtomSampleViewer
                 desc.m_imageViewDescriptor = m_outputImageViewDescriptor;
                 desc.m_loadStoreAction.m_clearValue = RHI::ClearValue::CreateVector4Float(0.0f, 0.0f, 0.0f, 0.0f);
 
-                frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::ReadWrite);
+                frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::ReadWrite, RHI::ScopeAttachmentStage::RayTracingShader);
             }
 
             // attach TLAS buffer
@@ -504,7 +504,7 @@ namespace AtomSampleViewer
                 desc.m_bufferViewDescriptor = m_tlasBufferViewDescriptor;
                 desc.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
 
-                frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::ReadWrite);
+                frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::ReadWrite, RHI::ScopeAttachmentStage::RayTracingShader);
             }
 
             frameGraph.SetEstimatedItemCount(1);
@@ -647,7 +647,7 @@ namespace AtomSampleViewer
                 desc.m_imageViewDescriptor = m_outputImageViewDescriptor;
                 desc.m_loadStoreAction.m_clearValue = RHI::ClearValue::CreateVector4Float(0.0f, 0.0f, 0.0f, 0.0f);
 
-                frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::ReadWrite);
+                frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::ReadWrite, RHI::ScopeAttachmentStage::FragmentShader);
 
                 const Name outputImageId{ "m_output" };
                 RHI::ShaderInputImageIndex outputImageIndex = m_drawSRG->FindShaderInputImageIndex(outputImageId);
