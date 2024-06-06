@@ -248,7 +248,8 @@ namespace AtomSampleViewer
                 attachmentDescriptor.m_attachmentId = InputAssembly::InputAssemblyBufferAttachmentId;
                 attachmentDescriptor.m_bufferViewDescriptor = RHI::BufferViewDescriptor::CreateStructured(0, BufferData::array_size, sizeof(BufferData::value_type));
                 attachmentDescriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::DontCare;
-                frameGraph.UseShaderAttachment(attachmentDescriptor, RHI::ScopeAttachmentAccess::ReadWrite);
+                frameGraph.UseShaderAttachment(
+                    attachmentDescriptor, RHI::ScopeAttachmentAccess::ReadWrite, RHI::ScopeAttachmentStage::ComputeShader);
             }
 
             {
@@ -256,7 +257,8 @@ namespace AtomSampleViewer
                 attachmentDescriptor.m_attachmentId = InputAssembly::ImportedInputAssemblyBufferAttachmentId;
                 attachmentDescriptor.m_bufferViewDescriptor = RHI::BufferViewDescriptor::CreateStructured(0, BufferData::array_size, sizeof(BufferData::value_type));
                 attachmentDescriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::DontCare;
-                frameGraph.UseShaderAttachment(attachmentDescriptor, RHI::ScopeAttachmentAccess::ReadWrite);
+                frameGraph.UseShaderAttachment(
+                    attachmentDescriptor, RHI::ScopeAttachmentAccess::ReadWrite, RHI::ScopeAttachmentStage::ComputeShader);
             }
 
             frameGraph.SetEstimatedItemCount(2);

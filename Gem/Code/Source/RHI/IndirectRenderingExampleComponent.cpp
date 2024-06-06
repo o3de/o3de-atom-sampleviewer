@@ -666,7 +666,8 @@ namespace AtomSampleViewer
             culledBufferAttachment.m_attachmentId = IndirectRendering::CulledIndirectBufferAttachmentId;
             culledBufferAttachment.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::DontCare;
             culledBufferAttachment.m_bufferViewDescriptor = RHI::BufferViewDescriptor::CreateStructured(0, m_numObjects, commandsStride);
-            frameGraph.UseShaderAttachment(culledBufferAttachment, RHI::ScopeAttachmentAccess::ReadWrite);
+            frameGraph.UseShaderAttachment(
+                culledBufferAttachment, RHI::ScopeAttachmentAccess::ReadWrite, RHI::ScopeAttachmentStage::ComputeShader);
 
             if (m_deviceSupportsCountBuffer)
             {
@@ -678,7 +679,8 @@ namespace AtomSampleViewer
                     0,
                     static_cast<uint32_t>(m_resetCounterBuffer->GetDescriptor().m_byteCount / sizeof(uint32_t)),
                     sizeof(uint32_t));
-                frameGraph.UseShaderAttachment(countBufferAttachment, RHI::ScopeAttachmentAccess::ReadWrite);
+                frameGraph.UseShaderAttachment(
+                    countBufferAttachment, RHI::ScopeAttachmentAccess::ReadWrite, RHI::ScopeAttachmentStage::ComputeShader);
             }
         };
 
@@ -783,7 +785,9 @@ namespace AtomSampleViewer
                 dsDesc.m_imageViewDescriptor.m_overrideFormat = AZ::RHI::Format::D32_FLOAT;
                 dsDesc.m_loadStoreAction.m_clearValue = AZ::RHI::ClearValue::CreateDepth(1.f);
                 dsDesc.m_loadStoreAction.m_loadAction = AZ::RHI::AttachmentLoadAction::Clear;
-                frameGraph.UseDepthStencilAttachment(dsDesc, AZ::RHI::ScopeAttachmentAccess::ReadWrite);
+                frameGraph.UseDepthStencilAttachment(
+                    dsDesc, AZ::RHI::ScopeAttachmentAccess::ReadWrite,
+                    RHI::ScopeAttachmentStage::EarlyFragmentTest | RHI::ScopeAttachmentStage::LateFragmentTest);
             }
 
             if (m_deviceSupportsCountBuffer)
@@ -797,7 +801,9 @@ namespace AtomSampleViewer
                     0,
                     static_cast<uint32_t>(m_resetCounterBuffer->GetDescriptor().m_byteCount / sizeof(uint32_t)),
                     sizeof(uint32_t));
-                frameGraph.UseAttachment(descriptor, RHI::ScopeAttachmentAccess::Read, RHI::ScopeAttachmentUsage::Indirect);
+                frameGraph.UseAttachment(
+                    descriptor, RHI::ScopeAttachmentAccess::Read, RHI::ScopeAttachmentUsage::Indirect,
+                    RHI::ScopeAttachmentStage::DrawIndirect);
             }
 
             {
@@ -810,7 +816,9 @@ namespace AtomSampleViewer
                     0,
                     m_numObjects,
                     m_indirectDrawBufferSignature->GetByteStride());
-                frameGraph.UseAttachment(descriptor, RHI::ScopeAttachmentAccess::Read, RHI::ScopeAttachmentUsage::Indirect);
+                frameGraph.UseAttachment(
+                    descriptor, RHI::ScopeAttachmentAccess::Read, RHI::ScopeAttachmentUsage::Indirect,
+                    RHI::ScopeAttachmentStage::DrawIndirect);
             }
 
             frameGraph.SetEstimatedItemCount(uint32_t(std::ceil(m_numObjects/ float(maxIndirectDrawCount))));

@@ -783,7 +783,7 @@ namespace AtomSampleViewer
                     RHI::ImageScopeAttachmentDescriptor descriptor;
                     descriptor.m_attachmentId = source;
                     descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
-                    frameGraph.UseShaderAttachment(descriptor, RHI::ScopeAttachmentAccess::Read);
+                    frameGraph.UseShaderAttachment(descriptor, RHI::ScopeAttachmentAccess::Read, RHI::ScopeAttachmentStage::FragmentShader);
                 }
             }
 
@@ -852,7 +852,9 @@ namespace AtomSampleViewer
                 dsDesc.m_imageViewDescriptor.m_overrideFormat = RHI::Format::D32_FLOAT;
                 dsDesc.m_loadStoreAction.m_clearValue = RHI::ClearValue::CreateDepthStencil(1.0f, 0);
                 dsDesc.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Clear;
-                frameGraph.UseDepthStencilAttachment(dsDesc, RHI::ScopeAttachmentAccess::ReadWrite);
+                frameGraph.UseDepthStencilAttachment(
+                    dsDesc, RHI::ScopeAttachmentAccess::ReadWrite,
+                    RHI::ScopeAttachmentStage::EarlyFragmentTest | RHI::ScopeAttachmentStage::LateFragmentTest);
             }
 
             frameGraph.SetEstimatedItemCount(static_cast<uint32_t>(m_shaderResourceGroups[ShadowScope].size()));
@@ -942,7 +944,9 @@ namespace AtomSampleViewer
 
             // Binds depth buffer from depth pass
             {
-                frameGraph.UseShaderAttachment(RHI::ImageScopeAttachmentDescriptor(m_shadowAttachmentId), RHI::ScopeAttachmentAccess::Read);
+                frameGraph.UseShaderAttachment(
+                    RHI::ImageScopeAttachmentDescriptor(m_shadowAttachmentId), RHI::ScopeAttachmentAccess::Read,
+                    RHI::ScopeAttachmentStage::FragmentShader);
             }
 
             // Binds DepthStencil image
@@ -954,7 +958,8 @@ namespace AtomSampleViewer
                 dsDesc.m_loadStoreAction.m_clearValue = RHI::ClearValue::CreateDepthStencil(0, 0);
                 dsDesc.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Clear;
                 dsDesc.m_loadStoreAction.m_loadActionStencil = RHI::AttachmentLoadAction::Clear;
-                frameGraph.UseDepthStencilAttachment(dsDesc, RHI::ScopeAttachmentAccess::Write);
+                frameGraph.UseDepthStencilAttachment(
+                    dsDesc, RHI::ScopeAttachmentAccess::Write, RHI::ScopeAttachmentStage::EarlyFragmentTest | RHI::ScopeAttachmentStage::LateFragmentTest);
             }
 
             frameGraph.SetEstimatedItemCount(static_cast<uint32_t>(m_shaderResourceGroups[ForwardScope].size()));
@@ -1059,12 +1064,14 @@ namespace AtomSampleViewer
                 RHI::ImageScopeAttachmentDescriptor inputOuputDescriptor;
                 inputOuputDescriptor.m_attachmentId = m_sceneIds[m_previousSceneImageIndex];
                 inputOuputDescriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
-                frameGraph.UseShaderAttachment(inputOuputDescriptor, RHI::ScopeAttachmentAccess::ReadWrite);
+                frameGraph.UseShaderAttachment(
+                    inputOuputDescriptor, RHI::ScopeAttachmentAccess::ReadWrite, RHI::ScopeAttachmentStage::ComputeShader);
 
                 RHI::ImageScopeAttachmentDescriptor luminanceDescriptor;
                 luminanceDescriptor.m_attachmentId = m_averageLuminanceAttachmentId;
                 luminanceDescriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
-                frameGraph.UseShaderAttachment(luminanceDescriptor, RHI::ScopeAttachmentAccess::Read);
+                frameGraph.UseShaderAttachment(
+                    luminanceDescriptor, RHI::ScopeAttachmentAccess::Read, RHI::ScopeAttachmentStage::ComputeShader);
             }
 
             frameGraph.SetEstimatedItemCount(1);
@@ -1139,7 +1146,7 @@ namespace AtomSampleViewer
                 RHI::ImageScopeAttachmentDescriptor sceneDescriptor;
                 sceneDescriptor.m_attachmentId = m_sceneIds[m_previousSceneImageIndex];
                 sceneDescriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
-                frameGraph.UseShaderAttachment(sceneDescriptor, RHI::ScopeAttachmentAccess::Read);
+                frameGraph.UseShaderAttachment(sceneDescriptor, RHI::ScopeAttachmentAccess::Read, RHI::ScopeAttachmentStage::FragmentShader);
             }
 
             frameGraph.SetEstimatedItemCount(1);
@@ -1229,12 +1236,14 @@ namespace AtomSampleViewer
                     RHI::ImageScopeAttachmentDescriptor inputDescriptor;
                     inputDescriptor.m_attachmentId = inputAttachmentId;
                     inputDescriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
-                    frameGraph.UseShaderAttachment(inputDescriptor, RHI::ScopeAttachmentAccess::Read);
+                    frameGraph.UseShaderAttachment(
+                        inputDescriptor, RHI::ScopeAttachmentAccess::Read, RHI::ScopeAttachmentStage::ComputeShader);
 
                     RHI::ImageScopeAttachmentDescriptor outputDescriptor;
                     outputDescriptor.m_attachmentId = outputAttachmentId;
                     outputDescriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::DontCare;
-                    frameGraph.UseShaderAttachment(outputDescriptor, RHI::ScopeAttachmentAccess::ReadWrite);
+                    frameGraph.UseShaderAttachment(
+                        outputDescriptor, RHI::ScopeAttachmentAccess::ReadWrite, RHI::ScopeAttachmentStage::ComputeShader);
                 }
 
                 frameGraph.SetEstimatedItemCount(1);

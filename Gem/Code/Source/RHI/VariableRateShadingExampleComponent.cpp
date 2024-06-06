@@ -533,7 +533,9 @@ namespace AtomSampleViewer
                 dsDesc.m_attachmentId = VariableRateShading::ShadingRateAttachmentId;
                 dsDesc.m_loadStoreAction.m_loadAction = AZ::RHI::AttachmentLoadAction::Load;
                 dsDesc.m_loadStoreAction.m_storeAction = AZ::RHI::AttachmentStoreAction::DontCare;
-                frameGraph.UseAttachment(dsDesc, AZ::RHI::ScopeAttachmentAccess::Read, AZ::RHI::ScopeAttachmentUsage::ShadingRate);
+                frameGraph.UseAttachment(
+                    dsDesc, AZ::RHI::ScopeAttachmentAccess::Read, AZ::RHI::ScopeAttachmentUsage::ShadingRate,
+                    AZ::RHI::ScopeAttachmentStage::ShadingRate);
             }
 
             frameGraph.SetEstimatedItemCount(1);
@@ -616,7 +618,8 @@ namespace AtomSampleViewer
                 shadingRateImageDesc.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::DontCare;
                 shadingRateImageDesc.m_loadStoreAction.m_storeAction = RHI::AttachmentStoreAction::Store;
                 shadingRateImageDesc.m_imageViewDescriptor.m_overrideFormat = ConvertToUInt(m_rateShadingImageFormat);
-                frameGraph.UseShaderAttachment(shadingRateImageDesc, RHI::ScopeAttachmentAccess::Write);
+                frameGraph.UseShaderAttachment(
+                    shadingRateImageDesc, RHI::ScopeAttachmentAccess::Write, RHI::ScopeAttachmentStage::ComputeShader);
             }
 
             frameGraph.SetEstimatedItemCount(1);
@@ -703,7 +706,8 @@ namespace AtomSampleViewer
                 shadingRateImageDesc.m_attachmentId = VariableRateShading::ShadingRateAttachmentId;
                 shadingRateImageDesc.m_loadStoreAction.m_storeAction = RHI::AttachmentStoreAction::DontCare;
                 shadingRateImageDesc.m_imageViewDescriptor.m_overrideFormat = ConvertToUInt(m_rateShadingImageFormat);
-                frameGraph.UseShaderAttachment(shadingRateImageDesc, RHI::ScopeAttachmentAccess::Read);
+                frameGraph.UseShaderAttachment(
+                    shadingRateImageDesc, RHI::ScopeAttachmentAccess::Read, RHI::ScopeAttachmentStage::FragmentShader);
             }
 
             frameGraph.SetEstimatedItemCount(1);

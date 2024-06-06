@@ -566,7 +566,7 @@ namespace AtomSampleViewer
                 RHI::ImageScopeAttachmentDescriptor desc;
                 desc.m_attachmentId = m_attachmentID[target];
                 desc.m_imageViewDescriptor = imageViewDescriptor;
-                frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::Read);
+                frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::Read, RHI::ScopeAttachmentStage::FragmentShader);
             }
             // We will submit a single draw item.
             frameGraph.SetEstimatedItemCount(1);

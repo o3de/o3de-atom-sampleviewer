@@ -399,7 +399,9 @@ namespace AtomSampleViewer
                 dsDesc.m_imageViewDescriptor.m_overrideFormat = AZ::RHI::Format::D32_FLOAT;
                 dsDesc.m_loadStoreAction.m_clearValue = m_depthClearValue;
                 dsDesc.m_loadStoreAction.m_loadAction = AZ::RHI::AttachmentLoadAction::Clear;
-                frameGraph.UseDepthStencilAttachment(dsDesc, AZ::RHI::ScopeAttachmentAccess::ReadWrite);
+                frameGraph.UseDepthStencilAttachment(
+                    dsDesc, AZ::RHI::ScopeAttachmentAccess::ReadWrite,
+                    AZ::RHI::ScopeAttachmentStage::EarlyFragmentTest | AZ::RHI::ScopeAttachmentStage::LateFragmentTest);
             }
 
             frameGraph.SetEstimatedItemCount(1);
@@ -460,7 +462,9 @@ namespace AtomSampleViewer
 
             // Binds depth buffer from depth pass
             {
-                frameGraph.UseShaderAttachment(AZ::RHI::ImageScopeAttachmentDescriptor(m_transientImageDescriptor.m_attachmentId), AZ::RHI::ScopeAttachmentAccess::Read);
+                frameGraph.UseShaderAttachment(
+                    AZ::RHI::ImageScopeAttachmentDescriptor(m_transientImageDescriptor.m_attachmentId),
+                    AZ::RHI::ScopeAttachmentAccess::Read, AZ::RHI::ScopeAttachmentStage::FragmentShader);
             }
 
             // Create & Binds DepthStencil image
@@ -482,7 +486,9 @@ namespace AtomSampleViewer
                 dsDesc.m_imageViewDescriptor.m_overrideFormat = depthStencilFormat;
                 dsDesc.m_loadStoreAction.m_clearValue = m_depthClearValue;
                 dsDesc.m_loadStoreAction.m_loadAction = AZ::RHI::AttachmentLoadAction::Clear;
-                frameGraph.UseDepthStencilAttachment(dsDesc, AZ::RHI::ScopeAttachmentAccess::Write);
+                frameGraph.UseDepthStencilAttachment(
+                    dsDesc, AZ::RHI::ScopeAttachmentAccess::Write,
+                    AZ::RHI::ScopeAttachmentStage::EarlyFragmentTest | AZ::RHI::ScopeAttachmentStage::LateFragmentTest);
             }
 
             // We will submit a single draw item.

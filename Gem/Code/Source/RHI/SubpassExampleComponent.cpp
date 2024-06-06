@@ -376,7 +376,9 @@ namespace AtomSampleViewer
                 dsDesc.m_attachmentId = m_depthStencilAttachmentId;
                 dsDesc.m_loadStoreAction.m_clearValue = RHI::ClearValue::CreateDepthStencil(0, 0);
                 dsDesc.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Clear;
-                frameGraph.UseDepthStencilAttachment(dsDesc, RHI::ScopeAttachmentAccess::Write);
+                frameGraph.UseDepthStencilAttachment(
+                    dsDesc, RHI::ScopeAttachmentAccess::Write,
+                    AZ::RHI::ScopeAttachmentStage::EarlyFragmentTest | AZ::RHI::ScopeAttachmentStage::LateFragmentTest);
             }
 
             frameGraph.SetEstimatedItemCount(m_meshCount);
@@ -447,7 +449,7 @@ namespace AtomSampleViewer
                 RHI::ImageScopeAttachmentDescriptor descriptor;
                 descriptor.m_attachmentId = m_positionAttachmentId;
                 descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
-                frameGraph.UseSubpassInputAttachment(descriptor);
+                frameGraph.UseSubpassInputAttachment(descriptor, RHI::ScopeAttachmentStage::FragmentShader);
             }
 
             // Bind the normal GBuffer
@@ -455,7 +457,7 @@ namespace AtomSampleViewer
                 RHI::ImageScopeAttachmentDescriptor descriptor;
                 descriptor.m_attachmentId = m_normalAttachmentId;
                 descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
-                frameGraph.UseSubpassInputAttachment(descriptor);
+                frameGraph.UseSubpassInputAttachment(descriptor, RHI::ScopeAttachmentStage::FragmentShader);
             }
 
             // Bind the albedo GBuffer
@@ -463,7 +465,7 @@ namespace AtomSampleViewer
                 RHI::ImageScopeAttachmentDescriptor descriptor;
                 descriptor.m_attachmentId = m_albedoAttachmentId;
                 descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
-                frameGraph.UseSubpassInputAttachment(descriptor);
+                frameGraph.UseSubpassInputAttachment(descriptor, RHI::ScopeAttachmentStage::FragmentShader);
             }
 
             // Bind SwapChain image
@@ -479,7 +481,9 @@ namespace AtomSampleViewer
                 RHI::ImageScopeAttachmentDescriptor dsDesc;
                 dsDesc.m_attachmentId = m_depthStencilAttachmentId;
                 dsDesc.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
-                frameGraph.UseDepthStencilAttachment(dsDesc, RHI::ScopeAttachmentAccess::Read);
+                frameGraph.UseDepthStencilAttachment(
+                    dsDesc, RHI::ScopeAttachmentAccess::Read,
+                    RHI::ScopeAttachmentStage::EarlyFragmentTest | RHI::ScopeAttachmentStage::LateFragmentTest);
             }
 
             frameGraph.SetEstimatedItemCount(1);

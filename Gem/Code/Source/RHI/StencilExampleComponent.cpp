@@ -186,7 +186,9 @@ namespace AtomSampleViewer
                     dsDesc.m_loadStoreAction.m_clearValue = m_depthClearValue;
                     dsDesc.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Clear;
                     dsDesc.m_loadStoreAction.m_loadActionStencil = RHI::AttachmentLoadAction::Clear;
-                    frameGraph.UseDepthStencilAttachment(dsDesc, RHI::ScopeAttachmentAccess::ReadWrite);
+                    frameGraph.UseDepthStencilAttachment(
+                        dsDesc, RHI::ScopeAttachmentAccess::ReadWrite,
+                        RHI::ScopeAttachmentStage::EarlyFragmentTest | RHI::ScopeAttachmentStage::LateFragmentTest);
                 }
                 // 1 color triangles draw item + 8 white triangles draw items
                 uint32_t itemCount = static_cast<uint32_t>(1 + m_pipelineStateStencil.size());

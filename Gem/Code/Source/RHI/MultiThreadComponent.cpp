@@ -284,7 +284,9 @@ namespace AtomSampleViewer
                 dsDesc.m_imageViewDescriptor.m_overrideFormat = device->GetNearestSupportedFormat(AZ::RHI::Format::D24_UNORM_S8_UINT, AZ::RHI::FormatCapabilities::DepthStencil);
                 dsDesc.m_loadStoreAction.m_clearValue = AZ::RHI::ClearValue::CreateDepthStencil(1.0f, 0);
                 dsDesc.m_loadStoreAction.m_loadAction = AZ::RHI::AttachmentLoadAction::Clear;
-                frameGraph.UseDepthStencilAttachment(dsDesc, AZ::RHI::ScopeAttachmentAccess::Write);
+                frameGraph.UseDepthStencilAttachment(
+                    dsDesc, AZ::RHI::ScopeAttachmentAccess::Write,
+                    AZ::RHI::ScopeAttachmentStage::EarlyFragmentTest | AZ::RHI::ScopeAttachmentStage::LateFragmentTest);
             }
 
             // We will submit s_numberOfCubes draw items.
