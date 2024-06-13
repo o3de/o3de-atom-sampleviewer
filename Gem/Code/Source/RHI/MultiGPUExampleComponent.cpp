@@ -112,9 +112,14 @@ namespace AtomSampleViewer
                 }
             }
 
+            m_scissors[0].m_minX = 0;
+            m_scissors[0].m_minY = 0;
             m_scissors[0].m_maxX = m_outputWidth / 2 + 1;
+            m_scissors[0].m_maxY = m_outputHeight;
             m_scissors[1].m_minX = m_outputWidth / 2;
+            m_scissors[1].m_minY = 0;
             m_scissors[1].m_maxX = m_outputWidth;
+            m_scissors[1].m_maxY = m_outputHeight;
 
             m_imageWidth = m_outputWidth;
             m_imageHeight = m_outputHeight;
