@@ -104,7 +104,14 @@ namespace AtomSampleViewer
 
         m_imguiScope = {}; // restores previous ImGui context.
 
-        m_scene->RemoveRenderPipeline(m_pipeline->GetId());
+        if (m_currentlyUsingCopyPipline)
+        {
+            m_scene->RemoveRenderPipeline(m_copyPipeline->GetId());
+        }
+        else
+        {
+            m_scene->RemoveRenderPipeline(m_pipeline->GetId());
+        }
         m_scene->AddRenderPipeline(m_originalPipeline);
 
         m_pipeline = nullptr;
