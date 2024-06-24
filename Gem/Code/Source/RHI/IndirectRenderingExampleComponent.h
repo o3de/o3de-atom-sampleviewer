@@ -196,7 +196,7 @@ namespace AtomSampleViewer
 
         AZ::RHI::Ptr<AZ::RHI::IndirectBufferWriter> m_indirectDispatchWriter;
 
-        AZ::RHI::MultiDeviceDrawIndirect m_drawIndirect;
+        AZ::RHI::DrawIndirect m_drawIndirect;
         AZ::RHI::CopyBufferDescriptor m_copyDescriptor;
 
         ImGuiSidebar m_imguiSidebar;

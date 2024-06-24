@@ -546,7 +546,7 @@ namespace AtomSampleViewer
                     descriptor.m_attachmentId = m_imageAttachmentIds[0];
                     descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
                     descriptor.m_loadStoreAction.m_storeAction = RHI::AttachmentStoreAction::DontCare;
-                    frameGraph.UseShaderAttachment(descriptor, RHI::ScopeAttachmentAccess::Read);
+                    frameGraph.UseShaderAttachment(descriptor, RHI::ScopeAttachmentAccess::Read, RHI::ScopeAttachmentStage::FragmentShader);
                 }
 
                 {
@@ -554,7 +554,7 @@ namespace AtomSampleViewer
                     descriptor.m_attachmentId = m_imageAttachmentIds[1];
                     descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
                     descriptor.m_loadStoreAction.m_storeAction = RHI::AttachmentStoreAction::DontCare;
-                    frameGraph.UseShaderAttachment(descriptor, RHI::ScopeAttachmentAccess::Read);
+                    frameGraph.UseShaderAttachment(descriptor, RHI::ScopeAttachmentAccess::Read, RHI::ScopeAttachmentStage::FragmentShader);
                 }
 
                 {
