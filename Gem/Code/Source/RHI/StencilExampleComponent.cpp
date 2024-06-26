@@ -52,13 +52,12 @@ namespace AtomSampleViewer
         RHI::PipelineStateDescriptorForDraw pipelineStateDescriptor;
 
         {
-            m_inputAssemblyBufferPool = RHI::Factory::Get().CreateBufferPool();
+            m_inputAssemblyBufferPool = aznew RHI::BufferPool();
 
             RHI::BufferPoolDescriptor bufferPoolDesc;
             bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
             bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-            m_inputAssemblyBufferPool->Init(*device, bufferPoolDesc);
-
+            m_inputAssemblyBufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
 
             BufferData bufferData;
 
@@ -96,7 +95,7 @@ namespace AtomSampleViewer
             // Triangles index
             SetVertexIndexIncreasing(bufferData.m_indices.data(), s_numberOfVertices);
 
-            m_inputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
+            m_inputAssemblyBuffer = aznew RHI::Buffer();
 
             RHI::BufferInitRequest request;
             request.m_buffer = m_inputAssemblyBuffer.get();
@@ -205,21 +204,21 @@ namespace AtomSampleViewer
                 commandList->SetViewports(&m_viewport, 1);
                 commandList->SetScissors(&m_scissor, 1);
 
-                const RHI::IndexBufferView indexBufferView =
-                {
-                    *m_inputAssemblyBuffer,
-                    offsetof(BufferData, m_indices),
-                    sizeof(BufferData::m_indices),
-                    RHI::IndexFormat::Uint16
-                };
+                const RHI::DeviceIndexBufferView indexBufferView = { *m_inputAssemblyBuffer->GetDeviceBuffer(context.GetDeviceIndex()),
+                                                                     offsetof(BufferData, m_indices), sizeof(BufferData::m_indices),
+                                                                     RHI::IndexFormat::Uint16 };
 
                 RHI::DrawIndexed drawIndexed;
                 drawIndexed.m_instanceCount = 1;
 
-                RHI::DrawItem drawItem;
+                RHI::DeviceDrawItem drawItem;
                 drawItem.m_indexBufferView = &indexBufferView;
                 drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
-                drawItem.m_streamBufferViews = m_streamBufferViews.data();
+                AZStd::array<AZ::RHI::DeviceStreamBufferView, 2> deviceStreamBufferViews{
+                    m_streamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()),
+                    m_streamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())
+                };
+                drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
 
                 for (uint32_t i = context.GetSubmitRange().m_startIndex; i < context.GetSubmitRange().m_endIndex; ++i)
                 {
@@ -229,7 +228,7 @@ namespace AtomSampleViewer
 
                         // Draw color triangles
                         drawItem.m_arguments = drawIndexed;
-                        drawItem.m_pipelineState = m_pipelineStateBasePass.get();
+                        drawItem.m_pipelineState = m_pipelineStateBasePass->GetDevicePipelineState(context.GetDeviceIndex()).get();
                         commandList->Submit(drawItem, i);
                     }
                     else
@@ -240,7 +239,7 @@ namespace AtomSampleViewer
                         drawItem.m_stencilRef = 1;
 
                         drawItem.m_arguments = drawIndexed;
-                        drawItem.m_pipelineState = m_pipelineStateStencil[i-1].get();
+                        drawItem.m_pipelineState = m_pipelineStateStencil[i-1]->GetDevicePipelineState(context.GetDeviceIndex()).get();
                         commandList->Submit(drawItem, i);
 
                         drawIndexed.m_indexOffset += 3;

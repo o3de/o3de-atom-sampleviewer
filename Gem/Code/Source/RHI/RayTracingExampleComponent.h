@@ -8,20 +8,20 @@
 
 #pragma once
 
-#include <AzCore/Component/Component.h>
-#include <AzCore/Math/Matrix4x4.h>
-#include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
+#include <Atom/RHI/BufferPool.h>
+#include <Atom/RHI/Device.h>
+#include <Atom/RHI/DeviceDispatchRaysItem.h>
+#include <Atom/RHI/Factory.h>
+#include <Atom/RHI/FrameScheduler.h>
+#include <Atom/RHI/PipelineState.h>
+#include <Atom/RHI/RayTracingAccelerationStructure.h>
+#include <Atom/RHI/RayTracingBufferPools.h>
 #include <Atom/RHI/RayTracingPipelineState.h>
 #include <Atom/RHI/RayTracingShaderTable.h>
-#include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/DispatchRaysItem.h>
-#include <Atom/RHI/Device.h>
-#include <Atom/RHI/Factory.h>
-#include <Atom/RHI/PipelineState.h>
-#include <Atom/RHI/BufferPool.h>
+#include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
+#include <AzCore/Component/Component.h>
+#include <AzCore/Math/Matrix4x4.h>
 #include <RHI/BasicRHIComponent.h>
-#include <Atom/RHI/RayTracingBufferPools.h>
-#include <Atom/RHI/RayTracingAccelerationStructure.h>
 
 namespace AtomSampleViewer
 {
@@ -141,7 +141,6 @@ namespace AtomSampleViewer
         RHI::ConstPtr<RHI::PipelineState> m_drawPipelineState;
         Data::Instance<RPI::ShaderResourceGroup> m_drawSRG;
         RHI::ShaderInputConstantIndex m_drawDimensionConstantIndex;
-        RHI::DrawItem m_drawItem;
 
         // time variable for moving the triangles and rectangle each frame
         float m_time = 0.0f;

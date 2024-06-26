@@ -12,7 +12,6 @@
 
 #include <Atom/RHI/Buffer.h>
 #include <Atom/RHI/BufferPool.h>
-#include <Atom/RHI/DrawItem.h>
 #include <Atom/RHI/PipelineState.h>
 #include <Atom/RPI.Public/Image/AttachmentImage.h>
 
@@ -105,7 +104,6 @@ namespace AtomSampleViewer
         AZ::RHI::AttachmentId m_depthMapID;
         AZ::RHI::AttachmentId m_depthStencilID;
         AZ::RHI::ClearValue m_depthClearValue;
-        AZ::RHI::DrawItem m_drawItem;
 
         AZ::RHI::TransientImageDescriptor m_transientImageDescriptor;
     };

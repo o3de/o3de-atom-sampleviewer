@@ -303,7 +303,7 @@ namespace AtomSampleViewer
                 auto const& mesh = meshes[i];
 
                 // Build draw packet and set the values of the inline constants.
-                RHI::DrawPacketBuilder drawPacketBuilder;
+                RHI::DrawPacketBuilder drawPacketBuilder{RHI::MultiDevice::DefaultDevice};
                 drawPacketBuilder.Begin(nullptr);
                 drawPacketBuilder.SetDrawArguments(mesh.m_drawArguments);
                 drawPacketBuilder.SetIndexBufferView(mesh.m_indexBufferView);
@@ -317,7 +317,7 @@ namespace AtomSampleViewer
                 drawRequest.m_sortKey = 0;
                 drawPacketBuilder.AddDrawItem(drawRequest);
 
-                AZStd::unique_ptr<const RHI::DrawPacket> drawPacket(drawPacketBuilder.End());
+                auto drawPacket{drawPacketBuilder.End()};
                 m_dynamicDraw->AddDrawPacket(m_scene, AZStd::move(drawPacket));
             }
         }

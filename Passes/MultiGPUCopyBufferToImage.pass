@@ -1,0 +1,50 @@
+{
+    "Type": "JsonSerialization",
+    "Version": 1,
+    "ClassName": "PassAsset",
+    "ClassData": {
+        "PassTemplate": {
+            "Name": "MultiGPUCopyImageToBufferPassTemplate",
+            "PassClass": "CopyPass",
+            "Slots": [
+                {
+                    "Name": "Input",
+                    "SlotType": "Input",
+                    "ScopeAttachmentUsage": "Copy",
+                    "BufferViewDesc": {
+                        "m_elementOffset": 0,
+                        "m_elementCount": 153600,
+                        "m_elementSize": 4
+                    }
+                },
+                {
+                    "Name": "Output",
+                    "SlotType": "Output",
+                    "ScopeAttachmentUsage": "Copy"
+                }
+            ],
+            "ImageAttachments": [
+                {
+                    "Name": "OutputAttachment",
+                    "ImageDescriptor": {
+                        "Format": "R8G8B8A8_UNORM",
+                        "Size": {
+                            "Width": 320,
+                            "Height": 480,
+                            "Depth": 1
+                        }
+                    }
+                }
+            ],
+            "Connections": [
+                {
+                    "LocalSlot": "Output",
+                    "AttachmentRef": {
+                        "Pass": "This",
+                        "Attachment": "OutputAttachment"
+                    }
+                }
+            ]
+        }
+    }
+}

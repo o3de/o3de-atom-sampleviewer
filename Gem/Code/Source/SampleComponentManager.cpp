@@ -52,6 +52,7 @@
 #include <RHI/MRTExampleComponent.h>
 #include <RHI/MSAAExampleComponent.h>
 #include <RHI/MultiThreadComponent.h>
+#include <RHI/MultiGPUExampleComponent.h>
 #include <RHI/MultiViewportSwapchainComponent.h>
 #include <RHI/MultipleViewsComponent.h>
 #include <RHI/QueryExampleComponent.h>
@@ -91,6 +92,7 @@
 #include <LightCullingExampleComponent.h>
 #include <MeshExampleComponent.h>
 #include <MSAA_RPI_ExampleComponent.h>
+#include <MultiGPURPIExampleComponent.h>
 #include <MultiRenderPipelineExampleComponent.h>
 #include <MultiSceneExampleComponent.h>
 #include <ParallaxMappingExampleComponent.h>
@@ -280,6 +282,7 @@ namespace AtomSampleViewer
             NewRHISample<MultipleViewsComponent>("MultipleViews"),
             NewRHISample<MRTExampleComponent>("MultiRenderTarget"),
             NewRHISample<MultiThreadComponent>("MultiThread"),
+            NewRHISample<MultiGPUExampleComponent>("MultiGPU", []() { return AZ::RHI::RHISystemInterface::Get()->GetDeviceCount() >= 2; }),
             NewRHISample<MultiViewportSwapchainComponent>("MultiViewportSwapchainComponent", [] { return IsMultiViewportSwapchainSampleSupported(); }),
             NewRHISample<QueryExampleComponent>("Queries"),
             NewRHISample<RayTracingExampleComponent>("RayTracing", []() {return Utils::GetRHIDevice()->GetFeatures().m_rayTracing; }),
@@ -306,6 +309,7 @@ namespace AtomSampleViewer
             NewRPISample<DynamicMaterialTestComponent>("DynamicMaterialTest"),
             NewRPISample<MeshExampleComponent>("Mesh"),
             NewRPISample<MSAA_RPI_ExampleComponent>("MSAA"),
+            NewRPISample<MultiGPURPIExampleComponent>("MultiGPU", []() { return AZ::RHI::RHISystemInterface::Get()->GetDeviceCount() >= 2; }),
             NewRPISample<MultiRenderPipelineExampleComponent>("MultiRenderPipeline"),
             NewRPISample<MultiSceneExampleComponent>("MultiScene"),
             NewRPISample<MultiViewSingleSceneAuxGeomExampleComponent>("MultiViewSingleSceneAuxGeom"),
@@ -1178,10 +1182,10 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::ShowTransientAttachmentProfilerWindow()
     {
-        auto* transientStats = AZ::RHI::RHIMemoryStatisticsInterface::Get()->GetTransientAttachmentStatistics();
-        if (transientStats)
+        const auto& transientStats = AZ::RHI::RHIMemoryStatisticsInterface::Get()->GetTransientAttachmentStatistics();
+        if (!transientStats.empty())
         {
-            m_showTransientAttachmentProfiler = m_imguiTransientAttachmentProfiler.Draw(*transientStats);
+            m_showTransientAttachmentProfiler = m_imguiTransientAttachmentProfiler.Draw(transientStats);
         }
     }
 

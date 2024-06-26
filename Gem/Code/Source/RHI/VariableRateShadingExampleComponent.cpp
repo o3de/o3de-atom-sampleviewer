@@ -169,10 +169,10 @@ namespace AtomSampleViewer
         const auto& tileSize = device->GetLimits().m_shadingRateTileSize;
         m_shadingRateImageSize = Vector2(ceil(static_cast<float>(m_outputWidth) / tileSize.m_width), ceil(static_cast<float>(m_outputHeight) / tileSize.m_height));
 
-        m_imagePool = RHI::Factory::Get().CreateImagePool();
+        m_imagePool = aznew RHI::ImagePool();
         RHI::ImagePoolDescriptor imagePoolDesc;
         imagePoolDesc.m_bindFlags = RHI::ImageBindFlags::ShadingRate | RHI::ImageBindFlags::ShaderReadWrite;
-        m_imagePool->Init(*device, imagePoolDesc);
+        m_imagePool->Init(RHI::MultiDevice::AllDevices, imagePoolDesc);
 
         // Initialize the shading rate images with proper values. Invalid values may cause a crash.
         uint32_t width = static_cast<uint32_t>(m_shadingRateImageSize.GetX());
@@ -200,7 +200,7 @@ namespace AtomSampleViewer
         m_shadingRateImages.resize(device->GetFeatures().m_dynamicShadingRateImage ? 1 : device->GetDescriptor().m_frameCountMax+3);
         for (auto& image : m_shadingRateImages)
         {
-            image = RHI::Factory::Get().CreateImage();
+            image = aznew RHI::Image();
             RHI::ImageInitRequest initImageRequest;
             RHI::ClearValue clearValue = RHI::ClearValue::CreateVector4Float(1, 1, 1, 1);
             initImageRequest.m_image = image.get();
@@ -215,14 +215,9 @@ namespace AtomSampleViewer
             RHI::ImageUpdateRequest request;
             request.m_image = image.get();
             request.m_sourceData = shadingRatePatternData.data();
-            request.m_sourceSubresourceLayout = RHI::ImageSubresourceLayout(
-                RHI::Size(width, height, 1),
-                height,
-                width * formatSize,
-                bufferSize,
-                1,
-                1
-            );
+            request.m_sourceSubresourceLayout = RHI::ImageSubresourceLayout();
+            request.m_sourceSubresourceLayout.Init(
+                RHI::MultiDevice::AllDevices, { RHI::Size(width, height, 1), height, width * formatSize, bufferSize, 1, 1 });
 
             m_imagePool->UpdateImageContents(request);
         }        
@@ -444,13 +439,11 @@ namespace AtomSampleViewer
 
     void VariableRateShadingExampleComponent::CreateInputAssemblyBuffersAndViews()
     {
-        const RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
-
-        m_bufferPool = RHI::Factory::Get().CreateBufferPool();
+        m_bufferPool = aznew RHI::BufferPool();
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-        m_bufferPool->Init(*device, bufferPoolDesc);
+        m_bufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
 
         struct BufferData
         {
@@ -462,7 +455,7 @@ namespace AtomSampleViewer
         BufferData bufferData;
         SetFullScreenRect(bufferData.m_positions.data(), bufferData.m_uvs.data(), bufferData.m_indices.data());
 
-        m_inputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
+        m_inputAssemblyBuffer = aznew RHI::Buffer();
         RHI::ResultCode result = RHI::ResultCode::Success;
         RHI::BufferInitRequest request;
 
@@ -558,7 +551,9 @@ namespace AtomSampleViewer
                 commandList->SetFragmentShadingRate(m_shadingRate, combinators);
             }
 
-            const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_modelShaderResourceGroup->GetRHIShaderResourceGroup() };
+            const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
+                m_modelShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
+            };
             // We have to wait until the updating of the initial contents of the shading rate image is done if
             // dynamic mode is not supported (since the CPU would try to read it while the GPU is updating the contents)
             bool useImageShadingRate = m_useImageShadingRate && (device->GetFeatures().m_dynamicShadingRateImage || m_frameCount > device->GetDescriptor().m_frameCountMax);
@@ -567,14 +562,19 @@ namespace AtomSampleViewer
             drawIndexed.m_indexCount = 6;
             drawIndexed.m_instanceCount = 1;
 
-            RHI::DrawItem drawItem;
+            RHI::DeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;
-            drawItem.m_pipelineState = m_modelPipelineState[useImageShadingRate ? 0 : 1].get();
-            drawItem.m_indexBufferView = &m_indexBufferView;
+            drawItem.m_pipelineState = m_modelPipelineState[useImageShadingRate ? 0 : 1]->GetDevicePipelineState(context.GetDeviceIndex()).get();
+            auto deviceIndexBufferView{m_indexBufferView.GetDeviceIndexBufferView(context.GetDeviceIndex())};
+            drawItem.m_indexBufferView = &deviceIndexBufferView;
             drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));;
             drawItem.m_shaderResourceGroups = shaderResourceGroups;
             drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
-            drawItem.m_streamBufferViews = m_streamBufferViews.data();
+            AZStd::array<AZ::RHI::DeviceStreamBufferView, 2> deviceStreamBufferViews{
+                m_streamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()),
+                m_streamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())
+            };
+            drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
 
             commandList->Submit(drawItem);
 
@@ -630,7 +630,7 @@ namespace AtomSampleViewer
             if (m_useImageShadingRate)
             {
                 Vector2 center = m_cursorPos * m_shadingRateImageSize;
-                const RHI::ImageView* shadingRateImageView = context.GetImageView(RHI::AttachmentId(shadingRateAttachmentId));
+                const auto* shadingRateImageView = context.GetImageView(RHI::AttachmentId(shadingRateAttachmentId));
                 m_computeShaderResourceGroup->SetImageView(m_shadingRateIndex, shadingRateImageView);
                 m_computeShaderResourceGroup->SetConstant(m_centerIndex, center);
                 m_computeShaderResourceGroup->Compile();
@@ -646,8 +646,8 @@ namespace AtomSampleViewer
 
             RHI::CommandList* commandList = context.GetCommandList();
 
-            RHI::DispatchItem dispatchItem;
-            decltype(dispatchItem.m_shaderResourceGroups) shaderResourceGroups = { { m_computeShaderResourceGroup->GetRHIShaderResourceGroup() } };
+            RHI::DeviceDispatchItem dispatchItem;
+            decltype(dispatchItem.m_shaderResourceGroups) shaderResourceGroups = { { m_computeShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get() } };
 
             RHI::DispatchDirect dispatchArgs;
 
@@ -662,7 +662,7 @@ namespace AtomSampleViewer
             AZ_Assert(dispatchArgs.m_threadsPerGroupZ == 1, "If the shader source changes, this logic should change too.");
 
             dispatchItem.m_arguments = dispatchArgs;
-            dispatchItem.m_pipelineState = m_computePipelineState.get();
+            dispatchItem.m_pipelineState = m_computePipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
             dispatchItem.m_shaderResourceGroupCount = 1;
             dispatchItem.m_shaderResourceGroups = shaderResourceGroups;
 
@@ -717,7 +717,7 @@ namespace AtomSampleViewer
         {
             if (m_showShadingRateImage)
             {
-                const RHI::ImageView* shadingRateImageView = context.GetImageView(RHI::AttachmentId(VariableRateShading::ShadingRateAttachmentId));
+                const auto* shadingRateImageView = context.GetImageView(RHI::AttachmentId(VariableRateShading::ShadingRateAttachmentId));
                 m_imageShaderResourceGroup->SetImageView(m_shadingRateDisplayIndex, shadingRateImageView);
                 m_imageShaderResourceGroup->Compile();
             }
@@ -736,20 +736,27 @@ namespace AtomSampleViewer
             commandList->SetViewports(&m_viewport, 1);
             commandList->SetScissors(&m_scissor, 1);
 
-            const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_imageShaderResourceGroup->GetRHIShaderResourceGroup() };
+            const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
+                m_imageShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
+            };
 
             RHI::DrawIndexed drawIndexed;
             drawIndexed.m_indexCount = 6;
             drawIndexed.m_instanceCount = 1;
 
-            RHI::DrawItem drawItem;
+            RHI::DeviceDrawItem drawItem;
             drawItem.m_arguments = drawIndexed;
-            drawItem.m_pipelineState = m_imagePipelineState.get();
-            drawItem.m_indexBufferView = &m_indexBufferView;
+            drawItem.m_pipelineState = m_imagePipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
+            auto deviceIndexBufferView{m_indexBufferView.GetDeviceIndexBufferView(context.GetDeviceIndex())};
+            drawItem.m_indexBufferView = &deviceIndexBufferView;
             drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
             drawItem.m_shaderResourceGroups = shaderResourceGroups;
             drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
-            drawItem.m_streamBufferViews = m_streamBufferViews.data();
+            AZStd::array<AZ::RHI::DeviceStreamBufferView, 2> deviceStreamBufferViews{
+                m_streamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()),
+                m_streamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())
+            };
+            drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
 
             commandList->Submit(drawItem);
         };

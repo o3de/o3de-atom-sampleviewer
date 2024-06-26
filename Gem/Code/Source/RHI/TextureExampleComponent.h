@@ -13,7 +13,6 @@
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 
 #include <Atom/RHI/BufferPool.h>
-#include <Atom/RHI/DrawItem.h>
 #include <Atom/RHI.Reflect/SamplerState.h>
 
 #include <AzCore/Component/TickBus.h>
@@ -68,7 +67,7 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 6> m_indices;
         };
 
-        AZ::RHI::DrawItem m_drawItem;
+        AZ::RHI::DeviceDrawItem m_drawItem;
         AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
 
         AZ::RHI::SamplerState m_samplerState;

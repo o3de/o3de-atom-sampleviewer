@@ -372,7 +372,7 @@ namespace AtomSampleViewer
         if (m_imguiSidebar.Begin())
         {
             Data::Instance<RPI::StreamingImagePool> streamingImagePool = RPI::ImageSystemInterface::Get()->GetSystemStreamingPool();
-            const RHI::StreamingImagePool* rhiPool = streamingImagePool->GetRHIPool();
+            const auto* rhiPool = streamingImagePool->GetRHIPool();
             const RHI::HeapMemoryUsage& memoryUsage = rhiPool->GetHeapMemoryUsage(RHI::HeapMemoryLevel::Device);
 
             const size_t MB = 1024*1024;
@@ -390,7 +390,7 @@ namespace AtomSampleViewer
             size_t budgetInBytes = memoryUsage.m_budgetInBytes;
             int budgetInMB = aznumeric_cast<int>(budgetInBytes/MB);
             ImGui::Text("GPU memory budget: %d MB", budgetInMB);
-            if (ScriptableImGui::SliderInt("MB", &budgetInMB, RHI::StreamingImagePool::ImagePoolMininumSizeInBytes/MB, 512))
+            if (ScriptableImGui::SliderInt("MB", &budgetInMB, RHI::DeviceStreamingImagePool::ImagePoolMininumSizeInBytes / MB, 512))
             {
                 streamingImagePool->SetMemoryBudget(budgetInMB * (1024*1024));
             }
@@ -490,7 +490,7 @@ namespace AtomSampleViewer
         for (Image3dToDraw& image3d : m_3dImages)
         {
             // Build draw packet...
-            RHI::DrawPacketBuilder drawPacketBuilder;
+            RHI::DrawPacketBuilder drawPacketBuilder{RHI::MultiDevice::DefaultDevice};
             drawPacketBuilder.Begin(nullptr);
             RHI::DrawLinear drawLinear;
             drawLinear.m_vertexCount = 4;
@@ -505,7 +505,7 @@ namespace AtomSampleViewer
             drawPacketBuilder.AddDrawItem(drawRequest);
 
             // Submit draw packet...
-            AZStd::unique_ptr<const RHI::DrawPacket> drawPacket(drawPacketBuilder.End());
+            auto drawPacket{drawPacketBuilder.End()};
             m_dynamicDraw->AddDrawPacket(m_scene, AZStd::move(drawPacket));
         }
     }
@@ -513,7 +513,7 @@ namespace AtomSampleViewer
     void StreamingImageExampleComponent::DrawImage(const ImageToDraw* imageInfo)
     {
         // Build draw packet...
-        RHI::DrawPacketBuilder drawPacketBuilder;
+        RHI::DrawPacketBuilder drawPacketBuilder{RHI::MultiDevice::DefaultDevice};
         drawPacketBuilder.Begin(nullptr);
         RHI::DrawLinear drawLinear;
         drawLinear.m_vertexCount = 4;
@@ -528,7 +528,7 @@ namespace AtomSampleViewer
         drawPacketBuilder.AddDrawItem(drawRequest);
 
         // Submit draw packet...
-        AZStd::unique_ptr<const RHI::DrawPacket> drawPacket(drawPacketBuilder.End());
+        auto drawPacket{drawPacketBuilder.End()};
         m_dynamicDraw->AddDrawPacket(m_scene, AZStd::move(drawPacket));
     }
 
@@ -653,7 +653,7 @@ namespace AtomSampleViewer
         // will be uploaded with a single command
         {
             AZStd::vector<uint8_t> imageData;
-            RHI::ImageSubresourceLayout layout;
+            RHI::DeviceImageSubresourceLayout layout;
             RHI::Format format = {};
             BasicRHIComponent::CreateImage3dData(imageData, layout, format, {
                                                             "textures/streaming/streaming13.dds.streamingimage",

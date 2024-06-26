@@ -18,7 +18,6 @@
 
 #include <Atom/RHI/ScopeProducer.h>
 #include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/DrawItem.h>
 #include <Atom/RHI/Device.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/PipelineState.h>
@@ -77,8 +76,6 @@ namespace AtomSampleViewer
         void UploadDataToConstantBuffer(InstanceInfo* data, uint32_t elementSize, uint32_t elementCount);
         void CreateConstantBufferView();
         
-        AZ::RHI::DrawItem m_drawItem;
-
         float m_time = 0.0f;
 
         // -------------------------------------------------

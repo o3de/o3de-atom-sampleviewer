@@ -21,10 +21,10 @@
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 
 #include <Atom/RHI/BufferPool.h>
-#include <Atom/RHI/DrawItem.h>
 #include <Atom/RHI/Device.h>
+#include <Atom/RHI/DeviceCopyItem.h>
+#include <Atom/RHI/DrawItem.h>
 #include <Atom/RHI/Factory.h>
-#include <Atom/RHI/CopyItem.h>
 #include <Atom/RHI/FrameScheduler.h>
 #include <Atom/RHI/PipelineState.h>
 

@@ -14,7 +14,6 @@
 #include <Atom/RPI.Public/XR/XRSpaceNotificationBus.h>
 
 #include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/DrawItem.h>
 #include <Atom/RHI/Device.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/PipelineState.h>
@@ -108,7 +107,6 @@ namespace AtomSampleViewer
         };
 
         AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
-        AZ::RHI::DrawItem m_drawItem;
         float m_time = 0.0f;
         AZStd::array<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, NumberOfCubes> m_shaderResourceGroups;
         AZStd::array<AZ::Matrix4x4, NumberOfCubes> m_modelMatrices;

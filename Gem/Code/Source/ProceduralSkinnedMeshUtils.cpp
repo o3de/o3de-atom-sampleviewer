@@ -12,6 +12,7 @@
 #include <Atom/RPI.Reflect/Buffer/BufferAssetCreator.h>
 #include <Atom/RPI.Reflect/ResourcePoolAssetCreator.h>
 #include <Atom/RPI.Reflect/Model/ModelAssetCreator.h>
+#include <Atom/RPI.Reflect/Model/ModelAssetHelpers.h>
 #include <Atom/RPI.Reflect/Model/ModelLodAssetCreator.h>
 #include <Atom/RPI.Reflect/Model/SkinJointIdPadding.h>
 #include <Atom/Feature/SkinnedMesh/SkinnedMeshInputBuffers.h>

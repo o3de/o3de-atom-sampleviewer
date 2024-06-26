@@ -9,7 +9,6 @@
 #pragma once
 
 #include <Atom/RHI/BufferPool.h>
-#include <Atom/RHI/DrawItem.h>
 #include <Atom/RHI/ScopeProducer.h>
 
 #include <Atom/RPI.Public/Image/AttachmentImage.h>
@@ -83,7 +82,6 @@ namespace AtomSampleViewer
         AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
         AZ::RHI::IndexBufferView m_indexBufferView;
 
-        AZ::RHI::DrawItem m_drawItem;
         AZStd::array<AZ::RHI::AttachmentId, 3> m_attachmentID;
         AZ::RHI::ClearValue m_clearValue;
         float m_time;

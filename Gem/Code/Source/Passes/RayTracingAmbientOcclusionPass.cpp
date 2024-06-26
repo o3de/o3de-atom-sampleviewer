@@ -6,21 +6,21 @@
  *
  */
 
-#include <Passes/RayTracingAmbientOcclusionPass.h>
+#include <Atom/Feature/TransformService/TransformServiceFeatureProcessor.h>
 #include <Atom/RHI/CommandList.h>
-#include <Atom/RHI/DispatchRaysItem.h>
+#include <Atom/RHI/DeviceDispatchRaysItem.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/FrameScheduler.h>
 #include <Atom/RHI/RHISystemInterface.h>
 #include <Atom/RHI/ScopeProducerFunction.h>
-#include <Atom/RPI.Public/Buffer/BufferSystemInterface.h>
 #include <Atom/RPI.Public/Buffer/Buffer.h>
-#include <Atom/RPI.Public/RenderPipeline.h>
-#include <Atom/RPI.Public/Scene.h>
+#include <Atom/RPI.Public/Buffer/BufferSystemInterface.h>
 #include <Atom/RPI.Public/Pass/PassUtils.h>
 #include <Atom/RPI.Public/RPIUtils.h>
+#include <Atom/RPI.Public/RenderPipeline.h>
+#include <Atom/RPI.Public/Scene.h>
 #include <Atom/RPI.Public/View.h>
-#include <Atom/Feature/TransformService/TransformServiceFeatureProcessor.h>
+#include <Passes/RayTracingAmbientOcclusionPass.h>
 
 namespace AZ
 {
@@ -49,8 +49,6 @@ namespace AZ
 
         void RayTracingAmbientOcclusionPass::CreateRayTracingPipelineState()
         {
-            RHI::Ptr<RHI::Device> device = RHI::RHISystemInterface::Get()->GetDevice();
-
             // load ray generation shader
             const char* rayGenerationShaderFilePath = "Shaders/RayTracing/RTAOGeneration.azshader";
             m_rayGenerationShader = RPI::LoadShader(rayGenerationShaderFilePath);
@@ -103,8 +101,8 @@ namespace AZ
                 ;
 
             // create the ray tracing pipeline state object
-            m_rayTracingPipelineState = RHI::Factory::Get().CreateRayTracingPipelineState();
-            m_rayTracingPipelineState->Init(*device.get(), &descriptor);
+            m_rayTracingPipelineState = aznew RHI::RayTracingPipelineState;
+            m_rayTracingPipelineState->Init(RHI::MultiDevice::AllDevices, descriptor);
         }
 
         void RayTracingAmbientOcclusionPass::FrameBeginInternal(FramePrepareParams params)
@@ -120,12 +118,11 @@ namespace AZ
 
             if (!m_rayTracingShaderTable)
             {
-                RHI::Ptr<RHI::Device> device = RHI::RHISystemInterface::Get()->GetDevice();
                 RHI::RayTracingBufferPools& rayTracingBufferPools = m_rayTracingFeatureProcessor->GetBufferPools();
 
                 // Build shader table once. Since we are not using local srg so we don't need to rebuild it even when scene changed 
-                m_rayTracingShaderTable = RHI::Factory::Get().CreateRayTracingShaderTable();
-                m_rayTracingShaderTable->Init(*device.get(), rayTracingBufferPools);
+                m_rayTracingShaderTable = aznew RHI::RayTracingShaderTable;
+                m_rayTracingShaderTable->Init(RHI::MultiDevice::AllDevices, rayTracingBufferPools);
 
                 AZStd::shared_ptr<RHI::RayTracingShaderTableDescriptor> descriptor = AZStd::make_shared<RHI::RayTracingShaderTableDescriptor>();
                 descriptor->Build(AZ::Name("RayTracingAOShaderTable"), m_rayTracingPipelineState)
@@ -162,7 +159,7 @@ namespace AZ
             RHI::ShaderInputConstantIndex constantIndex;
 
             // Bind scene TLAS buffer
-            const RHI::Ptr<RHI::Buffer> tlasBuffer = m_rayTracingFeatureProcessor->GetTlas()->GetTlasBuffer();
+            auto tlasBuffer = m_rayTracingFeatureProcessor->GetTlas()->GetTlasBuffer();
             if (tlasBuffer)
             {
                 // TLAS
@@ -170,7 +167,7 @@ namespace AZ
                 RHI::BufferViewDescriptor bufferViewDescriptor = RHI::BufferViewDescriptor::CreateRayTracingTLAS(tlasBufferByteCount);
 
                 bufferIndex = srgLayout->FindShaderInputBufferIndex(AZ::Name("m_scene"));
-                m_shaderResourceGroup->SetBufferView(bufferIndex, tlasBuffer->GetBufferView(bufferViewDescriptor).get());
+                m_shaderResourceGroup->SetBufferView(bufferIndex, tlasBuffer->BuildBufferView(bufferViewDescriptor).get());
             }
 
             // Bind constants
@@ -220,20 +217,19 @@ namespace AZ
             RPI::PassAttachment* outputAttachment = GetOutputBinding(0).GetAttachment().get();
             RHI::Size targetImageSize = outputAttachment->m_descriptor.m_image.m_size;
 
-            const RHI::ShaderResourceGroup* shaderResourceGroups[] =
-            {
-                m_shaderResourceGroup->GetRHIShaderResourceGroup()
+            const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
+                m_shaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
             };
 
-            RHI::DispatchRaysItem dispatchRaysItem;
+            RHI::DeviceDispatchRaysItem dispatchRaysItem;
             dispatchRaysItem.m_arguments.m_direct.m_width = targetImageSize.m_width;
             dispatchRaysItem.m_arguments.m_direct.m_height = targetImageSize.m_height;
             dispatchRaysItem.m_arguments.m_direct.m_depth = 1;
-            dispatchRaysItem.m_rayTracingPipelineState = m_rayTracingPipelineState.get();
-            dispatchRaysItem.m_rayTracingShaderTable = m_rayTracingShaderTable.get();
+            dispatchRaysItem.m_rayTracingPipelineState = m_rayTracingPipelineState->GetDeviceRayTracingPipelineState(context.GetDeviceIndex()).get();
+            dispatchRaysItem.m_rayTracingShaderTable = m_rayTracingShaderTable->GetDeviceRayTracingShaderTable(context.GetDeviceIndex()).get();
             dispatchRaysItem.m_shaderResourceGroupCount = 1;
             dispatchRaysItem.m_shaderResourceGroups = shaderResourceGroups;
-            dispatchRaysItem.m_globalPipelineState = m_globalPipelineState.get();
+            dispatchRaysItem.m_globalPipelineState = m_globalPipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
 
             // submit the DispatchRays item
             context.GetCommandList()->Submit(dispatchRaysItem);

@@ -13,7 +13,6 @@
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 
 #include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/DrawItem.h>
 #include <Atom/RHI/Device.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/PipelineState.h>
@@ -62,6 +61,5 @@ namespace AtomSampleViewer
         };
 
         AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
-        AZ::RHI::DrawItem m_drawItem;
     };
 } // namespace AtomSampleViewer

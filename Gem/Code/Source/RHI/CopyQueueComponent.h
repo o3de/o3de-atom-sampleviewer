@@ -93,7 +93,6 @@ namespace AtomSampleViewer
 
         BufferData m_bufferData;
 
-        AZ::RHI::DrawItem m_drawItem;
         AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
 
         static const int numberOfPaths = 3;

@@ -271,7 +271,7 @@ namespace AtomSampleViewer
     void TonemappingExampleComponent::DrawImage(const ImageToDraw* imageInfo)
     {
         // Build draw packet
-        RHI::DrawPacketBuilder drawPacketBuilder;
+        RHI::DrawPacketBuilder drawPacketBuilder{RHI::MultiDevice::DefaultDevice};
         drawPacketBuilder.Begin(nullptr);
         RHI::DrawLinear drawLinear;
         drawLinear.m_vertexCount = 4;
@@ -285,7 +285,7 @@ namespace AtomSampleViewer
         drawPacketBuilder.AddDrawItem(drawRequest);
 
         // Submit draw packet
-        AZStd::unique_ptr<const RHI::DrawPacket> drawPacket(drawPacketBuilder.End());
+        auto drawPacket{drawPacketBuilder.End()};
         m_dynamicDraw->AddDrawPacket(m_scene, AZStd::move(drawPacket));
     }
 
