@@ -167,6 +167,7 @@ namespace AtomSampleViewer
     {
         const AZ::Render::DirectionalLightFeatureProcessorInterface::LightHandle handle = m_directionalLightFeatureProcessor->AcquireLight();
 
+        m_directionalLightFeatureProcessor->SetShadowEnabled(handle, true);
         m_directionalLightFeatureProcessor->SetShadowmapSize(handle, AZ::Render::ShadowmapSize::Size2048);
         m_directionalLightFeatureProcessor->SetCascadeCount(handle, 4);
         m_directionalLightFeatureProcessor->SetShadowmapFrustumSplitSchemeRatio(handle, 0.5f);

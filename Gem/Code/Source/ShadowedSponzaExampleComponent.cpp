@@ -242,6 +242,7 @@ namespace AtomSampleViewer
                 lightTransform.GetBasis(1));
 
             featureProcessor->SetRgbIntensity(handle, AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Lux>(DirectionalLightColor * m_directionalLightIntensity));
+            featureProcessor->SetShadowEnabled(handle, m_shadowEnabled);
             featureProcessor->SetCascadeCount(handle, s_cascadesCountDefault);
             featureProcessor->SetShadowmapSize(handle, s_shadowmapSizes[s_shadowmapSizeIndexDefault]);
             featureProcessor->SetViewFrustumCorrectionEnabled(handle, m_isCascadeCorrectionEnabled);

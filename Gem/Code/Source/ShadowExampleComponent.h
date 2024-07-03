@@ -153,6 +153,8 @@ namespace AtomSampleViewer
             FarClipDistance * 3 / 4,
             FarClipDistance * 4 / 4
         };
+
+        bool m_shadowEnabled = true;
         bool m_useFullscreenBlur = false;
         bool m_isCascadeCorrectionEnabled = false;
         bool m_isDebugColoringEnabled = false;

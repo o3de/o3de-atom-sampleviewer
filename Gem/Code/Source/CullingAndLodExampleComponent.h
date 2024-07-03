@@ -116,6 +116,7 @@ namespace AtomSampleViewer
         static constexpr int s_shadowmapSizeIndexDefault = 3;
         static constexpr int s_cascadesCountDefault = 4;
         static constexpr float s_ratioLogarithmUniformDefault = 0.8f;
+        bool m_dirShadowEnabled = true;
         int m_directionalLightShadowmapSizeIndex = 0;
         int m_cascadeCount = 0;
         float m_ratioLogarithmUniform = 0.f;
