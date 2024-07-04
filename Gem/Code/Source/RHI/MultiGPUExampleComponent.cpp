@@ -62,25 +62,24 @@ namespace AtomSampleViewer
     {
         if (m_outputWidth != m_imageWidth || m_outputHeight != m_imageHeight)
         {
-            // Image used as color attachment
+            // Image used as color attachment only on first device
             {
-                m_image = aznew RHI::Image;
+                m_images[0] = aznew RHI::Image;
                 RHI::ImageInitRequest initImageRequest;
-                initImageRequest.m_image = m_image.get();
+                initImageRequest.m_image = m_images[0].get();
                 initImageRequest.m_descriptor = RHI::ImageDescriptor::Create2D(
-                    RHI::ImageBindFlags::Color | RHI::ImageBindFlags::ShaderReadWrite | RHI::ImageBindFlags::CopyRead, m_outputWidth, m_outputHeight, m_outputFormat);
-                m_imagePool->InitImage(initImageRequest);
+                    RHI::ImageBindFlags::Color | RHI::ImageBindFlags::ShaderReadWrite, m_outputWidth, m_outputHeight, m_outputFormat);
+                m_firstDeviceOnlyImagePool->InitImage(initImageRequest);
             }
 
-            // Image holds rendered texture from GPU1 (on GPU0)
+            // Image used as color attachment on both devices (rendered on device 1 and copied to device 0 for compositing)
             {
-                m_transferImage = aznew RHI::Image;
+                m_images[1] = aznew RHI::Image;
                 RHI::ImageInitRequest initImageRequest;
-                initImageRequest.m_image = m_transferImage.get();
+                initImageRequest.m_image = m_images[1].get();
                 initImageRequest.m_descriptor = RHI::ImageDescriptor::Create2D(
-                    RHI::ImageBindFlags::Color | RHI::ImageBindFlags::ShaderRead | RHI::ImageBindFlags::CopyWrite, m_outputWidth, m_outputHeight,
-                    m_outputFormat);
-                m_transferImagePool->InitImage(initImageRequest);
+                    RHI::ImageBindFlags::Color | RHI::ImageBindFlags::ShaderReadWrite | RHI::ImageBindFlags::CopyRead | RHI::ImageBindFlags::CopyWrite, m_outputWidth, m_outputHeight, m_outputFormat);
+                m_imagePool->InitImage(initImageRequest);
             }
 
             RHI::BufferBindFlags stagingBufferBindFlags{ RHI::BufferBindFlags::CopyWrite | RHI::BufferBindFlags::CopyRead };
@@ -92,7 +91,6 @@ namespace AtomSampleViewer
                 RHI::BufferInitRequest request;
                 request.m_buffer = m_stagingBufferToGPU.get();
                 request.m_descriptor = RHI::BufferDescriptor{stagingBufferBindFlags, initialData.size() * sizeof(unsigned int)};
-                //? Check BindFlags
                 request.m_initialData = initialData.data();
                 if (m_stagingBufferPoolToGPU->InitBuffer(request) != RHI::ResultCode::Success)
                 {
@@ -105,7 +103,7 @@ namespace AtomSampleViewer
                 RHI::BufferInitRequest request;
                 request.m_buffer = m_stagingBufferToCPU.get();
                 request.m_descriptor =
-                    RHI::BufferDescriptor{ stagingBufferBindFlags, m_outputWidth * m_outputHeight * sizeof(unsigned int) }; //? Check BindFlags
+                    RHI::BufferDescriptor{ stagingBufferBindFlags, m_outputWidth * m_outputHeight * sizeof(unsigned int) };
                 if (m_stagingBufferPoolToCPU->InitBuffer(request) != RHI::ResultCode::Success)
                 {
                     AZ_Error("MultiGPUExampleComponent", false, "StagingBufferToCPU was not created");
@@ -126,16 +124,13 @@ namespace AtomSampleViewer
         }
 
         frameGraphBuilder.GetAttachmentDatabase().ImportImage(
-            m_imageAttachmentIds[0], m_image);
+            m_imageAttachmentIds[0], m_images[0]);
 
         frameGraphBuilder.GetAttachmentDatabase().ImportImage(
-            m_imageAttachmentIds[1], m_transferImage);
+            m_imageAttachmentIds[1], m_images[1]);
 
         frameGraphBuilder.GetAttachmentDatabase().ImportBuffer(
-            m_bufferAttachmentIds[0], m_stagingBufferToGPU);
-
-        frameGraphBuilder.GetAttachmentDatabase().ImportBuffer(
-            m_bufferAttachmentIds[1], m_stagingBufferToCPU);
+            m_bufferAttachmentId, m_stagingBufferToCPU);
 
         RHI::DeviceBufferMapRequest request{};
         request.m_buffer = m_stagingBufferToCPU->GetDeviceBuffer(1).get();
@@ -177,14 +172,15 @@ namespace AtomSampleViewer
 
         // Create multi-device resources
 
-        // ImagePool for the render target texture
+        RHI::ImageBindFlags imageBindFlags{ RHI::ImageBindFlags::Color | RHI::ImageBindFlags::ShaderReadWrite | RHI::ImageBindFlags::CopyRead | RHI::ImageBindFlags::CopyWrite };
+
+        // ImagePool for both devices
         {
             m_imagePool = aznew RHI::ImagePool;
-            m_imagePool->SetName(Name("RenderTexturePool"));
+            m_imagePool->SetName(Name("MultiDeviceTexturePool"));
 
             RHI::ImagePoolDescriptor imagePoolDescriptor{};
-            imagePoolDescriptor.m_bindFlags =
-                RHI::ImageBindFlags::Color | RHI::ImageBindFlags::ShaderReadWrite | RHI::ImageBindFlags::CopyRead | RHI::ImageBindFlags::CopyWrite;
+            imagePoolDescriptor.m_bindFlags = imageBindFlags;
 
             if (m_imagePool->Init(m_deviceMask, imagePoolDescriptor) != RHI::ResultCode::Success)
             {
@@ -193,18 +189,17 @@ namespace AtomSampleViewer
             }
         }
 
-        // ImagePool used to transfer the rendered texture from GPU 1 -> GPU 0
+        // ImagePool only on first device to render the left half
         {
-            m_transferImagePool = aznew RHI::ImagePool;
-            m_transferImagePool->SetName(Name("TransferImagePool"));
+            m_firstDeviceOnlyImagePool = aznew RHI::ImagePool;
+            m_firstDeviceOnlyImagePool->SetName(Name("FirstDeviceImagePool"));
 
             RHI::ImagePoolDescriptor imagePoolDescriptor{};
-            imagePoolDescriptor.m_bindFlags =
-                RHI::ImageBindFlags::ShaderReadWrite | RHI::ImageBindFlags::CopyRead | RHI::ImageBindFlags::CopyWrite;
+            imagePoolDescriptor.m_bindFlags = imageBindFlags;
 
-            if (m_transferImagePool->Init(m_deviceMask_1, imagePoolDescriptor) != RHI::ResultCode::Success)
+            if (m_firstDeviceOnlyImagePool->Init(m_deviceMask_1, imagePoolDescriptor) != RHI::ResultCode::Success)
             {
-                AZ_Error("MultiGPUExampleComponent", false, "Failed to initialize transfer image pool.");
+                AZ_Error("MultiGPUExampleComponent", false, "Failed to initialize first device image pool.");
                 return;
             }
         }
@@ -372,7 +367,7 @@ namespace AtomSampleViewer
             }
         }
 
-        // Creates a scope for rendering the triangle.
+        // Creates two scopes for rendering the halves of the triangle.
         {
             struct ScopeData
             {
@@ -381,9 +376,9 @@ namespace AtomSampleViewer
 
             const auto prepareFunction = [this](RHI::FrameGraphInterface frameGraph, [[maybe_unused]] ScopeData& scopeData)
             {
-                // Binds the swap chain as a color attachment. Clears it to white.
+                // Binds the swap chain as a color attachment. Clears it to black.
                 RHI::ImageScopeAttachmentDescriptor descriptor;
-                descriptor.m_attachmentId = m_imageAttachmentIds[0];
+                descriptor.m_attachmentId = m_imageAttachmentIds[scopeData.second];
                 descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Clear;
                 descriptor.m_loadStoreAction.m_storeAction = RHI::AttachmentStoreAction::Store;
                 descriptor.m_loadStoreAction.m_clearValue.m_vector4Uint = {0, 0, 0, 0};
@@ -564,9 +559,6 @@ namespace AtomSampleViewer
                 }
 
                 frameGraph.SetEstimatedItemCount(1);
-
-                frameGraph.ExecuteAfter(RHI::ScopeId{ "MultiGPUTriangle0" });
-                frameGraph.ExecuteAfter(RHI::ScopeId{ "MultiGPUCopyToGPU" });
             };
 
             const auto compileFunction = [this](const RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
@@ -649,7 +641,7 @@ namespace AtomSampleViewer
             copyDescriptor.m_sourceBytesPerRow = m_imageWidth * sizeof(uint32_t);
             copyDescriptor.m_sourceBytesPerImage = static_cast<uint32_t>(m_stagingBufferToGPU->GetDescriptor().m_byteCount);
             copyDescriptor.m_sourceSize = RHI::Size{ m_imageWidth, m_imageHeight, 1 };
-            copyDescriptor.m_destinationImage = m_transferImage->GetDeviceImage(context.GetDeviceIndex()).get();
+            copyDescriptor.m_destinationImage = m_images[1]->GetDeviceImage(context.GetDeviceIndex()).get();
 
             RHI::DeviceCopyItem copyItem(copyDescriptor);
             context.GetCommandList()->Submit(copyItem);
@@ -670,7 +662,7 @@ namespace AtomSampleViewer
         {
             {
                 RHI::BufferScopeAttachmentDescriptor descriptor{};
-                descriptor.m_attachmentId = m_bufferAttachmentIds[1];
+                descriptor.m_attachmentId = m_bufferAttachmentId;
                 descriptor.m_bufferViewDescriptor = RHI::BufferViewDescriptor::CreateRaw(0, static_cast<uint32_t>(m_stagingBufferToCPU->GetDescriptor().m_byteCount));
                 descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::DontCare;
                 descriptor.m_loadStoreAction.m_storeAction = RHI::AttachmentStoreAction::Store;
@@ -679,13 +671,11 @@ namespace AtomSampleViewer
 
             {
                 RHI::ImageScopeAttachmentDescriptor descriptor{};
-                descriptor.m_attachmentId = m_imageAttachmentIds[0];
+                descriptor.m_attachmentId = m_imageAttachmentIds[1];
                 descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
                 descriptor.m_loadStoreAction.m_storeAction = RHI::AttachmentStoreAction::DontCare;
                 frameGraph.UseCopyAttachment(descriptor, RHI::ScopeAttachmentAccess::Read);
             }
-
-            frameGraph.ExecuteAfter(RHI::ScopeId{ "MultiGPUTriangle1" });
         };
 
         const auto compileFunction = []([[maybe_unused]] const RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
@@ -695,7 +685,7 @@ namespace AtomSampleViewer
         const auto executeFunction = [this](const RHI::FrameGraphExecuteContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
             RHI::DeviceCopyImageToBufferDescriptor copyDescriptor{};
-            copyDescriptor.m_sourceImage = m_image->GetDeviceImage(context.GetDeviceIndex()).get();
+            copyDescriptor.m_sourceImage = m_images[1]->GetDeviceImage(context.GetDeviceIndex()).get();
             copyDescriptor.m_sourceSize = RHI::Size{ m_imageWidth, m_imageHeight, 1 };
             copyDescriptor.m_destinationBuffer = m_stagingBufferToCPU->GetDeviceBuffer(context.GetDeviceIndex()).get();
             copyDescriptor.m_destinationOffset = 0;

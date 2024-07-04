@@ -79,11 +79,10 @@ namespace AtomSampleViewer
         AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
 
         AZ::RHI::Ptr<AZ::RHI::ImagePool> m_imagePool{};
-        AZ::RHI::Ptr<AZ::RHI::Image> m_image{};
+        AZStd::array<AZ::RHI::Ptr<AZ::RHI::Image>, 2> m_images;
         AZStd::array<AZ::RHI::AttachmentId, 2> m_imageAttachmentIds = { { AZ::RHI::AttachmentId("MultiGPURenderTexture1"),
                                                                           AZ::RHI::AttachmentId("MultiGPURenderTexture2") } };
-        AZStd::array<AZ::RHI::AttachmentId, 2> m_bufferAttachmentIds = { { AZ::RHI::AttachmentId("MultiGPUBufferToGPU"),
-                                                                          AZ::RHI::AttachmentId("MultiGPUBufferToCPU") } };
+        AZ::RHI::AttachmentId m_bufferAttachmentId = { AZ::RHI::AttachmentId("MultiGPUBufferToCPU") };
         uint32_t m_imageWidth{0};
         uint32_t m_imageHeight{0};
 
@@ -107,8 +106,7 @@ namespace AtomSampleViewer
         AZ::RHI::MultiDevice::DeviceMask m_deviceMask_1{};
         AZ::RHI::Ptr<AZ::RHI::BufferPool> m_stagingBufferPoolToGPU{};
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_stagingBufferToGPU{};
-        AZ::RHI::Ptr<AZ::RHI::ImagePool> m_transferImagePool{};
-        AZ::RHI::Ptr<AZ::RHI::Image> m_transferImage{};
+        AZ::RHI::Ptr<AZ::RHI::ImagePool> m_firstDeviceOnlyImagePool{};
         AZ::RHI::Ptr<AZ::RHI::BufferPool> m_inputAssemblyBufferPoolComposite{};
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_inputAssemblyBufferComposite{};
         AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViewsComposite;

@@ -59,9 +59,6 @@ namespace AtomSampleViewer
         // AZ::TickBus::Handler overrides ...
         void OnTick(float deltaTime, AZ::ScriptTimePoint timePoint) override;
 
-        // CommonSampleComponentBase overrides...
-        void OnAllAssetsReadyActivate() override;
-
         // DefaultWindowNotificationBus::Handler overrides...
         void DefaultWindowCreated() override;
 
