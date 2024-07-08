@@ -66,13 +66,6 @@ namespace AtomSampleViewer
 
         AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusConnect();
 
-        // preload assets
-        AZStd::vector<AssetCollectionAsyncLoader::AssetToLoadInfo> assetList = {
-            {CubeModelFilePath, azrtti_typeid<RPI::ModelAsset>()}
-        };
-
-        PreloadAssets(assetList);
-
         // save original render pipeline first and remove it from the scene
         m_originalPipeline = m_scene->GetDefaultRenderPipeline();
         m_scene->RemoveRenderPipeline(m_originalPipeline->GetId());
@@ -163,19 +156,6 @@ namespace AtomSampleViewer
             }
             m_imguiSidebar.End();
         }
-    }
-
-    void MultiGPURPIExampleComponent::OnAllAssetsReadyActivate()
-    {
-        auto meshFeatureProcessor = GetMeshFeatureProcessor();
-
-        auto asset = RPI::AssetUtils::LoadAssetByProductPath<RPI::ModelAsset>(CubeModelFilePath,
-                                                                              RPI::AssetUtils::TraceLevel::Assert);
-        m_meshHandle = meshFeatureProcessor->AcquireMesh(Render::MeshHandleDescriptor(asset));
-
-        const Vector3 translation{ 0.f, 0.f, -1.0f };
-        Transform transform = Transform::CreateTranslation(translation);
-        meshFeatureProcessor->SetTransform(m_meshHandle, transform);
     }
 
     void MultiGPURPIExampleComponent::DefaultWindowCreated()

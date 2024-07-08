@@ -160,7 +160,7 @@
                     ],
                     "PassData": {
                         "$type": "CopyPassData",
-                        "CloneInput": true,
+                        "CloneInput": false,
                         "SourceDeviceIndex": 0,
                         "DestinationDeviceIndex": 1
                     }

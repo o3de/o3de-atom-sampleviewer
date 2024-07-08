@@ -18,6 +18,10 @@ set(FILES
     Passes/Fullscreen.pass
     Passes/FullscreenPipeline.pass
     Passes/MultiGPUPipeline.pass
+    Passes/MultiGPUCopyBufferToBuffer.pass
+    Passes/MultiGPUCopyBufferToImage.pass
+    Passes/MultiGPUCopyImageToBuffer.pass
+    Passes/MultiGPUCopyTestPipeline.pass
     Passes/MultiGPUCompositePass.pass
     Passes/MultiGPUTrianglePass.pass
     Passes/RayTracingAmbientOcclusion.pass
