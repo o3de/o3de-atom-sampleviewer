@@ -82,7 +82,8 @@ namespace AtomSampleViewer
         AZStd::array<AZ::RHI::Ptr<AZ::RHI::Image>, 2> m_images;
         AZStd::array<AZ::RHI::AttachmentId, 2> m_imageAttachmentIds = { { AZ::RHI::AttachmentId("MultiGPURenderTexture1"),
                                                                           AZ::RHI::AttachmentId("MultiGPURenderTexture2") } };
-        AZ::RHI::AttachmentId m_bufferAttachmentId = { AZ::RHI::AttachmentId("MultiGPUBufferToCPU") };
+        AZStd::array<AZ::RHI::AttachmentId, 2> m_bufferAttachmentIds = { { AZ::RHI::AttachmentId("MultiGPUBufferToCPU"),
+                                                                           AZ::RHI::AttachmentId("MultiGPUBufferToGPU") } };
         uint32_t m_imageWidth{0};
         uint32_t m_imageHeight{0};
 
