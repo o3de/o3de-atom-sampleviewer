@@ -1,0 +1,62 @@
+{
+    "Type": "JsonSerialization",
+    "Version": 1,
+    "ClassName": "PassAsset",
+    "ClassData": {
+        "PassTemplate": {
+            "Name": "TwoSubpassesPipelineTemplate",
+            "PassClass": "ParentPass",
+            "Slots": [
+                {
+                    "Name": "PipelineOutput",
+                    "SlotType": "InputOutput"
+                }
+            ],
+            "PassData": {
+                "$type": "PassData",
+                "PipelineGlobalConnections": [
+                    {
+                        "GlobalName": "PipelineOutput",
+                        "Slot": "PipelineOutput"
+                    }
+                ]
+                , "MergeChildrenAsSubpasses": true
+            },
+            "PassRequests": [
+                {
+                    "Name": "ForwardSubpass",
+                    "TemplateName": "ForwardSubpassExampleTemplate",
+                    "PassData": {
+                        "$type": "RasterPassData",
+                        "DrawListTag": "multiViewForward",
+                        "BindViewSrg": true,
+                        "PassSrgShaderAsset": {
+                            "FilePath": "Shaders/ForwardPassSrg.shader"
+                        }
+                    }
+                },
+                {
+                    "Name": "SkyBoxSubpass",
+                    "TemplateName": "SkyBoxSubpassExampleTemplate",
+                    "Enabled": true,
+                    "Connections": [
+                        {
+                            "LocalSlot": "LightingOutput",
+                            "AttachmentRef": {
+                                "Pass": "ForwardSubpass",
+                                "Attachment": "LightingOutput"
+                            }
+                        },
+                        {
+                            "LocalSlot": "SkyBoxDepth",
+                            "AttachmentRef": {
+                                "Pass": "ForwardSubpass",
+                                "Attachment": "DepthOutput"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

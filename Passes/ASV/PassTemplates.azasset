@@ -119,6 +119,26 @@
             {
                 "Name": "DeferredLightingPassTemplate",
                 "Path": "Passes/PrototypeDeferredPipeline/DeferredLighting.pass"
+            },
+            {
+                "Name": "ForwardPassExampleTemplate",
+                "Path": "Passes/SubpassExample/TwoPasses/ForwardPass.pass"
+            },
+            {
+                "Name": "TwoPassesPipelineTemplate",
+                "Path": "Passes/SubpassExample/TwoPasses/TwoPassesPipeline.pass"
+            },
+            {
+                "Name": "ForwardSubpassExampleTemplate",
+                "Path": "Passes/SubpassExample/TwoSubpasses/ForwardSubpass.pass"
+            },
+            {
+                "Name": "SkyBoxSubpassExampleTemplate",
+                "Path": "Passes/SubpassExample/TwoSubpasses/SkyBoxSubpass.pass"
+            },
+            {
+                "Name": "TwoSubpassesPipelineTemplate",
+                "Path": "Passes/SubpassExample/TwoSubpasses/TwoSubpassesPipeline.pass"
             }
         ]
     }

@@ -44,7 +44,7 @@ namespace AtomSampleViewer
             using namespace AZ;
 
             auto* rhiSystem = RHI::RHISystemInterface::Get();
-            AZ_Assert(rhiSystem, "Failed to retrieve rpi system.");
+            AZ_Assert(rhiSystem, "Failed to retrieve rhi system.");
 
             return rhiSystem->GetDevice();
         }
