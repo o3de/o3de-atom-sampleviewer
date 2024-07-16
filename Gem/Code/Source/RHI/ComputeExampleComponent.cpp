@@ -106,7 +106,7 @@ namespace AtomSampleViewer
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-        m_inputAssemblyBufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
+        m_inputAssemblyBufferPool->Init(bufferPoolDesc);
 
         BufferData bufferData;
         SetFullScreenRect(bufferData.m_positions.data(), bufferData.m_uvs.data(), bufferData.m_indices.data());
@@ -240,7 +240,7 @@ namespace AtomSampleViewer
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
         bufferPoolDesc.m_hostMemoryAccess = RHI::HostMemoryAccess::Write;
 
-        result = m_computeBufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
+        result = m_computeBufferPool->Init(bufferPoolDesc);
         AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialized compute buffer pool");
 
         m_computeBuffer = aznew RHI::Buffer();
