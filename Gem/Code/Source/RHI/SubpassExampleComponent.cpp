@@ -222,20 +222,25 @@ namespace AtomSampleViewer
         uint32_t subpassIndex = 0;
         // Build the render attachment layout with the 2 subpasses.
         RHI::RenderAttachmentLayoutBuilder attachmentsBuilder;
+
         // GBuffer Subpass
         attachmentsBuilder.AddSubpass()
             ->RenderTargetAttachment(RHI::Format::R16G16B16A16_FLOAT, m_positionAttachmentId)
             ->RenderTargetAttachment(RHI::Format::R16G16B16A16_FLOAT, m_normalAttachmentId)
             ->RenderTargetAttachment(RHI::Format::R8G8B8A8_UNORM, m_albedoAttachmentId)
             ->RenderTargetAttachment(m_outputFormat, m_outputAttachmentId)
-            ->DepthStencilAttachment(AZ::RHI::Format::D32_FLOAT, m_depthStencilAttachmentId);
+            ->DepthStencilAttachment(AZ::RHI::Format::D32_FLOAT, m_depthStencilAttachmentId, AZ::RHI::AttachmentLoadStoreAction(),
+                AZ::RHI::ScopeAttachmentAccess::Write,
+                AZ::RHI::ScopeAttachmentStage::EarlyFragmentTest | AZ::RHI::ScopeAttachmentStage::LateFragmentTest);
         // Composition Subpass
         attachmentsBuilder.AddSubpass()
             ->SubpassInputAttachment(m_positionAttachmentId, RHI::ImageAspectFlags::Color)
             ->SubpassInputAttachment(m_normalAttachmentId, RHI::ImageAspectFlags::Color)
             ->SubpassInputAttachment(m_albedoAttachmentId, RHI::ImageAspectFlags::Color)
             ->RenderTargetAttachment(m_outputAttachmentId)
-            ->DepthStencilAttachment(m_depthStencilAttachmentId);
+            ->DepthStencilAttachment(m_depthStencilAttachmentId, AZ::RHI::AttachmentLoadStoreAction(),
+                AZ::RHI::ScopeAttachmentAccess::Read,
+                AZ::RHI::ScopeAttachmentStage::EarlyFragmentTest | AZ::RHI::ScopeAttachmentStage::LateFragmentTest);
 
         RHI::RenderAttachmentLayout renderAttachmentLayout;
         [[maybe_unused]] RHI::ResultCode result = attachmentsBuilder.End(renderAttachmentLayout);
@@ -341,6 +346,7 @@ namespace AtomSampleViewer
                 descriptor.m_attachmentId = m_positionAttachmentId;
                 descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Clear;
                 descriptor.m_loadStoreAction.m_clearValue = RHI::ClearValue::CreateVector4Float(0.f, 0.f, 0.f, 0.f);
+                descriptor.m_imageViewDescriptor.m_aspectFlags = RHI::ImageAspectFlags::Color;
                 frameGraph.UseColorAttachment(descriptor);
             }
 
@@ -350,6 +356,7 @@ namespace AtomSampleViewer
                 descriptor.m_attachmentId = m_normalAttachmentId;
                 descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Clear;
                 descriptor.m_loadStoreAction.m_clearValue = RHI::ClearValue::CreateVector4Float(0.f, 0.f, 0.f, 0.f);
+                descriptor.m_imageViewDescriptor.m_aspectFlags = RHI::ImageAspectFlags::Color;
                 frameGraph.UseColorAttachment(descriptor);
             }
 
@@ -359,6 +366,7 @@ namespace AtomSampleViewer
                 descriptor.m_attachmentId = m_albedoAttachmentId;
                 descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Clear;
                 descriptor.m_loadStoreAction.m_clearValue = RHI::ClearValue::CreateVector4Float(0.f, 0.f, 0.f, 0.f);
+                descriptor.m_imageViewDescriptor.m_aspectFlags = RHI::ImageAspectFlags::Color;
                 frameGraph.UseColorAttachment(descriptor);
             }
 
@@ -367,6 +375,7 @@ namespace AtomSampleViewer
                 RHI::ImageScopeAttachmentDescriptor descriptor;
                 descriptor.m_attachmentId = m_outputAttachmentId;
                 descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
+                descriptor.m_imageViewDescriptor.m_aspectFlags = RHI::ImageAspectFlags::Color;
                 frameGraph.UseColorAttachment(descriptor);
             }
 
@@ -376,6 +385,7 @@ namespace AtomSampleViewer
                 dsDesc.m_attachmentId = m_depthStencilAttachmentId;
                 dsDesc.m_loadStoreAction.m_clearValue = RHI::ClearValue::CreateDepthStencil(0, 0);
                 dsDesc.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Clear;
+                dsDesc.m_imageViewDescriptor.m_aspectFlags = RHI::ImageAspectFlags::Depth;
                 frameGraph.UseDepthStencilAttachment(
                     dsDesc, RHI::ScopeAttachmentAccess::Write,
                     AZ::RHI::ScopeAttachmentStage::EarlyFragmentTest | AZ::RHI::ScopeAttachmentStage::LateFragmentTest);
@@ -456,6 +466,7 @@ namespace AtomSampleViewer
                 RHI::ImageScopeAttachmentDescriptor descriptor;
                 descriptor.m_attachmentId = m_positionAttachmentId;
                 descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
+                descriptor.m_imageViewDescriptor.m_aspectFlags = RHI::ImageAspectFlags::Color;
                 frameGraph.UseSubpassInputAttachment(descriptor, RHI::ScopeAttachmentStage::FragmentShader);
             }
 
@@ -464,6 +475,7 @@ namespace AtomSampleViewer
                 RHI::ImageScopeAttachmentDescriptor descriptor;
                 descriptor.m_attachmentId = m_normalAttachmentId;
                 descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
+                descriptor.m_imageViewDescriptor.m_aspectFlags = RHI::ImageAspectFlags::Color;
                 frameGraph.UseSubpassInputAttachment(descriptor, RHI::ScopeAttachmentStage::FragmentShader);
             }
 
@@ -472,6 +484,7 @@ namespace AtomSampleViewer
                 RHI::ImageScopeAttachmentDescriptor descriptor;
                 descriptor.m_attachmentId = m_albedoAttachmentId;
                 descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
+                descriptor.m_imageViewDescriptor.m_aspectFlags = RHI::ImageAspectFlags::Color;
                 frameGraph.UseSubpassInputAttachment(descriptor, RHI::ScopeAttachmentStage::FragmentShader);
             }
 
@@ -480,6 +493,7 @@ namespace AtomSampleViewer
                 RHI::ImageScopeAttachmentDescriptor descriptor;
                 descriptor.m_attachmentId = m_outputAttachmentId;
                 descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
+                descriptor.m_imageViewDescriptor.m_aspectFlags = RHI::ImageAspectFlags::Color;
                 frameGraph.UseColorAttachment(descriptor);
             }
 
@@ -488,6 +502,7 @@ namespace AtomSampleViewer
                 RHI::ImageScopeAttachmentDescriptor dsDesc;
                 dsDesc.m_attachmentId = m_depthStencilAttachmentId;
                 dsDesc.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
+                dsDesc.m_imageViewDescriptor.m_aspectFlags = RHI::ImageAspectFlags::Depth;
                 frameGraph.UseDepthStencilAttachment(
                     dsDesc, RHI::ScopeAttachmentAccess::Read,
                     RHI::ScopeAttachmentStage::EarlyFragmentTest | RHI::ScopeAttachmentStage::LateFragmentTest);

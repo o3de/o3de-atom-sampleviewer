@@ -113,6 +113,7 @@
 #include <XRRPIExampleComponent.h>
 #include <ShaderReloadTestComponent.h>
 #include <ReadbackExampleComponent.h>
+#include <Subpass_RPI_ExampleComponent.h>
 
 #include <Atom/Bootstrap/DefaultWindowBus.h>
 
@@ -288,7 +289,7 @@ namespace AtomSampleViewer
             NewRHISample<RayTracingExampleComponent>("RayTracing", []() {return Utils::GetRHIDevice()->GetFeatures().m_rayTracing; }),
             NewRHISample<SphericalHarmonicsExampleComponent>("SphericalHarmonics"),
             NewRHISample<StencilExampleComponent>("Stencil"),
-            NewRHISample<SubpassExampleComponent>("Subpass", []() {return Utils::GetRHIDevice()->GetFeatures().m_renderTargetSubpassInputSupport != AZ::RHI::SubpassInputSupportType::NotSupported; }),
+            NewRHISample<SubpassExampleComponent>("Subpass", []() { return RHI::RHISystemInterface::Get()->CanMergeSubpasses(); }),
             NewRHISample<SwapchainExampleComponent>("Swapchain"),
             NewRHISample<TextureExampleComponent>("Texture"),
             NewRHISample<Texture3dExampleComponent>("Texture3d"),
@@ -319,6 +320,7 @@ namespace AtomSampleViewer
             NewRPISample<SceneReloadSoakTestComponent>("SceneReloadSoakTest"),
             NewRPISample<StreamingImageExampleComponent>("StreamingImage"),
             NewRPISample<ShaderReloadTestComponent>("ShaderReloadTest"),
+            NewRPISample<Subpass_RPI_ExampleComponent>("Subpass", []() { return RHI::RHISystemInterface::Get()->CanMergeSubpasses(); }),
             NewFeaturesSample<AreaLightExampleComponent>("AreaLight"),
             NewFeaturesSample<BloomExampleComponent>("Bloom"),
             NewFeaturesSample<CheckerboardExampleComponent>("Checkerboard", []() {return (Utils::GetRHIDevice()->GetPhysicalDevice().GetDescriptor().m_vendorId != RHI::VendorId::ARM && Utils::GetRHIDevice()->GetPhysicalDevice().GetDescriptor().m_vendorId != RHI::VendorId::Qualcomm); }),

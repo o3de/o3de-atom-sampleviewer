@@ -190,6 +190,8 @@ set(FILES
     Source/TransparencyExampleComponent.h
     Source/ShaderReloadTestComponent.cpp
     Source/ShaderReloadTestComponent.h
+    Source/Subpass_RPI_ExampleComponent.cpp
+    Source/Subpass_RPI_ExampleComponent.h
     Source/Utils/ImGuiAssetBrowser.cpp
     Source/Utils/ImGuiAssetBrowser.h
     Source/Utils/ImGuiHistogramQueue.cpp
