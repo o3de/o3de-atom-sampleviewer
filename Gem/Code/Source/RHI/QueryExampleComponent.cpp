@@ -159,7 +159,7 @@ namespace AtomSampleViewer
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-        m_inputAssemblyBufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
+        m_inputAssemblyBufferPool->Init(bufferPoolDesc);
 
         {
             // Create quad buffer and views
@@ -557,7 +557,7 @@ namespace AtomSampleViewer
         queryPoolDesc.m_pipelineStatisticsMask = statisticsMask;
 
         queryPool = aznew RHI::QueryPool;
-        auto result = queryPool->Init(RHI::MultiDevice::AllDevices, queryPoolDesc);
+        auto result = queryPool->Init(queryPoolDesc);
         if (result != RHI::ResultCode::Success)
         {
             AZ_Assert(false, "Failed to createa query pool");
@@ -597,7 +597,7 @@ namespace AtomSampleViewer
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::Predication | RHI::BufferBindFlags::CopyWrite;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-        m_predicationBufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
+        m_predicationBufferPool->Init(bufferPoolDesc);
 
         m_predicationBuffer = aznew RHI::Buffer();
 

@@ -139,7 +139,7 @@ namespace AtomSampleViewer
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-        m_inputAssemblyBufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
+        m_inputAssemblyBufferPool->Init(bufferPoolDesc);
 
         {
             BufferData bufferData;
@@ -337,7 +337,7 @@ namespace AtomSampleViewer
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::ShaderRead | RHI::BufferBindFlags::Indirect;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-        m_shaderBufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
+        m_shaderBufferPool->Init(bufferPoolDesc);
 
         // Create the layout depending on which commands are supported by the device.
         m_indirectDrawBufferLayout = RHI::IndirectBufferLayout();
@@ -530,7 +530,7 @@ namespace AtomSampleViewer
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::ShaderRead;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Host;
-        m_instancesBufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
+        m_instancesBufferPool->Init(bufferPoolDesc);
 
         m_instancesDataBuffer = aznew RHI::Buffer();
 
@@ -561,7 +561,7 @@ namespace AtomSampleViewer
             bufferPoolDesc = {};
             bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::CopyRead;
             bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Host;
-            m_copyBufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
+            m_copyBufferPool->Init(bufferPoolDesc);
 
             m_resetCounterBuffer = aznew RHI::Buffer();
 

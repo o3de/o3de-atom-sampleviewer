@@ -71,7 +71,7 @@ namespace AtomSampleViewer
             RHI::BufferPoolDescriptor bufferPoolDesc;
             bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
             bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Host;
-            [[maybe_unused]] RHI::ResultCode resultCode = m_inputAssemblyBufferPool->Init(RHI::MultiDevice::AllDevices, bufferPoolDesc);
+            [[maybe_unused]] RHI::ResultCode resultCode = m_inputAssemblyBufferPool->Init(bufferPoolDesc);
             AZ_Assert(resultCode == RHI::ResultCode::Success, "Failed to initialize input assembly buffer pool");
         }
 
@@ -81,7 +81,7 @@ namespace AtomSampleViewer
             imagePoolDesc.m_bindFlags = RHI::ImageBindFlags::ShaderReadWrite;
 
             m_imagePool = aznew RHI::ImagePool();
-            [[maybe_unused]] RHI::ResultCode result = m_imagePool->Init(RHI::MultiDevice::AllDevices, imagePoolDesc);
+            [[maybe_unused]] RHI::ResultCode result = m_imagePool->Init(imagePoolDesc);
             AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialize output image pool");
         }
 

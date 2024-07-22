@@ -184,8 +184,9 @@ namespace AtomSampleViewer
 
             RHI::ImagePoolDescriptor imagePoolDescriptor{};
             imagePoolDescriptor.m_bindFlags = imageBindFlags;
+            imagePoolDescriptor.m_deviceMask = m_deviceMask;
 
-            if (m_imagePool->Init(m_deviceMask, imagePoolDescriptor) != RHI::ResultCode::Success)
+            if (m_imagePool->Init(imagePoolDescriptor) != RHI::ResultCode::Success)
             {
                 AZ_Error("MultiGPUExampleComponent", false, "Failed to initialize render texture image pool.");
                 return;
@@ -199,8 +200,9 @@ namespace AtomSampleViewer
 
             RHI::ImagePoolDescriptor imagePoolDescriptor{};
             imagePoolDescriptor.m_bindFlags = imageBindFlags;
+            imagePoolDescriptor.m_deviceMask = m_deviceMask_1;
 
-            if (m_firstDeviceOnlyImagePool->Init(m_deviceMask_1, imagePoolDescriptor) != RHI::ResultCode::Success)
+            if (m_firstDeviceOnlyImagePool->Init(imagePoolDescriptor) != RHI::ResultCode::Success)
             {
                 AZ_Error("MultiGPUExampleComponent", false, "Failed to initialize first device image pool.");
                 return;
@@ -217,7 +219,8 @@ namespace AtomSampleViewer
             bufferPoolDesc.m_bindFlags = stagingBufferBindFlags;
             bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Host;
             bufferPoolDesc.m_hostMemoryAccess = RHI::HostMemoryAccess::Write;
-            if (m_stagingBufferPoolToGPU->Init(m_deviceMask_1, bufferPoolDesc) != RHI::ResultCode::Success)
+            bufferPoolDesc.m_deviceMask = m_deviceMask_1;
+            if (m_stagingBufferPoolToGPU->Init(bufferPoolDesc) != RHI::ResultCode::Success)
             {
                 AZ_Error("MultiGPUExampleComponent", false, "StagingBufferPoolToGPU was not initialized");
             }
@@ -231,7 +234,8 @@ namespace AtomSampleViewer
             bufferPoolDesc.m_bindFlags = stagingBufferBindFlags;
             bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Host;
             bufferPoolDesc.m_hostMemoryAccess = RHI::HostMemoryAccess::Read;
-            if (m_stagingBufferPoolToCPU->Init(m_deviceMask_2, bufferPoolDesc) != RHI::ResultCode::Success)
+            bufferPoolDesc.m_deviceMask = m_deviceMask_2;
+            if (m_stagingBufferPoolToCPU->Init(bufferPoolDesc) != RHI::ResultCode::Success)
             {
                 AZ_Error("MultiGPUExampleComponent", false, "StagingBufferPoolToCPU was not created");
             }
@@ -281,7 +285,8 @@ namespace AtomSampleViewer
             RHI::BufferPoolDescriptor bufferPoolDesc;
             bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
             bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-            m_inputAssemblyBufferPool->Init(m_deviceMask, bufferPoolDesc);
+            bufferPoolDesc.m_deviceMask = m_deviceMask;
+            m_inputAssemblyBufferPool->Init(bufferPoolDesc);
 
             BufferDataTrianglePass bufferData;
 
@@ -454,7 +459,8 @@ namespace AtomSampleViewer
             RHI::BufferPoolDescriptor bufferPoolDesc;
             bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
             bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-            m_inputAssemblyBufferPoolComposite->Init(m_deviceMask_1, bufferPoolDesc);
+            bufferPoolDesc.m_deviceMask = m_deviceMask_1;
+            m_inputAssemblyBufferPoolComposite->Init(bufferPoolDesc);
 
             SetFullScreenRect(bufferData.m_positions.data(), bufferData.m_uvs.data(), bufferData.m_indices.data());
 
@@ -512,9 +518,10 @@ namespace AtomSampleViewer
 
             RHI::ShaderResourceGroupPoolDescriptor srgPoolDescriptor{};
             srgPoolDescriptor.m_layout = shader->GetAsset()->FindShaderResourceGroupLayout(AZ::Name { "CompositeSrg" }, shader->GetSupervariantIndex()).get();
+            srgPoolDescriptor.m_deviceMask = m_deviceMask_1;
 
             m_shaderResourceGroupPoolComposite = aznew RHI::ShaderResourceGroupPool;
-            m_shaderResourceGroupPoolComposite->Init(m_deviceMask_1, srgPoolDescriptor);
+            m_shaderResourceGroupPoolComposite->Init(srgPoolDescriptor);
 
             m_shaderResourceGroupComposite = aznew RHI::ShaderResourceGroup;
             m_shaderResourceGroupPoolComposite->InitGroup(*m_shaderResourceGroupComposite);
