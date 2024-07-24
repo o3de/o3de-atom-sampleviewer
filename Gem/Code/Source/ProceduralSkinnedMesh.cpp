@@ -13,6 +13,8 @@
 
 const uint32_t maxInfluencesPerVertex = 4;
 
+using namespace AZ;
+
 namespace AtomSampleViewer
 {
     void ProceduralSkinnedMesh::Resize(SkinnedMeshConfig& skinnedMeshConfig)
