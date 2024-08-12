@@ -14,10 +14,11 @@
 
 #include <Atom/RHI/RHISystemInterface.h>
 
-#include <Atom/RPI.Public/ViewProviderBus.h>
+#include <Atom/RPI.Public/Pass/PassFilter.h>
+#include <Atom/RPI.Public/RPISystemInterface.h>
 #include <Atom/RPI.Public/RenderPipeline.h>
 #include <Atom/RPI.Public/Scene.h>
-#include <Atom/RPI.Public/RPISystemInterface.h>
+#include <Atom/RPI.Public/ViewProviderBus.h>
 #include <Atom/RPI.Reflect/Asset/AssetUtils.h>
 #include <Atom/RPI.Reflect/Model/ModelAsset.h>
 
@@ -111,6 +112,8 @@ namespace AtomSampleViewer
         m_copyPipeline = nullptr;
         m_useCopyPipeline = false;
         m_currentlyUsingCopyPipline = false;
+        m_migrate = false;
+        m_currentlyMigrated = false;
 
         AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusDisconnect();
 
@@ -142,6 +145,39 @@ namespace AtomSampleViewer
             }
             m_currentlyUsingCopyPipline = m_useCopyPipeline;
         }
+
+        if (m_currentlyMigrated != m_migrate)
+        {
+            AZ::RPI::PassFilter trianglePassFilter = AZ::RPI::PassFilter::CreateWithPassName(Name("TrianglePass2"), m_scene);
+            AZ::RPI::PassFilter copyPassFilter = AZ::RPI::PassFilter::CreateWithPassName(Name("CopyPass"), m_scene);
+            AZ::RPI::PassFilter compositePassFilter = AZ::RPI::PassFilter::CreateWithPassName(Name("CompositePass"), m_scene);
+
+            RPI::RenderPass* trianglePass =
+                azrtti_cast<RPI::RenderPass*>(AZ::RPI::PassSystemInterface::Get()->FindFirstPass(trianglePassFilter));
+            RPI::Pass* copyPass = AZ::RPI::PassSystemInterface::Get()->FindFirstPass(copyPassFilter);
+            RPI::Pass* compositePass = AZ::RPI::PassSystemInterface::Get()->FindFirstPass(compositePassFilter);
+            AZ_Assert(trianglePass && copyPass && compositePass, "Couldn't find passes");
+
+            if (m_migrate)
+            {
+                trianglePass->SetDeviceIndex(0);
+                copyPass->SetEnabled(false);
+                auto& attachmentBinding = compositePass->GetInputBinding(1);
+                attachmentBinding.m_connectedBinding = &trianglePass->GetOutputBinding(0);
+                attachmentBinding.UpdateConnection(false);
+            }
+            else
+            {
+                trianglePass->SetDeviceIndex(1);
+                copyPass->SetEnabled(true);
+                auto& attachmentBinding = compositePass->GetInputBinding(1);
+                attachmentBinding.m_connectedBinding = &copyPass->GetOutputBinding(0);
+                attachmentBinding.UpdateConnection(false);
+            }
+
+            m_currentlyMigrated = m_migrate;
+        }
+
         if (m_imguiSidebar.Begin())
         {
             ImGui::Spacing();
@@ -153,6 +189,14 @@ namespace AtomSampleViewer
                                   "buffer to buffer\n"
                                   "buffer to image\n"
                                   "image to image\n");
+            }
+            if (!m_useCopyPipeline)
+            {
+                ImGui::Checkbox("Migrate", &m_migrate);
+                if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+                {
+                    ImGui::SetTooltip("Migrate all passes to the first GPU.");
+                }
             }
             m_imguiSidebar.End();
         }
