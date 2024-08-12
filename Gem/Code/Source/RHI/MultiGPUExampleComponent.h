@@ -105,10 +105,8 @@ namespace AtomSampleViewer
 
         AZ::RHI::Ptr<AZ::RHI::Device> m_device_1{};
         AZ::RHI::MultiDevice::DeviceMask m_deviceMask_1{};
-        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_stagingBufferPoolToGPU{};
+        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_stagingBufferPool{};
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_stagingBufferToGPU{};
-        AZ::RHI::Ptr<AZ::RHI::ImagePool> m_firstDeviceOnlyImagePool{};
-        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_inputAssemblyBufferPoolComposite{};
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_inputAssemblyBufferComposite{};
         AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViewsComposite;
         AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_pipelineStateComposite;
@@ -122,7 +120,6 @@ namespace AtomSampleViewer
 
         AZ::RHI::Ptr<AZ::RHI::Device> m_device_2{};
         AZ::RHI::MultiDevice::DeviceMask m_deviceMask_2{};
-        AZ::RHI::Ptr<AZ::RHI::BufferPool> m_stagingBufferPoolToCPU{};
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_stagingBufferToCPU{};
         AZStd::vector<AZStd::shared_ptr<AZ::RHI::ScopeProducer>> m_secondaryScopeProducers;
     };
