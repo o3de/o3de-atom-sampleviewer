@@ -74,6 +74,8 @@ namespace AtomSampleViewer
 
         bool m_useCopyPipeline = false;
         bool m_currentlyUsingCopyPipline = false;
+        bool m_migrate = false;
+        bool m_currentlyMigrated = false;
     };
 
 } // namespace AtomSampleViewer
