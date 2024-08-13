@@ -145,13 +145,6 @@
                                 "Pass": "TrianglePass2",
                                 "Attachment": "Output"
                             }
-                        },
-                        {
-                            "LocalSlot": "Output",
-                            "AttachmentRef": {
-                                "Pass": "TrianglePass2",
-                                "Attachment": "Output"
-                            }
                         }
                     ],
                     "PassData": {

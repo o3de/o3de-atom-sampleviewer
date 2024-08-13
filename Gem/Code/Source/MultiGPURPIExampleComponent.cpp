@@ -14,6 +14,7 @@
 
 #include <Atom/RHI/RHISystemInterface.h>
 
+#include <Atom/RPI.Public/Pass/CopyPass.h>
 #include <Atom/RPI.Public/Pass/PassFilter.h>
 #include <Atom/RPI.Public/RPISystemInterface.h>
 #include <Atom/RPI.Public/RenderPipeline.h>
@@ -112,8 +113,10 @@ namespace AtomSampleViewer
         m_copyPipeline = nullptr;
         m_useCopyPipeline = false;
         m_currentlyUsingCopyPipline = false;
-        m_migrate = false;
-        m_currentlyMigrated = false;
+        m_migrateRight = false;
+        m_rightMigrated = false;
+        m_migrateLeft = false;
+        m_leftMigrated = false;
 
         AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusDisconnect();
 
@@ -146,7 +149,7 @@ namespace AtomSampleViewer
             m_currentlyUsingCopyPipline = m_useCopyPipeline;
         }
 
-        if (m_currentlyMigrated != m_migrate)
+        if (m_rightMigrated != m_migrateRight)
         {
             AZ::RPI::PassFilter trianglePassFilter = AZ::RPI::PassFilter::CreateWithPassName(Name("TrianglePass2"), m_scene);
             AZ::RPI::PassFilter copyPassFilter = AZ::RPI::PassFilter::CreateWithPassName(Name("CopyPass"), m_scene);
@@ -158,24 +161,76 @@ namespace AtomSampleViewer
             RPI::Pass* compositePass = AZ::RPI::PassSystemInterface::Get()->FindFirstPass(compositePassFilter);
             AZ_Assert(trianglePass && copyPass && compositePass, "Couldn't find passes");
 
-            if (m_migrate)
+            if (m_migrateRight)
             {
                 trianglePass->SetDeviceIndex(0);
                 copyPass->SetEnabled(false);
-                auto& attachmentBinding = compositePass->GetInputBinding(1);
-                attachmentBinding.m_connectedBinding = &trianglePass->GetOutputBinding(0);
-                attachmentBinding.UpdateConnection(false);
+                compositePass->ChangeConnection(Name("Input2"), trianglePass, Name("Output"));
             }
             else
             {
                 trianglePass->SetDeviceIndex(1);
                 copyPass->SetEnabled(true);
-                auto& attachmentBinding = compositePass->GetInputBinding(1);
-                attachmentBinding.m_connectedBinding = &copyPass->GetOutputBinding(0);
-                attachmentBinding.UpdateConnection(false);
+                compositePass->ChangeConnection(Name("Input2"), copyPass, Name("Output"));
             }
 
-            m_currentlyMigrated = m_migrate;
+            m_rightMigrated = m_migrateRight;
+        }
+
+        if (m_leftMigrated != m_migrateLeft)
+        {
+            AZ::RPI::PassFilter trianglePassFilter = AZ::RPI::PassFilter::CreateWithPassName(Name("TrianglePass1"), m_scene);
+            AZ::RPI::PassFilter compositePassFilter = AZ::RPI::PassFilter::CreateWithPassName(Name("CompositePass"), m_scene);
+
+            RPI::RenderPass* trianglePass =
+                azrtti_cast<RPI::RenderPass*>(AZ::RPI::PassSystemInterface::Get()->FindFirstPass(trianglePassFilter));
+            RPI::Pass* compositePass = AZ::RPI::PassSystemInterface::Get()->FindFirstPass(compositePassFilter);
+            AZ_Assert(trianglePass && compositePass, "Couldn't find passes");
+
+            if (m_migrateLeft)
+            {
+                trianglePass->SetDeviceIndex(1);
+
+                AZStd::shared_ptr<RPI::PassRequest> passRequest = AZStd::make_shared<RPI::PassRequest>();
+                passRequest->m_templateName = Name("CopyPassTemplate");
+                passRequest->m_passName = Name("CopyPassLeft");
+
+                AZStd::shared_ptr<RPI::CopyPassData> passData = AZStd::make_shared<RPI::CopyPassData>();
+                passData->m_sourceDeviceIndex = 1;
+                passData->m_destinationDeviceIndex = 0;
+                passRequest->m_passData = passData;
+
+                RPI::PassConnection passConnection;
+                passConnection.m_localSlot = Name{ "Input" };
+                passConnection.m_attachmentRef.m_pass = Name{ "TrianglePass1" };
+                passConnection.m_attachmentRef.m_attachment = Name{ "Output" };
+                passRequest->m_connections.emplace_back(passConnection);
+
+                RPI::PassDescriptor descriptor;
+                descriptor.m_passData = passData;
+                descriptor.m_passRequest = passRequest;
+                descriptor.m_passName = passRequest->m_passName;
+
+                auto copyPass = RPI::PassSystemInterface::Get()->CreatePassFromRequest(passRequest.get());
+
+                m_pipeline->AddPassAfter(copyPass, passConnection.m_attachmentRef.m_pass);
+
+                compositePass->ChangeConnection(Name("Input1"), copyPass.get(), Name("Output"));
+            }
+            else
+            {
+                trianglePass->SetDeviceIndex(0);
+
+                compositePass->ChangeConnection(Name("Input1"), trianglePass, Name("Output"));
+
+                AZ::RPI::PassFilter copyPassFilter = AZ::RPI::PassFilter::CreateWithPassName(Name("CopyPassLeft"), m_scene);
+                RHI::Ptr<RPI::Pass> copyPass = AZ::RPI::PassSystemInterface::Get()->FindFirstPass(copyPassFilter);
+                AZ_Assert(copyPass.get(), "Couldn't find copy pass");
+
+                copyPass->QueueForRemoval();
+            }
+
+            m_leftMigrated = m_migrateLeft;
         }
 
         if (m_imguiSidebar.Begin())
@@ -192,10 +247,16 @@ namespace AtomSampleViewer
             }
             if (!m_useCopyPipeline)
             {
-                ImGui::Checkbox("Migrate", &m_migrate);
+                ImGui::Checkbox("Migrate right half (1 -> 0)", &m_migrateRight);
                 if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
                 {
-                    ImGui::SetTooltip("Migrate all passes to the first GPU.");
+                    ImGui::SetTooltip("Migrate right half to the first GPU (default on second).");
+                }
+
+                ImGui::Checkbox("Migrate left half (0 -> 1)", &m_migrateLeft);
+                if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+                {
+                    ImGui::SetTooltip("Migrate left half to the second GPU (default on first).");
                 }
             }
             m_imguiSidebar.End();
