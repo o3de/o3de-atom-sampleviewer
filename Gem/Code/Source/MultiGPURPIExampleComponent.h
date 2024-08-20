@@ -74,8 +74,10 @@ namespace AtomSampleViewer
 
         bool m_useCopyPipeline = false;
         bool m_currentlyUsingCopyPipline = false;
-        bool m_migrate = false;
-        bool m_currentlyMigrated = false;
+        bool m_migrateRight = false;
+        bool m_rightMigrated = false;
+        bool m_migrateLeft = false;
+        bool m_leftMigrated = false;
     };
 
 } // namespace AtomSampleViewer
