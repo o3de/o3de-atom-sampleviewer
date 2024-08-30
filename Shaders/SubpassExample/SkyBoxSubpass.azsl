@@ -128,7 +128,8 @@ PSOutput MainPS(VSOutput input)
         discard;
     }
 
-    const float zDepth = PassSrg::m_depthInput.SubpassLoad().x;
+    int3 loadPos = int3(input.m_position.x, input.m_position.y, 0);
+    const float zDepth = PassSrg::m_depthInput.SubpassLoad(loadPos).x;
     if (zDepth > 0.0)
     {
         //TODO: discard or clip(-1)?

@@ -86,17 +86,6 @@ namespace AtomSampleViewer
         static constexpr char DefaultModelPath[] = "materialeditor/viewportmodels/hermanubis.fbx.azmodel";
         static constexpr char DefaultGroundPlaneModelPath[] = "objects/plane.fbx.azmodel";
 
-        struct PipelineOption
-        {
-            char m_pipelineName[256];
-            char m_rootPassTemplate[256];
-        };
-
-        const AZStd::array<PipelineOption, 2> PipelineOptions = {{
-            { "TwoSubpassesPipeline", "TwoSubpassesPipelineTemplate" },
-            { "TwoPassesPipeline", "TwoPassesPipelineTemplate" }
-        }};
-
         AvailablePipelines m_activePipelineOption = AvailablePipelines::TwoSubpassesPipeline;
 
         //! Original render pipeline when the sample was started.

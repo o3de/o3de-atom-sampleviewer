@@ -101,7 +101,7 @@ namespace AtomSampleViewer
                     AZ_Error("MultiGPUExampleComponent", false, "StagingBufferToGPU was not created");
                 }
 
-                auto bufferViewDescriptor{ RHI::BufferViewDescriptor::CreateRaw(0, request.m_descriptor.m_byteCount) };
+                auto bufferViewDescriptor{ RHI::BufferViewDescriptor::CreateRaw(0, aznumeric_caster(request.m_descriptor.m_byteCount)) };
                 auto bufferView = m_stagingBufferToGPU->BuildBufferView(bufferViewDescriptor);
                 bufferView->GetDeviceBufferView(0);
                 bufferView->GetDeviceBufferView(1);
