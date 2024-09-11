@@ -609,7 +609,7 @@ namespace AtomSampleViewer
             commandList->SetScissors(&m_scissor, 1);
 
             RHI::DrawIndexed drawIndexed;
-            drawIndexed.m_indexCount = m_bufferViews[target].m_indexBufferView.GetByteCount() / sizeof(uint16_t);
+            drawIndexed.m_indexCount = m_bufferViews[target].m_geometryView.GetIndexBufferView().GetByteCount() / sizeof(uint16_t);
             m_bufferViews[target].m_geometryView.SetDrawArguments(drawIndexed);
 
             const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
