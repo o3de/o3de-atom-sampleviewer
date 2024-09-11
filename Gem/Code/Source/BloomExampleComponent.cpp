@@ -374,9 +374,8 @@ namespace AtomSampleViewer
         // Build draw packet
         RHI::DrawPacketBuilder drawPacketBuilder{RHI::MultiDevice::DefaultDevice};
         drawPacketBuilder.Begin(nullptr);
-        RHI::DrawLinear drawLinear;
-        drawLinear.m_vertexCount = 4;
-        drawPacketBuilder.SetDrawArguments(drawLinear);
+        m_geometryView.SetDrawArguments(RHI::DrawLinear(4, 0));
+        drawPacketBuilder.SetGeometryView(&m_geometryView);
 
         RHI::DrawPacketBuilder::DrawRequest drawRequest;
         drawRequest.m_listTag = m_drawListTag;

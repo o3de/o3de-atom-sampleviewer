@@ -93,7 +93,7 @@ namespace AtomSampleViewer
 
         BufferData m_bufferData;
 
-        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
+        AZ::RHI::GeometryView m_geometryView;
 
         static const int numberOfPaths = 3;
         const char* m_filePaths[numberOfPaths] = {

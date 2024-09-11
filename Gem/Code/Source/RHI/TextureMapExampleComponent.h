@@ -56,7 +56,7 @@ namespace AtomSampleViewer
 
         struct BufferViewData
         {
-            AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
+            AZ::RHI::GeometryView m_geometryView;
             AZ::RHI::IndexBufferView m_indexBufferView;
             AZ::RHI::InputStreamLayout m_inputStreamLayout;
         };

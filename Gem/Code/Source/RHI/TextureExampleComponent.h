@@ -56,6 +56,7 @@ namespace AtomSampleViewer
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_indexBuffer;
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_positionBuffer;
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_uvBuffer;
+        AZ::RHI::GeometryView m_geometryView;
 
         AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_pipelineState;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_shaderResourceGroup;
@@ -68,7 +69,6 @@ namespace AtomSampleViewer
         };
 
         AZ::RHI::DeviceDrawItem m_drawItem;
-        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
 
         AZ::RHI::SamplerState m_samplerState;
         bool m_useStaticSampler = true;

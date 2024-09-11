@@ -144,28 +144,35 @@ namespace AtomSampleViewer
         request.m_initialData = &bufferData;
         m_inputAssemblyBufferPool->InitBuffer(request);
 
-        m_triangleStreamBufferViews[0] =
-        {
+        m_triangleGeometryView.SetDrawArguments(RHI::DrawIndexed(0, 3, 0));
+
+        m_triangleGeometryView.SetIndexBufferView({
+            *m_triangleInputAssemblyBuffer,
+            offsetof(TriangleBufferData, m_indices),
+            sizeof(TriangleBufferData::m_indices),
+            RHI::IndexFormat::Uint16
+        });
+
+        m_triangleGeometryView.AddStreamBufferView({
             *m_triangleInputAssemblyBuffer,
             offsetof(TriangleBufferData, m_positions),
             sizeof(TriangleBufferData::m_positions),
             sizeof(VertexPosition)
-        };
+        });
 
-        m_triangleStreamBufferViews[1] =
-        {
+        m_triangleGeometryView.AddStreamBufferView({
             *m_triangleInputAssemblyBuffer,
             offsetof(TriangleBufferData, m_colors),
             sizeof(TriangleBufferData::m_colors),
             sizeof(VertexColor)
-        };
+        });
 
         RHI::InputStreamLayoutBuilder layoutBuilder;
         layoutBuilder.AddBuffer()->Channel("POSITION", RHI::Format::R32G32B32_FLOAT);
         layoutBuilder.AddBuffer()->Channel("COLOR", RHI::Format::R32G32B32A32_FLOAT);
         m_triangleInputStreamLayout = layoutBuilder.End();
 
-        RHI::ValidateStreamBufferViews(m_triangleInputStreamLayout, m_triangleStreamBufferViews);
+        RHI::ValidateStreamBufferViews(m_triangleInputStreamLayout, m_triangleGeometryView, m_triangleGeometryView.GetFullStreamBufferIndices());
 
         m_triangleShader = LoadShader(TriangeShaderFilePath, SampleName);
         if (!m_triangleShader)
@@ -205,26 +212,35 @@ namespace AtomSampleViewer
             return;
         }
 
-        m_quadStreamBufferViews[0] = {
+        m_quadGeometryView.SetDrawArguments(RHI::DrawIndexed(0, 6, 0));
+
+        m_quadGeometryView.SetIndexBufferView({
+            *m_quadInputAssemblyBuffer,
+            offsetof(QuadBufferData, m_indices),
+            sizeof(QuadBufferData::m_indices),
+            RHI::IndexFormat::Uint16
+        });
+
+        m_quadGeometryView.AddStreamBufferView({
             *m_quadInputAssemblyBuffer,
             offsetof(QuadBufferData, m_positions),
             sizeof(QuadBufferData::m_positions),
             sizeof(VertexPosition)
-        };
+        });
 
-        m_quadStreamBufferViews[1] = {
+        m_quadGeometryView.AddStreamBufferView({
             *m_quadInputAssemblyBuffer,
             offsetof(QuadBufferData, m_uvs),
             sizeof(QuadBufferData::m_uvs),
             sizeof(VertexUV)
-        };
+        });
 
         RHI::InputStreamLayoutBuilder layoutBuilder;
         layoutBuilder.AddBuffer()->Channel("POSITION", RHI::Format::R32G32B32_FLOAT);
         layoutBuilder.AddBuffer()->Channel("UV", RHI::Format::R32G32_FLOAT);
         m_quadInputStreamLayout = layoutBuilder.End();
 
-        RHI::ValidateStreamBufferViews(m_quadInputStreamLayout, m_quadStreamBufferViews);
+        RHI::ValidateStreamBufferViews(m_quadInputStreamLayout, m_quadGeometryView, m_quadGeometryView.GetFullStreamBufferIndices());
 
         m_customMSAAResolveShader = LoadShader(CustomResolveShaderFilePath, SampleName);
         if (!m_customMSAAResolveShader)
@@ -339,32 +355,17 @@ namespace AtomSampleViewer
             commandList->SetViewports(&m_viewport, 1);
             commandList->SetScissors(&m_scissor, 1);
 
-            const RHI::DeviceIndexBufferView indexBufferView = { *m_triangleInputAssemblyBuffer->GetDeviceBuffer(context.GetDeviceIndex()),
-                                                                 offsetof(TriangleBufferData, m_indices),
-                                                                 sizeof(TriangleBufferData::m_indices), RHI::IndexFormat::Uint16 };
-
-            RHI::DrawIndexed drawIndexed;
-            drawIndexed.m_indexCount = 3;
-            drawIndexed.m_instanceCount = 1;
-
             const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
                 m_triangleShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
             };
 
+            // Submit the triangle draw item.
             RHI::DeviceDrawItem drawItem;
-            drawItem.m_arguments = drawIndexed;
+            drawItem.m_geometryView = m_triangleGeometryView.GetDeviceGeometryView(context.GetDeviceIndex());
+            drawItem.m_streamIndices = m_triangleGeometryView.GetFullStreamBufferIndices();
             drawItem.m_pipelineState = m_pipelineStates[msaaTypeIndex]->GetDevicePipelineState(context.GetDeviceIndex()).get();
-            drawItem.m_indexBufferView = &indexBufferView;
             drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
             drawItem.m_shaderResourceGroups = shaderResourceGroups;
-            drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_triangleStreamBufferViews.size());
-            AZStd::array<AZ::RHI::DeviceStreamBufferView, 2> deviceStreamBufferViews{
-                m_triangleStreamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()),
-                m_triangleStreamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())
-            };
-            drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
-
-            // Submit the triangle draw item.
             commandList->Submit(drawItem);
         };
 
@@ -454,33 +455,18 @@ namespace AtomSampleViewer
             commandList->SetViewports(&m_viewport, 1);
             commandList->SetScissors(&m_scissor, 1);
 
-            const RHI::DeviceIndexBufferView indexBufferView = { *m_quadInputAssemblyBuffer->GetDeviceBuffer(context.GetDeviceIndex()),
-                                                                 offsetof(QuadBufferData, m_indices), sizeof(QuadBufferData::m_indices),
-                                                                 RHI::IndexFormat::Uint16 };
-
-            RHI::DrawIndexed drawIndexed;
-            drawIndexed.m_indexCount = 6;
-            drawIndexed.m_instanceCount = 1;
-
             const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = { m_customMSAAResolveShaderResourceGroup
                                                                                  ->GetRHIShaderResourceGroup()
                                                                                  ->GetDeviceShaderResourceGroup(context.GetDeviceIndex())
                                                                                  .get() };
 
+            // Submit the quad draw item.
             RHI::DeviceDrawItem drawItem;
-            drawItem.m_arguments = drawIndexed;
+            drawItem.m_geometryView = m_quadGeometryView.GetDeviceGeometryView(context.GetDeviceIndex());
+            drawItem.m_streamIndices = m_quadGeometryView.GetFullStreamBufferIndices();
             drawItem.m_pipelineState = m_customResolveMSAAPipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
-            drawItem.m_indexBufferView = &indexBufferView;
             drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
             drawItem.m_shaderResourceGroups = shaderResourceGroups;
-            drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_quadStreamBufferViews.size());
-            AZStd::array<AZ::RHI::DeviceStreamBufferView, 2> deviceStreamBufferViews{
-                m_quadStreamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()),
-                m_quadStreamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())
-            };
-            drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
-
-            // Submit the triangle draw item.
             commandList->Submit(drawItem);
         };
 

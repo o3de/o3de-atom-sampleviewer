@@ -114,6 +114,8 @@ namespace AtomSampleViewer
 
     void StreamingImageExampleComponent::Activate()
     {
+        m_geometryView.SetDrawArguments(RHI::DrawLinear(4, 0));
+
         // Save the streaming image pool's budget and streaming image pool controller's mip bias 
         // These would be recovered when exist the example
         Data::Instance<RPI::StreamingImagePool> streamingImagePool = RPI::ImageSystemInterface::Get()->GetSystemStreamingPool();
@@ -492,12 +494,11 @@ namespace AtomSampleViewer
             // Build draw packet...
             RHI::DrawPacketBuilder drawPacketBuilder{RHI::MultiDevice::DefaultDevice};
             drawPacketBuilder.Begin(nullptr);
-            RHI::DrawLinear drawLinear;
-            drawLinear.m_vertexCount = 4;
-            drawLinear.m_instanceCount = image3d.m_sliceCount;
-            drawPacketBuilder.SetDrawArguments(drawLinear);
+            drawPacketBuilder.SetGeometryView(&m_geometryView);
+            drawPacketBuilder.SetDrawInstanceArguments(RHI::DrawInstanceArguments(image3d.m_sliceCount, 0));
 
             RHI::DrawPacketBuilder::DrawRequest drawRequest;
+            drawRequest.m_streamIndices = m_geometryView.GetFullStreamBufferIndices();
             drawRequest.m_listTag = m_image3dDrawListTag;
             drawRequest.m_pipelineState = m_image3dPipelineState.get();
             drawRequest.m_sortKey = 0;
@@ -510,17 +511,16 @@ namespace AtomSampleViewer
         }
     }
 
-    void StreamingImageExampleComponent::DrawImage(const ImageToDraw* imageInfo)
+    void StreamingImageExampleComponent::DrawImage(ImageToDraw* imageInfo)
     {
         // Build draw packet...
         RHI::DrawPacketBuilder drawPacketBuilder{RHI::MultiDevice::DefaultDevice};
         drawPacketBuilder.Begin(nullptr);
-        RHI::DrawLinear drawLinear;
-        drawLinear.m_vertexCount = 4;
-        drawLinear.m_instanceCount = imageInfo->m_image->GetMipLevelCount();
-        drawPacketBuilder.SetDrawArguments(drawLinear);
+        drawPacketBuilder.SetGeometryView(&m_geometryView);
+        drawPacketBuilder.SetDrawInstanceArguments(RHI::DrawInstanceArguments(imageInfo->m_image->GetMipLevelCount(), 0));
 
         RHI::DrawPacketBuilder::DrawRequest drawRequest;
+        drawRequest.m_streamIndices = m_geometryView.GetFullStreamBufferIndices();
         drawRequest.m_listTag = m_drawListTag;
         drawRequest.m_pipelineState = m_pipelineState.get();
         drawRequest.m_sortKey = 0;

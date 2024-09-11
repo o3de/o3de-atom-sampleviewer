@@ -44,6 +44,7 @@ namespace AtomSampleViewer
         AZStd::array<AZ::RHI::StreamBufferView, 2> m_rectangleStreamBufferViews;
         AZ::RHI::InputStreamLayout m_rectangleInputStreamLayout;
         AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_pipelineState;
+        AZ::RHI::GeometryView m_geometryView;
 
         // Srg related resources
         AZ::Data::Instance<AZ::RPI::Shader> m_shader;

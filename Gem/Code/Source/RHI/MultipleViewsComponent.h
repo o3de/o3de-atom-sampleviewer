@@ -99,8 +99,7 @@ namespace AtomSampleViewer
         AZStd::array<AZ::RHI::ShaderInputConstantIndex, 6> m_shaderInputConstantIndices;
         AZ::RHI::ShaderInputImageIndex m_shaderInputImageIndex;
 
-        AZStd::array<AZ::RHI::StreamBufferView, 3> m_streamBufferViews;
-        AZ::RHI::IndexBufferView m_indexBufferView;
+        AZ::RHI::GeometryView m_geometryView;
         AZ::RHI::AttachmentId m_depthMapID;
         AZ::RHI::AttachmentId m_depthStencilID;
         AZ::RHI::ClearValue m_depthClearValue;

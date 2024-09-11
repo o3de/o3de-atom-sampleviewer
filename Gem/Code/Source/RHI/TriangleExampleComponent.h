@@ -60,6 +60,6 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 3> m_indices;
         };
 
-        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
+        AZ::RHI::GeometryView m_geometryView;
     };
 } // namespace AtomSampleViewer

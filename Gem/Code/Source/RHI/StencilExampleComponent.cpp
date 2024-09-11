@@ -103,28 +103,38 @@ namespace AtomSampleViewer
             request.m_initialData = &bufferData;
             m_inputAssemblyBufferPool->InitBuffer(request);
 
-            m_streamBufferViews[0] =
-            {
+            m_geometryView.SetIndexBufferView({
+                *m_inputAssemblyBuffer,
+                offsetof(BufferData, m_indices),
+                sizeof(BufferData::m_indices),
+                RHI::IndexFormat::Uint16
+            });
+
+            m_geometryView.AddStreamBufferView({
                 *m_inputAssemblyBuffer,
                 offsetof(BufferData, m_positions),
                 sizeof(BufferData::m_positions),
                 sizeof(VertexPosition)
-            };
+            });
 
-            m_streamBufferViews[1] =
-            {
+            m_geometryView.AddStreamBufferView({
                 *m_inputAssemblyBuffer,
                 offsetof(BufferData, m_colors),
                 sizeof(BufferData::m_colors),
                 sizeof(VertexColor)
-            };
+            });
+
+            m_geometryView.SetDrawArguments(RHI::DrawIndexed(0, s_numberOfVertices / 2, 0));
+
+            m_geometryView2 = m_geometryView;
+            m_geometryView2.SetDrawArguments(RHI::DrawIndexed(0, 3, s_numberOfVertices / 2));
 
             RHI::InputStreamLayoutBuilder layoutBuilder;
             layoutBuilder.AddBuffer()->Channel("POSITION", RHI::Format::R32G32B32_FLOAT);
             layoutBuilder.AddBuffer()->Channel("COLOR", RHI::Format::R32G32B32A32_FLOAT);
             pipelineStateDescriptor.m_inputStreamLayout = layoutBuilder.End();
 
-            RHI::ValidateStreamBufferViews(pipelineStateDescriptor.m_inputStreamLayout, m_streamBufferViews);
+            RHI::ValidateStreamBufferViews(pipelineStateDescriptor.m_inputStreamLayout, m_geometryView, m_geometryView.GetFullStreamBufferIndices());
         }
 
         {
@@ -204,45 +214,27 @@ namespace AtomSampleViewer
                 commandList->SetViewports(&m_viewport, 1);
                 commandList->SetScissors(&m_scissor, 1);
 
-                const RHI::DeviceIndexBufferView indexBufferView = { *m_inputAssemblyBuffer->GetDeviceBuffer(context.GetDeviceIndex()),
-                                                                     offsetof(BufferData, m_indices), sizeof(BufferData::m_indices),
-                                                                     RHI::IndexFormat::Uint16 };
-
-                RHI::DrawIndexed drawIndexed;
-                drawIndexed.m_instanceCount = 1;
 
                 RHI::DeviceDrawItem drawItem;
-                drawItem.m_indexBufferView = &indexBufferView;
-                drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
-                AZStd::array<AZ::RHI::DeviceStreamBufferView, 2> deviceStreamBufferViews{
-                    m_streamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()),
-                    m_streamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())
-                };
-                drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
+                drawItem.m_geometryView = m_geometryView.GetDeviceGeometryView(context.GetDeviceIndex());
+                drawItem.m_streamIndices = m_geometryView.GetFullStreamBufferIndices();
 
                 for (uint32_t i = context.GetSubmitRange().m_startIndex; i < context.GetSubmitRange().m_endIndex; ++i)
                 {
                     if (i == 0)
                     {
-                        drawIndexed.m_indexCount = s_numberOfVertices / 2;
-
                         // Draw color triangles
-                        drawItem.m_arguments = drawIndexed;
+                        drawItem.m_geometryView = m_geometryView.GetDeviceGeometryView(context.GetDeviceIndex());
                         drawItem.m_pipelineState = m_pipelineStateBasePass->GetDevicePipelineState(context.GetDeviceIndex()).get();
                         commandList->Submit(drawItem, i);
                     }
                     else
                     {
                         // Draw white triangles
-                        drawIndexed.m_indexOffset = s_numberOfVertices / 2;
-                        drawIndexed.m_indexCount = 3;
                         drawItem.m_stencilRef = 1;
-
-                        drawItem.m_arguments = drawIndexed;
+                        drawItem.m_geometryView = m_geometryView2.GetDeviceGeometryView(context.GetDeviceIndex());
                         drawItem.m_pipelineState = m_pipelineStateStencil[i-1]->GetDevicePipelineState(context.GetDeviceIndex()).get();
                         commandList->Submit(drawItem, i);
-
-                        drawIndexed.m_indexOffset += 3;
                     }
                 }
             };

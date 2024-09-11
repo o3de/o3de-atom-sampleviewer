@@ -171,6 +171,7 @@ namespace AtomSampleViewer
 
         AZStd::array<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, NumSequencesType> m_indirectCommandsShaderResourceGroups;
 
+        AZStd::vector<AZ::RHI::GeometryView> m_geometryViews;
         AZStd::array<AZ::RHI::StreamBufferView, 3> m_streamBufferViews;
         AZStd::array<AZ::RHI::IndexBufferView, 2> m_indexBufferViews;
         AZ::RHI::IndirectBufferView m_indirectDrawBufferView;

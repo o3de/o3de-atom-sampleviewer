@@ -126,6 +126,7 @@ namespace AtomSampleViewer
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_indexBuffer;
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_positionBuffer;
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_uvBuffer;
+        AZ::RHI::GeometryView m_geometryView;
 
         struct BufferData
         {
@@ -134,7 +135,6 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 6> m_indices;
         };
 
-        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
         // ------------------------------------------------------------
 
         AZ::EntityId m_cameraEntityId;
