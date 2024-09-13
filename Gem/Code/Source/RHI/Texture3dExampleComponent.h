@@ -54,6 +54,7 @@ namespace AtomSampleViewer
         AZ::RHI::Ptr<AZ::RHI::ImageView> m_imageView = nullptr;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_shaderResourceGroup = nullptr;
         AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_pipelineState = nullptr;
+        AZ::RHI::GeometryView m_geometryView;
 
         // Shader Input indices
         AZ::RHI::ShaderInputImageIndex m_texture3dInputIndex;

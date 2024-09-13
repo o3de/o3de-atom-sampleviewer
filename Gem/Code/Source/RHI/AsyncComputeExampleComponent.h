@@ -122,14 +122,13 @@ namespace AtomSampleViewer
         // Quad related variables
         AZ::RHI::Ptr<AZ::RHI::BufferPool> m_quadBufferPool;
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_quadInputAssemblyBuffer;
-        AZ::RHI::IndexBufferView m_quadIndexBufferView;
-        AZStd::array<AZStd::vector<AZ::RHI::StreamBufferView>, NumScopes> m_quadStreamBufferViews;
+        AZStd::array<AZ::RHI::GeometryView, NumScopes> m_geometryViews;
 
         // Terrain related variables
         AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::PipelineState>, NumScopes> m_terrainPipelineStates;
 
         // Model related variables
-        AZStd::array<AZ::RPI::ModelLod::StreamBufferViewList, NumScopes> m_modelStreamBufferViews;
+        AZStd::array<AZ::RHI::StreamBufferIndices, NumScopes> m_modelStreamBufferIndices;
         AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::PipelineState>, NumScopes> m_modelPipelineStates;
         AZ::Data::Instance<AZ::RPI::Model> m_model;
 

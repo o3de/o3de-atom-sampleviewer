@@ -131,8 +131,8 @@ namespace AtomSampleViewer
 
             AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_perSubMeshSrg;
 
-            const AZ::RPI::ModelLod::Mesh* m_mesh;
-            AZ::RPI::ModelLod::StreamBufferViewList bufferStreamViewArray;
+            AZ::RPI::ModelLod::Mesh* m_mesh;
+            AZ::RHI::StreamBufferIndices m_streamIndices;
 
             AZ::Matrix4x4 m_modelMatrix;
 

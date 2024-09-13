@@ -241,6 +241,14 @@ namespace AtomSampleViewer
 
             RHI::ValidateStreamBufferViews(m_inputStreamLayout, AZStd::span<const RHI::StreamBufferView>(m_streamBufferViews.data(), 2));
         }
+
+        for (uint32_t i = 0; i < m_numObjects; ++i)
+        {
+            RHI::GeometryView& geoView = m_geometryViews[i];
+            geoView.SetIndexBufferView(m_indexBufferViews[0]);
+            geoView.AddStreamBufferView(m_streamBufferViews[0]);
+            geoView.AddStreamBufferView(m_streamBufferViews[1]);
+        }
     }
 
 
@@ -406,22 +414,11 @@ namespace AtomSampleViewer
                         ->SetVertexView(0, triangleStreamBufferView)
                         ->SetIndexView(triangleIndexBufferView);
                 }
-                indirectBufferWriter->DrawIndexed(
-                    RHI::DrawIndexed(
-                        1,
-                        i,
-                        0,
-                        3,
-                        0));
+                indirectBufferWriter->DrawIndexed(RHI::DrawIndexed(0, 3, 0), RHI::DrawInstanceArguments(1, i));
             }
             else
             {
-                RHI::DrawIndexed arguments(
-                    1,
-                    i,
-                    0,
-                    6,
-                    0);
+                RHI::DrawIndexed arguments(0, 6, 0);
 
                 switch (m_mode)
                 {
@@ -441,7 +438,7 @@ namespace AtomSampleViewer
                     return;
                 }
 
-                indirectBufferWriter->DrawIndexed(arguments);
+                indirectBufferWriter->DrawIndexed(arguments, RHI::DrawInstanceArguments(1, i));
             }
 
             indirectBufferWriter->NextSequence();
@@ -850,21 +847,14 @@ namespace AtomSampleViewer
                 m_drawIndirect.m_maxSequenceCount = AZStd::min(m_numObjects - i, maxIndirectDrawCount);
                 m_drawIndirect.m_indirectBufferByteOffset = i * m_indirectDrawBufferView.GetByteStride();
                 m_drawIndirect.m_indirectBufferView = &m_indirectDrawBufferView;
+                m_geometryViews[i].SetDrawArguments(m_drawIndirect);
 
                 RHI::DeviceDrawItem drawItem;
-                drawItem.m_arguments = AZ::RHI::DrawArguments(m_drawIndirect).GetDeviceDrawArguments(context.GetDeviceIndex());
+                drawItem.m_geometryView = m_geometryViews[i].GetDeviceGeometryView(context.GetDeviceIndex());
+                drawItem.m_streamIndices = m_geometryViews[i].GetFullStreamBufferIndices();
                 drawItem.m_pipelineState = m_drawPipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
-                auto deviceIndexBufferView{m_indexBufferViews[0].GetDeviceIndexBufferView(context.GetDeviceIndex())};
-                drawItem.m_indexBufferView = &deviceIndexBufferView;
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
-                drawItem.m_streamBufferViewCount = 2;
-                AZStd::array<AZ::RHI::DeviceStreamBufferView, 2> deviceStreamBufferViews{
-                    m_streamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()),
-                    m_streamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())
-                };
-                drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
-
                 // Submit the indirect draw item.
                 commandList->Submit(drawItem);
             }
@@ -888,6 +878,7 @@ namespace AtomSampleViewer
         using namespace AZ;
 
         m_numObjects = s_maxNumberOfObjects / 2;
+        m_geometryViews.resize(m_numObjects);
 
         RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
 
@@ -1000,6 +991,7 @@ namespace AtomSampleViewer
         m_indirectDispatchBufferSignature = nullptr;
 
         m_instancesData.clear();
+        m_geometryViews.clear();
 
         m_imguiSidebar.Deactivate();
         AzFramework::WindowNotificationBus::Handler::BusDisconnect();

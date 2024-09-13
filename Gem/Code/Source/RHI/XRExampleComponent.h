@@ -94,7 +94,6 @@ namespace AtomSampleViewer
         void CreateScope();
 
         AZ::RHI::Ptr<AZ::RHI::BufferPool> m_bufferPool;
-        AZ::RHI::IndexBufferView m_indexBufferView;
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_inputAssemblyBuffer;
         AZ::RHI::InputStreamLayout m_streamLayoutDescriptor;
         AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_pipelineState;
@@ -106,7 +105,7 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 3> m_indices;
         };
 
-        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
+        AZ::RHI::GeometryView m_geometryView;
         float m_time = 0.0f;
         AZStd::array<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, NumberOfCubes> m_shaderResourceGroups;
         AZStd::array<AZ::Matrix4x4, NumberOfCubes> m_modelMatrices;

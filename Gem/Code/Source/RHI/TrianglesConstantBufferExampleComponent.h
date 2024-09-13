@@ -91,7 +91,6 @@ namespace AtomSampleViewer
         AZ::RHI::Ptr<AZ::RHI::BufferPool> m_inputAssemblyBufferPool;
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_inputAssemblyBuffer;
 
-        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
         AZ::RHI::IndexBufferView m_indexBufferView;
 
         AZ::RHI::Ptr<AZ::RHI::BufferPool> m_constantBufferPool;
@@ -99,6 +98,8 @@ namespace AtomSampleViewer
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_constantBuffer;
 
         AZ::RHI::Ptr<AZ::RHI::BufferView> m_constantBufferView;
+
+        AZ::RHI::GeometryView m_geometryView;
 
         // --------------------------------------------------------
         // Pipeline state and SRG to be constructed from the shader

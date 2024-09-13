@@ -220,29 +220,28 @@ namespace AtomSampleViewer
             return;
         }
 
-        m_streamBufferViews[0] =
-        {
+        m_geometryView.SetDrawArguments(AZ::RHI::DrawIndexed(0, GeometryIndexCount, 0));
+
+        m_geometryView.AddStreamBufferView({
             *m_inputAssemblyBuffer,
             offsetof(SingleCubeBufferData, m_positions),
             sizeof(SingleCubeBufferData::m_positions),
             sizeof(VertexPosition)
-        };
+        });
 
-        m_streamBufferViews[1] =
-        {
+        m_geometryView.AddStreamBufferView({
             *m_inputAssemblyBuffer,
             offsetof(SingleCubeBufferData, m_colors),
             sizeof(SingleCubeBufferData::m_colors),
             sizeof(VertexColor)
-        };
+        });
 
-        m_indexBufferView =
-        {
+        m_geometryView.SetIndexBufferView({
             *m_inputAssemblyBuffer,
             offsetof(SingleCubeBufferData, m_indices),
             sizeof(SingleCubeBufferData::m_indices),
             AZ::RHI::IndexFormat::Uint16
-        };
+        });
 
         AZ::RHI::InputStreamLayoutBuilder layoutBuilder;
         layoutBuilder.SetTopology(AZ::RHI::PrimitiveTopology::TriangleList);
@@ -251,7 +250,7 @@ namespace AtomSampleViewer
         m_streamLayoutDescriptor.Clear();
         m_streamLayoutDescriptor = layoutBuilder.End();
 
-        AZ::RHI::ValidateStreamBufferViews(m_streamLayoutDescriptor, m_streamBufferViews);
+        AZ::RHI::ValidateStreamBufferViews(m_streamLayoutDescriptor, m_geometryView, m_geometryView.GetFullStreamBufferIndices());
     }
 
     void XRExampleComponent::CreateCubePipeline()
@@ -358,10 +357,6 @@ namespace AtomSampleViewer
             commandList->SetViewports(&m_viewport, 1);
             commandList->SetScissors(&m_scissor, 1);
 
-            AZ::RHI::DrawIndexed drawIndexed;
-            drawIndexed.m_indexCount = GeometryIndexCount;
-            drawIndexed.m_instanceCount = 1;
-
             // Dividing NumberOfCubes by context.GetCommandListCount() to balance to number 
             // of draw call equally between each thread.
             uint32_t numberOfCubesPerCommandList = NumberOfCubes / context.GetCommandListCount();
@@ -380,18 +375,11 @@ namespace AtomSampleViewer
                 };
 
                 AZ::RHI::DeviceDrawItem drawItem;
-                drawItem.m_arguments = drawIndexed;
+                drawItem.m_geometryView = m_geometryView.GetDeviceGeometryView(context.GetDeviceIndex());
+                drawItem.m_streamIndices = m_geometryView.GetFullStreamBufferIndices();
                 drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
-                auto deviceIndexBufferView{m_indexBufferView.GetDeviceIndexBufferView(context.GetDeviceIndex())};
-                drawItem.m_indexBufferView = &deviceIndexBufferView;
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(AZ::RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
-                drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
-                AZStd::array<AZ::RHI::DeviceStreamBufferView, 2> deviceStreamBufferViews{
-                    m_streamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()),
-                    m_streamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())
-                };
-                drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
 
                 commandList->Submit(drawItem);
             }

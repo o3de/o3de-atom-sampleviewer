@@ -175,7 +175,7 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 6> m_indices;
         };
 
-        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
+        AZ::RHI::GeometryView m_geometryView;
 
         // ImGui stuff.
         ImGuiSidebar m_imguiSidebar;

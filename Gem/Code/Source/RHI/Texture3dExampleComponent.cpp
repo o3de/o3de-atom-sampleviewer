@@ -213,9 +213,7 @@ namespace AtomSampleViewer
                 commandList->SetViewports(&m_viewport, 1);
                 commandList->SetScissors(&m_scissor, 1);
 
-                RHI::DrawLinear drawIndexed;
-                drawIndexed.m_vertexCount = 4;
-                drawIndexed.m_instanceCount = 1;
+                m_geometryView.SetDrawArguments(RHI::DrawLinear(4, 0));
 
                 const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
                     m_shaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
@@ -223,13 +221,11 @@ namespace AtomSampleViewer
 
                 // Create the draw item
                 RHI::DeviceDrawItem drawItem;
-                drawItem.m_arguments = drawIndexed;
+                drawItem.m_geometryView = m_geometryView.GetDeviceGeometryView(context.GetDeviceIndex());
+                drawItem.m_streamIndices = m_geometryView.GetFullStreamBufferIndices();
                 drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
-                drawItem.m_indexBufferView = nullptr;
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
-                drawItem.m_streamBufferViewCount = 0;
-                drawItem.m_streamBufferViews = nullptr;
 
                 // Add the draw item to the commandlist
                 commandList->Submit(drawItem);

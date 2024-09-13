@@ -100,8 +100,8 @@ namespace AtomSampleViewer
             AZStd::array<VertexPosition, 4> m_positions;
             AZStd::array<uint16_t, 6> m_indices;
         };
-        AZ::RHI::StreamBufferView m_quadStreamBufferView;
         AZ::RHI::InputStreamLayout m_quadInputStreamLayout;
+        AZ::RHI::GeometryView m_geometryView;
 
         AZStd::array<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, 3> m_shaderResourceGroups;
         AZ::RHI::ShaderInputConstantIndex m_objectMatrixConstantIndex;

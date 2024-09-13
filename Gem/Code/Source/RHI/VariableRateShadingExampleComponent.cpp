@@ -469,36 +469,35 @@ namespace AtomSampleViewer
             return;
         }
 
-        m_streamBufferViews[0] =
-        {
+        m_geometryView.SetDrawArguments(RHI::DrawIndexed(0, 6, 0));
+
+        m_geometryView.AddStreamBufferView({
             *m_inputAssemblyBuffer,
             offsetof(BufferData, m_positions),
             sizeof(BufferData::m_positions),
             sizeof(VertexPosition)
-        };
+        });
 
-        m_streamBufferViews[1] =
-        {
+        m_geometryView.AddStreamBufferView({
             *m_inputAssemblyBuffer,
             offsetof(BufferData, m_uvs),
             sizeof(BufferData::m_uvs),
             sizeof(VertexUV)
-        };
+        });
 
-        m_indexBufferView =
-        {
+        m_geometryView.SetIndexBufferView({
             *m_inputAssemblyBuffer,
             offsetof(BufferData, m_indices),
             sizeof(BufferData::m_indices),
             RHI::IndexFormat::Uint16
-        };
+        });
 
         RHI::InputStreamLayoutBuilder layoutBuilder;
         layoutBuilder.AddBuffer()->Channel("POSITION", RHI::Format::R32G32B32_FLOAT);
         layoutBuilder.AddBuffer()->Channel("UV", RHI::Format::R32G32_FLOAT);
         m_inputStreamLayout = layoutBuilder.End();
 
-        RHI::ValidateStreamBufferViews(m_inputStreamLayout, m_streamBufferViews);
+        RHI::ValidateStreamBufferViews(m_inputStreamLayout, m_geometryView, m_geometryView.GetFullStreamBufferIndices());
     }
 
     void VariableRateShadingExampleComponent::CreateRenderScope()
@@ -558,23 +557,12 @@ namespace AtomSampleViewer
             // dynamic mode is not supported (since the CPU would try to read it while the GPU is updating the contents)
             bool useImageShadingRate = m_useImageShadingRate && (device->GetFeatures().m_dynamicShadingRateImage || m_frameCount > device->GetDescriptor().m_frameCountMax);
 
-            RHI::DrawIndexed drawIndexed;
-            drawIndexed.m_indexCount = 6;
-            drawIndexed.m_instanceCount = 1;
-
             RHI::DeviceDrawItem drawItem;
-            drawItem.m_arguments = drawIndexed;
+            drawItem.m_geometryView = m_geometryView.GetDeviceGeometryView(context.GetDeviceIndex());
+            drawItem.m_streamIndices = m_geometryView.GetFullStreamBufferIndices();
             drawItem.m_pipelineState = m_modelPipelineState[useImageShadingRate ? 0 : 1]->GetDevicePipelineState(context.GetDeviceIndex()).get();
-            auto deviceIndexBufferView{m_indexBufferView.GetDeviceIndexBufferView(context.GetDeviceIndex())};
-            drawItem.m_indexBufferView = &deviceIndexBufferView;
             drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));;
             drawItem.m_shaderResourceGroups = shaderResourceGroups;
-            drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
-            AZStd::array<AZ::RHI::DeviceStreamBufferView, 2> deviceStreamBufferViews{
-                m_streamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()),
-                m_streamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())
-            };
-            drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
 
             commandList->Submit(drawItem);
 
@@ -740,23 +728,12 @@ namespace AtomSampleViewer
                 m_imageShaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
             };
 
-            RHI::DrawIndexed drawIndexed;
-            drawIndexed.m_indexCount = 6;
-            drawIndexed.m_instanceCount = 1;
-
             RHI::DeviceDrawItem drawItem;
-            drawItem.m_arguments = drawIndexed;
+            drawItem.m_geometryView = m_geometryView.GetDeviceGeometryView(context.GetDeviceIndex());
+            drawItem.m_streamIndices = m_geometryView.GetFullStreamBufferIndices();
             drawItem.m_pipelineState = m_imagePipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
-            auto deviceIndexBufferView{m_indexBufferView.GetDeviceIndexBufferView(context.GetDeviceIndex())};
-            drawItem.m_indexBufferView = &deviceIndexBufferView;
             drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
             drawItem.m_shaderResourceGroups = shaderResourceGroups;
-            drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
-            AZStd::array<AZ::RHI::DeviceStreamBufferView, 2> deviceStreamBufferViews{
-                m_streamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()),
-                m_streamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())
-            };
-            drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
 
             commandList->Submit(drawItem);
         };
