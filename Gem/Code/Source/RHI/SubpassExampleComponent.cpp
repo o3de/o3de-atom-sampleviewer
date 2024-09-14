@@ -391,6 +391,7 @@ namespace AtomSampleViewer
                     AZ::RHI::ScopeAttachmentStage::EarlyFragmentTest | AZ::RHI::ScopeAttachmentStage::LateFragmentTest);
             }
 
+            frameGraph.SetGroupId(AZ::Name(SubpassInputExample::SampleName));
             frameGraph.SetEstimatedItemCount(m_meshCount);
         };
 
@@ -499,7 +500,7 @@ namespace AtomSampleViewer
                     dsDesc, RHI::ScopeAttachmentAccess::Read,
                     RHI::ScopeAttachmentStage::EarlyFragmentTest | RHI::ScopeAttachmentStage::LateFragmentTest);
             }
-
+            frameGraph.SetGroupId(AZ::Name(SubpassInputExample::SampleName));
             frameGraph.SetEstimatedItemCount(1);
         };
 

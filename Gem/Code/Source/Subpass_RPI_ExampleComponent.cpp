@@ -84,17 +84,18 @@ namespace AtomSampleViewer
         }
 
         // Create the pipeline.
-        const auto pipelineOptionIdx = static_cast<size_t>(pipelineOption);
         AZ::RPI::RenderPipelineDescriptor pipelineDesc;
         pipelineDesc.m_mainViewTagName = "MainCamera";
         pipelineDesc.m_materialPipelineTag = "MultiViewPipeline";
-        pipelineDesc.m_name = PipelineOptions[pipelineOptionIdx].m_pipelineName;
-        pipelineDesc.m_rootPassTemplate = PipelineOptions[pipelineOptionIdx].m_rootPassTemplate;
+        pipelineDesc.m_name = "SubpassesPipeline";
+        pipelineDesc.m_rootPassTemplate = "SubpassesPipelineTemplate";
         pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 1;
+        pipelineDesc.m_allowSubpassMerging = pipelineOption == AvailablePipelines::TwoSubpassesPipeline;
 
         m_activePipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
-        AZ_Assert(m_activePipeline != nullptr, "Failed to create render pipeline with name='%s' and template='%s'.",
-            PipelineOptions[pipelineOptionIdx].m_pipelineName, PipelineOptions[pipelineOptionIdx].m_rootPassTemplate);
+        AZ_Assert(
+            m_activePipeline != nullptr, "Failed to create render pipeline with name='%s' and template='%s'.", pipelineDesc.m_name.c_str(),
+            pipelineDesc.m_rootPassTemplate.c_str());
 
         // Activate the pipeline
         m_activePipeline->GetRootPass()->SetEnabled(true); // PassSystem::RemoveRenderPipeline was calling SetEnabled(false)
@@ -106,8 +107,9 @@ namespace AtomSampleViewer
         }
 
         m_activePipelineOption = pipelineOption;
-        AZ_TracePrintf(LogName, "New active pipeline is '%s' from template '%s'",
-            PipelineOptions[pipelineOptionIdx].m_pipelineName,  PipelineOptions[pipelineOptionIdx].m_rootPassTemplate);
+        AZ_TracePrintf(
+            LogName, "New active pipeline is '%s' from template '%s'", pipelineDesc.m_name.c_str(),
+            pipelineDesc.m_rootPassTemplate.c_str());
     }
 
     void Subpass_RPI_ExampleComponent::RestoreOriginalPipeline()

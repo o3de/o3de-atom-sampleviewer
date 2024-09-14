@@ -32,9 +32,6 @@
                         },
                         "LoadAction": "Clear",
                         "LoadActionStencil": "DontCare",
-                        // The depth buffer won't be used after the two subpasses are completed.
-                        // For efficiency's sake do not Store.
-                        "StoreAction": "DontCare",
                         "StoreActionStencil": "DontCare"
                     }
                 },

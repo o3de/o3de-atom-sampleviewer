@@ -4,7 +4,7 @@
     "ClassName": "PassAsset",
     "ClassData": {
         "PassTemplate": {
-            "Name": "TwoSubpassesPipelineTemplate",
+            "Name": "SubpassesPipelineTemplate",
             "PassClass": "ParentPass",
             "Slots": [
                 {
