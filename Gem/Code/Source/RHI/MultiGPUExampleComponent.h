@@ -76,8 +76,7 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 3> m_indices;
         };
 
-        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
-
+        AZ::RHI::GeometryView m_geometryView;
         AZ::RHI::Ptr<AZ::RHI::ImagePool> m_imagePool{};
         AZStd::array<AZ::RHI::Ptr<AZ::RHI::Image>, 2> m_images;
         AZStd::array<AZ::RHI::AttachmentId, 2> m_imageAttachmentIds = { { AZ::RHI::AttachmentId("MultiGPURenderTexture1"),
@@ -108,7 +107,7 @@ namespace AtomSampleViewer
         AZ::RHI::Ptr<AZ::RHI::BufferPool> m_stagingBufferPool{};
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_stagingBufferToGPU{};
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_inputAssemblyBufferComposite{};
-        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViewsComposite;
+        AZ::RHI::GeometryView m_geometryViewComposite;
         AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_pipelineStateComposite;
         AZ::RHI::Ptr<AZ::RHI::ShaderResourceGroupPool> m_shaderResourceGroupPoolComposite;
         AZ::RHI::Ptr<AZ::RHI::ShaderResourceGroup> m_shaderResourceGroupComposite;

@@ -68,7 +68,7 @@ namespace AtomSampleViewer
        
         // Models
         AZStd::vector<AZ::Data::Instance<AZ::RPI::Model>> m_models;
-        AZStd::vector<AZStd::vector<AZ::RPI::ModelLod::StreamBufferViewList>> m_modelStreamBufferViews;
+        AZStd::vector<AZStd::vector<AZ::RHI::StreamBufferIndices>> m_streamIndices;
 
         // Cache interfaces
         AZ::RPI::DynamicDrawInterface* m_dynamicDraw = nullptr;

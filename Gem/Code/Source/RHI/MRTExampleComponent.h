@@ -79,8 +79,7 @@ namespace AtomSampleViewer
             AZStd::array<VertexUV, 4> m_uvs;
             AZStd::array<uint16_t, 6> m_indices;
         };
-        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
-        AZ::RHI::IndexBufferView m_indexBufferView;
+        AZ::RHI::GeometryView m_geometryView;
 
         AZStd::array<AZ::RHI::AttachmentId, 3> m_attachmentID;
         AZ::RHI::ClearValue m_clearValue;

@@ -98,6 +98,7 @@ namespace AtomSampleViewer
         AZ::RHI::DrawListTag m_drawListTag;
         AZ::Data::Asset<AZ::RPI::ShaderAsset> m_shaderAsset;
         AZ::RHI::Ptr<AZ::RHI::ShaderResourceGroupLayout> m_srgLayout;
+        AZ::RHI::GeometryView m_geometryView;
 
         // shader input indices
         AZ::RHI::ShaderInputNameIndex m_imageInputIndex = "m_texture";

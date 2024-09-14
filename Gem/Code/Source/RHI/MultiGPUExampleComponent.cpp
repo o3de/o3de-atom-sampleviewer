@@ -101,7 +101,7 @@ namespace AtomSampleViewer
                     AZ_Error("MultiGPUExampleComponent", false, "StagingBufferToGPU was not created");
                 }
 
-                auto bufferViewDescriptor{ RHI::BufferViewDescriptor::CreateRaw(0, aznumeric_caster(request.m_descriptor.m_byteCount)) };
+                auto bufferViewDescriptor{ RHI::BufferViewDescriptor::CreateRaw(0, static_cast<u32>(request.m_descriptor.m_byteCount)) };
                 auto bufferView = m_stagingBufferToGPU->BuildBufferView(bufferViewDescriptor);
                 bufferView->GetDeviceBufferView(0);
                 bufferView->GetDeviceBufferView(1);
@@ -304,20 +304,35 @@ namespace AtomSampleViewer
             request.m_initialData = &bufferData;
             m_inputAssemblyBufferPool->InitBuffer(request);
 
-            m_streamBufferViews[0] = { *m_inputAssemblyBuffer,
-                                       offsetof(BufferDataTrianglePass, m_positions), sizeof(BufferDataTrianglePass::m_positions),
-                                       sizeof(VertexPosition) };
+            m_geometryView.SetDrawArguments(RHI::DrawIndexed(0, 3, 0));
 
-            m_streamBufferViews[1] = { *m_inputAssemblyBuffer,
-                                       offsetof(BufferDataTrianglePass, m_colors), sizeof(BufferDataTrianglePass::m_colors),
-                                       sizeof(VertexColor) };
+            m_geometryView.SetIndexBufferView({
+                *m_inputAssemblyBuffer,
+                offsetof(BufferDataTrianglePass, m_indices),
+                sizeof(BufferDataTrianglePass::m_indices),
+                RHI::IndexFormat::Uint16
+            });
+
+            m_geometryView.AddStreamBufferView({
+                *m_inputAssemblyBuffer,
+                offsetof(BufferDataTrianglePass, m_positions),
+                sizeof(BufferDataTrianglePass::m_positions),
+                sizeof(VertexPosition)
+            });
+
+            m_geometryView.AddStreamBufferView({
+                *m_inputAssemblyBuffer,
+                offsetof(BufferDataTrianglePass, m_colors),
+                sizeof(BufferDataTrianglePass::m_colors),
+                sizeof(VertexColor)
+            });
 
             RHI::InputStreamLayoutBuilder layoutBuilder;
             layoutBuilder.AddBuffer()->Channel("POSITION", RHI::Format::R32G32B32_FLOAT);
             layoutBuilder.AddBuffer()->Channel("COLOR", RHI::Format::R32G32B32A32_FLOAT);
             pipelineStateDescriptor.m_inputStreamLayout = layoutBuilder.End();
 
-            RHI::ValidateStreamBufferViews(pipelineStateDescriptor.m_inputStreamLayout, m_streamBufferViews);
+            RHI::ValidateStreamBufferViews(pipelineStateDescriptor.m_inputStreamLayout, m_geometryView, m_geometryView.GetFullStreamBufferIndices());
         }
 
         {
@@ -402,32 +417,17 @@ namespace AtomSampleViewer
                 commandList->SetViewports(&m_viewport, 1);
                 commandList->SetScissors(&m_scissors[int(scopeData.second)], 1);
 
-                const RHI::DeviceIndexBufferView indexBufferView = { *m_inputAssemblyBuffer->GetDeviceBuffer(context.GetDeviceIndex()),
-                                                                     offsetof(BufferDataTrianglePass, m_indices),
-                                                                     sizeof(BufferDataTrianglePass::m_indices), RHI::IndexFormat::Uint16 };
-
-                RHI::DrawIndexed drawIndexed;
-                drawIndexed.m_indexCount = 3;
-                drawIndexed.m_instanceCount = 1;
-
                 const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
                     m_shaderResourceGroupShared->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
                 };
 
+                // Submit the triangle draw item.
                 RHI::DeviceDrawItem drawItem;
-                drawItem.m_arguments = drawIndexed;
+                drawItem.m_geometryView = m_geometryView.GetDeviceGeometryView(context.GetDeviceIndex());
+                drawItem.m_streamIndices = m_geometryView.GetFullStreamBufferIndices();
                 drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
-                drawItem.m_indexBufferView = &indexBufferView;
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
-                drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
-                AZStd::array<RHI::DeviceStreamBufferView, 2> deviceStreamBufferViews{
-                    m_streamBufferViews[0].GetDeviceStreamBufferView(context.GetDeviceIndex()),
-                    m_streamBufferViews[1].GetDeviceStreamBufferView(context.GetDeviceIndex())
-                };
-                drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
-
-                // Submit the triangle draw item.
                 commandList->Submit(drawItem);
             };
 
@@ -461,20 +461,35 @@ namespace AtomSampleViewer
             request.m_deviceMask = m_deviceMask_1;
             m_inputAssemblyBufferPool->InitBuffer(request);
 
-            m_streamBufferViewsComposite[0] = { *m_inputAssemblyBufferComposite,
-                                                offsetof(BufferDataCompositePass, m_positions),
-                                                sizeof(BufferDataCompositePass::m_positions), sizeof(VertexPosition) };
+            m_geometryViewComposite.SetDrawArguments(RHI::DrawIndexed(0, 6, 0));
 
-            m_streamBufferViewsComposite[1] = { *m_inputAssemblyBufferComposite,
-                                                offsetof(BufferDataCompositePass, m_uvs), sizeof(BufferDataCompositePass::m_uvs),
-                                                sizeof(VertexUV) };
+            m_geometryViewComposite.SetIndexBufferView({
+                *m_inputAssemblyBufferComposite,
+                offsetof(BufferDataCompositePass, m_indices),
+                sizeof(BufferDataCompositePass::m_indices),
+                RHI::IndexFormat::Uint16
+            });
+
+            m_geometryViewComposite.AddStreamBufferView({
+                *m_inputAssemblyBufferComposite,
+                offsetof(BufferDataCompositePass, m_positions),
+                sizeof(BufferDataCompositePass::m_positions),
+                sizeof(VertexPosition)
+            });
+
+            m_geometryViewComposite.AddStreamBufferView({
+                *m_inputAssemblyBufferComposite,
+                offsetof(BufferDataCompositePass, m_uvs),
+                sizeof(BufferDataCompositePass::m_uvs),
+                sizeof(VertexUV)
+            });
 
             RHI::InputStreamLayoutBuilder layoutBuilder;
             layoutBuilder.AddBuffer()->Channel("POSITION", RHI::Format::R32G32B32_FLOAT);
             layoutBuilder.AddBuffer()->Channel("UV", RHI::Format::R32G32_FLOAT);
             pipelineStateDescriptor.m_inputStreamLayout = layoutBuilder.End();
 
-            RHI::ValidateStreamBufferViews(pipelineStateDescriptor.m_inputStreamLayout, m_streamBufferViewsComposite);
+            RHI::ValidateStreamBufferViews(pipelineStateDescriptor.m_inputStreamLayout, m_geometryViewComposite, m_geometryViewComposite.GetFullStreamBufferIndices());
         }
 
         // Load shader and connect inputs
@@ -575,32 +590,16 @@ namespace AtomSampleViewer
                 commandList->SetViewports(&m_viewport, 1);
                 commandList->SetScissors(&m_scissor, 1);
 
-                const RHI::DeviceIndexBufferView indexBufferView = {
-                    *m_inputAssemblyBufferComposite->GetDeviceBuffer(context.GetDeviceIndex()),
-                    offsetof(BufferDataCompositePass, m_indices), sizeof(BufferDataCompositePass::m_indices), RHI::IndexFormat::Uint16
-                };
-
-                RHI::DrawIndexed drawIndexed;
-                drawIndexed.m_indexCount = 6;
-                drawIndexed.m_instanceCount = 1;
-
                 const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
                     m_shaderResourceGroupComposite->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
                 };
 
                 RHI::DeviceDrawItem drawItem;
-                drawItem.m_arguments = drawIndexed;
+                drawItem.m_geometryView = m_geometryViewComposite.GetDeviceGeometryView(context.GetDeviceIndex());
+                drawItem.m_streamIndices = m_geometryViewComposite.GetFullStreamBufferIndices();
                 drawItem.m_pipelineState = m_pipelineStateComposite->GetDevicePipelineState(context.GetDeviceIndex()).get();
-                drawItem.m_indexBufferView = &indexBufferView;
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
-                drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViewsComposite.size());
-                AZStd::array<RHI::DeviceStreamBufferView, 2> deviceStreamBufferViews{
-                    m_streamBufferViewsComposite[0].GetDeviceStreamBufferView(context.GetDeviceIndex()),
-                    m_streamBufferViewsComposite[1].GetDeviceStreamBufferView(context.GetDeviceIndex())
-                };
-                drawItem.m_streamBufferViews = deviceStreamBufferViews.data();
-
                 commandList->Submit(drawItem);
             };
 

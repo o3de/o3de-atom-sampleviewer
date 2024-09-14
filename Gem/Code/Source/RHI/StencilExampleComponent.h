@@ -60,7 +60,8 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, s_numberOfVertices> m_indices;
         };
 
-        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
+        AZ::RHI::GeometryView m_geometryView;
+        AZ::RHI::GeometryView m_geometryView2;
 
         AZ::RHI::AttachmentId m_depthStencilID;
         AZ::RHI::ClearValue m_depthClearValue;

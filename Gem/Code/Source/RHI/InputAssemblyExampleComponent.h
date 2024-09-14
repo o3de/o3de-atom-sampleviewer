@@ -65,7 +65,7 @@ namespace AtomSampleViewer
         // -------------------------------------------------
         // Input Assembly buffer and its Streams/Index Views
         // -------------------------------------------------
-        AZ::RHI::StreamBufferView m_streamBufferView[2];
+        AZ::RHI::GeometryView m_geometryView[2];
         AZ::RHI::InputStreamLayout m_inputStreamLayout;
 
         AZ::RHI::Ptr<AZ::RHI::BufferPool> m_inputAssemblyBufferPool;

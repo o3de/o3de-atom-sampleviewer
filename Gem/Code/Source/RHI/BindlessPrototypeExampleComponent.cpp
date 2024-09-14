@@ -341,7 +341,7 @@ namespace AtomSampleViewer
             const AZ::Name LightHandleId{ "m_lightHandle" };
 
             const uint32_t lodModel = 0u;
-            const ModelLod::Mesh& mesh = m_model->GetLods()[lodModel]->GetMeshes()[subMeshIdx];
+            ModelLod::Mesh& mesh = m_model->GetLods()[lodModel]->GetMeshes()[subMeshIdx];
 
             auto uvAssetBufferView{ m_model->GetModelAsset()->GetLodAssets()[lodModel]->GetMeshes()[subMeshIdx].GetSemanticBufferAssetView(
                 AZ::Name{ "UV" }) };
@@ -360,7 +360,7 @@ namespace AtomSampleViewer
 
             // Set the buffer stream
             RHI::InputStreamLayout layout;
-            m_model->GetLods()[lodModel]->GetStreamsForMesh(layout, subMeshInstance.bufferStreamViewArray, nullptr, m_shader->GetInputContract(), subMeshIdx);
+            m_model->GetLods()[lodModel]->GetStreamsForMesh(layout, subMeshInstance.m_streamIndices, nullptr, m_shader->GetInputContract(), subMeshIdx);
         }
     }
 
@@ -519,8 +519,8 @@ namespace AtomSampleViewer
         {
             const uint32_t meshIndex = 0u;
             RHI::InputStreamLayout layout;
-            ModelLod::StreamBufferViewList streamBufferView;
-            m_model->GetLods()[m_modelLod]->GetStreamsForMesh(layout, streamBufferView, nullptr, m_shader->GetInputContract(), meshIndex);
+            RHI::StreamBufferIndices streamBufferIndices;
+            m_model->GetLods()[m_modelLod]->GetStreamsForMesh(layout, streamBufferIndices, nullptr, m_shader->GetInputContract(), meshIndex);
             // Set the pipeline state
             {
                 RHI::PipelineStateDescriptorForDraw pipelineStateDescriptor;
@@ -1282,20 +1282,11 @@ namespace AtomSampleViewer
                             .get(),
                     };
                     RHI::DeviceDrawItem drawItem;
-                    drawItem.m_arguments = subMesh.m_mesh->m_drawArguments.GetDeviceDrawArguments(context.GetDeviceIndex());
+                    drawItem.m_geometryView = subMesh.m_mesh->GetDeviceGeometryView(context.GetDeviceIndex());
+                    drawItem.m_streamIndices = subMesh.m_streamIndices;
                     drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
-                    auto deviceIndexBufferView{subMesh.m_mesh->m_indexBufferView.GetDeviceIndexBufferView(context.GetDeviceIndex())};
-                    drawItem.m_indexBufferView = &deviceIndexBufferView;
                     drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                     drawItem.m_shaderResourceGroups = shaderResourceGroups;
-                    drawItem.m_streamBufferViewCount = static_cast<uint8_t>(subMesh.bufferStreamViewArray.size());
-                    AZStd::vector<RHI::DeviceStreamBufferView> deviceQuadStreamBufferViews;
-                    for(const auto& streamBufferView : subMesh.bufferStreamViewArray)
-                    {
-                        deviceQuadStreamBufferViews.emplace_back(streamBufferView.GetDeviceStreamBufferView(context.GetDeviceIndex()));
-                    }
-                    drawItem.m_streamBufferViews = deviceQuadStreamBufferViews.data();
-
                     // Submit the triangle draw item.
                     commandList->Submit(drawItem, instanceIdx);
                 }

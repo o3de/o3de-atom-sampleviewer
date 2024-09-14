@@ -60,6 +60,7 @@ namespace AtomSampleViewer
     {
         using namespace AZ;
 
+        m_geometryView.SetDrawArguments(RHI::DrawLinear(4, 0));
         m_dynamicDraw = RPI::DynamicDrawInterface::Get();
 
         m_imguiSidebar.Activate();
@@ -273,11 +274,10 @@ namespace AtomSampleViewer
         // Build draw packet
         RHI::DrawPacketBuilder drawPacketBuilder{RHI::MultiDevice::DefaultDevice};
         drawPacketBuilder.Begin(nullptr);
-        RHI::DrawLinear drawLinear;
-        drawLinear.m_vertexCount = 4;
-        drawPacketBuilder.SetDrawArguments(drawLinear);
+        drawPacketBuilder.SetGeometryView(&m_geometryView);
 
         RHI::DrawPacketBuilder::DrawRequest drawRequest;
+        drawRequest.m_streamIndices = m_geometryView.GetFullStreamBufferIndices();
         drawRequest.m_listTag = m_drawListTag;
         drawRequest.m_pipelineState = m_pipelineState.get();
         drawRequest.m_sortKey = 0;

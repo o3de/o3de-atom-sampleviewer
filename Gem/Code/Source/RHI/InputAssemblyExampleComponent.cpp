@@ -371,9 +371,10 @@ namespace AtomSampleViewer
                 const auto* inputAssemblyBufferView = context.GetBufferView(RHI::AttachmentId{ InputAssembly::InputAssemblyBufferAttachmentId });
                 if (inputAssemblyBufferView)
                 {
-                    m_streamBufferView[0] = {*(inputAssemblyBufferView->GetBuffer()), 0, sizeof(BufferData), sizeof(BufferData::value_type)};
+                    m_geometryView[0].ClearStreamBufferViews();
+                    m_geometryView[0].AddStreamBufferView({*(inputAssemblyBufferView->GetBuffer()), 0, sizeof(BufferData), sizeof(BufferData::value_type)});
 
-                    RHI::ValidateStreamBufferViews(m_inputStreamLayout, AZStd::span<const RHI::StreamBufferView>(&m_streamBufferView[0], 1));
+                    RHI::ValidateStreamBufferViews(m_inputStreamLayout, m_geometryView[0], m_geometryView[0].GetFullStreamBufferIndices());
                 }
             }
 
@@ -381,9 +382,10 @@ namespace AtomSampleViewer
                 const auto* inputAssemblyBufferView = context.GetBufferView(RHI::AttachmentId{ InputAssembly::ImportedInputAssemblyBufferAttachmentId });
                 if (inputAssemblyBufferView)
                 {
-                    m_streamBufferView[1] = {*(inputAssemblyBufferView->GetBuffer()), 0, sizeof(BufferData), sizeof(BufferData::value_type)};
+                    m_geometryView[1].ClearStreamBufferViews();
+                    m_geometryView[1].AddStreamBufferView({*(inputAssemblyBufferView->GetBuffer()), 0, sizeof(BufferData), sizeof(BufferData::value_type)});
 
-                    RHI::ValidateStreamBufferViews(m_inputStreamLayout, AZStd::span<const RHI::StreamBufferView>(&m_streamBufferView[1], 1));
+                    RHI::ValidateStreamBufferViews(m_inputStreamLayout, m_geometryView[1], m_geometryView[1].GetFullStreamBufferIndices());
                 }
             }
         };
@@ -401,16 +403,14 @@ namespace AtomSampleViewer
             drawLinear.m_vertexCount = BufferData::array_size;
 
             RHI::DeviceDrawItem drawItem;
-            drawItem.m_arguments = drawLinear;
             drawItem.m_pipelineState = m_drawPipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
-            drawItem.m_indexBufferView = nullptr;
-            drawItem.m_streamBufferViewCount = 1;
             drawItem.m_shaderResourceGroupCount = 1;
 
             for (uint32_t index = context.GetSubmitRange().m_startIndex; index < context.GetSubmitRange().m_endIndex; ++index)
             {
-                auto deviceStreamBufferView{m_streamBufferView[index].GetDeviceStreamBufferView(context.GetDeviceIndex())};
-                drawItem.m_streamBufferViews = &deviceStreamBufferView;
+                m_geometryView[index].SetDrawArguments(drawLinear);
+                drawItem.m_geometryView = m_geometryView[index].GetDeviceGeometryView(context.GetDeviceIndex());
+                drawItem.m_streamIndices = m_geometryView[index].GetFullStreamBufferIndices();
 
                 RHI::DeviceShaderResourceGroup* rhiSRGS[] = {
                     m_drawSRG[index]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
