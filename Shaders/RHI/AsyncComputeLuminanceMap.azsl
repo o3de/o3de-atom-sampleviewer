@@ -5,6 +5,8 @@
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
+ 
+ // MKR this is to referesh this thing. And see if ASV passes normally
 
 #include <Atom/Features/SrgSemantics.azsli>
 
