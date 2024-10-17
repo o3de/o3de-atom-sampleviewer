@@ -159,7 +159,7 @@ namespace AtomSampleViewer
             pipelineStateDescriptor.m_inputStreamLayout.SetTopology(AZ::RHI::PrimitiveTopology::TriangleStrip);
             pipelineStateDescriptor.m_inputStreamLayout.Finalize();
             m_pipelineState = shader->AcquirePipelineState(pipelineStateDescriptor);
-            if (!m_pipelineState)
+            if (!m_pipelineState || !m_pipelineState->IsInitialized())
             {
                 AZ_Error("Render", false, "Failed to acquire default pipeline state for shader %s", texture3dShaderFilePath);
             }
