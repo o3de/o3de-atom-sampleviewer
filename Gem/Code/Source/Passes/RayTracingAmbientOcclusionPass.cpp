@@ -6,7 +6,7 @@
  *
  */
 
-#include <Atom/Feature/TransformService/TransformServiceFeatureProcessor.h>
+#include <Atom/Feature/TransformService/TransformServiceFeatureProcessorInterface.h>
 #include <Atom/RHI/CommandList.h>
 #include <Atom/RHI/DeviceDispatchRaysItem.h>
 #include <Atom/RHI/Factory.h>
@@ -110,7 +110,7 @@ namespace AZ
             if (m_createRayTracingPipelineState)
             {
                 RPI::Scene* scene = m_pipeline->GetScene();
-                m_rayTracingFeatureProcessor = scene->GetFeatureProcessor<RayTracingFeatureProcessor>();
+                m_rayTracingFeatureProcessor = scene->GetFeatureProcessor<RayTracingFeatureProcessorInterface>();
 
                 CreateRayTracingPipelineState();
                 m_createRayTracingPipelineState = false;
@@ -201,7 +201,7 @@ namespace AZ
         void RayTracingAmbientOcclusionPass::BuildCommandListInternal([[maybe_unused]] const RHI::FrameGraphExecuteContext& context)
         {
             RPI::Scene* scene = m_pipeline->GetScene();
-            RayTracingFeatureProcessor* rayTracingFeatureProcessor = scene->GetFeatureProcessor<RayTracingFeatureProcessor>();
+            RayTracingFeatureProcessorInterface* rayTracingFeatureProcessor = scene->GetFeatureProcessor<RayTracingFeatureProcessorInterface>();
             AZ_Assert(rayTracingFeatureProcessor, "RayTracingAmbientOcclusionPass requires the RayTracingFeatureProcessor");
 
             if (!rayTracingFeatureProcessor->GetSubMeshCount())

@@ -12,7 +12,7 @@
 #include <Atom/Feature/CoreLights/DirectionalLightFeatureProcessorInterface.h>
 #include <Atom/Feature/CoreLights/DiskLightFeatureProcessorInterface.h>
 #include <Atom/Feature/CoreLights/ShadowConstants.h>
-#include <Atom/Feature/Mesh/MeshFeatureProcessor.h>
+#include <Atom/Feature/Mesh/MeshFeatureProcessorInterface.h>
 #include <Atom/RPI.Reflect/Material/MaterialAsset.h>
 #include <Atom/RPI.Reflect/Model/ModelAsset.h>
 #include <AzCore/Component/TickBus.h>
