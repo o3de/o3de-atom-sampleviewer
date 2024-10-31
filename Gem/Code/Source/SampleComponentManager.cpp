@@ -12,13 +12,13 @@
 #include <Atom/Component/DebugCamera/CameraComponent.h>
 #include <Atom/Component/DebugCamera/NoClipControllerComponent.h>
 #include <Atom/Component/DebugCamera/ArcBallControllerComponent.h>
-#include <Atom/Feature/AuxGeom/AuxGeomFeatureProcessor.h>
 #include <Atom/Feature/ImGui/ImGuiUtils.h>
 #include <Atom/Feature/ImGui/SystemBus.h>
-#include <Atom/Feature/Mesh/MeshFeatureProcessor.h>
+#include <Atom/Feature/Mesh/MeshFeatureProcessorInterface.h>
 #include <Atom/Feature/PostProcessing/PostProcessingConstants.h>
 #include <Atom/Feature/SkinnedMesh/SkinnedMeshInputBuffers.h>
 
+#include <Atom/RPI.Public/AuxGeom/AuxGeomFeatureProcessorInterface.h>
 #include <Atom/RPI.Public/Pass/Pass.h>
 #include <Atom/RPI.Public/Pass/ParentPass.h>
 #include <Atom/RPI.Public/Pass/PassSystemInterface.h>
@@ -27,6 +27,7 @@
 #include <Atom/RPI.Public/RenderPipeline.h>
 #include <Atom/RPI.Public/RPISystemInterface.h>
 #include <Atom/RPI.Public/Scene.h>
+#include <Atom/RPI.Public/Shader/ShaderSystemInterface.h>
 #include <Atom/RPI.Reflect/Asset/AssetUtils.h>
 #include <Atom/RPI.Reflect/Image/AttachmentImageAsset.h>
 #include <Atom/RPI.Reflect/Image/AttachmentImageAssetCreator.h>
