@@ -171,7 +171,7 @@ namespace AtomSampleViewer
             {
                 trianglePass->SetDeviceIndex(1);
                 copyPass->SetEnabled(true);
-                compositePass->ChangeConnection(Name("Input2"), copyPass, Name("Output"));
+                compositePass->ChangeConnection(Name("Input2"), copyPass, Name("InputOutput"));
             }
 
             m_rightMigrated = m_migrateRight;
@@ -192,16 +192,17 @@ namespace AtomSampleViewer
                 trianglePass->SetDeviceIndex(1);
 
                 AZStd::shared_ptr<RPI::PassRequest> passRequest = AZStd::make_shared<RPI::PassRequest>();
-                passRequest->m_templateName = Name("CopyPassTemplate");
+                passRequest->m_templateName = Name("MultiDeviceCopyPassTemplate");
                 passRequest->m_passName = Name("CopyPassLeft");
 
                 AZStd::shared_ptr<RPI::CopyPassData> passData = AZStd::make_shared<RPI::CopyPassData>();
                 passData->m_sourceDeviceIndex = 1;
                 passData->m_destinationDeviceIndex = 0;
+                passData->m_cloneInput = false;
                 passRequest->m_passData = passData;
 
                 RPI::PassConnection passConnection;
-                passConnection.m_localSlot = Name{ "Input" };
+                passConnection.m_localSlot = Name{ "InputOutput" };
                 passConnection.m_attachmentRef.m_pass = Name{ "TrianglePass1" };
                 passConnection.m_attachmentRef.m_attachment = Name{ "Output" };
                 passRequest->m_connections.emplace_back(passConnection);
@@ -215,7 +216,7 @@ namespace AtomSampleViewer
 
                 m_pipeline->AddPassAfter(copyPass, passConnection.m_attachmentRef.m_pass);
 
-                compositePass->ChangeConnection(Name("Input1"), copyPass.get(), Name("Output"));
+                compositePass->ChangeConnection(Name("Input1"), copyPass.get(), Name("InputOutput"));
             }
             else
             {

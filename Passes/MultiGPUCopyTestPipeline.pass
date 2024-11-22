@@ -193,10 +193,10 @@
                 },
                 {
                     "Name": "CopyPass4",
-                    "TemplateName": "CopyPassTemplate",
+                    "TemplateName": "MultiDeviceCopyPassTemplate",
                     "Connections": [
                         {
-                            "LocalSlot": "Input",
+                            "LocalSlot": "InputOutput",
                             "AttachmentRef": {
                                 "Pass": "CopyPass3",
                                 "Attachment": "Output"
@@ -212,13 +212,13 @@
                 },
                 {
                     "Name": "CopyPass5",
-                    "TemplateName": "CopyPassTemplate",
+                    "TemplateName": "MultiDeviceCopyPassTemplate",
                     "Connections": [
                         {
-                            "LocalSlot": "Input",
+                            "LocalSlot": "InputOutput",
                             "AttachmentRef": {
                                 "Pass": "CopyPass4",
-                                "Attachment": "Output"
+                                "Attachment": "InputOutput"
                             }
                         }
                     ],
@@ -244,7 +244,7 @@
                             "LocalSlot": "Input2",
                             "AttachmentRef": {
                                 "Pass": "CopyPass5",
-                                "Attachment": "Output"
+                                "Attachment": "InputOutput"
                             }
                         }
                     ],

@@ -137,10 +137,10 @@
                 },
                 {
                     "Name": "CopyPass",
-                    "TemplateName": "CopyPassTemplate",
+                    "TemplateName": "MultiDeviceCopyPassTemplate",
                     "Connections": [
                         {
-                            "LocalSlot": "Input",
+                            "LocalSlot": "InputOutput",
                             "AttachmentRef": {
                                 "Pass": "TrianglePass2",
                                 "Attachment": "Output"
@@ -168,7 +168,7 @@
                             "LocalSlot": "Input2",
                             "AttachmentRef": {
                                 "Pass": "CopyPass",
-                                "Attachment": "Output"
+                                "Attachment": "InputOutput"
                             }
                         }
                     ],
