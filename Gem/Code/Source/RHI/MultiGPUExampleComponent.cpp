@@ -648,6 +648,7 @@ namespace AtomSampleViewer
             copyDescriptor.m_sourceBytesPerRow = m_imageWidth * sizeof(uint32_t);
             copyDescriptor.m_sourceBytesPerImage = static_cast<uint32_t>(m_stagingBufferToGPU->GetDescriptor().m_byteCount);
             copyDescriptor.m_sourceSize = RHI::Size{ m_imageWidth, m_imageHeight, 1 };
+            copyDescriptor.m_sourceFormat = m_images[1]->GetDeviceImage(context.GetDeviceIndex())->GetDescriptor().m_format;
             copyDescriptor.m_destinationImage = m_images[1]->GetDeviceImage(context.GetDeviceIndex()).get();
 
             RHI::DeviceCopyItem copyItem(copyDescriptor);
