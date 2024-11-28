@@ -4,7 +4,7 @@
     "ClassName": "PassAsset",
     "ClassData": {
         "PassTemplate": {
-            "Name": "MultiGPUCopyImageToBufferPassTemplate",
+            "Name": "MultiGPUCopyBufferToBufferPassTemplate",
             "PassClass": "CopyPass",
             "Slots": [
                 {
