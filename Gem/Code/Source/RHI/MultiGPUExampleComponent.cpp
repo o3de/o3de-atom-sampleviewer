@@ -96,7 +96,7 @@ namespace AtomSampleViewer
 
                 // This buffer is only necessary on device 0, but we test UpdateBufferDeviceMask below
                 request.m_deviceMask = RHI::MultiDevice::AllDevices;
-                if (m_stagingBufferPool->InitBuffer(request) != RHI::ResultCode::Success)
+                if (m_stagingBufferPoolToGPU->InitBuffer(request) != RHI::ResultCode::Success)
                 {
                     AZ_Error("MultiGPUExampleComponent", false, "StagingBufferToGPU was not created");
                 }
@@ -110,7 +110,7 @@ namespace AtomSampleViewer
                 updateRequest.m_buffer = m_stagingBufferToGPU.get();
                 updateRequest.m_initialData = initialData.data();
                 updateRequest.m_deviceMask = m_deviceMask_1;
-                if (m_stagingBufferPool->UpdateBufferDeviceMask(updateRequest) != RHI::ResultCode::Success)
+                if (m_stagingBufferPoolToGPU->UpdateBufferDeviceMask(updateRequest) != RHI::ResultCode::Success)
                 {
                     AZ_Error("MultiGPUExampleComponent", false, "StagingBufferToGPU was not created");
                 }
@@ -126,7 +126,7 @@ namespace AtomSampleViewer
                     RHI::BufferDescriptor{ stagingBufferBindFlags, m_outputWidth * m_outputHeight * sizeof(unsigned int) };
                 // This buffer is necessary on device 1, but we test UpdateBufferDeviceMask below
                 request.m_deviceMask = RHI::MultiDevice::NoDevices;
-                if (m_stagingBufferPool->InitBuffer(request) != RHI::ResultCode::Success)
+                if (m_stagingBufferPoolToCPU->InitBuffer(request) != RHI::ResultCode::Success)
                 {
                     AZ_Error("MultiGPUExampleComponent", false, "StagingBufferToCPU was not created");
                 }
@@ -134,7 +134,7 @@ namespace AtomSampleViewer
                 RHI::BufferDeviceMaskRequest updateRequest;
                 updateRequest.m_buffer = m_stagingBufferToCPU.get();
                 updateRequest.m_deviceMask = m_deviceMask_2;
-                if (m_stagingBufferPool->UpdateBufferDeviceMask(updateRequest) != RHI::ResultCode::Success)
+                if (m_stagingBufferPoolToCPU->UpdateBufferDeviceMask(updateRequest) != RHI::ResultCode::Success)
                 {
                     AZ_Error("MultiGPUExampleComponent", false, "StagingBufferToCPU was not created");
                 }
@@ -171,20 +171,20 @@ namespace AtomSampleViewer
 
         RHI::DeviceBufferMapResponse response{};
 
-        m_stagingBufferPool->GetDeviceBufferPool(1)->MapBuffer(request, response);
+        m_stagingBufferPoolToCPU->GetDeviceBufferPool(1)->MapBuffer(request, response);
 
         [[maybe_unused]] uint32_t* source = reinterpret_cast<uint32_t*>(response.m_data);
 
         request.m_buffer = m_stagingBufferToGPU->GetDeviceBuffer(0).get();
 
-        m_stagingBufferPool->GetDeviceBufferPool(0)->MapBuffer(request, response);
+        m_stagingBufferPoolToGPU->GetDeviceBufferPool(0)->MapBuffer(request, response);
 
         uint32_t* destination = reinterpret_cast<uint32_t*>(response.m_data);
 
         memcpy(destination, source, request.m_byteCount);
 
-        m_stagingBufferPool->GetDeviceBufferPool(1)->UnmapBuffer(*m_stagingBufferToCPU->GetDeviceBuffer(1));
-        m_stagingBufferPool->GetDeviceBufferPool(0)->UnmapBuffer(*m_stagingBufferToGPU->GetDeviceBuffer(0));
+        m_stagingBufferPoolToCPU->GetDeviceBufferPool(1)->UnmapBuffer(*m_stagingBufferToCPU->GetDeviceBuffer(1));
+        m_stagingBufferPoolToGPU->GetDeviceBufferPool(0)->UnmapBuffer(*m_stagingBufferToGPU->GetDeviceBuffer(0));
     }
 
     MultiGPUExampleComponent::MultiGPUExampleComponent()
@@ -225,18 +225,33 @@ namespace AtomSampleViewer
 
         RHI::BufferBindFlags stagingBufferBindFlags{ RHI::BufferBindFlags::CopyWrite | RHI::BufferBindFlags::CopyRead };
 
-        // Create staging buffer pool for buffer copy to the CPU and to GPU
+        // Create staging buffer pool for buffer copy to the GPU
         {
-            m_stagingBufferPool = aznew RHI::BufferPool;
+            m_stagingBufferPoolToGPU = aznew RHI::BufferPool;
 
             RHI::BufferPoolDescriptor bufferPoolDesc;
             bufferPoolDesc.m_bindFlags = stagingBufferBindFlags;
             bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Host;
             bufferPoolDesc.m_hostMemoryAccess = RHI::HostMemoryAccess::Write;
             bufferPoolDesc.m_deviceMask = m_deviceMask;
-            if (m_stagingBufferPool->Init(bufferPoolDesc) != RHI::ResultCode::Success)
+            if (m_stagingBufferPoolToGPU->Init(bufferPoolDesc) != RHI::ResultCode::Success)
             {
                 AZ_Error("MultiGPUExampleComponent", false, "StagingBufferPool was not initialized");
+            }
+        }
+
+        // Create staging buffer pool for buffer copy to the CPU
+        {
+            m_stagingBufferPoolToCPU = aznew RHI::BufferPool;
+
+            RHI::BufferPoolDescriptor bufferPoolDesc;
+            bufferPoolDesc.m_bindFlags = stagingBufferBindFlags;
+            bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Host;
+            bufferPoolDesc.m_hostMemoryAccess = RHI::HostMemoryAccess::Read;
+            bufferPoolDesc.m_deviceMask = m_deviceMask;
+            if (m_stagingBufferPoolToCPU->Init(bufferPoolDesc) != RHI::ResultCode::Success)
+            {
+                AZ_Error("MultiGPUExampleComponent", false, "StagingBufferPoolToCPU was not initialized");
             }
         }
 
@@ -256,7 +271,8 @@ namespace AtomSampleViewer
         m_pipelineState = nullptr;
         m_shaderResourceGroupShared = nullptr;
 
-        m_stagingBufferPool = nullptr;
+        m_stagingBufferPoolToGPU = nullptr;
+        m_stagingBufferPoolToCPU = nullptr;
         m_stagingBufferToGPU = nullptr;
         m_stagingBufferToCPU = nullptr;
         m_inputAssemblyBufferComposite = nullptr;
@@ -671,7 +687,8 @@ namespace AtomSampleViewer
             {
                 RHI::BufferScopeAttachmentDescriptor descriptor{};
                 descriptor.m_attachmentId = m_bufferAttachmentIds[0];
-                descriptor.m_bufferViewDescriptor = RHI::BufferViewDescriptor::CreateRaw(0, static_cast<uint32_t>(m_stagingBufferToCPU->GetDescriptor().m_byteCount));
+                descriptor.m_bufferViewDescriptor =
+                    RHI::BufferViewDescriptor::CreateRaw(0, static_cast<uint32_t>(m_stagingBufferToCPU->GetDescriptor().m_byteCount));
                 descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::DontCare;
                 descriptor.m_loadStoreAction.m_storeAction = RHI::AttachmentStoreAction::Store;
                 frameGraph.UseCopyAttachment(descriptor, RHI::ScopeAttachmentAccess::Write);
