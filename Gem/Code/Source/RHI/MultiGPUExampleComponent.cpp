@@ -635,15 +635,6 @@ namespace AtomSampleViewer
         const auto prepareFunction = [this]([[maybe_unused]] RHI::FrameGraphInterface frameGraph, [[maybe_unused]] ScopeData& scopeData)
         {
             {
-                RHI::BufferScopeAttachmentDescriptor descriptor{};
-                descriptor.m_attachmentId = m_bufferAttachmentIds[1];
-                descriptor.m_bufferViewDescriptor = RHI::BufferViewDescriptor::CreateRaw(0, static_cast<uint32_t>(m_stagingBufferToGPU->GetDescriptor().m_byteCount));
-                descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
-                descriptor.m_loadStoreAction.m_storeAction = RHI::AttachmentStoreAction::DontCare;
-                frameGraph.UseCopyAttachment(descriptor, RHI::ScopeAttachmentAccess::Read);
-            }
-
-            {
                 RHI::ImageScopeAttachmentDescriptor descriptor{};
                 descriptor.m_attachmentId = m_imageAttachmentIds[1];
                 descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::DontCare;
@@ -684,16 +675,6 @@ namespace AtomSampleViewer
 
         const auto prepareFunction = [this]([[maybe_unused]] RHI::FrameGraphInterface frameGraph, [[maybe_unused]] ScopeData& scopeData)
         {
-            {
-                RHI::BufferScopeAttachmentDescriptor descriptor{};
-                descriptor.m_attachmentId = m_bufferAttachmentIds[0];
-                descriptor.m_bufferViewDescriptor =
-                    RHI::BufferViewDescriptor::CreateRaw(0, static_cast<uint32_t>(m_stagingBufferToCPU->GetDescriptor().m_byteCount));
-                descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::DontCare;
-                descriptor.m_loadStoreAction.m_storeAction = RHI::AttachmentStoreAction::Store;
-                frameGraph.UseCopyAttachment(descriptor, RHI::ScopeAttachmentAccess::Write);
-            }
-
             {
                 RHI::ImageScopeAttachmentDescriptor descriptor{};
                 descriptor.m_attachmentId = m_imageAttachmentIds[1];
