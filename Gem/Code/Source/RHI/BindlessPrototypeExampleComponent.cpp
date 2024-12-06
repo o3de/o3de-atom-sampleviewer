@@ -767,12 +767,17 @@ namespace AtomSampleViewer
             views.push_back(m_computeImageView.get());
             isViewReadOnly.push_back(false);
 
+            AZStd::unordered_map<int, uint32_t*> mappedData;
+            for (auto [deviceIndex, data] : mapResponse.m_data)
+            {
+                mappedData[deviceIndex] = static_cast<uint32_t*>(data);
+            }
+
             // Populate the indirect buffer with indices of the views that reside within the bindless heap
             uint32_t arrayIndex = 0;
             auto indirectionBufferIndex = indirectionBufferSrg->FindShaderInputBufferIndex(AZ::Name{ "m_imageIndirectionBuffer" });
             indirectionBufferSrg->SetBindlessViews(
-                indirectionBufferIndex, m_imageIndirectionBufferView.get(), views, static_cast<uint32_t*>(mapResponse.m_data[RHI::MultiDevice::DefaultDeviceIndex]),
-                isViewReadOnly, arrayIndex);
+                indirectionBufferIndex, m_imageIndirectionBufferView.get(), views, mappedData, isViewReadOnly, arrayIndex);
 
             m_bufferPool->UnmapBuffer(*m_imageIndirectionBuffer);
         }
@@ -796,12 +801,17 @@ namespace AtomSampleViewer
             views.push_back(m_computeBufferView.get());
             isViewReadOnly.push_back(false);
 
+            AZStd::unordered_map<int, uint32_t*> mappedData;
+            for (auto [deviceIndex, data] : mapResponse.m_data)
+            {
+                mappedData[deviceIndex] = static_cast<uint32_t*>(data);
+            }
+
             //Populate the indirect buffer with indices of the views that reside within the bindless heap
             uint32_t arrayIndex = 0;
             auto indirectionBufferIndex = indirectionBufferSrg->FindShaderInputBufferIndex(AZ::Name{ "m_bufferIndirectionBuffer" });
             indirectionBufferSrg->SetBindlessViews(
-                indirectionBufferIndex, m_bufferIndirectionBufferView.get(), views, static_cast<uint32_t*>(mapResponse.m_data[RHI::MultiDevice::DefaultDeviceIndex]),
-                isViewReadOnly, arrayIndex);
+                indirectionBufferIndex, m_bufferIndirectionBufferView.get(), views, mappedData, isViewReadOnly, arrayIndex);
 
             m_bufferPool->UnmapBuffer(*m_bufferIndirectionBuffer);
         }
