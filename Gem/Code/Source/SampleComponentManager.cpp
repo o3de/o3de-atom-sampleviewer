@@ -256,7 +256,7 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::GetRequiredServices(AZ::ComponentDescriptor::DependencyArrayType& required)
     {
-        required.push_back(AZ_CRC("PrototypeLmbrCentralService", 0xe35e6de0));
+        required.push_back(AZ_CRC_CE("PrototypeLmbrCentralService"));
     }
 
     void SampleComponentManager::GetProvidedServices(AZ::ComponentDescriptor::DependencyArrayType& provided)
@@ -266,7 +266,7 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::GetDependentServices(AZ::ComponentDescriptor::DependencyArrayType& dependent)
     {
-        dependent.push_back(AZ_CRC("AzFrameworkConfigurationSystemComponentService", 0xcc49c96e)); // Ensures a scene is created for the GameEntityContext
+        dependent.push_back(AZ_CRC_CE("AzFrameworkConfigurationSystemComponentService")); // Ensures a scene is created for the GameEntityContext
     }
 
     AZStd::vector<SampleEntry> SampleComponentManager::GetSamples()
