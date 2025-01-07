@@ -6,8 +6,8 @@
  *
  */
 
-#include <viewsrg.srgi>
-#include <scenesrg.srgi>
+#include <viewsrg_all.srgi>
+#include <scenesrg_all.srgi>
 
 ShaderResourceGroupSemantic SRG_PerGroup
 {
