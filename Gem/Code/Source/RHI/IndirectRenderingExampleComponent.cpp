@@ -447,8 +447,8 @@ namespace AtomSampleViewer
         indirectBufferWriter->Shutdown();
 
         auto viewDescriptor = RHI::BufferViewDescriptor::CreateStructured(0, s_maxNumberOfObjects, commandsStride);
-        m_sourceIndirectBufferView = m_sourceIndirectBuffer->BuildBufferView(viewDescriptor);
-                  
+        m_sourceIndirectBufferView = m_sourceIndirectBuffer->GetBufferView(viewDescriptor);
+
         if(!m_sourceIndirectBufferView.get())
         {
             AZ_Assert(false, "Fail to initialize Indirect Buffer View");
@@ -540,8 +540,8 @@ namespace AtomSampleViewer
         m_instancesBufferPool->InitBuffer(request);
 
         auto descriptor = RHI::BufferViewDescriptor::CreateStructured(0, static_cast<uint32_t>(m_instancesData.size()), sizeof(InstanceData));
-        m_instancesDataBufferView = m_instancesDataBuffer->BuildBufferView(descriptor);
-                  
+        m_instancesDataBufferView = m_instancesDataBuffer->GetBufferView(descriptor);
+
         if(!m_instancesDataBufferView.get())
         {
             AZ_Assert(false, "Fail to initialize Instances Data Buffer View");

@@ -304,7 +304,7 @@ namespace AtomSampleViewer
         AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialize constant buffer");
 
         RHI::BufferViewDescriptor bufferDesc = RHI::BufferViewDescriptor::CreateStructured(0, 1u, constantBufferSize);
-        m_constantBufferView = m_constantBuffer->BuildBufferView(bufferDesc);
+        m_constantBufferView = m_constantBuffer->GetBufferView(bufferDesc);
     }
 
     void TrianglesConstantBufferExampleComponent::Deactivate()

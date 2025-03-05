@@ -209,7 +209,7 @@ namespace AtomSampleViewer
         AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialize output image");
 
         m_outputImageViewDescriptor = RHI::ImageViewDescriptor::Create(RHI::Format::R8G8B8A8_UNORM, 0, 0);
-        m_outputImageView = m_outputImage->BuildImageView(m_outputImageViewDescriptor);
+        m_outputImageView = m_outputImage->GetImageView(m_outputImageViewDescriptor);
         AZ_Assert(m_outputImageView.get(), "Failed to create output image view");
         AZ_Assert(m_outputImageView->GetDeviceImageView(RHI::MultiDevice::DefaultDeviceIndex)->IsFullView(), "Image View initialization IsFullView() failed");
     }
@@ -511,7 +511,7 @@ namespace AtomSampleViewer
 
                 uint32_t tlasBufferByteCount = aznumeric_cast<uint32_t>(m_rayTracingTlas->GetTlasBuffer()->GetDescriptor().m_byteCount);
                 RHI::BufferViewDescriptor bufferViewDescriptor = RHI::BufferViewDescriptor::CreateRayTracingTLAS(tlasBufferByteCount);
-                m_globalSrg->SetBufferView(tlasConstantIndex, m_rayTracingTlas->GetTlasBuffer()->BuildBufferView(bufferViewDescriptor).get());
+                m_globalSrg->SetBufferView(tlasConstantIndex, m_rayTracingTlas->GetTlasBuffer()->GetBufferView(bufferViewDescriptor).get());
 
                 RHI::ShaderInputImageIndex outputConstantIndex;
                 FindShaderInputIndex(&outputConstantIndex, m_globalSrg, AZ::Name{ "m_output" }, RayTracingExampleName);
