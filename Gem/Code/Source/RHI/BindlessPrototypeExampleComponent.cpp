@@ -281,7 +281,7 @@ namespace AtomSampleViewer
 
         RHI::BufferViewDescriptor viewDesc =
             RHI::BufferViewDescriptor::CreateRaw(0, aznumeric_cast<uint32_t>(bufferRequest.m_descriptor.m_byteCount));
-        bufferView = indirectionBuffer->BuildBufferView(viewDesc);
+        bufferView = indirectionBuffer->GetBufferView(viewDesc);
     }
 
     void BindlessPrototypeExampleComponent::CreateColorBuffer(
@@ -308,7 +308,7 @@ namespace AtomSampleViewer
 
         RHI::BufferViewDescriptor viewDesc =
             RHI::BufferViewDescriptor::CreateRaw(0, aznumeric_cast<uint32_t>(bufferRequest.m_descriptor.m_byteCount));
-        bufferView = buffer->BuildBufferView(viewDesc);
+        bufferView = buffer->GetBufferView(viewDesc);
     }
 
     void BindlessPrototypeExampleComponent::ClearObjects()
@@ -507,7 +507,7 @@ namespace AtomSampleViewer
             m_floatBuffer = std::make_unique<FloatBuffer>(FloatBuffer(m_bufferPool, byteCount));
 
             RHI::BufferViewDescriptor bufferViewDesc = RHI::BufferViewDescriptor::CreateStructured(0u, m_bufferFloatCount, sizeof(float));
-            AZ::RHI::Ptr<AZ::RHI::BufferView> bufferView = m_floatBuffer->m_buffer->BuildBufferView(bufferViewDesc);
+            AZ::RHI::Ptr<AZ::RHI::BufferView> bufferView = m_floatBuffer->m_buffer->GetBufferView(bufferViewDesc);
             bufferView->SetName(Name(m_floatBufferSrgName));
             m_bindlessSrg->SetBufferView(m_floatBufferSrgName, floatBufferId, bufferView.get());
 
@@ -591,7 +591,7 @@ namespace AtomSampleViewer
             AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialized compute buffer");
 
             m_rwBufferViewDescriptor = RHI::BufferViewDescriptor::CreateRaw(0, bufferSize);
-            m_computeBufferView = m_computeBuffer->BuildBufferView(m_rwBufferViewDescriptor);
+            m_computeBufferView = m_computeBuffer->GetBufferView(m_rwBufferViewDescriptor);
         }
 
         // Set the image version of color multiplier buffer
@@ -606,7 +606,7 @@ namespace AtomSampleViewer
             AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialize output image");
 
             m_rwImageViewDescriptor = RHI::ImageViewDescriptor::Create(RHI::Format::R32G32B32A32_FLOAT, 0, 0);
-            m_computeImageView = m_computeImage->BuildImageView(m_rwImageViewDescriptor);
+            m_computeImageView = m_computeImage->GetImageView(m_rwImageViewDescriptor);
         }
 
 #if ATOMSAMPLEVIEWER_TRAIT_BINDLESS_PROTOTYPE_SUPPORTS_DIRECT_BOUND_UNBOUNDED_ARRAY

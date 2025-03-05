@@ -167,7 +167,7 @@ namespace AZ
                 RHI::BufferViewDescriptor bufferViewDescriptor = RHI::BufferViewDescriptor::CreateRayTracingTLAS(tlasBufferByteCount);
 
                 bufferIndex = srgLayout->FindShaderInputBufferIndex(AZ::Name("m_scene"));
-                m_shaderResourceGroup->SetBufferView(bufferIndex, tlasBuffer->BuildBufferView(bufferViewDescriptor).get());
+                m_shaderResourceGroup->SetBufferView(bufferIndex, tlasBuffer->GetBufferView(bufferViewDescriptor).get());
             }
 
             // Bind constants

@@ -102,7 +102,7 @@ namespace AtomSampleViewer
                 }
 
                 auto bufferViewDescriptor{ RHI::BufferViewDescriptor::CreateRaw(0, static_cast<u32>(request.m_descriptor.m_byteCount)) };
-                auto bufferView = m_stagingBufferToGPU->BuildBufferView(bufferViewDescriptor);
+                auto bufferView = m_stagingBufferToGPU->GetBufferView(bufferViewDescriptor);
                 bufferView->GetDeviceBufferView(0);
                 bufferView->GetDeviceBufferView(1);
 
