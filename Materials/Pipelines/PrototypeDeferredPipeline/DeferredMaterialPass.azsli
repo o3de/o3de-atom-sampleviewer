@@ -5,12 +5,32 @@
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
- 
+#pragma once
+
+#include <Atom/Features/SrgSemantics.azsli>
+
 #define MATERIALPIPELINE_SHADER_HAS_PIXEL_STAGE 1
 
 //TODO(DeferredPOC): Support clear coat
 #define ENABLE_CLEAR_COAT 0
 #define ENABLE_TRANSMISSION 0
+
+// we don't have a pass-srg for this pass
+#define PIPELINE_HAS_PASS_SRG 0
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+#ifdef MATERIAL_TYPE_DEFINES_AZSLI_FILE_PATH
+#include MATERIAL_TYPE_DEFINES_AZSLI_FILE_PATH
+#endif
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+#include <viewsrg_all.srgi>
+#include <scenesrg_all.srgi>
+// #include <Atom/Features/Pipeline/Forward/ForwardPassSrg.azsli>
+#include <Atom/Features/Pipeline/Forward/ForwardPassVertexData.azsli>
+#include <Atom/Features/Pipeline/Forward/ForwardPassPipelineCallbacks.azsli>
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -18,17 +38,12 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <viewsrg.srgi>
-#include <Atom/Features/PBR/DefaultObjectSrg.azsli>
-#include <Atom/RPI/ShaderResourceGroups/DefaultDrawSrg.azsli>
-#include <Atom/Features/ColorManagement/TransformColor.azsli>
-#include <Atom/Features/PBR/LightingOptions.azsli>
 
 VsOutput MaterialVS(VsInput IN, uint instanceId : SV_InstanceID)
 {
     VsSystemValues SV;
     SV.m_instanceId = instanceId;
-    return EvaluateVertexGeometry(IN, SV);
+    return EvaluateVertexGeometry(IN, SV, GetMaterialParameters());
 }
 
 struct DeferredMaterialOutput
@@ -48,11 +63,15 @@ struct DeferredMaterialOutput
 #endif
 DeferredMaterialOutput MaterialPS(VsOutput IN, bool isFrontFace : SV_IsFrontFace)
 {
+    // ------- Reconstruct the Instance-Id --------
+    VsSystemValues SV;
+    SV.m_instanceId = IN.m_instanceId;
+
     // ------- Geometry -> Surface -------
 
-    PixelGeometryData geoData = EvaluatePixelGeometry(IN, isFrontFace);
+    PixelGeometryData geoData = EvaluatePixelGeometry(IN, SV, isFrontFace, GetMaterialParameters());
 
-    Surface surface = EvaluateSurface(IN, geoData);
+    Surface surface = EvaluateSurface(IN, SV, geoData, GetMaterialParameters());
 
     // ------- Output -------
 
