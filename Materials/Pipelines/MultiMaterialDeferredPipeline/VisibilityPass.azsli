@@ -1,0 +1,64 @@
+/*
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
+ * SPDX-License-Identifier: Apache-2.0 OR MIT
+ *
+ */
+#pragma once 
+
+#include <Atom/Features/SrgSemantics.azsli>
+
+#define MATERIALPIPELINE_SHADER_HAS_PIXEL_STAGE 0
+#define PIPELINE_HAS_PASS_SRG 0
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+#ifdef MATERIAL_TYPE_DEFINES_AZSLI_FILE_PATH
+#include MATERIAL_TYPE_DEFINES_AZSLI_FILE_PATH
+#endif
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+#include <viewsrg_all.srgi>
+#include <scenesrg_all.srgi>
+#include <Atom/Features/Pipeline/Forward/ForwardPassVertexData.azsli>
+#include <Atom/Features/Pipeline/Forward/ForwardPassPipelineCallbacks.azsli>
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+#include MATERIAL_TYPE_AZSLI_FILE_PATH
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+VsOutput VertexShader(VsInput IN, uint instanceId : SV_InstanceID)
+{
+    VsSystemValues SV;
+    SV.m_instanceId = instanceId;
+    VsOutput OUT = EvaluateVertexGeometry(IN, SV, GetMaterialParameters(DrawSrg::m_materialTypeId, DrawSrg::m_materialInstanceId));
+    OUT.m_instanceId = instanceId;
+    return OUT;
+}
+
+struct PsOutput
+{
+    float4 firstVBuffer: SV_Target0;
+    float4 secondVBuffer: SV_Target1;
+};
+#include <MultiMaterialDeferredPipeline/VisibilityPassCommon.azsli>
+
+PsOutput PixelShader(VsOutput IN, uint triangleIndex : SV_PrimitiveID, float3 barycentrics : SV_Barycentrics, bool isFrontFace : SV_IsFrontFace)
+{
+    // ------- Reconstruct the Instance-Id --------
+    VsSystemValues SV;
+    SV.m_instanceId = IN.m_instanceId;
+
+    VisibilityBuffer vbuffer = CreateVisibiltiyBufferEntry(SV, triangleIndex, DrawSrg::m_meshInfoIndex, barycentrics, IN.worldPosition, isFrontFace);
+
+    PsOutput OUT;
+    packVisibilityBuffer(vbuffer, OUT.firstVBuffer, OUT.secondVBuffer);
+
+    return OUT;
+}
+
+
+

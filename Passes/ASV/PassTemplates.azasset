@@ -121,6 +121,22 @@
                 "Path": "Passes/PrototypeDeferredPipeline/DeferredLighting.pass"
             },
             {
+                "Name": "DeferredMaterialEvalPassTemplate",
+                "Path": "Passes/MultiMaterialDeferredPipeline/DeferredMaterialEval.pass"
+            },
+            {
+                "Name": "VisibilityPassTemplate",
+                "Path": "Passes/MultiMaterialDeferredPipeline/Visibility.pass"
+            },
+            {
+                "Name": "MultiMaterialDeferredOpaqueParentTemplate",
+                "Path": "Passes/MultiMaterialDeferredPipeline/MultiMaterialDeferredOpaqueParent.pass"
+            },
+            {
+                "Name": "MultiMaterialDeferredPipelineTemplate",
+                "Path": "Passes/MultiMaterialDeferredPipeline/MultiMaterialDeferredPipeline.pass"
+            },
+            {
                 "Name": "ForwardSubpassExampleTemplate",
                 "Path": "Passes/SubpassExample/ForwardSubpass.pass"
             },

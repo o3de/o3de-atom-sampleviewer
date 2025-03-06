@@ -105,6 +105,27 @@ namespace AtomSampleViewer
         m_deferredPipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
     }
 
+    void MeshExampleComponent::CreateMultiMaterialDeferredPipeline()
+    {
+        AZ::RPI::RenderPipelineDescriptor pipelineDesc;
+        pipelineDesc.m_mainViewTagName = "MainCamera";
+        pipelineDesc.m_name = "MultiMaterialDeferredPipeline";
+        pipelineDesc.m_materialPipelineTag = "MultiMaterialDeferredPipeline";
+        pipelineDesc.m_rootPassTemplate = "MultiMaterialDeferredPipelineTemplate";
+        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 1;
+        SampleComponentManagerRequestBus::BroadcastResult(
+            pipelineDesc.m_renderSettings.m_multisampleState.m_samples, &SampleComponentManagerRequests::GetNumMSAASamples);
+        pipelineDesc.m_allowModification =
+            true; // MainPipeline allows modifications, so the DeferredPipeline must as well, to get a consistent result.
+
+        m_multiMaterialDeferredPipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
+    }
+
+    void MeshExampleComponent::DestroyMultiMaterialDeferredPipeline()
+    {
+        m_multiMaterialDeferredPipeline = nullptr;
+    }
+
     void MeshExampleComponent::DestroyDeferredPipeline()
     {
         m_deferredPipeline = nullptr;
@@ -160,6 +181,27 @@ namespace AtomSampleViewer
 
         m_imguiScope = {}; // I'm not sure why this is needed. Something must be wrong in the ImGuiActiveContextScope class
         m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass({m_deferredPipeline->GetId().GetCStr(), "ImGuiPass"});
+    }
+
+    void MeshExampleComponent::ActivateMultiMaterialDeferredPipeline()
+    {
+        if (!m_multiMaterialDeferredPipeline)
+            return;
+
+        AZ::RPI::RenderPipelinePtr prevPipeline = m_scene->GetDefaultRenderPipeline();
+
+        if (!m_originalPipeline)
+        {
+            m_originalPipeline = prevPipeline;
+        }
+
+        m_multiMaterialDeferredPipeline->GetRootPass()->SetEnabled(true); // PassSystem::RemoveRenderPipeline was calling SetEnabled(false)
+        m_scene->AddRenderPipeline(m_multiMaterialDeferredPipeline);
+        m_multiMaterialDeferredPipeline->SetDefaultView(prevPipeline->GetDefaultView());
+        m_scene->RemoveRenderPipeline(prevPipeline->GetId());
+
+        m_imguiScope = {}; // I'm not sure why this is needed. Something must be wrong in the ImGuiActiveContextScope class
+        m_imguiScope = AZ::Render::ImGuiActiveContextScope::FromPass({ m_multiMaterialDeferredPipeline->GetId().GetCStr(), "ImGuiPass" });
     }
 
     void MeshExampleComponent::ActivateOriginalPipeline()
@@ -231,17 +273,20 @@ namespace AtomSampleViewer
         AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusConnect();
         CreateLowEndPipeline();
         CreateDeferredPipeline();
+        CreateMultiMaterialDeferredPipeline();
         CreateMultiViewXRPipeline();
     }
 
     void MeshExampleComponent::Deactivate()
     {
-        if (m_useLowEndPipeline || m_useDeferredPipeline || m_useMultiViewXRPipeline)
+        if (m_usedRenderPipeline != UsedRenderPipeline::Default)
         {
             ActivateOriginalPipeline();
+            m_usedRenderPipeline = UsedRenderPipeline::Default;
         }
         DestroyLowEndPipeline();
         DestroyDeferredPipeline();
+        DestroyMultiMaterialDeferredPipeline();
         DestroyMultiViewXRPipeline();
 
         AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusDisconnect();
@@ -272,15 +317,19 @@ namespace AtomSampleViewer
         // Switch pipeline before any imGui actions (switching pipelines switches imGui scope)
         if (m_switchPipeline)
         {
-            if (m_useLowEndPipeline)
+            if (m_usedRenderPipeline == UsedRenderPipeline::LowEnd)
             {
                 ActivateLowEndPipeline();
             }
-            else if (m_useDeferredPipeline)
+            else if (m_usedRenderPipeline == UsedRenderPipeline::Deferred)
             {
                 ActivateDeferredPipeline();
             }
-            else if (m_useMultiViewXRPipeline)
+            else if (m_usedRenderPipeline == UsedRenderPipeline::MultiMaterialDeferred)
+            {
+                ActivateMultiMaterialDeferredPipeline();
+            }
+            else if (m_usedRenderPipeline == UsedRenderPipeline::MultiViewXR)
             {
                 ActivateMultiViewXRPipeline();
             }
@@ -298,27 +347,28 @@ namespace AtomSampleViewer
 
             ImGuiAssetBrowser::WidgetSettings assetBrowserSettings;
 
-            if (ScriptableImGui::Checkbox("Use Low End Pipeline", &m_useLowEndPipeline))
+            AZStd::vector<AZStd::string> renderPipelineNames{
+                "Default Pipeline", "Low End Pipeline", "Deferred Pipeline", "Multimaterial Deferred Pipeline", "MultiViewXR Pipeline",
+            };
+
+            if (ScriptableImGui::BeginCombo("Renderpipeline", renderPipelineNames.at(static_cast<uint32_t>(m_usedRenderPipeline)).c_str()))
             {
-                m_switchPipeline = true;
-                m_useDeferredPipeline = false;
-                m_useMultiViewXRPipeline = false;
+                for (uint32_t i = 0; i < renderPipelineNames.size(); ++i)
+                {
+                    AZStd::string& name = renderPipelineNames.at(i);
+                    auto renderPipelineType = UsedRenderPipeline(i);
+                    if (ScriptableImGui::Selectable(name.c_str(), m_usedRenderPipeline == renderPipelineType))
+                    {
+                        if (m_usedRenderPipeline != renderPipelineType)
+                        {
+                            m_switchPipeline = true;
+                            m_usedRenderPipeline = renderPipelineType;
+                        }
+                    }
+                }
+                ScriptableImGui::EndCombo();
             }
 
-            if (ScriptableImGui::Checkbox("Use Deferred Pipeline", &m_useDeferredPipeline))
-            {
-                m_switchPipeline = true;
-                m_useLowEndPipeline = false;
-                m_useMultiViewXRPipeline = false;
-            }
-
-            if (ScriptableImGui::Checkbox("Use MultiViewXR Pipeline", &m_useMultiViewXRPipeline))
-            {
-                m_switchPipeline = true;
-                m_useLowEndPipeline = false;
-                m_useDeferredPipeline = false;
-            }
-			
             modelNeedsUpdate |= ScriptableImGui::Checkbox("Enable Material Override", &m_enableMaterialOverride);
            
             if (ScriptableImGui::Checkbox("Show Ground Plane", &m_showGroundPlane))
