@@ -1,0 +1,97 @@
+{
+    "Type": "JsonSerialization",
+    "Version": 1,
+    "ClassName": "PassAsset",
+    "ClassData": {
+        "PassTemplate": {
+            "Name": "VisibilityPassTemplate",
+            "PassClass": "RasterPass",
+            "Slots": [
+                // Inputs...
+                {
+                    "Name": "DepthStencilInputOutput",
+                    "SlotType": "InputOutput",
+                    "ScopeAttachmentUsage": "DepthStencil"
+                },
+                // Outputs...
+                {
+                    "Name": "VisibilityBufferOutput_0",
+                    "SlotType": "Output",
+                    "ScopeAttachmentUsage": "RenderTarget",
+                    "LoadStoreAction": {
+                        "ClearValue": {
+                            "Value": [
+                                "NaN",
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "LoadAction": "Clear"
+                    }
+                },
+                {
+                    "Name": "VisibilityBufferOutput_1",
+                    "SlotType": "Output",
+                    "ScopeAttachmentUsage": "RenderTarget",
+                    "LoadStoreAction": {
+                        // no need to clear the second buffer
+                        "LoadAction": "DontCare"
+                    }
+                }
+            ],
+            "ImageAttachments": [
+                {
+                    "Name": "VisibilityBufferImage_0",
+                    "SizeSource": {
+                        "Source": {
+                            "Pass": "Parent",
+                            "Attachment": "PipelineOutput"
+                        }
+                    },
+                    "MultisampleSource": {
+                        "Pass": "This",
+                        "Attachment": "DepthStencilInputOutput"
+                    },
+                    "ImageDescriptor": {
+                        "Format": "R32G32B32A32_FLOAT",
+                        "SharedQueueMask": "Graphics"
+                    }
+                },
+                {
+                    "Name": "VisibilityBufferImage_1",
+                    "SizeSource": {
+                        "Source": {
+                            "Pass": "Parent",
+                            "Attachment": "PipelineOutput"
+                        }
+                    },
+                    "MultisampleSource": {
+                        "Pass": "This",
+                        "Attachment": "DepthStencilInputOutput"
+                    },
+                    "ImageDescriptor": {
+                        "Format": "R32G32B32A32_FLOAT",
+                        "SharedQueueMask": "Graphics"
+                    }
+                }
+            ],
+            "Connections": [
+                {
+                    "LocalSlot": "VisibilityBufferOutput_0",
+                    "AttachmentRef": {
+                        "Pass": "This",
+                        "Attachment": "VisibilityBufferImage_0"
+                    }
+                },
+                {
+                    "LocalSlot": "VisibilityBufferOutput_1",
+                    "AttachmentRef": {
+                        "Pass": "This",
+                        "Attachment": "VisibilityBufferImage_1"
+                    }
+                }
+            ]
+        }
+    }
+}

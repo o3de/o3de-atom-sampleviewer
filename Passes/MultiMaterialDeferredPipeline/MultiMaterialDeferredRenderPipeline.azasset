@@ -1,0 +1,17 @@
+{
+    "Type": "JsonSerialization",
+    "Version": 1,
+    "ClassName": "RenderPipelineDescriptor",
+    "ClassData": {
+        "Name": "MultiMaterialDeferredPipeline",
+        "MainViewTag": "MainCamera",
+        "MaterialPipelineTag": "MultiMaterialDeferredPipeline",
+        "RootPassTemplate": "MultiMaterialDeferredPipelineTemplate",
+        "AllowModification": true,
+        "RenderSettings": {
+            "MultisampleState": {
+                "samples": 4
+            }
+        }
+    }
+}
