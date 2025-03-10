@@ -80,6 +80,7 @@ ForwardPassOutput MainPS(VSOutput IN, in uint sampleIndex : SV_SampleIndex)
         SV.m_materialTypeId = meshInfo.m_materialTypeId;
         SV.m_materialInstanceId = meshInfo.m_materialInstanceId;
         SV.m_lightingChannels = meshInfo.m_lightingChannels;
+        SV.m_uvStreamTangentBitmask = meshInfo.m_uvStreamTangentBitmask;
 
         // ------- Material Parameters -------
         const MaterialParameters params = GetMaterialParameters(SV.m_materialTypeId, SV.m_materialInstanceId);
