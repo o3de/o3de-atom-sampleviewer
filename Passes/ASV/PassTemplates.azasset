@@ -131,6 +131,10 @@
             {
                 "Name": "SubpassesPipelineTemplate",
                 "Path": "Passes/SubpassExample/SubpassesPipeline.pass"
+            },
+            {
+                "Name": "VertexAnimationTemplate",
+                "Path": "Passes/VertexAnimation.pass"
             }
         ]
     }
