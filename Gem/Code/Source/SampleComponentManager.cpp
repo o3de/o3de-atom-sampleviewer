@@ -74,6 +74,7 @@
 
 #include <Performance/100KDrawable_SingleView_ExampleComponent.h>
 #include <Performance/100KDraw_10KDrawable_MultiView_ExampleComponent.h>
+#include <Performance/RayTracingVertexAnimationExampleComponent.h>
 
 #include <AreaLightExampleComponent.h>
 #include <AssetLoadTestComponent.h>
@@ -137,6 +138,7 @@
 #include <AzFramework/Scene/SceneSystemInterface.h>
 
 #include <Passes/RayTracingAmbientOcclusionPass.h>
+#include <Passes/VertexAnimationPass.h>
 
 #include <Utils/Utils.h>
 
@@ -344,6 +346,7 @@ namespace AtomSampleViewer
             NewFeaturesSample<TransparencyExampleComponent>("Transparency"),
             NewPerfSample<_100KDrawableExampleComponent>("100KDrawable_SingleView"),
             NewPerfSample<_100KDraw10KDrawableExampleComponent>("100KDraw_10KDrawable_MultiView"),
+            NewPerfSample<RayTracingVertexAnimationExampleComponent>("RayTracingVertexAnimation", []() { return Utils::GetRHIDevice()->GetFeatures().m_rayTracing; }),
         };
     }
 
@@ -410,6 +413,7 @@ namespace AtomSampleViewer
         AZ_Assert(passSystem, "Cannot get the pass system.");
 
         passSystem->AddPassCreator(Name("RayTracingAmbientOcclusionPass"), &AZ::Render::RayTracingAmbientOcclusionPass::Create);
+        passSystem->AddPassCreator(Name("VertexAnimationPass"), &AZ::Render::VertexAnimationPass::Create);
     }
 
     void SampleComponentManager::ActivateInternal()

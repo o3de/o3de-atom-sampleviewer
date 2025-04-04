@@ -1,0 +1,81 @@
+/*
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
+ * SPDX-License-Identifier: Apache-2.0 OR MIT
+ *
+ */
+
+#include <Atom/Features/SrgSemantics.azsli>
+#include <Atom/RPI/Math.azsli>
+
+ShaderResourceGroup PassSrg : SRG_PerPass
+{
+    StructuredBuffer<float3> m_sourceVertexData;
+    RWStructuredBuffer<float3> m_targetVertexData;
+    uint m_frameNumber;
+    uint m_vertexCountPerInstance;
+    uint m_targetVertexStridePerInstance;
+}
+
+class ContinuousSineRng
+{
+    uint m_seed;
+    uint m_timeshift;
+
+    void Initialize(float3 position, uint instanceIndex, uint timeshift)
+    {
+        m_seed = 0;
+        m_seed ^= asuint(position.x);
+        Xorshift(m_seed);
+        m_seed ^= asuint(position.y);
+        Xorshift(m_seed);
+        m_seed ^= asuint(position.z);
+        Xorshift(m_seed);
+
+        m_seed ^= instanceIndex;
+        Xorshift(m_seed);
+
+        m_timeshift = timeshift;
+    }
+
+    float GetRandomNormalizedFloat()
+    {
+        // Duration in frames after which the animation repeats
+        float animationDuration = Xorshift(m_seed) % 40 + 120;
+
+        // The float values passed to the sin-function should not be too large, otherwise the result is not continuous
+        uint seedSmall = m_seed % 1024;
+        float timeshiftSmall = (m_timeshift % animationDuration) / animationDuration * TWO_PI;
+        return sin(seedSmall + timeshiftSmall) * 0.5f + 0.5f;
+    }
+
+    float3 GetRandomUnitSphereDirection()
+    {
+        float z = GetRandomNormalizedFloat() * 2.f - 1.f;
+        float phi = GetRandomNormalizedFloat() * TWO_PI;
+
+        float rxy = sqrt(1.f - z * z);
+        float x = rxy * cos(phi);
+        float y = rxy * sin(phi);
+
+        return normalize(float3(x, y, z));
+    }
+};
+
+[numthreads(64, 1, 1)]
+void AnimateVertices(uint3 dispatchId : SV_DispatchThreadID)
+{
+    uint instanceIndex = dispatchId.x / PassSrg::m_vertexCountPerInstance;
+    uint inputIndex = dispatchId.x % PassSrg::m_vertexCountPerInstance;
+    uint outputIndex = instanceIndex * PassSrg::m_targetVertexStridePerInstance + inputIndex;
+
+    ContinuousSineRng rng;
+    rng.Initialize(PassSrg::m_sourceVertexData[inputIndex], instanceIndex, PassSrg::m_frameNumber);
+
+    // Animated the vertices by displacing each vertex in a random direction by a random amount
+    float3 moveDirection = rng.GetRandomUnitSphereDirection();
+    float moveAmount = rng.GetRandomNormalizedFloat() * 0.1f;
+
+    PassSrg::m_targetVertexData[outputIndex] = PassSrg::m_sourceVertexData[inputIndex] + moveDirection * moveAmount;
+}
