@@ -30,17 +30,17 @@ namespace AtomSampleViewer
     // This sample demonstrates the use of Atom Ray Tracing through the RHI abstraction layer.
     // It creates three triangles and one rectangle in a scene, and ray traces that scene to
     // an output image and displays it.
-    class RayTracingExampleComponent final
+    class RayTracingClusterExampleComponent final
         : public BasicRHIComponent
     {
     public:
-        AZ_COMPONENT(RayTracingExampleComponent, "{FC4636BC-9C5C-4D7D-8FEF-41A02C56B62D}", AZ::Component);
-        AZ_DISABLE_COPY(RayTracingExampleComponent);
+        AZ_COMPONENT(RayTracingClusterExampleComponent, "{85D46D8F-84C6-4178-ABE5-CADBBC6E6E9C}", AZ::Component);
+        AZ_DISABLE_COPY(RayTracingClusterExampleComponent);
 
         static void Reflect(AZ::ReflectContext* context);
 
-        RayTracingExampleComponent();
-        ~RayTracingExampleComponent() override {}
+        RayTracingClusterExampleComponent();
+        ~RayTracingClusterExampleComponent() override {}
 
     protected:
 

@@ -6,7 +6,7 @@
  *
  */
 
-#include <RHI/RayTracingExampleComponent.h>
+#include <RHI/RayTracingClusterExampleComponent.h>
 #include <Utils/Utils.h>
 #include <SampleComponentManager.h>
 #include <Atom/RHI/CommandList.h>
@@ -19,26 +19,29 @@
 #include <Atom/RPI.Reflect/Shader/ShaderAsset.h>
 #include <AzCore/Serialization/SerializeContext.h>
 
-static const char* RayTracingExampleName = "RayTracingExample";
+namespace
+{
+    static const char* SampleName = "RayTracingClusterExample";
+}
 
 namespace AtomSampleViewer
 {
-    void RayTracingExampleComponent::Reflect(AZ::ReflectContext* context)
+    void RayTracingClusterExampleComponent::Reflect(AZ::ReflectContext* context)
     {
         if (auto* serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
         {
-            serializeContext->Class<RayTracingExampleComponent, AZ::Component>()
+            serializeContext->Class<RayTracingClusterExampleComponent, AZ::Component>()
                 ->Version(0)
                 ;
         }
     }
 
-    RayTracingExampleComponent::RayTracingExampleComponent()
+    RayTracingClusterExampleComponent::RayTracingClusterExampleComponent()
     {
         m_supportRHISamplePipeline = true;
     }
 
-    void RayTracingExampleComponent::Activate()
+    void RayTracingClusterExampleComponent::Activate()
     {
         CreateResourcePools();
         CreateGeometry();
@@ -55,14 +58,14 @@ namespace AtomSampleViewer
         RHI::RHISystemNotificationBus::Handler::BusConnect();
     }
 
-    void RayTracingExampleComponent::Deactivate()
+    void RayTracingClusterExampleComponent::Deactivate()
     {
         RHI::RHISystemNotificationBus::Handler::BusDisconnect();
         m_windowContext = nullptr;
         m_scopeProducers.clear();
     }
 
-    void RayTracingExampleComponent::CreateResourcePools()
+    void RayTracingClusterExampleComponent::CreateResourcePools()
     {
         // create input assembly buffer pool
         {
@@ -90,7 +93,7 @@ namespace AtomSampleViewer
         m_rayTracingBufferPools->Init(RHI::MultiDevice::AllDevices);
     }
 
-    void RayTracingExampleComponent::CreateGeometry()
+    void RayTracingClusterExampleComponent::CreateGeometry()
     {
         // triangle
         {
@@ -155,7 +158,7 @@ namespace AtomSampleViewer
         }
     }
 
-    void RayTracingExampleComponent::CreateFullScreenBuffer()
+    void RayTracingClusterExampleComponent::CreateFullScreenBuffer()
     {
         FullScreenBufferData bufferData;
         SetFullScreenRect(bufferData.m_positions.data(), bufferData.m_uvs.data(), bufferData.m_indices.data());
@@ -197,7 +200,7 @@ namespace AtomSampleViewer
         m_fullScreenInputStreamLayout = layoutBuilder.End();
     }
 
-    void RayTracingExampleComponent::CreateOutputTexture()
+    void RayTracingClusterExampleComponent::CreateOutputTexture()
     {
         // create output image
         m_outputImage = aznew RHI::Image();
@@ -214,18 +217,18 @@ namespace AtomSampleViewer
         AZ_Assert(m_outputImageView->GetDeviceImageView(RHI::MultiDevice::DefaultDeviceIndex)->IsFullView(), "Image View initialization IsFullView() failed");
     }
 
-    void RayTracingExampleComponent::CreateRayTracingAccelerationStructureObjects()
+    void RayTracingClusterExampleComponent::CreateRayTracingAccelerationStructureObjects()
     {
         m_triangleRayTracingBlas = aznew AZ::RHI::RayTracingBlas;
         m_rectangleRayTracingBlas = aznew AZ::RHI::RayTracingBlas;
         m_rayTracingTlas = aznew AZ::RHI::RayTracingTlas;
     }
 
-    void RayTracingExampleComponent::CreateRasterShader()
+    void RayTracingClusterExampleComponent::CreateRasterShader()
     {
         const char* shaderFilePath = "Shaders/RHI/RayTracingDraw.azshader";
 
-        auto drawShader = LoadShader(shaderFilePath, RayTracingExampleName);
+        auto drawShader = LoadShader(shaderFilePath, SampleName);
         AZ_Assert(drawShader, "Failed to load Draw shader");
 
         RHI::PipelineStateDescriptorForDraw pipelineDesc;
@@ -240,14 +243,14 @@ namespace AtomSampleViewer
         m_drawPipelineState = drawShader->AcquirePipelineState(pipelineDesc);
         AZ_Assert(m_drawPipelineState, "Failed to acquire draw pipeline state");
 
-        m_drawSRG = CreateShaderResourceGroup(drawShader, "BufferSrg", RayTracingExampleName);
+        m_drawSRG = CreateShaderResourceGroup(drawShader, "BufferSrg", SampleName);
     }
 
-    void RayTracingExampleComponent::CreateRayTracingPipelineState()
+    void RayTracingClusterExampleComponent::CreateRayTracingPipelineState()
     {
         // load ray generation shader
         const char* rayGenerationShaderFilePath = "Shaders/RHI/RayTracingDispatch.azshader";
-        m_rayGenerationShader = LoadShader(rayGenerationShaderFilePath, RayTracingExampleName);
+        m_rayGenerationShader = LoadShader(rayGenerationShaderFilePath, SampleName);
         AZ_Assert(m_rayGenerationShader, "Failed to load ray generation shader");
 
         auto rayGenerationShaderVariant = m_rayGenerationShader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId);
@@ -256,7 +259,7 @@ namespace AtomSampleViewer
 
         // load miss shader
         const char* missShaderFilePath = "Shaders/RHI/RayTracingMiss.azshader";
-        m_missShader = LoadShader(missShaderFilePath, RayTracingExampleName);
+        m_missShader = LoadShader(missShaderFilePath, SampleName);
         AZ_Assert(m_missShader, "Failed to load miss shader");
 
         auto missShaderVariant = m_missShader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId);
@@ -265,7 +268,7 @@ namespace AtomSampleViewer
 
         // load closest hit gradient shader
         const char* closestHitGradientShaderFilePath = "Shaders/RHI/RayTracingClosestHitGradient.azshader";
-        m_closestHitGradientShader = LoadShader(closestHitGradientShaderFilePath, RayTracingExampleName);
+        m_closestHitGradientShader = LoadShader(closestHitGradientShaderFilePath, SampleName);
         AZ_Assert(m_closestHitGradientShader, "Failed to load closest hit gradient shader");
 
         auto closestHitGradientShaderVariant = m_closestHitGradientShader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId);
@@ -274,7 +277,7 @@ namespace AtomSampleViewer
 
         // load closest hit solid shader
         const char* closestHitSolidShaderFilePath = "Shaders/RHI/RayTracingClosestHitSolid.azshader";
-        m_closestHitSolidShader = LoadShader(closestHitSolidShaderFilePath, RayTracingExampleName);
+        m_closestHitSolidShader = LoadShader(closestHitSolidShaderFilePath, SampleName);
         AZ_Assert(m_closestHitSolidShader, "Failed to load closest hit solid shader");
 
         auto closestHitSolidShaderVariant = m_closestHitSolidShader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId);
@@ -284,7 +287,7 @@ namespace AtomSampleViewer
         // global pipeline state and srg
         m_globalPipelineState = m_rayGenerationShader->AcquirePipelineState(rayGenerationShaderDescriptor);
         AZ_Assert(m_globalPipelineState, "Failed to acquire ray tracing global pipeline state");
-        m_globalSrg = CreateShaderResourceGroup(m_rayGenerationShader, "RayTracingGlobalSrg", RayTracingExampleName);
+        m_globalSrg = CreateShaderResourceGroup(m_rayGenerationShader, "RayTracingGlobalSrg", SampleName);
 
         // build the ray tracing pipeline state descriptor
         RHI::RayTracingPipelineStateDescriptor descriptor;
@@ -308,13 +311,13 @@ namespace AtomSampleViewer
         m_rayTracingPipelineState->Init(RHI::MultiDevice::AllDevices, descriptor);
     }
 
-    void RayTracingExampleComponent::CreateRayTracingShaderTable()
+    void RayTracingClusterExampleComponent::CreateRayTracingShaderTable()
     {
         m_rayTracingShaderTable = aznew RHI::RayTracingShaderTable;
         m_rayTracingShaderTable->Init(RHI::MultiDevice::AllDevices, *m_rayTracingBufferPools);
     }
 
-    void RayTracingExampleComponent::CreateRayTracingAccelerationTableScope()
+    void RayTracingClusterExampleComponent::CreateRayTracingAccelerationTableScope()
     {
         struct ScopeData
         {
@@ -431,7 +434,7 @@ namespace AtomSampleViewer
             m_tlasBufferViewDescriptor = RHI::BufferViewDescriptor::CreateRaw(0, (uint32_t)m_rayTracingTlas->GetTlasBuffer()->GetDescriptor().m_byteCount);
 
             [[maybe_unused]] RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportBuffer(m_tlasBufferAttachmentId, m_rayTracingTlas->GetTlasBuffer());
-            AZ_Error(RayTracingExampleName, result == RHI::ResultCode::Success, "Failed to import TLAS buffer with error %d", result);
+            AZ_Error(SampleName, result == RHI::ResultCode::Success, "Failed to import TLAS buffer with error %d", result);
 
             RHI::BufferScopeAttachmentDescriptor desc;
             desc.m_attachmentId = m_tlasBufferAttachmentId;
@@ -466,7 +469,7 @@ namespace AtomSampleViewer
                 executeFunction));
     }
 
-    void RayTracingExampleComponent::CreateRayTracingDispatchScope()
+    void RayTracingClusterExampleComponent::CreateRayTracingDispatchScope()
     {
         struct ScopeData
         {
@@ -477,7 +480,7 @@ namespace AtomSampleViewer
             // attach output image
             {
                 [[maybe_unused]] RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportImage(m_outputImageAttachmentId, m_outputImage);
-                AZ_Error(RayTracingExampleName, result == RHI::ResultCode::Success, "Failed to import output image with error %d", result);
+                AZ_Error(SampleName, result == RHI::ResultCode::Success, "Failed to import output image with error %d", result);
 
                 RHI::ImageScopeAttachmentDescriptor desc;
                 desc.m_attachmentId = m_outputImageAttachmentId;
@@ -507,14 +510,14 @@ namespace AtomSampleViewer
             {
                 // set the TLAS and output image in the ray tracing global Srg
                 RHI::ShaderInputBufferIndex tlasConstantIndex;
-                FindShaderInputIndex(&tlasConstantIndex, m_globalSrg, AZ::Name{ "m_scene" }, RayTracingExampleName);
+                FindShaderInputIndex(&tlasConstantIndex, m_globalSrg, AZ::Name{ "m_scene" }, SampleName);
 
                 uint32_t tlasBufferByteCount = aznumeric_cast<uint32_t>(m_rayTracingTlas->GetTlasBuffer()->GetDescriptor().m_byteCount);
                 RHI::BufferViewDescriptor bufferViewDescriptor = RHI::BufferViewDescriptor::CreateRayTracingTLAS(tlasBufferByteCount);
                 m_globalSrg->SetBufferView(tlasConstantIndex, m_rayTracingTlas->GetTlasBuffer()->GetBufferView(bufferViewDescriptor).get());
 
                 RHI::ShaderInputImageIndex outputConstantIndex;
-                FindShaderInputIndex(&outputConstantIndex, m_globalSrg, AZ::Name{ "m_output" }, RayTracingExampleName);
+                FindShaderInputIndex(&outputConstantIndex, m_globalSrg, AZ::Name{ "m_output" }, SampleName);
                 m_globalSrg->SetImageView(outputConstantIndex, m_outputImageView.get());
 
                 // set hit shader data, each array element corresponds to the InstanceIndex() of the geometry in the TLAS
@@ -522,7 +525,7 @@ namespace AtomSampleViewer
 
                 // set HitGradient values
                 RHI::ShaderInputConstantIndex hitGradientDataConstantIndex;
-                FindShaderInputIndex(&hitGradientDataConstantIndex, m_globalSrg, AZ::Name{"m_hitGradientData"}, RayTracingExampleName);
+                FindShaderInputIndex(&hitGradientDataConstantIndex, m_globalSrg, AZ::Name{"m_hitGradientData"}, SampleName);
 
                 struct HitGradientData
                 {
@@ -540,7 +543,7 @@ namespace AtomSampleViewer
 
                 // set HitSolid values
                 RHI::ShaderInputConstantIndex hitSolidDataConstantIndex;
-                FindShaderInputIndex(&hitSolidDataConstantIndex, m_globalSrg, AZ::Name{"m_hitSolidData"}, RayTracingExampleName);
+                FindShaderInputIndex(&hitSolidDataConstantIndex, m_globalSrg, AZ::Name{"m_hitSolidData"}, SampleName);
 
                 struct HitSolidData
                 {
@@ -615,7 +618,7 @@ namespace AtomSampleViewer
                 executeFunction));
     }
 
-    void RayTracingExampleComponent::CreateRasterScope()
+    void RayTracingClusterExampleComponent::CreateRasterScope()
     {
         struct ScopeData
         {
@@ -642,7 +645,7 @@ namespace AtomSampleViewer
 
                 const Name outputImageId{ "m_output" };
                 RHI::ShaderInputImageIndex outputImageIndex = m_drawSRG->FindShaderInputImageIndex(outputImageId);
-                AZ_Error(RayTracingExampleName, outputImageIndex.IsValid(), "Failed to find shader input image %s.", outputImageId.GetCStr());
+                AZ_Error(SampleName, outputImageIndex.IsValid(), "Failed to find shader input image %s.", outputImageId.GetCStr());
                 m_drawSRG->SetImageView(outputImageIndex, m_outputImageView.get());
                 m_drawSRG->Compile();
             }
