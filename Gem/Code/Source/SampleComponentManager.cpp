@@ -68,6 +68,7 @@
 #include <RHI/XRExampleComponent.h>
 #include <RHI/TrianglesConstantBufferExampleComponent.h>
 #include <RHI/BindlessPrototypeExampleComponent.h>
+#include <RHI/RayTracingCLASExampleComponent.h>
 #include <RHI/RayTracingExampleComponent.h>
 #include <RHI/MatrixAlignmentTestExampleComponent.h>
 #include <RHI/VariableRateShadingExampleComponent.h>
@@ -288,6 +289,7 @@ namespace AtomSampleViewer
             NewRHISample<MultiGPUExampleComponent>("MultiGPU", []() { return AZ::RHI::RHISystemInterface::Get()->GetDeviceCount() >= 2; }),
             NewRHISample<MultiViewportSwapchainComponent>("MultiViewportSwapchainComponent", [] { return IsMultiViewportSwapchainSampleSupported(); }),
             NewRHISample<QueryExampleComponent>("Queries"),
+            NewRHISample<RayTracingCLASExampleComponent>("RayTracingCLAS", []() { return Utils::GetRHIDevice()->GetFeatures().m_rayTracing; }),
             NewRHISample<RayTracingExampleComponent>("RayTracing", []() {return Utils::GetRHIDevice()->GetFeatures().m_rayTracing; }),
             NewRHISample<SphericalHarmonicsExampleComponent>("SphericalHarmonics"),
             NewRHISample<StencilExampleComponent>("Stencil"),
