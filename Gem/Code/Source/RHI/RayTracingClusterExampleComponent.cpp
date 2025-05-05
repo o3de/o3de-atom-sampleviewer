@@ -17,6 +17,7 @@
 #include <Atom/RHI.Reflect/RenderAttachmentLayoutBuilder.h>
 #include <Atom/RPI.Public/Shader/Shader.h>
 #include <Atom/RPI.Reflect/Shader/ShaderAsset.h>
+#include <AzCore/Math/PackedVector3.h>
 #include <AzCore/Serialization/SerializeContext.h>
 
 namespace
@@ -156,6 +157,131 @@ namespace AtomSampleViewer
             request.m_initialData = m_rectangleIndices.data();
             m_inputAssemblyBufferPool->InitBuffer(request);
         }
+
+        // clusters
+        {
+            using VertexType = PackedVector3f;
+            using IndexType = PackedVector3<uint32_t>;
+
+            AZStd::vector<VertexType> clusterVertices;
+            AZStd::vector<IndexType> clusterTriangles;
+
+            RHI::RayTracingClasBuildTriangleClusterInfoExpanded commonClusterInfo;
+            commonClusterInfo.m_clusterFlags = RHI::RayTracingClasClusterFlags::AllowDisableOpacityMicromaps;
+            commonClusterInfo.m_positionTruncateBitCount = 0;
+            commonClusterInfo.m_geometryFlags = RHI::RayTracingClasGeometryFlags::Opaque;
+            commonClusterInfo.m_indexType = RHI::RayTracingClasIndexFormat::UINT32;
+            commonClusterInfo.m_indexBufferStride = 0;
+            commonClusterInfo.m_vertexBufferStride = 0;
+            commonClusterInfo.m_geometryIndexAndFlagsBufferStride = 0;
+            commonClusterInfo.m_opacityMicromapIndexBufferStride = 0;
+            commonClusterInfo.m_opacityMicromapArrayAddress = 0;
+            commonClusterInfo.m_opacityMicromapIndexBufferAddress = 0;
+            commonClusterInfo.m_geometryIndexAndFlagsBufferAddress = 0;
+
+            // Cluster 1: Quad with size 2x1 centered at (0,0)
+            {
+                auto& quadClusterInfo = m_clusterSourceInfosExpanded.emplace_back(commonClusterInfo);
+                quadClusterInfo.m_clusterID = 0;
+                quadClusterInfo.m_vertexCount = 2;
+                quadClusterInfo.m_triangleCount = 4;
+                quadClusterInfo.m_baseGeometryIndex = 0;
+
+                clusterVertices.emplace_back(-1.f, -0.5f, 1.f);
+                clusterVertices.emplace_back(1.f, -0.5f, 1.f);
+                clusterVertices.emplace_back(1.f, 0.5f, 1.f);
+                clusterVertices.emplace_back(-1.f, 0.5f, 1.f);
+                clusterTriangles.emplace_back(0, 1, 2);
+                clusterTriangles.emplace_back(0, 2, 3);
+            }
+
+            // Cluster 2: Regular pentagon with radius 1 centered at (0,0) and pointing upwards
+            {
+                auto& pentagonClusterInfo = m_clusterSourceInfosExpanded.emplace_back(commonClusterInfo);
+                pentagonClusterInfo.m_clusterID = 1;
+                pentagonClusterInfo.m_vertexCount = 5;
+                pentagonClusterInfo.m_triangleCount = 3;
+                pentagonClusterInfo.m_baseGeometryIndex = 1;
+
+                clusterVertices.emplace_back(0.f, 1.f, 1.f);
+                clusterVertices.emplace_back(-0.951f, 0.309f, 1.f);
+                clusterVertices.emplace_back(-0.588f, -0.809f, 1.f);
+                clusterVertices.emplace_back(0.588f, -0.809f, 1.f);
+                clusterVertices.emplace_back(0.951f, 0.309f, 1.f);
+                clusterTriangles.emplace_back(4, 5, 6);
+                clusterTriangles.emplace_back(4, 6, 7);
+                clusterTriangles.emplace_back(4, 7, 8);
+            }
+
+            // Cluster 3: The text "CLUSTER" written in the pixel font "CG pixel 4x5" (68 rectangles -> 272 vertices, 136 triangles)
+            // Font source: https://fontstruct.com/fontstructions/show/1404171/cg-pixel-4x5 (License: Public domain)
+            //   0    5   9    14   19  23   28
+            // 0  ##  #   #  #  ### ### #### ###
+            // 1 #  # #   #  # #     #  #    #  #
+            // 2 #    #   #  #  ##   #  ###  ###
+            // 3 #  # #   #  #    #  #  #    # #
+            // 4  ##  ###  ##  ###   #  #### #  #
+            {
+                auto& textClusterInfo = m_clusterSourceInfosExpanded.emplace_back(commonClusterInfo);
+                textClusterInfo.m_clusterID = 2;
+                textClusterInfo.m_vertexCount = 20;
+                textClusterInfo.m_triangleCount = 10;
+                textClusterInfo.m_baseGeometryIndex = 2;
+
+                uint32_t textIndexOffset{ aznumeric_cast<uint32_t>(clusterVertices.size()) };
+                auto AddRectangle = [&](int x, int y, int width, int height)
+                {
+                    clusterVertices.emplace_back(static_cast<float>(x), static_cast<float>(y), static_cast<float>(x));
+                    clusterVertices.emplace_back(static_cast<float>(x + width), static_cast<float>(y), static_cast<float>(x));
+                    clusterVertices.emplace_back(static_cast<float>(x + width), static_cast<float>(y + height), static_cast<float>(x));
+                    clusterVertices.emplace_back(static_cast<float>(x), static_cast<float>(y + height), static_cast<float>(x));
+                    clusterTriangles.emplace_back(textIndexOffset, textIndexOffset + 1, textIndexOffset + 2);
+                    clusterTriangles.emplace_back(textIndexOffset, textIndexOffset + 2, textIndexOffset + 3);
+                };
+                // Letter "C"
+                AddRectangle(3, 1, 1, 1);
+                AddRectangle(1, 0, 2, 1);
+                AddRectangle(0, 1, 1, 3);
+                AddRectangle(1, 4, 2, 1);
+                AddRectangle(3, 3, 1, 1);
+                // Letter "U"
+                // TODO: Add remaining letters
+            }
+
+            // Create cluster vertex buffer
+            {
+                m_clusterVertexBuffer = aznew RHI::Buffer();
+                m_clusterVertexBuffer->SetName(Name("Cluster vertex buffer"));
+                RHI::BufferInitRequest request;
+                request.m_buffer = m_clusterVertexBuffer.get();
+                request.m_descriptor.m_byteCount = clusterVertices.size() * sizeof(VertexType);
+                request.m_descriptor.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
+                request.m_initialData = clusterVertices.data();
+                m_inputAssemblyBufferPool->InitBuffer(request);
+            }
+
+            // Create cluster index buffer
+            {
+                m_clusterIndexBuffer = aznew RHI::Buffer();
+                m_clusterIndexBuffer->SetName(Name("Cluster index buffer"));
+                RHI::BufferInitRequest request;
+                request.m_buffer = m_clusterIndexBuffer.get();
+                request.m_descriptor.m_byteCount = clusterTriangles.size() * sizeof(IndexType);
+                request.m_descriptor.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
+                request.m_initialData = clusterTriangles.data();
+                m_inputAssemblyBufferPool->InitBuffer(request);
+            }
+
+            // Calculate upper bound data for CLAS
+            for (const auto& clusterSourceInfoExpanded : m_clusterSourceInfosExpanded)
+            {
+                m_maxClusterTriangleCount = AZStd::max(m_maxClusterTriangleCount, clusterSourceInfoExpanded.m_triangleCount);
+                m_maxClusterVertexCount = AZStd::max(m_maxClusterVertexCount, clusterSourceInfoExpanded.m_vertexCount);
+                m_maxGeometryIndex = AZStd::max(m_maxGeometryIndex, clusterSourceInfoExpanded.m_baseGeometryIndex);
+            }
+            m_maxTotalTriangleCount = aznumeric_cast<uint32_t>(clusterTriangles.size());
+            m_maxTotalVertexCount = aznumeric_cast<uint32_t>(clusterVertices.size());
+        }
     }
 
     void RayTracingClusterExampleComponent::CreateFullScreenBuffer()
@@ -221,6 +347,7 @@ namespace AtomSampleViewer
     {
         m_triangleRayTracingBlas = aznew AZ::RHI::RayTracingBlas;
         m_rectangleRayTracingBlas = aznew AZ::RHI::RayTracingBlas;
+        m_clusterRayTracingBlas = aznew AZ::RHI::RayTracingClusterBlas;
         m_rayTracingTlas = aznew AZ::RHI::RayTracingTlas;
     }
 
@@ -383,6 +510,57 @@ namespace AtomSampleViewer
                 ;
 
                 m_rectangleRayTracingBlas->CreateBuffers(RHI::MultiDevice::AllDevices, &rectangleBlasDescriptor, *m_rayTracingBufferPools);
+            }
+
+            if (!m_clusterRayTracingBlasInitialized)
+            {
+                m_clusterRayTracingBlasInitialized = true;
+
+                RHI::RayTracingClusterBlasDescriptor clusterBlasDescriptor;
+                clusterBlasDescriptor.m_vertexFormat = AZ::RHI::Format::R32G32B32_FLOAT;
+                clusterBlasDescriptor.m_maxGeometryIndexValue = m_maxGeometryIndex;
+                clusterBlasDescriptor.m_maxClusterUniqueGeometryCount = aznumeric_cast<uint32_t>(m_clusterSourceInfosExpanded.size());
+                clusterBlasDescriptor.m_maxClusterTriangleCount = m_maxClusterTriangleCount;
+                clusterBlasDescriptor.m_maxClusterVertexCount = m_maxClusterVertexCount;
+                clusterBlasDescriptor.m_maxTotalTriangleCount = m_maxTotalTriangleCount;
+                clusterBlasDescriptor.m_maxTotalVertexCount = m_maxTotalVertexCount;
+                clusterBlasDescriptor.m_minPositionTruncateBitCount = 0;
+                clusterBlasDescriptor.m_maxClusterCount = aznumeric_cast<uint32_t>(m_clusterSourceInfosExpanded.size());
+
+                m_clusterRayTracingBlas->CreateBuffers(RHI::MultiDevice::AllDevices, &clusterBlasDescriptor, *m_rayTracingBufferPools);
+
+                m_clusterRayTracingBlas->IterateDevices(
+                    RHI::MultiDevice::AllDevices,
+                    [&](int deviceIndex)
+                    {
+                        auto deviceClusterBuffers = m_clusterRayTracingBlas->GetDeviceRayTracingClusterBlas(deviceIndex);
+                        auto deviceBufferPool = m_rayTracingBufferPools->GetSrcInfosArrayBufferPool()->GetDeviceBufferPool(deviceIndex);
+                        uint64_t deviceVertexBufferAddress = m_clusterVertexBuffer->GetDeviceBuffer(deviceIndex)->GetDeviceAddress();
+                        uint64_t deviceIndexBufferAddress = m_clusterIndexBuffer->GetDeviceBuffer(deviceIndex)->GetDeviceAddress();
+
+                        RHI::DeviceBufferMapRequest request;
+                        request.m_buffer = deviceClusterBuffers->GetSrcInfosArrayBuffer().get();
+                        request.m_byteCount = m_clusterSourceInfosExpanded.size() * sizeof(RHI::RayTracingClasBuildTriangleClusterInfo);
+                        request.m_byteOffset = 0;
+
+                        RHI::DeviceBufferMapResponse response;
+                        RHI::ResultCode result = deviceBufferPool->MapBuffer(request, response);
+                        AZ_Assert(result == AZ::RHI::ResultCode::Success, "Failed to map SrcInfosArrayBuffer");
+
+                        auto* gpuClusterInfo = reinterpret_cast<RHI::RayTracingClasBuildTriangleClusterInfo*>(response.m_data);
+
+                        for (auto clusterSourceInfoExpanded : m_clusterSourceInfosExpanded)
+                        {
+                            clusterSourceInfoExpanded.m_vertexBufferAddress = deviceVertexBufferAddress;
+                            clusterSourceInfoExpanded.m_indexBufferAddress = deviceIndexBufferAddress;
+                            *gpuClusterInfo = RHI::RayTracingClasConvertBuildTriangleClusterInfo(clusterSourceInfoExpanded);
+                            gpuClusterInfo++;
+                        }
+
+                        deviceBufferPool->UnmapBuffer(*request.m_buffer);
+
+                        return true;
+                    });
             }
 
             m_time += 0.005f;

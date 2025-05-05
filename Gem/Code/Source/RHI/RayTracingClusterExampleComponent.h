@@ -23,6 +23,12 @@
 #include <AzCore/Math/Matrix4x4.h>
 #include <RHI/BasicRHIComponent.h>
 
+namespace AZ::RHI
+{
+    using uint = uint32_t;
+#include "../../Assets/ShaderLib/Atom/Features/IndirectRayTracing.azsli"
+} // namespace AZ::RHI::CLAS
+
 namespace AtomSampleViewer
 {
     using namespace AZ;
@@ -84,9 +90,21 @@ namespace AtomSampleViewer
         RHI::Ptr<RHI::Buffer> m_rectangleVB;
         RHI::Ptr<RHI::Buffer> m_rectangleIB;
 
+        // CLAS data
+        AZStd::vector<RHI::RayTracingClasBuildTriangleClusterInfoExpanded> m_clusterSourceInfosExpanded;
+        RHI::Ptr<RHI::Buffer> m_clusterVertexBuffer;
+        RHI::Ptr<RHI::Buffer> m_clusterIndexBuffer;
+        uint32_t m_maxClusterTriangleCount = 0;
+        uint32_t m_maxClusterVertexCount = 0;
+        uint32_t m_maxGeometryIndex = 0;
+        uint32_t m_maxTotalTriangleCount = 0;
+        uint32_t m_maxTotalVertexCount = 0;
+
         // ray tracing acceleration structures
         RHI::Ptr<RHI::RayTracingBlas> m_triangleRayTracingBlas;
         RHI::Ptr<RHI::RayTracingBlas> m_rectangleRayTracingBlas;
+        RHI::Ptr<RHI::RayTracingClusterBlas> m_clusterRayTracingBlas;
+        bool m_clusterRayTracingBlasInitialized = false;
         RHI::Ptr<RHI::RayTracingTlas> m_rayTracingTlas;
         RHI::BufferViewDescriptor m_tlasBufferViewDescriptor;
         RHI::AttachmentId m_tlasBufferAttachmentId = RHI::AttachmentId("tlasBufferAttachmentId");
