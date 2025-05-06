@@ -289,7 +289,7 @@ namespace AtomSampleViewer
             NewRHISample<MultiGPUExampleComponent>("MultiGPU", []() { return AZ::RHI::RHISystemInterface::Get()->GetDeviceCount() >= 2; }),
             NewRHISample<MultiViewportSwapchainComponent>("MultiViewportSwapchainComponent", [] { return IsMultiViewportSwapchainSampleSupported(); }),
             NewRHISample<QueryExampleComponent>("Queries"),
-            NewRHISample<RayTracingClusterExampleComponent>("RayTracingCluster", []() { return Utils::GetRHIDevice()->GetFeatures().m_rayTracing; }),
+            NewRHISample<RayTracingClusterExampleComponent>("RayTracingCluster", []() { return Utils::GetRHIDevice()->GetFeatures().m_rayTracingClas; }),
             NewRHISample<RayTracingExampleComponent>("RayTracing", []() {return Utils::GetRHIDevice()->GetFeatures().m_rayTracing; }),
             NewRHISample<SphericalHarmonicsExampleComponent>("SphericalHarmonics"),
             NewRHISample<StencilExampleComponent>("Stencil"),

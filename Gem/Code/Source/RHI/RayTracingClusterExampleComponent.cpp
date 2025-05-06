@@ -225,7 +225,7 @@ namespace AtomSampleViewer
                 auto& textClusterInfo = m_clusterSourceInfosExpanded.emplace_back(commonClusterInfo);
                 textClusterInfo.m_clusterID = 2;
                 textClusterInfo.m_vertexCount = 20;
-                textClusterInfo.m_triangleCount = 10;
+                textClusterInfo.m_triangleCount = 20; // TODO: Why must this be 2x the actual number of triangles?
                 textClusterInfo.m_baseGeometryIndex = 2;
 
                 auto AddRectangle = [&](int gridX, int gridY, int gridWidth, int gridHeight)
@@ -580,13 +580,13 @@ namespace AtomSampleViewer
             triangleTransform2.SetTranslation(sinf(m_time) * -100.0f, cosf(m_time) * 100.0f, 2.0f);
             triangleTransform2.MultiplyByUniformScale(100.0f);
 
-            AZ::Transform triangleTransform3 = AZ::Transform::CreateIdentity();
-            triangleTransform3.SetTranslation(sinf(m_time) * 100.0f, cosf(m_time) * 100.0f, 3.0f);
-            triangleTransform3.MultiplyByUniformScale(100.0f);
-
             AZ::Transform rectangleTransform = AZ::Transform::CreateIdentity();
             rectangleTransform.SetTranslation(sinf(m_time) * 100.0f, cosf(m_time) * -100.0f, 4.0f);
             rectangleTransform.MultiplyByUniformScale(100.0f);
+
+            AZ::Transform clusterTransform = AZ::Transform::CreateIdentity();
+            clusterTransform.SetTranslation(sinf(m_time) * 100.0f, cosf(m_time) * 100.0f, 3.0f);
+            clusterTransform.MultiplyByUniformScale(100.0f);
 
             // create the TLAS
             RHI::RayTracingTlasDescriptor tlasDescriptor;
@@ -604,13 +604,13 @@ namespace AtomSampleViewer
                 ->Instance()
                     ->InstanceID(2)
                     ->HitGroupIndex(2)
-                    ->Blas(m_triangleRayTracingBlas)
-                    ->Transform(triangleTransform3)
+                    ->Blas(m_rectangleRayTracingBlas)
+                    ->Transform(rectangleTransform)
                 ->Instance()
                     ->InstanceID(3)
                     ->HitGroupIndex(3)
-                    ->Blas(m_rectangleRayTracingBlas)
-                    ->Transform(rectangleTransform)
+                    ->ClusterBlas(m_clusterRayTracingBlas)
+                    ->Transform(clusterTransform)
                 ;
 
             m_rayTracingTlas->CreateBuffers(RHI::MultiDevice::AllDevices, &tlasDescriptor, *m_rayTracingBufferPools);
@@ -634,8 +634,10 @@ namespace AtomSampleViewer
         {
             RHI::CommandList* commandList = context.GetCommandList();
 
+            commandList->BuildClusterAccelerationStructures(*m_clusterRayTracingBlas->GetDeviceRayTracingClusterBlas(context.GetDeviceIndex()));
             commandList->BuildBottomLevelAccelerationStructure(*m_triangleRayTracingBlas->GetDeviceRayTracingBlas(context.GetDeviceIndex()));
             commandList->BuildBottomLevelAccelerationStructure(*m_rectangleRayTracingBlas->GetDeviceRayTracingBlas(context.GetDeviceIndex()));
+            commandList->BuildClusterBottomLevelAccelerationStructure(*m_clusterRayTracingBlas->GetDeviceRayTracingClusterBlas(context.GetDeviceIndex()));
             commandList->BuildTopLevelAccelerationStructure(
                 *m_rayTracingTlas->GetDeviceRayTracingTlas(context.GetDeviceIndex()), { m_triangleRayTracingBlas->GetDeviceRayTracingBlas(context.GetDeviceIndex()).get(), m_rectangleRayTracingBlas->GetDeviceRayTracingBlas(context.GetDeviceIndex()).get() });
         };
@@ -718,7 +720,7 @@ namespace AtomSampleViewer
 
                 AZStd::array<HitGradientData, 4> hitGradientData = {{
                     {AZ::Vector4(1.0f, 0.0f, 0.0f, 1.0f)}, // triangle1
-                    {AZ::Vector4(0.0f, 1.0f, 0.0f, 1.0f)}, // triangle2
+                    {AZ::Vector4(0.0f, 1.0f, 0.0f, 1.0f)}, // unused
                     {AZ::Vector4(0.0f, 0.0f, 0.0f, 0.0f)}, // unused
                     {AZ::Vector4(0.0f, 0.0f, 0.0f, 0.0f)}, // unused
                 }};
@@ -739,9 +741,9 @@ namespace AtomSampleViewer
 
                 AZStd::array<HitSolidData, 4> hitSolidData = {{
                     {AZ::Vector4(0.0f, 0.0f, 0.0f, 0.0f), 0.0f, {0.0f, 0.0f, 0.0f}, AZ::Vector4(0.0f, 0.0f, 0.0f, 0.0f)}, // unused
-                    {AZ::Vector4(0.0f, 0.0f, 0.0f, 0.0f), 0.0f, {0.0f, 0.0f, 0.0f}, AZ::Vector4(0.0f, 0.0f, 0.0f, 0.0f)}, // unused
-                    {AZ::Vector4(1.0f, 0.0f, 0.0f, 1.0f), 0.5f, {0.0f, 0.0f, 0.0f}, AZ::Vector4(0.0f, 1.0f, 0.0f, 1.0f)}, // triangle3
+                    {AZ::Vector4(1.0f, 0.0f, 0.0f, 1.0f), 0.5f, {0.0f, 0.0f, 0.0f}, AZ::Vector4(0.0f, 1.0f, 0.0f, 1.0f)}, // triangle2
                     {AZ::Vector4(1.0f, 0.0f, 0.0f, 1.0f), 0.5f, {0.0f, 0.0f, 0.0f}, AZ::Vector4(0.0f, 0.0f, 1.0f, 1.0f)}, // rectangle
+                    {AZ::Vector4(1.0f, 0.0f, 0.0f, 1.0f), 0.5f, {0.0f, 0.0f, 0.0f}, AZ::Vector4(1.0f, 0.0f, 0.0f, 1.0f)}, // clusters
                 }};
 
                 m_globalSrg->SetConstantArray(hitSolidDataConstantIndex, hitSolidData);
@@ -753,9 +755,9 @@ namespace AtomSampleViewer
                     ->RayGenerationRecord(AZ::Name("RayGenerationShader"))
                     ->MissRecord(AZ::Name("MissShader"))
                     ->HitGroupRecord(AZ::Name("HitGroupGradient")) // triangle1
-                    ->HitGroupRecord(AZ::Name("HitGroupGradient")) // triangle2
-                    ->HitGroupRecord(AZ::Name("HitGroupSolid")) // triangle3
+                    ->HitGroupRecord(AZ::Name("HitGroupSolid")) // triangle2
                     ->HitGroupRecord(AZ::Name("HitGroupSolid")) // rectangle
+                    ->HitGroupRecord(AZ::Name("HitGroupSolid")) // clusters
                     ;
 
                 m_rayTracingShaderTable->Build(descriptor);
