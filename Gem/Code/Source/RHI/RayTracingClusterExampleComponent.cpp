@@ -188,14 +188,14 @@ namespace AtomSampleViewer
                 quadClusterInfo.m_baseGeometryIndex = 0;
 
                 clusterVertices.emplace_back(-1.f, -0.5f, 1.f);
-                clusterVertices.emplace_back(1.f, -0.5f, 1.f);
-                clusterVertices.emplace_back(1.f, 0.5f, 1.f);
                 clusterVertices.emplace_back(-1.f, 0.5f, 1.f);
+                clusterVertices.emplace_back(1.f, 0.5f, 1.f);
+                clusterVertices.emplace_back(1.f, -0.5f, 1.f);
                 clusterTriangles.emplace_back(0, 1, 2);
                 clusterTriangles.emplace_back(0, 2, 3);
             }
 
-            // Cluster 2: Regular pentagon with radius 1 centered at (0,0) and pointing upwards
+            // Cluster 2: Regular pentagon with radius 1 centered at (3,0) and pointing upwards
             {
                 auto& pentagonClusterInfo = m_clusterSourceInfosExpanded.emplace_back(commonClusterInfo);
                 pentagonClusterInfo.m_clusterID = 1;
@@ -203,11 +203,11 @@ namespace AtomSampleViewer
                 pentagonClusterInfo.m_triangleCount = 3;
                 pentagonClusterInfo.m_baseGeometryIndex = 1;
 
-                clusterVertices.emplace_back(0.f, 1.f, 1.f);
-                clusterVertices.emplace_back(-0.951f, 0.309f, 1.f);
-                clusterVertices.emplace_back(-0.588f, -0.809f, 1.f);
-                clusterVertices.emplace_back(0.588f, -0.809f, 1.f);
-                clusterVertices.emplace_back(0.951f, 0.309f, 1.f);
+                clusterVertices.emplace_back(3.f + 0.f, 1.f, 1.f);
+                clusterVertices.emplace_back(3.f + 0.951f, 0.309f, 1.f);
+                clusterVertices.emplace_back(3.f + 0.588f, -0.809f, 1.f);
+                clusterVertices.emplace_back(3.f - 0.588f, -0.809f, 1.f);
+                clusterVertices.emplace_back(3.f - 0.951f, 0.309f, 1.f);
                 clusterTriangles.emplace_back(4, 5, 6);
                 clusterTriangles.emplace_back(4, 6, 7);
                 clusterTriangles.emplace_back(4, 7, 8);
@@ -228,13 +228,19 @@ namespace AtomSampleViewer
                 textClusterInfo.m_triangleCount = 10;
                 textClusterInfo.m_baseGeometryIndex = 2;
 
-                uint32_t textIndexOffset{ aznumeric_cast<uint32_t>(clusterVertices.size()) };
-                auto AddRectangle = [&](int x, int y, int width, int height)
+                auto AddRectangle = [&](int gridX, int gridY, int gridWidth, int gridHeight)
                 {
-                    clusterVertices.emplace_back(static_cast<float>(x), static_cast<float>(y), static_cast<float>(x));
-                    clusterVertices.emplace_back(static_cast<float>(x + width), static_cast<float>(y), static_cast<float>(x));
-                    clusterVertices.emplace_back(static_cast<float>(x + width), static_cast<float>(y + height), static_cast<float>(x));
-                    clusterVertices.emplace_back(static_cast<float>(x), static_cast<float>(y + height), static_cast<float>(x));
+                    float scale = 0.2f;
+                    float x = static_cast<float>(gridX) * scale - 2.f;
+                    float y = static_cast<float>(gridY) * scale + 1.5f;
+                    float width = static_cast<float>(gridWidth) * scale;
+                    float height = static_cast<float>(gridHeight) * scale;
+                    uint32_t textIndexOffset{ aznumeric_cast<uint32_t>(clusterVertices.size()) };
+
+                    clusterVertices.emplace_back(x, y, 1.f);
+                    clusterVertices.emplace_back(x, y + height, 1.f);
+                    clusterVertices.emplace_back(x + width, y + height, 1.f);
+                    clusterVertices.emplace_back(x + width, y, 1.f);
                     clusterTriangles.emplace_back(textIndexOffset, textIndexOffset + 1, textIndexOffset + 2);
                     clusterTriangles.emplace_back(textIndexOffset, textIndexOffset + 2, textIndexOffset + 3);
                 };
