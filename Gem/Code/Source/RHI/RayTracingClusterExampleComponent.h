@@ -21,6 +21,7 @@
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 #include <AzCore/Component/Component.h>
 #include <AzCore/Math/Matrix4x4.h>
+#include <AzCore/Math/PackedVector3.h>
 #include <RHI/BasicRHIComponent.h>
 
 namespace AZ::RHI
@@ -91,6 +92,8 @@ namespace AtomSampleViewer
         RHI::Ptr<RHI::Buffer> m_rectangleIB;
 
         // CLAS data
+        using ClusterVertexType = PackedVector3f;
+        using ClusterIndexType = PackedVector3<uint32_t>;
         AZStd::vector<RHI::RayTracingClasBuildTriangleClusterInfoExpanded> m_clusterSourceInfosExpanded;
         RHI::Ptr<RHI::Buffer> m_clusterVertexBuffer;
         RHI::Ptr<RHI::Buffer> m_clusterIndexBuffer;

@@ -17,7 +17,6 @@
 #include <Atom/RHI.Reflect/RenderAttachmentLayoutBuilder.h>
 #include <Atom/RPI.Public/Shader/Shader.h>
 #include <Atom/RPI.Reflect/Shader/ShaderAsset.h>
-#include <AzCore/Math/PackedVector3.h>
 #include <AzCore/Serialization/SerializeContext.h>
 
 namespace
@@ -160,11 +159,8 @@ namespace AtomSampleViewer
 
         // clusters
         {
-            using VertexType = PackedVector3f;
-            using IndexType = PackedVector3<uint32_t>;
-
-            AZStd::vector<VertexType> clusterVertices;
-            AZStd::vector<IndexType> clusterTriangles;
+            AZStd::vector<ClusterVertexType> clusterVertices;
+            AZStd::vector<ClusterIndexType> clusterTriangles;
 
             RHI::RayTracingClasBuildTriangleClusterInfoExpanded commonClusterInfo;
             commonClusterInfo.m_clusterFlags = RHI::RayTracingClasClusterFlags::AllowDisableOpacityMicromaps;
@@ -183,8 +179,8 @@ namespace AtomSampleViewer
             {
                 auto& quadClusterInfo = m_clusterSourceInfosExpanded.emplace_back(commonClusterInfo);
                 quadClusterInfo.m_clusterID = 0;
-                quadClusterInfo.m_vertexCount = 2;
-                quadClusterInfo.m_triangleCount = 4;
+                quadClusterInfo.m_vertexCount = 4;
+                quadClusterInfo.m_triangleCount = 2;
                 quadClusterInfo.m_baseGeometryIndex = 0;
 
                 clusterVertices.emplace_back(-1.f, -0.5f, 1.f);
@@ -213,19 +209,19 @@ namespace AtomSampleViewer
                 clusterTriangles.emplace_back(4, 7, 8);
             }
 
-            // Cluster 3: The text "CLUSTER" written in the pixel font "CG pixel 4x5" (68 rectangles -> 272 vertices, 136 triangles)
+            // Cluster 3: The text "CLAS" written in the pixel font "CG pixel 4x5" (16 rectangles -> 64 vertices, 32 triangles)
             // Font source: https://fontstruct.com/fontstructions/show/1404171/cg-pixel-4x5 (License: Public domain)
-            //   0    5   9    14   19  23   28
-            // 0  ##  #   #  #  ### ### #### ###
-            // 1 #  # #   #  # #     #  #    #  #
-            // 2 #    #   #  #  ##   #  ###  ###
-            // 3 #  # #   #  #    #  #  #    # #
-            // 4  ##  ###  ##  ###   #  #### #  #
+            //   0    5   9    14
+            // 4  ##  #    ##   ###
+            // 3 #  # #   #  # #
+            // 2 #    #   ####  ##
+            // 1 #  # #   #  #    #
+            // 0  ##  ### #  # ###
             {
                 auto& textClusterInfo = m_clusterSourceInfosExpanded.emplace_back(commonClusterInfo);
                 textClusterInfo.m_clusterID = 2;
-                textClusterInfo.m_vertexCount = 20;
-                textClusterInfo.m_triangleCount = 20; // TODO: Why must this be 2x the actual number of triangles?
+                textClusterInfo.m_vertexCount = 64;
+                textClusterInfo.m_triangleCount = 32;
                 textClusterInfo.m_baseGeometryIndex = 2;
 
                 auto AddRectangle = [&](int gridX, int gridY, int gridWidth, int gridHeight)
@@ -250,8 +246,20 @@ namespace AtomSampleViewer
                 AddRectangle(0, 1, 1, 3);
                 AddRectangle(1, 4, 2, 1);
                 AddRectangle(3, 3, 1, 1);
-                // Letter "U"
-                // TODO: Add remaining letters
+                // Letter "L"
+                AddRectangle(5, 1, 1, 4);
+                AddRectangle(5, 0, 3, 1);
+                // Letter "A"
+                AddRectangle(9, 0, 1, 4);
+                AddRectangle(10, 4, 2, 1);
+                AddRectangle(12, 0, 1, 4);
+                AddRectangle(10, 2, 2, 1);
+                // Letter "S"
+                AddRectangle(15, 4, 3, 1);
+                AddRectangle(14, 3, 1, 1);
+                AddRectangle(15, 2, 2, 1);
+                AddRectangle(17, 1, 1, 1);
+                AddRectangle(14, 0, 3, 1);
             }
 
             // Create cluster vertex buffer
@@ -260,7 +268,7 @@ namespace AtomSampleViewer
                 m_clusterVertexBuffer->SetName(Name("Cluster vertex buffer"));
                 RHI::BufferInitRequest request;
                 request.m_buffer = m_clusterVertexBuffer.get();
-                request.m_descriptor.m_byteCount = clusterVertices.size() * sizeof(VertexType);
+                request.m_descriptor.m_byteCount = clusterVertices.size() * sizeof(ClusterVertexType);
                 request.m_descriptor.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
                 request.m_initialData = clusterVertices.data();
                 m_inputAssemblyBufferPool->InitBuffer(request);
@@ -272,7 +280,7 @@ namespace AtomSampleViewer
                 m_clusterIndexBuffer->SetName(Name("Cluster index buffer"));
                 RHI::BufferInitRequest request;
                 request.m_buffer = m_clusterIndexBuffer.get();
-                request.m_descriptor.m_byteCount = clusterTriangles.size() * sizeof(IndexType);
+                request.m_descriptor.m_byteCount = clusterTriangles.size() * sizeof(ClusterIndexType);
                 request.m_descriptor.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
                 request.m_initialData = clusterTriangles.data();
                 m_inputAssemblyBufferPool->InitBuffer(request);
@@ -525,7 +533,7 @@ namespace AtomSampleViewer
                 RHI::RayTracingClusterBlasDescriptor clusterBlasDescriptor;
                 clusterBlasDescriptor.m_vertexFormat = AZ::RHI::Format::R32G32B32_FLOAT;
                 clusterBlasDescriptor.m_maxGeometryIndexValue = m_maxGeometryIndex;
-                clusterBlasDescriptor.m_maxClusterUniqueGeometryCount = aznumeric_cast<uint32_t>(m_clusterSourceInfosExpanded.size());
+                clusterBlasDescriptor.m_maxClusterUniqueGeometryCount = 1;
                 clusterBlasDescriptor.m_maxClusterTriangleCount = m_maxClusterTriangleCount;
                 clusterBlasDescriptor.m_maxClusterVertexCount = m_maxClusterVertexCount;
                 clusterBlasDescriptor.m_maxTotalTriangleCount = m_maxTotalTriangleCount;
@@ -561,6 +569,7 @@ namespace AtomSampleViewer
                             clusterSourceInfoExpanded.m_indexBufferAddress = deviceIndexBufferAddress;
                             *gpuClusterInfo = RHI::RayTracingClasConvertBuildTriangleClusterInfo(clusterSourceInfoExpanded);
                             gpuClusterInfo++;
+                            deviceIndexBufferAddress += clusterSourceInfoExpanded.m_triangleCount * sizeof(ClusterIndexType);
                         }
 
                         deviceBufferPool->UnmapBuffer(*request.m_buffer);
