@@ -295,6 +295,19 @@ namespace AtomSampleViewer
             }
             m_maxTotalTriangleCount = aznumeric_cast<uint32_t>(clusterTriangles.size());
             m_maxTotalVertexCount = aznumeric_cast<uint32_t>(clusterVertices.size());
+
+            // Create srcInfosArray buffer
+            {
+                m_srcInfosArrayBuffer = aznew RHI::Buffer();
+                m_srcInfosArrayBuffer->SetName(Name("Source infos array buffer"));
+                RHI::BufferInitRequest request;
+                request.m_buffer = m_srcInfosArrayBuffer.get();
+                request.m_descriptor.m_byteCount =
+                    m_clusterSourceInfosExpanded.size() * sizeof(RHI::RayTracingClasBuildTriangleClusterInfo);
+                request.m_descriptor.m_bindFlags = m_rayTracingBufferPools->GetSrcInfosArrayBufferPool()->GetDescriptor().m_bindFlags;
+                // Buffer data is populated in CreateRayTracingAccelerationTableScope
+                m_rayTracingBufferPools->GetSrcInfosArrayBufferPool()->InitBuffer(request);
+            }
         }
     }
 
@@ -540,6 +553,10 @@ namespace AtomSampleViewer
                 clusterBlasDescriptor.m_maxTotalVertexCount = m_maxTotalVertexCount;
                 clusterBlasDescriptor.m_minPositionTruncateBitCount = 0;
                 clusterBlasDescriptor.m_maxClusterCount = aznumeric_cast<uint32_t>(m_clusterSourceInfosExpanded.size());
+                clusterBlasDescriptor.m_srcInfosArrayBufferView = m_srcInfosArrayBuffer->GetBufferView(
+                    RHI::BufferViewDescriptor::CreateStructured(
+                        0, aznumeric_cast<uint32_t>(m_clusterSourceInfosExpanded.size()),
+                        sizeof(RHI::RayTracingClasBuildTriangleClusterInfo)));
 
                 m_clusterRayTracingBlas->CreateBuffers(RHI::MultiDevice::AllDevices, &clusterBlasDescriptor, *m_rayTracingBufferPools);
 
@@ -553,7 +570,7 @@ namespace AtomSampleViewer
                         uint64_t deviceIndexBufferAddress = m_clusterIndexBuffer->GetDeviceBuffer(deviceIndex)->GetDeviceAddress();
 
                         RHI::DeviceBufferMapRequest request;
-                        request.m_buffer = deviceClusterBuffers->GetSrcInfosArrayBuffer().get();
+                        request.m_buffer = m_srcInfosArrayBuffer->GetDeviceBuffer(deviceIndex).get();
                         request.m_byteCount = m_clusterSourceInfosExpanded.size() * sizeof(RHI::RayTracingClasBuildTriangleClusterInfo);
                         request.m_byteOffset = 0;
 
@@ -728,10 +745,10 @@ namespace AtomSampleViewer
                 };
 
                 AZStd::array<HitGradientData, 4> hitGradientData = {{
-                    {AZ::Vector4(1.0f, 0.0f, 0.0f, 1.0f)}, // triangle1
+                    {AZ::Vector4(1.0f, 0.0f, 0.0f, 1.0f)}, // unused
                     {AZ::Vector4(0.0f, 1.0f, 0.0f, 1.0f)}, // unused
                     {AZ::Vector4(0.0f, 0.0f, 0.0f, 0.0f)}, // unused
-                    {AZ::Vector4(0.0f, 0.0f, 0.0f, 0.0f)}, // unused
+                    {AZ::Vector4(1.0f, 1.0f, 1.0f, 0.0f)}, // cluster
                 }};
 
                 m_globalSrg->SetConstantArray(hitGradientDataConstantIndex, hitGradientData);
@@ -749,10 +766,10 @@ namespace AtomSampleViewer
                 };
 
                 AZStd::array<HitSolidData, 4> hitSolidData = {{
-                    {AZ::Vector4(0.0f, 0.0f, 0.0f, 0.0f), 0.0f, {0.0f, 0.0f, 0.0f}, AZ::Vector4(0.0f, 0.0f, 0.0f, 0.0f)}, // unused
+                    {AZ::Vector4(1.0f, 0.0f, 0.0f, 1.0f), 0.5f, {0.0f, 0.0f, 0.0f}, AZ::Vector4(1.0f, 0.0f, 0.0f, 0.0f)}, // triangle1
                     {AZ::Vector4(1.0f, 0.0f, 0.0f, 1.0f), 0.5f, {0.0f, 0.0f, 0.0f}, AZ::Vector4(0.0f, 1.0f, 0.0f, 1.0f)}, // triangle2
                     {AZ::Vector4(1.0f, 0.0f, 0.0f, 1.0f), 0.5f, {0.0f, 0.0f, 0.0f}, AZ::Vector4(0.0f, 0.0f, 1.0f, 1.0f)}, // rectangle
-                    {AZ::Vector4(1.0f, 0.0f, 0.0f, 1.0f), 0.5f, {0.0f, 0.0f, 0.0f}, AZ::Vector4(1.0f, 0.0f, 0.0f, 1.0f)}, // clusters
+                    {AZ::Vector4(1.0f, 0.0f, 0.0f, 1.0f), 0.5f, {0.0f, 0.0f, 0.0f}, AZ::Vector4(0.0f, 0.0f, 0.0f, 1.0f)}, // unused
                 }};
 
                 m_globalSrg->SetConstantArray(hitSolidDataConstantIndex, hitSolidData);
@@ -763,10 +780,10 @@ namespace AtomSampleViewer
                 descriptor->Build(AZ::Name("RayTracingExampleShaderTable"), m_rayTracingPipelineState)
                     ->RayGenerationRecord(AZ::Name("RayGenerationShader"))
                     ->MissRecord(AZ::Name("MissShader"))
-                    ->HitGroupRecord(AZ::Name("HitGroupGradient")) // triangle1
+                    ->HitGroupRecord(AZ::Name("HitGroupSolid")) // triangle1
                     ->HitGroupRecord(AZ::Name("HitGroupSolid")) // triangle2
                     ->HitGroupRecord(AZ::Name("HitGroupSolid")) // rectangle
-                    ->HitGroupRecord(AZ::Name("HitGroupSolid")) // clusters
+                    ->HitGroupRecord(AZ::Name("HitGroupGradient")) // clusters
                     ;
 
                 m_rayTracingShaderTable->Build(descriptor);

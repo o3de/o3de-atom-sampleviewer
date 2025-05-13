@@ -97,6 +97,7 @@ namespace AtomSampleViewer
         AZStd::vector<RHI::RayTracingClasBuildTriangleClusterInfoExpanded> m_clusterSourceInfosExpanded;
         RHI::Ptr<RHI::Buffer> m_clusterVertexBuffer;
         RHI::Ptr<RHI::Buffer> m_clusterIndexBuffer;
+        RHI::Ptr<RHI::Buffer> m_srcInfosArrayBuffer;
         uint32_t m_maxClusterTriangleCount = 0;
         uint32_t m_maxClusterVertexCount = 0;
         uint32_t m_maxGeometryIndex = 0;
