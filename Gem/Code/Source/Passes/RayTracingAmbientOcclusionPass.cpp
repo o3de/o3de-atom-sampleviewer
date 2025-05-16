@@ -88,17 +88,13 @@ namespace AZ
                 GetPathName().GetCStr(), rayGenerationShaderFilePath);
                         
             RHI::RayTracingPipelineStateDescriptor descriptor;
-            descriptor.Build()
-                ->PipelineState(m_globalPipelineState.get())
-                ->ShaderLibrary(rayGenerationShaderDescriptor)
-                ->RayGenerationShaderName(AZ::Name("AoRayGen"))
-                ->ShaderLibrary(missShaderDescriptor)
-                ->MissShaderName(AZ::Name("AoMiss"))
-                ->ShaderLibrary(hitShaderDescriptor)
-                ->ClosestHitShaderName(AZ::Name("AoClosestHit"))
-                ->HitGroup(AZ::Name("ClosestHitGroup"))
-                ->ClosestHitShaderName(AZ::Name("AoClosestHit"))
-                ;
+            descriptor.m_pipelineState = m_globalPipelineState.get();
+
+            descriptor.AddRayGenerationShaderLibrary(rayGenerationShaderDescriptor, Name("AoRayGen"));
+            descriptor.AddMissShaderLibrary(missShaderDescriptor, Name("AoMiss"));
+            descriptor.AddClosestHitShaderLibrary(hitShaderDescriptor, Name("AoClosestHit"));
+
+            descriptor.AddHitGroup(Name("ClosestHitGroup"), Name("AoClosestHit"));
 
             // create the ray tracing pipeline state object
             m_rayTracingPipelineState = aznew RHI::RayTracingPipelineState;

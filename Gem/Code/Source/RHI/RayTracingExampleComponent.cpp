@@ -269,8 +269,8 @@ namespace AtomSampleViewer
         AZ_Assert(m_closestHitGradientShader, "Failed to load closest hit gradient shader");
 
         auto closestHitGradientShaderVariant = m_closestHitGradientShader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId);
-        RHI::PipelineStateDescriptorForRayTracing closestHitGradiantShaderDescriptor;
-        closestHitGradientShaderVariant.ConfigurePipelineState(closestHitGradiantShaderDescriptor);
+        RHI::PipelineStateDescriptorForRayTracing closestHitGradientShaderDescriptor;
+        closestHitGradientShaderVariant.ConfigurePipelineState(closestHitGradientShaderDescriptor);
 
         // load closest hit solid shader
         const char* closestHitSolidShaderFilePath = "Shaders/RHI/RayTracingClosestHitSolid.azshader";
@@ -288,21 +288,16 @@ namespace AtomSampleViewer
 
         // build the ray tracing pipeline state descriptor
         RHI::RayTracingPipelineStateDescriptor descriptor;
-        descriptor.Build()
-            ->PipelineState(m_globalPipelineState.get())
-            ->ShaderLibrary(rayGenerationShaderDescriptor)
-                ->RayGenerationShaderName(AZ::Name("RayGenerationShader"))
-            ->ShaderLibrary(missShaderDescriptor)
-                ->MissShaderName(AZ::Name("MissShader"))
-            ->ShaderLibrary(closestHitGradiantShaderDescriptor)
-                ->ClosestHitShaderName(AZ::Name("ClosestHitGradientShader"))
-            ->ShaderLibrary(closestHitSolidShaderDescriptor)
-                ->ClosestHitShaderName(AZ::Name("ClosestHitSolidShader"))
-            ->HitGroup(AZ::Name("HitGroupGradient"))
-                ->ClosestHitShaderName(AZ::Name("ClosestHitGradientShader"))
-            ->HitGroup(AZ::Name("HitGroupSolid"))
-                ->ClosestHitShaderName(AZ::Name("ClosestHitSolidShader"));
-    
+        descriptor.m_pipelineState = m_globalPipelineState.get();
+
+        descriptor.AddRayGenerationShaderLibrary(rayGenerationShaderDescriptor, Name("RayGenerationShader"));
+        descriptor.AddMissShaderLibrary(missShaderDescriptor, Name("MissShader"));
+        descriptor.AddClosestHitShaderLibrary(closestHitGradientShaderDescriptor, Name("ClosestHitGradientShader"));
+        descriptor.AddClosestHitShaderLibrary(closestHitSolidShaderDescriptor, Name("ClosestHitSolidShader"));
+
+        descriptor.AddHitGroup(Name("HitGroupGradient"), Name("ClosestHitGradientShader"));
+        descriptor.AddHitGroup(Name("HitGroupSolid"), Name("ClosestHitSolidShader"));
+
         // create the ray tracing pipeline state object
         m_rayTracingPipelineState = aznew RHI::RayTracingPipelineState;
         m_rayTracingPipelineState->Init(RHI::MultiDevice::AllDevices, descriptor);
