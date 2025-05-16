@@ -342,12 +342,11 @@ namespace AtomSampleViewer
                 };
 
                 RHI::RayTracingBlasDescriptor triangleBlasDescriptor;
-                triangleBlasDescriptor.Build()
-                    ->Geometry()
-                        ->VertexFormat(RHI::Format::R32G32B32_FLOAT)
-                        ->VertexBuffer(triangleVertexBufferView)
-                        ->IndexBuffer(triangleIndexBufferView)
-                ;
+
+                RHI::RayTracingGeometry& triangleBlasGeometry = triangleBlasDescriptor.m_geometries.emplace_back();
+                triangleBlasGeometry.m_vertexFormat = RHI::Format::R32G32B32_FLOAT;
+                triangleBlasGeometry.m_vertexBuffer = triangleVertexBufferView;
+                triangleBlasGeometry.m_indexBuffer = triangleIndexBufferView;
 
                 m_triangleRayTracingBlas->CreateBuffers(RHI::MultiDevice::AllDevices, &triangleBlasDescriptor, *m_rayTracingBufferPools);
             }
@@ -372,12 +371,11 @@ namespace AtomSampleViewer
                 };
 
                 RHI::RayTracingBlasDescriptor rectangleBlasDescriptor;
-                rectangleBlasDescriptor.Build()
-                    ->Geometry()
-                        ->VertexFormat(RHI::Format::R32G32B32_FLOAT)
-                        ->VertexBuffer(rectangleVertexBufferView)
-                        ->IndexBuffer(rectangleIndexBufferView)
-                ;
+
+                RHI::RayTracingGeometry& rectangleBlasGeometry = rectangleBlasDescriptor.m_geometries.emplace_back();
+                rectangleBlasGeometry.m_vertexFormat = RHI::Format::R32G32B32_FLOAT;
+                rectangleBlasGeometry.m_vertexBuffer = rectangleVertexBufferView;
+                rectangleBlasGeometry.m_indexBuffer = rectangleIndexBufferView;
 
                 m_rectangleRayTracingBlas->CreateBuffers(RHI::MultiDevice::AllDevices, &rectangleBlasDescriptor, *m_rayTracingBufferPools);
             }
@@ -403,28 +401,34 @@ namespace AtomSampleViewer
 
             // create the TLAS
             RHI::RayTracingTlasDescriptor tlasDescriptor;
-            tlasDescriptor.Build()
-                ->Instance()
-                    ->InstanceID(0)
-                    ->HitGroupIndex(0)
-                    ->Blas(m_triangleRayTracingBlas)
-                    ->Transform(triangleTransform1)
-                ->Instance()
-                    ->InstanceID(1)
-                    ->HitGroupIndex(1)
-                    ->Blas(m_triangleRayTracingBlas)
-                    ->Transform(triangleTransform2)
-                ->Instance()
-                    ->InstanceID(2)
-                    ->HitGroupIndex(2)
-                    ->Blas(m_triangleRayTracingBlas)
-                    ->Transform(triangleTransform3)
-                ->Instance()
-                    ->InstanceID(3)
-                    ->HitGroupIndex(3)
-                    ->Blas(m_rectangleRayTracingBlas)
-                    ->Transform(rectangleTransform)
-                ;
+            {
+                RHI::RayTracingTlasInstance& tlasInstance = tlasDescriptor.m_instances.emplace_back();
+                tlasInstance.m_instanceID = 0;
+                tlasInstance.m_hitGroupIndex = 0;
+                tlasInstance.m_blas = m_triangleRayTracingBlas;
+                tlasInstance.m_transform = triangleTransform1;
+            }
+            {
+                RHI::RayTracingTlasInstance& tlasInstance = tlasDescriptor.m_instances.emplace_back();
+                tlasInstance.m_instanceID = 1;
+                tlasInstance.m_hitGroupIndex = 1;
+                tlasInstance.m_blas = m_triangleRayTracingBlas;
+                tlasInstance.m_transform = triangleTransform2;
+            }
+            {
+                RHI::RayTracingTlasInstance& tlasInstance = tlasDescriptor.m_instances.emplace_back();
+                tlasInstance.m_instanceID = 2;
+                tlasInstance.m_hitGroupIndex = 2;
+                tlasInstance.m_blas = m_triangleRayTracingBlas;
+                tlasInstance.m_transform = triangleTransform3;
+            }
+            {
+                RHI::RayTracingTlasInstance& tlasInstance = tlasDescriptor.m_instances.emplace_back();
+                tlasInstance.m_instanceID = 3;
+                tlasInstance.m_hitGroupIndex = 3;
+                tlasInstance.m_blas = m_rectangleRayTracingBlas;
+                tlasInstance.m_transform = rectangleTransform;
+            }
 
             m_rayTracingTlas->CreateBuffers(RHI::MultiDevice::AllDevices, &tlasDescriptor, *m_rayTracingBufferPools);
 
