@@ -561,14 +561,14 @@ namespace AtomSampleViewer
 
                 // update the ray tracing shader table
                 AZStd::shared_ptr<RHI::RayTracingShaderTableDescriptor> descriptor = AZStd::make_shared<RHI::RayTracingShaderTableDescriptor>();
-                descriptor->Build(AZ::Name("RayTracingExampleShaderTable"), m_rayTracingPipelineState)
-                    ->RayGenerationRecord(AZ::Name("RayGenerationShader"))
-                    ->MissRecord(AZ::Name("MissShader"))
-                    ->HitGroupRecord(AZ::Name("HitGroupGradient")) // triangle1
-                    ->HitGroupRecord(AZ::Name("HitGroupGradient")) // triangle2
-                    ->HitGroupRecord(AZ::Name("HitGroupSolid")) // triangle3
-                    ->HitGroupRecord(AZ::Name("HitGroupSolid")) // rectangle
-                    ;
+                descriptor->m_name = AZ::Name("RayTracingExampleShaderTable");
+                descriptor->m_rayTracingPipelineState = m_rayTracingPipelineState;
+                descriptor->m_rayGenerationRecord.emplace_back(AZ::Name("RayGenerationShader"));
+                descriptor->m_missRecords.emplace_back(AZ::Name("MissShader"));
+                descriptor->m_hitGroupRecords.emplace_back(AZ::Name("HitGroupGradient")); // triangle1
+                descriptor->m_hitGroupRecords.emplace_back(AZ::Name("HitGroupGradient")); // triangle2
+                descriptor->m_hitGroupRecords.emplace_back(AZ::Name("HitGroupSolid")); // triangle3
+                descriptor->m_hitGroupRecords.emplace_back(AZ::Name("HitGroupSolid")); // rectangle
 
                 m_rayTracingShaderTable->Build(descriptor);
             }
