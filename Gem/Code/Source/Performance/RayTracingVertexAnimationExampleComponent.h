@@ -10,6 +10,7 @@
 
 #include <Atom/Feature/Debug/RayTracingDebugFeatureProcessorInterface.h>
 #include <Atom/Feature/RayTracing/RayTracingFeatureProcessorInterface.h>
+#include <Atom/RPI.Public/Buffer/BufferPool.h>
 #include <AzCore/Math/PackedVector3.h>
 #include <CommonSampleComponentBase.h>
 #include <Passes/VertexAnimationPass.h>
@@ -54,6 +55,7 @@ namespace AtomSampleViewer
         };
 
         BasicGeometry GenerateBasicGeometry();
+        void CreateBufferPools();
         void CreateRayTracingGeometry();
         void AddVertexAnimationPass(AZ::RPI::RenderPipeline* renderPipeline);
         AZ::Render::RayTracingFeatureProcessorInterface& GetRayTracingFeatureProcessor();
@@ -62,6 +64,9 @@ namespace AtomSampleViewer
         AZ::Render::RayTracingFeatureProcessorInterface* m_rayTracingFeatureProcessor{ nullptr };
         AZ::Render::RayTracingDebugFeatureProcessorInterface* m_rayTracingDebugFeatureProcessor{ nullptr };
 
+        AZ::RHI::BufferBindFlags m_geometryDataBufferBindFlags{ AZ::RHI::BufferBindFlags::ShaderReadWrite |
+                                                                AZ::RHI::BufferBindFlags::DynamicInputAssembly };
+        AZ::Data::Asset<AZ::RPI::ResourcePoolAsset> m_geometryDataBufferPoolAsset;
         AZ::Data::Instance<AZ::RPI::Buffer> m_sourceGeometryBuffer;
         AZ::Data::Instance<AZ::RPI::Buffer> m_targetGeometryBuffer;
         AZStd::vector<RayTracingMesh> m_rayTracingData;
