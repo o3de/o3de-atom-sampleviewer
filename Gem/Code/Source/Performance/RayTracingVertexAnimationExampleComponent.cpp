@@ -14,6 +14,8 @@
 #include <Atom/Component/DebugCamera/ArcBallControllerComponent.h>
 #include <Atom/RHI/RayTracingBufferPools.h>
 #include <Atom/RPI.Public/Pass/PassFilter.h>
+#include <Atom/RPI.Reflect/Buffer/BufferAssetCreator.h>
+#include <Atom/RPI.Reflect/ResourcePoolAssetCreator.h>
 #include <AzCore/Math/Geometry3DUtils.h>
 
 AZ_DECLARE_BUDGET(AtomSampleViewer);
@@ -48,6 +50,7 @@ namespace AtomSampleViewer
         EBUS_EVENT_ID(GetCameraEntityId(), Debug::ArcBallControllerRequestBus, SetPitch, DegToRad(-20.f));
         EBUS_EVENT_ID(GetCameraEntityId(), Debug::ArcBallControllerRequestBus, SetPan, AZ::Vector3{ 0.2f, 0.6f, 1.2f });
 
+        CreateBufferPools();
         CreateRayTracingGeometry();
 
         RPI::SceneNotificationBus::Handler::BusConnect(RPI::Scene::GetSceneForEntityContextId(GetEntityContextId())->GetId());
@@ -72,6 +75,8 @@ namespace AtomSampleViewer
     void RayTracingVertexAnimationExampleComponent::OnRenderPipelineChanged(
         AZ::RPI::RenderPipeline* renderPipeline, RenderPipelineChangeType changeType)
     {
+        AZ_UNUSED(changeType);
+
         if (!renderPipeline->GetScene() || renderPipeline != renderPipeline->GetScene()->GetDefaultRenderPipeline().get())
         {
             return;
@@ -103,6 +108,20 @@ namespace AtomSampleViewer
         AZStd::ranges::iota(geometry.m_indices, 0);
 
         return geometry;
+    }
+
+    void RayTracingVertexAnimationExampleComponent::CreateBufferPools()
+    {
+        auto targetBufferPoolDesc{ AZStd::make_unique<AZ::RHI::BufferPoolDescriptor>() };
+        targetBufferPoolDesc->m_bindFlags = m_geometryDataBufferBindFlags;
+        targetBufferPoolDesc->m_heapMemoryLevel = AZ::RHI::HeapMemoryLevel::Device;
+        targetBufferPoolDesc->m_hostMemoryAccess = AZ::RHI::HostMemoryAccess::Write;
+
+        AZ::RPI::ResourcePoolAssetCreator targetBufferPoolCreator;
+        targetBufferPoolCreator.Begin(AZ::Uuid::CreateRandom());
+        targetBufferPoolCreator.SetPoolDescriptor(AZStd::move(targetBufferPoolDesc));
+        targetBufferPoolCreator.SetPoolName("RayTracingExampleComponentTargetGeometry-BufferPool");
+        targetBufferPoolCreator.End(m_geometryDataBufferPoolAsset);
     }
 
     void RayTracingVertexAnimationExampleComponent::CreateRayTracingGeometry()
@@ -141,26 +160,33 @@ namespace AtomSampleViewer
         memcpy(geometryBuffer.data() + normalByteOffset, geometry.m_normals.data(), vertexCount * NormalSize);
         memcpy(geometryBuffer.data() + indexByteOffset, geometry.m_indices.data(), indexCount * IndexSize);
 
-        AZ::RPI::CommonBufferDescriptor sourceBufferDescriptor;
-        sourceBufferDescriptor.m_bufferName = "RayTracingExampleComponentSourceGeometry";
-        sourceBufferDescriptor.m_poolType = AZ::RPI::CommonBufferPoolType::ReadWrite;
-        sourceBufferDescriptor.m_byteCount = sourceBufferSize;
-        sourceBufferDescriptor.m_elementSize = 1;
-        sourceBufferDescriptor.m_bufferData = geometryBuffer.data();
-        m_sourceGeometryBuffer = AZ::RPI::BufferSystemInterface::Get()->CreateBufferFromCommonPool(sourceBufferDescriptor);
+        AZ::RPI::BufferAssetCreator sourceBufferCreator;
+        sourceBufferCreator.Begin(AZ::Uuid::CreateRandom());
+        sourceBufferCreator.SetBufferName("RayTracingExampleComponentSourceGeometry");
+        sourceBufferCreator.SetPoolAsset(m_geometryDataBufferPoolAsset);
+        sourceBufferCreator.SetBuffer(
+            geometryBuffer.data(), sourceBufferSize, AZ::RHI::BufferDescriptor{ m_geometryDataBufferBindFlags, sourceBufferSize });
+        sourceBufferCreator.SetBufferViewDescriptor(AZ::RHI::BufferViewDescriptor::CreateStructured(0, sourceBufferSize, 1));
 
-        AZ::RPI::CommonBufferDescriptor targetBufferDescriptor;
-        targetBufferDescriptor.m_bufferName = "RayTracingExampleComponentTargetGeometry";
-        targetBufferDescriptor.m_poolType = AZ::RPI::CommonBufferPoolType::ReadWrite;
-        targetBufferDescriptor.m_byteCount = targetBufferSize;
-        targetBufferDescriptor.m_elementSize = 1;
-        m_targetGeometryBuffer = AZ::RPI::BufferSystemInterface::Get()->CreateBufferFromCommonPool(targetBufferDescriptor);
+        AZ::Data::Asset<AZ::RPI::BufferAsset> sourceBufferAsset;
+        sourceBufferCreator.End(sourceBufferAsset);
+        m_sourceGeometryBuffer = AZ::RPI::Buffer::FindOrCreate(sourceBufferAsset);
+
+        AZ::RPI::BufferAssetCreator targetBufferCreator;
+        targetBufferCreator.Begin(AZ::Uuid::CreateRandom());
+        targetBufferCreator.SetBufferName("RayTracingExampleComponentTargetGeometry");
+        targetBufferCreator.SetPoolAsset(m_geometryDataBufferPoolAsset);
+        targetBufferCreator.SetBuffer(nullptr, 0, AZ::RHI::BufferDescriptor{ m_geometryDataBufferBindFlags, targetBufferSize });
+        targetBufferCreator.SetBufferViewDescriptor(AZ::RHI::BufferViewDescriptor::CreateStructured(0, targetBufferSize, 1));
+
+        AZ::Data::Asset<AZ::RPI::BufferAsset> targetBufferAsset;
+        targetBufferCreator.End(targetBufferAsset);
+        m_targetGeometryBuffer = AZ::RPI::Buffer::FindOrCreate(targetBufferAsset);
 
         auto sourceRhiGeometryBuffer{ m_sourceGeometryBuffer->GetRHIBuffer() };
         auto targetRhiGeometryBuffer{ m_targetGeometryBuffer->GetRHIBuffer() };
         auto sourceShaderBufferView{ sourceRhiGeometryBuffer->GetBufferView(RHI::BufferViewDescriptor::CreateRaw(0, sourceBufferSize)) };
-        auto targetShaderBufferView{ targetRhiGeometryBuffer->GetBufferView(
-            RHI::BufferViewDescriptor::CreateRaw(0, targetBufferSize)) };
+        auto targetShaderBufferView{ targetRhiGeometryBuffer->GetBufferView(RHI::BufferViewDescriptor::CreateRaw(0, targetBufferSize)) };
 
         int gridWidth{ aznumeric_cast<int>(AZStd::ceil(AZStd::sqrt(m_geometryCount))) };
         float gridSpacing{ 2.3f };
