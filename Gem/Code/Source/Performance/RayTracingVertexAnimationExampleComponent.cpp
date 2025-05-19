@@ -52,15 +52,28 @@ namespace AtomSampleViewer
 
         CreateBufferPools();
         CreateRayTracingGeometry();
+        m_imguiSidebar.Activate();
+
+        auto meshFeatureProcessor{ AZ::RPI::Scene::GetFeatureProcessorForEntityContextId<Render::MeshFeatureProcessorInterface>(
+            GetEntityContextId()) };
+        AZ::RPI::PassFilter passFilter{ AZ::RPI::PassFilter::CreateWithPassName(
+            AZ::Name{ "RayTracingAccelerationStructurePass" }, meshFeatureProcessor->GetParentScene()) };
+        m_rayTracingAccelerationStructurePass = AZ::RPI::PassSystemInterface::Get()->FindFirstPass(passFilter);
+        m_rayTracingAccelerationStructurePass->SetTimestampQueryEnabled(true);
 
         RPI::SceneNotificationBus::Handler::BusConnect(RPI::Scene::GetSceneForEntityContextId(GetEntityContextId())->GetId());
+        AZ::TickBus::Handler::BusConnect();
 
         Render::Bootstrap::NotificationBus::Broadcast(&Render::Bootstrap::NotificationBus::Handler::OnBootstrapSceneReady, m_scene);
     }
 
     void RayTracingVertexAnimationExampleComponent::Deactivate()
     {
+        AZ::TickBus::Handler::BusDisconnect();
         RPI::SceneNotificationBus::Handler::BusDisconnect();
+
+        m_rayTracingAccelerationStructurePass.reset();
+        m_imguiSidebar.Deactivate();
 
         for (const RayTracingMesh& rayTracingMesh : m_rayTracingData)
         {
@@ -70,6 +83,14 @@ namespace AtomSampleViewer
         GetRayTracingDebugFeatureProcessor().OnRayTracingDebugComponentRemoved();
 
         ShutdownLightingPresets();
+    }
+
+    void RayTracingVertexAnimationExampleComponent::OnTick(float deltaTime, AZ::ScriptTimePoint /*timePoint*/)
+    {
+        m_imGuiFrameTimer.PushValue(deltaTime);
+        m_accelerationStructureTimer.PushValue(
+            m_rayTracingAccelerationStructurePass->GetLatestTimestampResult().GetDurationInNanoseconds() / 1'000'000'000.f);
+        DrawSidebar();
     }
 
     void RayTracingVertexAnimationExampleComponent::OnRenderPipelineChanged(
@@ -259,6 +280,36 @@ namespace AtomSampleViewer
         m_vertexAnimationPass->SetInstanceCount(m_geometryCount);
 
         renderPipeline->AddPassBefore(m_vertexAnimationPass, Name{ "RayTracingAccelerationStructurePass" });
+    }
+
+    void RayTracingVertexAnimationExampleComponent::DrawSidebar()
+    {
+        bool buildTypeUpdated{ false };
+
+        if (m_imguiSidebar.Begin())
+        {
+            ImGui::Text("RTAS Type:");
+            buildTypeUpdated |= ScriptableImGui::RadioButton("Triangle BLAS", &m_accelerationStructureType, 0);
+            buildTypeUpdated |= ScriptableImGui::RadioButton("CLAS", &m_accelerationStructureType, 1);
+
+            ImGui::Spacing();
+            ImGui::Separator();
+            ImGui::Spacing();
+            ImGui::Text("Performance:");
+
+            // Cannot use m_imGuiFrameTimer.Tick since times in seconds are rounded to 0
+            ImGui::Text(
+                "Frame time: %.2f ms (%.0f fps)", m_imGuiFrameTimer.GetDisplayedAverage() * 1000.f,
+                1.f / m_imGuiFrameTimer.GetDisplayedAverage());
+            ImGui::Text("RTAS build time: %.2f ms", m_accelerationStructureTimer.GetDisplayedAverage() * 1000.f);
+
+            m_imguiSidebar.End();
+        }
+
+        if (buildTypeUpdated)
+        {
+            // TODO: Change acceleration structure type
+        }
     }
 
     Render::RayTracingFeatureProcessorInterface& RayTracingVertexAnimationExampleComponent::GetRayTracingFeatureProcessor()

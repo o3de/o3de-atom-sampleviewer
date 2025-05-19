@@ -14,6 +14,8 @@
 #include <AzCore/Math/PackedVector3.h>
 #include <CommonSampleComponentBase.h>
 #include <Passes/VertexAnimationPass.h>
+#include <Utils/ImGuiHistogramQueue.h>
+#include <Utils/ImGuiSidebar.h>
 
 namespace AtomSampleViewer
 {
@@ -23,6 +25,7 @@ namespace AtomSampleViewer
     class RayTracingVertexAnimationExampleComponent
         : public CommonSampleComponentBase
         , public AZ::RPI::SceneNotificationBus::Handler
+        , public AZ::TickBus::Handler
     {
         using Base = CommonSampleComponentBase;
 
@@ -35,6 +38,7 @@ namespace AtomSampleViewer
 
         void Activate() override;
         void Deactivate() override;
+        void OnTick(float deltaTime, AZ::ScriptTimePoint timePoint) override;
 
         void OnRenderPipelineChanged(AZ::RPI::RenderPipeline* renderPipeline, RenderPipelineChangeType changeType) override;
 
@@ -58,6 +62,8 @@ namespace AtomSampleViewer
         void CreateBufferPools();
         void CreateRayTracingGeometry();
         void AddVertexAnimationPass(AZ::RPI::RenderPipeline* renderPipeline);
+        void DrawSidebar();
+
         AZ::Render::RayTracingFeatureProcessorInterface& GetRayTracingFeatureProcessor();
         AZ::Render::RayTracingDebugFeatureProcessorInterface& GetRayTracingDebugFeatureProcessor();
 
@@ -74,5 +80,11 @@ namespace AtomSampleViewer
         AZ::u32 m_vertexCountPerInstance;
         AZ::u32 m_targetVertexStridePerInstance;
         AZ::RPI::Ptr<AZ::Render::VertexAnimationPass> m_vertexAnimationPass;
+
+        ImGuiSidebar m_imguiSidebar;
+        int m_accelerationStructureType{ 0 };
+        ImGuiHistogramQueue m_imGuiFrameTimer{ 60, 60 };
+        ImGuiHistogramQueue m_accelerationStructureTimer{ 60, 60 };
+        AZ::RHI::Ptr<AZ::RPI::Pass> m_rayTracingAccelerationStructurePass;
     };
 } // namespace AtomSampleViewer
