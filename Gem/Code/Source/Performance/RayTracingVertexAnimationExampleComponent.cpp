@@ -20,6 +20,16 @@
 
 AZ_DECLARE_BUDGET(AtomSampleViewer);
 
+namespace AtomSampleViewer::ImGuiHelper
+{
+    template<typename T, AZStd::enable_if_t<AZStd::is_enum_v<T>, bool> = true>
+    bool RadioButton(const char* label, T* value, T buttonValue)
+    {
+        return ScriptableImGui::RadioButton(
+            label, reinterpret_cast<AZStd::underlying_type_t<T>*>(value), AZStd::to_underlying(buttonValue));
+    }
+} // namespace AtomSampleViewer::ImGuiHelper
+
 namespace AtomSampleViewer
 {
     using namespace AZ;
@@ -54,12 +64,7 @@ namespace AtomSampleViewer
         CreateRayTracingGeometry();
         m_imguiSidebar.Activate();
 
-        auto meshFeatureProcessor{ AZ::RPI::Scene::GetFeatureProcessorForEntityContextId<Render::MeshFeatureProcessorInterface>(
-            GetEntityContextId()) };
-        AZ::RPI::PassFilter passFilter{ AZ::RPI::PassFilter::CreateWithPassName(
-            AZ::Name{ "RayTracingAccelerationStructurePass" }, meshFeatureProcessor->GetParentScene()) };
-        m_rayTracingAccelerationStructurePass = AZ::RPI::PassSystemInterface::Get()->FindFirstPass(passFilter);
-        m_rayTracingAccelerationStructurePass->SetTimestampQueryEnabled(true);
+        SaveVSyncStateAndDisableVsync();
 
         RPI::SceneNotificationBus::Handler::BusConnect(RPI::Scene::GetSceneForEntityContextId(GetEntityContextId())->GetId());
         AZ::TickBus::Handler::BusConnect();
@@ -72,6 +77,9 @@ namespace AtomSampleViewer
         AZ::TickBus::Handler::BusDisconnect();
         RPI::SceneNotificationBus::Handler::BusDisconnect();
 
+        RestoreVSyncState();
+
+        m_rayTracingAccelerationStructurePass->SetTimestampQueryEnabled(false);
         m_rayTracingAccelerationStructurePass.reset();
         m_imguiSidebar.Deactivate();
 
@@ -103,7 +111,28 @@ namespace AtomSampleViewer
             return;
         }
 
+        auto meshFeatureProcessor{ AZ::RPI::Scene::GetFeatureProcessorForEntityContextId<Render::MeshFeatureProcessorInterface>(
+            GetEntityContextId()) };
+        AZ::RPI::PassFilter passFilter{ AZ::RPI::PassFilter::CreateWithPassName(
+            AZ::Name{ "RayTracingAccelerationStructurePass" }, meshFeatureProcessor->GetParentScene()) };
+        m_rayTracingAccelerationStructurePass = AZ::RPI::PassSystemInterface::Get()->FindFirstPass(passFilter);
+        m_rayTracingAccelerationStructurePass->SetTimestampQueryEnabled(true);
+
         AddVertexAnimationPass(renderPipeline);
+    }
+
+    void RayTracingVertexAnimationExampleComponent::SaveVSyncStateAndDisableVsync()
+    {
+        AzFramework::NativeWindowHandle windowHandle{ nullptr };
+        EBUS_EVENT_RESULT(windowHandle, AzFramework::WindowSystemRequestBus, GetDefaultWindowHandle);
+        EBUS_EVENT_ID_RESULT(m_preActivateVSyncInterval, windowHandle, AzFramework::WindowRequestBus, GetSyncInterval);
+        EBUS_EVENT_ID(windowHandle, AzFramework::WindowRequestBus, SetSyncInterval, 0);
+    }
+    void RayTracingVertexAnimationExampleComponent::RestoreVSyncState()
+    {
+        AzFramework::NativeWindowHandle windowHandle{ nullptr };
+        EBUS_EVENT_RESULT(windowHandle, AzFramework::WindowSystemRequestBus, GetDefaultWindowHandle);
+        EBUS_EVENT_ID(windowHandle, AzFramework::WindowRequestBus, SetSyncInterval, m_preActivateVSyncInterval);
     }
 
     RayTracingVertexAnimationExampleComponent::BasicGeometry RayTracingVertexAnimationExampleComponent::GenerateBasicGeometry()
@@ -212,6 +241,7 @@ namespace AtomSampleViewer
         int gridWidth{ aznumeric_cast<int>(AZStd::ceil(AZStd::sqrt(m_geometryCount))) };
         float gridSpacing{ 2.3f };
 
+        // TODO: Add CLAS version
         for (int i{ 0 }; i < m_geometryCount; i++)
         {
             auto& data{ m_rayTracingData.emplace_back() };
@@ -289,8 +319,10 @@ namespace AtomSampleViewer
         if (m_imguiSidebar.Begin())
         {
             ImGui::Text("RTAS Type:");
-            buildTypeUpdated |= ScriptableImGui::RadioButton("Triangle BLAS", &m_accelerationStructureType, 0);
-            buildTypeUpdated |= ScriptableImGui::RadioButton("CLAS", &m_accelerationStructureType, 1);
+            buildTypeUpdated |=
+                ImGuiHelper::RadioButton("Triangle BLAS", &m_accelerationStructureType, AccelerationStructureType::TriangleBLAS);
+            buildTypeUpdated |=
+                ImGuiHelper::RadioButton("CLAS + Cluster BLAS", &m_accelerationStructureType, AccelerationStructureType::CLAS_ClusterBLAS);
 
             ImGui::Spacing();
             ImGui::Separator();
@@ -308,7 +340,7 @@ namespace AtomSampleViewer
 
         if (buildTypeUpdated)
         {
-            // TODO: Change acceleration structure type
+            CreateRayTracingGeometry();
         }
     }
 
