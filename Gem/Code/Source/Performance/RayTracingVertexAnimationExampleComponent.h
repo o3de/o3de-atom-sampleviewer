@@ -29,6 +29,12 @@ namespace AtomSampleViewer
     {
         using Base = CommonSampleComponentBase;
 
+        enum class AccelerationStructureType : int
+        {
+            TriangleBLAS,
+            CLAS_ClusterBLAS,
+        };
+
     public:
         AZ_COMPONENT(RayTracingVertexAnimationExampleComponent, "{9B43FED7-8BD0-4159-BDEC-BBF7EA39C1EC}", Base);
 
@@ -58,6 +64,8 @@ namespace AtomSampleViewer
             AZStd::vector<AZ::u32> m_indices;
         };
 
+        void SaveVSyncStateAndDisableVsync();
+        void RestoreVSyncState();
         BasicGeometry GenerateBasicGeometry();
         void CreateBufferPools();
         void CreateRayTracingGeometry();
@@ -69,6 +77,7 @@ namespace AtomSampleViewer
 
         AZ::Render::RayTracingFeatureProcessorInterface* m_rayTracingFeatureProcessor{ nullptr };
         AZ::Render::RayTracingDebugFeatureProcessorInterface* m_rayTracingDebugFeatureProcessor{ nullptr };
+        uint32_t m_preActivateVSyncInterval{ 0 };
 
         AZ::RHI::BufferBindFlags m_geometryDataBufferBindFlags{ AZ::RHI::BufferBindFlags::ShaderReadWrite |
                                                                 AZ::RHI::BufferBindFlags::DynamicInputAssembly };
@@ -82,7 +91,7 @@ namespace AtomSampleViewer
         AZ::RPI::Ptr<AZ::Render::VertexAnimationPass> m_vertexAnimationPass;
 
         ImGuiSidebar m_imguiSidebar;
-        int m_accelerationStructureType{ 0 };
+        AccelerationStructureType m_accelerationStructureType{ AccelerationStructureType::TriangleBLAS };
         ImGuiHistogramQueue m_imGuiFrameTimer{ 60, 60 };
         ImGuiHistogramQueue m_accelerationStructureTimer{ 60, 60 };
         AZ::RHI::Ptr<AZ::RPI::Pass> m_rayTracingAccelerationStructurePass;
