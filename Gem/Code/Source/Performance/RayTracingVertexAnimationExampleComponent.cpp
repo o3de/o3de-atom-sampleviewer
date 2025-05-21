@@ -18,15 +18,20 @@
 #include <Atom/RPI.Reflect/ResourcePoolAssetCreator.h>
 #include <AzCore/Math/Geometry3DUtils.h>
 
+namespace AZ::RHI
+{
+    using uint = uint32_t;
+#include "../../Assets/ShaderLib/Atom/Features/IndirectRayTracing.azsli"
+} // namespace AZ::RHI
+
 AZ_DECLARE_BUDGET(AtomSampleViewer);
 
 namespace AtomSampleViewer::ImGuiHelper
 {
-    template<typename T, AZStd::enable_if_t<AZStd::is_enum_v<T>, bool> = true>
+    template<typename T, AZStd::enable_if_t<AZStd::is_enum_v<T> && sizeof(T) == sizeof(int), bool> = true>
     bool RadioButton(const char* label, T* value, T buttonValue)
     {
-        return ScriptableImGui::RadioButton(
-            label, reinterpret_cast<AZStd::underlying_type_t<T>*>(value), AZStd::to_underlying(buttonValue));
+        return ScriptableImGui::RadioButton(label, reinterpret_cast<int*>(value), AZStd::to_underlying(buttonValue));
     }
 } // namespace AtomSampleViewer::ImGuiHelper
 
@@ -53,7 +58,7 @@ namespace AtomSampleViewer
 
         auto& rayTracingDebugFeatureProcessor{ GetRayTracingDebugFeatureProcessor() };
         rayTracingDebugFeatureProcessor.OnRayTracingDebugComponentAdded();
-        rayTracingDebugFeatureProcessor.GetSettingsInterface()->SetDebugViewMode(AZ::Render::RayTracingDebugViewMode::Normals);
+        rayTracingDebugFeatureProcessor.GetSettingsInterface()->SetDebugViewMode(m_rayTracingDebugViewMode);
 
         EBUS_EVENT_ID(GetCameraEntityId(), Debug::CameraControllerRequestBus, Enable, azrtti_typeid<Debug::ArcBallControllerComponent>());
         EBUS_EVENT_ID(GetCameraEntityId(), Debug::ArcBallControllerRequestBus, SetDistance, 10.f);
@@ -132,6 +137,21 @@ namespace AtomSampleViewer
         AddVertexAnimationPass(renderPipeline);
     }
 
+    int RayTracingVertexAnimationExampleComponent::BasicGeometry::GetTriangleCount() const
+    {
+        return GetIndexCount() / 3;
+    }
+
+    int RayTracingVertexAnimationExampleComponent::BasicGeometry::GetIndexCount() const
+    {
+        return aznumeric_cast<int>(m_indices.size());
+    }
+
+    int RayTracingVertexAnimationExampleComponent::BasicGeometry::GetVertexCount() const
+    {
+        return aznumeric_cast<int>(m_positions.size());
+    }
+
     void RayTracingVertexAnimationExampleComponent::SaveVSyncStateAndDisableVsync()
     {
         AzFramework::NativeWindowHandle windowHandle{ nullptr };
@@ -150,7 +170,7 @@ namespace AtomSampleViewer
     {
         BasicGeometry geometry;
 
-        AZStd::vector<AZ::Vector3> vertices{ Geometry3dUtils::GenerateIcoSphere(2) };
+        AZStd::vector<AZ::Vector3> vertices{ Geometry3dUtils::GenerateIcoSphere(1) };
 
         for (const Vector3& unpackedVertex : vertices)
         {
@@ -167,6 +187,10 @@ namespace AtomSampleViewer
 
         geometry.m_indices.resize(vertices.size());
         AZStd::ranges::iota(geometry.m_indices, 0);
+
+        // TODO(CLAS): Query actual limits from PhysicalDevice
+        AZ_Assert(geometry.GetVertexCount() < 256, "CLAS does not support more than 256 vertices per cluster");
+        AZ_Assert(geometry.GetTriangleCount() < 256, "CLAS does not support more than 256 triangles per cluster");
 
         return geometry;
     }
@@ -221,47 +245,101 @@ namespace AtomSampleViewer
         memcpy(geometryBuffer.data() + normalByteOffset, geometry.m_normals.data(), vertexCount * NormalSize);
         memcpy(geometryBuffer.data() + indexByteOffset, geometry.m_indices.data(), indexCount * IndexSize);
 
-        AZ::RPI::BufferAssetCreator sourceBufferCreator;
-        sourceBufferCreator.Begin(AZ::Uuid::CreateRandom());
-        sourceBufferCreator.SetBufferName("RayTracingExampleComponentSourceGeometry");
-        sourceBufferCreator.SetPoolAsset(m_geometryDataBufferPoolAsset);
-        sourceBufferCreator.SetBuffer(
-            geometryBuffer.data(), sourceBufferSize, AZ::RHI::BufferDescriptor{ m_geometryDataBufferBindFlags, sourceBufferSize });
-        sourceBufferCreator.SetBufferViewDescriptor(AZ::RHI::BufferViewDescriptor::CreateStructured(0, sourceBufferSize, 1));
+        if (!m_sourceGeometryBuffer)
+        {
+            AZ::RPI::BufferAssetCreator sourceBufferCreator;
+            sourceBufferCreator.Begin(AZ::Uuid::CreateRandom());
+            sourceBufferCreator.SetBufferName("RayTracingExampleComponentSourceGeometry");
+            sourceBufferCreator.SetPoolAsset(m_geometryDataBufferPoolAsset);
+            sourceBufferCreator.SetBuffer(
+                geometryBuffer.data(), sourceBufferSize, AZ::RHI::BufferDescriptor{ m_geometryDataBufferBindFlags, sourceBufferSize });
+            sourceBufferCreator.SetBufferViewDescriptor(AZ::RHI::BufferViewDescriptor::CreateStructured(0, sourceBufferSize, 1));
 
-        AZ::Data::Asset<AZ::RPI::BufferAsset> sourceBufferAsset;
-        sourceBufferCreator.End(sourceBufferAsset);
-        m_sourceGeometryBuffer = AZ::RPI::Buffer::FindOrCreate(sourceBufferAsset);
+            AZ::Data::Asset<AZ::RPI::BufferAsset> sourceBufferAsset;
+            sourceBufferCreator.End(sourceBufferAsset);
+            m_sourceGeometryBuffer = AZ::RPI::Buffer::FindOrCreate(sourceBufferAsset);
+        }
 
-        AZ::RPI::BufferAssetCreator targetBufferCreator;
-        targetBufferCreator.Begin(AZ::Uuid::CreateRandom());
-        targetBufferCreator.SetBufferName("RayTracingExampleComponentTargetGeometry");
-        targetBufferCreator.SetPoolAsset(m_geometryDataBufferPoolAsset);
-        targetBufferCreator.SetBuffer(nullptr, 0, AZ::RHI::BufferDescriptor{ m_geometryDataBufferBindFlags, targetBufferSize });
-        targetBufferCreator.SetBufferViewDescriptor(AZ::RHI::BufferViewDescriptor::CreateStructured(0, targetBufferSize, 1));
+        if (!m_targetGeometryBuffer)
+        {
+            AZ::RPI::BufferAssetCreator targetBufferCreator;
+            targetBufferCreator.Begin(AZ::Uuid::CreateRandom());
+            targetBufferCreator.SetBufferName("RayTracingExampleComponentTargetGeometry");
+            targetBufferCreator.SetPoolAsset(m_geometryDataBufferPoolAsset);
+            targetBufferCreator.SetBuffer(nullptr, 0, AZ::RHI::BufferDescriptor{ m_geometryDataBufferBindFlags, targetBufferSize });
+            targetBufferCreator.SetBufferViewDescriptor(AZ::RHI::BufferViewDescriptor::CreateStructured(0, targetBufferSize, 1));
 
-        AZ::Data::Asset<AZ::RPI::BufferAsset> targetBufferAsset;
-        targetBufferCreator.End(targetBufferAsset);
-        m_targetGeometryBuffer = AZ::RPI::Buffer::FindOrCreate(targetBufferAsset);
+            AZ::Data::Asset<AZ::RPI::BufferAsset> targetBufferAsset;
+            targetBufferCreator.End(targetBufferAsset);
+            m_targetGeometryBuffer = AZ::RPI::Buffer::FindOrCreate(targetBufferAsset);
+        }
 
         auto sourceRhiGeometryBuffer{ m_sourceGeometryBuffer->GetRHIBuffer() };
         auto targetRhiGeometryBuffer{ m_targetGeometryBuffer->GetRHIBuffer() };
         auto sourceShaderBufferView{ sourceRhiGeometryBuffer->GetBufferView(RHI::BufferViewDescriptor::CreateRaw(0, sourceBufferSize)) };
         auto targetShaderBufferView{ targetRhiGeometryBuffer->GetBufferView(RHI::BufferViewDescriptor::CreateRaw(0, targetBufferSize)) };
 
-        int gridWidth{ aznumeric_cast<int>(AZStd::ceil(AZStd::sqrt(m_geometryCount))) };
-        float gridSpacing{ 2.3f };
+        {
+            int gridWidth{ aznumeric_cast<int>(AZStd::ceil(AZStd::sqrt(m_geometryCount))) };
+            float gridSpacing{ 2.3f };
 
-        // TODO: Add CLAS version
-        for (int i{ 0 }; i < m_geometryCount; i++)
+            AZStd::vector<AZ::PackedVector3f> instanceOffsets;
+            for (int i{ 0 }; i < m_geometryCount; i++)
+            {
+                instanceOffsets.emplace_back((i % gridWidth - (gridWidth - 1) / 2.f) * gridSpacing, (i / gridWidth) * gridSpacing, 0.f);
+            }
+
+            RPI::CommonBufferDescriptor instanceOffsetBufferDescriptor;
+            instanceOffsetBufferDescriptor.m_poolType = RPI::CommonBufferPoolType::ReadWrite;
+            instanceOffsetBufferDescriptor.m_bufferName = "InstanceOffsetBuffer";
+            instanceOffsetBufferDescriptor.m_byteCount = instanceOffsets.size() * sizeof(instanceOffsets[0]);
+            instanceOffsetBufferDescriptor.m_bufferData = instanceOffsets.data();
+            m_instanceOffsetDataBuffer = RPI::BufferSystemInterface::Get()->CreateBufferFromCommonPool(instanceOffsetBufferDescriptor);
+        }
+
+        if (m_accelerationStructureType == AccelerationStructureType::TriangleBLAS)
+        {
+            for (int i{ 0 }; i < m_geometryCount; i++)
+            {
+                auto& data{ m_rayTracingData.emplace_back() };
+                data.m_uuid = AZ::Uuid::CreateRandom();
+
+                // m_assetId needs to be unique for each instance, otherwise BLASes are not unique
+                data.m_rtMesh.m_assetId = Data::AssetId{ Uuid::CreateRandom() };
+                data.m_rtMesh.m_isSkinnedMesh = true; // Skinned mesh BLASes are updated every frame
+                data.m_rtMesh.m_instanceMask |=
+                    static_cast<uint32_t>(AZ::RHI::RayTracingAccelerationStructureInstanceInclusionMask::STATIC_MESH);
+
+                auto& subMesh{ data.m_rtSubMeshes.emplace_back() };
+
+                // Use position data from target buffer with unique offset per instance
+                subMesh.m_positionFormat = PositionStreamFormat;
+                subMesh.m_positionShaderBufferView = targetShaderBufferView;
+                subMesh.m_positionVertexBufferView = RHI::StreamBufferView{ *targetRhiGeometryBuffer, targetBufferSizePerInstance * i,
+                                                                            vertexCount * PositionSize, PositionSize };
+
+                // Use normal data from source buffer
+                subMesh.m_normalFormat = NormalStreamFormat;
+                subMesh.m_normalShaderBufferView = sourceShaderBufferView;
+                subMesh.m_normalVertexBufferView =
+                    RHI::StreamBufferView{ *sourceRhiGeometryBuffer, normalByteOffset, vertexCount * NormalSize, NormalSize };
+
+                // Use index data from source data
+                subMesh.m_indexShaderBufferView = sourceShaderBufferView;
+                subMesh.m_indexBufferView =
+                    RHI::IndexBufferView{ *sourceRhiGeometryBuffer, indexByteOffset, indexCount * IndexSize, IndexStreamFormat };
+
+                // Dont need to set material since the DebugRayTracingPass is used to visualize the geometry
+                GetRayTracingFeatureProcessor().AddMesh(data.m_uuid, data.m_rtMesh, data.m_rtSubMeshes);
+            }
+        }
+        else if (m_accelerationStructureType == AccelerationStructureType::CLAS_ClusterBLAS)
         {
             auto& data{ m_rayTracingData.emplace_back() };
             data.m_uuid = AZ::Uuid::CreateRandom();
 
             // m_assetId needs to be unique for each instance, otherwise BLASes are not unique
             data.m_rtMesh.m_assetId = Data::AssetId{ Uuid::CreateRandom() };
-            data.m_rtMesh.m_transform.SetTranslation(
-                AZ::Vector3{ (i % gridWidth - (gridWidth - 1) / 2.f) * gridSpacing, (i / gridWidth) * gridSpacing, 0.f });
             data.m_rtMesh.m_isSkinnedMesh = true; // Skinned mesh BLASes are updated every frame
             data.m_rtMesh.m_instanceMask |=
                 static_cast<uint32_t>(AZ::RHI::RayTracingAccelerationStructureInstanceInclusionMask::STATIC_MESH);
@@ -271,8 +349,8 @@ namespace AtomSampleViewer
             // Use position data from target buffer with unique offset per instance
             subMesh.m_positionFormat = PositionStreamFormat;
             subMesh.m_positionShaderBufferView = targetShaderBufferView;
-            subMesh.m_positionVertexBufferView = RHI::StreamBufferView{ *targetRhiGeometryBuffer, targetBufferSizePerInstance * i,
-                                                                        vertexCount * PositionSize, PositionSize };
+            subMesh.m_positionVertexBufferView =
+                RHI::StreamBufferView{ *targetRhiGeometryBuffer, 0, vertexCount * PositionSize, PositionSize };
 
             // Use normal data from source buffer
             subMesh.m_normalFormat = NormalStreamFormat;
@@ -285,9 +363,116 @@ namespace AtomSampleViewer
             subMesh.m_indexBufferView =
                 RHI::IndexBufferView{ *sourceRhiGeometryBuffer, indexByteOffset, indexCount * IndexSize, IndexStreamFormat };
 
-            // Dont need to set material since the DebugRayTracingPass is used to visualize the geometry
+            auto& bufferPools{ GetRayTracingFeatureProcessor().GetBufferPools() };
 
+            {
+                m_srcInfosArrayBuffer = aznew RHI::Buffer();
+                m_srcInfosArrayBuffer->SetName(Name("SourceInfosArrayBuffer"));
+                RHI::BufferInitRequest srcInfoInitRequest;
+                srcInfoInitRequest.m_buffer = m_srcInfosArrayBuffer.get();
+                srcInfoInitRequest.m_descriptor.m_byteCount = m_geometryCount * sizeof(RHI::RayTracingClasBuildTriangleClusterInfo);
+                srcInfoInitRequest.m_descriptor.m_bindFlags = bufferPools.GetSrcInfosArrayBufferPool()->GetDescriptor().m_bindFlags;
+                bufferPools.GetSrcInfosArrayBufferPool()->InitBuffer(srcInfoInitRequest);
+            }
+
+            {
+                m_clusterStreamOffsets = aznew RHI::Buffer();
+                m_clusterStreamOffsets->SetName(Name("ClusterStreamOffsetsBuffer"));
+                RHI::BufferInitRequest clusterStreamOffsetsInitRequest;
+                clusterStreamOffsetsInitRequest.m_buffer = m_clusterStreamOffsets.get();
+                clusterStreamOffsetsInitRequest.m_descriptor.m_byteCount = m_geometryCount * sizeof(RHI::RayTracingClasClusterOffsetInfo);
+                clusterStreamOffsetsInitRequest.m_descriptor.m_bindFlags =
+                    bufferPools.GetSrcInfosArrayBufferPool()->GetDescriptor().m_bindFlags;
+                bufferPools.GetSrcInfosArrayBufferPool()->InitBuffer(clusterStreamOffsetsInitRequest);
+            }
+
+            const auto targetBufferAddress{ targetRhiGeometryBuffer->GetDeviceAddress() };
+            const auto sourceBufferAddress{ sourceRhiGeometryBuffer->GetDeviceAddress() };
+
+            RHI::BufferMapRequest srcInfoMapRequest;
+            srcInfoMapRequest.m_buffer = m_srcInfosArrayBuffer.get();
+            srcInfoMapRequest.m_byteCount = m_srcInfosArrayBuffer->GetDescriptor().m_byteCount;
+            RHI::BufferMapResponse srcInfoMapResponse;
+            bufferPools.GetSrcInfosArrayBufferPool()->MapBuffer(srcInfoMapRequest, srcInfoMapResponse);
+
+            RHI::BufferMapRequest clusterStreamOffsetsMapRequest;
+            clusterStreamOffsetsMapRequest.m_buffer = m_clusterStreamOffsets.get();
+            clusterStreamOffsetsMapRequest.m_byteCount = m_clusterStreamOffsets->GetDescriptor().m_byteCount;
+            RHI::BufferMapResponse clusterStreamOffsetsMapResponse;
+            bufferPools.GetSrcInfosArrayBufferPool()->MapBuffer(clusterStreamOffsetsMapRequest, clusterStreamOffsetsMapResponse);
+
+            for (int i{ 0 }; i < m_geometryCount; i++)
+            {
+                // This data should generally be filled in on the GPU, but since the cluster parameters do not change in this case, it would
+                // not benefit the sample
+                RHI::RayTracingClasBuildTriangleClusterInfoExpanded clusterInfoExpanded{};
+                clusterInfoExpanded.m_clusterID = i;
+                clusterInfoExpanded.m_clusterFlags = AZ::RHI::RayTracingClasClusterFlags::AllowDisableOpacityMicromaps;
+                clusterInfoExpanded.m_triangleCount = geometry.GetTriangleCount();
+                clusterInfoExpanded.m_vertexCount = geometry.GetVertexCount();
+                clusterInfoExpanded.m_positionTruncateBitCount = 0;
+                clusterInfoExpanded.m_indexType = AZ::RHI::RayTracingClasIndexFormat::UINT32;
+                clusterInfoExpanded.m_opacityMicromapIndexType = AZ::RHI::RayTracingClasIndexFormat::UINT32;
+                // Using a unique geometry index per cluster also entails adding a unique hit group record in the ray tracing pass
+                clusterInfoExpanded.m_baseGeometryIndex = 0; // TODO(CLAS): Investigate unique per-cluster geometry index
+                clusterInfoExpanded.m_geometryFlags = AZ::RHI::RayTracingClasGeometryFlags::Opaque;
+                clusterInfoExpanded.m_indexBufferStride = 0;
+                clusterInfoExpanded.m_vertexBufferStride = 0;
+                clusterInfoExpanded.m_geometryIndexAndFlagsBufferStride = 0;
+                clusterInfoExpanded.m_opacityMicromapIndexBufferStride = 0;
+                clusterInfoExpanded.m_indexBufferAddress = 0;
+                clusterInfoExpanded.m_vertexBufferAddress = 0;
+                clusterInfoExpanded.m_geometryIndexAndFlagsBufferAddress = 0;
+                clusterInfoExpanded.m_opacityMicromapArrayAddress = 0;
+                clusterInfoExpanded.m_opacityMicromapIndexBufferAddress = 0;
+
+                for (const auto& [deviceIndex, dataPointer] : srcInfoMapResponse.m_data)
+                {
+                    // The vertex data is unique for each cluster (output of VertexAnimationPass)
+                    clusterInfoExpanded.m_vertexBufferAddress = targetBufferAddress.at(deviceIndex) + targetBufferSizePerInstance * i;
+
+                    // The index data is the same for all clusters
+                    clusterInfoExpanded.m_indexBufferAddress = sourceBufferAddress.at(deviceIndex) + indexByteOffset;
+
+                    auto* gpuClusterInfo{ reinterpret_cast<RHI::RayTracingClasBuildTriangleClusterInfo*>(dataPointer) + i };
+                    *gpuClusterInfo = RHI::RayTracingClasConvertBuildTriangleClusterInfo(clusterInfoExpanded);
+                }
+
+                for (const auto& [deviceIndex, dataPointer] : clusterStreamOffsetsMapResponse.m_data)
+                {
+                    auto* clusterOffsetInfo{ reinterpret_cast<RHI::RayTracingClasClusterOffsetInfo*>(dataPointer) + i };
+                    clusterOffsetInfo->m_indexBufferOffset = 0; // Use same index data for all clusters
+                    clusterOffsetInfo->m_positionBufferOffset =
+                        targetBufferSizePerInstance * i; // Use unique position data for each cluster
+                    clusterOffsetInfo->m_normalBufferOffset = 0; // Use same normal data for all clusters
+                }
+            }
+            bufferPools.GetSrcInfosArrayBufferPool()->UnmapBuffer(*m_srcInfosArrayBuffer);
+            bufferPools.GetSrcInfosArrayBufferPool()->UnmapBuffer(*m_clusterStreamOffsets);
+
+            RHI::RayTracingClusterBlasDescriptor clusterDescriptor;
+            clusterDescriptor.m_buildFlags = AZ::RHI::RayTracingAccelerationStructureBuildFlags::FAST_BUILD;
+            clusterDescriptor.m_vertexFormat = AZ::RHI::VertexFormat::R32G32B32_FLOAT;
+            clusterDescriptor.m_maxGeometryIndexValue = 0;
+            clusterDescriptor.m_maxClusterUniqueGeometryCount = 1;
+            clusterDescriptor.m_maxClusterTriangleCount = geometry.GetTriangleCount();
+            clusterDescriptor.m_maxClusterVertexCount = geometry.GetVertexCount();
+            clusterDescriptor.m_maxTotalTriangleCount = geometry.GetTriangleCount() * m_geometryCount;
+            clusterDescriptor.m_maxTotalVertexCount = geometry.GetVertexCount() * m_geometryCount;
+            clusterDescriptor.m_minPositionTruncateBitCount = 0;
+            clusterDescriptor.m_maxClusterCount = m_geometryCount;
+            clusterDescriptor.m_srcInfosArrayBufferView = m_srcInfosArrayBuffer->GetBufferView(
+                RHI::BufferViewDescriptor::CreateStructured(0, m_geometryCount, sizeof(RHI::RayTracingClasBuildTriangleClusterInfo)));
+            // clusterDescriptor.m_srcInfosCountBufferView: Dont use this buffer in the sample
+
+            subMesh.m_clusterBlasDescriptor = clusterDescriptor;
+            subMesh.m_clusterOffsetBufferView = m_clusterStreamOffsets->GetBufferView(
+                RHI::BufferViewDescriptor::CreateRaw(0, m_geometryCount * sizeof(RHI::RayTracingClasClusterOffsetInfo)));
             GetRayTracingFeatureProcessor().AddMesh(data.m_uuid, data.m_rtMesh, data.m_rtSubMeshes);
+        }
+        else
+        {
+            AZ_Assert(false, "Unsupported m_accelerationStructureType");
         }
     }
 
@@ -316,6 +501,7 @@ namespace AtomSampleViewer
         m_vertexAnimationPass->SetTargetThreadCounts(m_vertexCountPerInstance * m_geometryCount, 1, 1);
         m_vertexAnimationPass->SetSourceBuffer(m_sourceGeometryBuffer);
         m_vertexAnimationPass->SetTargetBuffer(m_targetGeometryBuffer);
+        m_vertexAnimationPass->SetInstanceOffsetBuffer(m_instanceOffsetDataBuffer);
         m_vertexAnimationPass->SetVertexCountPerInstance(m_vertexCountPerInstance);
         m_vertexAnimationPass->SetTargetVertexStridePerInstance(m_targetVertexStridePerInstance);
         m_vertexAnimationPass->SetInstanceCount(m_geometryCount);
@@ -334,6 +520,29 @@ namespace AtomSampleViewer
                 ImGuiHelper::RadioButton("Triangle BLAS", &m_accelerationStructureType, AccelerationStructureType::TriangleBLAS);
             buildTypeUpdated |=
                 ImGuiHelper::RadioButton("CLAS + Cluster BLAS", &m_accelerationStructureType, AccelerationStructureType::CLAS_ClusterBLAS);
+
+            ImGui::Spacing();
+            ImGui::Text("RT Debug Type:");
+            bool rayTracingDebugViewModeUpdated{ false };
+            rayTracingDebugViewModeUpdated |=
+                ImGuiHelper::RadioButton("Instance Index", &m_rayTracingDebugViewMode, Render::RayTracingDebugViewMode::InstanceIndex);
+            rayTracingDebugViewModeUpdated |=
+                ImGuiHelper::RadioButton("Instance ID", &m_rayTracingDebugViewMode, Render::RayTracingDebugViewMode::InstanceID);
+            rayTracingDebugViewModeUpdated |=
+                ImGuiHelper::RadioButton("Cluster ID", &m_rayTracingDebugViewMode, Render::RayTracingDebugViewMode::ClusterID);
+            rayTracingDebugViewModeUpdated |=
+                ImGuiHelper::RadioButton("Primitive Index", &m_rayTracingDebugViewMode, Render::RayTracingDebugViewMode::PrimitiveIndex);
+            rayTracingDebugViewModeUpdated |= ImGuiHelper::RadioButton(
+                "Barycentric Coordinates", &m_rayTracingDebugViewMode, Render::RayTracingDebugViewMode::Barycentrics);
+            rayTracingDebugViewModeUpdated |=
+                ImGuiHelper::RadioButton("Normals", &m_rayTracingDebugViewMode, Render::RayTracingDebugViewMode::Normals);
+            rayTracingDebugViewModeUpdated |=
+                ImGuiHelper::RadioButton("UV Coordinates", &m_rayTracingDebugViewMode, Render::RayTracingDebugViewMode::UVs);
+            if (rayTracingDebugViewModeUpdated)
+            {
+                auto& rayTracingDebugFeatureProcessor{ GetRayTracingDebugFeatureProcessor() };
+                rayTracingDebugFeatureProcessor.GetSettingsInterface()->SetDebugViewMode(m_rayTracingDebugViewMode);
+            }
 
             ImGui::Spacing();
             ImGui::Separator();

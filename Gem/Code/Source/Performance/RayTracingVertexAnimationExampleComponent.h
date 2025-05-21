@@ -62,6 +62,10 @@ namespace AtomSampleViewer
             AZStd::vector<AZ::PackedVector3f> m_positions;
             AZStd::vector<AZ::PackedVector3f> m_normals;
             AZStd::vector<AZ::u32> m_indices;
+
+            int GetVertexCount() const;
+            int GetIndexCount() const;
+            int GetTriangleCount() const;
         };
 
         void SaveVSyncStateAndDisableVsync();
@@ -84,6 +88,9 @@ namespace AtomSampleViewer
         AZ::Data::Asset<AZ::RPI::ResourcePoolAsset> m_geometryDataBufferPoolAsset;
         AZ::Data::Instance<AZ::RPI::Buffer> m_sourceGeometryBuffer;
         AZ::Data::Instance<AZ::RPI::Buffer> m_targetGeometryBuffer;
+        AZ::Data::Instance<AZ::RPI::Buffer> m_instanceOffsetDataBuffer;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_srcInfosArrayBuffer;
+        AZ::RHI::Ptr<AZ::RHI::Buffer> m_clusterStreamOffsets;
         AZStd::vector<RayTracingMesh> m_rayTracingData;
         int m_geometryCount{ 1024 };
         AZ::u32 m_vertexCountPerInstance;
@@ -92,6 +99,7 @@ namespace AtomSampleViewer
 
         ImGuiSidebar m_imguiSidebar;
         AccelerationStructureType m_accelerationStructureType{ AccelerationStructureType::TriangleBLAS };
+        AZ::Render::RayTracingDebugViewMode m_rayTracingDebugViewMode{ AZ::Render::RayTracingDebugViewMode::Barycentrics };
         ImGuiHistogramQueue m_imGuiFrameTimer{ 60, 60 };
         ImGuiHistogramQueue m_accelerationStructurePassTimer{ 60, 60 };
         ImGuiHistogramQueue m_rayTracingPassTimer{ 60, 60 };

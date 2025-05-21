@@ -30,6 +30,11 @@ namespace AZ::Render
         m_targetBuffer = targetBuffer;
     }
 
+    void VertexAnimationPass::SetInstanceOffsetBuffer(Data::Instance<RPI::Buffer> instanceOffsetBuffer)
+    {
+        m_instanceOffsetBuffer = instanceOffsetBuffer;
+    }
+
     void VertexAnimationPass::SetInstanceCount(u32 instanceCount)
     {
         m_instanceCount = instanceCount;
@@ -49,6 +54,7 @@ namespace AZ::Render
     {
         AttachBufferToSlot("SourceData", m_sourceBuffer);
         AttachBufferToSlot("TargetData", m_targetBuffer);
+        AttachBufferToSlot("InstanceOffsetData", m_instanceOffsetBuffer);
 
         RHI::BufferViewDescriptor sourceBufferView;
         sourceBufferView.m_elementOffset = 0;
@@ -61,6 +67,12 @@ namespace AZ::Render
         targetBufferView.m_elementCount = m_targetVertexStridePerInstance * m_instanceCount;
         targetBufferView.m_elementSize = 12;
         FindAttachmentBinding(Name{ "TargetData" })->m_unifiedScopeDesc.SetAsBuffer(targetBufferView);
+
+        RHI::BufferViewDescriptor instanceOffsetBufferView;
+        instanceOffsetBufferView.m_elementOffset = 0;
+        instanceOffsetBufferView.m_elementCount = m_instanceCount;
+        instanceOffsetBufferView.m_elementSize = 12;
+        FindAttachmentBinding(Name{ "InstanceOffsetData" })->m_unifiedScopeDesc.SetAsBuffer(instanceOffsetBufferView);
 
         BaseClass::BuildInternal();
     }

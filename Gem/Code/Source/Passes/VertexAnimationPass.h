@@ -23,6 +23,7 @@ namespace AZ::Render
 
         void SetSourceBuffer(Data::Instance<RPI::Buffer> sourceBuffer);
         void SetTargetBuffer(Data::Instance<RPI::Buffer> targetBuffer);
+        void SetInstanceOffsetBuffer(Data::Instance<RPI::Buffer> instanceOffsetBuffer);
         void SetInstanceCount(u32 instanceCount);
         void SetVertexCountPerInstance(u32 vertexCountPerInstance);
         void SetTargetVertexStridePerInstance(u32 targetVertexStridePerInstance);
@@ -36,6 +37,7 @@ namespace AZ::Render
     private:
         Data::Instance<RPI::Buffer> m_sourceBuffer;
         Data::Instance<RPI::Buffer> m_targetBuffer;
+        Data::Instance<RPI::Buffer> m_instanceOffsetBuffer;
         u32 m_instanceCount;
         u32 m_vertexCountPerInstance;
         u32 m_targetVertexStridePerInstance;
