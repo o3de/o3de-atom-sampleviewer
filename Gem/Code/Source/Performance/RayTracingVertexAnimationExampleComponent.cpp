@@ -81,6 +81,8 @@ namespace AtomSampleViewer
 
         m_rayTracingAccelerationStructurePass->SetTimestampQueryEnabled(false);
         m_rayTracingAccelerationStructurePass.reset();
+        m_debugRayTracingPass->SetTimestampQueryEnabled(false);
+        m_debugRayTracingPass.reset();
         m_imguiSidebar.Deactivate();
 
         for (const RayTracingMesh& rayTracingMesh : m_rayTracingData)
@@ -96,8 +98,9 @@ namespace AtomSampleViewer
     void RayTracingVertexAnimationExampleComponent::OnTick(float deltaTime, AZ::ScriptTimePoint /*timePoint*/)
     {
         m_imGuiFrameTimer.PushValue(deltaTime);
-        m_accelerationStructureTimer.PushValue(
+        m_accelerationStructurePassTimer.PushValue(
             m_rayTracingAccelerationStructurePass->GetLatestTimestampResult().GetDurationInNanoseconds() / 1'000'000'000.f);
+        m_rayTracingPassTimer.PushValue(m_debugRayTracingPass->GetLatestTimestampResult().GetDurationInNanoseconds() / 1'000'000'000.f);
         DrawSidebar();
     }
 
@@ -113,10 +116,18 @@ namespace AtomSampleViewer
 
         auto meshFeatureProcessor{ AZ::RPI::Scene::GetFeatureProcessorForEntityContextId<Render::MeshFeatureProcessorInterface>(
             GetEntityContextId()) };
-        AZ::RPI::PassFilter passFilter{ AZ::RPI::PassFilter::CreateWithPassName(
+        AZ::RPI::PassFilter accelerationStructurePassFilter{ AZ::RPI::PassFilter::CreateWithPassName(
             AZ::Name{ "RayTracingAccelerationStructurePass" }, meshFeatureProcessor->GetParentScene()) };
-        m_rayTracingAccelerationStructurePass = AZ::RPI::PassSystemInterface::Get()->FindFirstPass(passFilter);
+        m_rayTracingAccelerationStructurePass = AZ::RPI::PassSystemInterface::Get()->FindFirstPass(accelerationStructurePassFilter);
         m_rayTracingAccelerationStructurePass->SetTimestampQueryEnabled(true);
+
+        AZ::RPI::PassFilter rayTracingPassFilter{ AZ::RPI::PassFilter::CreateWithPassName(
+            AZ::Name{ "DebugRayTracingPass" }, meshFeatureProcessor->GetParentScene()) };
+        m_debugRayTracingPass = AZ::RPI::PassSystemInterface::Get()->FindFirstPass(rayTracingPassFilter);
+        if (m_debugRayTracingPass) // The debug ray tracing pass is not available in the first invocation of OnRenderPipelineChanged
+        {
+            m_debugRayTracingPass->SetTimestampQueryEnabled(true);
+        }
 
         AddVertexAnimationPass(renderPipeline);
     }
@@ -333,7 +344,8 @@ namespace AtomSampleViewer
             ImGui::Text(
                 "Frame time: %.2f ms (%.0f fps)", m_imGuiFrameTimer.GetDisplayedAverage() * 1000.f,
                 1.f / m_imGuiFrameTimer.GetDisplayedAverage());
-            ImGui::Text("RTAS build time: %.2f ms", m_accelerationStructureTimer.GetDisplayedAverage() * 1000.f);
+            ImGui::Text("RTAS build time: %.2f ms", m_accelerationStructurePassTimer.GetDisplayedAverage() * 1000.f);
+            ImGui::Text("RT pass time: %.2f ms", m_rayTracingPassTimer.GetDisplayedAverage() * 1000.f);
 
             m_imguiSidebar.End();
         }
