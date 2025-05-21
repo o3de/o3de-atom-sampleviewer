@@ -93,7 +93,9 @@ namespace AtomSampleViewer
         ImGuiSidebar m_imguiSidebar;
         AccelerationStructureType m_accelerationStructureType{ AccelerationStructureType::TriangleBLAS };
         ImGuiHistogramQueue m_imGuiFrameTimer{ 60, 60 };
-        ImGuiHistogramQueue m_accelerationStructureTimer{ 60, 60 };
+        ImGuiHistogramQueue m_accelerationStructurePassTimer{ 60, 60 };
+        ImGuiHistogramQueue m_rayTracingPassTimer{ 60, 60 };
         AZ::RHI::Ptr<AZ::RPI::Pass> m_rayTracingAccelerationStructurePass;
+        AZ::RHI::Ptr<AZ::RPI::Pass> m_debugRayTracingPass;
     };
 } // namespace AtomSampleViewer
