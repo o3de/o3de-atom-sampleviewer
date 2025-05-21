@@ -18,6 +18,12 @@
                   "ShaderInputName": "m_targetVertexData",
                   "SlotType": "InputOutput",
                   "ScopeAttachmentUsage": "Shader"
+              },
+              {
+                "Name": "InstanceOffsetData",
+                "ShaderInputName": "m_instanceOffsetData",
+                "SlotType": "Input",
+                "ScopeAttachmentUsage": "Shader"
               }
           ],
           "PassData": {

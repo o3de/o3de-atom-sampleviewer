@@ -13,6 +13,7 @@ ShaderResourceGroup PassSrg : SRG_PerPass
 {
     StructuredBuffer<float3> m_sourceVertexData;
     RWStructuredBuffer<float3> m_targetVertexData;
+    StructuredBuffer<float3> m_instanceOffsetData;
     uint m_frameNumber;
     uint m_vertexCountPerInstance;
     uint m_targetVertexStridePerInstance;
@@ -74,8 +75,11 @@ void AnimateVertices(uint3 dispatchId : SV_DispatchThreadID)
     rng.Initialize(PassSrg::m_sourceVertexData[inputIndex], instanceIndex, PassSrg::m_frameNumber);
 
     // Animated the vertices by displacing each vertex in a random direction by a random amount
-    float3 moveDirection = rng.GetRandomUnitSphereDirection();
-    float moveAmount = rng.GetRandomNormalizedFloat() * 0.1f;
+    float3 animationMoveDirection = rng.GetRandomUnitSphereDirection();
+    float animationMoveAmount = rng.GetRandomNormalizedFloat() * 0.1f;
 
-    PassSrg::m_targetVertexData[outputIndex] = PassSrg::m_sourceVertexData[inputIndex] + moveDirection * moveAmount;
+    // Need to move vertices per instance in the compute shader since CLAS does not have a separate transform
+    float3 vertexBaseLocation = PassSrg::m_instanceOffsetData[instanceIndex] + PassSrg::m_sourceVertexData[inputIndex];
+
+    PassSrg::m_targetVertexData[outputIndex] = vertexBaseLocation + animationMoveDirection * animationMoveAmount;
 }
