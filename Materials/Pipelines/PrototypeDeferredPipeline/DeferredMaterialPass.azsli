@@ -18,7 +18,7 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <viewsrg.srgi>
+#include <viewsrg_all.srgi>
 #include <Atom/Features/PBR/DefaultObjectSrg.azsli>
 #include <Atom/RPI/ShaderResourceGroups/DefaultDrawSrg.azsli>
 #include <Atom/Features/ColorManagement/TransformColor.azsli>
@@ -48,9 +48,13 @@ struct DeferredMaterialOutput
 #endif
 DeferredMaterialOutput MaterialPS(VsOutput IN, bool isFrontFace : SV_IsFrontFace)
 {
+    // ------- Reconstruct the Instance-Id --------
+    VsSystemValues SV;
+    SV.m_instanceId = IN.m_instanceId;
+
     // ------- Geometry -> Surface -------
 
-    PixelGeometryData geoData = EvaluatePixelGeometry(IN, isFrontFace);
+    PixelGeometryData geoData = EvaluatePixelGeometry(IN, SV, isFrontFace);
 
     Surface surface = EvaluateSurface(IN, geoData);
 
