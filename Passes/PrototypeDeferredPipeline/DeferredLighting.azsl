@@ -6,7 +6,8 @@
  *
  */
 
-#include <viewsrg.srgi>
+#include <viewsrg_all.srgi>
+#include <scenesrg_all.srgi>
 
 #include <Atom/Features/PostProcessing/FullscreenVertex.azsli>
 #include <Atom/Features/ScreenSpace/ScreenSpaceUtil.azsli>
@@ -55,11 +56,6 @@ ShaderResourceGroup PassSrg : SRG_PerPass
 
 #define FORCE_OPAQUE 1 // Because there is no transparency in deferred, so we don't want the o_opacity_mode shader option
 
-//TODO(DeferredPOC): Support multiple lighting models, not just StandardLighting
-#include <Atom/Features/PBR/Lighting/StandardLighting.azsli>
-#include <Atom/Features/PBR/Lights/Ibl.azsli>
-#include <Atom/Features/PBR/Decals.azsli>
-
 // Copied from ForwardPassOutput
 struct PSOutput
 {
@@ -75,9 +71,20 @@ struct PSOutput
 // TODO(DeferredPOC): Make a way to turn this on as needed for testing. Right now we don't have a way to turn it on programmatically.
 option bool o_deferredPipelineWatermark = false;
 
+#define ENABLE_LIGHT_CULLING 0
+#define PIPELINE_HAS_DRAW_SRG 0
+#define PIPELINE_HAS_OBJECT_SRG 0
+
+#include <Atom/Features/GoboTexture.azsli>
+#include <Atom/Features/SampleBrdfMap.azsli>
+#include <Atom/Features/PBR/Lighting/StandardLighting.azsli>
+#include <Atom/Features/PBR/Lighting/StandardLightingDataEval.azsli>
+#include <Atom/Features/PBR/Surfaces/StandardSurfaceEval.azsli>
+#include <Atom/Features/Pipeline/Deferred/DeferredPassEvaluateLighting.azsli>
+
 PSOutput MainPS(VSOutput IN, in uint sampleIndex : SV_SampleIndex)
 {
-    uint2 screenCoords = IN.m_position.xy;
+    uint2 screenCoords = uint2(IN.m_position.xy);
 
     // ------- Unpack G-Buffers -------
 
@@ -100,52 +107,15 @@ PSOutput MainPS(VSOutput IN, in uint sampleIndex : SV_SampleIndex)
     // Copied from Gems\Atom\Feature\Common\Assets\Materials\Pipelines\MainPipeline\ForwardPass.azsli
 
     // ------- Surface -------
-
-    Surface surface;
-    surface.position = surfacePosWS;
-
-    // TODO(DeferredPOC): We don't actually have the vertex normal, so just use the per-pixel normal for now
-    surface.vertexNormal = normal;
-    surface.normal = normal;
-    surface.roughnessLinear = roughnessMetallic.x;
     float specularF0Factor = 0.5f; // TODO(DeferredPOC): Consider passing the actual specF0 through a GBuffer
-    surface.SetAlbedoAndSpecularF0(baseColor, specularF0Factor, roughnessMetallic.y);
-    surface.clearCoat.InitializeToZero();
-        
-    surface.CalculateRoughnessA();
+    uint lightingChannel = -1u; // TODO: we need to get the lighting channel per object somehow
 
-    // ------- LightingData -------
-
-    LightingData lightingData;
-
-    // Light iterator
-    lightingData.tileIterator.Init(IN.m_position, PassSrg::m_lightListRemapped, PassSrg::m_tileLightData);
-    lightingData.Init(surface.position, surface.normal, surface.roughnessLinear, ViewSrg::m_worldPosition.xyz);
-
-
-    // Diffuse and Specular response
-    lightingData.specularResponse = FresnelSchlickWithRoughness(lightingData.NdotV, surface.specularF0, surface.roughnessLinear);
-    lightingData.diffuseResponse = 1.0f - lightingData.specularResponse;
-
-    const float alpha = 1.0f;
+    Surface surface = EvaluateSurface(surfacePosWS, normal /*vertexNormal*/, normal, baseColor, specularF0Factor, roughnessMetallic.x, roughnessMetallic.y, lightingChannel);
 
     // ------- Lighting Calculation -------
+    LightingData lightingData = EvaluateLighting(surface, float4(IN.m_texCoord, 0, 0), ViewSrg::m_worldPosition.xyz);
 
-    // Apply Decals
-    ApplyDecals(lightingData.tileIterator, surface);
-
-    // Apply Direct Lighting
-    ApplyDirectLighting(surface, lightingData, IN.m_position);
-
-    // Apply Image Based Lighting (IBL)
-    // TODO(DeferredPOC): how can we support a localized reflection probe in deferred?
-    ReflectionProbeData unusedReflectionProbe; 
-    TextureCube unusedReflectionProbeCubeMap;
-    ApplyIBL(surface, lightingData, true, false, unusedReflectionProbe, unusedReflectionProbeCubeMap);
-
-    // Finalize Lighting
-    lightingData.FinalizeLighting();
-
+    const float alpha = 1.0f;
     PbrLightingOutput lightingOutput = GetPbrLightingOutput(surface, lightingData, alpha);
 
     // ------- Output -------
@@ -156,7 +126,9 @@ PSOutput MainPS(VSOutput IN, in uint sampleIndex : SV_SampleIndex)
     OUT.m_diffuseColor.w = -1; // Subsurface scattering is disabled
     OUT.m_specularColor = lightingOutput.m_specularColor;
     OUT.m_specularF0 = lightingOutput.m_specularF0;
-    OUT.m_albedo = lightingOutput.m_albedo;
+    OUT.m_albedo = float4(lightingData.diffuseLighting, 1.0f);
+    OUT.m_albedo = float4(surface.albedo, 1.0f);
+
 
     return OUT;
 }

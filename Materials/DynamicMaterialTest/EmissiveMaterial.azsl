@@ -6,18 +6,14 @@
  *
  */
 
-#include <viewsrg.srgi>
+#include <Atom/Features/SrgSemantics.azsli>
+#include <viewsrg_all.srgi>
 #include <Atom/Features/PBR/AlphaUtils.azsli>
 #include <Atom/Features/PBR/DefaultObjectSrg.azsli>
 #include <Atom/RPI/ShaderResourceGroups/DefaultDrawSrg.azsli>
 #include <Atom/Features/InstancedTransforms.azsli>
-#include <Atom/Features/Pipeline/Forward/ForwardPassSrg.azsli>
-#include <Atom/Features/Pipeline/Forward/ForwardPassOutput.azsli>
-#include <Atom/Features/ColorManagement/TransformColor.azsli>
-#include <Atom/Features/SrgSemantics.azsli>
-#include <Atom/Features/PBR/Lighting/StandardLighting.azsli>
-#include <Atom/Features/PBR/Lights/IblForward.azsli>
-#include <Atom/Features/PBR/Decals.azsli>
+// for PassSrg, Surface, LightingData, and EvaluateLighting
+#include <Atom/Features/Pipeline/Forward/ForwardPassStandardLighting.azsli>
 
 ShaderResourceGroup MaterialSrg : SRG_PerMaterial
 {
@@ -81,6 +77,8 @@ ForwardPassOutput MainPS(VSOutput IN)
 
     Surface surface;
     
+    surface.lightingChannels = ObjectSrg::m_lightingChannelMask;
+
     // Position, Normal, Roughness
     surface.position = IN.m_worldPosition.xyz;
     surface.normal = surface.vertexNormal = vertexNormal;
@@ -96,14 +94,6 @@ ForwardPassOutput MainPS(VSOutput IN)
     // Clear Coat
     surface.clearCoat.InitializeToZero();
 
-    // ------- LightingData -------
-
-    LightingData lightingData;
-
-    // Light iterator
-    lightingData.tileIterator.Init(IN.m_position, PassSrg::m_lightListRemapped, PassSrg::m_tileLightData);
-    lightingData.Init(surface.position, surface.normal, surface.roughnessLinear, ViewSrg::m_worldPosition.xyz);
-
     // Emissive
     float3 emissive = MaterialSrg::m_emissiveColor.rgb * MaterialSrg::m_emissiveIntensity;
     if (o_emissive_useTexture)
@@ -111,28 +101,16 @@ ForwardPassOutput MainPS(VSOutput IN)
         float4 sampledValue = MaterialSrg::m_emissiveMap.Sample(MaterialSrg::m_sampler, IN.m_uv);
         emissive *= TransformColor(sampledValue.rgb, ColorSpaceId::LinearSRGB, ColorSpaceId::ACEScg);
     }
-    lightingData.emissiveLighting = emissive;
+    surface.emissiveLighting = emissive;
+    
+    surface.diffuseAmbientOcclusion = 1.0f;
+    surface.specularOcclusion = 1.0f;
 
-    // Diffuse and Specular response
-    lightingData.specularResponse = FresnelSchlickWithRoughness(lightingData.NdotV, surface.specularF0, surface.roughnessLinear);
-    lightingData.diffuseResponse = 1.0f - lightingData.specularResponse;
+    // ------- Direct Light Evaluation -------
+
+    LightingData lightingData = EvaluateLighting(surface, IN.m_position, ViewSrg::m_worldPosition.xyz);
 
     const float alpha = 1.0f;
-
-    // ------- Lighting Calculation -------
-
-    // Apply Decals
-    ApplyDecals(lightingData.tileIterator, surface);
-
-    // Apply Direct Lighting
-    ApplyDirectLighting(surface, lightingData, IN.m_position);
-
-    // Apply Image Based Lighting (IBL)
-    ApplyIblForward(surface, lightingData);
-
-    // Finalize Lighting
-    lightingData.FinalizeLighting();
-
     PbrLightingOutput lightingOutput = GetPbrLightingOutput(surface, lightingData, alpha);
 
     ForwardPassOutput OUT;

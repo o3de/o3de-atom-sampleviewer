@@ -4,8 +4,9 @@
     "ClassName": "PassAsset",
     "ClassData": {
         "PassTemplate": {
-            "Name": "DeferredLightingPassTemplate",
-            "PassClass": "FullScreenTriangle",
+            "Name": "DeferredMaterialEvalPassTemplate",
+            //"PassClass": "DeferredMaterialPass",
+            "PassClass": "RasterPass",
             "Slots": [
                 // Inputs...
                 {
@@ -69,38 +70,21 @@
                     "ScopeAttachmentUsage": "Shader"
                 },
                 {
-                    "Name": "BaseColor",
-                    "SlotType": "Input",
-                    "ScopeAttachmentUsage": "Shader",
-                    "ShaderInputName": "m_baseColor"
-                },
-                {
-                    "Name": "RoughnessMetal",
-                    "SlotType": "Input",
-                    "ScopeAttachmentUsage": "Shader",
-                    "ShaderInputName": "m_roughnessMetal"
-                },
-                {
-                    "Name": "Normal",
-                    "SlotType": "Input",
-                    "ScopeAttachmentUsage": "Shader",
-                    "ShaderInputName": "m_normal"
-                },
-                {
-                    "Name": "DepthStencil",
-                    "SlotType": "Input",
+                    "Name": "DepthStencilInputOutput",
+                    "SlotType": "InputOutput",
                     "ScopeAttachmentUsage": "DepthStencil"
                 },
                 {
-                    "Name": "InputDepthStencil",
+                    "Name": "VisibilityBuffer_0",
                     "SlotType": "Input",
-                    "ShaderInputName": "m_depthStencilTexture",
                     "ScopeAttachmentUsage": "Shader",
-                    "ImageViewDesc": {
-                        "AspectFlags": [
-                            "Depth"
-                        ]
-                    }
+                    "ShaderInputName": "m_visibilityBuffer_0"
+                },
+                {
+                    "Name": "VisibilityBuffer_1",
+                    "SlotType": "Input",
+                    "ScopeAttachmentUsage": "Shader",
+                    "ShaderInputName": "m_visibilityBuffer_1"
                 },
                 // Outputs...
                 {
@@ -166,6 +150,22 @@
                         },
                         "LoadAction": "Clear"
                     }
+                },
+                {
+                    "Name": "NormalOutput",
+                    "SlotType": "Output",
+                    "ScopeAttachmentUsage": "RenderTarget",
+                    "LoadStoreAction": {
+                        "ClearValue": {
+                            "Value": [
+                                0.0,
+                                0.0,
+                                0.0,
+                                0.0
+                            ]
+                        },
+                        "LoadAction": "Clear"
+                    }
                 }
             ],
             "ImageAttachments": [
@@ -179,7 +179,7 @@
                     },
                     "MultisampleSource": {
                         "Pass": "This",
-                        "Attachment": "DepthStencil"
+                        "Attachment": "DepthStencilInputOutput"
                     },
                     "ImageDescriptor": {
                         "Format": "R16G16B16A16_FLOAT",
@@ -200,7 +200,7 @@
                     },
                     "MultisampleSource": {
                         "Pass": "This",
-                        "Attachment": "DepthStencil"
+                        "Attachment": "DepthStencilInputOutput"
                     },
                     "ImageDescriptor": {
                         "Format": "R16G16B16A16_FLOAT",
@@ -217,7 +217,7 @@
                     },
                     "MultisampleSource": {
                         "Pass": "This",
-                        "Attachment": "DepthStencil"
+                        "Attachment": "DepthStencilInputOutput"
                     },
                     "ImageDescriptor": {
                         "Format": "R8G8B8A8_UNORM",
@@ -234,10 +234,27 @@
                     },
                     "MultisampleSource": {
                         "Pass": "This",
-                        "Attachment": "DepthStencil"
+                        "Attachment": "DepthStencilInputOutput"
                     },
                     "ImageDescriptor": {
                         "Format": "R8G8B8A8_UNORM",
+                        "SharedQueueMask": "Graphics"
+                    }
+                },
+                {
+                    "Name": "NormalImage",
+                    "SizeSource": {
+                        "Source": {
+                            "Pass": "Parent",
+                            "Attachment": "PipelineOutput"
+                        }
+                    },
+                    "MultisampleSource": {
+                        "Pass": "This",
+                        "Attachment": "DepthStencilInputOutput"
+                    },
+                    "ImageDescriptor": {
+                        "Format": "R10G10B10A2_UNORM",
                         "SharedQueueMask": "Graphics"
                     }
                 },
@@ -279,6 +296,13 @@
                     }
                 },
                 {
+                    "LocalSlot": "NormalOutput",
+                    "AttachmentRef": {
+                        "Pass": "This",
+                        "Attachment": "NormalImage"
+                    }
+                },
+                {
                     "LocalSlot": "BRDFTextureInput",
                     "AttachmentRef": {
                         "Pass": "This",
@@ -293,13 +317,21 @@
                     }
                 }
             ],
+            // "PassData": {
+            //     "$type": "DeferredMaterialPassData",
+            //     "DrawListTag": "deferred",
+            //     "BindViewSrg": true,
+            //     "PassSrgShaderAsset": {
+            //         "FilePath": "Shaders/DeferredPassSrg.shader"
+            //     }
+            // }
             "PassData": {
-                "$type": "FullscreenTrianglePassData",
-                "ShaderAsset": {
-                    // TODO(DeferredPOC): Make the pass system support source-relative paths
-                    "FilePath": "Passes/PrototypeDeferredPipeline/DeferredLighting.shader"
-                },
-                "BindViewSrg": true
+                "$type": "RasterPassData",
+                "DrawListTag": "deferred",
+                "BindViewSrg": true,
+                "PassSrgShaderAsset": {
+                    "FilePath": "Shaders/DeferredPassSrg.shader"
+                }
             }
         }
     }

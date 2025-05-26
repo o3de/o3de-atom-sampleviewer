@@ -4,7 +4,7 @@
     "ClassName": "PassAsset",
     "ClassData": {
         "PassTemplate": {
-            "Name": "DeferredOpaqueParentTemplate",
+            "Name": "MultiMaterialDeferredOpaqueParentTemplate",
             "PassClass": "ParentPass",
             "Slots": [
                 // Inputs...
@@ -67,11 +67,10 @@
             ],
             "PassRequests": [
                 {
-                    "Name": "DeferredMaterial",
-                    "TemplateName": "DeferredMaterialPassTemplate",
+                    "Name": "VisibilityBufferPass",
+                    "TemplateName": "VisibilityPassTemplate",
                     "Connections": [
                         // Inputs...
-
                         // Input/Outputs...
                         {
                             "LocalSlot": "DepthStencilInputOutput",
@@ -83,14 +82,14 @@
                     ],
                     "PassData": {
                         "$type": "RasterPassData",
-                        "DrawListTag": "deferredMaterial",
+                        "DrawListTag": "visibility",
                         "BindViewSrg": true
                         // No PassSrgShaderAsset is needed here because the material pass only packs GBuffers, and doesn't need any per-pass resources
                     }
                 },
                 {
-                    "Name": "DeferredLighting",
-                    "TemplateName": "DeferredLightingPassTemplate",
+                    "Name": "DeferredMaterial",
+                    "TemplateName": "DeferredMaterialEvalPassTemplate",
                     "Connections": [
                         // Inputs...
                         {
@@ -136,38 +135,24 @@
                             }
                         },
                         {
-                            "LocalSlot": "DepthStencil",
+                            "LocalSlot": "DepthStencilInputOutput",
                             "AttachmentRef": {
-                                "Pass": "Parent",
-                                "Attachment": "DepthStencil"
+                                "Pass": "VisibilityBufferPass",
+                                "Attachment": "DepthStencilInputOutput"
                             }
                         },
                         {
-                            "LocalSlot": "InputDepthStencil",
+                            "LocalSlot": "VisibilityBuffer_0",
                             "AttachmentRef": {
-                                "Pass": "Parent",
-                                "Attachment": "DepthStencil"
+                                "Pass": "VisibilityBufferPass",
+                                "Attachment": "VisibilityBufferOutput_0"
                             }
                         },
                         {
-                            "LocalSlot": "BaseColor",
+                            "LocalSlot": "VisibilityBuffer_1",
                             "AttachmentRef": {
-                                "Pass": "DeferredMaterial",
-                                "Attachment": "BaseColorOutput"
-                            }
-                        },
-                        {
-                            "LocalSlot": "RoughnessMetal",
-                            "AttachmentRef": {
-                                "Pass": "DeferredMaterial",
-                                "Attachment": "RoughnessMetalOutput"
-                            }
-                        },
-                        {
-                            "LocalSlot": "Normal",
-                            "AttachmentRef": {
-                                "Pass": "DeferredMaterial",
-                                "Attachment": "NormalOutput"
+                                "Pass": "VisibilityBufferPass",
+                                "Attachment": "VisibilityBufferOutput_1"
                             }
                         }
                     ]
@@ -179,14 +164,14 @@
                         {
                             "LocalSlot": "DiffuseInputOutput",
                             "AttachmentRef": {
-                                "Pass": "DeferredLighting",
+                                "Pass": "DeferredMaterial",
                                 "Attachment": "DiffuseOutput"
                             }
                         },
                         {
                             "LocalSlot": "AlbedoInput",
                             "AttachmentRef": {
-                                "Pass": "DeferredLighting",
+                                "Pass": "DeferredMaterial",
                                 "Attachment": "AlbedoOutput"
                             }
                         },
@@ -228,14 +213,14 @@
                         {
                             "LocalSlot": "SpecularF0Input",
                             "AttachmentRef": {
-                                "Pass": "DeferredLighting",
+                                "Pass": "DeferredMaterial",
                                 "Attachment": "SpecularF0Output"
                             }
                         },
                         {
                             "LocalSlot": "AlbedoInput",
                             "AttachmentRef": {
-                                "Pass": "DeferredLighting",
+                                "Pass": "DeferredMaterial",
                                 "Attachment": "AlbedoOutput"
                             }
                         },
@@ -256,7 +241,7 @@
                         {
                             "LocalSlot": "SpecularInputOutput",
                             "AttachmentRef": {
-                                "Pass": "DeferredLighting",
+                                "Pass": "DeferredMaterial",
                                 "Attachment": "SpecularOutput"
                             }
                         }

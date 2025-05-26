@@ -1,0 +1,53 @@
+/*
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
+ * SPDX-License-Identifier: Apache-2.0 OR MIT
+ *
+ */
+
+#pragma once
+
+#include <Atom/Features/Pipeline/Deferred/VisibilityBuffer.azsli>
+
+#ifdef SV_BARYCENTRICS_NOT_SUPPORTED
+#include <Atom/Features/MeshInfo/MeshInfoUtil.azsli>
+#endif
+
+
+VisibilityBuffer CreateVisibiltiyBufferEntry(VsSystemValues SV, const int triangleIndex, const int meshInfoIndex, const float3 barycentrics, float3 worldPosition, const bool isFrontFace)
+{
+   VisibilityBuffer vbuffer;
+
+    vbuffer.m_meshInfoIndex = meshInfoIndex;
+    vbuffer.m_triangleId = triangleIndex;
+    vbuffer.m_isFrontFace = isFrontFace;
+
+#ifdef SV_BARYCENTRICS_NOT_SUPPORTED
+    MeshInfo meshInfo;
+    if (GetMeshInfoEntry(vbuffer.m_meshInfoIndex, meshInfo))
+    {
+        float3 vertices[3];
+
+        LoadTriangleVertices(meshInfo, triangleIndex, vertices[0], vertices[1], vertices[2]);
+
+        [unroll]
+        for (int i = 0; i < 3; ++i)
+        {
+            vertices[i] = mul(GetObjectToWorldMatrix(SV), float4(vertices[i], 1.0f)).xyz;
+        }
+
+        vbuffer.m_barycentrics = CalculateBarycentrics(vertices[0], vertices[1], vertices[2], worldPosition);
+    } 
+    else {
+        vbuffer.m_barycentrics = float3(0, 0, 0);
+    }
+#else
+    vbuffer.m_barycentrics = barycentrics;
+#endif
+
+    vbuffer.m_barycentricsDx = ddx(vbuffer.m_barycentrics);
+    vbuffer.m_barycentricsDy = ddy(vbuffer.m_barycentrics);
+
+    return vbuffer;
+}
