@@ -1,5 +1,5 @@
 #include <Atom/Features/SrgSemantics.azsli>
-#include <viewsrg.srgi>
+#include <viewsrg_all.srgi>
 
 struct CubeTransform
 {

@@ -38,7 +38,11 @@
                     "min": -10,
                     "max": 20,
                     "softMin": -6,
-                    "softMax": 16
+                    "softMax": 16,
+                    "connection": {
+                        "type": "ShaderInput",
+                        "id": "m_emissiveIntensity"
+                    }
                 },
                 {
                     "id": "textureMap",

@@ -5,7 +5,10 @@
  * SPDX-License-Identifier: Apache-2.0 OR MIT
  *
  */
- 
+#pragma once
+
+#include <Atom/Features/SrgSemantics.azsli>
+
 #define MATERIALPIPELINE_SHADER_HAS_PIXEL_STAGE 1
 
 //TODO(DeferredPOC): Support clear coat
@@ -28,7 +31,7 @@ VsOutput MaterialVS(VsInput IN, uint instanceId : SV_InstanceID)
 {
     VsSystemValues SV;
     SV.m_instanceId = instanceId;
-    return EvaluateVertexGeometry(IN, SV);
+    return EvaluateVertexGeometry(IN, SV, GetMaterialParameters());
 }
 
 struct DeferredMaterialOutput
@@ -48,11 +51,11 @@ struct DeferredMaterialOutput
 #endif
 DeferredMaterialOutput MaterialPS(VsOutput IN, bool isFrontFace : SV_IsFrontFace)
 {
-    // ------- Geometry -> Surface -------
+        // ------- Geometry -> Surface -------
 
-    PixelGeometryData geoData = EvaluatePixelGeometry(IN, isFrontFace);
+    PixelGeometryData geoData = EvaluatePixelGeometry(IN, isFrontFace, GetMaterialParameters());
 
-    Surface surface = EvaluateSurface(IN, geoData);
+    Surface surface = EvaluateSurface(IN, geoData, GetMaterialParameters());
 
     // ------- Output -------
 

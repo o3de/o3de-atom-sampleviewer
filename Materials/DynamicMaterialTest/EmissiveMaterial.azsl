@@ -6,7 +6,8 @@
  *
  */
 
-#include <viewsrg.srgi>
+#include <Atom/Features/SrgSemantics.azsli>
+#include <viewsrg_all.srgi>
 #include <Atom/Features/PBR/AlphaUtils.azsli>
 #include <Atom/Features/PBR/DefaultObjectSrg.azsli>
 #include <Atom/RPI/ShaderResourceGroups/DefaultDrawSrg.azsli>
@@ -112,7 +113,7 @@ ForwardPassOutput MainPS(VSOutput IN)
         emissive *= TransformColor(sampledValue.rgb, ColorSpaceId::LinearSRGB, ColorSpaceId::ACEScg);
     }
     lightingData.emissiveLighting = emissive;
-
+    
     // Diffuse and Specular response
     lightingData.specularResponse = FresnelSchlickWithRoughness(lightingData.NdotV, surface.specularF0, surface.roughnessLinear);
     lightingData.diffuseResponse = 1.0f - lightingData.specularResponse;
