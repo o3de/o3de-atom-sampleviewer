@@ -299,7 +299,7 @@
                     // TODO(DeferredPOC): Make the pass system support source-relative paths
                     "FilePath": "Passes/PrototypeDeferredPipeline/DeferredLighting.shader"
                 },
-                "PipelineViewTag": "MainCamera"
+                "BindViewSrg": true
             }
         }
     }

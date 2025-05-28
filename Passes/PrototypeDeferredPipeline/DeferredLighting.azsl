@@ -6,7 +6,8 @@
  *
  */
 
-#include <viewsrg.srgi>
+#include <viewsrg_all.srgi>
+#include <scenesrg_all.srgi>
 
 #include <Atom/Features/PostProcessing/FullscreenVertex.azsli>
 #include <Atom/Features/ScreenSpace/ScreenSpaceUtil.azsli>
@@ -77,7 +78,7 @@ option bool o_deferredPipelineWatermark = false;
 
 PSOutput MainPS(VSOutput IN, in uint sampleIndex : SV_SampleIndex)
 {
-    uint2 screenCoords = IN.m_position.xy;
+    uint2 screenCoords = uint2(IN.m_position.xy);
 
     // ------- Unpack G-Buffers -------
 
@@ -130,7 +131,7 @@ PSOutput MainPS(VSOutput IN, in uint sampleIndex : SV_SampleIndex)
     const float alpha = 1.0f;
 
     // ------- Lighting Calculation -------
-
+    
     // Apply Decals
     ApplyDecals(lightingData.tileIterator, surface);
 

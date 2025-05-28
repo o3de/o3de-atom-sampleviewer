@@ -84,7 +84,7 @@
                     "PassData": {
                         "$type": "RasterPassData",
                         "DrawListTag": "deferredMaterial",
-                        "PipelineViewTag": "MainCamera"
+                        "BindViewSrg": true
                         // No PassSrgShaderAsset is needed here because the material pass only packs GBuffers, and doesn't need any per-pass resources
                     }
                 },
