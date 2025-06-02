@@ -9,6 +9,7 @@
 #pragma once
 
 #include <Atom/RPI.Public/Pass/ComputePass.h>
+#include <AzCore/Debug/Timer.h>
 
 namespace AZ::Render
 {
@@ -42,9 +43,10 @@ namespace AZ::Render
         u32 m_vertexCountPerInstance;
         u32 m_targetVertexStridePerInstance;
 
-        RHI::ShaderInputNameIndex m_frameNumberNameIndex{ "m_frameNumber" };
+        RHI::ShaderInputNameIndex m_frameTimeNameIndex{ "m_frameTime" };
         RHI::ShaderInputNameIndex m_vertexCountPerInstanceNameIndex{ "m_vertexCountPerInstance" };
         RHI::ShaderInputNameIndex m_targetVertexStridePerInstanceNameIndex{ "m_targetVertexStridePerInstance" };
-        unsigned m_frameNumber{ 0 };
+        Debug::Timer m_frameTimer;
+        float m_frameTime{ 0 };
     };
 } // namespace AZ::Render

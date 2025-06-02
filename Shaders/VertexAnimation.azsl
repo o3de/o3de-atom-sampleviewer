@@ -14,7 +14,7 @@ ShaderResourceGroup PassSrg : SRG_PerPass
     StructuredBuffer<float3> m_sourceVertexData;
     RWStructuredBuffer<float3> m_targetVertexData;
     StructuredBuffer<float3> m_instanceOffsetData;
-    uint m_frameNumber;
+    float m_frameTime;
     uint m_vertexCountPerInstance;
     uint m_targetVertexStridePerInstance;
 }
@@ -22,9 +22,9 @@ ShaderResourceGroup PassSrg : SRG_PerPass
 class ContinuousSineRng
 {
     uint m_seed;
-    uint m_timeshift;
+    float m_timeshift;
 
-    void Initialize(float3 position, uint instanceIndex, uint timeshift)
+    void Initialize(float3 position, uint instanceIndex, float timeshift)
     {
         m_seed = 0;
         m_seed ^= asuint(position.x);
@@ -42,8 +42,8 @@ class ContinuousSineRng
 
     float GetRandomNormalizedFloat()
     {
-        // Duration in frames after which the animation repeats
-        float animationDuration = Xorshift(m_seed) % 40 + 120;
+        // Duration in seconds after which the animation repeats
+        float animationDuration = (Xorshift(m_seed) % 60 + 120) / 60.f;
 
         // The float values passed to the sin-function should not be too large, otherwise the result is not continuous
         uint seedSmall = m_seed % 1024;
@@ -72,7 +72,7 @@ void AnimateVertices(uint3 dispatchId : SV_DispatchThreadID)
     uint outputIndex = instanceIndex * PassSrg::m_targetVertexStridePerInstance + inputIndex;
 
     ContinuousSineRng rng;
-    rng.Initialize(PassSrg::m_sourceVertexData[inputIndex], instanceIndex, PassSrg::m_frameNumber);
+    rng.Initialize(PassSrg::m_sourceVertexData[inputIndex], instanceIndex, PassSrg::m_frameTime);
 
     // Animated the vertices by displacing each vertex in a random direction by a random amount
     float3 animationMoveDirection = rng.GetRandomUnitSphereDirection();
