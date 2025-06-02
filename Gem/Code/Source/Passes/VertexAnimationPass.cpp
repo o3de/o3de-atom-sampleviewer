@@ -18,6 +18,7 @@ namespace AZ::Render
     VertexAnimationPass::VertexAnimationPass(const RPI::PassDescriptor& descriptor)
         : BaseClass{ descriptor }
     {
+        m_frameTimer.Stamp();
     }
 
     void VertexAnimationPass::SetSourceBuffer(Data::Instance<RPI::Buffer> sourceBuffer)
@@ -79,9 +80,11 @@ namespace AZ::Render
 
     void VertexAnimationPass::FrameBeginInternal(FramePrepareParams params)
     {
-        m_shaderResourceGroup->SetConstant(m_frameNumberNameIndex, m_frameNumber++);
+        m_shaderResourceGroup->SetConstant(m_frameTimeNameIndex, m_frameTime);
         m_shaderResourceGroup->SetConstant(m_vertexCountPerInstanceNameIndex, m_vertexCountPerInstance);
         m_shaderResourceGroup->SetConstant(m_targetVertexStridePerInstanceNameIndex, m_targetVertexStridePerInstance);
+
+        m_frameTime += m_frameTimer.StampAndGetDeltaTimeInSeconds();
 
         BaseClass::FrameBeginInternal(params);
     }
