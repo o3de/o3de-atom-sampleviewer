@@ -35,6 +35,17 @@ namespace AtomSampleViewer
             CLAS_ClusterBLAS,
         };
 
+        struct PerformanceConfiguration
+        {
+            int m_geometryCount;
+            AccelerationStructureType m_accelerationStructureType;
+        };
+        struct PerformanceResult
+        {
+            float m_buildTime;
+            float m_traceRayTime;
+        };
+
     public:
         AZ_COMPONENT(RayTracingVertexAnimationExampleComponent, "{9B43FED7-8BD0-4159-BDEC-BBF7EA39C1EC}", Base);
 
@@ -70,11 +81,15 @@ namespace AtomSampleViewer
 
         void SaveVSyncStateAndDisableVsync();
         void RestoreVSyncState();
+        void GeneratePerformanceConfigurations();
         BasicGeometry GenerateBasicGeometry();
         void CreateBufferPools();
         void CreateRayTracingGeometry();
         void AddVertexAnimationPass(AZ::RPI::RenderPipeline* renderPipeline);
+        void SetVertexAnimationPassData();
         void DrawSidebar();
+        void UpdatePerformanceData();
+        void PrintPerformanceResults();
 
         AZ::Render::RayTracingFeatureProcessorInterface& GetRayTracingFeatureProcessor();
         AZ::Render::RayTracingDebugFeatureProcessorInterface& GetRayTracingDebugFeatureProcessor();
@@ -100,10 +115,16 @@ namespace AtomSampleViewer
         ImGuiSidebar m_imguiSidebar;
         AccelerationStructureType m_accelerationStructureType{ AccelerationStructureType::TriangleBLAS };
         AZ::Render::RayTracingDebugViewMode m_rayTracingDebugViewMode{ AZ::Render::RayTracingDebugViewMode::Barycentrics };
-        ImGuiHistogramQueue m_imGuiFrameTimer{ 60, 60 };
-        ImGuiHistogramQueue m_accelerationStructurePassTimer{ 60, 60 };
-        ImGuiHistogramQueue m_rayTracingPassTimer{ 60, 60 };
+        unsigned m_histogramSampleCount{ 60 };
+        ImGuiHistogramQueue m_imGuiFrameTimer{ m_histogramSampleCount, m_histogramSampleCount };
+        ImGuiHistogramQueue m_accelerationStructurePassTimer{ m_histogramSampleCount, m_histogramSampleCount };
+        ImGuiHistogramQueue m_rayTracingPassTimer{ m_histogramSampleCount, m_histogramSampleCount };
         AZ::RHI::Ptr<AZ::RPI::Pass> m_rayTracingAccelerationStructurePass;
         AZ::RHI::Ptr<AZ::RPI::Pass> m_debugRayTracingPass;
+
+        AZStd::vector<PerformanceConfiguration> m_performanceConfigurations;
+        AZStd::vector<PerformanceResult> m_performanceResults;
+        int m_measureTicks{ 0 };
+        int m_currentPerformanceConfiguration{ -1 };
     };
 } // namespace AtomSampleViewer
