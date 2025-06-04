@@ -65,6 +65,7 @@ namespace AtomSampleViewer
         EBUS_EVENT_ID(GetCameraEntityId(), Debug::ArcBallControllerRequestBus, SetPitch, DegToRad(-20.f));
         EBUS_EVENT_ID(GetCameraEntityId(), Debug::ArcBallControllerRequestBus, SetPan, AZ::Vector3{ 0.2f, 0.6f, 1.2f });
 
+        GeneratePerformanceConfigurations();
         CreateBufferPools();
         CreateRayTracingGeometry();
         m_imguiSidebar.Activate();
@@ -107,6 +108,39 @@ namespace AtomSampleViewer
             m_rayTracingAccelerationStructurePass->GetLatestTimestampResult().GetDurationInNanoseconds() / 1'000'000'000.f);
         m_rayTracingPassTimer.PushValue(m_debugRayTracingPass->GetLatestTimestampResult().GetDurationInNanoseconds() / 1'000'000'000.f);
         DrawSidebar();
+        UpdatePerformanceData();
+    }
+
+    void RayTracingVertexAnimationExampleComponent::UpdatePerformanceData()
+    {
+        if (m_currentPerformanceConfiguration == -1)
+        {
+            return;
+        }
+
+        if (m_measureTicks == 0)
+        {
+            const auto& currentConfiguration{ m_performanceConfigurations[m_currentPerformanceConfiguration] };
+            m_accelerationStructureType = currentConfiguration.m_accelerationStructureType;
+            m_geometryCount = currentConfiguration.m_geometryCount;
+            CreateRayTracingGeometry();
+        }
+
+        else if (m_measureTicks == aznumeric_cast<int>(m_histogramSampleCount) * 3)
+        {
+            // (histogram size * 3) seems to be long enough for the measured values to become reasonable stable
+            m_performanceResults.push_back(
+                { m_accelerationStructurePassTimer.GetDisplayedAverage(), m_rayTracingPassTimer.GetDisplayedAverage() });
+            m_measureTicks = -1;
+            m_currentPerformanceConfiguration++;
+            if (m_currentPerformanceConfiguration == m_performanceConfigurations.size())
+            {
+                PrintPerformanceResults();
+                m_currentPerformanceConfiguration = -1;
+            }
+        }
+
+        m_measureTicks++;
     }
 
     void RayTracingVertexAnimationExampleComponent::OnRenderPipelineChanged(
@@ -159,11 +193,32 @@ namespace AtomSampleViewer
         EBUS_EVENT_ID_RESULT(m_preActivateVSyncInterval, windowHandle, AzFramework::WindowRequestBus, GetSyncInterval);
         EBUS_EVENT_ID(windowHandle, AzFramework::WindowRequestBus, SetSyncInterval, 0);
     }
+
     void RayTracingVertexAnimationExampleComponent::RestoreVSyncState()
     {
         AzFramework::NativeWindowHandle windowHandle{ nullptr };
         EBUS_EVENT_RESULT(windowHandle, AzFramework::WindowSystemRequestBus, GetDefaultWindowHandle);
         EBUS_EVENT_ID(windowHandle, AzFramework::WindowRequestBus, SetSyncInterval, m_preActivateVSyncInterval);
+    }
+
+    void RayTracingVertexAnimationExampleComponent::GeneratePerformanceConfigurations()
+    {
+        m_performanceConfigurations.clear();
+        m_performanceResults.clear();
+
+        auto addPerformanceConfiguration{
+            [&](int geometryCount)
+            {
+                m_performanceConfigurations.push_back({ geometryCount, AccelerationStructureType::TriangleBLAS });
+                m_performanceConfigurations.push_back({ geometryCount, AccelerationStructureType::CLAS_ClusterBLAS });
+            }
+        };
+        addPerformanceConfiguration(1000);
+        addPerformanceConfiguration(3000);
+        addPerformanceConfiguration(6000);
+        addPerformanceConfiguration(10000);
+        addPerformanceConfiguration(15000);
+        addPerformanceConfiguration(30000);
     }
 
     RayTracingVertexAnimationExampleComponent::BasicGeometry RayTracingVertexAnimationExampleComponent::GenerateBasicGeometry()
@@ -260,7 +315,6 @@ namespace AtomSampleViewer
             m_sourceGeometryBuffer = AZ::RPI::Buffer::FindOrCreate(sourceBufferAsset);
         }
 
-        if (!m_targetGeometryBuffer)
         {
             AZ::RPI::BufferAssetCreator targetBufferCreator;
             targetBufferCreator.Begin(AZ::Uuid::CreateRandom());
@@ -295,6 +349,11 @@ namespace AtomSampleViewer
             instanceOffsetBufferDescriptor.m_byteCount = instanceOffsets.size() * sizeof(instanceOffsets[0]);
             instanceOffsetBufferDescriptor.m_bufferData = instanceOffsets.data();
             m_instanceOffsetDataBuffer = RPI::BufferSystemInterface::Get()->CreateBufferFromCommonPool(instanceOffsetBufferDescriptor);
+        }
+
+        if (m_vertexAnimationPass)
+        {
+            SetVertexAnimationPassData();
         }
 
         if (m_accelerationStructureType == AccelerationStructureType::TriangleBLAS)
@@ -498,6 +557,12 @@ namespace AtomSampleViewer
             return;
         }
 
+        SetVertexAnimationPassData();
+        renderPipeline->AddPassBefore(m_vertexAnimationPass, Name{ "RayTracingAccelerationStructurePass" });
+    }
+
+    void RayTracingVertexAnimationExampleComponent::SetVertexAnimationPassData()
+    {
         m_vertexAnimationPass->SetTargetThreadCounts(m_vertexCountPerInstance * m_geometryCount, 1, 1);
         m_vertexAnimationPass->SetSourceBuffer(m_sourceGeometryBuffer);
         m_vertexAnimationPass->SetTargetBuffer(m_targetGeometryBuffer);
@@ -505,8 +570,7 @@ namespace AtomSampleViewer
         m_vertexAnimationPass->SetVertexCountPerInstance(m_vertexCountPerInstance);
         m_vertexAnimationPass->SetTargetVertexStridePerInstance(m_targetVertexStridePerInstance);
         m_vertexAnimationPass->SetInstanceCount(m_geometryCount);
-
-        renderPipeline->AddPassBefore(m_vertexAnimationPass, Name{ "RayTracingAccelerationStructurePass" });
+        m_vertexAnimationPass->QueueForBuildAndInitialization();
     }
 
     void RayTracingVertexAnimationExampleComponent::DrawSidebar()
@@ -515,6 +579,19 @@ namespace AtomSampleViewer
 
         if (m_imguiSidebar.Begin())
         {
+            if (ImGui::Button("Start benchmark"))
+            {
+                m_currentPerformanceConfiguration = 0;
+            }
+            ImGui::Spacing();
+            ImGui::Separator();
+
+            if (ImGui::InputInt("Geometry count", &m_geometryCount, 1, 100, ImGuiInputTextFlags_EnterReturnsTrue))
+            {
+                buildTypeUpdated = true;
+                m_geometryCount = AZStd::max(m_geometryCount, 1);
+            }
+
             ImGui::Text("RTAS Type:");
             buildTypeUpdated |=
                 ImGuiHelper::RadioButton("Triangle BLAS", &m_accelerationStructureType, AccelerationStructureType::TriangleBLAS);
@@ -562,6 +639,62 @@ namespace AtomSampleViewer
         if (buildTypeUpdated)
         {
             CreateRayTracingGeometry();
+        }
+    }
+
+    void RayTracingVertexAnimationExampleComponent::PrintPerformanceResults()
+    {
+        AZStd::vector<AZStd::vector<AZStd::string>> table;
+        table.push_back({ "Geometry", "BLAS", "CLAS", "BLAS", "CLAS", "BLAS", "CLAS" });
+        table.push_back({ "count", "build", "build", "trace", "trace", "sum", "sum" });
+        table.push_back({ "--------", "-----", "-----", "-----", "-----", "----", "----" });
+
+        for (size_t i{ 0 }; i < m_performanceConfigurations.size(); i += 2)
+        {
+            const auto& blasResult{ m_performanceResults[i] };
+            const auto& clasResult{ m_performanceResults[i + 1] };
+
+            table.push_back(
+                {
+                    AZStd::to_string(m_performanceConfigurations[i].m_geometryCount),
+                    AZStd::string::format("%.2f", blasResult.m_buildTime * 1000.f),
+                    AZStd::string::format("%.2f", clasResult.m_buildTime * 1000.f),
+                    AZStd::string::format("%.2f", blasResult.m_traceRayTime * 1000.f),
+                    AZStd::string::format("%.2f", clasResult.m_traceRayTime * 1000.f),
+                    AZStd::string::format("%.2f", (blasResult.m_buildTime + blasResult.m_traceRayTime) * 1000.f),
+                    AZStd::string::format("%.2f", (clasResult.m_buildTime + clasResult.m_traceRayTime) * 1000.f),
+                });
+        }
+
+        AZStd::vector<int> columnWidths(table[0].size(), 0);
+        for (size_t row{ 0 }; row < table.size(); row++)
+        {
+            for (size_t column{ 0 }; column < table[row].size(); column++)
+            {
+                columnWidths[column] = AZStd::max(columnWidths[column], aznumeric_cast<int>(table[row][column].size()));
+            }
+        }
+
+        for (size_t row{ 0 }; row < table.size(); row++)
+        {
+            AZStd::string line;
+            for (size_t column{ 0 }; column < table[row].size(); column++)
+            {
+                if (column != 0)
+                {
+                    line += " | ";
+                }
+
+                int textWidth{ aznumeric_cast<int>(table[row][column].size()) };
+                int cellWidth{ columnWidths[column] };
+                int leftPad{ (cellWidth - textWidth) / 2 };
+                int rightPad{ cellWidth - textWidth - leftPad };
+
+                line += AZStd::string(leftPad, ' ');
+                line += table[row][column];
+                line += AZStd::string(rightPad, ' ');
+            }
+            AZ_Info("Performance", "%s\n", line.c_str());
         }
     }
 
