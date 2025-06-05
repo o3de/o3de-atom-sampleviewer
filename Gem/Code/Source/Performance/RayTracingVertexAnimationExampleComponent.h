@@ -73,10 +73,16 @@ namespace AtomSampleViewer
             AZStd::vector<AZ::PackedVector3f> m_positions;
             AZStd::vector<AZ::PackedVector3f> m_normals;
             AZStd::vector<AZ::u32> m_indices;
+            int m_verticesPerCluster{ 0 };
+            int m_trianglesPerCluster{ 0 };
 
             int GetVertexCount() const;
+            int GetVertexCountPerCluster() const;
             int GetIndexCount() const;
+            int GetIndexCountPerCluster() const;
             int GetTriangleCount() const;
+            int GetTriangleCountPerCluster() const;
+            int GetClusterCount() const;
         };
 
         void SaveVSyncStateAndDisableVsync();
@@ -107,7 +113,8 @@ namespace AtomSampleViewer
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_srcInfosArrayBuffer;
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_clusterStreamOffsets;
         AZStd::vector<RayTracingMesh> m_rayTracingData;
-        int m_geometryCount{ 1024 };
+        int m_geometryCount{ 100 };
+        bool m_separateClusterBlasForEachInstance{ false };
         AZ::u32 m_vertexCountPerInstance;
         AZ::u32 m_targetVertexStridePerInstance;
         AZ::RPI::Ptr<AZ::Render::VertexAnimationPass> m_vertexAnimationPass;
