@@ -76,7 +76,7 @@ void AnimateVertices(uint3 dispatchId : SV_DispatchThreadID)
 
     // Animated the vertices by displacing each vertex in a random direction by a random amount
     float3 animationMoveDirection = rng.GetRandomUnitSphereDirection();
-    float animationMoveAmount = rng.GetRandomNormalizedFloat() * 0.1f;
+    float animationMoveAmount = rng.GetRandomNormalizedFloat() * 0.02f;
 
     // Need to move vertices per instance in the compute shader since CLAS does not have a separate transform
     float3 vertexBaseLocation = PassSrg::m_instanceOffsetData[instanceIndex] + PassSrg::m_sourceVertexData[inputIndex];

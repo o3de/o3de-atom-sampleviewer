@@ -26,6 +26,22 @@ namespace AZ::RHI
 
 AZ_DECLARE_BUDGET(AtomSampleViewer);
 
+namespace AZStd
+{
+    template<>
+    struct hash<AZ::Vector3>
+    {
+        using result_type = AZStd::size_t;
+
+        result_type operator()(const AZ::Vector3& value) const
+        {
+            result_type hash{ 0 };
+            hash_combine(hash, value.GetX(), value.GetY(), value.GetZ());
+            return hash;
+        }
+    };
+} // namespace AZStd
+
 namespace AtomSampleViewer::ImGuiHelper
 {
     template<typename T, AZStd::enable_if_t<AZStd::is_enum_v<T> && sizeof(T) == sizeof(int), bool> = true>
@@ -176,14 +192,34 @@ namespace AtomSampleViewer
         return GetIndexCount() / 3;
     }
 
+    int RayTracingVertexAnimationExampleComponent::BasicGeometry::GetTriangleCountPerCluster() const
+    {
+        return m_trianglesPerCluster;
+    }
+
     int RayTracingVertexAnimationExampleComponent::BasicGeometry::GetIndexCount() const
     {
         return aznumeric_cast<int>(m_indices.size());
     }
 
+    int RayTracingVertexAnimationExampleComponent::BasicGeometry::GetIndexCountPerCluster() const
+    {
+        return m_trianglesPerCluster * 3;
+    }
+
     int RayTracingVertexAnimationExampleComponent::BasicGeometry::GetVertexCount() const
     {
         return aznumeric_cast<int>(m_positions.size());
+    }
+
+    int RayTracingVertexAnimationExampleComponent::BasicGeometry::GetVertexCountPerCluster() const
+    {
+        return m_verticesPerCluster;
+    }
+
+    int RayTracingVertexAnimationExampleComponent::BasicGeometry::GetClusterCount() const
+    {
+        return GetTriangleCount() / GetTriangleCountPerCluster();
     }
 
     void RayTracingVertexAnimationExampleComponent::SaveVSyncStateAndDisableVsync()
@@ -213,39 +249,61 @@ namespace AtomSampleViewer
                 m_performanceConfigurations.push_back({ geometryCount, AccelerationStructureType::CLAS_ClusterBLAS });
             }
         };
-        addPerformanceConfiguration(1000);
-        addPerformanceConfiguration(3000);
-        addPerformanceConfiguration(6000);
-        addPerformanceConfiguration(10000);
-        addPerformanceConfiguration(15000);
-        addPerformanceConfiguration(30000);
+        addPerformanceConfiguration(1);
+        addPerformanceConfiguration(5);
+        addPerformanceConfiguration(10);
+        addPerformanceConfiguration(30);
+        addPerformanceConfiguration(60);
+        addPerformanceConfiguration(100);
     }
 
     RayTracingVertexAnimationExampleComponent::BasicGeometry RayTracingVertexAnimationExampleComponent::GenerateBasicGeometry()
     {
+        constexpr int triangleCountPerCluster{ 64 };
+        constexpr int indexCountPerCluster{ triangleCountPerCluster * 3 };
+
+        AZStd::vector<AZ::Vector3> vertices{ Geometry3dUtils::GenerateIcoSphere(6) }; // 6 subdivisions -> 81920 triangles
+        int clusterCount{ aznumeric_cast<int>(vertices.size()) / indexCountPerCluster };
+
         BasicGeometry geometry;
 
-        AZStd::vector<AZ::Vector3> vertices{ Geometry3dUtils::GenerateIcoSphere(1) };
-
-        for (const Vector3& unpackedVertex : vertices)
+        int maxVertexCountPerCluster{ 0 };
+        for (int clusterIndex{ 0 }; clusterIndex < clusterCount; clusterIndex++)
         {
-            geometry.m_positions.emplace_back(unpackedVertex);
+            u32 vertexOffset{ aznumeric_cast<u32>(geometry.m_positions.size()) };
+            AZStd::unordered_map<AZ::Vector3, u32> uniqueVertices;
+            AZStd::map<u32, AZ::Vector3> aggregatedVertexNormals; // Use map to automatically sort by vertex id
+
+            for (int i{ 0 }; i < indexCountPerCluster; i += 3)
+            {
+                int baseIndex{ clusterIndex * indexCountPerCluster + i };
+                AZ::Vector3 faceNormal{
+                    (vertices[baseIndex + 1] - vertices[baseIndex]).Cross(vertices[baseIndex + 2] - vertices[baseIndex]).GetNormalized()
+                };
+
+                for (int j{ 0 }; j < 3; j++)
+                {
+                    auto [iterator, inserted]{ uniqueVertices.emplace(
+                        vertices[baseIndex + j], aznumeric_cast<u32>(uniqueVertices.size())) };
+                    if (inserted)
+                    {
+                        geometry.m_positions.emplace_back(iterator->first);
+                    }
+                    geometry.m_indices.emplace_back(vertexOffset + iterator->second);
+                    aggregatedVertexNormals[iterator->second] += faceNormal;
+                }
+            }
+
+            for (const auto& [_, vertexNormal] : aggregatedVertexNormals)
+            {
+                geometry.m_normals.emplace_back(vertexNormal.GetNormalized());
+            }
+
+            maxVertexCountPerCluster = AZStd::max(maxVertexCountPerCluster, aznumeric_cast<int>(uniqueVertices.size()));
         }
 
-        for (size_t i{ 0 }; i < vertices.size(); i += 3)
-        {
-            AZ::Vector3 normal{ (vertices[i + 1] - vertices[i]).Cross(vertices[i + 2] - vertices[i]).GetNormalized() };
-            geometry.m_normals.emplace_back(normal);
-            geometry.m_normals.emplace_back(normal);
-            geometry.m_normals.emplace_back(normal);
-        }
-
-        geometry.m_indices.resize(vertices.size());
-        AZStd::ranges::iota(geometry.m_indices, 0);
-
-        // TODO(CLAS): Query actual limits from PhysicalDevice
-        AZ_Assert(geometry.GetVertexCount() < 256, "CLAS does not support more than 256 vertices per cluster");
-        AZ_Assert(geometry.GetTriangleCount() < 256, "CLAS does not support more than 256 triangles per cluster");
+        geometry.m_trianglesPerCluster = triangleCountPerCluster;
+        geometry.m_verticesPerCluster = maxVertexCountPerCluster;
 
         return geometry;
     }
@@ -280,9 +338,8 @@ namespace AtomSampleViewer
         const uint32_t IndexSize{ AZ::RHI::GetIndexFormatSize(IndexStreamFormat) };
 
         BasicGeometry geometry{ GenerateBasicGeometry() };
-
-        u32 vertexCount{ aznumeric_cast<u32>(geometry.m_positions.size()) };
-        u32 indexCount{ vertexCount };
+        int vertexCount{ geometry.GetVertexCount() };
+        int indexCount{ geometry.GetIndexCount() };
 
         u32 positionByteOffset{ 0 };
         u32 normalByteOffset{ positionByteOffset + vertexCount * PositionSize };
@@ -291,6 +348,8 @@ namespace AtomSampleViewer
 
         u32 targetBufferSizePerInstance{ vertexCount * PositionSize };
         u32 targetBufferSize{ targetBufferSizePerInstance * m_geometryCount };
+        u32 targetBufferSizePerCluster{ geometry.GetVertexCountPerCluster() * PositionSize };
+        u32 indexBufferSizePerCluster{ geometry.GetIndexCountPerCluster() * IndexSize };
 
         m_vertexCountPerInstance = vertexCount;
         m_targetVertexStridePerInstance = targetBufferSizePerInstance / PositionSize;
@@ -403,7 +462,7 @@ namespace AtomSampleViewer
             data.m_rtMesh.m_instanceMask |=
                 static_cast<uint32_t>(AZ::RHI::RayTracingAccelerationStructureInstanceInclusionMask::STATIC_MESH);
 
-            auto& subMesh{ data.m_rtSubMeshes.emplace_back() };
+            Render::RayTracingFeatureProcessorInterface::SubMesh subMesh;
 
             // Use position data from target buffer with unique offset per instance
             subMesh.m_positionFormat = PositionStreamFormat;
@@ -423,13 +482,15 @@ namespace AtomSampleViewer
                 RHI::IndexBufferView{ *sourceRhiGeometryBuffer, indexByteOffset, indexCount * IndexSize, IndexStreamFormat };
 
             auto& bufferPools{ GetRayTracingFeatureProcessor().GetBufferPools() };
+            int clusterCountPerInstance{ geometry.GetClusterCount() };
+            int totalClusterCount{ m_geometryCount * clusterCountPerInstance };
 
             {
                 m_srcInfosArrayBuffer = aznew RHI::Buffer();
                 m_srcInfosArrayBuffer->SetName(Name("SourceInfosArrayBuffer"));
                 RHI::BufferInitRequest srcInfoInitRequest;
                 srcInfoInitRequest.m_buffer = m_srcInfosArrayBuffer.get();
-                srcInfoInitRequest.m_descriptor.m_byteCount = m_geometryCount * sizeof(RHI::RayTracingClasBuildTriangleClusterInfo);
+                srcInfoInitRequest.m_descriptor.m_byteCount = totalClusterCount * sizeof(RHI::RayTracingClasBuildTriangleClusterInfo);
                 srcInfoInitRequest.m_descriptor.m_bindFlags = bufferPools.GetSrcInfosArrayBufferPool()->GetDescriptor().m_bindFlags;
                 bufferPools.GetSrcInfosArrayBufferPool()->InitBuffer(srcInfoInitRequest);
             }
@@ -439,7 +500,7 @@ namespace AtomSampleViewer
                 m_clusterStreamOffsets->SetName(Name("ClusterStreamOffsetsBuffer"));
                 RHI::BufferInitRequest clusterStreamOffsetsInitRequest;
                 clusterStreamOffsetsInitRequest.m_buffer = m_clusterStreamOffsets.get();
-                clusterStreamOffsetsInitRequest.m_descriptor.m_byteCount = m_geometryCount * sizeof(RHI::RayTracingClasClusterOffsetInfo);
+                clusterStreamOffsetsInitRequest.m_descriptor.m_byteCount = totalClusterCount * sizeof(RHI::RayTracingClasClusterOffsetInfo);
                 clusterStreamOffsetsInitRequest.m_descriptor.m_bindFlags =
                     bufferPools.GetSrcInfosArrayBufferPool()->GetDescriptor().m_bindFlags;
                 bufferPools.GetSrcInfosArrayBufferPool()->InitBuffer(clusterStreamOffsetsInitRequest);
@@ -460,15 +521,17 @@ namespace AtomSampleViewer
             RHI::BufferMapResponse clusterStreamOffsetsMapResponse;
             bufferPools.GetSrcInfosArrayBufferPool()->MapBuffer(clusterStreamOffsetsMapRequest, clusterStreamOffsetsMapResponse);
 
-            for (int i{ 0 }; i < m_geometryCount; i++)
+            for (int i{ 0 }; i < totalClusterCount; i++)
             {
+                int clusterId{ i % clusterCountPerInstance };
+
                 // This data should generally be filled in on the GPU, but since the cluster parameters do not change in this case, it would
                 // not benefit the sample
                 RHI::RayTracingClasBuildTriangleClusterInfoExpanded clusterInfoExpanded{};
-                clusterInfoExpanded.m_clusterID = i;
+                clusterInfoExpanded.m_clusterID = clusterId;
                 clusterInfoExpanded.m_clusterFlags = AZ::RHI::RayTracingClasClusterFlags::AllowDisableOpacityMicromaps;
-                clusterInfoExpanded.m_triangleCount = geometry.GetTriangleCount();
-                clusterInfoExpanded.m_vertexCount = geometry.GetVertexCount();
+                clusterInfoExpanded.m_triangleCount = geometry.GetTriangleCountPerCluster();
+                clusterInfoExpanded.m_vertexCount = geometry.GetVertexCountPerCluster(); // TODO(CLAS): Unique vertex count per cluster?
                 clusterInfoExpanded.m_positionTruncateBitCount = 0;
                 clusterInfoExpanded.m_indexType = AZ::RHI::RayTracingClasIndexFormat::UINT32;
                 clusterInfoExpanded.m_opacityMicromapIndexType = AZ::RHI::RayTracingClasIndexFormat::UINT32;
@@ -488,9 +551,10 @@ namespace AtomSampleViewer
                 for (const auto& [deviceIndex, dataPointer] : srcInfoMapResponse.m_data)
                 {
                     // The vertex data is unique for each cluster (output of VertexAnimationPass)
-                    clusterInfoExpanded.m_vertexBufferAddress = targetBufferAddress.at(deviceIndex) + targetBufferSizePerInstance * i;
+                    clusterInfoExpanded.m_vertexBufferAddress = targetBufferAddress.at(deviceIndex) + targetBufferSizePerCluster * i;
 
-                    // The index data is the same for all clusters
+                    // The index data is the same for all clusters (Since the indices do not restart at 0 for each cluster, there is no
+                    // additional per-cluster offset)
                     clusterInfoExpanded.m_indexBufferAddress = sourceBufferAddress.at(deviceIndex) + indexByteOffset;
 
                     auto* gpuClusterInfo{ reinterpret_cast<RHI::RayTracingClasBuildTriangleClusterInfo*>(dataPointer) + i };
@@ -500,9 +564,8 @@ namespace AtomSampleViewer
                 for (const auto& [deviceIndex, dataPointer] : clusterStreamOffsetsMapResponse.m_data)
                 {
                     auto* clusterOffsetInfo{ reinterpret_cast<RHI::RayTracingClasClusterOffsetInfo*>(dataPointer) + i };
-                    clusterOffsetInfo->m_indexBufferOffset = 0; // Use same index data for all clusters
-                    clusterOffsetInfo->m_positionBufferOffset =
-                        targetBufferSizePerInstance * i; // Use unique position data for each cluster
+                    clusterOffsetInfo->m_indexBufferOffset = indexBufferSizePerCluster * clusterId; // Use same index data for all clusters
+                    clusterOffsetInfo->m_positionBufferOffset = targetBufferSizePerCluster * i; // Use unique position data for each cluster
                     clusterOffsetInfo->m_normalBufferOffset = 0; // Use same normal data for all clusters
                 }
             }
@@ -514,19 +577,44 @@ namespace AtomSampleViewer
             clusterDescriptor.m_vertexFormat = AZ::RHI::VertexFormat::R32G32B32_FLOAT;
             clusterDescriptor.m_maxGeometryIndexValue = 0;
             clusterDescriptor.m_maxClusterUniqueGeometryCount = 1;
-            clusterDescriptor.m_maxClusterTriangleCount = geometry.GetTriangleCount();
-            clusterDescriptor.m_maxClusterVertexCount = geometry.GetVertexCount();
-            clusterDescriptor.m_maxTotalTriangleCount = geometry.GetTriangleCount() * m_geometryCount;
-            clusterDescriptor.m_maxTotalVertexCount = geometry.GetVertexCount() * m_geometryCount;
+            clusterDescriptor.m_maxClusterTriangleCount = geometry.GetTriangleCountPerCluster();
+            clusterDescriptor.m_maxClusterVertexCount = geometry.GetVertexCountPerCluster();
+            clusterDescriptor.m_maxTotalTriangleCount = geometry.GetTriangleCount();
+            clusterDescriptor.m_maxTotalVertexCount = geometry.GetVertexCount();
+            clusterDescriptor.m_maxClusterCount = clusterCountPerInstance;
             clusterDescriptor.m_minPositionTruncateBitCount = 0;
-            clusterDescriptor.m_maxClusterCount = m_geometryCount;
-            clusterDescriptor.m_srcInfosArrayBufferView = m_srcInfosArrayBuffer->GetBufferView(
-                RHI::BufferViewDescriptor::CreateStructured(0, m_geometryCount, sizeof(RHI::RayTracingClasBuildTriangleClusterInfo)));
             // clusterDescriptor.m_srcInfosCountBufferView: Dont use this buffer in the sample
-
+            if (!m_separateClusterBlasForEachInstance)
+            {
+                clusterDescriptor.m_maxTotalTriangleCount *= m_geometryCount;
+                clusterDescriptor.m_maxTotalVertexCount *= m_geometryCount;
+                clusterDescriptor.m_maxClusterCount *= m_geometryCount;
+            }
             subMesh.m_clusterBlasDescriptor = clusterDescriptor;
-            subMesh.m_clusterOffsetBufferView = m_clusterStreamOffsets->GetBufferView(
-                RHI::BufferViewDescriptor::CreateRaw(0, m_geometryCount * sizeof(RHI::RayTracingClasClusterOffsetInfo)));
+
+            if (m_separateClusterBlasForEachInstance)
+            {
+                for (int i{ 0 }; i < m_geometryCount; i++)
+                {
+                    subMesh.m_clusterBlasDescriptor->m_srcInfosArrayBufferView = m_srcInfosArrayBuffer->GetBufferView(
+                        RHI::BufferViewDescriptor::CreateStructured(
+                            i * clusterCountPerInstance, clusterCountPerInstance, sizeof(RHI::RayTracingClasBuildTriangleClusterInfo)));
+                    subMesh.m_clusterOffsetBufferView = m_clusterStreamOffsets->GetBufferView(
+                        RHI::BufferViewDescriptor::CreateRaw(
+                            i * clusterCountPerInstance * sizeof(RHI::RayTracingClasClusterOffsetInfo),
+                            clusterCountPerInstance * sizeof(RHI::RayTracingClasClusterOffsetInfo)));
+                    data.m_rtSubMeshes.push_back(subMesh);
+                }
+            }
+            else
+            {
+                subMesh.m_clusterBlasDescriptor->m_srcInfosArrayBufferView = m_srcInfosArrayBuffer->GetBufferView(
+                    RHI::BufferViewDescriptor::CreateStructured(0, totalClusterCount, sizeof(RHI::RayTracingClasBuildTriangleClusterInfo)));
+                subMesh.m_clusterOffsetBufferView = m_clusterStreamOffsets->GetBufferView(
+                    RHI::BufferViewDescriptor::CreateRaw(0, totalClusterCount * sizeof(RHI::RayTracingClasClusterOffsetInfo)));
+                data.m_rtSubMeshes.push_back(subMesh);
+            }
+
             GetRayTracingFeatureProcessor().AddMesh(data.m_uuid, data.m_rtMesh, data.m_rtSubMeshes);
         }
         else
