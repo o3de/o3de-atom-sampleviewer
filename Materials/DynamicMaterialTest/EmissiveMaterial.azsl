@@ -71,6 +71,9 @@ VSOutput MainVS(VSInput IN, uint instanceId : SV_InstanceID)
 
 ForwardPassOutput MainPS(VSOutput IN)
 {
+    float3 views[MAX_SHADING_VIEWS];
+    views[0] = ViewSrg::m_worldPosition.xyz;    // Assume one view for forward pass for now
+
     real4x4 objectToWorld = real4x4(GetObjectToWorldMatrix(IN.m_instanceId));
     real3x3 objectToWorldIT = real3x3(GetObjectToWorldMatrixInverseTranspose(IN.m_instanceId));
 
@@ -102,7 +105,7 @@ ForwardPassOutput MainPS(VSOutput IN)
 
     // Light iterator
     lightingData.tileIterator.Init(IN.m_position, PassSrg::m_lightListRemapped, PassSrg::m_tileLightData);
-    lightingData.Init(surface.position, surface.normal, surface.roughnessLinear, ViewSrg::m_worldPosition.xyz);
+    lightingData.Init(surface.position, surface.normal, surface.roughnessLinear, views);
 
     // Emissive
     float3 emissive = MaterialSrg::m_emissiveColor.rgb * MaterialSrg::m_emissiveIntensity;
@@ -114,7 +117,7 @@ ForwardPassOutput MainPS(VSOutput IN)
     lightingData.emissiveLighting = emissive;
 
     // Diffuse and Specular response
-    lightingData.specularResponse = FresnelSchlickWithRoughness(lightingData.NdotV, surface.specularF0, surface.roughnessLinear);
+    lightingData.specularResponse = FresnelSchlickWithRoughness(lightingData.GetSpecularNdotV(), surface.GetSpecularF0(), surface.roughnessLinear);
     lightingData.diffuseResponse = 1.0f - lightingData.specularResponse;
 
     const float alpha = 1.0f;
