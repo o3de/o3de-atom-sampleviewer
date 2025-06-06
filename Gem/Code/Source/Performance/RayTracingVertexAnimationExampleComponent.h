@@ -114,7 +114,7 @@ namespace AtomSampleViewer
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_clusterStreamOffsets;
         AZStd::vector<RayTracingMesh> m_rayTracingData;
         int m_geometryCount{ 100 };
-        bool m_separateClusterBlasForEachInstance{ false };
+        bool m_separateClusterBlasForEachInstance{ true };
         AZ::u32 m_vertexCountPerInstance;
         AZ::u32 m_targetVertexStridePerInstance;
         AZ::RPI::Ptr<AZ::Render::VertexAnimationPass> m_vertexAnimationPass;

@@ -564,9 +564,11 @@ namespace AtomSampleViewer
                 for (const auto& [deviceIndex, dataPointer] : clusterStreamOffsetsMapResponse.m_data)
                 {
                     auto* clusterOffsetInfo{ reinterpret_cast<RHI::RayTracingClasClusterOffsetInfo*>(dataPointer) + i };
-                    clusterOffsetInfo->m_indexBufferOffset = indexBufferSizePerCluster * clusterId; // Use same index data for all clusters
-                    clusterOffsetInfo->m_positionBufferOffset = targetBufferSizePerCluster * i; // Use unique position data for each cluster
-                    clusterOffsetInfo->m_normalBufferOffset = 0; // Use same normal data for all clusters
+                    clusterOffsetInfo->m_indexOffset = indexBufferSizePerCluster * clusterId; // Use same index data for all clusters
+                    clusterOffsetInfo->m_positionOffset = targetBufferSizePerCluster * i; // Use unique position data for each cluster
+                    clusterOffsetInfo->m_positionStride = 0; // Tightly pack positions
+                    clusterOffsetInfo->m_normalOffset = 0; // Use same normal data for all clusters
+                    clusterOffsetInfo->m_normalStride = 0; // Tightly pack normals
                 }
             }
             bufferPools.GetSrcInfosArrayBufferPool()->UnmapBuffer(*m_srcInfosArrayBuffer);
