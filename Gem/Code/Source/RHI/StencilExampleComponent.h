@@ -60,8 +60,8 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, s_numberOfVertices> m_indices;
         };
 
-        AZ::RHI::GeometryView m_geometryView;
-        AZ::RHI::GeometryView m_geometryView2;
+        AZ::RHI::GeometryView m_geometryView{ AZ::RHI::MultiDevice::AllDevices };
+        AZ::RHI::GeometryView m_geometryView2{ AZ::RHI::MultiDevice::AllDevices };
 
         AZ::RHI::AttachmentId m_depthStencilID;
         AZ::RHI::ClearValue m_depthClearValue;

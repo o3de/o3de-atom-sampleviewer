@@ -878,7 +878,7 @@ namespace AtomSampleViewer
         using namespace AZ;
 
         m_numObjects = s_maxNumberOfObjects / 2;
-        m_geometryViews.resize(m_numObjects);
+        m_geometryViews.resize(m_numObjects, RHI::GeometryView(RHI::MultiDevice::AllDevices));
 
         RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
 

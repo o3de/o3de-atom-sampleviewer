@@ -105,7 +105,7 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 3> m_indices;
         };
 
-        AZ::RHI::GeometryView m_geometryView;
+        AZ::RHI::GeometryView m_geometryView{ AZ::RHI::MultiDevice::AllDevices };
         float m_time = 0.0f;
         AZStd::array<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, NumberOfCubes> m_shaderResourceGroups;
         AZStd::array<AZ::Matrix4x4, NumberOfCubes> m_modelMatrices;

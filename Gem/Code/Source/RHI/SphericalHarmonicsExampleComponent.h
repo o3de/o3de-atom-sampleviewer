@@ -126,7 +126,7 @@ namespace AtomSampleViewer
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_indexBuffer;
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_positionBuffer;
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_uvBuffer;
-        AZ::RHI::GeometryView m_geometryView;
+        AZ::RHI::GeometryView m_geometryView{ AZ::RHI::MultiDevice::AllDevices };
 
         struct BufferData
         {

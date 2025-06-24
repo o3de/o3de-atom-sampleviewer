@@ -99,7 +99,7 @@ namespace AtomSampleViewer
 
         AZ::RHI::Ptr<AZ::RHI::BufferView> m_constantBufferView;
 
-        AZ::RHI::GeometryView m_geometryView;
+        AZ::RHI::GeometryView m_geometryView{ AZ::RHI::MultiDevice::AllDevices };
 
         // --------------------------------------------------------
         // Pipeline state and SRG to be constructed from the shader

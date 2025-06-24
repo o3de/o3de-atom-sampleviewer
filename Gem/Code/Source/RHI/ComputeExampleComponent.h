@@ -83,7 +83,7 @@ namespace AtomSampleViewer
         AZ::RHI::Ptr<AZ::RHI::BufferPool> m_inputAssemblyBufferPool;
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_inputAssemblyBuffer;
 
-        AZ::RHI::GeometryView m_geometryView;
+        AZ::RHI::GeometryView m_geometryView{ AZ::RHI::MultiDevice::AllDevices };
         AZ::RHI::InputStreamLayout m_inputStreamLayout;
 
         // ----------------------------
