@@ -134,7 +134,7 @@ namespace AtomSampleViewer
         };
 
         RHI::Ptr<RHI::Buffer> m_fullScreenInputAssemblyBuffer;
-        RHI::GeometryView m_geometryView;
+        RHI::GeometryView m_geometryView{ AZ::RHI::MultiDevice::AllDevices };
         RHI::InputStreamLayout m_fullScreenInputStreamLayout;
 
         RHI::ConstPtr<RHI::PipelineState> m_drawPipelineState;
