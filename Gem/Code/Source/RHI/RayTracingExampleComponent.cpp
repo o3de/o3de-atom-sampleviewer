@@ -395,37 +395,44 @@ namespace AtomSampleViewer
             rectangleTransform.MultiplyByUniformScale(100.0f);
 
             // create the TLAS
-            RHI::RayTracingTlasDescriptor tlasDescriptor;
-            {
-                RHI::RayTracingTlasInstance& tlasInstance = tlasDescriptor.m_instances.emplace_back();
-                tlasInstance.m_instanceID = 0;
-                tlasInstance.m_hitGroupIndex = 0;
-                tlasInstance.m_blas = m_triangleRayTracingBlas;
-                tlasInstance.m_transform = triangleTransform1;
-            }
-            {
-                RHI::RayTracingTlasInstance& tlasInstance = tlasDescriptor.m_instances.emplace_back();
-                tlasInstance.m_instanceID = 1;
-                tlasInstance.m_hitGroupIndex = 1;
-                tlasInstance.m_blas = m_triangleRayTracingBlas;
-                tlasInstance.m_transform = triangleTransform2;
-            }
-            {
-                RHI::RayTracingTlasInstance& tlasInstance = tlasDescriptor.m_instances.emplace_back();
-                tlasInstance.m_instanceID = 2;
-                tlasInstance.m_hitGroupIndex = 2;
-                tlasInstance.m_blas = m_triangleRayTracingBlas;
-                tlasInstance.m_transform = triangleTransform3;
-            }
-            {
-                RHI::RayTracingTlasInstance& tlasInstance = tlasDescriptor.m_instances.emplace_back();
-                tlasInstance.m_instanceID = 3;
-                tlasInstance.m_hitGroupIndex = 3;
-                tlasInstance.m_blas = m_rectangleRayTracingBlas;
-                tlasInstance.m_transform = rectangleTransform;
-            }
+            auto deviceMask = RHI::MultiDevice::AllDevices;
+            AZStd::unordered_map<int, RHI::DeviceRayTracingTlasDescriptor> tlasDescriptor;
+            RHI::MultiDeviceObject::IterateDevices(
+                deviceMask,
+                [&](int deviceIndex)
+                {
+                    {
+                        auto& tlasInstance = tlasDescriptor[deviceIndex].m_instances.emplace_back();
+                        tlasInstance.m_instanceID = 0;
+                        tlasInstance.m_hitGroupIndex = 0;
+                        tlasInstance.m_blas = m_triangleRayTracingBlas->GetDeviceRayTracingBlas(deviceIndex);
+                        tlasInstance.m_transform = triangleTransform1;
+                    }
+                    {
+                        auto& tlasInstance = tlasDescriptor[deviceIndex].m_instances.emplace_back();
+                        tlasInstance.m_instanceID = 1;
+                        tlasInstance.m_hitGroupIndex = 1;
+                        tlasInstance.m_blas = m_triangleRayTracingBlas->GetDeviceRayTracingBlas(deviceIndex);
+                        tlasInstance.m_transform = triangleTransform2;
+                    }
+                    {
+                        auto& tlasInstance = tlasDescriptor[deviceIndex].m_instances.emplace_back();
+                        tlasInstance.m_instanceID = 2;
+                        tlasInstance.m_hitGroupIndex = 2;
+                        tlasInstance.m_blas = m_triangleRayTracingBlas->GetDeviceRayTracingBlas(deviceIndex);
+                        tlasInstance.m_transform = triangleTransform3;
+                    }
+                    {
+                        auto& tlasInstance = tlasDescriptor[deviceIndex].m_instances.emplace_back();
+                        tlasInstance.m_instanceID = 3;
+                        tlasInstance.m_hitGroupIndex = 3;
+                        tlasInstance.m_blas = m_rectangleRayTracingBlas->GetDeviceRayTracingBlas(deviceIndex);
+                        tlasInstance.m_transform = rectangleTransform;
+                    }
+                    return true;
+                });
 
-            m_rayTracingTlas->CreateBuffers(RHI::MultiDevice::AllDevices, &tlasDescriptor, *m_rayTracingBufferPools);
+            m_rayTracingTlas->CreateBuffers(deviceMask, tlasDescriptor, *m_rayTracingBufferPools);
 
             m_tlasBufferViewDescriptor = RHI::BufferViewDescriptor::CreateRaw(0, (uint32_t)m_rayTracingTlas->GetTlasBuffer()->GetDescriptor().m_byteCount);
 
