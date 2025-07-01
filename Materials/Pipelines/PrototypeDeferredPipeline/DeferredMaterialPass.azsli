@@ -14,13 +14,24 @@
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
+#ifdef MATERIAL_TYPE_DEFINES_AZSLI_FILE_PATH
+#include MATERIAL_TYPE_DEFINES_AZSLI_FILE_PATH
+#endif
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
+#include <viewsrg_all.srgi>
+#include <scenesrg_all.srgi>
+#include <Atom/Features/Pipeline/Forward/ForwardPassSrg.azsli>
+#include <Atom/Features/Pipeline/Forward/ForwardPassVertexData.azsli>
+#include <Atom/Features/Pipeline/Forward/ForwardPassPipelineCallbacks.azsli>
+
+//////////////////////////////////////////////////////////////////////////////////////////////////
+
 #include MATERIAL_TYPE_AZSLI_FILE_PATH
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
-#include <viewsrg.srgi>
-#include <Atom/Features/PBR/DefaultObjectSrg.azsli>
-#include <Atom/RPI/ShaderResourceGroups/DefaultDrawSrg.azsli>
 #include <Atom/Features/ColorManagement/TransformColor.azsli>
 #include <Atom/Features/PBR/LightingOptions.azsli>
 
@@ -28,7 +39,9 @@ VsOutput MaterialVS(VsInput IN, uint instanceId : SV_InstanceID)
 {
     VsSystemValues SV;
     SV.m_instanceId = instanceId;
-    return EvaluateVertexGeometry(IN, SV, GetMaterialParameters());
+    VsOutput OUT = EvaluateVertexGeometry(IN, SV, GetMaterialParameters());
+    OUT.m_instanceId = instanceId;
+    return OUT;
 }
 
 struct DeferredMaterialOutput
@@ -48,9 +61,12 @@ struct DeferredMaterialOutput
 #endif
 DeferredMaterialOutput MaterialPS(VsOutput IN, bool isFrontFace : SV_IsFrontFace)
 {
+    VsSystemValues SV;
+    SV.m_instanceId = IN.m_instanceId;
+
     // ------- Geometry -> Surface -------
 
-    PixelGeometryData geoData = EvaluatePixelGeometry(IN, isFrontFace, GetMaterialParameters());
+    PixelGeometryData geoData = EvaluatePixelGeometry(IN, SV, isFrontFace, GetMaterialParameters());
 
     Surface surface = EvaluateSurface(IN, geoData, GetMaterialParameters());
 
