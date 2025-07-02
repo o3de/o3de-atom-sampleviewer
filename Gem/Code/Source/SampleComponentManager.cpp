@@ -98,6 +98,7 @@
 #include <MultiSceneExampleComponent.h>
 #include <ParallaxMappingExampleComponent.h>
 #include <RayTracingIntersectionShaderExampleComponent.h>
+#include <RayTracingVertexFormatExampleComponent.h>
 #include <RenderTargetTextureExampleComponent.h>
 #include <SceneReloadSoakTestComponent.h>
 #include <ShadowExampleComponent.h>
@@ -315,6 +316,7 @@ namespace AtomSampleViewer
             NewRPISample<MultiRenderPipelineExampleComponent>("MultiRenderPipeline"),
             NewRPISample<MultiSceneExampleComponent>("MultiScene"),
             NewRPISample<MultiViewSingleSceneAuxGeomExampleComponent>("MultiViewSingleSceneAuxGeom"),
+            NewRPISample<RayTracingVertexFormatExampleComponent>("RayTracingVertexFormat", []() { return Utils::GetRHIDevice()->GetFeatures().m_rayTracing; }),
             NewRPISample<ReadbackExampleComponent>("Readback"),
             NewRPISample<RenderTargetTextureExampleComponent>("RenderTargetTexture"),
             NewRPISample<RootConstantsExampleComponent>("RootConstants"),

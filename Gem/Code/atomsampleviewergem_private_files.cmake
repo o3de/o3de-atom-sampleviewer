@@ -160,6 +160,8 @@ set(FILES
     Source/ProceduralSkinnedMesh.h
     Source/ProceduralSkinnedMeshUtils.cpp
     Source/ProceduralSkinnedMeshUtils.h
+    Source/RayTracingVertexFormatExampleComponent.cpp
+    Source/RayTracingVertexFormatExampleComponent.h
     Source/ReadbackExampleComponent.cpp
     Source/ReadbackExampleComponent.h
     Source/RenderTargetTextureExampleComponent.cpp
