@@ -339,7 +339,7 @@ namespace AtomSampleViewer
                 RHI::RayTracingBlasDescriptor triangleBlasDescriptor;
 
                 RHI::RayTracingGeometry& triangleBlasGeometry = triangleBlasDescriptor.m_geometries.emplace_back();
-                triangleBlasGeometry.m_vertexFormat = RHI::Format::R32G32B32_FLOAT;
+                triangleBlasGeometry.m_vertexFormat = RHI::VertexFormat::R32G32B32_FLOAT;
                 triangleBlasGeometry.m_vertexBuffer = triangleVertexBufferView;
                 triangleBlasGeometry.m_indexBuffer = triangleIndexBufferView;
 
@@ -368,7 +368,7 @@ namespace AtomSampleViewer
                 RHI::RayTracingBlasDescriptor rectangleBlasDescriptor;
 
                 RHI::RayTracingGeometry& rectangleBlasGeometry = rectangleBlasDescriptor.m_geometries.emplace_back();
-                rectangleBlasGeometry.m_vertexFormat = RHI::Format::R32G32B32_FLOAT;
+                rectangleBlasGeometry.m_vertexFormat = RHI::VertexFormat::R32G32B32_FLOAT;
                 rectangleBlasGeometry.m_vertexBuffer = rectangleVertexBufferView;
                 rectangleBlasGeometry.m_indexBuffer = rectangleIndexBufferView;
 
