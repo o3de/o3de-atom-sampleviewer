@@ -88,7 +88,7 @@ namespace AtomSampleViewer
 
     // --- World Model ---
 
-    void SsaoExampleComponent::OnModelReady(AZ::Data::Instance<AZ::RPI::Model> model)
+    void SsaoExampleComponent::OnModelReady([[maybe_unused]] AZ::Data::Instance<AZ::RPI::Model> model)
     {
         m_worldModelAssetLoaded = true;
     }

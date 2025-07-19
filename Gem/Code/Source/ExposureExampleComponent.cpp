@@ -146,7 +146,7 @@ namespace AtomSampleViewer
         m_pointLight = lightHandle;
     }
 
-    void ExposureExampleComponent::OnModelReady(AZ::Data::Instance<AZ::RPI::Model> model)
+    void ExposureExampleComponent::OnModelReady([[maybe_unused]] AZ::Data::Instance<AZ::RPI::Model> model)
     {
         m_sponzaAssetLoaded = true;
 
