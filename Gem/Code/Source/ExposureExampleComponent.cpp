@@ -112,24 +112,24 @@ namespace AtomSampleViewer
     {
         using namespace AZ;
 
-        const char* sponzaPath = "objects/sponza.azmodel";
-        Data::Asset<RPI::ModelAsset> modelAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>(sponzaPath, RPI::AssetUtils::TraceLevel::Assert);
-        Data::Asset<RPI::MaterialAsset> materialAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::MaterialAsset>(DefaultPbrMaterialPath, RPI::AssetUtils::TraceLevel::Assert);
-        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(Render::MeshHandleDescriptor{ modelAsset }, AZ::RPI::Material::FindOrCreate(materialAsset));
+        const char* sponzaPath = "objects/sponza.fbx.azmodel";
+        Data::Asset<RPI::ModelAsset> modelAsset =
+            RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>(sponzaPath, RPI::AssetUtils::TraceLevel::Assert);
+        Data::Asset<RPI::MaterialAsset> materialAsset =
+            RPI::AssetUtils::GetAssetByProductPath<RPI::MaterialAsset>(DefaultPbrMaterialPath, RPI::AssetUtils::TraceLevel::Assert);
 
+        Render::MeshHandleDescriptor descriptor(modelAsset, AZ::RPI::Material::FindOrCreate(materialAsset));
+        descriptor.m_modelChangedEventHandler =
+            AZ::Render::MeshHandleDescriptor::ModelChangedEvent::Handler{ [this](const AZ::Data::Instance<AZ::RPI::Model>& model)
+                                                                          {
+                                                                              OnModelReady(model);
+                                                                          } };
+
+        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(descriptor);
+ 
         // rotate the entity 180 degrees about Z (the vertical axis)
         // This makes it consistent with how it was positioned in the world when the world was Y-up.
         GetMeshFeatureProcessor()->SetTransform(m_meshHandle, Transform::CreateRotationZ(AZ::Constants::Pi));
-
-        Data::Instance<RPI::Model> model = GetMeshFeatureProcessor()->GetModel(m_meshHandle);
-        if (model)
-        {
-            OnModelReady(model);
-        }
-        else
-        {
-            GetMeshFeatureProcessor()->ConnectModelChangeEventHandler(m_meshHandle, m_meshChangedHandler);
-        }
 
         SetupLights();
     }
@@ -256,7 +256,7 @@ namespace AtomSampleViewer
 
 
                 float minimumExposure = m_exposureControlSettings->GetEyeAdaptationExposureMin();
-                if (ImGui::SliderFloat("Minumum Exposure", &minimumExposure, -16.0f, 16.0f, "%0.4f") || !m_isInitParameters)
+                if (ImGui::SliderFloat("Minimum Exposure", &minimumExposure, -16.0f, 16.0f, "%0.4f") || !m_isInitParameters)
                 {
                     m_exposureControlSettings->SetEyeAdaptationExposureMin(minimumExposure);
                     m_exposureControlSettings->OnConfigChanged();

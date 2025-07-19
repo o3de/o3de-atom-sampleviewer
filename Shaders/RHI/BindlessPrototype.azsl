@@ -12,29 +12,34 @@
 
 #include <Atom/Features/Bindless.azsli>
 
+// Material type to test read only buffer, read write buffer, read write texture
 struct BindlessMaterial0
 {
-    uint4 materialIndex;
-
-    float4 m_diffuseColor;
+    uint materialIndex;
+    uint m_colorBufferId; // id to to robuffer
+    uint m_colorBufferMultiplierBufferId; // id to rwbuffer
+    uint m_colorImageMultiplierBufferId; // id to rwtexture
 };
 
+// Material type to test unbounded array in a non-bindless srg
 struct BindlessMaterial1
 {
-    uint4 materialIndex;
-
-    float4 m_diffuseColor;
-    uint m_diffuseTextureIndex;
+    uint materialIndex;
+    uint m_diffuseTextureIndex; // id to read only texture
 };
 
+// Material type to test read only texture
 struct BindlessMaterial2
 {
-    uint4 materialIndex;
+    uint materialIndex;
+    uint m_diffuseTextureIndex;  // id to rotexture
+};
 
-    float4 m_diffuseColor;
-    uint m_diffuseTextureIndex;
-    uint m_normalTextureIndex;
-    uint m_specularTextureIndex;
+// Material type to test read only cubemap texture
+struct BindlessMaterial3
+{
+    uint materialIndex;
+    uint m_cubeTextureIndex; // id to read only cube map texture
 };
 
 struct PerObject
@@ -56,6 +61,9 @@ ShaderResourceGroup HandleSrg : PerSubMesh
     uint m_perObjectHandle;
     uint m_materialHandle;
     uint m_lightHandle;
+
+    uint m_uvBufferIndex;
+    uint m_uvBufferByteOffset;
 };
 
 struct VertexInput
@@ -65,6 +73,7 @@ struct VertexInput
     float3 m_tangent : TANGENT;
     float3 m_bitangent : BITANGENT;
     float2 m_uv : UV0;
+    uint m_vertexId : SV_VertexID;
 };
 
 struct VertexOutput
@@ -97,7 +106,8 @@ VertexOutput MainVS(VertexInput vsInput)
 
     const float4 worldPosition = mul(perObject.m_localToWorldMatrix,  float4(vsInput.m_position, 1.0));
     OUT.m_position = mul(worldToClipMatrix, worldPosition);
-    OUT.m_uv = vsInput.m_uv;
+    OUT.m_uv =
+        asfloat(Bindless::GetByteAddressBuffer(HandleSrg::m_uvBufferIndex).Load2(HandleSrg::m_uvBufferByteOffset + vsInput.m_vertexId * 8));
     OUT.m_normal = normalize(vsInput.m_normal);
 
     return OUT;
@@ -114,54 +124,86 @@ PixelOutput MainPS(VertexOutput psInput)
     uint offset = 0;
     
     // Read the material index to identify the material type
-    uint4 materialIndex;
-    {
-        ReadFromFloatBuffer(materialIndex, HandleSrg::m_materialHandle, offset);
-    }
+    uint materialIndex;
+    ReadFromFloatBuffer(materialIndex, HandleSrg::m_materialHandle, offset);
     
-    // Read the material data from the FloatBuffer depending ont he material index
+    // Read the material data from the FloatBuffer depending on the material index.
+    // BindlessMaterial0 is suppose to test the following resource types
+    //     roBuffer - We read the color value from a roBuffer via Bindless SRG
+    //     rwBuffer - We read a multiplier vlue from a rwBuffer via Bindless SRG
+    //     roTexture - We read another color multiplier from a rwTexture via Bindless SRG
     if(materialIndex.x == 0) // Albedo material
     {
         BindlessMaterial0 bindlessMaterial0; 
-        ReadFromFloatBuffer(bindlessMaterial0.m_diffuseColor, HandleSrg::m_materialHandle, offset);
+        //Read all the ids for the resources in question
+        ReadFromFloatBuffer(bindlessMaterial0.m_colorBufferId, HandleSrg::m_materialHandle, offset);
+        ReadFromFloatBuffer(bindlessMaterial0.m_colorBufferMultiplierBufferId, HandleSrg::m_materialHandle, offset);
+        ReadFromFloatBuffer(bindlessMaterial0.m_colorImageMultiplierBufferId, HandleSrg::m_materialHandle, offset);
         
-        OUT.m_color = float4(bindlessMaterial0.m_diffuseColor.xyz, 1.0);
+        //Get the bindless resource id and then extract the color value from roBuffer
+        uint colorDataIndex = IndirectionBufferSrg::m_bufferIndirectionBuffer.Load(bindlessMaterial0.m_colorBufferId * 4);
+        ByteAddressBuffer colorData = Bindless::GetByteAddressBuffer(colorDataIndex);
+        float4 colorVal = asfloat(colorData.Load4(0));
+
+        //Get the bindless resource id and then extract the color multiplier from rwBuffer
+        uint colorBufferMultiplierIndex = IndirectionBufferSrg::m_bufferIndirectionBuffer.Load(bindlessMaterial0.m_colorBufferMultiplierBufferId * 4);
+        RWByteAddressBuffer colorMultiplier = Bindless::GetRWByteAddressBuffer(colorBufferMultiplierIndex);
+        uint colorMultiplierVal = colorMultiplier.Load(0);
+
+        //Get the bindless resource id and then extract another color multiplier from rwTexture
+        uint colorImageMultiplierIndex = IndirectionBufferSrg::m_imageIndirectionBuffer.Load(bindlessMaterial0.m_colorImageMultiplierBufferId * 4);
+        RWTexture2D<float4> colorImageMultiplier = Bindless::GetRWTexture2D(colorImageMultiplierIndex);
+        float colorImageMultiplierVal = colorImageMultiplier.Load(0).x;
+       
+        //Calculate the final color
+        OUT.m_color = colorVal * colorMultiplierVal * colorImageMultiplierVal;
     }
-    else if(materialIndex.x == 1) // Texture sample material
+    else if(materialIndex.x == 1) // Test unbounded array in a non-bindless srg. For metal we fallback to bindless srg
     {
         BindlessMaterial1 bindlessMaterial1; 
-        ReadFromFloatBuffer(bindlessMaterial1.m_diffuseColor, HandleSrg::m_materialHandle, offset);
+        //Read the id for read only texture
         ReadFromFloatBuffer(bindlessMaterial1.m_diffuseTextureIndex, HandleSrg::m_materialHandle, offset);
         
+        //Extract the color value. UB_DIRECTBINDING_NOTSUPPPORTED assumes that the RHI can not support unbounded arrays in a non-bindless SRG
 #ifdef UB_DIRECTBINDING_NOTSUPPPORTED 
         Texture2D texture = Bindless::GetTexture2D(
-            IndirectionBufferSrg::m_indirectionBuffer.Load(bindlessMaterial1.m_diffuseTextureIndex * 4));
+            IndirectionBufferSrg::m_imageIndirectionBuffer.Load(bindlessMaterial1.m_diffuseTextureIndex * 4));
 #else   
-        // % 8 for wrap-around texture index as specified in ImageSrg.m_textureArray
+        //% 8 for wrap-around texture index as specified in ImageSrg.m_textureArray
         Texture2D texture = ImageSrg::m_textureArray[bindlessMaterial1.m_diffuseTextureIndex % 8]; 
 #endif
-        OUT.m_color = texture.Sample(SamplerSrg::m_sampler, psInput.m_uv);
+        OUT.m_color = texture.Sample(SamplerSrg::m_sampler, psInput.m_uv) * 10;
     }
-    else if(materialIndex.x == 2) // Shaded material
+    else if(materialIndex.x == 2) // Test read only texture via Bindless SRG
     {
-        float4 color; 
         BindlessMaterial2 bindlessMaterial2; 
-        ReadFromFloatBuffer(bindlessMaterial2.m_diffuseColor, HandleSrg::m_materialHandle, offset);
+        //Read the id related to the read only texture we are testing
         ReadFromFloatBuffer(bindlessMaterial2.m_diffuseTextureIndex, HandleSrg::m_materialHandle, offset);
-        ReadFromFloatBuffer(bindlessMaterial2.m_normalTextureIndex, HandleSrg::m_materialHandle, offset);
-        ReadFromFloatBuffer(bindlessMaterial2.m_specularTextureIndex, HandleSrg::m_materialHandle, offset);
+        
+        //Get the bindless id for the texture in question
+        uint index = IndirectionBufferSrg::m_imageIndirectionBuffer.Load(bindlessMaterial2.m_diffuseTextureIndex * 4);
+        Texture2D texture = Bindless::GetTexture2D(index);
+        //Get the color value from the texture
+        float4 color = texture.Sample(SamplerSrg::m_sampler, psInput.m_uv);
 
-        Texture2D texture = Bindless::GetTexture2D(
-            IndirectionBufferSrg::m_indirectionBuffer.Load(bindlessMaterial2.m_diffuseTextureIndex * 4));
-        color = texture.Sample(SamplerSrg::m_sampler, psInput.m_uv);
-
+        //Apply basic shading
         float3 lightDir;
         uint lightOffset = 0;
         ReadFromFloatBuffer(lightDir, HandleSrg::m_lightHandle, lightOffset); 
         lightDir = normalize(-lightDir);
-
         color *= dot(lightDir, psInput.m_normal) * 8.0;
         OUT.m_color = color;
+    }
+    else if(materialIndex.x == 3) // Test read only cubemap texture
+    {
+        BindlessMaterial3 bindlessMaterial3; 
+        //Read the id related to the read only cubemap texture we are testing
+        ReadFromFloatBuffer(bindlessMaterial3.m_cubeTextureIndex, HandleSrg::m_materialHandle, offset);   
+
+        //Get the bindless resource id and then extract color fromt he cubemap texture
+        uint index = IndirectionBufferSrg::m_imageIndirectionBuffer.Load(bindlessMaterial3.m_cubeTextureIndex * 4);
+        TextureCube texture = Bindless::GetTextureCube(index);
+        OUT.m_color = texture.Sample(SamplerSrg::m_sampler, float3(psInput.m_uv,1));
     }
     else
     {

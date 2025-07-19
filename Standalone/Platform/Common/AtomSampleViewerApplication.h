@@ -37,6 +37,11 @@ namespace AtomSampleViewer
 
         int GetExitCode() const { return m_exitCode; }
 
+        //////////////////////////////////////////////////////////////////////////
+        // AZ::ComponentApplication
+        AZ::ComponentTypeList GetRequiredSystemComponents() const override;
+        //////////////////////////////////////////////////////////////////////////
+
     private:
         //////////////////////////////////////////////////////////////////////////
         // AzFramework::AssetSystemStatusBus::Handler
@@ -71,6 +76,9 @@ namespace AtomSampleViewer
 
         // SampleComponentManagerNotificationBus ...
         void OnSampleManagerActivated() override;
+
+        // AzFramework::Application ...
+        void CreateStaticModules(AZStd::vector<AZ::Module*>& outModules) override;
 
         void WriteStartupLog();
         void ReadAutomatedTestOptions();

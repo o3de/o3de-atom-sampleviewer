@@ -149,11 +149,11 @@ namespace AtomSampleViewer
         const AZ::RHI::Ptr<AZ::RHI::Device> device = Utils::GetRHIDevice();
         AZ::RHI::ResultCode result = AZ::RHI::ResultCode::Success;
 
-        m_bufferPool = AZ::RHI::Factory::Get().CreateBufferPool();
+        m_bufferPool = aznew AZ::RHI::BufferPool();
         AZ::RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = AZ::RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = AZ::RHI::HeapMemoryLevel::Device;
-        result = m_bufferPool->Init(*device, bufferPoolDesc);
+        result = m_bufferPool->Init(bufferPoolDesc);
         if (result != AZ::RHI::ResultCode::Success)
         {
             AZ_Error("MultiThreadComponent", false, "Failed to initialize buffer pool with error code %d", result);
@@ -162,7 +162,7 @@ namespace AtomSampleViewer
 
         SingleCubeBufferData bufferData = CreateSingleCubeBufferData(AZ::Vector4(1.0f, 0.0f, 0.0f, 0.0f));
 
-        m_inputAssemblyBuffer = AZ::RHI::Factory::Get().CreateBuffer();
+        m_inputAssemblyBuffer = aznew AZ::RHI::Buffer();
         AZ::RHI::BufferInitRequest request;
 
         request.m_buffer = m_inputAssemblyBuffer.get();
@@ -175,29 +175,28 @@ namespace AtomSampleViewer
             return;
         }
 
-        m_streamBufferViews[0] =
-        {
+        m_geometryView.SetDrawArguments(AZ::RHI::DrawIndexed(0, s_geometryIndexCount, 0));
+
+        m_geometryView.AddStreamBufferView({
             *m_inputAssemblyBuffer,
             offsetof(SingleCubeBufferData, m_positions),
             sizeof(SingleCubeBufferData::m_positions),
             sizeof(VertexPosition)
-        };
+        });
 
-        m_streamBufferViews[1] =
-        {
+        m_geometryView.AddStreamBufferView({
             *m_inputAssemblyBuffer,
             offsetof(SingleCubeBufferData, m_colors),
             sizeof(SingleCubeBufferData::m_colors),
             sizeof(VertexColor)
-        };
+        });
 
-        m_indexBufferView =
-        {
+        m_geometryView.SetIndexBufferView({
             *m_inputAssemblyBuffer,
             offsetof(SingleCubeBufferData, m_indices),
             sizeof(SingleCubeBufferData::m_indices),
             AZ::RHI::IndexFormat::Uint16
-        };
+        });
 
         AZ::RHI::InputStreamLayoutBuilder layoutBuilder;
         layoutBuilder.SetTopology(AZ::RHI::PrimitiveTopology::TriangleList);
@@ -206,7 +205,7 @@ namespace AtomSampleViewer
         m_streamLayoutDescriptor.Clear();
         m_streamLayoutDescriptor = layoutBuilder.End();
 
-        AZ::RHI::ValidateStreamBufferViews(m_streamLayoutDescriptor, m_streamBufferViews);
+        AZ::RHI::ValidateStreamBufferViews(m_streamLayoutDescriptor, m_geometryView, m_geometryView.GetFullStreamBufferIndices());
     }
 
     void MultiThreadComponent::CreatePipeline()
@@ -284,7 +283,9 @@ namespace AtomSampleViewer
                 dsDesc.m_imageViewDescriptor.m_overrideFormat = device->GetNearestSupportedFormat(AZ::RHI::Format::D24_UNORM_S8_UINT, AZ::RHI::FormatCapabilities::DepthStencil);
                 dsDesc.m_loadStoreAction.m_clearValue = AZ::RHI::ClearValue::CreateDepthStencil(1.0f, 0);
                 dsDesc.m_loadStoreAction.m_loadAction = AZ::RHI::AttachmentLoadAction::Clear;
-                frameGraph.UseDepthStencilAttachment(dsDesc, AZ::RHI::ScopeAttachmentAccess::Write);
+                frameGraph.UseDepthStencilAttachment(
+                    dsDesc, AZ::RHI::ScopeAttachmentAccess::Write,
+                    AZ::RHI::ScopeAttachmentStage::EarlyFragmentTest | AZ::RHI::ScopeAttachmentStage::LateFragmentTest);
             }
 
             // We will submit s_numberOfCubes draw items.
@@ -312,10 +313,6 @@ namespace AtomSampleViewer
             commandList->SetViewports(&m_viewport, 1);
             commandList->SetScissors(&m_scissor, 1);
 
-            AZ::RHI::DrawIndexed drawIndexed;
-            drawIndexed.m_indexCount = s_geometryIndexCount;
-            drawIndexed.m_instanceCount = 1;
-
             if (context.GetCommandListIndex() == context.GetCommandListCount() - 1)
             {
 #if defined(AZ_DEBUG_BUILD)
@@ -326,17 +323,16 @@ namespace AtomSampleViewer
             
             for (uint32_t i = context.GetSubmitRange().m_startIndex; i < context.GetSubmitRange().m_endIndex; ++i)
             {
-                const AZ::RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[i]->GetRHIShaderResourceGroup() };
+                const AZ::RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
+                    m_shaderResourceGroups[i]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
+                };
 
-                AZ::RHI::DrawItem drawItem;
-                drawItem.m_arguments = drawIndexed;
-                drawItem.m_pipelineState = m_pipelineState.get();
-                drawItem.m_indexBufferView = &m_indexBufferView;
+                AZ::RHI::DeviceDrawItem drawItem;
+                drawItem.m_geometryView = m_geometryView.GetDeviceGeometryView(context.GetDeviceIndex());
+                drawItem.m_streamIndices = m_geometryView.GetFullStreamBufferIndices();
+                drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(AZ::RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
-                drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
-                drawItem.m_streamBufferViews = m_streamBufferViews.data();
-
                 commandList->Submit(drawItem, i);
             }
         };

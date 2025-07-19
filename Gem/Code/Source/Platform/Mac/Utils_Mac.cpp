@@ -21,21 +21,25 @@ namespace AtomSampleViewer
             return true;
         }
 
-        bool RunDiffTool(const AZStd::string& filePathA, const AZStd::string& filePathB)
+        AZStd::string GetDefaultDiffToolPath_Impl()
+        {
+            return AZStd::string("/usr/local/bin/bcompare");
+        }
+
+        bool RunDiffTool_Impl(const AZStd::string& diffToolPath, const AZStd::string& filePathA, const AZStd::string& filePathB)
         {
             bool result = true;
-            AZStd::string executablePath = "/usr/local/bin/bcompare";
-           
+
             //Fork a process to run Beyond Compare app
             pid_t childPid = fork();
-            
+
             if (childPid == 0)
             {
                 //In child process
-                char* args[] = { const_cast<char*>(executablePath.c_str()), const_cast<char*>(filePathA.c_str()), const_cast<char*>(filePathB.c_str()), static_cast<char*>(0)};
-                execv(executablePath.c_str(), args);
-                
-                AZ_TracePrintf("RunDiffTool", "RunDiffTool: Unable to launch Beyond Compare %s : errno = %s . Make sure you have installed Beyond Compare command line tools.", executablePath.c_str(), strerror(errno));
+                char* args[] = { const_cast<char*>(diffToolPath.c_str()), const_cast<char*>(filePathA.c_str()), const_cast<char*>(filePathB.c_str()), static_cast<char*>(0)};
+                execv(diffToolPath.c_str(), args);
+
+                AZ_TracePrintf("RunDiffTool", "RunDiffTool: Unable to launch Diff Tool %s : errno = %s .", diffToolPath.c_str(), strerror(errno));
                 std::cerr << strerror(errno) << std::endl;
 
                 _exit(errno);

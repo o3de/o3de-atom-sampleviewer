@@ -106,9 +106,9 @@ namespace AtomSampleViewer
     {
         auto traceLevel = AZ::RPI::AssetUtils::TraceLevel::Assert;
         m_sponzaInteriorAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>
-            ("Objects/Sponza.azmodel", traceLevel);
+            ("Objects/Sponza.fbx.azmodel", traceLevel);
 
-        m_sponzaInteriorMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_sponzaInteriorAsset });
+        m_sponzaInteriorMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor(m_sponzaInteriorAsset));
 
         // rotate the entities 180 degrees about Z (the vertical axis)
         // This makes it consistent with how it was positioned in the world when the world was Y-up.
@@ -153,6 +153,7 @@ namespace AtomSampleViewer
 
         AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Lux> sunColor(AZ::Color(1.0f, 1.0f, 0.97f, 1.0f) * 20.f);
         m_directionalLightFeatureProcessor->SetRgbIntensity(handle, sunColor);
+        m_directionalLightFeatureProcessor->SetShadowEnabled(handle, true);
         m_directionalLightFeatureProcessor->SetCascadeCount(handle, 4);
         m_directionalLightFeatureProcessor->SetShadowmapSize(handle, AZ::Render::ShadowmapSizeNamespace::ShadowmapSize::Size2048);
         m_directionalLightFeatureProcessor->SetViewFrustumCorrectionEnabled(handle, true);
@@ -379,7 +380,7 @@ namespace AtomSampleViewer
 
         FinalizeLoadBenchmarkData();
 
-        const AZStd::string unresolvedPath = AZStd::string::format("@user@/benchmarks/sponzaLoad_%ld.xml", time(0));
+        const AZStd::string unresolvedPath = "@user@/benchmarks/sponzaLoad_" + AZStd::to_string(time(0)) + ".xml";
         char sponzaLoadBenchmarkDataFilePath[AZ_MAX_PATH_LEN] = { 0 };
         AZ::IO::FileIOBase::GetInstance()->ResolvePath(unresolvedPath.c_str(), sponzaLoadBenchmarkDataFilePath, AZ_MAX_PATH_LEN);
 
@@ -477,7 +478,7 @@ namespace AtomSampleViewer
 
         FinalizeRunBenchmarkData();
 
-        const AZStd::string unresolvedPath = AZStd::string::format("@user@/benchmarks/sponzaRun_%ld.xml", time(0));
+        const AZStd::string unresolvedPath = "@user@/benchmarks/sponzaRun_" + AZStd::to_string(time(0)) + ".xml";
 
         char sponzaRunBenchmarkDataFilePath[AZ_MAX_PATH_LEN] = { 0 };
         AZ::IO::FileIOBase::GetInstance()->ResolvePath(unresolvedPath.c_str(), sponzaRunBenchmarkDataFilePath, AZ_MAX_PATH_LEN);
@@ -504,8 +505,8 @@ namespace AtomSampleViewer
         AzFramework::WindowSize windowSize;
         AzFramework::WindowRequestBus::EventResult(
             windowSize,
-            windowHandle,
-            &AzFramework::WindowRequestBus::Events::GetClientAreaSize);
+            windowHandle, 
+            &AzFramework::WindowRequestBus::Events::GetRenderResolution);
 
         const float loadingWindowWidth = 225.0f;
         const float loadingWindowHeight = 65.0f;
@@ -550,8 +551,8 @@ namespace AtomSampleViewer
         AzFramework::WindowSize windowSize;
         AzFramework::WindowRequestBus::EventResult(
             windowSize,
-            windowHandle,
-            &AzFramework::WindowRequestBus::Events::GetClientAreaSize);
+            windowHandle, 
+            &AzFramework::WindowRequestBus::Events::GetRenderResolution);
 
         const float halfWindowWidth = windowSize.m_width * 0.5f;
         const float halfWindowHeight = windowSize.m_height * 0.5f;

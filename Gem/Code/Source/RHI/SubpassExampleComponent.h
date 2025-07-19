@@ -72,7 +72,7 @@ namespace AtomSampleViewer
 
         struct ModelData
         {
-            AZ::RPI::ModelLod::StreamBufferViewList m_streamBufferList;
+            AZ::RHI::StreamBufferIndices m_streamIndices;
             AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_pipelineState;
             AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_shaderResourceGroup;
             ModelType m_modelType = ModelType_ShaderBall;
@@ -109,6 +109,8 @@ namespace AtomSampleViewer
         AZ::RHI::AttachmentId m_normalAttachmentId;
         AZ::RHI::AttachmentId m_positionAttachmentId;
         AZ::RHI::AttachmentId m_depthStencilAttachmentId;
+
+        AZ::RHI::GeometryView m_compositeGeometryView;
 
         AZ::EntityId m_cameraEntityId;
         AzFramework::EntityContextId m_entityContextId;

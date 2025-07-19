@@ -7,9 +7,10 @@
  */
 
 #include <viewsrg.srgi>
-#include <Atom/RPI/ShaderResourceGroups/DefaultDrawSrg.azsli>
 #include <Atom/Features/PBR/AlphaUtils.azsli>
 #include <Atom/Features/PBR/DefaultObjectSrg.azsli>
+#include <Atom/RPI/ShaderResourceGroups/DefaultDrawSrg.azsli>
+#include <Atom/Features/InstancedTransforms.azsli>
 #include <Atom/Features/Pipeline/Forward/ForwardPassSrg.azsli>
 #include <Atom/Features/Pipeline/Forward/ForwardPassOutput.azsli>
 #include <Atom/Features/ColorManagement/TransformColor.azsli>
@@ -50,29 +51,31 @@ struct VSOutput
     float3 m_worldPosition : UV0;
     float2 m_uv : UV1;
     float3 m_shadowCoords[ViewSrg::MaxCascadeCount] : UV3;
+    uint m_instanceId : SV_InstanceID;
 };
 
 option bool o_emissive_useTexture; 
 
-VSOutput MainVS(VSInput IN)
+VSOutput MainVS(VSInput IN, uint instanceId : SV_InstanceID)
 {
     VSOutput OUT;
-    float3 worldPosition = mul(ObjectSrg::GetWorldMatrix(), float4(IN.m_position, 1.0)).xyz;
+    float3 worldPosition = mul(GetObjectToWorldMatrix(instanceId), float4(IN.m_position, 1.0)).xyz;
     OUT.m_worldPosition = worldPosition;
     OUT.m_position = mul(ViewSrg::m_viewProjectionMatrix, float4(OUT.m_worldPosition, 1.0));
     OUT.m_normal = IN.m_normal;
     OUT.m_tangent = IN.m_tangent;
     OUT.m_uv = IN.m_uv;
+    OUT.m_instanceId = instanceId;
     return OUT;
 }
 
 ForwardPassOutput MainPS(VSOutput IN)
 {
-    float4x4 objectToWorld = ObjectSrg::GetWorldMatrix();
-    float3x3 objectToWorldIT = ObjectSrg::GetWorldMatrixInverseTranspose();
+    real4x4 objectToWorld = real4x4(GetObjectToWorldMatrix(IN.m_instanceId));
+    real3x3 objectToWorldIT = real3x3(GetObjectToWorldMatrixInverseTranspose(IN.m_instanceId));
 
     float3 vertexNormal, vertexTangent, vertexBitangent;
-    ConstructTBN(IN.m_normal, IN.m_tangent, objectToWorld, objectToWorldIT, vertexNormal, vertexTangent, vertexBitangent);
+    ConstructTBN(real3(IN.m_normal), real4(IN.m_tangent), objectToWorld, objectToWorldIT, vertexNormal, vertexTangent, vertexBitangent);
 
     // ------- Surface -------
 
@@ -99,7 +102,7 @@ ForwardPassOutput MainPS(VSOutput IN)
 
     // Light iterator
     lightingData.tileIterator.Init(IN.m_position, PassSrg::m_lightListRemapped, PassSrg::m_tileLightData);
-    lightingData.Init(surface.position, surface.normal, surface.roughnessLinear);
+    lightingData.Init(surface.position, surface.normal, surface.roughnessLinear, ViewSrg::m_worldPosition.xyz);
 
     // Emissive
     float3 emissive = MaterialSrg::m_emissiveColor.rgb * MaterialSrg::m_emissiveIntensity;

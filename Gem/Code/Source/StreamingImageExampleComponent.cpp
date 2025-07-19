@@ -114,6 +114,8 @@ namespace AtomSampleViewer
 
     void StreamingImageExampleComponent::Activate()
     {
+        m_geometryView.SetDrawArguments(RHI::DrawLinear(4, 0));
+
         // Save the streaming image pool's budget and streaming image pool controller's mip bias 
         // These would be recovered when exist the example
         Data::Instance<RPI::StreamingImagePool> streamingImagePool = RPI::ImageSystemInterface::Get()->GetSystemStreamingPool();
@@ -345,7 +347,7 @@ namespace AtomSampleViewer
         }
 
         // only need to set the image the first time all images were streamed
-        if (m_streamingImageEnd == 0 && numStreamed == m_numImageCreated && m_numImageCreated > 0)
+        if (m_streamingImageEnd == 0 && numStreamed == m_numImageCreated && m_numImageCreated > 0 && m_numImageAssetQueued == m_numImageCreated)
         {
             m_streamingImageEnd = AZStd::GetTimeUTCMilliSecond();
             for (auto& imageInfo : m_images)
@@ -372,7 +374,7 @@ namespace AtomSampleViewer
         if (m_imguiSidebar.Begin())
         {
             Data::Instance<RPI::StreamingImagePool> streamingImagePool = RPI::ImageSystemInterface::Get()->GetSystemStreamingPool();
-            const RHI::StreamingImagePool* rhiPool = streamingImagePool->GetRHIPool();
+            const auto* rhiPool = streamingImagePool->GetRHIPool();
             const RHI::HeapMemoryUsage& memoryUsage = rhiPool->GetHeapMemoryUsage(RHI::HeapMemoryLevel::Device);
 
             const size_t MB = 1024*1024;
@@ -390,7 +392,7 @@ namespace AtomSampleViewer
             size_t budgetInBytes = memoryUsage.m_budgetInBytes;
             int budgetInMB = aznumeric_cast<int>(budgetInBytes/MB);
             ImGui::Text("GPU memory budget: %d MB", budgetInMB);
-            if (ScriptableImGui::SliderInt("MB", &budgetInMB, RHI::StreamingImagePool::ImagePoolMininumSizeInBytes/MB, 512))
+            if (ScriptableImGui::SliderInt("MB", &budgetInMB, RHI::DeviceStreamingImagePool::ImagePoolMininumSizeInBytes / MB, 512))
             {
                 streamingImagePool->SetMemoryBudget(budgetInMB * (1024*1024));
             }
@@ -490,14 +492,13 @@ namespace AtomSampleViewer
         for (Image3dToDraw& image3d : m_3dImages)
         {
             // Build draw packet...
-            RHI::DrawPacketBuilder drawPacketBuilder;
+            RHI::DrawPacketBuilder drawPacketBuilder{RHI::MultiDevice::DefaultDevice};
             drawPacketBuilder.Begin(nullptr);
-            RHI::DrawLinear drawLinear;
-            drawLinear.m_vertexCount = 4;
-            drawLinear.m_instanceCount = image3d.m_sliceCount;
-            drawPacketBuilder.SetDrawArguments(drawLinear);
+            drawPacketBuilder.SetGeometryView(&m_geometryView);
+            drawPacketBuilder.SetDrawInstanceArguments(RHI::DrawInstanceArguments(image3d.m_sliceCount, 0));
 
             RHI::DrawPacketBuilder::DrawRequest drawRequest;
+            drawRequest.m_streamIndices = m_geometryView.GetFullStreamBufferIndices();
             drawRequest.m_listTag = m_image3dDrawListTag;
             drawRequest.m_pipelineState = m_image3dPipelineState.get();
             drawRequest.m_sortKey = 0;
@@ -505,22 +506,21 @@ namespace AtomSampleViewer
             drawPacketBuilder.AddDrawItem(drawRequest);
 
             // Submit draw packet...
-            AZStd::unique_ptr<const RHI::DrawPacket> drawPacket(drawPacketBuilder.End());
+            auto drawPacket{drawPacketBuilder.End()};
             m_dynamicDraw->AddDrawPacket(m_scene, AZStd::move(drawPacket));
         }
     }
 
-    void StreamingImageExampleComponent::DrawImage(const ImageToDraw* imageInfo)
+    void StreamingImageExampleComponent::DrawImage(ImageToDraw* imageInfo)
     {
         // Build draw packet...
-        RHI::DrawPacketBuilder drawPacketBuilder;
+        RHI::DrawPacketBuilder drawPacketBuilder{RHI::MultiDevice::DefaultDevice};
         drawPacketBuilder.Begin(nullptr);
-        RHI::DrawLinear drawLinear;
-        drawLinear.m_vertexCount = 4;
-        drawLinear.m_instanceCount = imageInfo->m_image->GetMipLevelCount();
-        drawPacketBuilder.SetDrawArguments(drawLinear);
+        drawPacketBuilder.SetGeometryView(&m_geometryView);
+        drawPacketBuilder.SetDrawInstanceArguments(RHI::DrawInstanceArguments(imageInfo->m_image->GetMipLevelCount(), 0));
 
         RHI::DrawPacketBuilder::DrawRequest drawRequest;
+        drawRequest.m_streamIndices = m_geometryView.GetFullStreamBufferIndices();
         drawRequest.m_listTag = m_drawListTag;
         drawRequest.m_pipelineState = m_pipelineState.get();
         drawRequest.m_sortKey = 0;
@@ -528,7 +528,7 @@ namespace AtomSampleViewer
         drawPacketBuilder.AddDrawItem(drawRequest);
 
         // Submit draw packet...
-        AZStd::unique_ptr<const RHI::DrawPacket> drawPacket(drawPacketBuilder.End());
+        auto drawPacket{drawPacketBuilder.End()};
         m_dynamicDraw->AddDrawPacket(m_scene, AZStd::move(drawPacket));
     }
 
@@ -653,7 +653,7 @@ namespace AtomSampleViewer
         // will be uploaded with a single command
         {
             AZStd::vector<uint8_t> imageData;
-            RHI::ImageSubresourceLayout layout;
+            RHI::DeviceImageSubresourceLayout layout;
             RHI::Format format = {};
             BasicRHIComponent::CreateImage3dData(imageData, layout, format, {
                                                             "textures/streaming/streaming13.dds.streamingimage",

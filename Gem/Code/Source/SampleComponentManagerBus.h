@@ -10,8 +10,63 @@
 #include <AzCore/EBus/EBus.h>
 #include <AzCore/std/string/string.h>
 
+namespace AZ
+{
+    class ComponentDescriptor;
+}
+
 namespace AtomSampleViewer
 {
+    enum class SamplePipelineType : uint32_t
+    {
+        RHI = 0,
+        RPI
+    };
+
+    class SampleEntry
+    {
+    public:
+        AZStd::string m_parentMenuName;
+        AZStd::string m_sampleName;
+        // m_parentMenuName/m_sampleName
+        AZStd::string m_fullName;
+        AZ::Uuid m_sampleUuid;
+        AZStd::function<bool()> m_isSupportedFunc;
+        SamplePipelineType m_pipelineType = SamplePipelineType::RHI;
+        AZ::ComponentDescriptor* m_componentDescriptor;
+        AZStd::string m_contentWarning;
+        AZStd::string m_contentWarningTitle;
+
+        bool operator==(const SampleEntry& other)
+        {
+            return other.m_sampleName == m_sampleName && other.m_parentMenuName == m_parentMenuName;
+        }
+    };
+
+    template <typename T>
+    static SampleEntry NewSample(SamplePipelineType type, const char* menuName, const AZStd::string& name)
+    {
+        SampleEntry entry;
+        entry.m_sampleName = name;
+        entry.m_sampleUuid = azrtti_typeid<T>();
+        entry.m_pipelineType = type;
+        entry.m_componentDescriptor = T::CreateDescriptor();
+        entry.m_parentMenuName = menuName;
+        entry.m_fullName = entry.m_parentMenuName + '/' + entry.m_sampleName;
+        entry.m_contentWarning = T::ContentWarning;
+        entry.m_contentWarningTitle = T::ContentWarningTitle;
+
+        return entry;
+    }
+
+    template <typename T>
+    static SampleEntry NewSample(SamplePipelineType type, const char* menuName, const AZStd::string& name, AZStd::function<bool()> isSupportedFunction)
+    {
+        SampleEntry entry = NewSample<T>(type, menuName, name);
+        entry.m_isSupportedFunc = isSupportedFunction;
+        return entry;
+    }
+
     class SampleComponentManagerRequests
         : public AZ::EBusTraits
     {
@@ -41,7 +96,16 @@ namespace AtomSampleViewer
 
         //! Set the number of MSAA samples
         //! @param numMSAASamples the number of MSAA samples
-        virtual void SetNumMSAASamples(int numMSAASamples) = 0;
+        virtual void SetNumMSAASamples(int16_t numMsaaSamples) = 0;
+
+        //! Gets the number of MSAA samples
+        virtual int16_t GetNumMSAASamples() = 0;
+
+        //! Sets the default number of MSAA samples
+        virtual void SetDefaultNumMSAASamples(int16_t defaultNumMsaaSamples) = 0;
+
+        //! Gets the default number of MSAA samples
+        virtual int16_t GetDefaultNumMSAASamples() = 0;
 
         //! Set the number of MSAA samples to the platform default
         virtual void ResetNumMSAASamples() = 0;
@@ -59,6 +123,21 @@ namespace AtomSampleViewer
         virtual void EnableXrPipelines(bool value) = 0;
     };
     using SampleComponentManagerRequestBus = AZ::EBus<SampleComponentManagerRequests>;
+
+    class ScriptManager;
+    class ScriptableImGui;
+
+    class SampleComponentSingletonRequests
+        : public AZ::EBusTraits
+    {
+    public:
+
+        virtual ScriptManager* GetScriptManagerInstance() = 0;
+        virtual ScriptableImGui* GetScriptableImGuiInstance() = 0;
+        virtual void RegisterSampleComponent(const SampleEntry& sample) = 0;
+    };
+    using SampleComponentSingletonRequestBus = AZ::EBus<SampleComponentSingletonRequests>;
+
 
     class SampleComponentManagerNotifications
         : public AZ::EBusTraits

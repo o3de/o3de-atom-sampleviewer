@@ -29,7 +29,7 @@ namespace AtomSampleViewer
 {
     namespace
     {
-        static constexpr const char* TargetMeshName = "objects/plane.azmodel";
+        static constexpr const char* TargetMeshName = "objects/plane.fbx.azmodel";
         static constexpr const char* TargetMaterialName = "materials/defaultpbr.azmaterial";
     }
 
@@ -54,7 +54,7 @@ namespace AtomSampleViewer
 
         // List of all assets this example needs.
         AZStd::vector<AZ::AssetCollectionAsyncLoader::AssetToLoadInfo> assetList = {
-            {"objects/plane.azmodel", azrtti_typeid<AZ::RPI::ModelAsset>()}, // The model
+            { TargetMeshName, azrtti_typeid<AZ::RPI::ModelAsset>() }, // The model
         };
 
         ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::PauseScript);
@@ -79,7 +79,7 @@ namespace AtomSampleViewer
     {
         const auto meshAsset = m_assetLoadManager.GetAsset<AZ::RPI::ModelAsset>(TargetMeshName);
         const auto materialAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::MaterialAsset>(TargetMaterialName, AZ::RPI::AssetUtils::TraceLevel::Assert);
-        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ meshAsset }, AZ::RPI::Material::FindOrCreate(materialAsset));
+        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor(meshAsset, AZ::RPI::Material::FindOrCreate(materialAsset)));
         ScaleObjectToFitDecals();
     }
 

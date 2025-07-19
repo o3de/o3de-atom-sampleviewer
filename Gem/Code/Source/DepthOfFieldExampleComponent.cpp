@@ -44,7 +44,7 @@ namespace AtomSampleViewer
         m_directionalLightFeatureProcessor = m_scene->GetFeatureProcessor<Render::DirectionalLightFeatureProcessorInterface>();
 
         // Create the assets
-        m_bunnyModelAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>("objects/bunny.azmodel", RPI::AssetUtils::TraceLevel::Assert);
+        m_bunnyModelAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>("objects/bunny.fbx.azmodel", RPI::AssetUtils::TraceLevel::Assert);
         m_materialAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::MaterialAsset>(DefaultPbrMaterialPath, RPI::AssetUtils::TraceLevel::Assert);
 
         CreateMeshes();
@@ -192,7 +192,7 @@ namespace AtomSampleViewer
 
         for (MeshHandle& meshHandle : m_meshHandles)
         {
-            meshHandle = GetMeshFeatureProcessor()->AcquireMesh(Render::MeshHandleDescriptor{ m_bunnyModelAsset }, materialInstance);
+            meshHandle = GetMeshFeatureProcessor()->AcquireMesh(Render::MeshHandleDescriptor(m_bunnyModelAsset, materialInstance));
 
             auto transform = AZ::Transform::CreateTranslation(translation);
             transform *= scaleTransform;

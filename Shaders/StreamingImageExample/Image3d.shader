@@ -5,7 +5,7 @@
         "Depth" : { "Enable" : false, "CompareFunc" : "GreaterEqual" }
     },
 
-    "DrawList" : "forward",
+    "DrawList" : "2dpass",
 
     "ProgramSettings":
     {

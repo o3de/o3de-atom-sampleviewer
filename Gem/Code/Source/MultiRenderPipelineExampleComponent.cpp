@@ -110,10 +110,10 @@ namespace AtomSampleViewer
             RPI::AssetUtils::TraceLevel::Assert);
         auto floorAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::ModelAsset>(CubeModelFilePath,
             RPI::AssetUtils::TraceLevel::Assert);
-        m_floorMeshHandle = meshFeatureProcessor->AcquireMesh(Render::MeshHandleDescriptor{ floorAsset }, material);
+        m_floorMeshHandle = meshFeatureProcessor->AcquireMesh(Render::MeshHandleDescriptor(floorAsset, material));
         for (uint32_t bunnyIndex = 0; bunnyIndex < BunnyCount; bunnyIndex++)
         {
-            m_bunnyMeshHandles[bunnyIndex] = meshFeatureProcessor->AcquireMesh(Render::MeshHandleDescriptor{ bunnyAsset }, material);
+            m_bunnyMeshHandles[bunnyIndex] = meshFeatureProcessor->AcquireMesh(Render::MeshHandleDescriptor(bunnyAsset, material));
         }
 
         const Vector3 floorNonUniformScale{ 12.f, 12.f, 0.1f };
@@ -214,6 +214,7 @@ namespace AtomSampleViewer
         featureProcessor->SetDirection(handle, lightTransform.GetBasis(1));
         AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Lux> lightColor(Color::CreateOne() * 5.0f);
         featureProcessor->SetRgbIntensity(handle, lightColor);
+        featureProcessor->SetShadowEnabled(handle, true);
         featureProcessor->SetCascadeCount(handle, 4);
         featureProcessor->SetShadowmapSize(handle, Render::ShadowmapSize::Size2048);
         featureProcessor->SetViewFrustumCorrectionEnabled(handle, true);
@@ -304,7 +305,12 @@ namespace AtomSampleViewer
         pipelineDesc.m_mainViewTagName = "MainCamera";
         pipelineDesc.m_name = "SecondPipeline";
         pipelineDesc.m_rootPassTemplate = "MainPipeline";
-        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 4;
+
+        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 1;
+        SampleComponentManagerRequestBus::BroadcastResult(
+            pipelineDesc.m_renderSettings.m_multisampleState.m_samples,
+            &SampleComponentManagerRequests::GetNumMSAASamples);
+
         pipelineDesc.m_allowModification = true;
         m_secondPipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_secondWindowContext);
 

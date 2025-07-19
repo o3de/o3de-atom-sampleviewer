@@ -64,9 +64,9 @@ namespace AtomSampleViewer
         {
             const char* modelsPath[] =
             {
-                "objects/shaderball_simple.azmodel",
-                "objects/bunny.azmodel",
-                "testdata/objects/cube/cube.azmodel"
+                "objects/shaderball_simple.fbx.azmodel",
+                "objects/bunny.fbx.azmodel",
+                "testdata/objects/cube/cube.fbx.azmodel"
             };
 
             for (uint32_t i = 0; i < AZ_ARRAY_SIZE(modelsPath); ++i)
@@ -166,7 +166,7 @@ namespace AtomSampleViewer
             }
             m_srg->Compile();
 
-            m_modelStreamBufferViews.resize(m_models.size());
+            m_streamIndices.resize(m_models.size());
             for (uint32_t i = 0; i < m_models.size(); ++i)
             {
                 auto model = m_models[i];
@@ -174,12 +174,12 @@ namespace AtomSampleViewer
                 {
                     Data::Instance<AZ::RPI::ModelLod> modelLod = model->GetLods()[0];
 
-                    m_modelStreamBufferViews[i].resize(modelLod->GetMeshes().size());
+                    m_streamIndices[i].resize(modelLod->GetMeshes().size());
 
-                    for (uint32_t j = 0; j < m_modelStreamBufferViews[i].size(); ++j)
+                    for (uint32_t j = 0; j < m_streamIndices[i].size(); ++j)
                     {
                         modelLod->GetStreamsForMesh(
-                            pipelineStateDescriptor.m_inputStreamLayout, m_modelStreamBufferViews[i][j], nullptr, shader->GetInputContract(),
+                            pipelineStateDescriptor.m_inputStreamLayout, m_streamIndices[i][j], nullptr, shader->GetInputContract(),
                             j);
                     }
                 }
@@ -237,7 +237,7 @@ namespace AtomSampleViewer
         m_srg = nullptr;
         m_modelMatrices.clear();
         m_models.clear();
-        m_modelStreamBufferViews.clear();
+        m_streamIndices.clear();
     }
        
     void RootConstantsExampleComponent::OnTick([[maybe_unused]] float deltaTime, AZ::ScriptTimePoint timePoint)
@@ -294,30 +294,29 @@ namespace AtomSampleViewer
         m_rootConstantData.SetConstant(m_materialIdInputIndex, modelIndex);
         m_rootConstantData.SetConstant(m_modelMatrixInputIndex, m_modelMatrices[modelIndex]);
 
-        const auto& model = m_models[modelIndex];
+        auto& model = m_models[modelIndex];
         if (model)
         {
-            const auto& meshes = model->GetLods()[0]->GetMeshes();
+            AZStd::span<AZ::RPI::ModelLod::Mesh> meshes = model->GetLods()[0]->GetMeshes();
             for (uint32_t i = 0; i < meshes.size(); ++i)
             {
-                auto const& mesh = meshes[i];
+                auto& mesh = meshes[i];
 
                 // Build draw packet and set the values of the inline constants.
-                RHI::DrawPacketBuilder drawPacketBuilder;
+                RHI::DrawPacketBuilder drawPacketBuilder{RHI::MultiDevice::DefaultDevice};
                 drawPacketBuilder.Begin(nullptr);
-                drawPacketBuilder.SetDrawArguments(mesh.m_drawArguments);
-                drawPacketBuilder.SetIndexBufferView(mesh.m_indexBufferView);
+                drawPacketBuilder.SetGeometryView(&mesh);
                 drawPacketBuilder.SetRootConstants(m_rootConstantData.GetConstantData());
                 drawPacketBuilder.AddShaderResourceGroup(m_srg->GetRHIShaderResourceGroup());
 
                 RHI::DrawPacketBuilder::DrawRequest drawRequest;
                 drawRequest.m_listTag = m_drawListTag;
                 drawRequest.m_pipelineState = m_pipelineState.get();
-                drawRequest.m_streamBufferViews = m_modelStreamBufferViews[modelIndex][i];
+                drawRequest.m_streamIndices = m_streamIndices[modelIndex][i];
                 drawRequest.m_sortKey = 0;
                 drawPacketBuilder.AddDrawItem(drawRequest);
 
-                AZStd::unique_ptr<const RHI::DrawPacket> drawPacket(drawPacketBuilder.End());
+                auto drawPacket{drawPacketBuilder.End()};
                 m_dynamicDraw->AddDrawPacket(m_scene, AZStd::move(drawPacket));
             }
         }

@@ -50,12 +50,12 @@ namespace AtomSampleViewer
     {
         using namespace AZ;
         RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
-        m_inputAssemblyBufferPool = RHI::Factory::Get().CreateBufferPool();
+        m_inputAssemblyBufferPool = aznew RHI::BufferPool();
 
         RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-        m_inputAssemblyBufferPool->Init(*device, bufferPoolDesc);
+        m_inputAssemblyBufferPool->Init(bufferPoolDesc);
 
         m_depthImageAttachmentId = RHI::AttachmentId("A2C_Depth");
         m_multisamleDepthImageAttachmentId = RHI::AttachmentId("A2C_MSAA_Depth");
@@ -145,7 +145,7 @@ namespace AtomSampleViewer
         RectangleBufferData bufferData;
         SetFullScreenRect(bufferData.m_positions.data(), bufferData.m_uvs.data(), bufferData.m_indices.data());
 
-        m_rectangleInputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
+        m_rectangleInputAssemblyBuffer = aznew RHI::Buffer();
 
         RHI::ResultCode result = RHI::ResultCode::Success;
         RHI::BufferInitRequest request;
@@ -158,22 +158,31 @@ namespace AtomSampleViewer
             AZ_Error(AlphaToCoverage::SampleName, false, "Failed to initialize position buffer with error code %d", result);
             return;
         }
-        
-        m_rectangleStreamBufferViews[0] = {
+
+        m_geometryView.SetDrawArguments(RHI::DrawIndexed(0, 6, 0));
+
+        m_geometryView.SetIndexBufferView({
+            *m_rectangleInputAssemblyBuffer,
+            offsetof(RectangleBufferData, m_indices),
+            sizeof(RectangleBufferData::m_indices),
+            RHI::IndexFormat::Uint16
+        });
+
+        m_geometryView.AddStreamBufferView({
             *m_rectangleInputAssemblyBuffer,
             offsetof(RectangleBufferData, m_positions),
             sizeof(RectangleBufferData::m_positions),
             sizeof(VertexPosition)
-        };
+        });
         
-        m_rectangleStreamBufferViews[1] = {
+        m_geometryView.AddStreamBufferView({
             *m_rectangleInputAssemblyBuffer,
             offsetof(RectangleBufferData, m_uvs),
             sizeof(RectangleBufferData::m_uvs),
             sizeof(VertexUV)
-        };
+        });
         
-        RHI::ValidateStreamBufferViews(m_rectangleInputStreamLayout, m_rectangleStreamBufferViews);
+        RHI::ValidateStreamBufferViews(m_rectangleInputStreamLayout, m_geometryView, m_geometryView.GetFullStreamBufferIndices());
 
         m_shader = LoadShader(AlphaToCoverage::ShaderFilePath, AlphaToCoverage::SampleName);
         if (!m_shader)
@@ -353,7 +362,9 @@ namespace AtomSampleViewer
                 descriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Clear;
                 descriptor.m_loadStoreAction.m_clearValue = RHI::ClearValue::CreateDepth(1.f);
                 descriptor.m_loadStoreAction.m_storeAction = RHI::AttachmentStoreAction::Store;
-                frameGraph.UseDepthStencilAttachment(descriptor, RHI::ScopeAttachmentAccess::ReadWrite);
+                frameGraph.UseDepthStencilAttachment(
+                    descriptor, RHI::ScopeAttachmentAccess::ReadWrite,
+                    AZ::RHI::ScopeAttachmentStage::EarlyFragmentTest | AZ::RHI::ScopeAttachmentStage::LateFragmentTest);
             }
 
             // Bind the resolve attachment
@@ -382,32 +393,20 @@ namespace AtomSampleViewer
             commandList->SetViewports(&m_viewport, 1);
             commandList->SetScissors(&m_scissor, 1);
 
-            RHI::DrawIndexed drawIndexed;
-            drawIndexed.m_indexCount = 6;
-            drawIndexed.m_instanceCount = 1;
-
             for (uint32_t rectIndex = context.GetSubmitRange().m_startIndex; rectIndex < context.GetSubmitRange().m_endIndex; ++rectIndex)
             {
-                const RHI::ShaderResourceGroup* shaderResourceGroups[] = {m_shaderResourceGroups[typeIndex][rectIndex]->GetRHIShaderResourceGroup()};
+                const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[typeIndex][rectIndex]
+                                                                                     ->GetRHIShaderResourceGroup()
+                                                                                     ->GetDeviceShaderResourceGroup(
+                                                                                         context.GetDeviceIndex())
+                                                                                     .get() };
 
-                RHI::DrawItem drawItem;
-                drawItem.m_arguments = drawIndexed;
-                drawItem.m_pipelineState = m_pipelineStates[typeIndex].get();
+                RHI::DeviceDrawItem drawItem;
+                drawItem.m_geometryView = m_geometryView.GetDeviceGeometryView(context.GetDeviceIndex());
+                drawItem.m_streamIndices = m_geometryView.GetFullStreamBufferIndices();
+                drawItem.m_pipelineState = m_pipelineStates[typeIndex]->GetDevicePipelineState(context.GetDeviceIndex()).get();
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
-
-                const RHI::IndexBufferView indexBufferView =
-                {
-                    *m_rectangleInputAssemblyBuffer,
-                    offsetof(RectangleBufferData, m_indices),
-                    sizeof(RectangleBufferData::m_indices),
-                    RHI::IndexFormat::Uint16
-                };
-                drawItem.m_indexBufferView = &indexBufferView;
-
-                AZStd::array<AZ::RHI::StreamBufferView, 2>& streamBufferViews = m_rectangleStreamBufferViews;
-                drawItem.m_streamBufferViewCount = static_cast<uint8_t>(streamBufferViews.size());
-                drawItem.m_streamBufferViews = streamBufferViews.data();
 
                 // Submit the rectangle draw item.
                 commandList->Submit(drawItem);

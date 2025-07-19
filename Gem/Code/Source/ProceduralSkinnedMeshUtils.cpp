@@ -12,6 +12,7 @@
 #include <Atom/RPI.Reflect/Buffer/BufferAssetCreator.h>
 #include <Atom/RPI.Reflect/ResourcePoolAssetCreator.h>
 #include <Atom/RPI.Reflect/Model/ModelAssetCreator.h>
+#include <Atom/RPI.Reflect/Model/ModelAssetHelpers.h>
 #include <Atom/RPI.Reflect/Model/ModelLodAssetCreator.h>
 #include <Atom/RPI.Reflect/Model/SkinJointIdPadding.h>
 #include <Atom/Feature/SkinnedMesh/SkinnedMeshInputBuffers.h>
@@ -99,51 +100,53 @@ namespace AtomSampleViewer
         modelCreator.SetName(AZStd::string("ProceduralSkinnedMesh_" + assetId.m_guid.ToString<AZStd::string>()));
 
         uint32_t submeshCount = proceduralMesh.GetSubMeshCount();
-        uint32_t verticesPerSubmesh = aznumeric_caster(proceduralMesh.m_positions.size());
+        uint32_t verticesPerSubmesh = proceduralMesh.GetVertexCount();
         uint32_t totalVertices = verticesPerSubmesh * submeshCount;
-
-        uint32_t jointIdCountPerSubmesh = verticesPerSubmesh * proceduralMesh.GetInfluencesPerVertex();
-        uint32_t extraJointIdCount = AZ::RPI::CalculateJointIdPaddingCount(jointIdCountPerSubmesh);
-        uint32_t extraPackedIdCount = extraJointIdCount / 2;
 
         // Copy the original buffer data n-times to create the data for extra sub-meshes
         DuplicateVertices(proceduralMesh.m_indices, aznumeric_caster(proceduralMesh.m_indices.size()), submeshCount);
-        DuplicateVertices(proceduralMesh.m_positions, verticesPerSubmesh, submeshCount);
-        DuplicateVertices(proceduralMesh.m_normals, verticesPerSubmesh, submeshCount);
-        DuplicateVertices(proceduralMesh.m_tangents, verticesPerSubmesh, submeshCount);
-        DuplicateVertices(proceduralMesh.m_bitangents, verticesPerSubmesh, submeshCount);
+        DuplicateVertices(proceduralMesh.m_positions, proceduralMesh.GetAlignedVertCountForRGBStream(), submeshCount);
+        DuplicateVertices(proceduralMesh.m_normals, proceduralMesh.GetAlignedVertCountForRGBStream(), submeshCount);
+        DuplicateVertices(proceduralMesh.m_bitangents, proceduralMesh.GetAlignedVertCountForRGBStream(), submeshCount);
+        
+        size_t alignedTangentVertCount = RPI::ModelAssetHelpers::GetAlignedCount<float>(verticesPerSubmesh, RPI::TangentFormat, RPI::SkinnedMeshBufferAlignment);
+        DuplicateVertices(proceduralMesh.m_tangents, aznumeric_cast<uint32_t>(alignedTangentVertCount), submeshCount);
+
         DuplicateVertices(proceduralMesh.m_uvs, verticesPerSubmesh, submeshCount);
-        DuplicateVertices(proceduralMesh.m_blendWeights, verticesPerSubmesh * proceduralMesh.GetInfluencesPerVertex(), submeshCount);
 
-        // Insert the jointId padding first before duplicating
-        AZStd::vector<uint32_t> extraIds(extraPackedIdCount, 0);
+        uint32_t numBlendWeights = verticesPerSubmesh * proceduralMesh.GetInfluencesPerVertex();
+        size_t alignedWeightsVertCount = RPI::ModelAssetHelpers::GetAlignedCount<float>(numBlendWeights, RPI::SkinWeightFormat, RPI::SkinnedMeshBufferAlignment);
+        DuplicateVertices(proceduralMesh.m_blendWeights, aznumeric_cast<uint32_t>(alignedWeightsVertCount), submeshCount);
 
-        // Track the count of 32-byte 'elements' (packed) and offsets for creating sub-mesh views
-        uint32_t jointIdElementCountPerSubmesh = aznumeric_caster(proceduralMesh.m_blendIndices.size());
-        uint32_t jointIdOffsetElementsPerSubmesh = jointIdElementCountPerSubmesh + extraPackedIdCount;
-
-        proceduralMesh.m_blendIndices.insert(proceduralMesh.m_blendIndices.end(), extraIds.begin(), extraIds.end());
-        DuplicateVertices(
-            proceduralMesh.m_blendIndices, aznumeric_caster(proceduralMesh.m_blendIndices.size()), submeshCount);
+        uint32_t numBlendIndices = verticesPerSubmesh * proceduralMesh.GetInfluencesPerVertex();
+        size_t alignedIndicesVertCount = RPI::ModelAssetHelpers::GetAlignedCount<uint32_t>(numBlendIndices, RPI::SkinIndicesFormat, RPI::SkinnedMeshBufferAlignment);
+        DuplicateVertices(proceduralMesh.m_blendIndices, aznumeric_cast<uint32_t>(alignedIndicesVertCount), submeshCount);
 
         // Offset duplicate positions in the +y direction, so each sub-mesh ends up in a unique position
         for (uint32_t subMeshIndex = 1; subMeshIndex < submeshCount; ++subMeshIndex)
         {
-            for (uint32_t i = 0; i < verticesPerSubmesh; ++i)
+            for (uint32_t i = 0; i < proceduralMesh.GetVertexCount(); i ++)
             {
-                proceduralMesh.m_positions[subMeshIndex*verticesPerSubmesh + i][1] +=
-                    aznumeric_cast<float>(subMeshIndex) * proceduralMesh.GetSubMeshYOffset();
+                uint32_t yPosPerSubMesh = (proceduralMesh.GetAlignedVertCountForRGBStream() * subMeshIndex) + (i*3) + 1;
+                proceduralMesh.m_positions[yPosPerSubMesh] +=
+                        aznumeric_cast<float>(subMeshIndex) * proceduralMesh.GetSubMeshYOffset();
             }
         }
 
+        size_t positionStreamSize = proceduralMesh.m_positions.size() / RHI::GetFormatComponentCount(RPI::PositionFormat);
+        size_t normalStreamSize = proceduralMesh.m_normals.size() / RHI::GetFormatComponentCount(RPI::NormalFormat);
+        size_t tangentStreamSize = proceduralMesh.m_tangents.size() / RHI::GetFormatComponentCount(RPI::TangentFormat);
+        size_t bitangentStreamSize = proceduralMesh.m_bitangents.size() / RHI::GetFormatComponentCount(RPI::BitangentFormat);
+        
         auto indexBuffer = CreateTypedBufferAsset(proceduralMesh.m_indices.data(), proceduralMesh.m_indices.size(), AZ::RHI::Format::R32_FLOAT);
-        auto positionBuffer = CreateTypedBufferAsset(proceduralMesh.m_positions.data(), proceduralMesh.m_positions.size(), AZ::RHI::Format::R32G32B32_FLOAT);
-        auto normalBuffer = CreateTypedBufferAsset(proceduralMesh.m_normals.data(), proceduralMesh.m_normals.size(), AZ::RHI::Format::R32G32B32_FLOAT);
-        auto tangentBuffer = CreateTypedBufferAsset(proceduralMesh.m_tangents.data(), proceduralMesh.m_tangents.size(), AZ::RHI::Format::R32G32B32A32_FLOAT);
-        auto bitangentBuffer = CreateTypedBufferAsset(proceduralMesh.m_bitangents.data(), proceduralMesh.m_bitangents.size(), AZ::RHI::Format::R32G32B32_FLOAT);
-        auto uvBuffer = CreateTypedBufferAsset(proceduralMesh.m_uvs.data(), proceduralMesh.m_uvs.size(), AZ::RHI::Format::R32G32_FLOAT);
+        
+        auto positionBuffer = CreateTypedBufferAsset(proceduralMesh.m_positions.data(), positionStreamSize, RPI::PositionFormat);
+        auto normalBuffer = CreateTypedBufferAsset(proceduralMesh.m_normals.data(), normalStreamSize, RPI::NormalFormat);
+        auto tangentBuffer = CreateTypedBufferAsset(proceduralMesh.m_tangents.data(), tangentStreamSize, RPI::TangentFormat);
+        auto bitangentBuffer = CreateTypedBufferAsset(proceduralMesh.m_bitangents.data(), bitangentStreamSize, RPI::BitangentFormat);
+        auto uvBuffer = CreateTypedBufferAsset(proceduralMesh.m_uvs.data(), proceduralMesh.m_uvs.size(), RPI::UVFormat);
         auto skinJointIdBuffer = CreateRawBufferAsset(proceduralMesh.m_blendIndices.data(), proceduralMesh.m_blendIndices.size(), sizeof(proceduralMesh.m_blendIndices[0]));
-        auto skinJointWeightBuffer = CreateTypedBufferAsset(proceduralMesh.m_blendWeights.data(), proceduralMesh.m_blendWeights.size(), AZ::RHI::Format::R32_FLOAT);
+        auto skinJointWeightBuffer = CreateTypedBufferAsset(proceduralMesh.m_blendWeights.data(), proceduralMesh.m_blendWeights.size(), RPI::SkinWeightFormat);
 
         //
         // Lod
@@ -183,6 +186,8 @@ namespace AtomSampleViewer
             // Get the element count and offset for this sub-mesh
             uint32_t elementCount = verticesPerSubmesh;
             uint32_t elementOffset = verticesPerSubmesh * submeshIndex;
+            uint32_t alignedRGBElementOffset = (proceduralMesh.GetAlignedVertCountForRGBStream()/RHI::GetFormatComponentCount(RHI::Format::R32G32B32_FLOAT)) * submeshIndex;
+            uint32_t alignedRGBAElementOffset = (proceduralMesh.GetAlignedVertCountForRGBAStream()/RHI::GetFormatComponentCount(RHI::Format::R32G32B32A32_FLOAT)) * submeshIndex;
 
             // Include any truncated vertices if this is the last mesh
             if (submeshIndex == submeshCount - 1)
@@ -190,17 +195,24 @@ namespace AtomSampleViewer
                 elementCount += totalVertices % verticesPerSubmesh;
             }
 
-            modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "POSITION" }, AZ::Name(), AZ::RPI::BufferAssetView{ positionBuffer, CreateSubmeshBufferViewDescriptor(positionBuffer, elementCount, elementOffset) });
-            modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "NORMAL" }, AZ::Name(), AZ::RPI::BufferAssetView{ normalBuffer, CreateSubmeshBufferViewDescriptor(normalBuffer, elementCount, elementOffset) });
-            modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "TANGENT" }, AZ::Name(), AZ::RPI::BufferAssetView{ tangentBuffer, CreateSubmeshBufferViewDescriptor(tangentBuffer, elementCount, elementOffset) });
-            modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "BITANGENT" }, AZ::Name(), AZ::RPI::BufferAssetView{ bitangentBuffer, CreateSubmeshBufferViewDescriptor(bitangentBuffer, elementCount, elementOffset) });
+            modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "POSITION" }, AZ::Name(), AZ::RPI::BufferAssetView{ positionBuffer, CreateSubmeshBufferViewDescriptor(positionBuffer, elementCount, alignedRGBElementOffset) });
+            
+            modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "NORMAL" }, AZ::Name(), AZ::RPI::BufferAssetView{ normalBuffer, CreateSubmeshBufferViewDescriptor(normalBuffer, elementCount, alignedRGBElementOffset) });
+ 
+
+            modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "TANGENT" }, AZ::Name(), AZ::RPI::BufferAssetView{ tangentBuffer, CreateSubmeshBufferViewDescriptor(tangentBuffer, elementCount, alignedRGBAElementOffset) });
+                        
+            modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "BITANGENT" }, AZ::Name(), AZ::RPI::BufferAssetView{ bitangentBuffer, CreateSubmeshBufferViewDescriptor(bitangentBuffer, elementCount, alignedRGBElementOffset) });
+            
             modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "UV" }, AZ::Name(), AZ::RPI::BufferAssetView{ uvBuffer, CreateSubmeshBufferViewDescriptor(uvBuffer, elementCount, elementOffset) });
-            modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "SKIN_JOINTINDICES" }, AZ::Name(), AZ::RPI::BufferAssetView{ skinJointIdBuffer, CreateSubmeshBufferViewDescriptor(skinJointIdBuffer, jointIdElementCountPerSubmesh, jointIdOffsetElementsPerSubmesh * submeshIndex) });
-
-            uint32_t jointWeightElementCount = elementCount * proceduralMesh.GetInfluencesPerVertex();
-            uint32_t jointWeightOffset = elementOffset * proceduralMesh.GetInfluencesPerVertex();
-            modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "SKIN_WEIGHTS" }, AZ::Name(), AZ::RPI::BufferAssetView{ skinJointWeightBuffer, CreateSubmeshBufferViewDescriptor(skinJointWeightBuffer, jointWeightElementCount, jointWeightOffset) });
-
+            
+            //Divide by 2 as we are storing 16bit data into 32bit integers
+            uint32_t numIndices = numBlendIndices/2;
+            modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "SKIN_JOINTINDICES" }, AZ::Name(), AZ::RPI::BufferAssetView{ skinJointIdBuffer, CreateSubmeshBufferViewDescriptor(skinJointIdBuffer, numIndices, aznumeric_cast<uint32_t>(alignedIndicesVertCount) * submeshIndex) });
+            
+            uint32_t jointWeightOffset = aznumeric_cast<uint32_t>(alignedWeightsVertCount) * submeshIndex;
+            modelLodCreator.AddMeshStreamBuffer(RHI::ShaderSemantic{ "SKIN_WEIGHTS" }, AZ::Name(), AZ::RPI::BufferAssetView{ skinJointWeightBuffer, CreateSubmeshBufferViewDescriptor(skinJointWeightBuffer, numBlendWeights, jointWeightOffset) });
+            
             AZ::Aabb localAabb = proceduralMesh.m_aabb;
             modelLodCreator.SetMeshAabb(AZStd::move(localAabb));
 

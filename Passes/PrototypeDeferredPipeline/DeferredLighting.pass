@@ -183,7 +183,11 @@
                     },
                     "ImageDescriptor": {
                         "Format": "R16G16B16A16_FLOAT",
-                        "SharedQueueMask": "Graphics"
+                        "SharedQueueMask": "Graphics",
+                        "BindFlags": [
+                            "ShaderReadWrite",
+                            "Color"
+                        ]
                     }
                 },
                 {

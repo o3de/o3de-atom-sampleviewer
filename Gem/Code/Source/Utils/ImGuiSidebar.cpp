@@ -116,8 +116,7 @@ namespace AtomSampleViewer
         AzFramework::WindowSize windowSize;
         AzFramework::WindowRequestBus::EventResult(
             windowSize,
-            windowHandle,
-            &AzFramework::WindowRequestBus::Events::GetClientAreaSize);
+            windowHandle, &AzFramework::WindowRequestBus::Events::GetRenderResolution);
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 

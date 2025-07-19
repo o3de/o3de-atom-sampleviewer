@@ -96,7 +96,10 @@ namespace AtomSampleViewer
         pipelineDesc.m_mainViewTagName = "MainCamera";       // Surface shaders render to the "MainCamera" tag
         pipelineDesc.m_name = "SecondPipeline";              // Sets the debug name for this pipeline
         pipelineDesc.m_rootPassTemplate = "MainPipeline";    // References a template in AtomSampleViewer\Passes\MainPipeline.pass
-        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 4;
+        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 1;
+        SampleComponentManagerRequestBus::BroadcastResult(
+            pipelineDesc.m_renderSettings.m_multisampleState.m_samples,
+            &SampleComponentManagerRequests::GetNumMSAASamples);
         pipelineDesc.m_allowModification = true;
         m_pipeline = RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
 
@@ -129,43 +132,38 @@ namespace AtomSampleViewer
         m_postProcessFeatureProcessor = m_scene->GetFeatureProcessor<Render::PostProcessFeatureProcessorInterface>();
 
         // Helper function to load meshes
-        const auto LoadMesh = [this](const char* modelPath) -> Render::MeshFeatureProcessorInterface::MeshHandle
+        auto LoadMesh = [this](
+                            const char* modelPath,
+                            const ModelChangedHandler& modelChangedHandler) -> Render::MeshFeatureProcessorInterface::MeshHandle
         {
             AZ_Assert(m_meshFeatureProcessor, "Cannot find mesh feature processor on scene");
 
-            auto meshAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>(modelPath, RPI::AssetUtils::TraceLevel::Assert);            
-            auto materialAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::MaterialAsset>(DefaultPbrMaterialPath,
-                RPI::AssetUtils::TraceLevel::Assert);
+            auto meshAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>(modelPath, RPI::AssetUtils::TraceLevel::Assert);
+            auto materialAsset =
+                RPI::AssetUtils::LoadAssetByProductPath<RPI::MaterialAsset>(DefaultPbrMaterialPath, RPI::AssetUtils::TraceLevel::Assert);
             auto material = AZ::RPI::Material::FindOrCreate(materialAsset);
-            Render::MeshFeatureProcessorInterface::MeshHandle meshHandle = m_meshFeatureProcessor->AcquireMesh(Render::MeshHandleDescriptor{ meshAsset }, material);
 
+            Render::MeshHandleDescriptor descriptor(meshAsset, material);
+            descriptor.m_modelChangedEventHandler = modelChangedHandler;
+            Render::MeshFeatureProcessorInterface::MeshHandle meshHandle = m_meshFeatureProcessor->AcquireMesh(descriptor);
             return meshHandle;
         };
 
         // Create the ShaderBalls
         {
-            for (uint32_t i = 0u; i < ShaderBallCount; i++)
+            m_shaderBallMeshHandles.resize(ShaderBallCount);
+            for (uint32_t i = 0u; i < ShaderBallCount; ++i)
             {
-                m_shaderBallMeshHandles.push_back(LoadMesh(ShaderBallModelFilePath));
-                auto updateShaderBallTransform = [this, i](Data::Instance<RPI::Model> model)
-                {
-                    const Aabb& aabb = model->GetModelAsset()->GetAabb();
-                    const Vector3 translation{ 0.0f, -aabb.GetMin().GetZ() * aznumeric_cast<float>(i), -aabb.GetMin().GetY() };
-                    const auto transform = Transform::CreateTranslation(translation);
-                    m_meshFeatureProcessor->SetTransform(m_shaderBallMeshHandles[i], transform);
-                };
-
-                // If the model is available already, set the tranform immediately, else utilize the EBus::Event feature
-                Data::Instance<RPI::Model> shaderBallModel = m_meshFeatureProcessor->GetModel(m_shaderBallMeshHandles[i]);
-                if (shaderBallModel)
-                {
-                    updateShaderBallTransform(shaderBallModel);
-                }
-                else
-                {
-                    m_shaderBallChangedHandles.push_back(ModelChangedHandler(updateShaderBallTransform));
-                    m_meshFeatureProcessor->ConnectModelChangeEventHandler(m_shaderBallMeshHandles[i], m_shaderBallChangedHandles.back());
-                }
+                m_shaderBallMeshHandles[i] = LoadMesh(
+                    ShaderBallModelFilePath,
+                    ModelChangedHandler{
+                        [this, i](const Data::Instance<RPI::Model>& model)
+                        {
+                            const Aabb& aabb = model->GetModelAsset()->GetAabb();
+                            const Vector3 translation{ 0.0f, -aabb.GetMin().GetZ() * aznumeric_cast<float>(i), -aabb.GetMin().GetY() };
+                            const auto transform = Transform::CreateTranslation(translation);
+                            m_meshFeatureProcessor->SetTransform(m_shaderBallMeshHandles[i], transform);
+                        } });
             }
         }
 
@@ -174,7 +172,7 @@ namespace AtomSampleViewer
             const Vector3 nonUniformScale{ 24.f, 24.f, 1.0f };
             const Vector3 translation{ 0.f, 0.f, 0.0f };
             const auto transform = Transform::CreateTranslation(translation);
-            m_floorMeshHandle = LoadMesh(CubeModelFilePath);
+            m_floorMeshHandle = LoadMesh(CubeModelFilePath, ModelChangedHandler{[](const Data::Instance<RPI::Model>&){}});
             m_meshFeatureProcessor->SetTransform(m_floorMeshHandle, transform, nonUniformScale);
         }
 
@@ -254,6 +252,7 @@ namespace AtomSampleViewer
             const auto lightDir = Transform::CreateLookAt(
                 helperPosition,
                 Vector3::CreateZero());
+            m_directionalLightFeatureProcessor->SetShadowEnabled(m_directionalLightHandle, true);
             m_directionalLightFeatureProcessor->SetDirection(m_directionalLightHandle, lightDir.GetBasis(1));
 
             m_directionalLightFeatureProcessor->SetShadowmapSize(m_directionalLightHandle, Render::ShadowmapSize::Size512);
@@ -313,7 +312,7 @@ namespace AtomSampleViewer
 
         // Release the probe
         m_reflectionProbeFeatureProcessor->RemoveReflectionProbe(m_reflectionProbeHandle);
-        m_reflectionProbeHandle = {};
+        m_reflectionProbeHandle = ReflectionProbeHandle::CreateNull();
 
         // Release all meshes
         for (auto& shaderBallMeshHandle : m_shaderBallMeshHandles)
@@ -434,7 +433,7 @@ namespace AtomSampleViewer
             auto material = AZ::RPI::Material::FindOrCreate(materialAsset);
             auto bunnyAsset = RPI::AssetUtils::LoadAssetByProductPath<RPI::ModelAsset>(BunnyModelFilePath,
                 RPI::AssetUtils::TraceLevel::Assert);
-            m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(Render::MeshHandleDescriptor{ bunnyAsset }, material);
+            m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(Render::MeshHandleDescriptor(bunnyAsset, material));
 
             GetMeshFeatureProcessor()->SetTransform(m_meshHandle, Transform::CreateRotationZ(Constants::Pi));
         }

@@ -24,7 +24,7 @@ namespace AtomSampleViewer
     RHISamplePass::RHISamplePass(const AZ::RPI::PassDescriptor& descriptor)
         : AZ::RPI::RenderPass(descriptor)
     {
-        m_flags.m_hasPipelineViewTag = true;
+        m_flags.m_bindViewSrg = true;
         m_pipelineViewTag = "MainCamera";
     }
 
@@ -511,7 +511,11 @@ namespace AtomSampleViewer
         return image;
     }
 
-    void BasicRHIComponent::CreateImage3dData(AZStd::vector<uint8_t>& data, AZ::RHI::ImageSubresourceLayout& layout, AZ::RHI::Format& format, AZStd::vector<const char*>&& imageAssetPaths)
+    void BasicRHIComponent::CreateImage3dData(
+        AZStd::vector<uint8_t>& data,
+        AZ::RHI::DeviceImageSubresourceLayout& layout,
+        AZ::RHI::Format& format,
+        AZStd::vector<const char*>&& imageAssetPaths)
     {
         using namespace AZ;
 
@@ -532,7 +536,7 @@ namespace AtomSampleViewer
         AZStd::vector<RHI::ImageDescriptor> imageDescriptors;
         imageDescriptors.reserve(imageAssetPaths.size());
 
-        AZStd::vector<RHI::ImageSubresourceLayout> imageSubresourceLayouts;
+        AZStd::vector<RHI::DeviceImageSubresourceLayout> imageSubresourceLayouts;
         imageSubresourceLayouts.reserve(imageAssetPaths.size());
 
         AZStd::vector<Data::Asset<RPI::ImageMipChainAsset>> imageMipAssets;
@@ -552,7 +556,7 @@ namespace AtomSampleViewer
             mipAsset.BlockUntilLoadComplete();
             imageMipAssets.emplace_back(mipAsset);
 
-            const RHI::ImageSubresourceLayout subImageLayout = mipAsset->GetSubImageLayout(0);
+            const auto subImageLayout = mipAsset->GetSubImageLayout(0);
             imageSubresourceLayouts.emplace_back(subImageLayout);
         }
 

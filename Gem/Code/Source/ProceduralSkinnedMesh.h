@@ -36,15 +36,18 @@ namespace AtomSampleViewer
         uint32_t GetSubMeshCount() const;
         float GetSubMeshYOffset() const;
 
+        uint32_t GetVertexCount() const;
+        uint32_t GetAlignedVertCountForRGBStream() const;
+        uint32_t GetAlignedVertCountForRGBAStream() const;
         static const uint32_t MaxInfluencesPerVertex = 4;
 
         // Mesh data that's used for rendering
         AZ::Aabb m_aabb = AZ::Aabb::CreateNull();
         AZStd::vector<uint32_t> m_indices;
-        AZStd::vector< AZStd::array<float, 3>> m_positions;
-        AZStd::vector< AZStd::array<float, 3>> m_normals;
-        AZStd::vector< AZStd::array<float, 4>> m_tangents;
-        AZStd::vector< AZStd::array<float, 3>> m_bitangents;
+        AZStd::vector<float> m_positions;
+        AZStd::vector<float> m_normals;
+        AZStd::vector<float> m_tangents;
+        AZStd::vector<float> m_bitangents;
         AZStd::vector<uint32_t> m_blendIndices;
         AZStd::vector<float> m_blendWeights;
         AZStd::vector<AZStd::array<float, 2>> m_uvs;
@@ -64,6 +67,8 @@ namespace AtomSampleViewer
 
         uint32_t m_boneCount = 0;
         uint32_t m_vertexCount = 0;
+        uint32_t m_alignedVertCountForRGBStream = 0;
+        uint32_t m_alignedVertCountForRGBAStream = 0;
         uint32_t m_verticesPerSegment = 0;
         uint32_t m_segmentCount = 0;
         uint32_t m_influencesPerVertex = 0;

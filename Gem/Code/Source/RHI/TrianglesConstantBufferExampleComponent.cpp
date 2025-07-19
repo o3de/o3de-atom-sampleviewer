@@ -102,7 +102,10 @@ namespace AtomSampleViewer
         AZ::RHI::ResultCode resultCode = m_constantBufferPool->MapBuffer(mapRequest, mapResponse);
         if (resultCode == AZ::RHI::ResultCode::Success)
         {
-            memcpy(mapResponse.m_data, data, sizeof(InstanceInfo) * elementCount);
+            for(const auto& [_, bufferData] : mapResponse.m_data)
+            {
+                memcpy(bufferData, data, sizeof(InstanceInfo) * elementCount);
+            }
             m_constantBufferPool->UnmapBuffer(*mapRequest.m_buffer);
         }
     }
@@ -117,12 +120,12 @@ namespace AtomSampleViewer
 
         // Creates Input Assembly buffer and Streams/Index Views
         {
-            m_inputAssemblyBufferPool = RHI::Factory::Get().CreateBufferPool();
+            m_inputAssemblyBufferPool = aznew RHI::BufferPool();
 
             RHI::BufferPoolDescriptor bufferPoolDesc;
             bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
             bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-            m_inputAssemblyBufferPool->Init(*device, bufferPoolDesc);
+            m_inputAssemblyBufferPool->Init(bufferPoolDesc);
 
             IABufferData bufferData;
 
@@ -136,7 +139,7 @@ namespace AtomSampleViewer
 
             SetVertexIndexIncreasing(bufferData.m_indices.data(), bufferData.m_indices.size());
 
-            m_inputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
+            m_inputAssemblyBuffer = aznew RHI::Buffer();
 
             RHI::BufferInitRequest request;
             request.m_buffer = m_inputAssemblyBuffer.get();
@@ -144,46 +147,45 @@ namespace AtomSampleViewer
             request.m_initialData = &bufferData;
             m_inputAssemblyBufferPool->InitBuffer(request);
 
-            m_streamBufferViews[0] =
-            {
+            m_geometryView.SetDrawArguments(RHI::DrawIndexed(0, 3, 0));
+
+            m_geometryView.AddStreamBufferView({
                 *m_inputAssemblyBuffer,
                 offsetof(IABufferData, m_positions),
                 sizeof(IABufferData::m_positions),
                 sizeof(VertexPosition)
-            };
+            });
 
-            m_streamBufferViews[1] =
-            {
+            m_geometryView.AddStreamBufferView({
                 *m_inputAssemblyBuffer,
                 offsetof(IABufferData, m_colors),
                 sizeof(IABufferData::m_colors),
                 sizeof(VertexColor)
-            };
+            });
 
-            m_indexBufferView =
-            {
+            m_geometryView.SetIndexBufferView({
                 *m_inputAssemblyBuffer,
                 offsetof(IABufferData, m_indices),
                 sizeof(IABufferData::m_indices),
                 RHI::IndexFormat::Uint16
-            };
+            });
 
             RHI::InputStreamLayoutBuilder layoutBuilder;
             layoutBuilder.AddBuffer()->Channel("POSITION", RHI::Format::R32G32B32_FLOAT);
             layoutBuilder.AddBuffer()->Channel("COLOR", RHI::Format::R32G32B32A32_FLOAT);
             pipelineStateDescriptor.m_inputStreamLayout = layoutBuilder.End();
 
-            RHI::ValidateStreamBufferViews(pipelineStateDescriptor.m_inputStreamLayout, m_streamBufferViews);
+            RHI::ValidateStreamBufferViews(pipelineStateDescriptor.m_inputStreamLayout, m_geometryView, m_geometryView.GetFullStreamBufferIndices());
         }
 
         // Create the buffer pool where both buffers get allocated from
         {
-            m_constantBufferPool = RHI::Factory::Get().CreateBufferPool();
+            m_constantBufferPool = aznew RHI::BufferPool();
             RHI::BufferPoolDescriptor constantBufferPoolDesc;
             constantBufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::Constant;
             constantBufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
             constantBufferPoolDesc.m_hostMemoryAccess = RHI::HostMemoryAccess::Write;
-            [[maybe_unused]] RHI::ResultCode result = m_constantBufferPool->Init(*device, constantBufferPoolDesc);
+            [[maybe_unused]] RHI::ResultCode result = m_constantBufferPool->Init(constantBufferPoolDesc);
             AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialized constant buffer pool");
         }
 
@@ -256,20 +258,17 @@ namespace AtomSampleViewer
                 commandList->SetViewports(&m_viewport, 1);
                 commandList->SetScissors(&m_scissor, 1);
 
-                RHI::DrawIndexed drawIndexed;
-                drawIndexed.m_indexCount = 3;
-                drawIndexed.m_instanceCount = s_numberOfTrianglesTotal;
+                const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
+                    m_shaderResourceGroup->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
+                };
 
-                const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroup->GetRHIShaderResourceGroup() };
-
-                RHI::DrawItem drawItem;
-                drawItem.m_arguments = drawIndexed;
-                drawItem.m_pipelineState = m_pipelineState.get();
-                drawItem.m_indexBufferView = &m_indexBufferView;
+                RHI::DeviceDrawItem drawItem;
+                drawItem.m_geometryView = m_geometryView.GetDeviceGeometryView(context.GetDeviceIndex());
+                drawItem.m_streamIndices = m_geometryView.GetFullStreamBufferIndices();
+                drawItem.m_drawInstanceArgs = RHI::DrawInstanceArguments(s_numberOfTrianglesTotal, 0);
+                drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
-                drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
-                drawItem.m_streamBufferViews = m_streamBufferViews.data();
 
                 // Submit the triangle draw item.
                 commandList->Submit(drawItem);
@@ -297,7 +296,7 @@ namespace AtomSampleViewer
         using namespace AZ;
         const uint32_t constantBufferSize = sizeof(InstanceInfo) * s_numberOfTrianglesTotal;
 
-        m_constantBuffer = RHI::Factory::Get().CreateBuffer();
+        m_constantBuffer = aznew RHI::Buffer();
         RHI::BufferInitRequest request;
         request.m_buffer = m_constantBuffer.get();
         request.m_descriptor = RHI::BufferDescriptor{ RHI::BufferBindFlags::Constant, constantBufferSize };
@@ -305,7 +304,7 @@ namespace AtomSampleViewer
         AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialize constant buffer");
 
         RHI::BufferViewDescriptor bufferDesc = RHI::BufferViewDescriptor::CreateStructured(0, 1u, constantBufferSize);
-        m_constantBufferView = m_constantBuffer->GetBufferView(bufferDesc);
+        m_constantBufferView = m_constantBuffer->BuildBufferView(bufferDesc);
     }
 
     void TrianglesConstantBufferExampleComponent::Deactivate()

@@ -172,12 +172,12 @@ namespace AtomSampleViewer
 
             if (renderData.m_skinnedMeshInstance->m_model)
             {
-                AZ::Render::MeshHandleDescriptor meshDescriptor;
-                meshDescriptor.m_modelAsset = renderData.m_skinnedMeshInstance->m_model->GetModelAsset();
+                AZ::Render::MeshHandleDescriptor meshDescriptor(
+                    renderData.m_skinnedMeshInstance->m_model->GetModelAsset(), materialOverrideInstance);
                 meshDescriptor.m_isRayTracingEnabled = false;
-                renderData.m_meshHandle =
-                    AZStd::make_shared<AZ::Render::MeshFeatureProcessorInterface::MeshHandle>(m_meshFeatureProcessor->AcquireMesh(
-                        meshDescriptor, materialOverrideInstance));
+                meshDescriptor.m_isAlwaysDynamic = true;
+                renderData.m_meshHandle = AZStd::make_shared<AZ::Render::MeshFeatureProcessorInterface::MeshHandle>(
+                    m_meshFeatureProcessor->AcquireMesh(meshDescriptor));
                 m_meshFeatureProcessor->SetTransform(*renderData.m_meshHandle, renderData.m_rootTransform);
             }
             // If render proxies already exist, they will be auto-freed

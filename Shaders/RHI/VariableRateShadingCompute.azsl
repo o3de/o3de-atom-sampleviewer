@@ -8,7 +8,7 @@
 
 #include <Atom/Features/SrgSemantics.azsli>
  
-#define NumShadingRates 7
+#define NumShadingRates 9
 
 ShaderResourceGroup ComputeSrg : SRG_PerObject
 {

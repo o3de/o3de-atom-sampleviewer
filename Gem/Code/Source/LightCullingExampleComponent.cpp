@@ -44,9 +44,9 @@ namespace AtomSampleViewer
     using namespace AZ::Render;
     using namespace AZ::RPI;
 
-    static const char* WorldModelName = "Objects/Sponza.azmodel";
+    static const char* WorldModelName = "Objects/Sponza.fbx.azmodel";
 
-    static const char* TransparentModelName = "Objects/ShaderBall_simple.azmodel";
+    static const char* TransparentModelName = "Objects/ShaderBall_simple.fbx.azmodel";
     static const char* TransparentMaterialName = "materials/DefaultPBRTransparent.azmaterial";
 
     static const char* DecalMaterialPath = "materials/Decal/airship_tail_01_decal.azmaterial";
@@ -204,7 +204,6 @@ namespace AtomSampleViewer
 
     void LightCullingExampleComponent::OnModelReady(AZ::Data::Instance<AZ::RPI::Model> model)
     {
-        m_meshChangedHandler.Disconnect();
         m_worldModelAssetLoaded = true;
         m_worldModelAABB = model->GetModelAsset()->GetAabb();
 
@@ -755,22 +754,19 @@ namespace AtomSampleViewer
 
     void LightCullingExampleComponent::CreateOpaqueModels()
     {
-        Data::Asset<RPI::ModelAsset> modelAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>(WorldModelName, RPI::AssetUtils::TraceLevel::Assert);
+        Data::Asset<RPI::ModelAsset> modelAsset =
+            RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>(WorldModelName, RPI::AssetUtils::TraceLevel::Assert);
 
-        auto meshFeatureProcessor = GetMeshFeatureProcessor();
+        Render::MeshHandleDescriptor descriptor(modelAsset);
+        descriptor.m_modelChangedEventHandler =
+            AZ::Render::MeshHandleDescriptor::ModelChangedEvent::Handler{ [this](const AZ::Data::Instance<AZ::RPI::Model>& model)
+                                                                          {
+                                                                              OnModelReady(model);
+                                                                          } };
 
-        m_meshHandle = meshFeatureProcessor->AcquireMesh(MeshHandleDescriptor{ modelAsset });
-        meshFeatureProcessor->SetTransform(m_meshHandle, Transform::CreateIdentity());
-        Data::Instance<RPI::Model> model = meshFeatureProcessor->GetModel(m_meshHandle);
-        // Loading in the world will probably take a while and I want to grab the AABB afterwards, so hook it up to a a ModelChangeEventHandler
-        if (model)
-        {
-            OnModelReady(model);
-        }
-        else
-        {
-            meshFeatureProcessor->ConnectModelChangeEventHandler(m_meshHandle, m_meshChangedHandler);
-        }
+        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(descriptor);
+
+        GetMeshFeatureProcessor()->SetTransform(m_meshHandle, Transform::CreateIdentity());
     }
 
     void LightCullingExampleComponent::CreateTransparentModels()
@@ -787,7 +783,8 @@ namespace AtomSampleViewer
 
         for (const AZ::Vector3& position : TransparentModelPositions)
         {
-            AZ::Render::MeshFeatureProcessorInterface::MeshHandle meshHandle = GetMeshFeatureProcessor()->AcquireMesh(MeshHandleDescriptor{ transparentModelAsset }, materialInstance);
+            AZ::Render::MeshFeatureProcessorInterface::MeshHandle meshHandle =
+                GetMeshFeatureProcessor()->AcquireMesh(MeshHandleDescriptor(transparentModelAsset, materialInstance));
             GetMeshFeatureProcessor()->SetTransform(meshHandle, Transform::CreateTranslation(position));
             m_transparentMeshHandles.push_back(std::move(meshHandle));
         }

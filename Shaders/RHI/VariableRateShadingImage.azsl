@@ -8,7 +8,7 @@
 
 #include <Atom/Features/SrgSemantics.azsli>
 
-#define NumShadingRates 7
+#define NumShadingRates 9
 ShaderResourceGroup InstanceSrg : SRG_PerObject
 {
     Texture2D<uint2> m_texture;

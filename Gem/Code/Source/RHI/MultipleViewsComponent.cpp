@@ -235,15 +235,15 @@ namespace AtomSampleViewer
 
         const AZ::RHI::Ptr<AZ::RHI::Device> device = Utils::GetRHIDevice();
 
-        m_bufferPool = AZ::RHI::Factory::Get().CreateBufferPool();
+        m_bufferPool = aznew AZ::RHI::BufferPool();
         AZ::RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = AZ::RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = AZ::RHI::HeapMemoryLevel::Device;
-        m_bufferPool->Init(*device, bufferPoolDesc);
+        m_bufferPool->Init(bufferPoolDesc);
 
         BufferData bufferData = CreateBufferData();
 
-        m_inputAssemblyBuffer = AZ::RHI::Factory::Get().CreateBuffer();
+        m_inputAssemblyBuffer = aznew AZ::RHI::Buffer();
         AZ::RHI::ResultCode result = AZ::RHI::ResultCode::Success;
         AZ::RHI::BufferInitRequest request;
 
@@ -257,37 +257,35 @@ namespace AtomSampleViewer
             return;
         }
 
-        m_streamBufferViews[0] =
-        {
+        m_geometryView.SetDrawArguments(RHI::DrawIndexed(0, geometryIndexCount, 0));
+
+        m_geometryView.AddStreamBufferView({
             *m_inputAssemblyBuffer,
             offsetof(BufferData, m_positions),
             sizeof(BufferData::m_positions),
             sizeof(VertexPosition)
-        };
+        });
 
-        m_streamBufferViews[1] =
-        {
+        m_geometryView.AddStreamBufferView({
             *m_inputAssemblyBuffer,
             offsetof(BufferData, m_colors),
             sizeof(BufferData::m_colors),
             sizeof(VertexColor)
-        };
+        });
 
-        m_streamBufferViews[2] =
-        {
+        m_geometryView.AddStreamBufferView({
             *m_inputAssemblyBuffer,
             offsetof(BufferData, m_normals),
             sizeof(BufferData::m_normals),
             sizeof(VertexNormal)
-        };
+        });
 
-        m_indexBufferView =
-        {
+        m_geometryView.SetIndexBufferView({
             *m_inputAssemblyBuffer,
             offsetof(BufferData, m_indices),
             sizeof(BufferData::m_indices),
             AZ::RHI::IndexFormat::Uint16
-        };
+        });
 
         RHI::InputStreamLayoutBuilder layoutBuilder;
         layoutBuilder.AddBuffer()->Channel("POSITION", RHI::Format::R32G32B32_FLOAT);
@@ -295,7 +293,7 @@ namespace AtomSampleViewer
         layoutBuilder.AddBuffer()->Channel("NORMAL", RHI::Format::R32G32B32_FLOAT);
         m_inputStreamLayout = layoutBuilder.End();
 
-        AZ::RHI::ValidateStreamBufferViews(m_inputStreamLayout, m_streamBufferViews);
+        AZ::RHI::ValidateStreamBufferViews(m_inputStreamLayout, m_geometryView, m_geometryView.GetFullStreamBufferIndices());
     }
 
     void MultipleViewsComponent::InitRenderTarget()
@@ -399,7 +397,9 @@ namespace AtomSampleViewer
                 dsDesc.m_imageViewDescriptor.m_overrideFormat = AZ::RHI::Format::D32_FLOAT;
                 dsDesc.m_loadStoreAction.m_clearValue = m_depthClearValue;
                 dsDesc.m_loadStoreAction.m_loadAction = AZ::RHI::AttachmentLoadAction::Clear;
-                frameGraph.UseDepthStencilAttachment(dsDesc, AZ::RHI::ScopeAttachmentAccess::ReadWrite);
+                frameGraph.UseDepthStencilAttachment(
+                    dsDesc, AZ::RHI::ScopeAttachmentAccess::ReadWrite,
+                    AZ::RHI::ScopeAttachmentStage::EarlyFragmentTest | AZ::RHI::ScopeAttachmentStage::LateFragmentTest);
             }
 
             frameGraph.SetEstimatedItemCount(1);
@@ -416,21 +416,16 @@ namespace AtomSampleViewer
             commandList->SetViewports(&viewport, 1);
             commandList->SetScissors(&scissor, 1);
 
-            AZ::RHI::DrawIndexed drawIndexed;
-            drawIndexed.m_indexCount = geometryIndexCount;
-            drawIndexed.m_instanceCount = 1;
+            const AZ::RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
+                m_shaderResourceGroups[0]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
+            };
 
-            const AZ::RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[0]->GetRHIShaderResourceGroup() };
-
-            AZ::RHI::DrawItem drawItem;
-            drawItem.m_arguments = drawIndexed;
-            drawItem.m_pipelineState = m_pipelineStates[0].get();
-            drawItem.m_indexBufferView = &m_indexBufferView;
+            AZ::RHI::DeviceDrawItem drawItem;
+            drawItem.m_geometryView = m_geometryView.GetDeviceGeometryView(context.GetDeviceIndex());
+            drawItem.m_streamIndices = m_geometryView.GetFullStreamBufferIndices();
+            drawItem.m_pipelineState = m_pipelineStates[0]->GetDevicePipelineState(context.GetDeviceIndex()).get();
             drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(AZ::RHI::ArraySize(shaderResourceGroups));
             drawItem.m_shaderResourceGroups = shaderResourceGroups;
-            drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
-            drawItem.m_streamBufferViews = m_streamBufferViews.data();
-
             commandList->Submit(drawItem);
         };
 
@@ -460,7 +455,9 @@ namespace AtomSampleViewer
 
             // Binds depth buffer from depth pass
             {
-                frameGraph.UseShaderAttachment(AZ::RHI::ImageScopeAttachmentDescriptor(m_transientImageDescriptor.m_attachmentId), AZ::RHI::ScopeAttachmentAccess::Read);
+                frameGraph.UseShaderAttachment(
+                    AZ::RHI::ImageScopeAttachmentDescriptor(m_transientImageDescriptor.m_attachmentId),
+                    AZ::RHI::ScopeAttachmentAccess::Read, AZ::RHI::ScopeAttachmentStage::FragmentShader);
             }
 
             // Create & Binds DepthStencil image
@@ -482,7 +479,9 @@ namespace AtomSampleViewer
                 dsDesc.m_imageViewDescriptor.m_overrideFormat = depthStencilFormat;
                 dsDesc.m_loadStoreAction.m_clearValue = m_depthClearValue;
                 dsDesc.m_loadStoreAction.m_loadAction = AZ::RHI::AttachmentLoadAction::Clear;
-                frameGraph.UseDepthStencilAttachment(dsDesc, AZ::RHI::ScopeAttachmentAccess::Write);
+                frameGraph.UseDepthStencilAttachment(
+                    dsDesc, AZ::RHI::ScopeAttachmentAccess::Write,
+                    AZ::RHI::ScopeAttachmentStage::EarlyFragmentTest | AZ::RHI::ScopeAttachmentStage::LateFragmentTest);
             }
 
             // We will submit a single draw item.
@@ -491,7 +490,7 @@ namespace AtomSampleViewer
 
         const auto compileFunctionMainView = [this](const AZ::RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
-            const AZ::RHI::ImageView* imageView = context.GetImageView(m_transientImageDescriptor.m_attachmentId);
+            const auto* imageView = context.GetImageView(m_transientImageDescriptor.m_attachmentId);
 
             m_shaderResourceGroups[1]->SetImageView(m_shaderInputImageIndex, imageView);
             m_shaderResourceGroups[1]->Compile();
@@ -505,21 +504,16 @@ namespace AtomSampleViewer
             commandList->SetViewports(&m_viewport, 1);
             commandList->SetScissors(&m_scissor, 1);
 
-            AZ::RHI::DrawIndexed drawIndexed;
-            drawIndexed.m_indexCount = geometryIndexCount;
-            drawIndexed.m_instanceCount = 1;
+            const AZ::RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
+                m_shaderResourceGroups[1]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
+            };
 
-            const AZ::RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[1]->GetRHIShaderResourceGroup() };
-
-            AZ::RHI::DrawItem drawItem;
-            drawItem.m_arguments = drawIndexed;
-            drawItem.m_pipelineState = m_pipelineStates[1].get();
-            drawItem.m_indexBufferView = &m_indexBufferView;
+            AZ::RHI::DeviceDrawItem drawItem;
+            drawItem.m_geometryView = m_geometryView.GetDeviceGeometryView(context.GetDeviceIndex());
+            drawItem.m_streamIndices = m_geometryView.GetFullStreamBufferIndices();
+            drawItem.m_pipelineState = m_pipelineStates[1]->GetDevicePipelineState(context.GetDeviceIndex()).get();
             drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(AZ::RHI::ArraySize(shaderResourceGroups));
             drawItem.m_shaderResourceGroups = shaderResourceGroups;
-            drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
-            drawItem.m_streamBufferViews = m_streamBufferViews.data();
-
             commandList->Submit(drawItem);
         };
 

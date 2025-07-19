@@ -7,6 +7,9 @@
  */
 #include <Utils/Utils.h>
 
+#include <AzCore/IO/SystemFile.h>
+#include <AzCore/Settings/SettingsRegistryMergeUtils.h>
+
 #include <AtomCore/Instance/InstanceDatabase.h>
 #include <Atom/RHI/RHISystemInterface.h>
 #include <Atom/RPI.Public/RenderPipeline.h>
@@ -41,7 +44,7 @@ namespace AtomSampleViewer
             using namespace AZ;
 
             auto* rhiSystem = RHI::RHISystemInterface::Get();
-            AZ_Assert(rhiSystem, "Failed to retrieve rpi system.");
+            AZ_Assert(rhiSystem, "Failed to retrieve rhi system.");
 
             return rhiSystem->GetDevice();
         }
@@ -167,11 +170,12 @@ namespace AtomSampleViewer
             constexpr uint32_t width = 4;
             constexpr uint32_t height = 4;
 
-            AZStd::string assetName = AZStd::string::format("SolidColorBackground_%u", color);
-            AZ::Data::AssetId assetId = AZ::Uuid::CreateName(assetName.c_str());
+            const AZStd::string assetName = AZStd::string::format("SolidColorBackground_%u", color);
+            const AZ::Data::InstanceId instanceId = AZ::Data::InstanceId::CreateName(assetName.c_str());
 
             // Check for existing image of the same color
-            AZ::Data::Instance<AZ::RPI::StreamingImage> existingImage = AZ::Data::InstanceDatabase<AZ::RPI::StreamingImage>::Instance().Find(AZ::Data::InstanceId::CreateFromAssetId(assetId));
+            AZ::Data::Instance<AZ::RPI::StreamingImage> existingImage =
+                AZ::Data::InstanceDatabase<AZ::RPI::StreamingImage>::Instance().Find(instanceId);
             if (existingImage)
             {
                 return existingImage;
@@ -190,7 +194,7 @@ namespace AtomSampleViewer
             // Create a new streaming image
 
             AZ::RPI::StreamingImageAssetCreator imageCreator;
-            imageCreator.Begin(assetId);
+            imageCreator.Begin(AZ::Data::AssetId(instanceId.GetGuid(), 0));
 
             int32_t arraySize = 6;
             AZ::RHI::Format format = AZ::RHI::Format::R8G8B8A8_UNORM_SRGB;
@@ -206,12 +210,11 @@ namespace AtomSampleViewer
             // Create the mip chain
 
             AZ::RPI::ImageMipChainAssetCreator mipChainCreator;
-            assetId.m_subId = 1;
-            mipChainCreator.Begin(assetId, 1, 6);
+            mipChainCreator.Begin(AZ::Data::AssetId(instanceId.GetGuid(), 1), 1, 6);
 
             uint32_t pitch = width * pixelSize;
 
-            AZ::RHI::ImageSubresourceLayout layout;
+            AZ::RHI::DeviceImageSubresourceLayout layout;
             layout.m_bytesPerImage = pixelDataSize;
             layout.m_rowCount = layout.m_bytesPerImage / pitch;
             layout.m_size = AZ::RHI::Size(width, height, 1);
@@ -233,7 +236,7 @@ namespace AtomSampleViewer
             AZ::Data::Asset<AZ::RPI::StreamingImageAsset> imageAsset;
             imageCreator.End(imageAsset);
 
-            return AZ::RPI::StreamingImage::FindOrCreate(imageAsset);
+            return AZ::Data::InstanceDatabase<AZ::RPI::StreamingImage>::Instance().FindOrCreate(instanceId, imageAsset);
         }
 
         AZStd::string ResolvePath(const AZStd::string& path)
@@ -255,6 +258,61 @@ namespace AtomSampleViewer
             {
                 return true;
             }
+            return false;
+        }
+
+        bool RunDiffTool(const AZStd::string& filePathA, const AZStd::string& filePathB)
+        {
+            // First let's try to use the user's favorite diff tool. 
+            static constexpr AZStd::string_view DiffToolPathKey = "/O3DE/External/DiffTool";
+
+            AZStd::string diffToolPath;
+            if (auto registry = AZ::SettingsRegistry::Get())
+            {
+                registry->Get(diffToolPath, DiffToolPathKey);
+            }
+
+            if (!diffToolPath.empty())
+            {
+                // Does the executable exist?
+                if (AZ::IO::SystemFile::Exists(diffToolPath.c_str()))
+                {
+                    return RunDiffTool_Impl(diffToolPath, filePathA, filePathB);
+                }
+
+                AZ_Warning(
+                    "ASV::RunDiffTool", false, "The user's diff tool <%s> doesn't exist. Will use the platform default <%s>.\n",
+                    diffToolPath.c_str(), GetDefaultDiffToolPath_Impl().c_str());
+
+            }
+
+            // If the key doesn't exist in the registry, or the user specified executable doesn't exist, then
+            // use the platform default.
+            diffToolPath = GetDefaultDiffToolPath_Impl();
+            if (!diffToolPath.empty())
+            {
+                // Does the executable exist?
+                if (AZ::IO::SystemFile::Exists(diffToolPath.c_str()))
+                {
+                    return RunDiffTool_Impl(diffToolPath, filePathA, filePathB);
+                }
+
+                AZ_Warning(
+                    "ASV::RunDiffTool", false,
+                    "The platform default diff tool <%s> doesn't exist.\n"
+                    "You can customize the tool path in the settings registry key: %s.\n",
+                    diffToolPath.c_str(),
+                    DiffToolPathKey.data());
+            }
+            else
+            {
+                AZ_Warning(
+                    "ASV::RunDiffTool", false,
+                    "No default diff tool has been defined for the current platform.\n"
+                    "You can customize the tool path in the settings registry key: %s.\n",
+                    DiffToolPathKey.data());
+            }
+
             return false;
         }
 

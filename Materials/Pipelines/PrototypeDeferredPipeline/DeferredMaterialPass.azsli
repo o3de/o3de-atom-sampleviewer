@@ -19,14 +19,16 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////
 
 #include <viewsrg.srgi>
+#include <Atom/Features/PBR/DefaultObjectSrg.azsli>
 #include <Atom/RPI/ShaderResourceGroups/DefaultDrawSrg.azsli>
 #include <Atom/Features/ColorManagement/TransformColor.azsli>
 #include <Atom/Features/PBR/LightingOptions.azsli>
 
-VsOutput MaterialVS(VsInput IN)
+VsOutput MaterialVS(VsInput IN, uint instanceId : SV_InstanceID)
 {
-    VsOutput OUT = EvaluateVertexGeometry(IN);
-    return OUT;
+    VsSystemValues SV;
+    SV.m_instanceId = instanceId;
+    return EvaluateVertexGeometry(IN, SV);
 }
 
 struct DeferredMaterialOutput

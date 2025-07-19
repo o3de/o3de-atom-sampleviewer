@@ -247,6 +247,13 @@
                             }
                         },
                         {
+                            "LocalSlot": "DepthLinear",
+                            "AttachmentRef": {
+                                "Pass": "Parent",
+                                "Attachment": "DepthLinear"
+                            }
+                        },
+                        {
                             "LocalSlot": "SpecularInputOutput",
                             "AttachmentRef": {
                                 "Pass": "DeferredLighting",
@@ -453,7 +460,7 @@
                 //        "ShaderAsset": {
                 //            "FilePath": "Shaders/PostProcessing/ScreenSpaceSubsurfaceScatteringCS.shader"
                 //        },
-                //        "Make Fullscreen Pass": true,
+                //        "FullscreenDispatch": true,
                 //        "PipelineViewTag": "MainCamera"
                 //    }
                 //},

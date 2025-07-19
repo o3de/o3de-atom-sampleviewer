@@ -46,6 +46,7 @@ namespace AtomSampleViewer
         CreateScope();
         AZ::RHI::RHISystemNotificationBus::Handler::BusConnect();
         AZ::TickBus::Handler::BusConnect();
+        AZ::RPI::XRSpaceNotificationBus::Handler::BusConnect();
     }
 
     void XRExampleComponent::OnTick(float deltaTime, [[maybe_unused]] AZ::ScriptTimePoint time)
@@ -53,46 +54,58 @@ namespace AtomSampleViewer
         m_time += deltaTime;
     }
 
+    void XRExampleComponent::OnXRSpaceLocationsChanged(
+        const AZ::Transform& baseSpaceToHeadTm, const AZ::Transform& headToLeftEyeTm, const AZ::Transform& headToRightEyeTm)
+    {
+        AZ::RPI::XRRenderingInterface* xrSystem = AZ::RPI::RPISystemInterface::Get()->GetXRSystem();
+        if (!xrSystem || !xrSystem->ShouldRender())
+        {
+            return;
+        }
+
+        m_baseSpaceToHeadTm = baseSpaceToHeadTm;
+        const AZ::Transform eyeWorldZupTm = (m_viewIndex == 0)
+            ? baseSpaceToHeadTm * headToLeftEyeTm // This is true for both: main pipeline and left eye pipeline.
+            : baseSpaceToHeadTm * headToRightEyeTm; // Right eye pipeline.
+
+        // When rendering, the camera Up vector should be Y+, and the forward vector is Z-
+        static const AZ::Transform zUpToYUp = AZ::Transform::CreateRotationX(AZ::Constants::HalfPi);
+        const auto eyeWorldYupTm = eyeWorldZupTm * zUpToYUp;
+
+        AZ::RPI::FovData fovData;
+        [[maybe_unused]] AZ::RHI::ResultCode resultCode = xrSystem->GetViewFov(m_viewIndex, fovData);
+
+        static const float clip_near = 0.05f;
+        static const float clip_far = 100.0f;
+        bool reverseDepth = false;
+        const auto projectionMat44 = xrSystem->CreateStereoscopicProjection(
+            fovData.m_angleLeft, fovData.m_angleRight, fovData.m_angleDown, fovData.m_angleUp, clip_near, clip_far, reverseDepth);
+
+        AZ::Matrix4x4 viewMat = AZ::Matrix4x4::CreateFromTransform(eyeWorldYupTm.GetInverse());
+        m_viewProjMatrix = projectionMat44 * viewMat;
+    }
+
     void XRExampleComponent::OnFramePrepare(AZ::RHI::FrameGraphBuilder& frameGraphBuilder)
     {
-        AZ::Matrix4x4 projection = AZ::Matrix4x4::CreateIdentity();
-
         AZ::RPI::XRRenderingInterface* xrSystem = AZ::RPI::RPISystemInterface::Get()->GetXRSystem();
         if (xrSystem && xrSystem->ShouldRender())
         {
-            AZ::RPI::FovData fovData;
-            AZ::RPI::PoseData poseData, frontViewPoseData;
-            [[maybe_unused]] AZ::RHI::ResultCode resultCode = xrSystem->GetViewFov(m_viewIndex, fovData);
-            resultCode = xrSystem->GetViewPose(m_viewIndex, poseData);
-                
-            static const float clip_near = 0.05f;
-            static const float clip_far = 100.0f;
-            bool reverseDepth = false;
-            projection = xrSystem->CreateStereoscopicProjection(fovData.m_angleLeft, fovData.m_angleRight,
-                                                          fovData.m_angleDown, fovData.m_angleUp, 
-                                                          clip_near, clip_far, reverseDepth);
-
-            AZ::Quaternion poseOrientation = poseData.m_orientation; 
-            poseOrientation.InvertFast(); 
-            AZ::Matrix4x4 viewMat = AZ::Matrix4x4::CreateFromQuaternionAndTranslation(poseOrientation, -poseData.m_position);
-            m_viewProjMatrix = projection * viewMat;
- 
             const AZ::Matrix4x4 initialScaleMat = AZ::Matrix4x4::CreateScale(AZ::Vector3(0.1f, 0.1f, 0.1f));
 
+            AZ::RPI::PoseData frontViewPoseData;
             //Model matrix for the cube related to the front view
-            resultCode = xrSystem->GetViewFrontPose(frontViewPoseData);
-            m_modelMatrices[0] = AZ::Matrix4x4::CreateFromQuaternionAndTranslation(frontViewPoseData.m_orientation, frontViewPoseData.m_position) * initialScaleMat;
-                      
-            //Model matrix for the cube related to the left controller
-            AZ::RPI::PoseData controllerLeftPose, controllerRightPose;
-            resultCode = xrSystem->GetControllerPose(0, controllerLeftPose);
-            AZ::Matrix4x4 leftScaleMat = initialScaleMat * AZ::Matrix4x4::CreateScale(AZ::Vector3(xrSystem->GetControllerScale(0)));
-            m_modelMatrices[1] = AZ::Matrix4x4::CreateFromQuaternionAndTranslation(controllerLeftPose.m_orientation, controllerLeftPose.m_position) * leftScaleMat;
+            [[maybe_unused]] AZ::RHI::ResultCode resultCode = xrSystem->GetViewFrontPose(frontViewPoseData);
+            m_modelMatrices[0] =
+                AZ::Matrix4x4::CreateFromQuaternionAndTranslation(frontViewPoseData.m_orientation, frontViewPoseData.m_position) *
+                initialScaleMat;
 
-            //Model matrix for the cube related to the right controller
-            AZ::Matrix4x4 rightScaleMat = initialScaleMat * AZ::Matrix4x4::CreateScale(AZ::Vector3(xrSystem->GetControllerScale(1)));
-            resultCode = xrSystem->GetControllerPose(1, controllerRightPose);
-            m_modelMatrices[2] = AZ::Matrix4x4::CreateFromQuaternionAndTranslation(controllerRightPose.m_orientation, controllerRightPose.m_position) * rightScaleMat;
+            AZ::Transform controllerLeftTm;
+            resultCode = xrSystem->GetControllerTransform(0, controllerLeftTm);
+            m_modelMatrices[1] = AZ::Matrix4x4::CreateFromTransform(m_baseSpaceToHeadTm * controllerLeftTm) * initialScaleMat;
+
+            AZ::Transform controllerRightTm;
+            resultCode = xrSystem->GetControllerTransform(1, controllerRightTm);
+            m_modelMatrices[2] = AZ::Matrix4x4::CreateFromTransform(m_baseSpaceToHeadTm * controllerRightTm) * initialScaleMat;
         }      
         
         for (int i = 0; i < NumberOfCubes; ++i)
@@ -109,17 +122,17 @@ namespace AtomSampleViewer
     {
         const AZStd::fixed_vector<AZ::Color, GeometryVertexCount> vertexColor =
         {
-            //Front Face
+            //Top Face
             AZ::Colors::DarkBlue,   AZ::Colors::DarkBlue,   AZ::Colors::DarkBlue,   AZ::Colors::DarkBlue,
-            //Back Face                                                                       
+            //bottom Face                                                                       
             AZ::Colors::Blue,       AZ::Colors::Blue,       AZ::Colors::Blue,       AZ::Colors::Blue,
             //Left Face                                                                      
             AZ::Colors::DarkGreen,  AZ::Colors::DarkGreen,  AZ::Colors::DarkGreen,  AZ::Colors::DarkGreen,
             //Right Face                                                                    
             AZ::Colors::Green,      AZ::Colors::Green,      AZ::Colors::Green,      AZ::Colors::Green,
-            //Top Face                                                                  
+            //Front Face                                                                  
             AZ::Colors::DarkRed,    AZ::Colors::DarkRed,    AZ::Colors::DarkRed,    AZ::Colors::DarkRed,
-            //Bottom Face                                                                    
+            //Back Face                                                                    
             AZ::Colors::Red,        AZ::Colors::Red,        AZ::Colors::Red,        AZ::Colors::Red,
         };
 
@@ -129,17 +142,17 @@ namespace AtomSampleViewer
             
             const AZStd::fixed_vector<AZ::Vector3, GeometryVertexCount> vertices =
             {
-                //Front Face
+                //Top Face
                 AZ::Vector3(1.0, 1.0, 1.0),         AZ::Vector3(-1.0, 1.0, 1.0),     AZ::Vector3(-1.0, -1.0, 1.0),    AZ::Vector3(1.0, -1.0, 1.0),
-                //Back Face                                                                       
+                //Bottom Face                                                                       
                 AZ::Vector3(1.0, 1.0, -1.0),        AZ::Vector3(-1.0, 1.0, -1.0),    AZ::Vector3(-1.0, -1.0, -1.0),   AZ::Vector3(1.0, -1.0, -1.0),
                 //Left Face                                                                      
                 AZ::Vector3(-1.0, 1.0, 1.0),        AZ::Vector3(-1.0, -1.0, 1.0),    AZ::Vector3(-1.0, -1.0, -1.0),   AZ::Vector3(-1.0, 1.0, -1.0),
                 //Right Face                                                                    
                 AZ::Vector3(1.0, 1.0, 1.0),         AZ::Vector3(1.0, -1.0, 1.0),     AZ::Vector3(1.0, -1.0, -1.0),    AZ::Vector3(1.0, 1.0, -1.0),
-                //Top Face                                                                  
+                //Front Face                                                                  
                 AZ::Vector3(1.0, 1.0, 1.0),         AZ::Vector3(-1.0, 1.0, 1.0),     AZ::Vector3(-1.0, 1.0, -1.0),    AZ::Vector3(1.0, 1.0, -1.0),
-                //Bottom Face                                                                    
+                //Back Face                                                                    
                 AZ::Vector3(1.0, -1.0, 1.0),        AZ::Vector3(-1.0, -1.0, 1.0),    AZ::Vector3(-1.0, -1.0, -1.0),   AZ::Vector3(1.0, -1.0, -1.0),
             };
 
@@ -152,10 +165,10 @@ namespace AtomSampleViewer
             bufferData.m_indices =
             {
                 {
-                    //Back
+                    //Top
                     2, 0, 1,
                     0, 2, 3,
-                    //Front
+                    //Bottom
                     4, 6, 5,
                     6, 4, 7,
                     //Left
@@ -164,10 +177,10 @@ namespace AtomSampleViewer
                     //Right
                     14, 12, 13,
                     15, 12, 14,
-                    //Top
+                    //Front
                     16, 18, 17,
                     18, 16, 19,
-                    //Bottom
+                    //Back
                     22, 20, 21,
                     23, 20, 22,
                 }
@@ -181,11 +194,11 @@ namespace AtomSampleViewer
         const AZ::RHI::Ptr<AZ::RHI::Device> device = Utils::GetRHIDevice();
         AZ::RHI::ResultCode result = AZ::RHI::ResultCode::Success;
 
-        m_bufferPool = AZ::RHI::Factory::Get().CreateBufferPool();
+        m_bufferPool = aznew AZ::RHI::BufferPool();
         AZ::RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = AZ::RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = AZ::RHI::HeapMemoryLevel::Device;
-        result = m_bufferPool->Init(*device, bufferPoolDesc);
+        result = m_bufferPool->Init(bufferPoolDesc);
         if (result != AZ::RHI::ResultCode::Success)
         {
             AZ_Error("XRExampleComponent", false, "Failed to initialize buffer pool with error code %d", result);
@@ -194,7 +207,7 @@ namespace AtomSampleViewer
 
         SingleCubeBufferData bufferData = CreateSingleCubeBufferData();
 
-        m_inputAssemblyBuffer = AZ::RHI::Factory::Get().CreateBuffer();
+        m_inputAssemblyBuffer = aznew AZ::RHI::Buffer();
         AZ::RHI::BufferInitRequest request;
 
         request.m_buffer = m_inputAssemblyBuffer.get();
@@ -207,29 +220,28 @@ namespace AtomSampleViewer
             return;
         }
 
-        m_streamBufferViews[0] =
-        {
+        m_geometryView.SetDrawArguments(AZ::RHI::DrawIndexed(0, GeometryIndexCount, 0));
+
+        m_geometryView.AddStreamBufferView({
             *m_inputAssemblyBuffer,
             offsetof(SingleCubeBufferData, m_positions),
             sizeof(SingleCubeBufferData::m_positions),
             sizeof(VertexPosition)
-        };
+        });
 
-        m_streamBufferViews[1] =
-        {
+        m_geometryView.AddStreamBufferView({
             *m_inputAssemblyBuffer,
             offsetof(SingleCubeBufferData, m_colors),
             sizeof(SingleCubeBufferData::m_colors),
             sizeof(VertexColor)
-        };
+        });
 
-        m_indexBufferView =
-        {
+        m_geometryView.SetIndexBufferView({
             *m_inputAssemblyBuffer,
             offsetof(SingleCubeBufferData, m_indices),
             sizeof(SingleCubeBufferData::m_indices),
             AZ::RHI::IndexFormat::Uint16
-        };
+        });
 
         AZ::RHI::InputStreamLayoutBuilder layoutBuilder;
         layoutBuilder.SetTopology(AZ::RHI::PrimitiveTopology::TriangleList);
@@ -238,7 +250,7 @@ namespace AtomSampleViewer
         m_streamLayoutDescriptor.Clear();
         m_streamLayoutDescriptor = layoutBuilder.End();
 
-        AZ::RHI::ValidateStreamBufferViews(m_streamLayoutDescriptor, m_streamBufferViews);
+        AZ::RHI::ValidateStreamBufferViews(m_streamLayoutDescriptor, m_geometryView, m_geometryView.GetFullStreamBufferIndices());
     }
 
     void XRExampleComponent::CreateCubePipeline()
@@ -326,7 +338,9 @@ namespace AtomSampleViewer
                 dsDesc.m_loadStoreAction.m_clearValue = AZ::RHI::ClearValue::CreateDepthStencil(1.0f, 0);
                 dsDesc.m_loadStoreAction.m_loadAction = AZ::RHI::AttachmentLoadAction::Clear;
                 dsDesc.m_loadStoreAction.m_loadActionStencil = AZ::RHI::AttachmentLoadAction::DontCare;
-                frameGraph.UseDepthStencilAttachment(dsDesc, AZ::RHI::ScopeAttachmentAccess::Write);
+                frameGraph.UseDepthStencilAttachment(
+                    dsDesc, AZ::RHI::ScopeAttachmentAccess::Write,
+                    AZ::RHI::ScopeAttachmentStage::EarlyFragmentTest | AZ::RHI::ScopeAttachmentStage::LateFragmentTest);
             }
 
             // We will submit NumberOfCubes draw items.
@@ -343,10 +357,6 @@ namespace AtomSampleViewer
             commandList->SetViewports(&m_viewport, 1);
             commandList->SetScissors(&m_scissor, 1);
 
-            AZ::RHI::DrawIndexed drawIndexed;
-            drawIndexed.m_indexCount = GeometryIndexCount;
-            drawIndexed.m_instanceCount = 1;
-
             // Dividing NumberOfCubes by context.GetCommandListCount() to balance to number 
             // of draw call equally between each thread.
             uint32_t numberOfCubesPerCommandList = NumberOfCubes / context.GetCommandListCount();
@@ -360,16 +370,16 @@ namespace AtomSampleViewer
 
             for (uint32_t i = indexStart; i < indexEnd; ++i)
             {
-                const AZ::RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_shaderResourceGroups[i]->GetRHIShaderResourceGroup() };
+                const AZ::RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
+                    m_shaderResourceGroups[i]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
+                };
 
-                AZ::RHI::DrawItem drawItem;
-                drawItem.m_arguments = drawIndexed;
-                drawItem.m_pipelineState = m_pipelineState.get();
-                drawItem.m_indexBufferView = &m_indexBufferView;
+                AZ::RHI::DeviceDrawItem drawItem;
+                drawItem.m_geometryView = m_geometryView.GetDeviceGeometryView(context.GetDeviceIndex());
+                drawItem.m_streamIndices = m_geometryView.GetFullStreamBufferIndices();
+                drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(AZ::RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
-                drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_streamBufferViews.size());
-                drawItem.m_streamBufferViews = m_streamBufferViews.data();
 
                 commandList->Submit(drawItem);
             }
@@ -394,6 +404,8 @@ namespace AtomSampleViewer
         {
             return;
         }
+
+        AZ::RPI::XRSpaceNotificationBus::Handler::BusDisconnect();
 
         m_inputAssemblyBuffer = nullptr;
         m_bufferPool = nullptr;

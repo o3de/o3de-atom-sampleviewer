@@ -51,9 +51,10 @@ PSOutput MainPS(float4 screenPos : SV_POSITION)
 
     PSOutput OUT;
 
-    float3 position = SubpassInputsSrg::m_position.SubpassLoad().xyz;
-    float3 normal = SubpassInputsSrg::m_normal.SubpassLoad().xyz;
-    float4 albedo = SubpassInputsSrg::m_albedo.SubpassLoad();
+    int3 loadPos = int3(screenPos.x, screenPos.y, 0);
+    float3 position = SubpassInputsSrg::m_position.SubpassLoad(loadPos).xyz;
+    float3 normal = SubpassInputsSrg::m_normal.SubpassLoad(loadPos).xyz;
+    float4 albedo = SubpassInputsSrg::m_albedo.SubpassLoad(loadPos);
 
     // Ambient part
     const float3 lightDir = normalize(float3(-1, -1, -1));

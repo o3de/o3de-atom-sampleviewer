@@ -210,25 +210,24 @@ namespace AtomSampleViewer
     {
         using namespace AZ;
 
-        const char* modelPath = "objects/sponza.azmodel";
+        const char* modelPath = "objects/sponza.fbx.azmodel";
         Data::Asset<RPI::ModelAsset> modelAsset =
             RPI::AssetUtils::GetAssetByProductPath<RPI::ModelAsset>(modelPath, RPI::AssetUtils::TraceLevel::Assert);
-        Data::Asset<RPI::MaterialAsset> materialAsset = RPI::AssetUtils::GetAssetByProductPath<RPI::MaterialAsset>(DefaultPbrMaterialPath, RPI::AssetUtils::TraceLevel::Assert);
-        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(Render::MeshHandleDescriptor{ modelAsset }, RPI::Material::FindOrCreate(materialAsset));
+        Data::Asset<RPI::MaterialAsset> materialAsset =
+            RPI::AssetUtils::GetAssetByProductPath<RPI::MaterialAsset>(DefaultPbrMaterialPath, RPI::AssetUtils::TraceLevel::Assert);
+
+        Render::MeshHandleDescriptor descriptor(modelAsset, RPI::Material::FindOrCreate(materialAsset));
+        descriptor.m_modelChangedEventHandler =
+            AZ::Render::MeshHandleDescriptor::ModelChangedEvent::Handler{ [this](const AZ::Data::Instance<AZ::RPI::Model>& model)
+                                                                          {
+                                                                              OnModelReady(model);
+                                                                          } };
+
+        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(descriptor);
 
         // rotate the entity 180 degrees about Z (the vertical axis)
         // This makes it consistent with how it was positioned in the world when the world was Y-up.
         GetMeshFeatureProcessor()->SetTransform(m_meshHandle, Transform::CreateRotationZ(AZ::Constants::Pi));
-
-        Data::Instance<RPI::Model> model = GetMeshFeatureProcessor()->GetModel(m_meshHandle);
-        if (model)
-        {
-            OnModelReady(model);
-        }
-        else
-        {
-            GetMeshFeatureProcessor()->ConnectModelChangeEventHandler(m_meshHandle, m_meshChangedHandler);
-        }
 
         // directional light
         {
@@ -243,6 +242,7 @@ namespace AtomSampleViewer
                 lightTransform.GetBasis(1));
 
             featureProcessor->SetRgbIntensity(handle, AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Lux>(DirectionalLightColor * m_directionalLightIntensity));
+            featureProcessor->SetShadowEnabled(handle, m_shadowEnabled);
             featureProcessor->SetCascadeCount(handle, s_cascadesCountDefault);
             featureProcessor->SetShadowmapSize(handle, s_shadowmapSizes[s_shadowmapSizeIndexDefault]);
             featureProcessor->SetViewFrustumCorrectionEnabled(handle, m_isCascadeCorrectionEnabled);

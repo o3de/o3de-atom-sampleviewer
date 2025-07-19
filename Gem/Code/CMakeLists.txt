@@ -25,10 +25,11 @@ ly_add_target(
         PUBLIC
             AZ::AzGameFramework
             Gem::Atom_AtomBridge.Static
-            Gem::Atom_Feature_Common.Static
+            Gem::Atom_Feature_Common.Public
             Gem::Atom_Component_DebugCamera.Static
             Gem::Profiler.Static
             Gem::DiffuseProbeGrid.Static
+            Gem::DebugDraw.Static
 )
 
 ly_add_target(

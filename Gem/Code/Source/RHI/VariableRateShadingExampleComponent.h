@@ -21,10 +21,10 @@
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 
 #include <Atom/RHI/BufferPool.h>
-#include <Atom/RHI/DrawItem.h>
 #include <Atom/RHI/Device.h>
+#include <Atom/RHI/DeviceCopyItem.h>
+#include <Atom/RHI/DrawItem.h>
 #include <Atom/RHI/Factory.h>
-#include <Atom/RHI/CopyItem.h>
 #include <Atom/RHI/FrameScheduler.h>
 #include <Atom/RHI/PipelineState.h>
 
@@ -136,10 +136,8 @@ namespace AtomSampleViewer
         AZ::RHI::Ptr<AZ::RHI::BufferPool> m_bufferPool;
         // Buffer for the IA of the full screen quad.
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_inputAssemblyBuffer;
-        // Bufferviews into the full screen quad IA
-        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
-        // Indexview of the full screen quad index buffer
-        AZ::RHI::IndexBufferView m_indexBufferView;
+        // Geometry view for the full screen quad.
+        AZ::RHI::GeometryView m_geometryView;
         // Layout of the full screen quad.
         AZ::RHI::InputStreamLayout m_inputStreamLayout;
 
