@@ -76,7 +76,7 @@ namespace AtomSampleViewer
         m_meshHandles.reserve(instanceCount);
 
         const char* materialPath = DefaultPbrMaterialPath;
-        const char* modelPath = "objects/shaderball_simple.azmodel";
+        const char* modelPath = "objects/shaderball_simple.fbx.azmodel";
 
         Data::AssetCatalogRequestBus::BroadcastResult(
             m_materialAssetId, &Data::AssetCatalogRequestBus::Events::GetAssetIdByPath,
@@ -103,9 +103,9 @@ namespace AtomSampleViewer
         Data::Asset<ModelAsset> modelAsset;
         modelAsset.Create(m_modelAssetId);
 
-        auto meshHandle = GetMeshFeatureProcessor()->AcquireMesh(Render::MeshHandleDescriptor{ modelAsset }, materialInstance);
+        auto meshHandle = GetMeshFeatureProcessor()->AcquireMesh(Render::MeshHandleDescriptor(modelAsset, materialInstance));
         GetMeshFeatureProcessor()->SetTransform(meshHandle, transform);
-        m_meshHandles.push_back(AZStd::move(meshHandle));
+        m_meshHandles.emplace_back(AZStd::move(meshHandle));
     }
 
     void SceneReloadSoakTestComponent::DestroyLatticeInstances()

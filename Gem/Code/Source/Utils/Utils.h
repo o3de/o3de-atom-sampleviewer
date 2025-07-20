@@ -66,7 +66,13 @@ namespace AtomSampleViewer
 
         void ReportScriptableAction(const char* formatStr, ...);
 
+        // Discovers, from the settings registry, the path to the diff tool and invokes
+        // the per-platform RunDiffTool_Impl.
         bool RunDiffTool(const AZStd::string& filePathA, const AZStd::string& filePathB);
+
+        // Customized per platform
+        AZStd::string GetDefaultDiffToolPath_Impl();
+        bool RunDiffTool_Impl(const AZStd::string& diffToolPath, const AZStd::string& filePathA, const AZStd::string& filePathB);
 
         AZ::Data::Instance<AZ::RPI::StreamingImage> GetSolidColorCubemap(uint32_t color);
 

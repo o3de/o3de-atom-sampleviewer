@@ -14,7 +14,8 @@
     "icon_path": "preview.png",
     "engine": "o3de",
     "external_subdirectories": [
-        "Gem"
+        "Gem",
+        "Standalone"
     ],
     "gem_names": [
         "Maestro",
@@ -34,13 +35,14 @@
         "UiBasics",
         "StreamerProfiler",
         "DiffuseProbeGrid",
+        "DebugDraw",
         "Atom_TestData",
         {
-            "name": "OpenXRVk",
+            "name": "OpenXRVk>=1.0.1",
             "optional": true
         },
         {
-            "name": "XR",
+            "name": "XR>=1.0.1",
             "optional": true
         }
     ]

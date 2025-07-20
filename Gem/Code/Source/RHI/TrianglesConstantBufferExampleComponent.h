@@ -18,7 +18,6 @@
 
 #include <Atom/RHI/ScopeProducer.h>
 #include <Atom/RHI/FrameScheduler.h>
-#include <Atom/RHI/DrawItem.h>
 #include <Atom/RHI/Device.h>
 #include <Atom/RHI/Factory.h>
 #include <Atom/RHI/PipelineState.h>
@@ -77,8 +76,6 @@ namespace AtomSampleViewer
         void UploadDataToConstantBuffer(InstanceInfo* data, uint32_t elementSize, uint32_t elementCount);
         void CreateConstantBufferView();
         
-        AZ::RHI::DrawItem m_drawItem;
-
         float m_time = 0.0f;
 
         // -------------------------------------------------
@@ -94,7 +91,6 @@ namespace AtomSampleViewer
         AZ::RHI::Ptr<AZ::RHI::BufferPool> m_inputAssemblyBufferPool;
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_inputAssemblyBuffer;
 
-        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
         AZ::RHI::IndexBufferView m_indexBufferView;
 
         AZ::RHI::Ptr<AZ::RHI::BufferPool> m_constantBufferPool;
@@ -102,6 +98,8 @@ namespace AtomSampleViewer
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_constantBuffer;
 
         AZ::RHI::Ptr<AZ::RHI::BufferView> m_constantBufferView;
+
+        AZ::RHI::GeometryView m_geometryView;
 
         // --------------------------------------------------------
         // Pipeline state and SRG to be constructed from the shader

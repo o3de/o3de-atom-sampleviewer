@@ -209,13 +209,13 @@ namespace AtomSampleViewer
             {
                 if (!meshHandle.IsValid())
                 {
-                    meshHandle = m_meshFeatureProcessor->AcquireMesh(MeshHandleDescriptor{ modelAsset }, m_materialInstances.at(i));
+                    meshHandle = m_meshFeatureProcessor->AcquireMesh(AZ::Render::MeshHandleDescriptor(modelAsset, m_materialInstances.at(i)));
                 }
                 else if (m_modelAsset.GetId() != modelAsset.GetId())
                 {
                     // Valid mesh handle, but wrong asset. Release and reacquire.
                     m_meshFeatureProcessor->ReleaseMesh(meshHandle);
-                    meshHandle = m_meshFeatureProcessor->AcquireMesh(MeshHandleDescriptor{ modelAsset }, m_materialInstances.at(i));
+                    meshHandle = m_meshFeatureProcessor->AcquireMesh(AZ::Render::MeshHandleDescriptor(modelAsset, m_materialInstances.at(i)));
                 }
 
                 AZ::Transform transform = AZ::Transform::CreateIdentity();

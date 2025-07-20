@@ -98,7 +98,7 @@ namespace AtomSampleViewer
         if (isNonMsaaPipeline != m_isNonMsaaPipeline)
         {      
             // set the number of MSAA samples and reset the RPI scene
-            SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequests::SetNumMSAASamples, m_numSamples);
+            SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequests::SetNumMSAASamples, static_cast<uint16_t>(m_numSamples));
             SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequests::ResetRPIScene);
 
             // reset internal sample scene related data
@@ -160,38 +160,35 @@ namespace AtomSampleViewer
         switch (m_modelType)
         {
         case 0:
-            return AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/cylinder.azmodel", traceLevel);
+            return AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/cylinder.fbx.azmodel", traceLevel);
         case 1:
-            return AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/cube.azmodel", traceLevel);
+            return AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/cube.fbx.azmodel", traceLevel);
         case 2:
-            return AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/shaderball_simple.azmodel", traceLevel);
+            return AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/shaderball_simple.fbx.azmodel", traceLevel);
         }
 
         AZ_Warning("MSAA_RPI_ExampleComponent", false, "Unsupported model type");
-        return AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/cylinder.azmodel", traceLevel);
+        return AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/cylinder.fbx.azmodel", traceLevel);
     }
 
     void MSAA_RPI_ExampleComponent::ActivateModel()
     {
-        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ GetModelAsset() }, AZ::RPI::Material::FindOrCreate(GetMaterialAsset()));
-        GetMeshFeatureProcessor()->SetTransform(m_meshHandle, AZ::Transform::CreateIdentity());
+        ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::PauseScript);
 
-        AZ::Data::Instance<AZ::RPI::Model> model = GetMeshFeatureProcessor()->GetModel(m_meshHandle);
-        if (model)
-        {
-            OnModelReady(model);
-        }
-        else
-        {
-            ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::PauseScript);
-            GetMeshFeatureProcessor()->ConnectModelChangeEventHandler(m_meshHandle, m_meshChangedHandler);
-        }
+        AZ::Render::MeshHandleDescriptor descriptor(GetModelAsset(), AZ::RPI::Material::FindOrCreate(GetMaterialAsset()));
+        descriptor.m_modelChangedEventHandler =
+            AZ::Render::MeshHandleDescriptor::ModelChangedEvent::Handler{ [this](const AZ::Data::Instance<AZ::RPI::Model>& model)
+                                                                          {
+                                                                              OnModelReady(model);
+                                                                          } };
+
+        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(descriptor);
+        GetMeshFeatureProcessor()->SetTransform(m_meshHandle, AZ::Transform::CreateIdentity());
     }
 
     void MSAA_RPI_ExampleComponent::OnModelReady(AZ::Data::Instance<AZ::RPI::Model> model)
     {
         AZ::Data::Asset<AZ::RPI::ModelAsset> modelAsset = model->GetModelAsset();
-        m_meshChangedHandler.Disconnect();
         ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::ResumeScript);
     }
 

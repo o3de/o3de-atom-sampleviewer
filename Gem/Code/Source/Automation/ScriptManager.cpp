@@ -27,6 +27,7 @@
 #include <AzCore/Script/ScriptAsset.h>
 #include <AzCore/Math/MathReflection.h>
 #include <AzCore/Console/IConsole.h>
+#include <AzCore/Time/ITime.h>
 
 #include <AzFramework/API/ApplicationAPI.h>
 #include <AzFramework/Components/ConsoleBus.h>
@@ -38,20 +39,23 @@
 
 namespace AtomSampleViewer
 {
-    ScriptManager* ScriptManager::s_instance = nullptr;
-
     ScriptManager::ScriptManager()
         : m_scriptBrowser("@user@/lua_script_browser.xml")
     {
     }
 
+    ScriptManager* ScriptManager::GetInstance()
+    {
+        static ScriptManager* s_instance = nullptr;
+        if (!s_instance)
+        {
+            AtomSampleViewer::SampleComponentSingletonRequestBus::BroadcastResult(s_instance, &AtomSampleViewer::SampleComponentSingletonRequestBus::Events::GetScriptManagerInstance);
+        }
+        return s_instance;
+    }
+
     void ScriptManager::Activate()
     {
-        AZ_Assert(s_instance == nullptr, "ScriptManager is already activated");
-        s_instance = this;
-
-        ScriptableImGui::Create();
-
         m_scriptContext = AZStd::make_unique<AZ::ScriptContext>();
         m_sriptBehaviorContext = AZStd::make_unique<AZ::BehaviorContext>();
         ReflectScriptContext(m_sriptBehaviorContext.get());
@@ -72,11 +76,9 @@ namespace AtomSampleViewer
 
     void ScriptManager::Deactivate()
     {
-        s_instance = nullptr;
         m_scriptContext = nullptr;
         m_sriptBehaviorContext = nullptr;
         m_scriptBrowser.Deactivate();
-        ScriptableImGui::Destory();
         m_imageComparisonOptions.Deactivate();
         ScriptRunnerRequestBus::Handler::BusDisconnect();
         ScriptRepeaterRequestBus::Handler::BusDisconnect();
@@ -932,6 +934,8 @@ namespace AtomSampleViewer
 
     void ScriptManager::ExecuteScript(const AZStd::string& scriptFilePath)
     {
+        ScriptManager* s_instance = GetInstance();
+
         AZ::Data::Asset<AZ::ScriptAsset> scriptAsset = AZ::RPI::AssetUtils::LoadAssetByProductPath<AZ::ScriptAsset>(scriptFilePath.c_str());
         if (!scriptAsset)
         {
@@ -955,7 +959,7 @@ namespace AtomSampleViewer
         // Execute(script) will add commands to the m_scriptOperations. These should be considered part of their own test script, for reporting purposes.
         s_instance->m_scriptOperations.push([scriptFilePath]()
             {
-                s_instance->m_scriptReporter.PushScript(scriptFilePath);
+                GetInstance()->m_scriptReporter.PushScript(scriptFilePath);
             }
         );
 
@@ -981,8 +985,8 @@ namespace AtomSampleViewer
         s_instance->m_scriptOperations.push([]()
             {
                 // We don't call m_scriptReporter.PopScript() yet because some cleanup needs to happen in TickScript() on the next frame.
-                AZ_Assert(!s_instance->m_shouldPopScript, "m_shouldPopScript is already true");
-                s_instance->m_shouldPopScript = true;
+                AZ_Assert(!GetInstance()->m_shouldPopScript, "m_shouldPopScript is already true");
+                GetInstance()->m_shouldPopScript = true;
             }
         );
     }
@@ -1133,8 +1137,7 @@ namespace AtomSampleViewer
         {
             ReportScriptError(message.c_str());
         };
-
-        s_instance->m_scriptOperations.push(AZStd::move(func));
+        GetInstance()->m_scriptOperations.push(AZStd::move(func));
     }
 
     void ScriptManager::Script_Warning(const AZStd::string& message)
@@ -1143,8 +1146,7 @@ namespace AtomSampleViewer
         {
             ReportScriptWarning(message.c_str());
         };
-
-        s_instance->m_scriptOperations.push(AZStd::move(func));
+        GetInstance()->m_scriptOperations.push(AZStd::move(func));
     }
 
     void ScriptManager::Script_Print(const AZStd::string& message [[maybe_unused]])
@@ -1155,7 +1157,7 @@ namespace AtomSampleViewer
             AZ_TracePrintf("Automation", "Script: %s\n", message.c_str());
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(func));
+        GetInstance()->m_scriptOperations.push(AZStd::move(func));
 #endif
     }
 
@@ -1175,8 +1177,6 @@ namespace AtomSampleViewer
     {
         auto operation = [sampleName]()
         {
-            AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
-
             if (sampleName.empty())
             {
                 SampleComponentManagerRequestBus::Broadcast(&SampleComponentManagerRequests::Reset);
@@ -1193,13 +1193,13 @@ namespace AtomSampleViewer
                     // They need 1 frame to activate, 1 frame to start ticking, and 1 frame to guarantee
                     // that a sample OnTick occurs before a ScriptManager::OnTick. We schedule
                     // a few extra just in case.
-                    AZ_Assert(s_instance->m_scriptIdleFrames == 0, "m_scriptIdleFrames is being stomped");
-                    s_instance->m_scriptIdleFrames = 6;
+                    AZ_Assert(GetInstance()->m_scriptIdleFrames == 0, "m_scriptIdleFrames is being stomped");
+                    GetInstance()->m_scriptIdleFrames = 6;
                 }
             }
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_ShowTool(const AZStd::string& toolName, bool enable)
@@ -1212,67 +1212,60 @@ namespace AtomSampleViewer
             AZ_Warning("ScriptManager", foundTool, "Can't find [%s] tool", toolName.c_str());
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_RunScript(const AZStd::string& scriptFilePath)
     {
         // Unlike other Script_ callback functions, we process immediately instead of pushing onto the m_scriptOperations queue.
         // This function is special because running the script is what adds more commands onto the m_scriptOperations queue.
-        s_instance->ExecuteScript(scriptFilePath);
+        GetInstance()->ExecuteScript(scriptFilePath);
     }
 
     void ScriptManager::Script_IdleFrames(int numFrames)
     {
         auto operation = [numFrames]()
         {
-            AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
-
-            AZ_Assert(s_instance->m_scriptIdleFrames == 0, "m_scriptIdleFrames is being stomped");
-            s_instance->m_scriptIdleFrames = numFrames;
+            AZ_Assert(GetInstance()->m_scriptIdleFrames == 0, "m_scriptIdleFrames is being stomped");
+            GetInstance()->m_scriptIdleFrames = numFrames;
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_IdleSeconds(float numSeconds)
     {
         auto operation = [numSeconds]()
         {
-            AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
-
-            s_instance->m_scriptIdleSeconds = numSeconds;
+            GetInstance()->m_scriptIdleSeconds = numSeconds;
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_LockFrameTime(float seconds)
     {
         auto operation = [seconds]()
         {
-            AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
-
-            int milliseconds = static_cast<int>(seconds * 1000);
-
-            AZ::Interface<AZ::IConsole>::Get()->PerformCommand(AZStd::string::format("t_simulationTickDeltaOverride %d", milliseconds).c_str());
-            s_instance->m_frameTimeIsLocked = true;
+            AZ::TimeUs us = AZ::SecondsToTimeUs(seconds);
+            
+            AZ::CVarFixedString commandString = AZ::CVarFixedString::format("t_simulationTickDeltaOverride %" PRId64, static_cast<int64_t>(us));
+            AZ::Interface<AZ::IConsole>::Get()->PerformCommand(commandString.c_str());
+            GetInstance()->m_frameTimeIsLocked = true;
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_UnlockFrameTime()
     {
         auto operation = []()
         {
-            AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
-
             AZ::Interface<AZ::IConsole>::Get()->PerformCommand("t_simulationTickDeltaOverride 0");
-            s_instance->m_frameTimeIsLocked = false;
+            GetInstance()->m_frameTimeIsLocked = false;
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_SetImguiValue(AZ::ScriptDataContext& dc)
@@ -1304,7 +1297,7 @@ namespace AtomSampleViewer
                 ScriptableImGui::SetBool(fieldNameString, value);
             };
 
-            s_instance->m_scriptOperations.push(AZStd::move(func));
+            GetInstance()->m_scriptOperations.push(AZStd::move(func));
         }
         else if (dc.IsNumber(1))
         {
@@ -1316,7 +1309,7 @@ namespace AtomSampleViewer
                 ScriptableImGui::SetNumber(fieldNameString, value);
             };
 
-            s_instance->m_scriptOperations.push(AZStd::move(func));
+            GetInstance()->m_scriptOperations.push(AZStd::move(func));
         }
         else if (dc.IsString(1))
         {
@@ -1330,7 +1323,7 @@ namespace AtomSampleViewer
                 ScriptableImGui::SetString(fieldNameString, valueString);
             };
 
-            s_instance->m_scriptOperations.push(AZStd::move(func));
+            GetInstance()->m_scriptOperations.push(AZStd::move(func));
         }
         else if (dc.IsClass<AZ::Vector3>(1))
         {
@@ -1342,7 +1335,7 @@ namespace AtomSampleViewer
                 ScriptableImGui::SetVector(fieldNameString, value);
             };
 
-            s_instance->m_scriptOperations.push(AZStd::move(func));
+            GetInstance()->m_scriptOperations.push(AZStd::move(func));
         }
         else if (dc.IsClass<AZ::Vector2>(1))
         {
@@ -1354,7 +1347,7 @@ namespace AtomSampleViewer
                 ScriptableImGui::SetVector(fieldNameString, value);
             };
 
-            s_instance->m_scriptOperations.push(AZStd::move(func));
+            GetInstance()->m_scriptOperations.push(AZStd::move(func));
         }
     }
 
@@ -1370,11 +1363,11 @@ namespace AtomSampleViewer
             }
             else
             {
-                s_instance->ReportScriptError("ResizeViewport() is not supported on this platform");
+                GetInstance()->ReportScriptError("ResizeViewport() is not supported on this platform");
             }
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_ExecuteConsoleCommand(const AZStd::string& command)
@@ -1384,7 +1377,7 @@ namespace AtomSampleViewer
             AZ::Interface<AZ::IConsole>::Get()->PerformCommand(command.c_str());
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::SetShowImGui(bool show)
@@ -1405,10 +1398,10 @@ namespace AtomSampleViewer
     {
         auto operation = [show]()
         {
-            s_instance->SetShowImGui(show);
+            GetInstance()->SetShowImGui(show);
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     bool ScriptManager::PrepareForScreenCapture(const AZStd::string& imageName)
@@ -1435,6 +1428,7 @@ namespace AtomSampleViewer
             return false;
         }
 
+        ScriptManager* s_instance = GetInstance();
         s_instance->m_scriptReporter.AddScreenshotTest(imageName);
 
         s_instance->m_isCapturePending = true;
@@ -1451,7 +1445,7 @@ namespace AtomSampleViewer
                 &AZ::Render::FrameCaptureTestRequestBus::Events::SetScreenshotFolder, screenshotFolder);
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_SetTestEnvPath(const AZStd::string& envPath)
@@ -1462,7 +1456,7 @@ namespace AtomSampleViewer
                 &AZ::Render::FrameCaptureTestRequestBus::Events::SetTestEnvPath, envPath);
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_SetOfficialBaselineImageFolder(const AZStd::string& baselineFolder)
@@ -1473,7 +1467,7 @@ namespace AtomSampleViewer
                 &AZ::Render::FrameCaptureTestRequestBus::Events::SetOfficialBaselineImageFolder, baselineFolder);
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_SetLocalBaselineImageFolder(const AZStd::string& baselineFolder)
@@ -1484,17 +1478,17 @@ namespace AtomSampleViewer
                 &AZ::Render::FrameCaptureTestRequestBus::Events::SetLocalBaselineImageFolder, baselineFolder);
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_SelectImageComparisonToleranceLevel(const AZStd::string& presetName)
     {
         auto operation = [presetName]()
         {
-            s_instance->m_imageComparisonOptions.SelectToleranceLevel(presetName);
+            GetInstance()->m_imageComparisonOptions.SelectToleranceLevel(presetName);
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_CaptureScreenshot(const AZStd::string& imageName)
@@ -1503,6 +1497,8 @@ namespace AtomSampleViewer
 
         auto operation = [imageName]()
         {
+            ScriptManager* s_instance = GetInstance();
+
             // Note this will pause the script until the capture is complete
             if (PrepareForScreenCapture(imageName))
             {
@@ -1530,7 +1526,7 @@ namespace AtomSampleViewer
                 AZ::Render::FrameCaptureRequestBus::BroadcastResult(capOutcome, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, screenshotFilePath);
                 if (!capOutcome.IsSuccess())
                 {
-                    ReportScriptError(AZStd::string::format("Failed to initiate frame capture for '%s'", screenshotFilePath.c_str()));
+                    ReportScriptError(AZStd::string::format("Failed to initiate screenshot capture for '%s: %s'", screenshotFilePath.c_str(), capOutcome.GetError().m_errorMessage.c_str()));
                     s_instance->m_isCapturePending = false;
                     s_instance->m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
                     s_instance->ResumeScript();
@@ -1542,16 +1538,17 @@ namespace AtomSampleViewer
             }
         };
 
+        ScriptManager* s_instance = GetInstance();
         s_instance->m_scriptOperations.push(AZStd::move(operation));
         s_instance->m_scriptOperations.push([]()
             {
-                s_instance->m_scriptReporter.CheckLatestScreenshot(s_instance->m_imageComparisonOptions.GetCurrentToleranceLevel());
+                GetInstance()->m_scriptReporter.CheckLatestScreenshot(GetInstance()->m_imageComparisonOptions.GetCurrentToleranceLevel());
             });
 
         // restore imgui show/hide
         s_instance->m_scriptOperations.push([]()
             {
-                s_instance->SetShowImGui(s_instance->m_prevShowImGui);
+                GetInstance()->SetShowImGui(GetInstance()->m_prevShowImGui);
             });
 
     }
@@ -1562,6 +1559,8 @@ namespace AtomSampleViewer
 
         auto operation = [imageName]()
         {
+            ScriptManager* s_instance = GetInstance();
+
             // Note this will pause the script until the capture is complete
             if (PrepareForScreenCapture(imageName))
             {
@@ -1589,7 +1588,7 @@ namespace AtomSampleViewer
                 AZ::Render::FrameCaptureRequestBus::BroadcastResult(capOutcome, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshot, screenshotFilePath);
                 if (!capOutcome.IsSuccess())
                 {
-                    ReportScriptError(AZStd::string::format("Failed to initiate frame capture for '%s'", screenshotFilePath.c_str()));
+                    ReportScriptError(AZStd::string::format("Failed to initiate screenshot capture for '%s: %s'", screenshotFilePath.c_str(), capOutcome.GetError().m_errorMessage.c_str()));
                     s_instance->m_isCapturePending = false;
                     s_instance->m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
                     s_instance->ResumeScript();
@@ -1601,16 +1600,18 @@ namespace AtomSampleViewer
             }
         };
 
+        ScriptManager* s_instance = GetInstance();
+
         s_instance->m_scriptOperations.push(AZStd::move(operation));
         s_instance->m_scriptOperations.push([]()
             {
-                s_instance->m_scriptReporter.CheckLatestScreenshot(s_instance->m_imageComparisonOptions.GetCurrentToleranceLevel());
+                GetInstance()->m_scriptReporter.CheckLatestScreenshot(GetInstance()->m_imageComparisonOptions.GetCurrentToleranceLevel());
             });
 
         // restore imgui show/hide
         s_instance->m_scriptOperations.push([]()
             {
-                s_instance->SetShowImGui(s_instance->m_prevShowImGui);
+                GetInstance()->SetShowImGui(GetInstance()->m_prevShowImGui);
             });
     }
 
@@ -1618,6 +1619,8 @@ namespace AtomSampleViewer
     {
         auto operation = [imageName]()
         {
+            ScriptManager* s_instance = GetInstance();
+
             // Note this will pause the script until the capture is complete
             if (PrepareForScreenCapture(imageName))
             {
@@ -1645,7 +1648,7 @@ namespace AtomSampleViewer
                 AZ::Render::FrameCaptureRequestBus::BroadcastResult(capOutcome, &AZ::Render::FrameCaptureRequestBus::Events::CaptureScreenshotWithPreview, screenshotFilePath);
                 if (!capOutcome.IsSuccess())
                 {
-                    ReportScriptError(AZStd::string::format("Failed to initiate frame capture for '%s'", screenshotFilePath.c_str()));
+                    ReportScriptError(AZStd::string::format("Failed to initiate screenshot capture for '%s: %s'", screenshotFilePath.c_str(), capOutcome.GetError().m_errorMessage.c_str()));
                     s_instance->m_isCapturePending = false;
                     s_instance->m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
                     s_instance->ResumeScript();
@@ -1657,10 +1660,11 @@ namespace AtomSampleViewer
             }
         };
 
+        ScriptManager* s_instance = GetInstance();
         s_instance->m_scriptOperations.push(AZStd::move(operation));
         s_instance->m_scriptOperations.push([]()
             {
-                s_instance->m_scriptReporter.CheckLatestScreenshot(s_instance->m_imageComparisonOptions.GetCurrentToleranceLevel());
+                GetInstance()->m_scriptReporter.CheckLatestScreenshot(GetInstance()->m_imageComparisonOptions.GetCurrentToleranceLevel());
             });
     }
 
@@ -1741,6 +1745,8 @@ namespace AtomSampleViewer
 
         auto operation = [passHierarchy, slot, imageName, readbackOption]()
         {
+            ScriptManager* s_instance = GetInstance();
+
             // Note this will pause the script until the capture is complete
             if (PrepareForScreenCapture(imageName))
             {
@@ -1768,7 +1774,7 @@ namespace AtomSampleViewer
                 AZ::Render::FrameCaptureRequestBus::BroadcastResult(capOutcome, &AZ::Render::FrameCaptureRequestBus::Events::CapturePassAttachment, screenshotFilePath, passHierarchy, slot, readbackOption);
                 if (!capOutcome.IsSuccess())
                 {
-                    ReportScriptError(AZStd::string::format("Failed to initiate frame capture for '%s'", screenshotFilePath.c_str()));
+                    ReportScriptError(AZStd::string::format("Failed to initiate screenshot capture for '%s: %s'", screenshotFilePath.c_str(), capOutcome.GetError().m_errorMessage.c_str()));
                     s_instance->m_isCapturePending = false;
                     s_instance->m_frameCaptureId = AZ::Render::InvalidFrameCaptureId;
                     s_instance->ResumeScript();
@@ -1781,10 +1787,10 @@ namespace AtomSampleViewer
             }
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
-        s_instance->m_scriptOperations.push([]()
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push([]()
             {
-                s_instance->m_scriptReporter.CheckLatestScreenshot(s_instance->m_imageComparisonOptions.GetCurrentToleranceLevel());
+                GetInstance()->m_scriptReporter.CheckLatestScreenshot(GetInstance()->m_imageComparisonOptions.GetCurrentToleranceLevel());
             });
     }
 
@@ -1851,14 +1857,14 @@ namespace AtomSampleViewer
 
         auto operation = [outputFilePath]()
         {
-            s_instance->m_isCapturePending = true;
-            s_instance->AZ::Render::ProfilingCaptureNotificationBus::Handler::BusConnect();
-            s_instance->PauseScript();
+            GetInstance()->m_isCapturePending = true;
+            GetInstance()->AZ::Render::ProfilingCaptureNotificationBus::Handler::BusConnect();
+            GetInstance()->PauseScript();
 
             AZ::Render::ProfilingCaptureRequestBus::Broadcast(&AZ::Render::ProfilingCaptureRequestBus::Events::CapturePassTimestamp, outputFilePath);
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_CaptureCpuFrameTime(AZ::ScriptDataContext& dc)
@@ -1872,14 +1878,14 @@ namespace AtomSampleViewer
 
         auto operation = [outputFilePath]()
         {
-            s_instance->m_isCapturePending = true;
-            s_instance->AZ::Render::ProfilingCaptureNotificationBus::Handler::BusConnect();
-            s_instance->PauseScript();
+            GetInstance()->m_isCapturePending = true;
+            GetInstance()->AZ::Render::ProfilingCaptureNotificationBus::Handler::BusConnect();
+            GetInstance()->PauseScript();
 
             AZ::Render::ProfilingCaptureRequestBus::Broadcast(&AZ::Render::ProfilingCaptureRequestBus::Events::CaptureCpuFrameTime, outputFilePath);
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_CapturePassPipelineStatistics(AZ::ScriptDataContext& dc)
@@ -1893,14 +1899,14 @@ namespace AtomSampleViewer
 
         auto operation = [outputFilePath]()
         {
-            s_instance->m_isCapturePending = true;
-            s_instance->AZ::Render::ProfilingCaptureNotificationBus::Handler::BusConnect();
-            s_instance->PauseScript();
+            GetInstance()->m_isCapturePending = true;
+            GetInstance()->AZ::Render::ProfilingCaptureNotificationBus::Handler::BusConnect();
+            GetInstance()->PauseScript();
 
             AZ::Render::ProfilingCaptureRequestBus::Broadcast(&AZ::Render::ProfilingCaptureRequestBus::Events::CapturePassPipelineStatistics, outputFilePath);
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_CaptureCpuProfilingStatistics(AZ::ScriptDataContext& dc)
@@ -1914,9 +1920,9 @@ namespace AtomSampleViewer
 
         auto operation = [outputFilePath]()
         {
-            s_instance->m_isCapturePending = true;
-            s_instance->AZ::Debug::ProfilerNotificationBus::Handler::BusConnect();
-            s_instance->PauseScript();
+            GetInstance()->m_isCapturePending = true;
+            GetInstance()->AZ::Debug::ProfilerNotificationBus::Handler::BusConnect();
+            GetInstance()->PauseScript();
 
             if (auto profilerSystem = AZ::Debug::ProfilerSystemInterface::Get(); profilerSystem)
             {
@@ -1924,7 +1930,7 @@ namespace AtomSampleViewer
             }
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_CaptureBenchmarkMetadata(AZ::ScriptDataContext& dc)
@@ -1952,14 +1958,14 @@ namespace AtomSampleViewer
 
         auto operation = [benchmarkName, outputFilePath]()
         {
-            s_instance->m_isCapturePending = true;
-            s_instance->AZ::Render::ProfilingCaptureNotificationBus::Handler::BusConnect();
-            s_instance->PauseScript();
+            GetInstance()->m_isCapturePending = true;
+            GetInstance()->AZ::Render::ProfilingCaptureNotificationBus::Handler::BusConnect();
+            GetInstance()->PauseScript();
 
             AZ::Render::ProfilingCaptureRequestBus::Broadcast(&AZ::Render::ProfilingCaptureRequestBus::Events::CaptureBenchmarkMetadata, benchmarkName, outputFilePath);
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     bool ScriptManager::ValidateProfilingCaptureScripContexts(AZ::ScriptDataContext& dc, AZStd::string& outputFilePath)
@@ -2003,12 +2009,12 @@ namespace AtomSampleViewer
 
     int ScriptManager::Script_GetRandomTestSeed()
     {
-        return s_instance->m_testSuiteRunConfig.m_randomSeed;
+        return GetInstance()->m_testSuiteRunConfig.m_randomSeed;
     }
 
     void ScriptManager::CheckArcBallControllerHandler()
     {
-        if (0 == AZ::Debug::ArcBallControllerRequestBus::GetNumOfEventHandlers(s_instance->m_cameraEntity->GetId()))
+        if (0 == AZ::Debug::ArcBallControllerRequestBus::GetNumOfEventHandlers(GetInstance()->m_cameraEntity->GetId()))
         {
             ReportScriptError("There is no handler for ArcBallControllerRequestBus for the camera entity.");
         }
@@ -2016,7 +2022,7 @@ namespace AtomSampleViewer
 
     void ScriptManager::CheckNoClipControllerHandler()
     {
-        if (0 == AZ::Debug::NoClipControllerRequestBus::GetNumOfEventHandlers(s_instance->m_cameraEntity->GetId()))
+        if (0 == AZ::Debug::NoClipControllerRequestBus::GetNumOfEventHandlers(GetInstance()->m_cameraEntity->GetId()))
         {
             ReportScriptError("There is no handler for NoClipControllerRequestBus for the camera entity.");
         }
@@ -2026,119 +2032,109 @@ namespace AtomSampleViewer
     {
         auto operation = [center]()
         {
-            AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
             CheckArcBallControllerHandler();
-            AZ::Debug::ArcBallControllerRequestBus::Event(s_instance->m_cameraEntity->GetId(), &AZ::Debug::ArcBallControllerRequestBus::Events::SetCenter, center);
+            AZ::Debug::ArcBallControllerRequestBus::Event(GetInstance()->m_cameraEntity->GetId(), &AZ::Debug::ArcBallControllerRequestBus::Events::SetCenter, center);
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_ArcBallCameraController_SetPan(AZ::Vector3 pan)
     {
         auto operation = [pan]()
         {
-            AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
             CheckArcBallControllerHandler();
-            AZ::Debug::ArcBallControllerRequestBus::Event(s_instance->m_cameraEntity->GetId(), &AZ::Debug::ArcBallControllerRequestBus::Events::SetPan, pan);
+            AZ::Debug::ArcBallControllerRequestBus::Event(GetInstance()->m_cameraEntity->GetId(), &AZ::Debug::ArcBallControllerRequestBus::Events::SetPan, pan);
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_ArcBallCameraController_SetDistance(float distance)
     {
         auto operation = [distance]()
         {
-            AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
             CheckArcBallControllerHandler();
-            AZ::Debug::ArcBallControllerRequestBus::Event(s_instance->m_cameraEntity->GetId(), &AZ::Debug::ArcBallControllerRequestBus::Events::SetDistance, distance);
+            AZ::Debug::ArcBallControllerRequestBus::Event(GetInstance()->m_cameraEntity->GetId(), &AZ::Debug::ArcBallControllerRequestBus::Events::SetDistance, distance);
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_ArcBallCameraController_SetHeading(float heading)
     {
         auto operation = [heading]()
         {
-            AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
             CheckArcBallControllerHandler();
-            AZ::Debug::ArcBallControllerRequestBus::Event(s_instance->m_cameraEntity->GetId(), &AZ::Debug::ArcBallControllerRequestBus::Events::SetHeading, heading);
+            AZ::Debug::ArcBallControllerRequestBus::Event(GetInstance()->m_cameraEntity->GetId(), &AZ::Debug::ArcBallControllerRequestBus::Events::SetHeading, heading);
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_ArcBallCameraController_SetPitch(float pitch)
     {
         auto operation = [pitch]()
         {
-            AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
             CheckArcBallControllerHandler();
-            AZ::Debug::ArcBallControllerRequestBus::Event(s_instance->m_cameraEntity->GetId(), &AZ::Debug::ArcBallControllerRequestBus::Events::SetPitch, pitch);
+            AZ::Debug::ArcBallControllerRequestBus::Event(GetInstance()->m_cameraEntity->GetId(), &AZ::Debug::ArcBallControllerRequestBus::Events::SetPitch, pitch);
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_NoClipCameraController_SetPosition(AZ::Vector3 position)
     {
         auto operation = [position]()
         {
-            AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
             CheckNoClipControllerHandler();
-            AZ::Debug::NoClipControllerRequestBus::Event(s_instance->m_cameraEntity->GetId(), &AZ::Debug::NoClipControllerRequestBus::Events::SetPosition, position);
+            AZ::Debug::NoClipControllerRequestBus::Event(GetInstance()->m_cameraEntity->GetId(), &AZ::Debug::NoClipControllerRequestBus::Events::SetPosition, position);
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_NoClipCameraController_SetHeading(float heading)
     {
         auto operation = [heading]()
         {
-            AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
             CheckNoClipControllerHandler();
-            AZ::Debug::NoClipControllerRequestBus::Event(s_instance->m_cameraEntity->GetId(), &AZ::Debug::NoClipControllerRequestBus::Events::SetHeading, heading);
+            AZ::Debug::NoClipControllerRequestBus::Event(GetInstance()->m_cameraEntity->GetId(), &AZ::Debug::NoClipControllerRequestBus::Events::SetHeading, heading);
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_NoClipCameraController_SetPitch(float pitch)
     {
         auto operation = [pitch]()
         {
-            AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
             CheckNoClipControllerHandler();
-            AZ::Debug::NoClipControllerRequestBus::Event(s_instance->m_cameraEntity->GetId(), &AZ::Debug::NoClipControllerRequestBus::Events::SetPitch, pitch);
+            AZ::Debug::NoClipControllerRequestBus::Event(GetInstance()->m_cameraEntity->GetId(), &AZ::Debug::NoClipControllerRequestBus::Events::SetPitch, pitch);
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_NoClipCameraController_SetFov(float fov)
     {
         auto operation = [fov]()
         {
-            AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
             CheckNoClipControllerHandler();
-            AZ::Debug::NoClipControllerRequestBus::Event(s_instance->m_cameraEntity->GetId(), &AZ::Debug::NoClipControllerRequestBus::Events::SetFov, fov);
+            AZ::Debug::NoClipControllerRequestBus::Event(GetInstance()->m_cameraEntity->GetId(), &AZ::Debug::NoClipControllerRequestBus::Events::SetFov, fov);
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_AssetTracking_Start()
     {
         auto operation = []()
         {
-            AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
-            s_instance->m_assetStatusTracker.StartTracking();
+            GetInstance()->m_assetStatusTracker.StartTracking();
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
 
@@ -2146,36 +2142,33 @@ namespace AtomSampleViewer
     {
         auto operation = [sourceAssetPath, expectedCount]()
         {
-            AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
-            s_instance->m_assetStatusTracker.ExpectAsset(sourceAssetPath, expectedCount);
+            GetInstance()->m_assetStatusTracker.ExpectAsset(sourceAssetPath, expectedCount);
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_AssetTracking_IdleUntilExpectedAssetsFinish(float timeout)
     {
         auto operation = [timeout]()
         {
-            AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
 
-            AZ_Assert(!s_instance->m_waitForAssetTracker, "It shouldn't be possible to run the next command until m_waitForAssetTracker is false");
+            AZ_Assert(!GetInstance()->m_waitForAssetTracker, "It shouldn't be possible to run the next command until m_waitForAssetTracker is false");
 
-            s_instance->m_waitForAssetTracker = true;
-            s_instance->m_assetTrackingTimeout = timeout;
+            GetInstance()->m_waitForAssetTracker = true;
+            GetInstance()->m_assetTrackingTimeout = timeout;
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 
     void ScriptManager::Script_AssetTracking_Stop()
     {
         auto operation = []()
         {
-            AZ_DEBUG_STATIC_MEMEBER(instance, s_instance);
-            s_instance->m_assetStatusTracker.StopTracking();
+            GetInstance()->m_assetStatusTracker.StopTracking();
         };
 
-        s_instance->m_scriptOperations.push(AZStd::move(operation));
+        GetInstance()->m_scriptOperations.push(AZStd::move(operation));
     }
 } // namespace AtomSampleViewer

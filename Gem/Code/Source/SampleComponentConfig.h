@@ -17,9 +17,9 @@
 namespace AtomSampleViewer
 {
     static constexpr const char DefaultPbrMaterialPath[] = "materials/defaultpbr.azmaterial";    
-    static constexpr const char BunnyModelFilePath[] = "objects/bunny.azmodel";
-    static constexpr const char ShaderBallModelFilePath[] = "objects/shaderball_simple.azmodel";
-    static constexpr const char CubeModelFilePath[] = "testdata/objects/cube/cube.azmodel";
+    static constexpr const char BunnyModelFilePath[] = "objects/bunny.fbx.azmodel";
+    static constexpr const char ShaderBallModelFilePath[] = "objects/shaderball_simple.fbx.azmodel";
+    static constexpr const char CubeModelFilePath[] = "testdata/objects/cube/cube.fbx.azmodel";
 
     class SampleComponentConfig
         : public AZ::ComponentConfig

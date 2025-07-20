@@ -53,6 +53,8 @@ set(FILES
     Source/RHI/MRTExampleComponent.cpp
     Source/RHI/MSAAExampleComponent.h
     Source/RHI/MSAAExampleComponent.cpp
+    Source/RHI/MultiGPUExampleComponent.cpp
+    Source/RHI/MultiGPUExampleComponent.h
     Source/RHI/MultiThreadComponent.cpp
     Source/RHI/MultiThreadComponent.h
     Source/RHI/MultipleViewsComponent.cpp
@@ -141,6 +143,8 @@ set(FILES
     Source/MeshExampleComponent.h
     Source/MSAA_RPI_ExampleComponent.cpp
     Source/MSAA_RPI_ExampleComponent.h
+    Source/MultiGPURPIExampleComponent.cpp
+    Source/MultiGPURPIExampleComponent.h
     Source/MultiRenderPipelineExampleComponent.cpp
     Source/MultiRenderPipelineExampleComponent.h
     Source/MultiSceneExampleComponent.cpp
@@ -162,6 +166,8 @@ set(FILES
     Source/RenderTargetTextureExampleComponent.h
     Source/RootConstantsExampleComponent.h
     Source/RootConstantsExampleComponent.cpp
+    Source/RayTracingIntersectionShaderExampleComponent.cpp
+    Source/RayTracingIntersectionShaderExampleComponent.h
     Source/SceneReloadSoakTestComponent.cpp
     Source/SceneReloadSoakTestComponent.h
     Source/ShadowExampleComponent.cpp
@@ -184,6 +190,8 @@ set(FILES
     Source/TransparencyExampleComponent.h
     Source/ShaderReloadTestComponent.cpp
     Source/ShaderReloadTestComponent.h
+    Source/Subpass_RPI_ExampleComponent.cpp
+    Source/Subpass_RPI_ExampleComponent.h
     Source/Utils/ImGuiAssetBrowser.cpp
     Source/Utils/ImGuiAssetBrowser.h
     Source/Utils/ImGuiHistogramQueue.cpp

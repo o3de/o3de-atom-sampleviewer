@@ -1,0 +1,299 @@
+{
+    "Type": "JsonSerialization",
+    "Version": 1,
+    "ClassName": "PassAsset",
+    "ClassData": {
+        "PassTemplate": {
+            "Name": "MultiGPUCopyTestPipeline",
+            "PassClass": "ParentPass",
+            "Slots": [
+                {
+                    "Name": "PipelineOutput",
+                    "SlotType": "InputOutput",
+                    "ScopeAttachmentUsage": "RenderTarget"
+                }
+            ],
+            "ImageAttachments": [
+                {
+                    "Name": "TriangleAttachment1",
+                    "ImageDescriptor": {
+                        "Format": "R8G8B8A8_UNORM",
+                        "Size": {
+                            "Width": 320,
+                            "Height": 480,
+                            "Depth": 1
+                        }
+                    }
+                },
+                {
+                    "Name": "TriangleAttachment2",
+                    "ImageDescriptor": {
+                        "Format": "R8G8B8A8_UNORM",
+                        "Size": {
+                            "Width": 320,
+                            "Height": 480,
+                            "Depth": 1
+                        }
+                    }
+                }
+            ],
+            "PassRequests": [
+                {
+                    "Name": "TrianglePass1",
+                    "TemplateName": "MultiGPUTrianglePassTemplate",
+                    "Connections": [
+                        {
+                            "LocalSlot": "Output",
+                            "AttachmentRef": {
+                                "Pass": "Parent",
+                                "Attachment": "TriangleAttachment1"
+                            }
+                        }
+                    ],
+                    "PassData": {
+                        "$type": "FullscreenTrianglePassData",
+                        "ShaderAsset": {
+                            "FilePath": "Shaders/MultiGPURPIExample/Triangle.shader"
+                        },
+                        "ShaderDataMappings": {
+                            "Matrix4x4Mappings": [
+                                {
+                                    "Name": "m_objectMatrix",
+                                    "Value": [
+                                        2.0,
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0,
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0,
+                                        0.0,
+                                        1.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "Name": "TrianglePass2",
+                    "TemplateName": "MultiGPUTrianglePassTemplate",
+                    "Connections": [
+                        {
+                            "LocalSlot": "Output",
+                            "AttachmentRef": {
+                                "Pass": "Parent",
+                                "Attachment": "TriangleAttachment2"
+                            }
+                        }
+                    ],
+                    "PassData": {
+                        "$type": "FullscreenTrianglePassData",
+                        "ShaderAsset": {
+                            "FilePath": "Shaders/MultiGPURPIExample/Triangle.shader"
+                        },
+                        "DeviceIndex": 1,
+                        "ShaderDataMappings": {
+                            "Matrix4x4Mappings": [
+                                {
+                                    "Name": "m_objectMatrix",
+                                    "Value": [
+                                        2.0,
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0,
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        0.0,
+                                        1.0,
+                                        0.0,
+                                        -1.0,
+                                        0.0,
+                                        0.0,
+                                        1.0
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "Name": "CopyPass1",
+                    "TemplateName": "MultiGPUCopyImageToBufferPassTemplate",
+                    "Connections": [
+                        {
+                            "LocalSlot": "Input",
+                            "AttachmentRef": {
+                                "Pass": "TrianglePass2",
+                                "Attachment": "Output"
+                            }
+                        }
+                    ],
+                    "PassData": {
+                        "$type": "CopyPassData",
+                        "CloneInput": false,
+                        "SourceDeviceIndex": 1,
+                        "DestinationDeviceIndex": 0
+                    }
+                },
+                {
+                    "Name": "CopyPass2",
+                    "TemplateName": "MultiGPUCopyBufferToBufferPassTemplate",
+                    "Connections": [
+                        {
+                            "LocalSlot": "Input",
+                            "AttachmentRef": {
+                                "Pass": "CopyPass1",
+                                "Attachment": "Output"
+                            }
+                        }
+                    ],
+                    "PassData": {
+                        "$type": "CopyPassData",
+                        "CloneInput": false,
+                        "SourceDeviceIndex": 0,
+                        "DestinationDeviceIndex": 1
+                    }
+                },
+                {
+                    "Name": "CopyPass3",
+                    "TemplateName": "MultiGPUCopyBufferToImagePassTemplate",
+                    "Connections": [
+                        {
+                            "LocalSlot": "Input",
+                            "AttachmentRef": {
+                                "Pass": "CopyPass2",
+                                "Attachment": "Output"
+                            }
+                        }
+                    ],
+                    "PassData": {
+                        "$type": "CopyPassData",
+                        "CloneInput": false,
+                        "SourceDeviceIndex": 1,
+                        "DestinationDeviceIndex": 0,
+                        "BufferSourceOffset": 0,
+                        "BufferSourceBytesPerRow": 1280,
+                        "BufferSourceBytesPerImage": 614400,
+                        "ImageSourceSize": {
+                            "Width": 320,
+                            "Height": 480
+                        }
+                    }
+                },
+                {
+                    "Name": "CopyPass4",
+                    "TemplateName": "CopyPassTemplate",
+                    "Connections": [
+                        {
+                            "LocalSlot": "Input",
+                            "AttachmentRef": {
+                                "Pass": "CopyPass3",
+                                "Attachment": "Output"
+                            }
+                        }
+                    ],
+                    "PassData": {
+                        "$type": "CopyPassData",
+                        "CloneInput": true,
+                        "SourceDeviceIndex": 0,
+                        "DestinationDeviceIndex": 1
+                    }
+                },
+                {
+                    "Name": "CopyPass5",
+                    "TemplateName": "CopyPassTemplate",
+                    "Connections": [
+                        {
+                            "LocalSlot": "Input",
+                            "AttachmentRef": {
+                                "Pass": "CopyPass4",
+                                "Attachment": "Output"
+                            }
+                        }
+                    ],
+                    "PassData": {
+                        "$type": "CopyPassData",
+                        "CloneInput": true,
+                        "SourceDeviceIndex": 1,
+                        "DestinationDeviceIndex": 0
+                    }
+                },
+                {
+                    "Name": "CompositePass",
+                    "TemplateName": "MultiGPUCompositePassTemplate",
+                    "Connections": [
+                        {
+                            "LocalSlot": "Input1",
+                            "AttachmentRef": {
+                                "Pass": "TrianglePass1",
+                                "Attachment": "Output"
+                            }
+                        },
+                        {
+                            "LocalSlot": "Input2",
+                            "AttachmentRef": {
+                                "Pass": "CopyPass5",
+                                "Attachment": "Output"
+                            }
+                        }
+                    ],
+                    "PassData": {
+                        "$type": "FullscreenTrianglePassData",
+                        "ShaderAsset": {
+                            "FilePath": "Shaders/MultiGPURPIExample/Composite.shader"
+                        }
+                    }
+                },
+                {
+                    "Name": "ImGuiPass",
+                    "TemplateName": "ImGuiPassTemplate",
+                    "Enabled": true,
+                    "Connections": [
+                        {
+                            "LocalSlot": "InputOutput",
+                            "AttachmentRef": {
+                                "Pass": "CompositePass",
+                                "Attachment": "Output"
+                            }
+                        }
+                    ],
+                    "PassData": {
+                        "$type": "ImGuiPassData",
+                        "IsDefaultImGui": true
+                    }
+                },
+                {
+                    "Name": "CopyToSwapChain",
+                    "TemplateName": "FullscreenCopyTemplate",
+                    "Connections": [
+                        {
+                            "LocalSlot": "Input",
+                            "AttachmentRef": {
+                                "Pass": "ImGuiPass",
+                                "Attachment": "InputOutput"
+                            }
+                        },
+                        {
+                            "LocalSlot": "Output",
+                            "AttachmentRef": {
+                                "Pass": "Parent",
+                                "Attachment": "PipelineOutput"
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    }
+}

@@ -13,8 +13,6 @@
 
 #include <Atom/RHI/BufferPool.h>
 #include <Atom/RHI/Device.h>
-#include <Atom/RHI/DrawItem.h>
-#include <Atom/RHI/ImagePool.h>
 #include <Atom/RHI/PipelineState.h>
 
 namespace AtomSampleViewer
@@ -62,8 +60,8 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, s_numberOfVertices> m_indices;
         };
 
-        AZStd::array<AZ::RHI::StreamBufferView, 2> m_streamBufferViews;
-        AZ::RHI::DrawItem m_drawItem;
+        AZ::RHI::GeometryView m_geometryView;
+        AZ::RHI::GeometryView m_geometryView2;
 
         AZ::RHI::AttachmentId m_depthStencilID;
         AZ::RHI::ClearValue m_depthClearValue;

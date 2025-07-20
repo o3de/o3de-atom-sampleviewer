@@ -28,9 +28,4 @@ namespace AtomSampleViewer
     {
         return "MainPipeline";
     }
-
-    int SampleComponentManager::GetDefaultNumMSAASamples()
-    {
-        return 4;
-    }
 } // namespace AtomSampleViewer

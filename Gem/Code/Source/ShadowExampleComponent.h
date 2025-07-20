@@ -119,9 +119,6 @@ namespace AtomSampleViewer
         AZ::Data::Instance<AZ::RPI::Material> m_materialInstance;
 
         // ModelReadyHandles
-        using ModelChangedHandler = AZ::Render::MeshFeatureProcessorInterface::ModelChangedEvent::Handler;
-        ModelChangedHandler m_bunnyReadyHandle;
-        ModelChangedHandler m_floorReadyHandle;
         bool m_bunnyMeshIsReady = false;
         bool m_floorMeshIsReady = false;
 
@@ -156,6 +153,8 @@ namespace AtomSampleViewer
             FarClipDistance * 3 / 4,
             FarClipDistance * 4 / 4
         };
+
+        bool m_shadowEnabled = true;
         bool m_useFullscreenBlur = false;
         bool m_isCascadeCorrectionEnabled = false;
         bool m_isDebugColoringEnabled = false;

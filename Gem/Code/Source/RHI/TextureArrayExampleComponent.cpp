@@ -59,7 +59,7 @@ namespace AtomSampleViewer
         };
 
         RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
-        m_inputAssemblyBufferPool = RHI::Factory::Get().CreateBufferPool();
+        m_inputAssemblyBufferPool = aznew RHI::BufferPool();
 
         // Load the shader
         {
@@ -132,8 +132,8 @@ namespace AtomSampleViewer
             RHI::BufferPoolDescriptor bufferPoolDesc;
             bufferPoolDesc.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
             bufferPoolDesc.m_heapMemoryLevel = RHI::HeapMemoryLevel::Device;
-            m_inputAssemblyBufferPool->Init(*device, bufferPoolDesc);
-            m_rectangleInputAssemblyBuffer = RHI::Factory::Get().CreateBuffer();
+            m_inputAssemblyBufferPool->Init(bufferPoolDesc);
+            m_rectangleInputAssemblyBuffer = aznew RHI::Buffer();
 
             RHI::ResultCode result = RHI::ResultCode::Success;
             RHI::BufferInitRequest request;
@@ -147,19 +147,28 @@ namespace AtomSampleViewer
                 return;
             }
 
-            m_rectangleStreamBufferViews[0u] = {
+            m_geometryView.SetDrawArguments(RHI::DrawIndexed(0, 6, 0));
+
+            m_geometryView.SetIndexBufferView({
+                *m_rectangleInputAssemblyBuffer,
+                offsetof(RectangleBufferData, m_indices),
+                sizeof(RectangleBufferData::m_indices),
+                RHI::IndexFormat::Uint16
+            });
+
+            m_geometryView.AddStreamBufferView({
                 *m_rectangleInputAssemblyBuffer,
                 offsetof(RectangleBufferData, m_positions),
                 sizeof(RectangleBufferData::m_positions),
                 sizeof(VertexPosition)
-            };
+            });
 
-            m_rectangleStreamBufferViews[1u] = {
+            m_geometryView.AddStreamBufferView({
                 *m_rectangleInputAssemblyBuffer,
                 offsetof(RectangleBufferData, m_uvs),
                 sizeof(RectangleBufferData::m_uvs),
                 sizeof(VertexUV)
-            };
+            });
 
             RHI::ValidateStreamBufferViews(m_rectangleInputStreamLayout, m_rectangleStreamBufferViews);
         }
@@ -205,29 +214,17 @@ namespace AtomSampleViewer
                 commandList->SetViewports(&viewport, 1u);
                 commandList->SetScissors(&m_scissor, 1u);
 
-                const RHI::IndexBufferView indexBufferView =
-                {
-                    *m_rectangleInputAssemblyBuffer,
-                    offsetof(RectangleBufferData, m_indices),
-                    sizeof(RectangleBufferData::m_indices),
-                    RHI::IndexFormat::Uint16
+                const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
+                    m_textureArraySrg->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get(),
+                    m_textureIndexSrg->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
                 };
 
-                RHI::DrawIndexed drawIndexed;
-                drawIndexed.m_indexCount = 6u;
-                drawIndexed.m_instanceCount = 1u;
-
-                const RHI::ShaderResourceGroup* shaderResourceGroups[] = {
-                    m_textureArraySrg->GetRHIShaderResourceGroup(), m_textureIndexSrg->GetRHIShaderResourceGroup() };
-
-                RHI::DrawItem drawItem;
-                drawItem.m_arguments = drawIndexed;
-                drawItem.m_pipelineState = m_pipelineState.get();
-                drawItem.m_indexBufferView = &indexBufferView;
+                RHI::DeviceDrawItem drawItem;
+                drawItem.m_geometryView = m_geometryView.GetDeviceGeometryView(context.GetDeviceIndex());
+                drawItem.m_streamIndices = m_geometryView.GetFullStreamBufferIndices();
+                drawItem.m_pipelineState = m_pipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
                 drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
                 drawItem.m_shaderResourceGroups = shaderResourceGroups;
-                drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_rectangleStreamBufferViews.size());
-                drawItem.m_streamBufferViews = m_rectangleStreamBufferViews.data();
 
                 // Submit the triangle draw item.
                 commandList->Submit(drawItem);

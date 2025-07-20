@@ -75,7 +75,10 @@ namespace AtomSampleViewer
             pipelineDesc.m_mainViewTagName = "MainCamera";          //Surface shaders render to the "MainCamera" tag
             pipelineDesc.m_name = "SecondPipeline";                 //Sets the debug name for this pipeline
             pipelineDesc.m_rootPassTemplate = "MainPipeline";    //References a template in AtomSampleViewer\Passes\PassTemplates.azasset
-            pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 4;
+            pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 1;
+            SampleComponentManagerRequestBus::BroadcastResult(
+                pipelineDesc.m_renderSettings.m_multisampleState.m_samples,
+                &SampleComponentManagerRequests::GetNumMSAASamples);
             m_pipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
 
             scene->AddRenderPipeline(m_pipeline);

@@ -102,7 +102,7 @@ namespace AtomSampleViewer
         void Draw3dImages();
 
         // Submit draw package for one image
-        void DrawImage(const ImageToDraw* imageInfo);
+        void DrawImage(ImageToDraw* imageInfo);
 
         // Creates resources, resource views, pipeline state, etc. for rendering
         void PrepareRenderData();
@@ -182,6 +182,8 @@ namespace AtomSampleViewer
 
         AZ::Data::Asset<AZ::RPI::ShaderAsset> m_image3dShaderAsset;
         AZ::RHI::Ptr<AZ::RHI::ShaderResourceGroupLayout> m_image3dSrgLayout;
+
+        AZ::RHI::GeometryView m_geometryView;
 
         // shader input indices
         AZ::RHI::ShaderInputImageIndex m_imageInputIndex;

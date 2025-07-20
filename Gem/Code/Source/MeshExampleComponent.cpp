@@ -62,19 +62,6 @@ namespace AtomSampleViewer
         , m_modelBrowser("@user@/MeshExampleComponent/model_browser.xml")
         , m_imguiSidebar("@user@/MeshExampleComponent/sidebar.xml")
     {
-        m_changedHandler = AZ::Render::MeshFeatureProcessorInterface::ModelChangedEvent::Handler
-        {
-            [&](AZ::Data::Instance<AZ::RPI::Model> model)
-            {
-                ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::ResumeScript);
-
-                // This handler will be connected to the feature processor so that when the model is updated, the camera
-                // controller will reset. This ensures the camera is a reasonable distance from the model when it resizes.
-                ResetCameraController();
-
-                UpdateGroundPlane();
-            }
-        };
     }
 
     void MeshExampleComponent::DefaultWindowCreated()
@@ -89,7 +76,10 @@ namespace AtomSampleViewer
         pipelineDesc.m_name = "LowEndPipeline";
         pipelineDesc.m_materialPipelineTag = "LowEndPipeline";
         pipelineDesc.m_rootPassTemplate = "LowEndPipelineTemplate";
-        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 4;
+        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 1;
+        SampleComponentManagerRequestBus::BroadcastResult(
+            pipelineDesc.m_renderSettings.m_multisampleState.m_samples,
+            &SampleComponentManagerRequests::GetNumMSAASamples);
 
         m_lowEndPipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
     }
@@ -106,7 +96,10 @@ namespace AtomSampleViewer
         pipelineDesc.m_name = "DeferredPipeline";
         pipelineDesc.m_materialPipelineTag = "DeferredPipeline";
         pipelineDesc.m_rootPassTemplate = "DeferredPipelineTemplate";
-        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 4;
+        pipelineDesc.m_renderSettings.m_multisampleState.m_samples = 1;
+        SampleComponentManagerRequestBus::BroadcastResult(
+            pipelineDesc.m_renderSettings.m_multisampleState.m_samples,
+            &SampleComponentManagerRequests::GetNumMSAASamples);
         pipelineDesc.m_allowModification = true; // MainPipeline allows modifications, so the DeferredPipeline must as well, to get a consistent result.
 
         m_deferredPipeline = AZ::RPI::RenderPipeline::CreateRenderPipelineForWindow(pipelineDesc, *m_windowContext);
@@ -232,7 +225,7 @@ namespace AtomSampleViewer
 
         AZ::Data::Asset<AZ::RPI::MaterialAsset> groundPlaneMaterialAsset = AZ::RPI::AssetUtils::LoadAssetByProductPath<AZ::RPI::MaterialAsset>(DefaultPbrMaterialPath, AZ::RPI::AssetUtils::TraceLevel::Error);
         m_groundPlaneMaterial = AZ::RPI::Material::FindOrCreate(groundPlaneMaterialAsset);
-        m_groundPlaneModelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/plane.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
+        m_groundPlaneModelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/plane.fbx.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
 
         AZ::TickBus::Handler::BusConnect();
         AZ::Render::Bootstrap::DefaultWindowNotificationBus::Handler::BusConnect();
@@ -472,10 +465,25 @@ namespace AtomSampleViewer
 
             m_modelAsset.Create(m_modelBrowser.GetSelectedAssetId());
             GetMeshFeatureProcessor()->ReleaseMesh(m_meshHandle);
-            m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_modelAsset }, m_customMaterialInstance);
-            GetMeshFeatureProcessor()->SetTransform(m_meshHandle, AZ::Transform::CreateIdentity());
-            GetMeshFeatureProcessor()->ConnectModelChangeEventHandler(m_meshHandle, m_changedHandler);
+
+            AZ::Render::MeshHandleDescriptor descriptor(m_modelAsset, m_customMaterialInstance);
+            descriptor.m_modelChangedEventHandler = AZ::Render::MeshHandleDescriptor::ModelChangedEvent::Handler{
+                [this](const AZ::Data::Instance<AZ::RPI::Model>& /*model*/)
+                {
+                    ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::ResumeScript);
+
+                    // This handler will be connected to the feature processor so that when the model is updated, the camera
+                    // controller will reset. This ensures the camera is a reasonable distance from the model when it resizes.
+                    ResetCameraController();
+
+                    UpdateGroundPlane();
+                }
+            };
+
+            m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(descriptor);
+
             GetMeshFeatureProcessor()->SetMeshLodConfiguration(m_meshHandle, m_lodConfig);
+            GetMeshFeatureProcessor()->SetTransform(m_meshHandle, AZ::Transform::CreateIdentity());
         }
         else
         {
@@ -485,7 +493,8 @@ namespace AtomSampleViewer
     
     void MeshExampleComponent::CreateGroundPlane()
     {
-        m_groundPlandMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_groundPlaneModelAsset }, m_groundPlaneMaterial);
+        m_groundPlandMeshHandle =
+            GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor(m_groundPlaneModelAsset, m_groundPlaneMaterial));
     }
 
     void MeshExampleComponent::UpdateGroundPlane()

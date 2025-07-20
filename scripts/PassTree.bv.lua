@@ -32,7 +32,7 @@ ResizeViewport(800, 600)
 SelectImageComparisonToleranceLevel("Level G")
 
 -- choose model, material and lighting
-SetImguiValue('Models/##Available', 'objects/shaderball_simple.azmodel')
+SetImguiValue('Models/##Available', 'objects/shaderball_simple.fbx.azmodel')
 SetImguiValue('Enable Material Override', true)
 SetImguiValue('Materials/##Available', 'materials/defaultpbr.azmaterial')
 SetImguiValue('Lighting Preset##SampleBase/Thumbnail', true)
@@ -48,14 +48,14 @@ SetImguiValue('Show Pass Attachments', true)
 SetImguiValue('Preview Attachment', true)
 
 SetShowImGui(false)
--- capture image attachment previews and capture them for different formats
-TestAttachment('Forward/[Input] [BRDFTextureInput] [Image] BRDFTexture [R16G16_FLOAT] [256x256]', 'brdf.png')
-TestAttachment('Forward/[Output] [AlbedoOutput] [Image] AlbedoImage [R8G8B8A8_UNORM] [800x600] [MSAA_4x]', 'albedo.png')
-TestAttachment('MSAAResolveDepthPass/[Input] [Input] [Image] DepthStencil [D32_FLOAT_S8X24_UINT] [800x600] [MSAA_4x]', 'depthStencilMs.png')
-TestAttachment('MSAAResolveDepthPass/[Output] [Output] [Image] ResolvedDepthOutput [D32_FLOAT_S8X24_UINT] [800x600]', 'depthStencilResolve.png')
-TestAttachment('DepthDownsample/[Input] [FullResDepth] [Image] LinearDepth [R32_FLOAT] [800x600]', 'linearDepth.png')
-TestAttachment('MSAAResolveSpecularPass/[Output] [Output] [Image] ResolvedOutput [R16G16B16A16_FLOAT] [800x600]', 'specularResolved.png')
 
+-- capture image attachment previews and capture them for different formats
+TestAttachment('Forward/[InputOutput] [DepthStencilInputOutput] [Image] DepthStencil [D32_FLOAT_S8X24_UINT] [800x600]', 'depth.png')
+TestAttachment('Forward/[Output] [AlbedoOutput] [Image] AlbedoImage [R8G8B8A8_UNORM] [800x600]', 'albedo.png')
+TestAttachment('Forward/[Output] [DiffuseOutput] [Image] DiffuseImage [R16G16B16A16_FLOAT] [800x600]', 'diffuse.png')
+TestAttachment('DepthDownsample/[Input] [FullResDepth] [Image] LinearDepth [R32_FLOAT] [800x600]', 'linearDepth.png')
+TestAttachment('Forward/[Input] [BRDFTextureInput] [Image] BRDFTexture [R16G16_FLOAT] [256x256]', 'brdf.png')
+--Root/RPISamplePipeline/
 SetShowImGui(true)
 
 -- Hide the tool

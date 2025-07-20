@@ -93,41 +93,46 @@ namespace AtomSampleViewer
             AZ::Transform transform = AZ::Transform::CreateIdentity();
             transform.SetTranslation(0.0f, 0.0f, -0.05f);
 
-            m_statueMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ modelAsset }, AZ::RPI::Material::FindOrCreate(materialAsset));
+            m_statueMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(
+                AZ::Render::MeshHandleDescriptor(modelAsset, AZ::RPI::Material::FindOrCreate(materialAsset)));
             GetMeshFeatureProcessor()->SetTransform(m_statueMeshHandle, transform);
         }
 
         // cube
         {
             AZ::Data::Asset<AZ::RPI::MaterialAsset> materialAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::MaterialAsset>("materials/ssrexample/cube.azmaterial", AZ::RPI::AssetUtils::TraceLevel::Assert);
-            AZ::Data::Asset<AZ::RPI::ModelAsset> modelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/cube.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
+            AZ::Data::Asset<AZ::RPI::ModelAsset> modelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/cube.fbx.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
             AZ::Transform transform = AZ::Transform::CreateIdentity();
             transform.SetTranslation(-4.5f, 0.0f, 0.49f);
 
-            m_boxMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ modelAsset }, AZ::RPI::Material::FindOrCreate(materialAsset));
+            m_boxMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(
+                AZ::Render::MeshHandleDescriptor(modelAsset, AZ::RPI::Material::FindOrCreate(materialAsset)));
             GetMeshFeatureProcessor()->SetTransform(m_boxMeshHandle, transform);
         }
 
         // shader ball
         {
             AZ::Data::Asset<AZ::RPI::MaterialAsset> materialAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::MaterialAsset>("Materials/Presets/PBR/default_grid.azmaterial", AZ::RPI::AssetUtils::TraceLevel::Assert);
-            AZ::Data::Asset<AZ::RPI::ModelAsset> modelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/ShaderBall_simple.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
+            AZ::Data::Asset<AZ::RPI::ModelAsset> modelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/ShaderBall_simple.fbx.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
             AZ::Transform transform = AZ::Transform::CreateIdentity();
             transform *= AZ::Transform::CreateRotationZ(AZ::Constants::Pi);
             transform.SetTranslation(4.5f, 0.0f, 0.89f);
 
-            m_shaderBallMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ modelAsset }, AZ::RPI::Material::FindOrCreate(materialAsset));
+            m_shaderBallMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(
+                AZ::Render::MeshHandleDescriptor(modelAsset, AZ::RPI::Material::FindOrCreate(materialAsset)));
             GetMeshFeatureProcessor()->SetTransform(m_shaderBallMeshHandle, transform);
         }
 
         // controller meshes
         {
             AZ::Data::Asset<AZ::RPI::MaterialAsset> materialAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::MaterialAsset>("Materials/XR/XR_Hand_Controller_ControlerMAT.azmaterial", AZ::RPI::AssetUtils::TraceLevel::Assert);
-            AZ::Data::Asset<AZ::RPI::ModelAsset> modelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/left_hand_controller.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
+            AZ::Data::Asset<AZ::RPI::ModelAsset> modelAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/left_hand_controller.fbx.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
             AZ::Transform transform = AZ::Transform::CreateIdentity();
 
-            m_leftControllerMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ modelAsset }, AZ::RPI::Material::FindOrCreate(materialAsset));
-            m_rightControllerMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ modelAsset }, AZ::RPI::Material::FindOrCreate(materialAsset));
+            m_leftControllerMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(
+                AZ::Render::MeshHandleDescriptor(modelAsset, AZ::RPI::Material::FindOrCreate(materialAsset)));
+            m_rightControllerMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(
+                AZ::Render::MeshHandleDescriptor(modelAsset, AZ::RPI::Material::FindOrCreate(materialAsset)));
             GetMeshFeatureProcessor()->SetTransform(m_leftControllerMeshHandle, transform);
             GetMeshFeatureProcessor()->SetTransform(m_rightControllerMeshHandle, transform);
         }
@@ -163,8 +168,9 @@ namespace AtomSampleViewer
         m_groundMaterialAsset.Create(groundMaterialAssetId);
 
         // load mesh
-        AZ::Data::Asset<AZ::RPI::ModelAsset> planeModel = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/plane.azmodel", AZ::RPI::AssetUtils::TraceLevel::Error);
-        m_groundMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ planeModel }, AZ::RPI::Material::FindOrCreate(m_groundMaterialAsset));
+        AZ::Data::Asset<AZ::RPI::ModelAsset> planeModel = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/plane.fbx.azmodel", AZ::RPI::AssetUtils::TraceLevel::Error);
+        m_groundMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(
+            AZ::Render::MeshHandleDescriptor(planeModel, AZ::RPI::Material::FindOrCreate(m_groundMaterialAsset)));
 
         AZ::Transform transform = AZ::Transform::CreateIdentity();
         const AZ::Vector3 nonUniformScale(15.0f, 15.0f, 1.0f);

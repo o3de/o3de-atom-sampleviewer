@@ -1,0 +1,50 @@
+{
+    "Type": "JsonSerialization",
+    "Version": 1,
+    "ClassName": "PassAsset",
+    "ClassData": {
+        "PassTemplate": {
+            "Name": "SkyBoxSubpassExampleTemplate",
+            "PassClass": "FullScreenTriangle",
+            "Slots": [
+                {
+                    "Name": "LightingOutput",
+                    "SlotType": "InputOutput",
+                    "ScopeAttachmentUsage": "RenderTarget",
+                    //"ScopeAttachmentStage": "ColorAttachmentOutput",
+                    "LoadStoreAction": {
+                        "LoadAction": "Load",
+                        "StoreAction": "Store"
+                    }
+                },
+                {
+                    "Name": "SkyBoxDepth",
+                    "SlotType": "Input",
+                    "ScopeAttachmentUsage": "SubpassInput",
+                    "ScopeAttachmentStage": "FragmentShader",
+                    // Specifying the AspectFlags is very important
+                    // because we can only sample Depth or Stencil data but not both of them.
+                    "ImageViewDesc": {
+                        "AspectFlags": [
+                            "Depth"
+                        ]
+                    },
+                    "LoadStoreAction": {
+                        "LoadAction": "Load",
+                        "LoadActionStencil": "DontCare",
+                        // For efficiency, no need to Store the depth pixels after this subpass is done.
+                        "StoreAction": "DontCare",
+                        "StoreActionStencil": "DontCare"
+                    }
+                }
+            ],
+            "PassData": {
+                "$type": "FullscreenTrianglePassData",
+                "ShaderAsset": {
+                    "FilePath": "Shaders/SubpassExample/SkyBoxSubpass.shader"
+                },
+                "BindViewSrg": true
+            }
+        }
+    }
+}

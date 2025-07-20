@@ -133,8 +133,8 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 6> m_indices;
         };
 
-        AZStd::array<AZ::RHI::StreamBufferView, 2> m_triangleStreamBufferViews;
-        AZStd::array<AZ::RHI::StreamBufferView, 2> m_quadStreamBufferViews;
+        AZ::RHI::GeometryView m_triangleGeometryView;
+        AZ::RHI::GeometryView m_quadGeometryView;
         AZ::RHI::InputStreamLayout m_triangleInputStreamLayout;
         AZ::RHI::InputStreamLayout m_quadInputStreamLayout;
 

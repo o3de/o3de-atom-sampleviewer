@@ -19,9 +19,9 @@
 
 namespace AtomSampleViewer
 {
-    static const char* MeshPath = "objects/eye.azmodel";
+    static const char* MeshPath = "objects/eye.fbx.azmodel";
     static const char* MaterialPath = "materials/eye/001_EyeBasic.azmaterial";
-    static const float DefaultCameraHeading = 40.0f;
+    static const float DefaultCameraHeadingDegrees = 129.6f;
     static const float DefaultCameraDistance = 2.0f;
     
     static const char* IrisColorName = "iris.baseColor.color";
@@ -92,7 +92,7 @@ namespace AtomSampleViewer
     void EyeMaterialExampleComponent::LoadMesh(AZ::Transform transform)
     {
         m_materialInstance = AZ::RPI::Material::Create(m_materialAsset);
-        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_modelAsset }, m_materialInstance);
+        m_meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor(m_modelAsset, m_materialInstance));
         GetMeshFeatureProcessor()->SetTransform(m_meshHandle, transform);
     }
 
@@ -104,7 +104,9 @@ namespace AtomSampleViewer
             &AZ::Debug::CameraControllerRequestBus::Events::Enable,
             azrtti_typeid<AZ::Debug::ArcBallControllerComponent>());
         AZ::Debug::ArcBallControllerRequestBus::Event(GetCameraEntityId(), &AZ::Debug::ArcBallControllerRequestBus::Events::SetDistance, DefaultCameraDistance);
-        AZ::Debug::ArcBallControllerRequestBus::Event(GetCameraEntityId(), &AZ::Debug::ArcBallControllerRequestBus::Events::SetHeading, DefaultCameraHeading);
+        const float headingRadians = AZ::DegToRad(DefaultCameraHeadingDegrees);
+        AZ::Debug::ArcBallControllerRequestBus::Event(
+            GetCameraEntityId(), &AZ::Debug::ArcBallControllerRequestBus::Events::SetHeading, headingRadians);
 
         // Lighting
         m_defaultIbl.Init(m_scene);

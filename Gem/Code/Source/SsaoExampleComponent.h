@@ -72,13 +72,6 @@ namespace AtomSampleViewer
         void SwitchAOType();
 
         AZ::Render::MeshFeatureProcessorInterface::MeshHandle m_meshHandle;
-        AZ::Render::MeshFeatureProcessorInterface::ModelChangedEvent::Handler m_meshChangedHandler
-        {
-            [&](AZ::Data::Instance<AZ::RPI::Model> model)
-            {
-                OnModelReady(model);
-            }
-        };
         
         AZ::RPI::RenderPipelinePtr m_ssaoPipeline;
         AZ::RPI::RenderPipelinePtr m_originalPipeline;

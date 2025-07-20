@@ -17,6 +17,13 @@ set(FILES
     Passes/CheckerboardPipeline.pass
     Passes/Fullscreen.pass
     Passes/FullscreenPipeline.pass
+    Passes/MultiGPUPipeline.pass
+    Passes/MultiGPUCopyBufferToBuffer.pass
+    Passes/MultiGPUCopyBufferToImage.pass
+    Passes/MultiGPUCopyImageToBuffer.pass
+    Passes/MultiGPUCopyTestPipeline.pass
+    Passes/MultiGPUCompositePass.pass
+    Passes/MultiGPUTrianglePass.pass
     Passes/RayTracingAmbientOcclusion.pass
     Passes/ReadbackFiller.pass
     Passes/ReadbackPipeline.pass
@@ -26,6 +33,7 @@ set(FILES
     Passes/RHISamplePipeline.pass
     Passes/SelectorPass.pass
     Passes/SsaoPipeline.pass
+    Passes/ASV/PassTemplates.azasset
     scripts/AreaLightTest.bv.lua
     scripts/AuxGeom.bv.lua
     scripts/CheckerboardTest.bv.lua
@@ -63,6 +71,10 @@ set(FILES
     Shaders/Instanced.azsl
     Shaders/DynamicDraw/DynamicDrawExample.azsl
     Shaders/DynamicDraw/DynamicDrawExample.shader
+    Shaders/MultiGPURPIExample/Composite.azsl
+    Shaders/MultiGPURPIExample/Composite.shader
+    Shaders/MultiGPURPIExample/Triangle.azsl
+    Shaders/MultiGPURPIExample/Triangle.shader
     Shaders/OptimizationTests/DummyTransformColor.azsl
     Shaders/OptimizationTests/DummyTransformColor.shader
     Shaders/PostProcessing/ColorInvertCS.azsl
@@ -117,6 +129,8 @@ set(FILES
     Shaders/RHI/MRTTarget.shader
     Shaders/RHI/MSAAResolve.azsl
     Shaders/RHI/MSAAResolve.shader
+    Shaders/RHI/MultiGPUComposite.azsl
+    Shaders/RHI/MultiGPUComposite.shader
     Shaders/RHI/MultipleViewsDepth.azsl
     Shaders/RHI/MultipleViewsDepth.shader
     Shaders/RHI/MultipleViewsShadow.azsl

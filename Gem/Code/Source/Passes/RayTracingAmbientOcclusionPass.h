@@ -7,6 +7,7 @@
  */
 #pragma once
 
+#include <Atom/Feature/RayTracing/RayTracingFeatureProcessorInterface.h>
 #include <Atom/RHI/ScopeProducer.h>
 #include <Atom/RPI.Public/Pass/RenderPass.h>
 #include <Atom/RPI.Public/Buffer/Buffer.h>
@@ -16,8 +17,6 @@
 #include <Atom/RPI.Public/RPIUtils.h>
 #include <Atom/RPI.Public/Shader/ShaderResourceGroup.h>
 #include <Atom/RPI.Public/Shader/Shader.h>
-
-#include <RayTracing/RayTracingFeatureProcessor.h>
 
 namespace AZ
 {
@@ -71,7 +70,7 @@ namespace AZ
             // ray tracing global pipeline state
             RHI::ConstPtr<RHI::PipelineState> m_globalPipelineState;
 
-            Render::RayTracingFeatureProcessor* m_rayTracingFeatureProcessor = nullptr;
+            Render::RayTracingFeatureProcessorInterface* m_rayTracingFeatureProcessor = nullptr;
 
             uint32_t m_frameCount = 0;
 

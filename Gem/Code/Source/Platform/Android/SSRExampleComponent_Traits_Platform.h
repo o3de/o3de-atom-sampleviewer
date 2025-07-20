@@ -9,4 +9,4 @@
 // Mali devices have a memory limitation of vertex buffer (180MB), so low resolution mesh model is needed.
 // https://community.arm.com/developer/tools-software/graphics/b/blog/posts/memory-limits-with-vulkan-on-mali-gpus
 // [ATOM-14947]
-#define ATOMSAMPLEVIEWER_TRAIT_SSR_SAMPLE_HERMANUBIS_MODEL_NAME "objects/hermanubis/hermanubis_low.azmodel"
+#define ATOMSAMPLEVIEWER_TRAIT_SSR_SAMPLE_HERMANUBIS_MODEL_NAME "objects/hermanubis/hermanubis_low.fbx.azmodel"

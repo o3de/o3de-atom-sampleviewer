@@ -65,6 +65,34 @@
                 "Path": "Passes/FullscreenPipeline.pass"
             },
             {
+                "Name": "MultiGPUPipeline",
+                "Path": "Passes/MultiGPUPipeline.pass"
+            },
+            {
+                "Name": "MultiGPUCopyTestPipeline",
+                "Path": "Passes/MultiGPUCopyTestPipeline.pass"
+            },
+            {
+                "Name": "MultiGPUCopyImageToBufferPassTemplate",
+                "Path": "Passes/MultiGPUCopyImageToBuffer.pass"
+            },
+            {
+                "Name": "MultiGPUCopyBufferToBufferPassTemplate",
+                "Path": "Passes/MultiGPUCopyBufferToBuffer.pass"
+            },
+            {
+                "Name": "MultiGPUCopyBufferToImagePassTemplate",
+                "Path": "Passes/MultiGPUCopyBufferToImage.pass"
+            },
+            {
+                "Name": "MultiGPUCompositePassTemplate",
+                "Path": "Passes/MultiGPUCompositePass.pass"
+            },
+            {
+                "Name": "MultiGPUTrianglePassTemplate",
+                "Path": "Passes/MultiGPUTrianglePass.pass"
+            },
+            {
                 "Name": "ReadbackFillerPassTemplate",
                 "Path": "Passes/ReadbackFiller.pass"
             },
@@ -91,6 +119,18 @@
             {
                 "Name": "DeferredLightingPassTemplate",
                 "Path": "Passes/PrototypeDeferredPipeline/DeferredLighting.pass"
+            },
+            {
+                "Name": "ForwardSubpassExampleTemplate",
+                "Path": "Passes/SubpassExample/ForwardSubpass.pass"
+            },
+            {
+                "Name": "SkyBoxSubpassExampleTemplate",
+                "Path": "Passes/SubpassExample/SkyBoxSubpass.pass"
+            },
+            {
+                "Name": "SubpassesPipelineTemplate",
+                "Path": "Passes/SubpassExample/SubpassesPipeline.pass"
             }
         ]
     }

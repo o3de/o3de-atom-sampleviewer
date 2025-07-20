@@ -93,7 +93,7 @@ namespace AtomSampleViewer
         };
         AZ::RHI::Ptr<AZ::RHI::BufferPool> m_inputAssemblyBufferPool;
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_rectangleInputAssemblyBuffer;
-        AZStd::array<AZ::RHI::StreamBufferView, 2> m_rectangleStreamBufferViews;
+        AZ::RHI::GeometryView m_geometryView;
         AZ::RHI::InputStreamLayout m_rectangleInputStreamLayout;
 
         // Shader Resource

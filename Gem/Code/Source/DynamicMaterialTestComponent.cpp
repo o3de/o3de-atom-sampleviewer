@@ -71,7 +71,7 @@ namespace AtomSampleViewer
     
     void DynamicMaterialTestComponent::PrepareCreateLatticeInstances(uint32_t instanceCount)
     {
-        const char* modelPath = "objects/shaderball_simple.azmodel";
+        const char* modelPath = "objects/shaderball_simple.fbx.azmodel";
 
         Data::AssetId modelAssetId;
         Data::AssetCatalogRequestBus::BroadcastResult(
@@ -95,26 +95,17 @@ namespace AtomSampleViewer
         AZ::Data::Asset<AZ::RPI::MaterialAsset>& materialAsset = m_materialConfigs[m_currentMaterialConfig].m_materialAsset;
         AZ::Data::Instance<AZ::RPI::Material> material = Material::Create(materialAsset);
          
-        Render::MeshHandleDescriptor meshDescriptor;
-        meshDescriptor.m_modelAsset = m_modelAsset;
+        Render::MeshHandleDescriptor meshDescriptor(m_modelAsset, material);
         meshDescriptor.m_isRayTracingEnabled = false;
-        auto meshHandle = GetMeshFeatureProcessor()->AcquireMesh(meshDescriptor, material);
+        meshDescriptor.m_modelChangedEventHandler =
+            AZ::Render::MeshHandleDescriptor::ModelChangedEvent::Handler{ [this](const AZ::Data::Instance<AZ::RPI::Model>& /*model*/)
+                                                                          {
+                                                                              m_loadedMeshCounter++;
+                                                                          } };
+
+        auto meshHandle = GetMeshFeatureProcessor()->AcquireMesh(meshDescriptor);
         GetMeshFeatureProcessor()->SetTransform(meshHandle, transform);
 
-        Data::Instance<RPI::Model> model = GetMeshFeatureProcessor()->GetModel(meshHandle);
-        if (model)
-        {
-            m_loadedMeshCounter++;
-        }
-        else
-        {
-            m_meshLoadEventHandlers.push_back(AZ::Render::MeshFeatureProcessorInterface::ModelChangedEvent::Handler
-                {
-                    [this](AZ::Data::Instance<AZ::RPI::Model> model) { m_loadedMeshCounter++; }
-                });
-            GetMeshFeatureProcessor()->ConnectModelChangeEventHandler(meshHandle, m_meshLoadEventHandlers.back());
-        }
-        
         m_meshHandles.push_back(AZStd::move(meshHandle));
         m_materials.push_back(material);
     }
@@ -130,7 +121,6 @@ namespace AtomSampleViewer
 
         m_loadedMeshCounter = 0;
         m_waitingForMeshes = false;
-        m_meshLoadEventHandlers.clear();
     }
 
     void DynamicMaterialTestComponent::InitMaterialConfigs()

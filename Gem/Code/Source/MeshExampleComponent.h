@@ -101,8 +101,6 @@ namespace AtomSampleViewer
         static const uint32_t CameraControllerCount = static_cast<uint32_t>(CameraControllerType::Count);
         static const char* CameraControllerNameTable[CameraControllerCount];
         CameraControllerType m_currentCameraControllerType = CameraControllerType::ArcBall;
-
-        AZ::Render::MeshFeatureProcessorInterface::ModelChangedEvent::Handler m_changedHandler;
         
         static constexpr float ArcballRadiusMinModifier = 0.01f;
         static constexpr float ArcballRadiusMaxModifier = 4.0f;

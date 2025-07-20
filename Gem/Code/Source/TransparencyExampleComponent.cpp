@@ -19,7 +19,7 @@ namespace AtomSampleViewer
 {
     static const int NumOfMeshes = 10;
     static const float MeshSpacing = 1.0f;
-    static const char* MeshPath = "objects/plane.azmodel";
+    static const char* MeshPath = "objects/plane.fbx.azmodel";
     static const char* MaterialPath = "materials/transparentdoubleside.azmaterial";
     static const char* ColorPropertyName = "baseColor.color";
     static const float DefaultCameraDistance = 2.0f;
@@ -74,7 +74,6 @@ namespace AtomSampleViewer
         }
         m_meshHandles.clear();
 
-        m_meshLoadEventHandlers.clear();
         AZ::TickBus::Handler::BusDisconnect();
     }
 
@@ -140,22 +139,15 @@ namespace AtomSampleViewer
     {
         auto materialInstance = AZ::RPI::Material::Create(m_materialAsset);
 
-        AZ::Render::MeshFeatureProcessorInterface::MeshHandle meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_modelAsset }, materialInstance);
-        GetMeshFeatureProcessor()->SetTransform(meshHandle, transform);
+        AZ::Render::MeshHandleDescriptor descriptor(m_modelAsset, materialInstance);
+        descriptor.m_modelChangedEventHandler =
+            AZ::Render::MeshHandleDescriptor::ModelChangedEvent::Handler{ [this](const AZ::Data::Instance<AZ::RPI::Model>& /*model*/)
+                                                                          {
+                                                                              m_loadedMeshCounter++;
+                                                                          } };
 
-        AZ::Data::Instance<AZ::RPI::Model> model = GetMeshFeatureProcessor()->GetModel(meshHandle);
-        if (model)
-        {
-            m_loadedMeshCounter++;
-        }
-        else
-        {
-            m_meshLoadEventHandlers.push_back(AZ::Render::MeshFeatureProcessorInterface::ModelChangedEvent::Handler
-                {
-                    [this](AZ::Data::Instance<AZ::RPI::Model> model) { m_loadedMeshCounter++; }
-                });
-            GetMeshFeatureProcessor()->ConnectModelChangeEventHandler(meshHandle, m_meshLoadEventHandlers.back());
-        }
+        AZ::Render::MeshFeatureProcessorInterface::MeshHandle meshHandle = GetMeshFeatureProcessor()->AcquireMesh(descriptor);
+        GetMeshFeatureProcessor()->SetTransform(meshHandle, transform);
 
         m_meshHandles.push_back(std::move(meshHandle));
     }

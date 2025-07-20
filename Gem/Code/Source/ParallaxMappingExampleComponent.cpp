@@ -73,8 +73,8 @@ namespace AtomSampleViewer
     void ParallaxMappingExampleComponent::Activate()
     {
         // Asset
-        m_planeAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/plane.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
-        m_boxAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/cube.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
+        m_planeAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/plane.fbx.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
+        m_boxAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::ModelAsset>("objects/cube.fbx.azmodel", AZ::RPI::AssetUtils::TraceLevel::Assert);
         m_parallaxMaterialAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::MaterialAsset>("testdata/materials/parallaxrock.azmaterial", AZ::RPI::AssetUtils::TraceLevel::Assert);
         m_defaultMaterialAsset = AZ::RPI::AssetUtils::GetAssetByProductPath<AZ::RPI::MaterialAsset>("materials/defaultpbr.azmaterial", AZ::RPI::AssetUtils::TraceLevel::Assert);
         m_parallaxMaterial = AZ::RPI::Material::Create(m_parallaxMaterialAsset);
@@ -157,7 +157,8 @@ namespace AtomSampleViewer
         AZ::Data::Instance<AZ::RPI::Material> material,
         AZ::Transform transform)
     {
-        AZ::Render::MeshFeatureProcessorInterface::MeshHandle meshHandle = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ modelAsset }, material);
+        AZ::Render::MeshFeatureProcessorInterface::MeshHandle meshHandle =
+            GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor(modelAsset, material));
         GetMeshFeatureProcessor()->SetTransform(meshHandle, transform);
         return meshHandle;
     }
@@ -166,6 +167,7 @@ namespace AtomSampleViewer
     {
         const AZ::Render::DirectionalLightFeatureProcessorInterface::LightHandle handle = m_directionalLightFeatureProcessor->AcquireLight();
 
+        m_directionalLightFeatureProcessor->SetShadowEnabled(handle, true);
         m_directionalLightFeatureProcessor->SetShadowmapSize(handle, AZ::Render::ShadowmapSize::Size2048);
         m_directionalLightFeatureProcessor->SetCascadeCount(handle, 4);
         m_directionalLightFeatureProcessor->SetShadowmapFrustumSplitSchemeRatio(handle, 0.5f);

@@ -342,11 +342,7 @@ namespace AtomSampleViewer
     {
         using namespace AZ;
 
-        m_materialInstance = RPI::Material::FindOrCreate(m_materialAsset);
-        m_floorMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(Render::MeshHandleDescriptor{ m_floorModelAsset }, m_materialInstance);
-        m_bunnyMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(Render::MeshHandleDescriptor{ m_bunnyModelAsset }, m_materialInstance);
-
-        auto updateFloorTransform = [&](Data::Instance<RPI::Model> model)
+        auto updateFloorTransform = [&](const Data::Instance<RPI::Model>& model)
         {
             const AZ::Aabb& aabb = model->GetModelAsset()->GetAabb();
             const float maxZ = aabb.GetMax().GetZ();
@@ -355,14 +351,14 @@ namespace AtomSampleViewer
             const auto transform = AZ::Transform::CreateTranslation(translation);
             GetMeshFeatureProcessor()->SetTransform(m_floorMeshHandle, transform, nonUniformScale);
             m_floorMeshIsReady = true;
-            if (m_bunnyMeshIsReady)
+            if (m_bunnyMeshIsReady || m_floorMeshIsReady)
             {
                 // Now that the models are initialized, we can allow the script to continue.
                 ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::ResumeScript);
             }
         };
 
-        auto updateBunnyTransform = [&](Data::Instance<RPI::Model> model)
+        auto updateBunnyTransform = [&](const Data::Instance<RPI::Model>& model)
         {
             const AZ::Aabb& aabb = model->GetModelAsset()->GetAabb();
             const float minZ = aabb.GetMin().GetZ();
@@ -371,31 +367,25 @@ namespace AtomSampleViewer
             transform.SetUniformScale(1.5f);
             GetMeshFeatureProcessor()->SetTransform(m_bunnyMeshHandle, transform);
             m_bunnyMeshIsReady = true;
-            if (m_floorMeshIsReady)
+            if (m_bunnyMeshIsReady || m_floorMeshIsReady)
             {
                 // Now that the models are initialized, we can allow the script to continue.
                 ScriptRunnerRequestBus::Broadcast(&ScriptRunnerRequests::ResumeScript);
             }
         };
 
-        m_floorReadyHandle = ModelChangedHandler(updateFloorTransform);
-        m_bunnyReadyHandle = ModelChangedHandler(updateBunnyTransform);
+        m_materialInstance = RPI::Material::FindOrCreate(m_materialAsset);
 
-        GetMeshFeatureProcessor()->ConnectModelChangeEventHandler(m_floorMeshHandle, m_floorReadyHandle);
-        GetMeshFeatureProcessor()->ConnectModelChangeEventHandler(m_bunnyMeshHandle, m_bunnyReadyHandle);
-
-        // Currently there's no way for the mesh feature procesor to announce change on connect if the model is ready already.
-        // This can go away when AZ::Event::Handler's callback can be called publicly.
-        Data::Instance<RPI::Model> floorModel = GetMeshFeatureProcessor()->GetModel(m_floorMeshHandle);
-        if (floorModel)
         {
-            updateFloorTransform(floorModel);
+            Render::MeshHandleDescriptor descriptor(m_floorModelAsset, m_materialInstance);
+            descriptor.m_modelChangedEventHandler = AZ::Render::MeshHandleDescriptor::ModelChangedEvent::Handler(updateFloorTransform);
+            m_floorMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(descriptor);
         }
 
-        Data::Instance<RPI::Model> bunnyModel = GetMeshFeatureProcessor()->GetModel(m_bunnyMeshHandle);
-        if (bunnyModel)
         {
-            updateBunnyTransform(bunnyModel);
+            Render::MeshHandleDescriptor descriptor(m_bunnyModelAsset, m_materialInstance);
+            descriptor.m_modelChangedEventHandler = AZ::Render::MeshHandleDescriptor::ModelChangedEvent::Handler(updateBunnyTransform);
+            m_bunnyMeshHandle = GetMeshFeatureProcessor()->AcquireMesh(descriptor);
         }
     }
 
@@ -408,6 +398,7 @@ namespace AtomSampleViewer
 
         AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Lux> lightColor(DirectionalLightColor * m_directionalLightIntensity);
         featureProcessor->SetRgbIntensity(handle, lightColor);
+        featureProcessor->SetShadowEnabled(handle, m_shadowEnabled);
         featureProcessor->SetShadowmapSize(handle, s_shadowmapImageSizes[m_directionalLightImageSizeIndex]);
         featureProcessor->SetShadowFarClipDistance(handle, FarClipDistance);
         featureProcessor->SetCascadeCount(handle, static_cast<uint16_t>(m_cascadeCount));

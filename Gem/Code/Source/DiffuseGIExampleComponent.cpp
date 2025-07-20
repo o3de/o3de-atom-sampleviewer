@@ -157,11 +157,11 @@ namespace AtomSampleViewer
     {
         // load plane and cube models
         // all geometry in the CornellBox is created from planes and boxes
-        static constexpr const char PlaneModelPath[] = "objects/plane.azmodel";
+        static constexpr const char PlaneModelPath[] = "objects/plane.fbx.azmodel";
         AZ::Data::AssetId planeAssetId = AZ::RPI::AssetUtils::GetAssetIdForProductPath(PlaneModelPath, AZ::RPI::AssetUtils::TraceLevel::Error);
         m_planeModelAsset.Create(planeAssetId);
 
-        static constexpr const char CubeModelPath[] = "objects/cube.azmodel";
+        static constexpr const char CubeModelPath[] = "objects/cube.fbx.azmodel";
         AZ::Data::AssetId cubeAssetId = AZ::RPI::AssetUtils::GetAssetIdForProductPath(CubeModelPath, AZ::RPI::AssetUtils::TraceLevel::Error);
         m_cubeModelAsset.Create(cubeAssetId);
 
@@ -187,7 +187,7 @@ namespace AtomSampleViewer
         m_whiteMaterialAsset.Create(whiteMaterialAssetId);
 
         // Sponza models
-        static constexpr const char InteriorModelPath[] = "objects/sponza.azmodel";
+        static constexpr const char InteriorModelPath[] = "objects/sponza.fbx.azmodel";
         AZ::Data::AssetId interiorAssetId = AZ::RPI::AssetUtils::GetAssetIdForProductPath(InteriorModelPath, AZ::RPI::AssetUtils::TraceLevel::Error);
         m_sponzaModelAsset.Create(interiorAssetId);
 
@@ -231,9 +231,9 @@ namespace AtomSampleViewer
             transform.SetTranslation(-5.0f, 0.0f, 0.0f);
             transform *= AZ::Transform::CreateRotationY(AZ::Constants::HalfPi);
             AZ::Vector3 nonUniformScale(10.05f, 10.05f, 1.0f);
-            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::LeftWall)] = GetMeshFeatureProcessor()->AcquireMesh(
-                AZ::Render::MeshHandleDescriptor{ m_planeModelAsset },
-                AZ::RPI::Material::FindOrCreate(GetCornellBoxMaterialAsset(m_leftWallColor)));
+            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::LeftWall)] =
+                GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor(
+                    m_planeModelAsset, AZ::RPI::Material::FindOrCreate(GetCornellBoxMaterialAsset(m_leftWallColor))));
             GetMeshFeatureProcessor()->SetTransform(
                 m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::LeftWall)], transform, nonUniformScale);
         }
@@ -245,9 +245,9 @@ namespace AtomSampleViewer
             transform.SetTranslation(5.0f, 0.0f, 0.0f);
             transform *= AZ::Transform::CreateRotationY(-AZ::Constants::HalfPi);
             AZ::Vector3 nonUniformScale(10.05f, 10.05f, 1.0f);
-            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::RightWall)] = GetMeshFeatureProcessor()->AcquireMesh(
-                AZ::Render::MeshHandleDescriptor{ m_planeModelAsset },
-                AZ::RPI::Material::FindOrCreate(GetCornellBoxMaterialAsset(m_rightWallColor)));
+            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::RightWall)] =
+                GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor(
+                    m_planeModelAsset, AZ::RPI::Material::FindOrCreate(GetCornellBoxMaterialAsset(m_rightWallColor))));
             GetMeshFeatureProcessor()->SetTransform(
                 m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::RightWall)], transform, nonUniformScale);
         }
@@ -259,9 +259,9 @@ namespace AtomSampleViewer
             transform.SetTranslation(0.0f, 5.0f, 0.0f);
             transform *= AZ::Transform::CreateRotationX(AZ::Constants::HalfPi);
             AZ::Vector3 nonUniformScale(10.05f, 10.05f, 1.0f);
-            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::BackWall)] = GetMeshFeatureProcessor()->AcquireMesh(
-                AZ::Render::MeshHandleDescriptor{ m_planeModelAsset },
-                AZ::RPI::Material::FindOrCreate(GetCornellBoxMaterialAsset(m_backWallColor)));
+            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::BackWall)] =
+                GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor(
+                    m_planeModelAsset, AZ::RPI::Material::FindOrCreate(GetCornellBoxMaterialAsset(m_backWallColor))));
             GetMeshFeatureProcessor()->SetTransform(
                 m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::BackWall)], transform, nonUniformScale);
         }
@@ -273,9 +273,9 @@ namespace AtomSampleViewer
             transform.SetTranslation(0.0f, 0.0f, 5.0f);
             transform *= AZ::Transform::CreateRotationX(AZ::Constants::Pi);
             AZ::Vector3 nonUniformScale(10.05f, 10.05f, 1.0f);
-            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Ceiling)] = GetMeshFeatureProcessor()->AcquireMesh(
-                AZ::Render::MeshHandleDescriptor{ m_planeModelAsset },
-                AZ::RPI::Material::FindOrCreate(GetCornellBoxMaterialAsset(m_ceilingColor)));
+            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Ceiling)] =
+                GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor(
+                    m_planeModelAsset, AZ::RPI::Material::FindOrCreate(GetCornellBoxMaterialAsset(m_ceilingColor))));
             GetMeshFeatureProcessor()->SetTransform(
                 m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Ceiling)], transform, nonUniformScale);
         }
@@ -286,9 +286,9 @@ namespace AtomSampleViewer
             AZ::Transform transform = AZ::Transform::CreateIdentity();
             transform.SetTranslation(0.0f, 0.0f, -5.0f);
             AZ::Vector3 nonUniformScale(10.05f, 10.05f, 1.0f);
-            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Floor)] = GetMeshFeatureProcessor()->AcquireMesh(
-                AZ::Render::MeshHandleDescriptor{ m_planeModelAsset },
-                AZ::RPI::Material::FindOrCreate(GetCornellBoxMaterialAsset(m_floorColor)));
+            m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Floor)] =
+                GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor(
+                    m_planeModelAsset, AZ::RPI::Material::FindOrCreate(GetCornellBoxMaterialAsset(m_floorColor))));
             GetMeshFeatureProcessor()->SetTransform(
                 m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::Floor)], transform, nonUniformScale);
         }
@@ -300,7 +300,7 @@ namespace AtomSampleViewer
             transform *= AZ::Transform::CreateRotationZ(AZ::Constants::HalfPi * 0.2f);
             AZ::Vector3 nonUniformScale(3.0f, 3.0f, 6.0f);
             m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::LargeBox)] = GetMeshFeatureProcessor()->AcquireMesh(
-                AZ::Render::MeshHandleDescriptor{ m_cubeModelAsset }, AZ::RPI::Material::FindOrCreate(m_whiteMaterialAsset));
+                AZ::Render::MeshHandleDescriptor(m_cubeModelAsset, AZ::RPI::Material::FindOrCreate(m_whiteMaterialAsset)));
             GetMeshFeatureProcessor()->SetTransform(
                 m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::LargeBox)], transform, nonUniformScale);
         }
@@ -312,7 +312,7 @@ namespace AtomSampleViewer
             transform *= AZ::Transform::CreateRotationZ(-AZ::Constants::HalfPi * 0.2f);
             AZ::Vector3 nonUniformScale(3.0f, 3.0f, 3.0f);
             m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::SmallBox)] = GetMeshFeatureProcessor()->AcquireMesh(
-                AZ::Render::MeshHandleDescriptor{ m_cubeModelAsset }, AZ::RPI::Material::FindOrCreate(m_whiteMaterialAsset));
+                AZ::Render::MeshHandleDescriptor(m_cubeModelAsset, AZ::RPI::Material::FindOrCreate(m_whiteMaterialAsset)));
             GetMeshFeatureProcessor()->SetTransform(
                 m_meshHandles[aznumeric_cast<uint32_t>(CornellBoxMeshes::SmallBox)], transform, nonUniformScale);
         }
@@ -377,7 +377,8 @@ namespace AtomSampleViewer
         m_meshHandles.resize(aznumeric_cast<uint32_t>(SponzaMeshes::Count));
 
         AZ::Transform transform = AZ::Transform::CreateIdentity();
-        m_meshHandles[aznumeric_cast<uint32_t>(SponzaMeshes::Inside)] = GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor{ m_sponzaModelAsset });
+        m_meshHandles[aznumeric_cast<uint32_t>(SponzaMeshes::Inside)] =
+            GetMeshFeatureProcessor()->AcquireMesh(AZ::Render::MeshHandleDescriptor(m_sponzaModelAsset));
         GetMeshFeatureProcessor()->SetTransform(m_meshHandles[aznumeric_cast<uint32_t>(SponzaMeshes::Inside)], transform);
         
         m_directionalLightPitch = AZ::DegToRad(-65.0f);
@@ -398,6 +399,7 @@ namespace AtomSampleViewer
             const auto lightTransform = AZ::Transform::CreateRotationZ(m_directionalLightYaw) * AZ::Transform::CreateRotationX(m_directionalLightPitch);
             directionalLightFeatureProcessor->SetDirection(m_directionalLightHandle, lightTransform.GetBasis(1));
             directionalLightFeatureProcessor->SetRgbIntensity(m_directionalLightHandle, AZ::Render::PhotometricColor<AZ::Render::PhotometricUnit::Lux>(m_directionalLightIntensity * m_directionalLightColor));
+            directionalLightFeatureProcessor->SetShadowEnabled(m_directionalLightHandle, true);
             directionalLightFeatureProcessor->SetCascadeCount(m_directionalLightHandle, 4);
             directionalLightFeatureProcessor->SetShadowmapSize(m_directionalLightHandle, AZ::Render::ShadowmapSize::Size2048);
             directionalLightFeatureProcessor->SetViewFrustumCorrectionEnabled(m_directionalLightHandle, false);

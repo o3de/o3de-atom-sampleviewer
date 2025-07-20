@@ -7,8 +7,6 @@
  */
 
 
-#include <Atom/RHI/ImagePool.h>
-
 #include <Atom/RHI.Reflect/InputStreamLayoutBuilder.h>
 #include <Atom/RHI.Reflect/RenderAttachmentLayoutBuilder.h>
 #include <Atom/RPI.Reflect/Shader/ShaderAsset.h>
@@ -206,12 +204,12 @@ namespace AtomSampleViewer
     void TextureMapExampleComponent::CreateInputAssemblyBufferPool()
     {
         const AZ::RHI::Ptr<AZ::RHI::Device> device = Utils::GetRHIDevice();
-        m_inputAssemblyBufferPool = AZ::RHI::Factory::Get().CreateBufferPool();
+        m_inputAssemblyBufferPool = aznew AZ::RHI::BufferPool();
 
         AZ::RHI::BufferPoolDescriptor bufferPoolDesc;
         bufferPoolDesc.m_bindFlags = AZ::RHI::BufferBindFlags::InputAssembly;
         bufferPoolDesc.m_heapMemoryLevel = AZ::RHI::HeapMemoryLevel::Device;
-        m_inputAssemblyBufferPool->Init(*device, bufferPoolDesc);
+        m_inputAssemblyBufferPool->Init(bufferPoolDesc);
     }
 
     void TextureMapExampleComponent::InitRenderTargetBufferView()
@@ -229,7 +227,9 @@ namespace AtomSampleViewer
         layoutBuilder.AddBuffer()->Channel("UV", AZ::RHI::Format::R32G32_FLOAT);
         m_bufferViews[RenderTargetIndex::BufferViewIndex].m_inputStreamLayout = layoutBuilder.End();
 
-        AZ::RHI::ValidateStreamBufferViews(m_bufferViews[RenderTargetIndex::BufferViewIndex].m_inputStreamLayout, m_bufferViews[RenderTargetIndex::BufferViewIndex].m_streamBufferViews);
+        AZ::RHI::ValidateStreamBufferViews(m_bufferViews[RenderTargetIndex::BufferViewIndex].m_inputStreamLayout,
+                                           m_bufferViews[RenderTargetIndex::BufferViewIndex].m_geometryView,
+                                           m_bufferViews[RenderTargetIndex::BufferViewIndex].m_geometryView.GetFullStreamBufferIndices());
     }
 
     void TextureMapExampleComponent::InitTexture1DBufferView()
@@ -260,7 +260,11 @@ namespace AtomSampleViewer
         layoutBuilder.AddBuffer()->Channel("UV", AZ::RHI::Format::R32G32_FLOAT);
         m_bufferViews[RenderTargetIndex::Texture1D].m_inputStreamLayout = layoutBuilder.End();
 
-        AZ::RHI::ValidateStreamBufferViews(m_bufferViews[RenderTargetIndex::Texture1D].m_inputStreamLayout, m_bufferViews[RenderTargetIndex::Texture1D].m_streamBufferViews);
+        AZ::RHI::ValidateStreamBufferViews(
+            m_bufferViews[RenderTargetIndex::Texture1D].m_inputStreamLayout,
+            m_bufferViews[RenderTargetIndex::Texture1D].m_geometryView,
+            m_bufferViews[RenderTargetIndex::Texture1D].m_geometryView.GetFullStreamBufferIndices()
+            );
     }
 
     void TextureMapExampleComponent::InitTexture1DArrayBufferView()
@@ -295,7 +299,11 @@ namespace AtomSampleViewer
         layoutBuilder.AddBuffer()->Channel("UV", AZ::RHI::Format::R32G32_FLOAT);
         m_bufferViews[RenderTargetIndex::Texture1DArray].m_inputStreamLayout = layoutBuilder.End();
 
-        AZ::RHI::ValidateStreamBufferViews(m_bufferViews[RenderTargetIndex::Texture1DArray].m_inputStreamLayout, m_bufferViews[RenderTargetIndex::Texture1DArray].m_streamBufferViews);
+        AZ::RHI::ValidateStreamBufferViews(
+            m_bufferViews[RenderTargetIndex::Texture1DArray].m_inputStreamLayout,
+            m_bufferViews[RenderTargetIndex::Texture1DArray].m_geometryView,
+            m_bufferViews[RenderTargetIndex::Texture1DArray].m_geometryView.GetFullStreamBufferIndices()
+        );
     }
 
     void TextureMapExampleComponent::InitTexture2DArrayBufferView()
@@ -315,7 +323,11 @@ namespace AtomSampleViewer
         layoutBuilder.AddBuffer()->Channel("UV", AZ::RHI::Format::R32G32B32_FLOAT);
         m_bufferViews[RenderTargetIndex::Texture2DArray].m_inputStreamLayout = layoutBuilder.End();
 
-        AZ::RHI::ValidateStreamBufferViews(m_bufferViews[RenderTargetIndex::Texture2DArray].m_inputStreamLayout, m_bufferViews[RenderTargetIndex::Texture2DArray].m_streamBufferViews);
+        AZ::RHI::ValidateStreamBufferViews(
+            m_bufferViews[RenderTargetIndex::Texture2DArray].m_inputStreamLayout,
+            m_bufferViews[RenderTargetIndex::Texture2DArray].m_geometryView,
+            m_bufferViews[RenderTargetIndex::Texture2DArray].m_geometryView.GetFullStreamBufferIndices()
+        );
     }
 
     void TextureMapExampleComponent::InitCubemapBufferView()
@@ -335,7 +347,11 @@ namespace AtomSampleViewer
         layoutBuilder.AddBuffer()->Channel("UV", AZ::RHI::Format::R32G32B32_FLOAT);
         m_bufferViews[RenderTargetIndex::TextureCubemap].m_inputStreamLayout = layoutBuilder.End();
 
-        AZ::RHI::ValidateStreamBufferViews(m_bufferViews[RenderTargetIndex::TextureCubemap].m_inputStreamLayout, m_bufferViews[RenderTargetIndex::TextureCubemap].m_streamBufferViews);
+        AZ::RHI::ValidateStreamBufferViews(
+            m_bufferViews[RenderTargetIndex::TextureCubemap].m_inputStreamLayout,
+            m_bufferViews[RenderTargetIndex::TextureCubemap].m_geometryView,
+            m_bufferViews[RenderTargetIndex::TextureCubemap].m_geometryView.GetFullStreamBufferIndices()
+            );
     }
 
     void TextureMapExampleComponent::InitCubemapArrayBufferView()
@@ -357,7 +373,11 @@ namespace AtomSampleViewer
         layoutBuilder.AddBuffer()->Channel("UV", AZ::RHI::Format::R32G32B32A32_FLOAT);
         m_bufferViews[RenderTargetIndex::TextureCubemapArray].m_inputStreamLayout = layoutBuilder.End();
 
-        AZ::RHI::ValidateStreamBufferViews(m_bufferViews[RenderTargetIndex::TextureCubemapArray].m_inputStreamLayout, m_bufferViews[RenderTargetIndex::TextureCubemapArray].m_streamBufferViews);
+        AZ::RHI::ValidateStreamBufferViews(
+            m_bufferViews[RenderTargetIndex::TextureCubemapArray].m_inputStreamLayout,
+            m_bufferViews[RenderTargetIndex::TextureCubemapArray].m_geometryView,
+            m_bufferViews[RenderTargetIndex::TextureCubemapArray].m_geometryView.GetFullStreamBufferIndices()
+        );
     }
 
     void TextureMapExampleComponent::InitTexture3DBufferView()
@@ -392,7 +412,9 @@ namespace AtomSampleViewer
         layoutBuilder.AddBuffer()->Channel("UV", AZ::RHI::Format::R32G32B32_FLOAT);
         m_bufferViews[RenderTargetIndex::Texture3D].m_inputStreamLayout = layoutBuilder.End();
 
-        AZ::RHI::ValidateStreamBufferViews(m_bufferViews[RenderTargetIndex::Texture3D].m_inputStreamLayout, m_bufferViews[RenderTargetIndex::Texture3D].m_streamBufferViews);
+        AZ::RHI::ValidateStreamBufferViews(m_bufferViews[RenderTargetIndex::Texture3D].m_inputStreamLayout,
+                                           m_bufferViews[RenderTargetIndex::Texture3D].m_geometryView,
+                                           m_bufferViews[RenderTargetIndex::Texture3D].m_geometryView.GetFullStreamBufferIndices());
     }
 
     void TextureMapExampleComponent::InitRenderTargets()
@@ -511,18 +533,16 @@ namespace AtomSampleViewer
             RHI::Scissor scissor(0, 0, m_renderTargetImageDescriptors[target].m_imageDescriptor.m_size.m_width, m_renderTargetImageDescriptors[target].m_imageDescriptor.m_size.m_height);
             commandList->SetScissors(&scissor, 1);
 
-            RHI::DrawIndexed drawIndexed;
-            drawIndexed.m_indexCount = 6;
-            drawIndexed.m_instanceCount = 1;
+            m_bufferViews[RenderTargetIndex::BufferViewIndex].m_geometryView.SetDrawArguments(RHI::DrawIndexed(0, 6, 0));
 
-            const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_targetSRGs[target]->GetRHIShaderResourceGroup() };
+            const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
+                m_targetSRGs[target]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
+            };
 
-            RHI::DrawItem drawItem;
-            drawItem.m_arguments = drawIndexed;
-            drawItem.m_pipelineState = m_targetPipelineStates[target].get();
-            drawItem.m_indexBufferView = &m_bufferViews[RenderTargetIndex::BufferViewIndex].m_indexBufferView;
-            drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_bufferViews[RenderTargetIndex::BufferViewIndex].m_streamBufferViews.size());
-            drawItem.m_streamBufferViews = m_bufferViews[RenderTargetIndex::BufferViewIndex].m_streamBufferViews.data();
+            RHI::DeviceDrawItem drawItem;
+            drawItem.m_geometryView = m_bufferViews[RenderTargetIndex::BufferViewIndex].m_geometryView.GetDeviceGeometryView(context.GetDeviceIndex());
+            drawItem.m_streamIndices = m_bufferViews[RenderTargetIndex::BufferViewIndex].m_geometryView.GetFullStreamBufferIndices();
+            drawItem.m_pipelineState = m_targetPipelineStates[target]->GetDevicePipelineState(context.GetDeviceIndex()).get();
             drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
             drawItem.m_shaderResourceGroups = shaderResourceGroups;
 
@@ -566,7 +586,7 @@ namespace AtomSampleViewer
                 RHI::ImageScopeAttachmentDescriptor desc;
                 desc.m_attachmentId = m_attachmentID[target];
                 desc.m_imageViewDescriptor = imageViewDescriptor;
-                frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::Read);
+                frameGraph.UseShaderAttachment(desc, RHI::ScopeAttachmentAccess::Read, RHI::ScopeAttachmentStage::FragmentShader);
             }
             // We will submit a single draw item.
             frameGraph.SetEstimatedItemCount(1);
@@ -574,7 +594,7 @@ namespace AtomSampleViewer
 
         const auto compileFunction = [this, target](const AZ::RHI::FrameGraphCompileContext& context, [[maybe_unused]] const ScopeData& scopeData)
         {
-            const AZ::RHI::ImageView* imageView = context.GetImageView(m_attachmentID[target]);
+            const auto* imageView = context.GetImageView(m_attachmentID[target]);
 
             m_screenSRGs[target]->SetImageView(m_shaderInputImageIndices[target], imageView);
             m_screenSRGs[target]->Compile();
@@ -589,17 +609,17 @@ namespace AtomSampleViewer
             commandList->SetScissors(&m_scissor, 1);
 
             RHI::DrawIndexed drawIndexed;
-            drawIndexed.m_indexCount = m_bufferViews[target].m_indexBufferView.GetByteCount() / sizeof(uint16_t);
-            drawIndexed.m_instanceCount = 1;
+            drawIndexed.m_indexCount = m_bufferViews[target].m_geometryView.GetIndexBufferView().GetByteCount() / sizeof(uint16_t);
+            m_bufferViews[target].m_geometryView.SetDrawArguments(drawIndexed);
 
-            const RHI::ShaderResourceGroup* shaderResourceGroups[] = { m_screenSRGs[target]->GetRHIShaderResourceGroup() };
+            const RHI::DeviceShaderResourceGroup* shaderResourceGroups[] = {
+                m_screenSRGs[target]->GetRHIShaderResourceGroup()->GetDeviceShaderResourceGroup(context.GetDeviceIndex()).get()
+            };
 
-            RHI::DrawItem drawItem;
-            drawItem.m_arguments = drawIndexed;
-            drawItem.m_pipelineState = m_screenPipelineStates[target].get();
-            drawItem.m_indexBufferView = &m_bufferViews[target].m_indexBufferView;
-            drawItem.m_streamBufferViewCount = static_cast<uint8_t>(m_bufferViews[target].m_streamBufferViews.size());
-            drawItem.m_streamBufferViews = m_bufferViews[target].m_streamBufferViews.data();
+            RHI::DeviceDrawItem drawItem;
+            drawItem.m_geometryView = m_bufferViews[target].m_geometryView.GetDeviceGeometryView(context.GetDeviceIndex());
+            drawItem.m_streamIndices = m_bufferViews[target].m_geometryView.GetFullStreamBufferIndices();
+            drawItem.m_pipelineState = m_screenPipelineStates[target]->GetDevicePipelineState(context.GetDeviceIndex()).get();
             drawItem.m_shaderResourceGroupCount = static_cast<uint8_t>(RHI::ArraySize(shaderResourceGroups));
             drawItem.m_shaderResourceGroups = shaderResourceGroups;
 
@@ -767,7 +787,7 @@ namespace AtomSampleViewer
         uint32_t uvSize, void* uvData, uint32_t uvTypeSize,
         uint32_t indexSize, void* indexData)
     {
-        m_positionBuffer[target] = AZ::RHI::Factory::Get().CreateBuffer();
+        m_positionBuffer[target] = aznew AZ::RHI::Buffer();
         AZ::RHI::ResultCode result = AZ::RHI::ResultCode::Success;
         AZ::RHI::BufferInitRequest request;
         request.m_buffer = m_positionBuffer[target].get();
@@ -780,15 +800,14 @@ namespace AtomSampleViewer
             AZ_Error(s_textureMapExampleName, false, "Failed to initialize buffer with error code %d", result);
         }
 
-        m_bufferViews[target].m_streamBufferViews[0] =
-        {
+        m_bufferViews[target].m_geometryView.AddStreamBufferView({
             *m_positionBuffer[target],
             0,
             posSize,
             sizeof(VertexPosition)
-        };
+        });
 
-        m_uvBuffer[target] = AZ::RHI::Factory::Get().CreateBuffer();
+        m_uvBuffer[target] = aznew AZ::RHI::Buffer();
         request.m_buffer = m_uvBuffer[target].get();
         request.m_descriptor = AZ::RHI::BufferDescriptor{ AZ::RHI::BufferBindFlags::InputAssembly, uvSize };
         request.m_initialData = uvData;
@@ -799,15 +818,14 @@ namespace AtomSampleViewer
             AZ_Error(s_textureMapExampleName, false, "Failed to initialize buffer with error code %d", result);
         }
 
-        m_bufferViews[target].m_streamBufferViews[1] =
-        {
+        m_bufferViews[target].m_geometryView.AddStreamBufferView({
             *m_uvBuffer[target],
             0,
             uvSize,
             uvTypeSize
-        };
+        });
 
-        m_indexBuffer[target] = AZ::RHI::Factory::Get().CreateBuffer();
+        m_indexBuffer[target] = aznew AZ::RHI::Buffer();
         request.m_buffer = m_indexBuffer[target].get();
         request.m_descriptor = AZ::RHI::BufferDescriptor{ AZ::RHI::BufferBindFlags::InputAssembly, indexSize };
         request.m_initialData = indexData;
@@ -818,12 +836,11 @@ namespace AtomSampleViewer
             AZ_Error(s_textureMapExampleName, false, "Failed to initialize buffer with error code %d", result);
         }
 
-        m_bufferViews[target].m_indexBufferView =
-        {
+        m_bufferViews[target].m_geometryView.SetIndexBufferView({
             *m_indexBuffer[target],
             0,
             indexSize,
             AZ::RHI::IndexFormat::Uint16
-        };
+        });
     }
 }

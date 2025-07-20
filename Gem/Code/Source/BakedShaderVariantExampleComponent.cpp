@@ -38,7 +38,7 @@ namespace AtomSampleViewer
     {
         namespace Products
         {
-            static constexpr const char ModelFilePath[] = "objects/plane.azmodel";
+            static constexpr const char ModelFilePath[] = "objects/plane.fbx.azmodel";
         } // namespace Products
     } // namespace
 
@@ -88,7 +88,8 @@ namespace AtomSampleViewer
 
         Transform meshTransform =
             Transform::CreateFromQuaternion(Quaternion::CreateFromAxisAngle(Vector3::CreateAxisX(), -AZ::Constants::HalfPi));
-        m_meshHandle = m_meshFeatureProcessor->AcquireMesh(Render::MeshHandleDescriptor{ m_modelAsset }, m_material);
+
+        m_meshHandle = m_meshFeatureProcessor->AcquireMesh(AZ::Render::MeshHandleDescriptor(m_modelAsset, m_material));
         m_meshFeatureProcessor->SetTransform(m_meshHandle, meshTransform);
 
         AZ::RPI::PassFilter passFilter = AZ::RPI::PassFilter::CreateWithPassName(AZ::Name(ATOMSAMPLEVIEWER_TRAIT_BAKED_SHADERVARIANT_SAMPLE_PASS_NAME), 
