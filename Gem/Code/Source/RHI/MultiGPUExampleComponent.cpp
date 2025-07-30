@@ -599,7 +599,7 @@ namespace AtomSampleViewer
                 m_shaderResourceGroupComposite->Compile(m_shaderResourceGroupDataComposite);
             };
 
-            const auto executeFunction = [=](const RHI::FrameGraphExecuteContext& context, [[maybe_unused]] const ScopeData& scopeData)
+            const auto executeFunction = [this](const RHI::FrameGraphExecuteContext& context, [[maybe_unused]] const ScopeData& scopeData)
             {
                 RHI::CommandList* commandList = context.GetCommandList();
 
