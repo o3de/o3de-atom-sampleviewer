@@ -456,7 +456,9 @@ namespace AtomSampleViewer
             commandList->BuildBottomLevelAccelerationStructure(*m_triangleRayTracingBlas->GetDeviceRayTracingBlas(context.GetDeviceIndex()));
             commandList->BuildBottomLevelAccelerationStructure(*m_rectangleRayTracingBlas->GetDeviceRayTracingBlas(context.GetDeviceIndex()));
             commandList->BuildTopLevelAccelerationStructure(
-                *m_rayTracingTlas->GetDeviceRayTracingTlas(context.GetDeviceIndex()), { m_triangleRayTracingBlas->GetDeviceRayTracingBlas(context.GetDeviceIndex()).get(), m_rectangleRayTracingBlas->GetDeviceRayTracingBlas(context.GetDeviceIndex()).get() });
+                *m_rayTracingTlas->GetDeviceRayTracingTlas(context.GetDeviceIndex()),
+                { m_triangleRayTracingBlas->GetDeviceRayTracingBlas(context.GetDeviceIndex()).get(), m_rectangleRayTracingBlas->GetDeviceRayTracingBlas(context.GetDeviceIndex()).get() },
+                {});
         };
 
         m_scopeProducers.emplace_back(
