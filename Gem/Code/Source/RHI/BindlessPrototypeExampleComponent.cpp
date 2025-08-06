@@ -539,7 +539,7 @@ namespace AtomSampleViewer
                 pipelineStateDescriptor.m_renderStates.m_depthStencilState.m_depth.m_enable = true;
 
                 m_pipelineState = m_shader->AcquirePipelineState(pipelineStateDescriptor);
-                AZ_Assert(m_pipelineState, "Failed to acquire default pipeline state for shader");
+                AZ_Assert(m_pipelineState && m_pipelineState->IsInitialized(), "Failed to acquire default pipeline state for shader");
             }
         }
 

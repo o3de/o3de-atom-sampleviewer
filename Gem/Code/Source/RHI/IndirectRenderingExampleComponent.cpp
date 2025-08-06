@@ -276,7 +276,7 @@ namespace AtomSampleViewer
             drawPipelineStateDescriptor.m_renderStates.m_depthStencilState = AZ::RHI::DepthStencilState::CreateDepth();
 
             m_drawPipelineState = shader->AcquirePipelineState(drawPipelineStateDescriptor);
-            if (!m_drawPipelineState)
+            if (!m_drawPipelineState || !m_drawPipelineState->IsInitialized())
             {
                 AZ_Error(IndirectRendering::SampleName, false, "Failed to acquire default pipeline state for shader '%s'", IndirectDrawShaderFilePath);
                 return;
@@ -305,7 +305,7 @@ namespace AtomSampleViewer
             shader->GetVariant(m_indirectDispatchShaderVariantStableId).ConfigurePipelineState(computePipelineStateDescriptor);
 
             m_cullPipelineState = shader->AcquirePipelineState(computePipelineStateDescriptor);
-            if (!m_cullPipelineState)
+            if (!m_cullPipelineState || !m_cullPipelineState->IsInitialized())
             {
                 AZ_Error(IndirectRendering::SampleName, false, "Failed to acquire default pipeline state for shader '%s'", IndirectDispatchShaderFilePath);
                 return;

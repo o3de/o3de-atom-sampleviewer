@@ -280,7 +280,7 @@ namespace AtomSampleViewer
         AZ_Assert(result == AZ::RHI::ResultCode::Success, "Failed to create render attachment layout");
 
         m_pipelineState = shader->AcquirePipelineState(pipelineDesc);
-        if (!m_pipelineState)
+        if (!m_pipelineState || !m_pipelineState->IsInitialized())
         {
             AZ_Error("XRExampleComponent", false, "Failed to acquire default pipeline state for shader '%s'", shaderFilePath);
             return;

@@ -329,7 +329,7 @@ namespace AtomSampleViewer
                 }
 
                 m_terrainPipelineStates[ShadowScope] = shader->AcquirePipelineState(pipelineDesc);
-                if (!m_terrainPipelineStates[ShadowScope])
+                if (!m_terrainPipelineStates[ShadowScope] || !m_terrainPipelineStates[ShadowScope]->IsInitialized())
                 {
                     AZ_Error(AsyncCompute::sampleName, false, "Failed to acquire default pipeline state for shadow shader");
                     return;
@@ -347,7 +347,7 @@ namespace AtomSampleViewer
                     0);
 
                 m_modelPipelineStates[ShadowScope] = shader->AcquirePipelineState(pipelineDesc);
-                if (!m_modelPipelineStates[ShadowScope])
+                if (!m_modelPipelineStates[ShadowScope] || !m_modelPipelineStates[ShadowScope]->IsInitialized())
                 {
                     AZ_Error(AsyncCompute::sampleName, false, "Failed to acquire default pipeline state for shader");
                     return;
@@ -390,7 +390,7 @@ namespace AtomSampleViewer
                 }
 
                 m_terrainPipelineStates[ForwardScope] = shader->AcquirePipelineState(pipelineDesc);
-                if (!m_terrainPipelineStates[ForwardScope])
+                if (!m_terrainPipelineStates[ForwardScope] || !m_terrainPipelineStates[ForwardScope]->IsInitialized())
                 {
                     AZ_Error(AsyncCompute::sampleName, false, "Failed to acquire default pipeline state for shadow shader");
                     return;
@@ -408,7 +408,7 @@ namespace AtomSampleViewer
                     0);
 
                 m_modelPipelineStates[ForwardScope] = shader->AcquirePipelineState(pipelineDesc);
-                if (!m_modelPipelineStates[ForwardScope])
+                if (!m_modelPipelineStates[ForwardScope] || !m_modelPipelineStates[ForwardScope]->IsInitialized())
                 {
                     AZ_Error(AsyncCompute::sampleName, false, "Failed to acquire default pipeline state for shader");
                     return;
@@ -451,7 +451,7 @@ namespace AtomSampleViewer
             }
 
             m_copyTexturePipelineState = shader->AcquirePipelineState(pipelineDesc);
-            if (!m_copyTexturePipelineState)
+            if (!m_copyTexturePipelineState || !m_copyTexturePipelineState->IsInitialized())
             {
                 AZ_Error(AsyncCompute::sampleName, false, "Failed to acquire default pipeline state for copy texture");
                 return;
@@ -487,7 +487,7 @@ namespace AtomSampleViewer
             }
 
             m_luminancePipelineState = shader->AcquirePipelineState(pipelineDesc);
-            if (!m_luminancePipelineState)
+            if (!m_luminancePipelineState || !m_luminancePipelineState->IsInitialized())
             {
                 AZ_Error(AsyncCompute::sampleName, false, "Failed to acquire default pipeline state for luminance map");
                 return;
@@ -501,7 +501,7 @@ namespace AtomSampleViewer
             shader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId).ConfigurePipelineState(pipelineDesc);
 
             m_luminanceReducePipelineState = shader->AcquirePipelineState(pipelineDesc);
-            if (!m_luminanceReducePipelineState)
+            if (!m_luminanceReducePipelineState || !m_luminanceReducePipelineState->IsInitialized())
             {
                 AZ_Error(AsyncCompute::sampleName, false, "Failed to acquire default pipeline state for luminance reduce");
                 return;
@@ -515,7 +515,7 @@ namespace AtomSampleViewer
             shader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId).ConfigurePipelineState(pipelineDesc);
 
             m_tonemappingPipelineState = shader->AcquirePipelineState(pipelineDesc);
-            if (!m_tonemappingPipelineState)
+            if (!m_tonemappingPipelineState || !m_tonemappingPipelineState->IsInitialized())
             {
                 AZ_Error(AsyncCompute::sampleName, false, "Failed to acquire default pipeline state for tonemapping");
                 return;
