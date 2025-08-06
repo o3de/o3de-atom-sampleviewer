@@ -107,7 +107,7 @@ namespace AtomSampleViewer
         AZ::RHI::Ptr<AZ::RHI::BufferPool> m_stagingBufferPoolToGPU{};
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_stagingBufferToGPU{};
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_inputAssemblyBufferComposite{};
-        AZ::RHI::GeometryView m_geometryViewComposite{ AZ::RHI::MultiDevice::AllDevices };
+        AZ::RHI::GeometryView m_geometryViewComposite{ AZ::RHI::MultiDevice::DeviceMask{1u << 0} };
         AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_pipelineStateComposite;
         AZ::RHI::Ptr<AZ::RHI::ShaderResourceGroupPool> m_shaderResourceGroupPoolComposite;
         AZ::RHI::Ptr<AZ::RHI::ShaderResourceGroup> m_shaderResourceGroupComposite;
