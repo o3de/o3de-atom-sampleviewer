@@ -11,7 +11,6 @@ import subprocess
 import pytest
 
 import ly_test_tools.environment.process_utils as process_utils
-import ly_test_tools.launchers.platforms.base
 from ly_test_tools.benchmark.data_aggregator import BenchmarkDataAggregator
 
 logger = logging.getLogger(__name__)
@@ -23,7 +22,7 @@ class AtomSampleViewerException(Exception):
 
 
 @pytest.mark.parametrize('launcher_platform', ['windows'])
-@pytest.mark.parametrize("project", ["AtomSampleViewer"])
+@pytest.mark.parametrize("project", ["o3de-atom-sampleviewer"])
 @pytest.mark.parametrize('rhi', ['dx12', 'vulkan'])
 @pytest.mark.usefixtures("clean_atomsampleviewer_logs", "atomsampleviewer_log_monitor")
 class TestPerformanceBenchmarksPeriodicSuite:
@@ -52,5 +51,5 @@ class TestPerformanceBenchmarksPeriodicSuite:
 
             aggregator = BenchmarkDataAggregator(workspace, logger, 'periodic')
             aggregator.upload_metrics(rhi)
-        except ly_test_tools.log.log_monitor.LogMonitorException as e:
+        except atomsampleviewer_log_monitor.log_monitor.LogMonitorException as e:
             raise AtomSampleViewerException(f'Data capturing did not complete in time for RHI {rhi}, got error: {e}')
