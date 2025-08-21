@@ -83,6 +83,8 @@ set(FILES
     Source/RHI/TriangleExampleComponent.h
     Source/RHI/TrianglesConstantBufferExampleComponent.h
     Source/RHI/TrianglesConstantBufferExampleComponent.cpp
+    Source/RHI/RayTracingClusterExampleComponent.cpp
+    Source/RHI/RayTracingClusterExampleComponent.h
     Source/RHI/RayTracingExampleComponent.cpp
     Source/RHI/RayTracingExampleComponent.h
     Source/RHI/MatrixAlignmentTestExampleComponent.cpp

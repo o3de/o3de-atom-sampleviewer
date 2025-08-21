@@ -6,7 +6,7 @@
  *
  */
 
-#include <RHI/RayTracingExampleComponent.h>
+#include <RHI/RayTracingClusterExampleComponent.h>
 #include <Utils/Utils.h>
 #include <SampleComponentManager.h>
 #include <Atom/RHI/CommandList.h>
@@ -19,26 +19,29 @@
 #include <Atom/RPI.Reflect/Shader/ShaderAsset.h>
 #include <AzCore/Serialization/SerializeContext.h>
 
-static const char* RayTracingExampleName = "RayTracingExample";
+namespace
+{
+    static const char* SampleName = "RayTracingClusterExample";
+}
 
 namespace AtomSampleViewer
 {
-    void RayTracingExampleComponent::Reflect(AZ::ReflectContext* context)
+    void RayTracingClusterExampleComponent::Reflect(AZ::ReflectContext* context)
     {
         if (auto* serializeContext = azrtti_cast<AZ::SerializeContext*>(context))
         {
-            serializeContext->Class<RayTracingExampleComponent, AZ::Component>()
+            serializeContext->Class<RayTracingClusterExampleComponent, AZ::Component>()
                 ->Version(0)
                 ;
         }
     }
 
-    RayTracingExampleComponent::RayTracingExampleComponent()
+    RayTracingClusterExampleComponent::RayTracingClusterExampleComponent()
     {
         m_supportRHISamplePipeline = true;
     }
 
-    void RayTracingExampleComponent::Activate()
+    void RayTracingClusterExampleComponent::Activate()
     {
         CreateResourcePools();
         CreateGeometry();
@@ -55,14 +58,14 @@ namespace AtomSampleViewer
         RHI::RHISystemNotificationBus::Handler::BusConnect();
     }
 
-    void RayTracingExampleComponent::Deactivate()
+    void RayTracingClusterExampleComponent::Deactivate()
     {
         RHI::RHISystemNotificationBus::Handler::BusDisconnect();
         m_windowContext = nullptr;
         m_scopeProducers.clear();
     }
 
-    void RayTracingExampleComponent::CreateResourcePools()
+    void RayTracingClusterExampleComponent::CreateResourcePools()
     {
         // create input assembly buffer pool
         {
@@ -90,7 +93,7 @@ namespace AtomSampleViewer
         m_rayTracingBufferPools->Init(RHI::MultiDevice::AllDevices);
     }
 
-    void RayTracingExampleComponent::CreateGeometry()
+    void RayTracingClusterExampleComponent::CreateGeometry()
     {
         // triangle
         {
@@ -153,9 +156,162 @@ namespace AtomSampleViewer
             request.m_initialData = m_rectangleIndices.data();
             m_inputAssemblyBufferPool->InitBuffer(request);
         }
+
+        // clusters
+        {
+            AZStd::vector<ClusterVertexType> clusterVertices;
+            AZStd::vector<ClusterIndexType> clusterTriangles;
+
+            RHI::RayTracingClasBuildTriangleClusterInfoExpanded commonClusterInfo;
+            commonClusterInfo.m_clusterFlags = RHI::RayTracingClasClusterFlags::AllowDisableOpacityMicromaps;
+            commonClusterInfo.m_positionTruncateBitCount = 0;
+            commonClusterInfo.m_geometryFlags = RHI::RayTracingClasGeometryFlags::Opaque;
+            commonClusterInfo.m_indexType = RHI::RayTracingClasIndexFormat::UINT32;
+            commonClusterInfo.m_indexBufferStride = 0;
+            commonClusterInfo.m_vertexBufferStride = 0;
+            commonClusterInfo.m_geometryIndexAndFlagsBufferStride = 0;
+            commonClusterInfo.m_opacityMicromapIndexBufferStride = 0;
+            commonClusterInfo.m_opacityMicromapArrayAddress = 0;
+            commonClusterInfo.m_opacityMicromapIndexBufferAddress = 0;
+            commonClusterInfo.m_geometryIndexAndFlagsBufferAddress = 0;
+
+            // Cluster 1: Quad with size 2x1 centered at (0,0)
+            {
+                auto& quadClusterInfo = m_clusterSourceInfosExpanded.emplace_back(commonClusterInfo);
+                quadClusterInfo.m_clusterID = 0;
+                quadClusterInfo.m_vertexCount = 4;
+                quadClusterInfo.m_triangleCount = 2;
+                quadClusterInfo.m_baseGeometryIndex = 0;
+
+                clusterVertices.emplace_back(-1.f, -0.5f, 1.f);
+                clusterVertices.emplace_back(-1.f, 0.5f, 1.f);
+                clusterVertices.emplace_back(1.f, 0.5f, 1.f);
+                clusterVertices.emplace_back(1.f, -0.5f, 1.f);
+                clusterTriangles.emplace_back(0, 1, 2);
+                clusterTriangles.emplace_back(0, 2, 3);
+            }
+
+            // Cluster 2: Regular pentagon with radius 1 centered at (3,0) and pointing upwards
+            {
+                auto& pentagonClusterInfo = m_clusterSourceInfosExpanded.emplace_back(commonClusterInfo);
+                pentagonClusterInfo.m_clusterID = 1;
+                pentagonClusterInfo.m_vertexCount = 5;
+                pentagonClusterInfo.m_triangleCount = 3;
+                pentagonClusterInfo.m_baseGeometryIndex = 1;
+
+                clusterVertices.emplace_back(3.f + 0.f, 1.f, 1.f);
+                clusterVertices.emplace_back(3.f + 0.951f, 0.309f, 1.f);
+                clusterVertices.emplace_back(3.f + 0.588f, -0.809f, 1.f);
+                clusterVertices.emplace_back(3.f - 0.588f, -0.809f, 1.f);
+                clusterVertices.emplace_back(3.f - 0.951f, 0.309f, 1.f);
+                clusterTriangles.emplace_back(4, 5, 6);
+                clusterTriangles.emplace_back(4, 6, 7);
+                clusterTriangles.emplace_back(4, 7, 8);
+            }
+
+            // Cluster 3: The text "CLAS" written in the pixel font "CG pixel 4x5" (16 rectangles -> 64 vertices, 32 triangles)
+            // Font source: https://fontstruct.com/fontstructions/show/1404171/cg-pixel-4x5 (License: Public domain)
+            //   0    5   9    14
+            // 4  ##  #    ##   ###
+            // 3 #  # #   #  # #
+            // 2 #    #   ####  ##
+            // 1 #  # #   #  #    #
+            // 0  ##  ### #  # ###
+            {
+                auto& textClusterInfo = m_clusterSourceInfosExpanded.emplace_back(commonClusterInfo);
+                textClusterInfo.m_clusterID = 2;
+                textClusterInfo.m_vertexCount = 64;
+                textClusterInfo.m_triangleCount = 32;
+                textClusterInfo.m_baseGeometryIndex = 2;
+
+                auto AddRectangle = [&](int gridX, int gridY, int gridWidth, int gridHeight)
+                {
+                    float scale = 0.2f;
+                    float x = static_cast<float>(gridX) * scale - 2.f;
+                    float y = static_cast<float>(gridY) * scale + 1.5f;
+                    float width = static_cast<float>(gridWidth) * scale;
+                    float height = static_cast<float>(gridHeight) * scale;
+                    uint32_t textIndexOffset{ aznumeric_cast<uint32_t>(clusterVertices.size()) };
+
+                    clusterVertices.emplace_back(x, y, 1.f);
+                    clusterVertices.emplace_back(x, y + height, 1.f);
+                    clusterVertices.emplace_back(x + width, y + height, 1.f);
+                    clusterVertices.emplace_back(x + width, y, 1.f);
+                    clusterTriangles.emplace_back(textIndexOffset, textIndexOffset + 1, textIndexOffset + 2);
+                    clusterTriangles.emplace_back(textIndexOffset, textIndexOffset + 2, textIndexOffset + 3);
+                };
+                // Letter "C"
+                AddRectangle(3, 1, 1, 1);
+                AddRectangle(1, 0, 2, 1);
+                AddRectangle(0, 1, 1, 3);
+                AddRectangle(1, 4, 2, 1);
+                AddRectangle(3, 3, 1, 1);
+                // Letter "L"
+                AddRectangle(5, 1, 1, 4);
+                AddRectangle(5, 0, 3, 1);
+                // Letter "A"
+                AddRectangle(9, 0, 1, 4);
+                AddRectangle(10, 4, 2, 1);
+                AddRectangle(12, 0, 1, 4);
+                AddRectangle(10, 2, 2, 1);
+                // Letter "S"
+                AddRectangle(15, 4, 3, 1);
+                AddRectangle(14, 3, 1, 1);
+                AddRectangle(15, 2, 2, 1);
+                AddRectangle(17, 1, 1, 1);
+                AddRectangle(14, 0, 3, 1);
+            }
+
+            // Create cluster vertex buffer
+            {
+                m_clusterVertexBuffer = aznew RHI::Buffer();
+                m_clusterVertexBuffer->SetName(Name("Cluster vertex buffer"));
+                RHI::BufferInitRequest request;
+                request.m_buffer = m_clusterVertexBuffer.get();
+                request.m_descriptor.m_byteCount = clusterVertices.size() * sizeof(ClusterVertexType);
+                request.m_descriptor.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
+                request.m_initialData = clusterVertices.data();
+                m_inputAssemblyBufferPool->InitBuffer(request);
+            }
+
+            // Create cluster index buffer
+            {
+                m_clusterIndexBuffer = aznew RHI::Buffer();
+                m_clusterIndexBuffer->SetName(Name("Cluster index buffer"));
+                RHI::BufferInitRequest request;
+                request.m_buffer = m_clusterIndexBuffer.get();
+                request.m_descriptor.m_byteCount = clusterTriangles.size() * sizeof(ClusterIndexType);
+                request.m_descriptor.m_bindFlags = RHI::BufferBindFlags::InputAssembly;
+                request.m_initialData = clusterTriangles.data();
+                m_inputAssemblyBufferPool->InitBuffer(request);
+            }
+
+            // Calculate upper bound data for CLAS
+            for (const auto& clusterSourceInfoExpanded : m_clusterSourceInfosExpanded)
+            {
+                m_maxClusterTriangleCount = AZStd::max(m_maxClusterTriangleCount, clusterSourceInfoExpanded.m_triangleCount);
+                m_maxClusterVertexCount = AZStd::max(m_maxClusterVertexCount, clusterSourceInfoExpanded.m_vertexCount);
+                m_maxGeometryIndex = AZStd::max(m_maxGeometryIndex, clusterSourceInfoExpanded.m_baseGeometryIndex);
+            }
+            m_maxTotalTriangleCount = aznumeric_cast<uint32_t>(clusterTriangles.size());
+            m_maxTotalVertexCount = aznumeric_cast<uint32_t>(clusterVertices.size());
+
+            // Create srcInfosArray buffer
+            {
+                m_srcInfosArrayBuffer = aznew RHI::Buffer();
+                m_srcInfosArrayBuffer->SetName(Name("Source infos array buffer"));
+                RHI::BufferInitRequest request;
+                request.m_buffer = m_srcInfosArrayBuffer.get();
+                request.m_descriptor.m_byteCount =
+                    m_clusterSourceInfosExpanded.size() * sizeof(RHI::RayTracingClasBuildTriangleClusterInfo);
+                request.m_descriptor.m_bindFlags = m_rayTracingBufferPools->GetSrcInfosArrayBufferPool()->GetDescriptor().m_bindFlags;
+                // Buffer data is populated in CreateRayTracingAccelerationTableScope
+                m_rayTracingBufferPools->GetSrcInfosArrayBufferPool()->InitBuffer(request);
+            }
+        }
     }
 
-    void RayTracingExampleComponent::CreateFullScreenBuffer()
+    void RayTracingClusterExampleComponent::CreateFullScreenBuffer()
     {
         FullScreenBufferData bufferData;
         SetFullScreenRect(bufferData.m_positions.data(), bufferData.m_uvs.data(), bufferData.m_indices.data());
@@ -197,7 +353,7 @@ namespace AtomSampleViewer
         m_fullScreenInputStreamLayout = layoutBuilder.End();
     }
 
-    void RayTracingExampleComponent::CreateOutputTexture()
+    void RayTracingClusterExampleComponent::CreateOutputTexture()
     {
         // create output image
         m_outputImage = aznew RHI::Image();
@@ -214,18 +370,19 @@ namespace AtomSampleViewer
         AZ_Assert(m_outputImageView->GetDeviceImageView(RHI::MultiDevice::DefaultDeviceIndex)->IsFullView(), "Image View initialization IsFullView() failed");
     }
 
-    void RayTracingExampleComponent::CreateRayTracingAccelerationStructureObjects()
+    void RayTracingClusterExampleComponent::CreateRayTracingAccelerationStructureObjects()
     {
         m_triangleRayTracingBlas = aznew AZ::RHI::RayTracingBlas;
         m_rectangleRayTracingBlas = aznew AZ::RHI::RayTracingBlas;
+        m_clusterRayTracingBlas = aznew AZ::RHI::RayTracingClusterBlas;
         m_rayTracingTlas = aznew AZ::RHI::RayTracingTlas;
     }
 
-    void RayTracingExampleComponent::CreateRasterShader()
+    void RayTracingClusterExampleComponent::CreateRasterShader()
     {
         const char* shaderFilePath = "Shaders/RHI/RayTracingDraw.azshader";
 
-        auto drawShader = LoadShader(shaderFilePath, RayTracingExampleName);
+        auto drawShader = LoadShader(shaderFilePath, SampleName);
         AZ_Assert(drawShader, "Failed to load Draw shader");
 
         RHI::PipelineStateDescriptorForDraw pipelineDesc;
@@ -240,14 +397,14 @@ namespace AtomSampleViewer
         m_drawPipelineState = drawShader->AcquirePipelineState(pipelineDesc);
         AZ_Assert(m_drawPipelineState, "Failed to acquire draw pipeline state");
 
-        m_drawSRG = CreateShaderResourceGroup(drawShader, "BufferSrg", RayTracingExampleName);
+        m_drawSRG = CreateShaderResourceGroup(drawShader, "BufferSrg", SampleName);
     }
 
-    void RayTracingExampleComponent::CreateRayTracingPipelineState()
+    void RayTracingClusterExampleComponent::CreateRayTracingPipelineState()
     {
         // load ray generation shader
         const char* rayGenerationShaderFilePath = "Shaders/RHI/RayTracingDispatch.azshader";
-        m_rayGenerationShader = LoadShader(rayGenerationShaderFilePath, RayTracingExampleName);
+        m_rayGenerationShader = LoadShader(rayGenerationShaderFilePath, SampleName);
         AZ_Assert(m_rayGenerationShader, "Failed to load ray generation shader");
 
         auto rayGenerationShaderVariant = m_rayGenerationShader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId);
@@ -256,7 +413,7 @@ namespace AtomSampleViewer
 
         // load miss shader
         const char* missShaderFilePath = "Shaders/RHI/RayTracingMiss.azshader";
-        m_missShader = LoadShader(missShaderFilePath, RayTracingExampleName);
+        m_missShader = LoadShader(missShaderFilePath, SampleName);
         AZ_Assert(m_missShader, "Failed to load miss shader");
 
         auto missShaderVariant = m_missShader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId);
@@ -265,16 +422,16 @@ namespace AtomSampleViewer
 
         // load closest hit gradient shader
         const char* closestHitGradientShaderFilePath = "Shaders/RHI/RayTracingClosestHitGradient.azshader";
-        m_closestHitGradientShader = LoadShader(closestHitGradientShaderFilePath, RayTracingExampleName);
+        m_closestHitGradientShader = LoadShader(closestHitGradientShaderFilePath, SampleName);
         AZ_Assert(m_closestHitGradientShader, "Failed to load closest hit gradient shader");
 
         auto closestHitGradientShaderVariant = m_closestHitGradientShader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId);
-        RHI::PipelineStateDescriptorForRayTracing closestHitGradientShaderDescriptor;
-        closestHitGradientShaderVariant.ConfigurePipelineState(closestHitGradientShaderDescriptor);
+        RHI::PipelineStateDescriptorForRayTracing closestHitGradiantShaderDescriptor;
+        closestHitGradientShaderVariant.ConfigurePipelineState(closestHitGradiantShaderDescriptor);
 
         // load closest hit solid shader
         const char* closestHitSolidShaderFilePath = "Shaders/RHI/RayTracingClosestHitSolid.azshader";
-        m_closestHitSolidShader = LoadShader(closestHitSolidShaderFilePath, RayTracingExampleName);
+        m_closestHitSolidShader = LoadShader(closestHitSolidShaderFilePath, SampleName);
         AZ_Assert(m_closestHitSolidShader, "Failed to load closest hit solid shader");
 
         auto closestHitSolidShaderVariant = m_closestHitSolidShader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId);
@@ -284,7 +441,7 @@ namespace AtomSampleViewer
         // global pipeline state and srg
         m_globalPipelineState = m_rayGenerationShader->AcquirePipelineState(rayGenerationShaderDescriptor);
         AZ_Assert(m_globalPipelineState, "Failed to acquire ray tracing global pipeline state");
-        m_globalSrg = CreateShaderResourceGroup(m_rayGenerationShader, "RayTracingGlobalSrg", RayTracingExampleName);
+        m_globalSrg = CreateShaderResourceGroup(m_rayGenerationShader, "RayTracingGlobalSrg", SampleName);
 
         // build the ray tracing pipeline state descriptor
         RHI::RayTracingPipelineStateDescriptor descriptor;
@@ -292,7 +449,7 @@ namespace AtomSampleViewer
 
         descriptor.AddRayGenerationShaderLibrary(rayGenerationShaderDescriptor, Name("RayGenerationShader"));
         descriptor.AddMissShaderLibrary(missShaderDescriptor, Name("MissShader"));
-        descriptor.AddClosestHitShaderLibrary(closestHitGradientShaderDescriptor, Name("ClosestHitGradientShader"));
+        descriptor.AddClosestHitShaderLibrary(closestHitGradiantShaderDescriptor, Name("ClosestHitGradientShader"));
         descriptor.AddClosestHitShaderLibrary(closestHitSolidShaderDescriptor, Name("ClosestHitSolidShader"));
 
         descriptor.AddHitGroup(Name("HitGroupGradient"), Name("ClosestHitGradientShader"));
@@ -303,13 +460,13 @@ namespace AtomSampleViewer
         m_rayTracingPipelineState->Init(RHI::MultiDevice::AllDevices, descriptor);
     }
 
-    void RayTracingExampleComponent::CreateRayTracingShaderTable()
+    void RayTracingClusterExampleComponent::CreateRayTracingShaderTable()
     {
         m_rayTracingShaderTable = aznew RHI::RayTracingShaderTable;
         m_rayTracingShaderTable->Init(RHI::MultiDevice::AllDevices, *m_rayTracingBufferPools);
     }
 
-    void RayTracingExampleComponent::CreateRayTracingAccelerationTableScope()
+    void RayTracingClusterExampleComponent::CreateRayTracingAccelerationTableScope()
     {
         struct ScopeData
         {
@@ -375,6 +532,62 @@ namespace AtomSampleViewer
                 m_rectangleRayTracingBlas->CreateBuffers(RHI::MultiDevice::AllDevices, &rectangleBlasDescriptor, *m_rayTracingBufferPools);
             }
 
+            if (!m_clusterRayTracingBlasInitialized)
+            {
+                m_clusterRayTracingBlasInitialized = true;
+
+                RHI::RayTracingClusterBlasDescriptor clusterBlasDescriptor;
+                clusterBlasDescriptor.m_vertexFormat = AZ::RHI::VertexFormat::R32G32B32_FLOAT;
+                clusterBlasDescriptor.m_maxGeometryIndexValue = m_maxGeometryIndex;
+                clusterBlasDescriptor.m_maxClusterUniqueGeometryCount = 1;
+                clusterBlasDescriptor.m_maxClusterTriangleCount = m_maxClusterTriangleCount;
+                clusterBlasDescriptor.m_maxClusterVertexCount = m_maxClusterVertexCount;
+                clusterBlasDescriptor.m_maxTotalTriangleCount = m_maxTotalTriangleCount;
+                clusterBlasDescriptor.m_maxTotalVertexCount = m_maxTotalVertexCount;
+                clusterBlasDescriptor.m_minPositionTruncateBitCount = 0;
+                clusterBlasDescriptor.m_maxClusterCount = aznumeric_cast<uint32_t>(m_clusterSourceInfosExpanded.size());
+                clusterBlasDescriptor.m_srcInfosArrayBufferView = m_srcInfosArrayBuffer->GetBufferView(
+                    RHI::BufferViewDescriptor::CreateStructured(
+                        0, aznumeric_cast<uint32_t>(m_clusterSourceInfosExpanded.size()),
+                        sizeof(RHI::RayTracingClasBuildTriangleClusterInfo)));
+
+                m_clusterRayTracingBlas->CreateBuffers(RHI::MultiDevice::AllDevices, &clusterBlasDescriptor, *m_rayTracingBufferPools);
+
+                m_clusterRayTracingBlas->IterateDevices(
+                    RHI::MultiDevice::AllDevices,
+                    [&](int deviceIndex)
+                    {
+                        auto deviceClusterBuffers = m_clusterRayTracingBlas->GetDeviceRayTracingClusterBlas(deviceIndex);
+                        auto deviceBufferPool = m_rayTracingBufferPools->GetSrcInfosArrayBufferPool()->GetDeviceBufferPool(deviceIndex);
+                        uint64_t deviceVertexBufferAddress = m_clusterVertexBuffer->GetDeviceBuffer(deviceIndex)->GetDeviceAddress();
+                        uint64_t deviceIndexBufferAddress = m_clusterIndexBuffer->GetDeviceBuffer(deviceIndex)->GetDeviceAddress();
+
+                        RHI::DeviceBufferMapRequest request;
+                        request.m_buffer = m_srcInfosArrayBuffer->GetDeviceBuffer(deviceIndex).get();
+                        request.m_byteCount = m_clusterSourceInfosExpanded.size() * sizeof(RHI::RayTracingClasBuildTriangleClusterInfo);
+                        request.m_byteOffset = 0;
+
+                        RHI::DeviceBufferMapResponse response;
+                        RHI::ResultCode result = deviceBufferPool->MapBuffer(request, response);
+                        AZ_Assert(result == AZ::RHI::ResultCode::Success, "Failed to map SrcInfosArrayBuffer");
+
+                        auto* gpuClusterInfo = reinterpret_cast<RHI::RayTracingClasBuildTriangleClusterInfo*>(response.m_data);
+
+                        for (auto clusterSourceInfoExpanded : m_clusterSourceInfosExpanded)
+                        {
+                            clusterSourceInfoExpanded.m_vertexBufferAddress = deviceVertexBufferAddress;
+                            clusterSourceInfoExpanded.m_indexBufferAddress = deviceIndexBufferAddress;
+                            *gpuClusterInfo = RHI::RayTracingClasConvertBuildTriangleClusterInfo(clusterSourceInfoExpanded);
+                            gpuClusterInfo++;
+                            deviceIndexBufferAddress += clusterSourceInfoExpanded.m_triangleCount * sizeof(ClusterIndexType);
+                        }
+
+                        deviceBufferPool->UnmapBuffer(*request.m_buffer);
+
+                        return true;
+                    });
+            }
+
             m_time += 0.005f;
 
             // transforms
@@ -386,13 +599,13 @@ namespace AtomSampleViewer
             triangleTransform2.SetTranslation(sinf(m_time) * -100.0f, cosf(m_time) * 100.0f, 2.0f);
             triangleTransform2.MultiplyByUniformScale(100.0f);
 
-            AZ::Transform triangleTransform3 = AZ::Transform::CreateIdentity();
-            triangleTransform3.SetTranslation(sinf(m_time) * 100.0f, cosf(m_time) * 100.0f, 3.0f);
-            triangleTransform3.MultiplyByUniformScale(100.0f);
-
             AZ::Transform rectangleTransform = AZ::Transform::CreateIdentity();
             rectangleTransform.SetTranslation(sinf(m_time) * 100.0f, cosf(m_time) * -100.0f, 4.0f);
             rectangleTransform.MultiplyByUniformScale(100.0f);
+
+            AZ::Transform clusterTransform = AZ::Transform::CreateIdentity();
+            clusterTransform.SetTranslation(sinf(m_time) * 100.0f, cosf(m_time) * 100.0f, 3.0f);
+            clusterTransform.MultiplyByUniformScale(100.0f);
 
             // create the TLAS
             auto deviceMask = RHI::MultiDevice::AllDevices;
@@ -419,15 +632,15 @@ namespace AtomSampleViewer
                         auto& tlasInstance = tlasDescriptor[deviceIndex].m_instances.emplace_back();
                         tlasInstance.m_instanceID = 2;
                         tlasInstance.m_hitGroupIndex = 2;
-                        tlasInstance.m_blas = m_triangleRayTracingBlas->GetDeviceRayTracingBlas(deviceIndex);
-                        tlasInstance.m_transform = triangleTransform3;
+                        tlasInstance.m_blas = m_rectangleRayTracingBlas->GetDeviceRayTracingBlas(deviceIndex);
+                        tlasInstance.m_transform = rectangleTransform;
                     }
                     {
                         auto& tlasInstance = tlasDescriptor[deviceIndex].m_instances.emplace_back();
                         tlasInstance.m_instanceID = 3;
                         tlasInstance.m_hitGroupIndex = 3;
-                        tlasInstance.m_blas = m_rectangleRayTracingBlas->GetDeviceRayTracingBlas(deviceIndex);
-                        tlasInstance.m_transform = rectangleTransform;
+                        tlasInstance.m_clusterBlas = m_clusterRayTracingBlas->GetDeviceRayTracingClusterBlas(deviceIndex);
+                        tlasInstance.m_transform = clusterTransform;
                     }
                     return true;
                 });
@@ -437,7 +650,7 @@ namespace AtomSampleViewer
             m_tlasBufferViewDescriptor = RHI::BufferViewDescriptor::CreateRaw(0, (uint32_t)m_rayTracingTlas->GetTlasBuffer()->GetDescriptor().m_byteCount);
 
             [[maybe_unused]] RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportBuffer(m_tlasBufferAttachmentId, m_rayTracingTlas->GetTlasBuffer());
-            AZ_Error(RayTracingExampleName, result == RHI::ResultCode::Success, "Failed to import TLAS buffer with error %d", result);
+            AZ_Error(SampleName, result == RHI::ResultCode::Success, "Failed to import TLAS buffer with error %d", result);
 
             RHI::BufferScopeAttachmentDescriptor desc;
             desc.m_attachmentId = m_tlasBufferAttachmentId;
@@ -453,12 +666,14 @@ namespace AtomSampleViewer
         {
             RHI::CommandList* commandList = context.GetCommandList();
 
+            commandList->BuildClusterAccelerationStructures(*m_clusterRayTracingBlas->GetDeviceRayTracingClusterBlas(context.GetDeviceIndex()));
             commandList->BuildBottomLevelAccelerationStructure(*m_triangleRayTracingBlas->GetDeviceRayTracingBlas(context.GetDeviceIndex()));
             commandList->BuildBottomLevelAccelerationStructure(*m_rectangleRayTracingBlas->GetDeviceRayTracingBlas(context.GetDeviceIndex()));
+            commandList->BuildClusterBottomLevelAccelerationStructures({ m_clusterRayTracingBlas->GetDeviceRayTracingClusterBlas(context.GetDeviceIndex()).get() });
             commandList->BuildTopLevelAccelerationStructure(
                 *m_rayTracingTlas->GetDeviceRayTracingTlas(context.GetDeviceIndex()),
                 { m_triangleRayTracingBlas->GetDeviceRayTracingBlas(context.GetDeviceIndex()).get(), m_rectangleRayTracingBlas->GetDeviceRayTracingBlas(context.GetDeviceIndex()).get() },
-                {});
+                { m_clusterRayTracingBlas->GetDeviceRayTracingClusterBlas(context.GetDeviceIndex()).get() });
         };
 
         m_scopeProducers.emplace_back(
@@ -474,7 +689,7 @@ namespace AtomSampleViewer
                 executeFunction));
     }
 
-    void RayTracingExampleComponent::CreateRayTracingDispatchScope()
+    void RayTracingClusterExampleComponent::CreateRayTracingDispatchScope()
     {
         struct ScopeData
         {
@@ -485,7 +700,7 @@ namespace AtomSampleViewer
             // attach output image
             {
                 [[maybe_unused]] RHI::ResultCode result = frameGraph.GetAttachmentDatabase().ImportImage(m_outputImageAttachmentId, m_outputImage);
-                AZ_Error(RayTracingExampleName, result == RHI::ResultCode::Success, "Failed to import output image with error %d", result);
+                AZ_Error(SampleName, result == RHI::ResultCode::Success, "Failed to import output image with error %d", result);
 
                 RHI::ImageScopeAttachmentDescriptor desc;
                 desc.m_attachmentId = m_outputImageAttachmentId;
@@ -515,14 +730,14 @@ namespace AtomSampleViewer
             {
                 // set the TLAS and output image in the ray tracing global Srg
                 RHI::ShaderInputBufferIndex tlasConstantIndex;
-                FindShaderInputIndex(&tlasConstantIndex, m_globalSrg, AZ::Name{ "m_scene" }, RayTracingExampleName);
+                FindShaderInputIndex(&tlasConstantIndex, m_globalSrg, AZ::Name{ "m_scene" }, SampleName);
 
                 uint32_t tlasBufferByteCount = aznumeric_cast<uint32_t>(m_rayTracingTlas->GetTlasBuffer()->GetDescriptor().m_byteCount);
                 RHI::BufferViewDescriptor bufferViewDescriptor = RHI::BufferViewDescriptor::CreateRayTracingTLAS(tlasBufferByteCount);
                 m_globalSrg->SetBufferView(tlasConstantIndex, m_rayTracingTlas->GetTlasBuffer()->GetBufferView(bufferViewDescriptor).get());
 
                 RHI::ShaderInputImageIndex outputConstantIndex;
-                FindShaderInputIndex(&outputConstantIndex, m_globalSrg, AZ::Name{ "m_output" }, RayTracingExampleName);
+                FindShaderInputIndex(&outputConstantIndex, m_globalSrg, AZ::Name{ "m_output" }, SampleName);
                 m_globalSrg->SetImageView(outputConstantIndex, m_outputImageView.get());
 
                 // set hit shader data, each array element corresponds to the InstanceIndex() of the geometry in the TLAS
@@ -530,7 +745,7 @@ namespace AtomSampleViewer
 
                 // set HitGradient values
                 RHI::ShaderInputConstantIndex hitGradientDataConstantIndex;
-                FindShaderInputIndex(&hitGradientDataConstantIndex, m_globalSrg, AZ::Name{"m_hitGradientData"}, RayTracingExampleName);
+                FindShaderInputIndex(&hitGradientDataConstantIndex, m_globalSrg, AZ::Name{"m_hitGradientData"}, SampleName);
 
                 struct HitGradientData
                 {
@@ -538,17 +753,17 @@ namespace AtomSampleViewer
                 };
 
                 AZStd::array<HitGradientData, 4> hitGradientData = {{
-                    {AZ::Vector4(1.0f, 0.0f, 0.0f, 1.0f)}, // triangle1
-                    {AZ::Vector4(0.0f, 1.0f, 0.0f, 1.0f)}, // triangle2
+                    {AZ::Vector4(1.0f, 0.0f, 0.0f, 1.0f)}, // unused
+                    {AZ::Vector4(0.0f, 1.0f, 0.0f, 1.0f)}, // unused
                     {AZ::Vector4(0.0f, 0.0f, 0.0f, 0.0f)}, // unused
-                    {AZ::Vector4(0.0f, 0.0f, 0.0f, 0.0f)}, // unused
+                    {AZ::Vector4(1.0f, 1.0f, 1.0f, 0.0f)}, // cluster
                 }};
 
                 m_globalSrg->SetConstantArray(hitGradientDataConstantIndex, hitGradientData);
 
                 // set HitSolid values
                 RHI::ShaderInputConstantIndex hitSolidDataConstantIndex;
-                FindShaderInputIndex(&hitSolidDataConstantIndex, m_globalSrg, AZ::Name{"m_hitSolidData"}, RayTracingExampleName);
+                FindShaderInputIndex(&hitSolidDataConstantIndex, m_globalSrg, AZ::Name{"m_hitSolidData"}, SampleName);
 
                 struct HitSolidData
                 {
@@ -559,10 +774,10 @@ namespace AtomSampleViewer
                 };
 
                 AZStd::array<HitSolidData, 4> hitSolidData = {{
-                    {AZ::Vector4(0.0f, 0.0f, 0.0f, 0.0f), 0.0f, {0.0f, 0.0f, 0.0f}, AZ::Vector4(0.0f, 0.0f, 0.0f, 0.0f)}, // unused
-                    {AZ::Vector4(0.0f, 0.0f, 0.0f, 0.0f), 0.0f, {0.0f, 0.0f, 0.0f}, AZ::Vector4(0.0f, 0.0f, 0.0f, 0.0f)}, // unused
-                    {AZ::Vector4(1.0f, 0.0f, 0.0f, 1.0f), 0.5f, {0.0f, 0.0f, 0.0f}, AZ::Vector4(0.0f, 1.0f, 0.0f, 1.0f)}, // triangle3
+                    {AZ::Vector4(1.0f, 0.0f, 0.0f, 1.0f), 0.5f, {0.0f, 0.0f, 0.0f}, AZ::Vector4(1.0f, 0.0f, 0.0f, 0.0f)}, // triangle1
+                    {AZ::Vector4(1.0f, 0.0f, 0.0f, 1.0f), 0.5f, {0.0f, 0.0f, 0.0f}, AZ::Vector4(0.0f, 1.0f, 0.0f, 1.0f)}, // triangle2
                     {AZ::Vector4(1.0f, 0.0f, 0.0f, 1.0f), 0.5f, {0.0f, 0.0f, 0.0f}, AZ::Vector4(0.0f, 0.0f, 1.0f, 1.0f)}, // rectangle
+                    {AZ::Vector4(1.0f, 0.0f, 0.0f, 1.0f), 0.5f, {0.0f, 0.0f, 0.0f}, AZ::Vector4(0.0f, 0.0f, 0.0f, 1.0f)}, // unused
                 }};
 
                 m_globalSrg->SetConstantArray(hitSolidDataConstantIndex, hitSolidData);
@@ -574,10 +789,10 @@ namespace AtomSampleViewer
                 descriptor->m_rayTracingPipelineState = m_rayTracingPipelineState;
                 descriptor->m_rayGenerationRecord.emplace_back(AZ::Name("RayGenerationShader"));
                 descriptor->m_missRecords.emplace_back(AZ::Name("MissShader"));
-                descriptor->m_hitGroupRecords.emplace_back(AZ::Name("HitGroupGradient")); // triangle1
-                descriptor->m_hitGroupRecords.emplace_back(AZ::Name("HitGroupGradient")); // triangle2
-                descriptor->m_hitGroupRecords.emplace_back(AZ::Name("HitGroupSolid")); // triangle3
+                descriptor->m_hitGroupRecords.emplace_back(AZ::Name("HitGroupSolid")); // triangle1
+                descriptor->m_hitGroupRecords.emplace_back(AZ::Name("HitGroupSolid")); // triangle2
                 descriptor->m_hitGroupRecords.emplace_back(AZ::Name("HitGroupSolid")); // rectangle
+                descriptor->m_hitGroupRecords.emplace_back(AZ::Name("HitGroupGradient")); // clusters
 
                 m_rayTracingShaderTable->Build(descriptor);
             }
@@ -623,7 +838,7 @@ namespace AtomSampleViewer
                 executeFunction));
     }
 
-    void RayTracingExampleComponent::CreateRasterScope()
+    void RayTracingClusterExampleComponent::CreateRasterScope()
     {
         struct ScopeData
         {
@@ -650,7 +865,7 @@ namespace AtomSampleViewer
 
                 const Name outputImageId{ "m_output" };
                 RHI::ShaderInputImageIndex outputImageIndex = m_drawSRG->FindShaderInputImageIndex(outputImageId);
-                AZ_Error(RayTracingExampleName, outputImageIndex.IsValid(), "Failed to find shader input image %s.", outputImageId.GetCStr());
+                AZ_Error(SampleName, outputImageIndex.IsValid(), "Failed to find shader input image %s.", outputImageId.GetCStr());
                 m_drawSRG->SetImageView(outputImageIndex, m_outputImageView.get());
                 m_drawSRG->Compile();
             }
