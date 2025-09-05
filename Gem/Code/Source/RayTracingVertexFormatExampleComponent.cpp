@@ -274,7 +274,12 @@ namespace AtomSampleViewer
         m_modelBrowser.Deactivate();
         m_imguiSidebar.Deactivate();
         GetRayTracingDebugFeatureProcessor().OnRayTracingDebugComponentRemoved();
-        // GetRayTracingFeatureProcessor().RemoveMesh(m_rayTracingUuid);
+
+        GetRayTracingFeatureProcessor().RemoveMesh(m_rayTracingUuid);
+        for (const auto& meshInfoHandle : m_meshInfoHandles)
+        {
+            GetMeshFeatureProcessor().ReleaseMeshInfoEntry(meshInfoHandle);
+        }
 
         EBUS_EVENT_ID(GetCameraEntityId(), Debug::CameraControllerRequestBus, Disable);
 
@@ -306,6 +311,7 @@ namespace AtomSampleViewer
             debugViewModeUpdated |= ImGuiHelper::RadioButton("Barycentric Coordinates", &m_debugViewMode, DebugViewMode::Barycentrics);
             debugViewModeUpdated |= ImGuiHelper::RadioButton("Normals", &m_debugViewMode, DebugViewMode::Normals);
             debugViewModeUpdated |= ImGuiHelper::RadioButton("UV Coordinates", &m_debugViewMode, DebugViewMode::UVs);
+            debugViewModeUpdated |= ImGuiHelper::RadioButton("Base Color", &m_debugViewMode, DebugViewMode::BaseColor);
             if (debugViewModeUpdated)
             {
                 GetRayTracingDebugFeatureProcessor().GetSettingsInterface()->SetDebugViewMode(m_debugViewMode);
@@ -387,13 +393,18 @@ namespace AtomSampleViewer
             return;
         }
 
+        {
+            GetRayTracingFeatureProcessor().RemoveMesh(m_rayTracingUuid);
+            for (const auto& meshInfoHandle : m_meshInfoHandles)
+            {
+                GetMeshFeatureProcessor().ReleaseMeshInfoEntry(meshInfoHandle);
+            }
+            m_meshInfoHandles.clear();
+        }
+
         m_currentModel.Create(m_modelBrowser.GetSelectedAssetId());
         m_currentModel.QueueLoad();
         m_currentModel.BlockUntilLoadComplete();
-
-        Render::RayTracingFeatureProcessorInterface::Mesh rtMesh;
-        rtMesh.m_assetId.m_guid = m_rayTracingUuid;
-        rtMesh.m_instanceMask |= static_cast<uint32_t>(RHI::RayTracingAccelerationStructureInstanceInclusionMask::STATIC_MESH);
 
         AZStd::vector<Render::RayTracingFeatureProcessorInterface::SubMesh> rtSubMeshes;
 
@@ -401,90 +412,73 @@ namespace AtomSampleViewer
         for (auto& mesh : meshes)
         {
             auto& rtSubMesh{ rtSubMeshes.emplace_back() };
+            auto meshInfoHandle{ m_meshInfoHandles.emplace_back(GetMeshFeatureProcessor().AcquireMeshInfoEntry()) };
+            auto defaultMaterialAsset{ m_currentModel->FindMaterialSlot(mesh.GetMaterialSlotId()).m_defaultMaterialAsset };
+            auto material{ RPI::Material::FindOrCreate(defaultMaterialAsset) };
 
-            {
-                const auto& indexView{ mesh.GetIndexBufferAssetView() };
-                auto indexBuffer{ ConvertIndexBuffer(
-                    indexView.GetBufferAsset()->GetBuffer(), indexView.GetBufferViewDescriptor(), m_indexFormat) };
-                uint32_t indexElementSize{ RHI::GetIndexFormatSize(m_indexFormat) };
+            rtSubMesh.m_meshInfoHandle = meshInfoHandle;
+            rtSubMesh.m_material = material;
 
-                rtSubMesh.m_indexBufferView =
-                    RHI::IndexBufferView{ *indexBuffer->GetRHIBuffer(), 0, mesh.GetIndexCount() * indexElementSize, m_indexFormat };
-                rtSubMesh.m_indexShaderBufferView = indexBuffer->GetRHIBuffer()->GetBufferView(indexBuffer->GetBufferViewDescriptor());
-            }
+            auto addMeshBuffer{
+                [&](Render::MeshInfoEntry* meshInfoEntry, AZStd::string_view semanticName, RHI::VertexFormat vertexFormat,
+                    int sourceComponentOverride = 0)
+                {
+                    const auto* semanticView{ mesh.GetSemanticBufferAssetView(Name{ semanticName }) };
+                    if (semanticView)
+                    {
+                        uint32_t elementSize{ RHI::GetVertexFormatSize(vertexFormat) };
+                        auto convertedBuffer{ ConvertVertexBuffer(
+                            semanticView->GetBufferAsset()->GetBuffer(), semanticView->GetBufferViewDescriptor(), vertexFormat,
+                            sourceComponentOverride) };
 
-            {
-                const auto* positionView{ mesh.GetSemanticBufferAssetView(AZ_NAME_LITERAL("POSITION")) };
-                uint32_t positionElementSize{ RHI::GetVertexFormatSize(m_positionFormat) };
-                int sourceComponentOverride{ m_positionFormat == RHI::VertexFormat::R16G16B16A16_FLOAT ? 3 : 0 };
-                auto positionBuffer{ ConvertVertexBuffer(
-                    positionView->GetBufferAsset()->GetBuffer(), positionView->GetBufferViewDescriptor(), m_positionFormat,
-                    sourceComponentOverride) };
+                        meshInfoEntry->m_meshBuffers[RHI::ShaderSemantic{ semanticName }] = Render::BufferViewIndexAndOffset::Create(
+                            RHI::StreamBufferView{ *convertedBuffer->GetRHIBuffer(), 0, mesh.GetVertexCount() * elementSize, elementSize },
+                            vertexFormat);
+                    }
+                }
+            };
 
-                rtSubMesh.m_positionVertexBufferView =
-                    RHI::StreamBufferView{ *positionBuffer->GetRHIBuffer(), 0, mesh.GetVertexCount() * positionElementSize,
-                                           positionElementSize };
-                rtSubMesh.m_positionShaderBufferView =
-                    positionBuffer->GetRHIBuffer()->GetBufferView(positionBuffer->GetBufferViewDescriptor());
-                rtSubMesh.m_positionFormat = m_positionFormat;
-            }
+            GetMeshFeatureProcessor().UpdateMeshInfoEntry(
+                meshInfoHandle,
+                [&](Render::MeshInfoEntry* meshInfoEntry)
+                {
+                    {
+                        const auto& indexView{ mesh.GetIndexBufferAssetView() };
+                        auto indexBuffer{ ConvertIndexBuffer(
+                            indexView.GetBufferAsset()->GetBuffer(), indexView.GetBufferViewDescriptor(), m_indexFormat) };
+                        uint32_t indexElementSize{ RHI::GetIndexFormatSize(m_indexFormat) };
 
-            {
-                const auto* normalView{ mesh.GetSemanticBufferAssetView(AZ_NAME_LITERAL("NORMAL")) };
-                uint32_t normalElementSize{ RHI::GetVertexFormatSize(m_normalFormat) };
-                auto normalBuffer{ ConvertVertexBuffer(
-                    normalView->GetBufferAsset()->GetBuffer(), normalView->GetBufferViewDescriptor(), m_normalFormat) };
+                        meshInfoEntry->m_indexBuffer = Render::IndexBufferViewIndexAndOffset::Create(
+                            RHI::IndexBufferView{ *indexBuffer->GetRHIBuffer(), 0, mesh.GetIndexCount() * indexElementSize,
+                                                  m_indexFormat });
+                    }
 
-                rtSubMesh.m_normalVertexBufferView =
-                    RHI::StreamBufferView{ *normalBuffer->GetRHIBuffer(), 0, mesh.GetVertexCount() * normalElementSize, normalElementSize };
-                rtSubMesh.m_normalShaderBufferView = normalBuffer->GetRHIBuffer()->GetBufferView(normalBuffer->GetBufferViewDescriptor());
-                rtSubMesh.m_normalFormat = m_normalFormat;
-            }
+                    addMeshBuffer(
+                        meshInfoEntry, "POSITION", m_positionFormat, m_positionFormat == RHI::VertexFormat::R16G16B16A16_FLOAT ? 3 : 0);
+                    addMeshBuffer(meshInfoEntry, "NORMAL", m_normalFormat);
+                    addMeshBuffer(meshInfoEntry, "UV", m_uvFormat);
+                    addMeshBuffer(meshInfoEntry, "TANGENT", m_tangentFormat);
+                    addMeshBuffer(meshInfoEntry, "BITANGENT", m_bitangentFormat);
 
-            if (auto* uvView{ mesh.GetSemanticBufferAssetView(AZ_NAME_LITERAL("UV")) })
-            {
-                uint32_t uvElementSize{ RHI::GetVertexFormatSize(m_uvFormat) };
-                auto uvBuffer{ ConvertVertexBuffer(uvView->GetBufferAsset()->GetBuffer(), uvView->GetBufferViewDescriptor(), m_uvFormat) };
+                    meshInfoEntry->m_materialTypeId = material->GetMaterialTypeId();
+                    meshInfoEntry->m_materialInstanceId = material->GetMaterialInstanceId();
 
-                rtSubMesh.m_uvVertexBufferView =
-                    RHI::StreamBufferView{ *uvBuffer->GetRHIBuffer(), 0, mesh.GetVertexCount() * uvElementSize, uvElementSize };
-                rtSubMesh.m_uvShaderBufferView = uvBuffer->GetRHIBuffer()->GetBufferView(uvBuffer->GetBufferViewDescriptor());
-                rtSubMesh.m_uvFormat = m_uvFormat;
-                rtSubMesh.m_bufferFlags |= Render::RayTracingSubMeshBufferFlags::UV;
-            }
+                    return true;
+                });
 
-            if (auto* tangentView{ mesh.GetSemanticBufferAssetView(AZ_NAME_LITERAL("TANGENT")) })
-            {
-                uint32_t tangentElementSize{ RHI::GetVertexFormatSize(m_tangentFormat) };
-                auto tangentBuffer{ ConvertVertexBuffer(
-                    tangentView->GetBufferAsset()->GetBuffer(), tangentView->GetBufferViewDescriptor(), m_tangentFormat) };
-
-                rtSubMesh.m_tangentVertexBufferView =
-                    RHI::StreamBufferView{ *tangentBuffer->GetRHIBuffer(), 0, mesh.GetVertexCount() * tangentElementSize,
-                                           tangentElementSize };
-                rtSubMesh.m_tangentShaderBufferView =
-                    tangentBuffer->GetRHIBuffer()->GetBufferView(tangentBuffer->GetBufferViewDescriptor());
-                rtSubMesh.m_tangentFormat = m_tangentFormat;
-                rtSubMesh.m_bufferFlags |= Render::RayTracingSubMeshBufferFlags::Tangent;
-            }
-
-            if (auto* bitangentView{ mesh.GetSemanticBufferAssetView(AZ_NAME_LITERAL("BITANGENT")) })
-            {
-                uint32_t bitangentElementSize{ RHI::GetVertexFormatSize(m_bitangentFormat) };
-                auto bitangentBuffer{ ConvertVertexBuffer(
-                    bitangentView->GetBufferAsset()->GetBuffer(), bitangentView->GetBufferViewDescriptor(), m_bitangentFormat) };
-
-                rtSubMesh.m_bitangentVertexBufferView =
-                    RHI::StreamBufferView{ *bitangentBuffer->GetRHIBuffer(), 0, mesh.GetVertexCount() * bitangentElementSize,
-                                           bitangentElementSize };
-                rtSubMesh.m_bitangentShaderBufferView =
-                    bitangentBuffer->GetRHIBuffer()->GetBufferView(bitangentBuffer->GetBufferViewDescriptor());
-                rtSubMesh.m_bitangentFormat = m_bitangentFormat;
-                rtSubMesh.m_bufferFlags |= Render::RayTracingSubMeshBufferFlags::Bitangent;
-            }
+            GetMeshFeatureProcessor().UpdateFallbackPBRMaterialEntry(
+                meshInfoHandle,
+                [&](Render::FallbackPBR::MaterialEntry* materialEntry)
+                {
+                    materialEntry->m_material = material;
+                    return true;
+                });
         }
 
-        GetRayTracingFeatureProcessor().RemoveMesh(m_rayTracingUuid);
+        Render::RayTracingFeatureProcessorInterface::Mesh rtMesh;
+        rtMesh.m_assetId.m_guid = m_rayTracingUuid;
+        rtMesh.m_instanceMask |= static_cast<uint32_t>(RHI::RayTracingAccelerationStructureInstanceInclusionMask::STATIC_MESH);
+
         GetRayTracingFeatureProcessor().AddMesh(m_rayTracingUuid, rtMesh, rtSubMeshes);
     }
 
@@ -585,6 +579,18 @@ namespace AtomSampleViewer
         desc.m_bufferData = targetBufferData.data();
 
         return RPI::BufferSystemInterface::Get()->CreateBufferFromCommonPool(desc);
+    }
+
+    Render::MeshFeatureProcessorInterface& RayTracingVertexFormatExampleComponent::GetMeshFeatureProcessor()
+    {
+        if (!m_meshFeatureProcessor)
+        {
+            auto* scene{ RPI::Scene::GetSceneForEntityContextId(GetEntityContextId()) };
+            auto featureProcessor{ scene->GetFeatureProcessor<Render::MeshFeatureProcessorInterface>() };
+            AZ_Assert(featureProcessor != nullptr, "RayTracingFeatureProcessor not found");
+            m_meshFeatureProcessor = featureProcessor;
+        }
+        return *m_meshFeatureProcessor;
     }
 
     Render::RayTracingFeatureProcessorInterface& RayTracingVertexFormatExampleComponent::GetRayTracingFeatureProcessor()

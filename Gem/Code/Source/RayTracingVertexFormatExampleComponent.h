@@ -48,6 +48,7 @@ namespace AtomSampleViewer
             AZStd::span<const uint8_t> sourceBufferData,
             const AZ::RHI::BufferViewDescriptor& sourceBufferDescriptor,
             AZ::RHI::IndexFormat targetFormat);
+        AZ::Render::MeshFeatureProcessorInterface& GetMeshFeatureProcessor();
         AZ::Render::RayTracingFeatureProcessorInterface& GetRayTracingFeatureProcessor();
         AZ::Render::RayTracingDebugFeatureProcessorInterface& GetRayTracingDebugFeatureProcessor();
 
@@ -55,6 +56,8 @@ namespace AtomSampleViewer
         ImGuiAssetBrowser m_modelBrowser{ "@user@/RayTracingVertexFormatExampleComponent/model_browser.xml" };
         AZ::Data::Asset<AZ::RPI::ModelAsset> m_currentModel;
         AZ::Uuid m_rayTracingUuid{ "85E1BC6E-AE09-4EF1-87B7-A0F237BDABCC" };
+        AZStd::vector<AZ::Render::MeshInfoHandle> m_meshInfoHandles;
+        AZ::Render::MeshFeatureProcessorInterface* m_meshFeatureProcessor{ nullptr };
         AZ::Render::RayTracingFeatureProcessorInterface* m_rayTracingFeatureProcessor{ nullptr };
         AZ::Render::RayTracingDebugFeatureProcessorInterface* m_rayTracingDebugFeatureProcessor{ nullptr };
         AZ::Render::RayTracingDebugViewMode m_debugViewMode{ AZ::Render::RayTracingDebugViewMode::PrimitiveIndex };
