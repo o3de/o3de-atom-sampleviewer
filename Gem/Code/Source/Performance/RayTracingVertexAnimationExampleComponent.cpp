@@ -110,6 +110,10 @@ namespace AtomSampleViewer
         for (const RayTracingMesh& rayTracingMesh : m_rayTracingData)
         {
             GetRayTracingFeatureProcessor().RemoveMesh(rayTracingMesh.m_uuid);
+            for (const auto& subMesh : rayTracingMesh.m_rtSubMeshes)
+            {
+                GetMeshFeatureProcessor().ReleaseMeshInfoEntry(subMesh.m_meshInfoHandle);
+            }
         }
 
         GetRayTracingDebugFeatureProcessor().OnRayTracingDebugComponentRemoved();
@@ -327,6 +331,10 @@ namespace AtomSampleViewer
         for (const RayTracingMesh& rayTracingMesh : m_rayTracingData)
         {
             GetRayTracingFeatureProcessor().RemoveMesh(rayTracingMesh.m_uuid);
+            for (const auto& subMesh : rayTracingMesh.m_rtSubMeshes)
+            {
+                GetMeshFeatureProcessor().ReleaseMeshInfoEntry(subMesh.m_meshInfoHandle);
+            }
         }
         m_rayTracingData.clear();
 
@@ -389,8 +397,6 @@ namespace AtomSampleViewer
 
         auto sourceRhiGeometryBuffer{ m_sourceGeometryBuffer->GetRHIBuffer() };
         auto targetRhiGeometryBuffer{ m_targetGeometryBuffer->GetRHIBuffer() };
-        auto sourceShaderBufferView{ sourceRhiGeometryBuffer->GetBufferView(RHI::BufferViewDescriptor::CreateRaw(0, sourceBufferSize)) };
-        auto targetShaderBufferView{ targetRhiGeometryBuffer->GetBufferView(RHI::BufferViewDescriptor::CreateRaw(0, targetBufferSize)) };
 
         {
             int gridWidth{ aznumeric_cast<int>(AZStd::ceil(AZStd::sqrt(m_geometryCount))) };
@@ -429,23 +435,29 @@ namespace AtomSampleViewer
                     static_cast<uint32_t>(AZ::RHI::RayTracingAccelerationStructureInstanceInclusionMask::STATIC_MESH);
 
                 auto& subMesh{ data.m_rtSubMeshes.emplace_back() };
+                subMesh.m_meshInfoHandle = GetMeshFeatureProcessor().AcquireMeshInfoEntry();
 
-                // Use position data from target buffer with unique offset per instance
-                subMesh.m_positionFormat = PositionStreamFormat;
-                subMesh.m_positionShaderBufferView = targetShaderBufferView;
-                subMesh.m_positionVertexBufferView = RHI::StreamBufferView{ *targetRhiGeometryBuffer, targetBufferSizePerInstance * i,
-                                                                            vertexCount * PositionSize, PositionSize };
+                GetMeshFeatureProcessor().UpdateMeshInfoEntry(
+                    subMesh.m_meshInfoHandle,
+                    [&](Render::MeshInfoEntry* meshInfoEntry)
+                    {
+                        // Use index data from source data;
+                        meshInfoEntry->m_indexBuffer = Render::IndexBufferViewIndexAndOffset::Create(
+                            RHI::IndexBufferView{ *sourceRhiGeometryBuffer, indexByteOffset, indexCount * IndexSize, IndexStreamFormat });
 
-                // Use normal data from source buffer
-                subMesh.m_normalFormat = NormalStreamFormat;
-                subMesh.m_normalShaderBufferView = sourceShaderBufferView;
-                subMesh.m_normalVertexBufferView =
-                    RHI::StreamBufferView{ *sourceRhiGeometryBuffer, normalByteOffset, vertexCount * NormalSize, NormalSize };
+                        // Use position data from target buffer with unique offset per instance
+                        meshInfoEntry->m_meshBuffers[RHI::ShaderSemantic{ "POSITION" }] = Render::BufferViewIndexAndOffset::Create(
+                            RHI::StreamBufferView{ *targetRhiGeometryBuffer, targetBufferSizePerInstance * i, vertexCount * PositionSize,
+                                                   PositionSize },
+                            PositionStreamFormat);
 
-                // Use index data from source data
-                subMesh.m_indexShaderBufferView = sourceShaderBufferView;
-                subMesh.m_indexBufferView =
-                    RHI::IndexBufferView{ *sourceRhiGeometryBuffer, indexByteOffset, indexCount * IndexSize, IndexStreamFormat };
+                        // Use normal data from source buffer
+                        meshInfoEntry->m_meshBuffers[RHI::ShaderSemantic{ "NORMAL" }] = Render::BufferViewIndexAndOffset::Create(
+                            RHI::StreamBufferView{ *sourceRhiGeometryBuffer, normalByteOffset, vertexCount * NormalSize, NormalSize },
+                            NormalStreamFormat);
+
+                        return true;
+                    });
 
                 // Dont need to set material since the DebugRayTracingPass is used to visualize the geometry
                 GetRayTracingFeatureProcessor().AddMesh(data.m_uuid, data.m_rtMesh, data.m_rtSubMeshes);
@@ -462,24 +474,34 @@ namespace AtomSampleViewer
             data.m_rtMesh.m_instanceMask |=
                 static_cast<uint32_t>(AZ::RHI::RayTracingAccelerationStructureInstanceInclusionMask::STATIC_MESH);
 
-            Render::RayTracingFeatureProcessorInterface::SubMesh subMesh;
+            auto updateMeshInfoBuffers{
+                [&](const Render::MeshInfoHandle& meshInfoHandle, const RHI::Ptr<RHI::BufferView>& clusterOffsetBufferView)
+                {
+                    GetMeshFeatureProcessor().UpdateMeshInfoEntry(
+                        meshInfoHandle,
+                        [&](Render::MeshInfoEntry* meshInfoEntry)
+                        {
+                            // Use index data from source data;
+                            meshInfoEntry->m_indexBuffer = Render::IndexBufferViewIndexAndOffset::Create(
+                                RHI::IndexBufferView{ *sourceRhiGeometryBuffer, indexByteOffset, indexCount * IndexSize,
+                                                      IndexStreamFormat });
 
-            // Use position data from target buffer with unique offset per instance
-            subMesh.m_positionFormat = PositionStreamFormat;
-            subMesh.m_positionShaderBufferView = targetShaderBufferView;
-            subMesh.m_positionVertexBufferView =
-                RHI::StreamBufferView{ *targetRhiGeometryBuffer, 0, vertexCount * PositionSize, PositionSize };
+                            // Use position data from target buffer with unique offset per instance
+                            meshInfoEntry->m_meshBuffers[RHI::ShaderSemantic{ "POSITION" }] = Render::BufferViewIndexAndOffset::Create(
+                                RHI::StreamBufferView{ *targetRhiGeometryBuffer, 0, vertexCount * PositionSize, PositionSize },
+                                PositionStreamFormat);
 
-            // Use normal data from source buffer
-            subMesh.m_normalFormat = NormalStreamFormat;
-            subMesh.m_normalShaderBufferView = sourceShaderBufferView;
-            subMesh.m_normalVertexBufferView =
-                RHI::StreamBufferView{ *sourceRhiGeometryBuffer, normalByteOffset, vertexCount * NormalSize, NormalSize };
+                            // Use normal data from source buffer
+                            meshInfoEntry->m_meshBuffers[RHI::ShaderSemantic{ "NORMAL" }] = Render::BufferViewIndexAndOffset::Create(
+                                RHI::StreamBufferView{ *sourceRhiGeometryBuffer, normalByteOffset, vertexCount * NormalSize, NormalSize },
+                                NormalStreamFormat);
 
-            // Use index data from source data
-            subMesh.m_indexShaderBufferView = sourceShaderBufferView;
-            subMesh.m_indexBufferView =
-                RHI::IndexBufferView{ *sourceRhiGeometryBuffer, indexByteOffset, indexCount * IndexSize, IndexStreamFormat };
+                            meshInfoEntry->m_clusterOffsetBuffer = clusterOffsetBufferView;
+
+                            return true;
+                        });
+                }
+            };
 
             auto& bufferPools{ GetRayTracingFeatureProcessor().GetBufferPools() };
             int clusterCountPerInstance{ geometry.GetClusterCount() };
@@ -564,11 +586,18 @@ namespace AtomSampleViewer
                 for (const auto& [deviceIndex, dataPointer] : clusterStreamOffsetsMapResponse.m_data)
                 {
                     auto* clusterOffsetInfo{ reinterpret_cast<RHI::RayTracingClasClusterOffsetInfo*>(dataPointer) + i };
-                    clusterOffsetInfo->m_indexOffset = indexBufferSizePerCluster * clusterId; // Use same index data for all clusters
-                    clusterOffsetInfo->m_positionOffset = targetBufferSizePerCluster * i; // Use unique position data for each cluster
-                    clusterOffsetInfo->m_positionStride = 0; // Tightly pack positions
-                    clusterOffsetInfo->m_normalOffset = 0; // Use same normal data for all clusters
-                    clusterOffsetInfo->m_normalStride = 0; // Tightly pack normals
+
+                    // Use same index data for all clusters
+                    clusterOffsetInfo->m_indexOffset = indexByteOffset + indexBufferSizePerCluster * clusterId;
+                    clusterOffsetInfo->m_indexStride = RHI::GetIndexFormatSize(IndexStreamFormat); // Tightly pack indices
+
+                    // Use unique position data for each cluster
+                    clusterOffsetInfo->m_positionOffset = positionByteOffset + targetBufferSizePerCluster * i;
+                    clusterOffsetInfo->m_positionStride = RHI::GetVertexFormatSize(PositionStreamFormat); // Tightly pack positions
+
+                    // Use same normal data for all clusters
+                    clusterOffsetInfo->m_normalOffset = normalByteOffset;
+                    clusterOffsetInfo->m_normalStride = RHI::GetVertexFormatSize(NormalStreamFormat); // Tightly pack normals
                 }
             }
             bufferPools.GetSrcInfosArrayBufferPool()->UnmapBuffer(*m_srcInfosArrayBuffer);
@@ -592,29 +621,36 @@ namespace AtomSampleViewer
                 clusterDescriptor.m_maxTotalVertexCount *= m_geometryCount;
                 clusterDescriptor.m_maxClusterCount *= m_geometryCount;
             }
-            subMesh.m_clusterBlasDescriptor = clusterDescriptor;
 
             if (m_separateClusterBlasForEachInstance)
             {
                 for (int i{ 0 }; i < m_geometryCount; i++)
                 {
+                    auto& subMesh{ data.m_rtSubMeshes.emplace_back() };
+                    subMesh.m_meshInfoHandle = GetMeshFeatureProcessor().AcquireMeshInfoEntry();
+                    subMesh.m_clusterBlasDescriptor = clusterDescriptor;
                     subMesh.m_clusterBlasDescriptor->m_srcInfosArrayBufferView = m_srcInfosArrayBuffer->GetBufferView(
                         RHI::BufferViewDescriptor::CreateStructured(
                             i * clusterCountPerInstance, clusterCountPerInstance, sizeof(RHI::RayTracingClasBuildTriangleClusterInfo)));
-                    subMesh.m_clusterOffsetBufferView = m_clusterStreamOffsets->GetBufferView(
+
+                    auto clusterOffsetBufferView{ m_clusterStreamOffsets->GetBufferView(
                         RHI::BufferViewDescriptor::CreateRaw(
                             i * clusterCountPerInstance * sizeof(RHI::RayTracingClasClusterOffsetInfo),
-                            clusterCountPerInstance * sizeof(RHI::RayTracingClasClusterOffsetInfo)));
-                    data.m_rtSubMeshes.push_back(subMesh);
+                            clusterCountPerInstance * sizeof(RHI::RayTracingClasClusterOffsetInfo))) };
+                    updateMeshInfoBuffers(subMesh.m_meshInfoHandle, clusterOffsetBufferView);
                 }
             }
             else
             {
+                auto& subMesh{ data.m_rtSubMeshes.emplace_back() };
+                subMesh.m_meshInfoHandle = GetMeshFeatureProcessor().AcquireMeshInfoEntry();
+                subMesh.m_clusterBlasDescriptor = clusterDescriptor;
                 subMesh.m_clusterBlasDescriptor->m_srcInfosArrayBufferView = m_srcInfosArrayBuffer->GetBufferView(
                     RHI::BufferViewDescriptor::CreateStructured(0, totalClusterCount, sizeof(RHI::RayTracingClasBuildTriangleClusterInfo)));
-                subMesh.m_clusterOffsetBufferView = m_clusterStreamOffsets->GetBufferView(
-                    RHI::BufferViewDescriptor::CreateRaw(0, totalClusterCount * sizeof(RHI::RayTracingClasClusterOffsetInfo)));
-                data.m_rtSubMeshes.push_back(subMesh);
+
+                auto clusterOffsetBufferView{ m_clusterStreamOffsets->GetBufferView(
+                    RHI::BufferViewDescriptor::CreateRaw(0, totalClusterCount * sizeof(RHI::RayTracingClasClusterOffsetInfo))) };
+                updateMeshInfoBuffers(subMesh.m_meshInfoHandle, clusterOffsetBufferView);
             }
 
             GetRayTracingFeatureProcessor().AddMesh(data.m_uuid, data.m_rtMesh, data.m_rtSubMeshes);
@@ -788,13 +824,25 @@ namespace AtomSampleViewer
         }
     }
 
+    Render::MeshFeatureProcessorInterface& RayTracingVertexAnimationExampleComponent::GetMeshFeatureProcessor()
+    {
+        if (!m_meshFeatureProcessor)
+        {
+            RPI::Scene* scene{ RPI::Scene::GetSceneForEntityContextId(GetEntityContextId()) };
+            auto featureProcessor{ scene->GetFeatureProcessor<Render::MeshFeatureProcessorInterface>() };
+            AZ_Assert(featureProcessor != nullptr, "MeshFeatureProcessor not found");
+            m_meshFeatureProcessor = featureProcessor;
+        }
+        return *m_meshFeatureProcessor;
+    }
+
     Render::RayTracingFeatureProcessorInterface& RayTracingVertexAnimationExampleComponent::GetRayTracingFeatureProcessor()
     {
         if (!m_rayTracingFeatureProcessor)
         {
             RPI::Scene* scene{ RPI::Scene::GetSceneForEntityContextId(GetEntityContextId()) };
             auto featureProcessor{ scene->GetFeatureProcessor<Render::RayTracingFeatureProcessorInterface>() };
-            AZ_Assert(featureProcessor != nullptr, "RayTracingDebugFeatureProcessor not found");
+            AZ_Assert(featureProcessor != nullptr, "RayTracingFeatureProcessor not found");
             m_rayTracingFeatureProcessor = featureProcessor;
         }
         return *m_rayTracingFeatureProcessor;

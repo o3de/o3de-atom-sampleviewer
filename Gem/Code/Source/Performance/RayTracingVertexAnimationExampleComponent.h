@@ -97,9 +97,11 @@ namespace AtomSampleViewer
         void UpdatePerformanceData();
         void PrintPerformanceResults();
 
+        AZ::Render::MeshFeatureProcessorInterface& GetMeshFeatureProcessor();
         AZ::Render::RayTracingFeatureProcessorInterface& GetRayTracingFeatureProcessor();
         AZ::Render::RayTracingDebugFeatureProcessorInterface& GetRayTracingDebugFeatureProcessor();
 
+        AZ::Render::MeshFeatureProcessorInterface* m_meshFeatureProcessor{ nullptr };
         AZ::Render::RayTracingFeatureProcessorInterface* m_rayTracingFeatureProcessor{ nullptr };
         AZ::Render::RayTracingDebugFeatureProcessorInterface* m_rayTracingDebugFeatureProcessor{ nullptr };
         uint32_t m_preActivateVSyncInterval{ 0 };
