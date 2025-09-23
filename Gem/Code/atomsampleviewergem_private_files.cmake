@@ -95,6 +95,8 @@ set(FILES
     Source/RHI/VariableRateShadingExampleComponent.h
     Source/Performance/HighInstanceExampleComponent.cpp
     Source/Performance/HighInstanceExampleComponent.h
+    Source/Performance/RayTracingVertexAnimationExampleComponent.cpp
+    Source/Performance/RayTracingVertexAnimationExampleComponent.h
     Source/Performance/100KDrawable_SingleView_ExampleComponent.cpp
     Source/Performance/100KDrawable_SingleView_ExampleComponent.h
     Source/Performance/100KDraw_10KDrawable_MultiView_ExampleComponent.cpp
@@ -157,6 +159,8 @@ set(FILES
     Source/ParallaxMappingExampleComponent.h
     Source/Passes/RayTracingAmbientOcclusionPass.cpp
     Source/Passes/RayTracingAmbientOcclusionPass.h
+    Source/Passes/VertexAnimationPass.cpp
+    Source/Passes/VertexAnimationPass.h
     Source/ParallaxMappingExampleComponent.h
     Source/ProceduralSkinnedMesh.cpp
     Source/ProceduralSkinnedMesh.h
