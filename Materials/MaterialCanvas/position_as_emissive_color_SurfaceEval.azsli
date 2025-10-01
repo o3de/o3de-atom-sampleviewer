@@ -1,0 +1,210 @@
+/*
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
+ * SPDX-License-Identifier: Apache-2.0 OR MIT
+ *
+ */
+
+#pragma once
+
+// This #define magic lets you use the EvaluateSurface function in this file without making it the final EvaluateSurface
+// used in your shader. Simply #define EvaluateSurface to your custom definition before including this file
+//
+#ifndef EvaluateSurface
+#define EvaluateSurface EvaluateSurface_position_as_emissive_color
+#endif
+
+#include <Atom/Features/PBR/LightingOptions.azsli>
+#include <Atom/Features/MatrixUtility.azsli>
+#include <Atom/RPI/TangentSpace.azsli>
+
+Surface EvaluateSurface_position_as_emissive_color(
+    VsOutput IN,
+    const MaterialParameters params,
+    float3 positionWS,
+    real3 normalWS,
+    float3 tangents[UvSetCount],
+    float3 bitangents[UvSetCount],
+    float2 uvs[UvSetCount],
+    bool isFrontFace,
+    bool isDisplacementClipped,
+    float4 uvDxDy,
+    bool customDerivatives,
+    uint lightingChannels)
+{
+    const float3 bitangent = cross((float3)IN.normal, (float3)IN.tangent);
+    const float3 O3DE_MC_POSITION = (float3)IN.position;
+    const float3 O3DE_MC_NORMAL = (float3)IN.normal;
+    const float3 O3DE_MC_TANGENT = (float3)IN.tangent;
+    const float3 O3DE_MC_BITANGENT = (float3)bitangent;
+    const float3 O3DE_MC_POSITION_WS = positionWS;
+    const float3 O3DE_MC_NORMAL_WS = normalWS;
+    const float3 O3DE_MC_TANGENT_WS = tangents[0];
+    const float3 O3DE_MC_BITANGENT_WS = bitangents[0];
+#if ENABLE_VERTEX_COLOR
+    const float4 O3DE_MC_COLOR = IN.color0;
+#else
+    const float4 O3DE_MC_COLOR = float4(1.0f, 1.0f, 1.0f, 1.0f);
+#endif
+    #define O3DE_MC_UV(index) uvs[clamp(index, 0, UvSetCount-1)];
+
+    // placeholder to keep MaterialParams from being compiled out when iterating on graphs
+    const int materialType = params.m_materialType;
+
+    // O3DE_GENERATED_INSTRUCTIONS_BEGIN: inNormal, inBaseColor, inMetallic, inRoughness, inSpecularF0Factor, inEmissive, inAlpha, inOpacityFactor, inDiffuseAmbientOcclusion, inSpecularOcclusion, inClearCoatFactor, inClearCoatRoughness, inClearCoatNormal, 
+float3 node13_world_position_outPosition = O3DE_MC_POSITION_WS;
+float node34_float_input_outValue = params.node34_float_input_inValue;
+float node16_float_input_outValue = params.node16_float_input_inValue;
+float node23_float_constant_inValue = 0.4;
+float node23_float_constant_outValue = node23_float_constant_inValue;
+int node36_int_input_outValue = params.node36_int_input_inValue;
+uint node30_uv_inIndex = node36_int_input_outValue;
+float2 node30_uv_outUV = O3DE_MC_UV(node30_uv_inIndex);
+float3 node33_multiply_inValue1 = node13_world_position_outPosition;
+float3 node33_multiply_inValue2 = node34_float_input_outValue;
+float3 node33_multiply_outValue = node33_multiply_inValue1 * node33_multiply_inValue2;
+const ColorSpaceId node29_sample_texture_2d_inColorSpaceFrom = ColorSpaceId::LinearSRGB;
+const ColorSpaceId node29_sample_texture_2d_inColorSpaceTo = ColorSpaceId::ACEScg;
+float2 node29_sample_texture_2d_inUV = node30_uv_outUV;
+#ifdef CS_SAMPLERS
+float4 node29_sample_texture_2d_outColor = TransformColor4(GetMaterialTexture(params.node29_sample_texture_2d_inValue).SampleLevel(GetMaterialTextureSampler(params.node29_sample_texture_2d_inSampler), (float2)node29_sample_texture_2d_inUV, 0), node29_sample_texture_2d_inColorSpaceFrom, node29_sample_texture_2d_inColorSpaceTo);
+#else
+float4 node29_sample_texture_2d_outColor = TransformColor4(GetMaterialTexture(params.node29_sample_texture_2d_inValue).Sample(GetMaterialTextureSampler(params.node29_sample_texture_2d_inSampler), (float2)node29_sample_texture_2d_inUV), node29_sample_texture_2d_inColorSpaceFrom, node29_sample_texture_2d_inColorSpaceTo);
+#endif /* CS_SAMPLERS */
+float3 node35_cosine_inValue = node33_multiply_outValue;
+float3 node35_cosine_outValue = cos(node35_cosine_inValue);
+float4 node37_multiply_add_inValue1 = float4(node35_cosine_outValue, 1);
+float4 node37_multiply_add_inValue2 = {0.5, 0.5, 0.5, 0};
+float4 node37_multiply_add_inValue3 = {0.5, 0.5, 0.5, 0};
+float4 node37_multiply_add_outValue = mad(node37_multiply_add_inValue1, node37_multiply_add_inValue2, node37_multiply_add_inValue3);
+float4 node31_linear_interpolate_inValue1 = node37_multiply_add_outValue;
+float4 node31_linear_interpolate_inValue2 = node29_sample_texture_2d_outColor;
+float4 node31_linear_interpolate_inValue3 = node23_float_constant_outValue;
+float4 node31_linear_interpolate_outValue = lerp(node31_linear_interpolate_inValue1, node31_linear_interpolate_inValue2, node31_linear_interpolate_inValue3);
+float3 inNormal = {0, 0, 0};
+float3 inBaseColor = (float3)node29_sample_texture_2d_outColor;
+float inMetallic = node16_float_input_outValue;
+float inSpecularF0Factor = 0;
+float inRoughness = 0;
+float3 inEmissive = (float3)node31_linear_interpolate_outValue;
+float inAlpha = 1;
+float inOpacityFactor = 1;
+float inDiffuseAmbientOcclusion = 1;
+float inSpecularOcclusion = 1;
+float inClearCoatFactor = 0;
+float inClearCoatRoughness = 0;
+float3 inClearCoatNormal = {0, 0, 0};
+    // O3DE_GENERATED_INSTRUCTIONS_END
+
+    #undef O3DE_MC_UV
+
+    CheckClipping((real)inAlpha, (real)inOpacityFactor);
+
+    Surface surface;
+    surface.lightingChannels = lightingChannels;
+    surface.position = positionWS;
+    surface.vertexNormal = normalWS;
+    surface.normal = normalize(o_normal_override_enabled ? GetWorldSpaceNormal((real2)inNormal, normalWS, tangents[0], bitangents[0]) : normalWS);
+    surface.normal *= real(mad(isFrontFace, 2.0, -1.0));
+    surface.roughnessLinear = inRoughness;
+    surface.SetAlbedoAndSpecularF0(inBaseColor, inSpecularF0Factor, inMetallic);
+    surface.CalculateRoughnessA();
+
+    // ------- Parallax Clipping -------
+
+#if ENABLE_PARALLAX
+    if(o_parallax_highlightClipping && isDisplacementClipped)
+    {
+        ApplyParallaxClippingHighlight(surface.albedo);
+    }
+#endif
+
+    surface.alpha = (real)inAlpha * (real)inOpacityFactor;
+    surface.emissiveLighting = inEmissive;
+    surface.diffuseAmbientOcclusion = inDiffuseAmbientOcclusion;
+    surface.specularOcclusion = inSpecularOcclusion;
+    surface.opacityAffectsSpecularFactor = o_opacity_affects_specular_factor;
+
+    // ------- Clearcoat -------
+
+#if ENABLE_CLEAR_COAT
+    if(o_clearCoat_enabled)
+    {
+        surface.clearCoat.factor = inClearCoatFactor;
+        surface.clearCoat.roughness = max(inClearCoatRoughness, 1e-3);
+
+        // Flip normal if back face is rendered   
+        surface.clearCoat.normal = normalize(o_clearCoat_normal_override_enabled ? GetWorldSpaceNormal((real2)inClearCoatNormal, normalWS, tangents[0], bitangents[0]) : normalWS);
+        surface.clearCoat.normal *= real(mad(isFrontFace, 2.0, -1.0));
+
+        ApplyClearCoatToSpecularF0(surface.specularF0, surface.clearCoat.factor);
+    }
+#endif
+
+    return surface;
+}
+
+// helper function to keep compatible with the previous version
+// because dxc compiler doesn't allow default parameters on functions with overloads
+Surface EvaluateSurface_position_as_emissive_color(
+    VsOutput IN,
+    const MaterialParameters params,
+    float3 positionWS,
+    real3 normalWS,
+    float3 tangents[UvSetCount],
+    float3 bitangents[UvSetCount],
+    float2 uvs[UvSetCount],
+    bool isFrontFace,
+    bool isDisplacementClipped,
+    uint lightingChannels)
+{
+    return EvaluateSurface_position_as_emissive_color(
+        IN,
+        params,
+        positionWS,
+        normalWS,
+        tangents,
+        bitangents,
+        uvs,
+        isFrontFace,
+        isDisplacementClipped,
+        float4(0.0f, 0.0f, 0.0f, 0.0f),
+        false,
+        lightingChannels); 
+}
+
+
+Surface EvaluateSurface_position_as_emissive_color(VsOutput IN, VsSystemValues SV, PixelGeometryData geoData, const MaterialParameters params, float4 uvDxDy, bool customDerivatives)
+{
+    return EvaluateSurface_position_as_emissive_color(
+        IN,
+        params,
+        geoData.positionWS,
+        geoData.vertexNormal,
+        geoData.tangents,
+        geoData.bitangents,
+        geoData.uvs,
+        geoData.isFrontFace,
+        geoData.isDisplacementClipped,
+        uvDxDy,
+        customDerivatives,
+        GetLightingChannelMask(SV));
+}
+
+Surface EvaluateSurface_position_as_emissive_color(VsOutput IN, VsSystemValues SV, PixelGeometryData geoData, const MaterialParameters params)
+{
+    return EvaluateSurface_position_as_emissive_color(
+        IN,
+        params,
+        geoData.positionWS,
+        geoData.vertexNormal,
+        geoData.tangents,
+        geoData.bitangents,
+        geoData.uvs,
+        geoData.isFrontFace,
+        geoData.isDisplacementClipped,
+        float4(0.0f, 0.0f, 0.0f, 0.0f),
+        false,
+        GetLightingChannelMask(SV));
+}
