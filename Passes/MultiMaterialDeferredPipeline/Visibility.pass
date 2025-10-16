@@ -21,7 +21,7 @@
                     "LoadStoreAction": {
                         "ClearValue": {
                             "Value": [
-                                "NaN",
+                                -0.0, // sets the first bit only
                                 0.0,
                                 0.0,
                                 0.0

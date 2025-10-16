@@ -28,8 +28,10 @@
 #include <Atom/Features/Pipeline/Deferred/VisibilityBuffer.azsli>
 #include <Atom/Features/MeshInfo/MeshInfo.azsli>
 #include <Atom/Features/MeshInfo/MeshInfoUtil.azsli>
+#include <Atom/Features/FallbackPBRMaterial/MaterialInfoUtil.azsli>
 
-bool GetDrawPacketId(int index, inout int drawPacketId)
+
+bool GetDrawPacketId(int index, inout uint drawPacketId)
 {
     uint entryCount;
 
@@ -71,7 +73,7 @@ ForwardPassOutput MainPS(VSOutput IN, in uint sampleIndex : SV_SampleIndex)
     {
         // vbuffer pixel not valid, e.g. for a background pixel
         renderPixel = true;
-        int drawPacketId;
+        uint drawPacketId;
         renderPixel &= GetDrawPacketId(meshInfoIndex, drawPacketId);
         renderPixel &= drawPacketId == DrawSrg::m_drawPacketId;
         renderPixel &= GetMeshInfoEntry(meshInfoIndex, meshInfo);
@@ -119,7 +121,18 @@ ForwardPassOutput MainPS(VSOutput IN, in uint sampleIndex : SV_SampleIndex)
         Surface surface = EvaluateSurface(dOUT, SV, geoData, params, uvDxDy, true);
         float3 views[MAX_SHADING_VIEWS];
         views[0] = ViewSrg::m_worldPosition.xyz;    // Assume one view for forward pass for now
-        LightingData lightingData = EvaluateLighting(surface, dOUT.position, views);
+        
+        MaterialInfo materialInfo;
+        if (HasMaterialInfoEntry(meshInfoIndex))
+        {
+            GetMaterialInfoEntry(meshInfoIndex, materialInfo);
+        }
+        else {
+            materialInfo.m_reflectionProbeData.m_useReflectionProbe = false;
+            materialInfo.m_reflectionProbeCubeMapIndex = SceneSrg::m_nullCubeMapIndex;
+        }
+
+        LightingData lightingData = EvaluateLighting(surface, dOUT.position, views, materialInfo.m_reflectionProbeCubeMapIndex, materialInfo.m_reflectionProbeData);
         // --- Diffuse Lighting ---
         OUT.m_diffuseColor.rgb = lightingData.diffuseLighting;
         OUT.m_diffuseColor.a = -1;  // Disable Subsurface Scattering
