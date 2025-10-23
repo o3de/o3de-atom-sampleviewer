@@ -1068,7 +1068,7 @@ namespace AtomSampleViewer
 
         auto io = AZ::IO::LocalFileIO::GetInstance();
         screenshotTestInfo.m_toleranceLevel = *toleranceLevel;
-        static constexpr float ImperceptibleDiffFilter = 0.01;
+        static constexpr float ImperceptibleDiffFilter = 0.01f;
 
         if (screenshotTestInfo.m_officialBaselineScreenshotFilePath.empty()
             || !io->Exists(screenshotTestInfo.m_officialBaselineScreenshotFilePath.c_str()))
@@ -1243,7 +1243,7 @@ namespace AtomSampleViewer
     void ScriptReporter::GenerateImageDiff(AZStd::span<const uint8_t> img1, AZStd::span<const uint8_t> img2, AZStd::vector<uint8_t>& buffer)
     {
         static constexpr size_t BytesPerPixel = 4;
-        static constexpr float MinDiffFilter = 0.01;
+        static constexpr float MinDiffFilter = 0.01f;
         static constexpr uint8_t DefaultPixelValue = 122;
 
         memset(buffer.data(), DefaultPixelValue, buffer.size() * sizeof(uint8_t));

@@ -574,9 +574,9 @@ namespace AtomSampleViewer
         CreateIndirectBuffer(Name("BufferIndirectionBuffer"), m_bufferIndirectionBuffer, m_bufferIndirectionBufferView, sizeof(uint32_t) * sizeof(uint32_t) * 3);
 
         //Read only buffer with green-ish color
-        CreateColorBuffer(Name("ColorBuffer1"), AZ::Vector4(0.1, 0.4, 0.1, 1.0), m_colorBuffer1, m_colorBuffer1View);
+        CreateColorBuffer(Name("ColorBuffer1"), AZ::Vector4(0.1f, 0.4f, 0.1f, 1.f), m_colorBuffer1, m_colorBuffer1View);
         // Read only buffer with blue-ish color
-        CreateColorBuffer(Name("ColorBuffer2"), AZ::Vector4(0.1, 0.1, 0.4, 1.0), m_colorBuffer2, m_colorBuffer2View);
+        CreateColorBuffer(Name("ColorBuffer2"), AZ::Vector4(0.1f, 0.1f, 0.4f, 1.f), m_colorBuffer2, m_colorBuffer2View);
 
         // Set the color multiplier buffer
         {

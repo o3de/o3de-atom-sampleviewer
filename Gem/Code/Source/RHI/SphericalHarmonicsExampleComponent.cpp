@@ -569,7 +569,7 @@ namespace AtomSampleViewer
             }
 
             static int angle[3] = {0, 0, 0};
-            static const float deg2rad = (AZ::Constants::Pi / 180.0);
+            static const float deg2rad = (AZ::Constants::Pi / 180.f);
             if (m_shaderInputPresetIndex == SHExampleComponent::FakeLightRotation)
             {
                 if (ScriptableImGui::SliderInt("Set X rotation", &angle[0], 0, 360))
