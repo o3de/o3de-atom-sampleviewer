@@ -335,7 +335,7 @@ namespace AtomSampleViewer
         auto cameraId = m_secondViewCameraEntity->GetId();
         AZ::Debug::NoClipControllerRequestBus::Event(cameraId, &AZ::Debug::NoClipControllerRequestBus::Events::SetFov, AZ::DegToRad(90));
         AZ::Debug::NoClipControllerRequestBus::Event(cameraId, &AZ::Debug::NoClipControllerRequestBus::Events::SetPosition, Vector3(2.75f, 5.25f, 1.49f));
-        AZ::Debug::NoClipControllerRequestBus::Event(cameraId, &AZ::Debug::NoClipControllerRequestBus::Events::SetHeading, AZ::DegToRad(-171.9));
+        AZ::Debug::NoClipControllerRequestBus::Event(cameraId, &AZ::Debug::NoClipControllerRequestBus::Events::SetHeading, AZ::DegToRad(-171.9f));
         AZ::Debug::NoClipControllerRequestBus::Event(cameraId, &AZ::Debug::NoClipControllerRequestBus::Events::SetPitch, AZ::DegToRad(-11.6f));
 
         if (m_useSecondCamera)

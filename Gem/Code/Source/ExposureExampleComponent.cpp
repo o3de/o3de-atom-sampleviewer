@@ -270,14 +270,14 @@ namespace AtomSampleViewer
                 }
 
                 float speedUp = m_exposureControlSettings->GetEyeAdaptationSpeedUp();
-                if (ImGui::SliderFloat("Speed Up", &speedUp, 0.01, 10.0f, "%0.4f") || !m_isInitParameters)
+                if (ImGui::SliderFloat("Speed Up", &speedUp, 0.01f, 10.0f, "%0.4f") || !m_isInitParameters)
                 {
                     m_exposureControlSettings->SetEyeAdaptationSpeedUp(speedUp);
                     m_exposureControlSettings->OnConfigChanged();
                 }
 
                 float speedDown = m_exposureControlSettings->GetEyeAdaptationSpeedDown();
-                if (ImGui::SliderFloat("Speed Down", &speedDown, 0.01, 10.0f, "%0.4f") || !m_isInitParameters)
+                if (ImGui::SliderFloat("Speed Down", &speedDown, 0.01f, 10.0f, "%0.4f") || !m_isInitParameters)
                 {
                     m_exposureControlSettings->SetEyeAdaptationSpeedDown(speedDown);
                     m_exposureControlSettings->OnConfigChanged();

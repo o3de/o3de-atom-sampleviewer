@@ -515,7 +515,7 @@ namespace AtomSampleViewer
         m_instancesData.resize(s_maxNumberOfObjects);
         for (InstanceData& data : m_instancesData)
         {
-            float scale = GetRandomFloat(0.01, 0.1f);
+            float scale = GetRandomFloat(0.01f, 0.1f);
             data.m_offset = AZ::Vector4(GetRandomFloat(-4.0f, -2.0f), GetRandomFloat(-1.f, 1.f), GetRandomFloat(0.f, 1.f), 0.f);
             data.m_scale = AZ::Vector4(scale, scale, 1.f, 0.f);
             data.m_color = AZ::Color(GetRandomFloat(0.5f, 1.0f), GetRandomFloat(0.5f, 1.0f), GetRandomFloat(0.5f, 1.0f), 1.0f);

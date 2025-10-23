@@ -34,8 +34,8 @@ namespace AtomSampleViewer
     const AZ::Color CyanAlpha      (0.0f, 0.5f, 0.5f, 0.5f);
     const AZ::Color MagentaAlpha   (0.5f, 0.0f, 0.5f, 0.5f);
 
-    const AZ::Color LightGray      (0.8f, 0.8f, 0.8, 1.0f);
-    const AZ::Color DarkGray       (0.2f, 0.2f, 0.2, 1.0f);
+    const AZ::Color LightGray      (0.8f, 0.8f, 0.8f, 1.0f);
+    const AZ::Color DarkGray       (0.2f, 0.2f, 0.2f, 1.0f);
 
     void DrawBackgroundBox(AZ::RPI::AuxGeomDrawPtr auxGeom)
     {
