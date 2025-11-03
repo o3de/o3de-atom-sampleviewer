@@ -11,7 +11,6 @@ import subprocess
 import pytest
 
 import ly_test_tools.environment.process_utils as process_utils
-import ly_test_tools.launchers.platforms.base
 
 logger = logging.getLogger(__name__)
 
@@ -22,14 +21,14 @@ class AtomSampleViewerException(Exception):
 
 
 @pytest.mark.parametrize('launcher_platform', ['windows'])
-@pytest.mark.parametrize("project", ["AtomSampleViewer"])
+@pytest.mark.parametrize("project", ["o3de-atom-sampleviewer"])
 @pytest.mark.parametrize('rhi', ['dx12', 'vulkan'])
 @pytest.mark.usefixtures("clean_atomsampleviewer_logs", "atomsampleviewer_log_monitor")
 class TestAutomationMainSuite:
 
     def test_AutomatedReviewTestSuite(self, request, workspace, launcher_platform, rhi, atomsampleviewer_log_monitor):
         # Script call setup.
-        test_script = '_FullTestSuite_.bv.lua'
+        test_script = '_AutomatedNightlyTestSuite_.bv.lua'
         test_script_path = os.path.join(workspace.paths.project(), 'scripts', test_script)
         if not os.path.exists(test_script_path):
             raise AtomSampleViewerException(f'Test script does not exist in path: {test_script_path}')
@@ -53,7 +52,7 @@ class TestAutomationMainSuite:
                                 "Traceback (most recent call last):"]
             atomsampleviewer_log_monitor.monitor_log_for_lines(
                 unexpected_lines=unexpected_lines, halt_on_unexpected=True, timeout=400)
-        except ly_test_tools.log.log_monitor.LogMonitorException as e:
+        except atomsampleviewer_log_monitor.LogMonitorException as e:
             expected_screenshots_path = os.path.join(
                 workspace.paths.project(), "scripts", "ExpectedScreenshots")
             test_screenshots_path = os.path.join(

@@ -9,8 +9,7 @@
 --
 ----------------------------------------------------------------------------------------------------
 
--- "Full" suite of tests that need to be run locally by developers before opening a pull request.
--- This suite of tests is NOT part of the automated review process.
+-- "Nightly" suite of tests that need to run nightly on Automated Review (AR) to ensure stability of AtomSampleViewerStandalone.
 
 -- This test suite is capable of randomly shuffling the order of the tests below if a random seed is provided that is not ZERO.
 -- NOTE: If the random seed is zero, then the order is not shuffled at all.
@@ -56,10 +55,6 @@ tests= {
     RunScriptWrapper('scripts/streamingimagetest.bv.luac'),
     RunScriptWrapper('scripts/parallaxtest.bv.luac'),
     RunScriptWrapper('scripts/parallaxdepthartifacts.bv.luac'),
-    -- Disable checkerboard pipeline as it's quite out of date and currently a maintenance burden
-    -- https://github.com/o3de/o3de-atom-sampleviewer/issues/456
-    -- RunScriptWrapper('scripts/checkerboardtest.bv.luac'),
-    RunScriptWrapper('scripts/scenereloadsoaktest.bv.luac'),
     RunScriptWrapper('scripts/diffusegitest.bv.luac'),
     RunScriptWrapper('scripts/arealighttest.bv.luac'),
     RunScriptWrapper('scripts/multiscene.bv.luac'),
@@ -72,7 +67,6 @@ tests= {
     RunScriptWrapper('scripts/ReadbackTest.bv.luac'),
     RunScriptWrapper('scripts/depthoffieldtest.bv.luac'),
     RunScriptWrapper('scripts/exposuretest.bv.luac'),
-    RunScriptWrapper('scripts/shaderreloadsoaktest.bv.luac'),
 
     --Fast checking for the samples which don't have a test. Samples should be removed from this list once they have their own tests
 
