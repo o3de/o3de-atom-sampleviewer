@@ -68,12 +68,15 @@ namespace AtomSampleViewer
         void DestroyLowEndPipeline();
         void CreateDeferredPipeline();
         void DestroyDeferredPipeline();
+        void CreateMultiMaterialDeferredPipeline();
+        void DestroyMultiMaterialDeferredPipeline();
         void CreateMultiViewXRPipeline();
         void DestroyMultiViewXRPipeline();
 
         void ActivateLowEndPipeline();
         void ActivateMultiViewXRPipeline();
         void ActivateDeferredPipeline();
+        void ActivateMultiMaterialDeferredPipeline();
         void ActivateOriginalPipeline();
 
         enum class Pipeline
@@ -86,6 +89,7 @@ namespace AtomSampleViewer
 
         AZ::RPI::RenderPipelinePtr m_lowEndPipeline = nullptr;
         AZ::RPI::RenderPipelinePtr m_deferredPipeline = nullptr;
+        AZ::RPI::RenderPipelinePtr m_multiMaterialDeferredPipeline = nullptr;
         AZ::RPI::RenderPipelinePtr m_multiViewXRPipeline = nullptr;
         AZ::RPI::RenderPipelinePtr m_originalPipeline = nullptr;
 
@@ -119,9 +123,16 @@ namespace AtomSampleViewer
 
         bool m_cameraControllerDisabled = false;
 
-        bool m_useLowEndPipeline = false;
-        bool m_useDeferredPipeline = false;
-        bool m_useMultiViewXRPipeline = false;
+        enum class UsedRenderPipeline : uint32_t
+        {
+            Default,
+            LowEnd,
+            Deferred,
+            MultiMaterialDeferred,
+            MultiViewXR
+        };
+
+        UsedRenderPipeline m_usedRenderPipeline = UsedRenderPipeline::Default;
         bool m_switchPipeline = false;
 
         AZ::Data::Instance<AZ::RPI::Material> m_customMaterialInstance; //< Holds a copy of the material instance being used when m_enableMaterialOverride is true.

@@ -1,0 +1,175 @@
+/*
+ * Copyright (c) Contributors to the Open 3D Engine Project.
+ * For complete copyright and license terms please see the LICENSE at the root of this distribution.
+ *
+ * SPDX-License-Identifier: Apache-2.0 OR MIT
+ *
+ */
+
+#include <viewsrg_all.srgi>
+#include <scenesrg_all.srgi>
+
+#include <Atom/Features/PostProcessing/FullscreenVertex.azsli>
+#include <Atom/Features/ScreenSpace/ScreenSpaceUtil.azsli>
+
+#if PIPELINE_HAS_DRAW_SRG
+#error "Deferred materials can't have a custom DrawSrg"
+#endif
+
+#if PIPELINE_HAS_OBJECT_SRG
+#error "Deferred materials can't have a custom ObjectSrg"
+#endif
+
+#include <Atom/Features/Pipeline/Deferred/DeferredDrawSrg.azsli>
+
+// we have the same render-targets as a forward pass
+#include <Atom/Features/Pipeline/Forward/ForwardPassOutput.azsli>
+
+#include <Atom/Features/Pipeline/Deferred/VisibilityBuffer.azsli>
+#include <Atom/Features/MeshInfo/MeshInfo.azsli>
+#include <Atom/Features/MeshInfo/MeshInfoUtil.azsli>
+#include <Atom/Features/FallbackPBRMaterial/MaterialInfoUtil.azsli>
+
+
+bool GetDrawPacketId(int index, inout uint drawPacketId)
+{
+    uint entryCount;
+
+    DrawSrg::m_drawPacketIds.GetDimensions(entryCount);
+
+    if (index < 0 || index >= entryCount)
+    {
+        return false;
+    }
+    drawPacketId = DrawSrg::m_drawPacketIds[index];
+    return true;
+}
+
+#if OUTPUT_SUBSURFACE
+float GetSubsurfaceScatteringFactorAndQuality(Surface surface)
+{
+    // Pack factor and quality, drawback: because of precision limit of float16 cannot represent exact 1, maximum representable value is 0.9961
+    uint factorAndQuality = dot(round(float2(saturate(surface.subsurfaceScatteringFactor), surface.subsurfaceScatteringQuality) * 255), float2(256, 1));
+    return factorAndQuality * (o_enableSubsurfaceScattering ? 1.0 : -1.0);
+}
+#endif
+
+ForwardPassOutput MainPS(VSOutput IN, in uint sampleIndex : SV_SampleIndex)
+{
+    // ------- Output -------
+    ForwardPassOutput OUT;
+
+    uint2 size;
+    PassSrg::m_visibilityBuffer_0.GetDimensions(size.x, size.y);
+
+    uint2 pixelIndex = uint2(IN.m_texCoord * size);
+
+    float4 vBufferValue0 = PassSrg::m_visibilityBuffer_0[pixelIndex];
+
+    int meshInfoIndex;
+    MeshInfo meshInfo;
+    bool renderPixel = false;
+    if (GetMeshInfoIndex(vBufferValue0, meshInfoIndex))
+    {
+        // vbuffer pixel not valid, e.g. for a background pixel
+        renderPixel = true;
+        uint drawPacketId;
+        renderPixel &= GetDrawPacketId(meshInfoIndex, drawPacketId);
+        renderPixel &= drawPacketId == DrawSrg::m_drawPacketId;
+        renderPixel &= GetMeshInfoEntry(meshInfoIndex, meshInfo);
+        renderPixel &= meshInfo.m_indexBufferIndex >= 0;
+        renderPixel &= meshInfo.m_materialTypeId >= 0;
+    }
+
+    // Note: we need the this if/else construct, since discard alone doesn't fully deactivate the shader, it only disables writing to the output.
+    // If we process after a discard, we could access a bindless buffer with an illegal index, which can crash the shader
+    if (renderPixel == false)
+    {
+        discard;
+    }
+    else {
+        // shade the current pixel:
+
+        // ------- Unpack the entire VBuffer entry -------
+        float4 vBufferValue1 = PassSrg::m_visibilityBuffer_1[pixelIndex];
+        VisibilityBuffer vbuffer;
+        unpackVisibilityBuffer(vBufferValue0, vBufferValue1, vbuffer);
+
+        // ------- Vertex-data, manually interpolated for the current pixel -------
+        VsInput dIN;
+        LoadInterpolatedVertexData(meshInfo, vbuffer.m_triangleId, vbuffer.m_barycentrics, dIN);
+
+        // ------- System Values -------
+        VsSystemValues SV;
+        SV.m_objectId = meshInfo.m_objectIdForTransform;
+        SV.m_lightingChannelMask = meshInfo.m_lightingChannels;
+        SV.m_uvStreamTangentBitmask = meshInfo.m_uvStreamTangentBitmask;
+
+        // ------- Material Parameters -------
+        const MaterialParameters params = GetMaterialParameters(meshInfo.m_materialTypeId, meshInfo.m_materialInstanceId);
+
+        // ------- Vertex Stage -------    
+        VsOutput dOUT = EvaluateVertexGeometry(dIN, SV, params);
+        dOUT.position.xyz /= dOUT.position.w;
+
+        // ------- Geometry -> Surface -> Lighting -------
+        PixelGeometryData geoData = EvaluatePixelGeometry(dOUT, SV, vbuffer.m_isFrontFace, params);
+
+        // note: the material functions currently only support dx/dy on one uv channel
+        float4 uvDxDy = CalculateUvDxDy(meshInfo, vbuffer.m_triangleId, vbuffer.m_barycentrics, vbuffer.m_barycentricsDx, vbuffer.m_barycentricsDy, 0);
+
+        Surface surface = EvaluateSurface(dOUT, SV, geoData, params, uvDxDy, true);
+        float3 views[MAX_SHADING_VIEWS];
+        views[0] = ViewSrg::m_worldPosition.xyz;    // Assume one view for forward pass for now
+        
+        MaterialInfo materialInfo;
+        if (HasMaterialInfoEntry(meshInfoIndex))
+        {
+            GetMaterialInfoEntry(meshInfoIndex, materialInfo);
+        }
+        else {
+            materialInfo.m_reflectionProbeData.m_useReflectionProbe = false;
+            materialInfo.m_reflectionProbeCubeMapIndex = SceneSrg::m_nullCubeMapIndex;
+        }
+
+        LightingData lightingData = EvaluateLighting(surface, dOUT.position, views, materialInfo.m_reflectionProbeCubeMapIndex, materialInfo.m_reflectionProbeData);
+        // --- Diffuse Lighting ---
+        OUT.m_diffuseColor.rgb = lightingData.diffuseLighting;
+        OUT.m_diffuseColor.a = -1;  // Disable Subsurface Scattering
+        // --- Specular Lighting ---
+        OUT.m_specularColor.rgb = lightingData.specularLighting[0].rgb;
+        OUT.m_specularColor.a = 1.0;
+        // --- Roughness and Specular ---
+        OUT.m_specularF0.rgb = surface.GetSpecularF0();
+        OUT.m_specularF0.a = surface.roughnessLinear;
+        // --- Albedo ---
+        OUT.m_albedo.rgb = surface.albedo * lightingData.diffuseResponse * lightingData.diffuseAmbientOcclusion;
+        OUT.m_albedo.a = lightingData.specularOcclusion;
+        // --- Normal ---
+        OUT.m_normal.rgb = EncodeNormalSignedOctahedron(surface.GetDefaultNormal());
+        OUT.m_normal.a = EncodeUnorm2BitFlags(o_enableIBL, o_specularF0_enableMultiScatterCompensation);
+
+        // --- Emissive ---
+        // Sending to specular output for historical reasons until sending to diffuse can be validated
+        OUT.m_specularColor.rgb += lightingData.emissiveLighting; 
+
+        // --- Subsurface ---
+#if OUTPUT_SUBSURFACE
+        bool applySubsurfaceScattering = o_enableSubsurfaceScattering;
+
+        if(applySubsurfaceScattering)
+        {
+            OUT.m_diffuseColor.a = GetSubsurfaceScatteringFactorAndQuality(surface);
+            OUT.m_scatterDistance = surface.scatterDistance;
+        }
+        else
+        {
+            OUT.m_scatterDistance = float3(0, 0, 0);
+        }
+#endif
+
+
+    }
+ 
+    return OUT;
+}
