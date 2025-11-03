@@ -238,7 +238,7 @@ namespace AtomSampleViewer
         AZ_Assert(result == RHI::ResultCode::Success, "Failed to create draw render attachment layout");
 
         m_drawPipelineState = drawShader->AcquirePipelineState(pipelineDesc);
-        AZ_Assert(m_drawPipelineState, "Failed to acquire draw pipeline state");
+        AZ_Assert(m_drawPipelineState && m_drawPipelineState->IsInitialized(), "Failed to acquire draw pipeline state");
 
         m_drawSRG = CreateShaderResourceGroup(drawShader, "BufferSrg", RayTracingExampleName);
     }
@@ -283,7 +283,7 @@ namespace AtomSampleViewer
 
         // global pipeline state and srg
         m_globalPipelineState = m_rayGenerationShader->AcquirePipelineState(rayGenerationShaderDescriptor);
-        AZ_Assert(m_globalPipelineState, "Failed to acquire ray tracing global pipeline state");
+        AZ_Assert(m_globalPipelineState && m_globalPipelineState->IsInitialized(), "Failed to acquire ray tracing global pipeline state");
         m_globalSrg = CreateShaderResourceGroup(m_rayGenerationShader, "RayTracingGlobalSrg", RayTracingExampleName);
 
         // build the ray tracing pipeline state descriptor

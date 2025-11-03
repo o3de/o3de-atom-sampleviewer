@@ -367,7 +367,7 @@ namespace AtomSampleViewer
             pipelineDesc.m_inputStreamLayout = m_inputStreamLayout;
 
             m_modelPipelineState[0] = shader->AcquirePipelineState(pipelineDesc);
-            if (!m_modelPipelineState[0])
+            if (!m_modelPipelineState[0] || !m_modelPipelineState[0]->IsInitialized())
             {
                 AZ_Error(VariableRateShading::SampleName, false, "Failed to acquire default pipeline state for shader");
                 return;
@@ -383,7 +383,7 @@ namespace AtomSampleViewer
             pipelineDesc.m_renderAttachmentConfiguration.m_renderAttachmentLayout = rateRenderAttachmentLayout;
 
             m_modelPipelineState[1] = shader->AcquirePipelineState(pipelineDesc);
-            if (!m_modelPipelineState[1])
+            if (!m_modelPipelineState[1] || !m_modelPipelineState[1]->IsInitialized())
             {
                 AZ_Error(VariableRateShading::SampleName, false, "Failed to acquire default pipeline state for shader");
                 return;
@@ -396,7 +396,7 @@ namespace AtomSampleViewer
             shader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId).ConfigurePipelineState(pipelineDesc);
 
             m_computePipelineState = shader->AcquirePipelineState(pipelineDesc);
-            if (!m_computePipelineState)
+            if (!m_computePipelineState || !m_computePipelineState->IsInitialized())
             {
                 AZ_Error(VariableRateShading::SampleName, false, "Failed to acquire default pipeline state for compute");
                 return;
@@ -429,7 +429,7 @@ namespace AtomSampleViewer
             targetBlendState.m_blendOp = RHI::BlendOp::Add;
 
             m_imagePipelineState = shader->AcquirePipelineState(pipelineDesc);
-            if (!m_imagePipelineState)
+            if (!m_imagePipelineState || !m_imagePipelineState->IsInitialized())
             {
                 AZ_Error(VariableRateShading::SampleName, false, "Failed to acquire default pipeline state for shader");
                 return;

@@ -300,7 +300,7 @@ namespace AtomSampleViewer
 
         auto& pipeline = m_pipelineStates[static_cast<uint32_t>(type)];
         pipeline = m_shader->AcquirePipelineState(pipelineStateDescriptor);
-        if (!pipeline)
+        if (!pipeline || !pipeline->IsInitialized())
         {
             AZ_Error(AlphaToCoverage::SampleName, false, "Failed to acquire default pipeline state for shader '%s'", AlphaToCoverage::ShaderFilePath);
             return;

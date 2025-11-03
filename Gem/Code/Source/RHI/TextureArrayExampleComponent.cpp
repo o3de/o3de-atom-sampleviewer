@@ -121,7 +121,9 @@ namespace AtomSampleViewer
             AZ_Assert(result == AZ::RHI::ResultCode::Success, "Failed to create render attachment layout");
 
             m_pipelineState = m_shader->AcquirePipelineState(pipelineStateDescriptor);
-            AZ_Error(InternalTA::SampleName, m_pipelineState, "Failed for the appropriate acquire default pipeline state for shader '%s'", InternalTA::ShaderFilePath);
+            AZ_Error(
+                InternalTA::SampleName, m_pipelineState && m_pipelineState->IsInitialized(),
+                "Failed for the appropriate acquire default pipeline state for shader '%s'", InternalTA::ShaderFilePath);
         }
 
         // Setup input buffer stream

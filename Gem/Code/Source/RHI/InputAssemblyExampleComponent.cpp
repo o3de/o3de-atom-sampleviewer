@@ -187,7 +187,7 @@ namespace AtomSampleViewer
         }
 
         m_dispatchPipelineState = shader->AcquirePipelineState(pipelineDesc);
-        if (!m_dispatchPipelineState)
+        if (!m_dispatchPipelineState || !m_dispatchPipelineState->IsInitialized())
         {
             AZ_Error(InputAssembly::SampleName, false, "Failed to acquire default pipeline state for shader '%s'", shaderFilePath);
             return;
@@ -218,7 +218,7 @@ namespace AtomSampleViewer
         AZ_Assert(result == RHI::ResultCode::Success, "Failed to create render attachment layout");
 
         m_drawPipelineState = shader->AcquirePipelineState(pipelineDesc);
-        if (!m_drawPipelineState)
+        if (!m_drawPipelineState || !m_drawPipelineState->IsInitialized())
         {
             AZ_Error(InputAssembly::SampleName, false, "Failed to acquire default pipeline state for shader '%s'", shaderFilePath);
             return;
