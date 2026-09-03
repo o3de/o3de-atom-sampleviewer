@@ -187,10 +187,12 @@ namespace AtomSampleViewer
         m_ssaoEntity->AddComponent(transformComponent);
 
         m_postProcessFeatureProcessor = m_scene->GetFeatureProcessor<Render::PostProcessFeatureProcessorInterface>();
-
         auto* postProcessSettings = m_postProcessFeatureProcessor->GetOrCreateSettingsInterface(m_ssaoEntity->GetId());
-        m_ssaoSettings = postProcessSettings->GetOrCreateSsaoSettingsInterface();
-
+        if (postProcessSettings)
+        {
+            m_ssaoSettings = postProcessSettings->GetOrCreateAoSettingsInterface();
+        }
+       
         m_ssaoEntity->Activate();
         AZ::EntityBus::MultiHandler::BusConnect(m_ssaoEntity->GetId());
     }
@@ -263,10 +265,10 @@ namespace AtomSampleViewer
                 m_ssaoSettings->OnConfigChanged();
             }
 
-            float strength = m_ssaoSettings->GetStrength();
+            float strength = m_ssaoSettings->GetSsaoStrength();
             if (ScriptableImGui::SliderFloat("SSAO Strength", &strength, 0.0f, 2.0f))
             {
-                m_ssaoSettings->SetStrength(strength);
+                m_ssaoSettings->SetSsaoStrength(strength);
                 m_ssaoSettings->OnConfigChanged();
             }
 

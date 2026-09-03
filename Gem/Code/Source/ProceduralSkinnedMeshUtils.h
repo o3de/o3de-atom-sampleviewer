@@ -9,7 +9,7 @@
 #pragma once
 
 #include <AzCore/std/smart_ptr/intrusive_ptr.h>
-#include <AtomCore/Instance/Instance.h>
+#include <AzCore/Instance/Instance.h>
 
 namespace AZ
 {

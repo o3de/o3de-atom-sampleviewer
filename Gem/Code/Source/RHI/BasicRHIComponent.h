@@ -9,6 +9,7 @@
 #pragma once
 #include <AtomSampleComponent.h>
 #include <AzCore/std/smart_ptr/shared_ptr.h>
+#include <AzCore/Instance/InstanceId.h>
 
 #include <Atom/RPI.Public/Image/StreamingImage.h>
 #include <Atom/RHI/RHISystemInterface.h>
@@ -21,8 +22,6 @@
 #include <Atom/RHI/FrameScheduler.h>
 #include <Atom/RHI/ScopeProducer.h>
 #include <Atom/RHI.Reflect/Format.h>
-
-#include <AtomCore/Instance/InstanceId.h>
 
 #include <AzCore/Math/Matrix4x4.h>
 #include <AzCore/Math/Vector3.h>

@@ -246,7 +246,7 @@ namespace AtomSampleViewer
             {
                 RHI::BufferScopeAttachmentDescriptor attachmentDescriptor;
                 attachmentDescriptor.m_attachmentId = InputAssembly::InputAssemblyBufferAttachmentId;
-                attachmentDescriptor.m_bufferViewDescriptor = RHI::BufferViewDescriptor::CreateStructured(0, BufferData::array_size, sizeof(BufferData::value_type));
+                attachmentDescriptor.m_bufferViewDescriptor = RHI::BufferViewDescriptor::CreateStructured(0, AZStd::tuple_size_v<BufferData>, sizeof(BufferData::value_type));
                 attachmentDescriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::DontCare;
                 frameGraph.UseShaderAttachment(
                     attachmentDescriptor, RHI::ScopeAttachmentAccess::ReadWrite, RHI::ScopeAttachmentStage::ComputeShader);
@@ -255,7 +255,7 @@ namespace AtomSampleViewer
             {
                 RHI::BufferScopeAttachmentDescriptor attachmentDescriptor;
                 attachmentDescriptor.m_attachmentId = InputAssembly::ImportedInputAssemblyBufferAttachmentId;
-                attachmentDescriptor.m_bufferViewDescriptor = RHI::BufferViewDescriptor::CreateStructured(0, BufferData::array_size, sizeof(BufferData::value_type));
+                attachmentDescriptor.m_bufferViewDescriptor = RHI::BufferViewDescriptor::CreateStructured(0, AZStd::tuple_size_v<BufferData>, sizeof(BufferData::value_type));
                 attachmentDescriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::DontCare;
                 frameGraph.UseShaderAttachment(
                     attachmentDescriptor, RHI::ScopeAttachmentAccess::ReadWrite, RHI::ScopeAttachmentStage::ComputeShader);
@@ -345,7 +345,7 @@ namespace AtomSampleViewer
             {
                 RHI::BufferScopeAttachmentDescriptor attachmentDescriptor;
                 attachmentDescriptor.m_attachmentId = InputAssembly::InputAssemblyBufferAttachmentId;
-                attachmentDescriptor.m_bufferViewDescriptor = RHI::BufferViewDescriptor::CreateStructured(0, BufferData::array_size, sizeof(BufferData::value_type));
+                attachmentDescriptor.m_bufferViewDescriptor = RHI::BufferViewDescriptor::CreateStructured(0, AZStd::tuple_size_v<BufferData>, sizeof(BufferData::value_type));
                 attachmentDescriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
                 attachmentDescriptor.m_loadStoreAction.m_storeAction = RHI::AttachmentStoreAction::DontCare;
                 frameGraph.UseInputAssemblyAttachment(attachmentDescriptor);
@@ -354,7 +354,7 @@ namespace AtomSampleViewer
             {
                 RHI::BufferScopeAttachmentDescriptor attachmentDescriptor;
                 attachmentDescriptor.m_attachmentId = InputAssembly::ImportedInputAssemblyBufferAttachmentId;
-                attachmentDescriptor.m_bufferViewDescriptor = RHI::BufferViewDescriptor::CreateStructured(0, BufferData::array_size, sizeof(BufferData::value_type));
+                attachmentDescriptor.m_bufferViewDescriptor = RHI::BufferViewDescriptor::CreateStructured(0, AZStd::tuple_size_v<BufferData>, sizeof(BufferData::value_type));
                 attachmentDescriptor.m_loadStoreAction.m_loadAction = RHI::AttachmentLoadAction::Load;
                 attachmentDescriptor.m_loadStoreAction.m_storeAction = RHI::AttachmentStoreAction::DontCare;
                 frameGraph.UseInputAssemblyAttachment(attachmentDescriptor);
@@ -400,7 +400,7 @@ namespace AtomSampleViewer
             commandList->SetScissors(&m_scissor, 1);
 
             RHI::DrawLinear drawLinear;
-            drawLinear.m_vertexCount = BufferData::array_size;
+            drawLinear.m_vertexCount = AZStd::tuple_size_v<BufferData>;
 
             RHI::DeviceDrawItem drawItem;
             drawItem.m_pipelineState = m_drawPipelineState->GetDevicePipelineState(context.GetDeviceIndex()).get();
