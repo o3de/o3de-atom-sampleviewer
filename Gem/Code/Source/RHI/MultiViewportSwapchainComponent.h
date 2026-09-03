@@ -7,8 +7,7 @@
  */
 #pragma once
 
-#include <AtomCore/Instance/InstanceId.h>
-
+#include <AzCore/Instance/InstanceId.h>
 #include <AzCore/Component/EntityBus.h>
 #include <AzCore/Component/TickBus.h>
 

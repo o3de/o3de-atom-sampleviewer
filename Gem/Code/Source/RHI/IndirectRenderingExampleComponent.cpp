@@ -430,8 +430,8 @@ namespace AtomSampleViewer
                 case SequenceType::DrawOnly:
                     // Since we are using one vertex buffer view and one index buffer view for both type of primitives
                     // we need to adjust the vertex and index offset so they point to the proper location.
-                    arguments.m_vertexOffset = decltype(BufferData::m_trianglePositions)::array_size;
-                    arguments.m_indexOffset = decltype(BufferData::m_triangleIndices)::array_size;
+                    arguments.m_vertexOffset = AZStd::tuple_size_v<decltype(BufferData::m_trianglePositions)>;
+                    arguments.m_indexOffset = AZStd::tuple_size_v<decltype(BufferData::m_triangleIndices)>;
                     break;
                 default:
                     AZ_Assert(false, "Invalid sequence type");

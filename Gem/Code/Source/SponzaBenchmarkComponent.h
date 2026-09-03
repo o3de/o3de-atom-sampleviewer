@@ -10,7 +10,7 @@
 
 #include <CommonSampleComponentBase.h>
 
-#include <AtomCore/Instance/InstanceId.h>
+#include <AzCore/Instance/InstanceId.h>
 
 #include <AzCore/Component/TickBus.h>
 #include <AzCore/IO/Path/Path.h>

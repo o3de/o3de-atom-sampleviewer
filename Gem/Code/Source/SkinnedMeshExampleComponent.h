@@ -13,9 +13,9 @@
 
 #include <AzCore/Component/EntityBus.h>
 #include <AzCore/Component/TickBus.h>
+#include <AzCore/Instance/Instance.h>
 
 #include <AzFramework/Input/Events/InputChannelEventListener.h>
-#include <AtomCore/Instance/Instance.h>
 
 #include <Utils/Utils.h>
 #include <Utils/ImGuiSidebar.h>

@@ -8,9 +8,9 @@
 #include <Utils/Utils.h>
 
 #include <AzCore/IO/SystemFile.h>
+#include <AzCore/Instance/InstanceDatabase.h>
 #include <AzCore/Settings/SettingsRegistryMergeUtils.h>
 
-#include <AtomCore/Instance/InstanceDatabase.h>
 #include <Atom/RHI/RHISystemInterface.h>
 #include <Atom/RPI.Public/RenderPipeline.h>
 #include <Atom/RPI.Public/RPISystemInterface.h>

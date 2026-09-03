@@ -192,7 +192,7 @@ namespace AtomSampleViewer
             ImGui::Indent();
             if (ScriptableImGui::ColorEdit3("Color##irisColor", m_irisColor, ImGuiColorEditFlags_None))
             {
-                m_materialInstance->SetPropertyValue(m_irisColorIndex, AZ::Color(m_irisColor[0], m_irisColor[1], m_irisColor[2], 1.0));
+                m_materialInstance->SetPropertyValue(m_irisColorIndex, AZ::Color(m_irisColor[0], m_irisColor[1], m_irisColor[2], 1.0f));
                 eyeSettingsChanged = true;
             }
             if (ScriptableImGui::SliderFloat("Color Factor##irisColorFactor", &m_irisColorFactor, 0.f, 1.f, "%.3f"))
@@ -212,7 +212,7 @@ namespace AtomSampleViewer
             ImGui::Indent();
             if (ScriptableImGui::ColorEdit3("Color##scleraColor", m_scleraColor, ImGuiColorEditFlags_None))
             {
-                m_materialInstance->SetPropertyValue(m_scleraColorIndex, AZ::Color(m_scleraColor[0], m_scleraColor[1], m_scleraColor[2], 1.0));
+                m_materialInstance->SetPropertyValue(m_scleraColorIndex, AZ::Color(m_scleraColor[0], m_scleraColor[1], m_scleraColor[2], 1.0f));
                 eyeSettingsChanged = true;
             }
             if (ScriptableImGui::SliderFloat("Color Factor##scleraColorFactor", &m_scleraColorFactor, 0.f, 1.f, "%.3f"))
@@ -277,7 +277,7 @@ namespace AtomSampleViewer
             }
             if (ScriptableImGui::ColorEdit3("Color##SSSColor", m_SSSColor, ImGuiColorEditFlags_None))
             {
-                m_materialInstance->SetPropertyValue(m_SSSColorIndex, AZ::Color(m_SSSColor[0], m_SSSColor[1], m_SSSColor[2], 1.0));
+                m_materialInstance->SetPropertyValue(m_SSSColorIndex, AZ::Color(m_SSSColor[0], m_SSSColor[1], m_SSSColor[2], 1.0f));
                 eyeSettingsChanged = true;
             }
             if (ScriptableImGui::SliderFloat("Factor##SSSColorFactor", &m_SSSFactor, 0.f, 1.f, "%.3f"))

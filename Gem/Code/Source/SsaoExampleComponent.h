@@ -82,7 +82,7 @@ namespace AtomSampleViewer
         bool m_worldModelAssetLoaded = false;
 
         AZ::Render::PostProcessFeatureProcessorInterface* m_postProcessFeatureProcessor = nullptr;
-        AZ::Render::SsaoSettingsInterface* m_ssaoSettings = nullptr;
+        AZ::Render::AoSettingsInterface* m_ssaoSettings = nullptr;
         AZ::Entity* m_ssaoEntity = nullptr;
 
         AZ::Render::ImGuiActiveContextScope m_imguiScope;
