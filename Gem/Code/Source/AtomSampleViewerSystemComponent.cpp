@@ -76,15 +76,15 @@ namespace AtomSampleViewer
 
     void AtomSampleViewerSystemComponent::GetProvidedServices(AZ::ComponentDescriptor::DependencyArrayType& provided)
     {
-        provided.push_back(AZ_CRC("PrototypeLmbrCentralService", 0xe35e6de0));
+        provided.push_back(AZ_CRC_CE("PrototypeLmbrCentralService"));
     }
 
     void AtomSampleViewerSystemComponent::GetRequiredServices(AZ::ComponentDescriptor::DependencyArrayType& required)
     {
         required.push_back(AZ::RHI::Factory::GetComponentService());
-        required.push_back(AZ_CRC("AssetDatabaseService", 0x3abf5601));
-        required.push_back(AZ_CRC("RPISystem", 0xf2add773));
-        required.push_back(AZ_CRC("BootstrapSystemComponent", 0xb8f32711));
+        required.push_back(AZ_CRC_CE("AssetDatabaseService"));
+        required.push_back(AZ_CRC_CE("RPISystem"));
+        required.push_back(AZ_CRC_CE("BootstrapSystemComponent"));
     }
 
     AtomSampleViewerSystemComponent::AtomSampleViewerSystemComponent()

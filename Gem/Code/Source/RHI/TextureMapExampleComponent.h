@@ -56,7 +56,7 @@ namespace AtomSampleViewer
 
         struct BufferViewData
         {
-            AZ::RHI::GeometryView m_geometryView;
+            AZ::RHI::GeometryView m_geometryView{ AZ::RHI::MultiDevice::AllDevices };
             AZ::RHI::InputStreamLayout m_inputStreamLayout;
         };
         

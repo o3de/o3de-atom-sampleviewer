@@ -93,7 +93,7 @@ namespace AtomSampleViewer
 
         BufferData m_bufferData;
 
-        AZ::RHI::GeometryView m_geometryView;
+        AZ::RHI::GeometryView m_geometryView{ AZ::RHI::MultiDevice::AllDevices };
 
         static const int numberOfPaths = 3;
         const char* m_filePaths[numberOfPaths] = {

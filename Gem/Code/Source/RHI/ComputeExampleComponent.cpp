@@ -253,8 +253,8 @@ namespace AtomSampleViewer
 
         
         m_bufferViewDescriptor = RHI::BufferViewDescriptor::CreateStructured(0, m_bufferWidth * m_bufferHeight, RHI::GetFormatSize(RHI::Format::R32G32B32A32_FLOAT));
-        m_computeBufferView = m_computeBuffer->BuildBufferView(m_bufferViewDescriptor);
-                  
+        m_computeBufferView = m_computeBuffer->GetBufferView(m_bufferViewDescriptor);
+
         if(!m_computeBufferView.get())
         {
             AZ_Assert(false, "Failed to initialized compute buffer view");

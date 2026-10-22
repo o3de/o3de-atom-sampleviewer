@@ -112,7 +112,7 @@ namespace AtomSampleViewer
         }
 
         {
-            auto scaleMatrix = AZ::Matrix4x4::CreateScale(AZ::Vector3(0.2, 0.2, 0.2));
+            auto scaleMatrix = AZ::Matrix4x4::CreateScale(AZ::Vector3(0.2f, 0.2f, 0.2f));
             [[maybe_unused]] bool success = m_shaderResourceGroups[0]->SetConstant(m_objectMatrixConstantIndex, scaleMatrix * AZ::Matrix4x4::CreateTranslation(AZ::Vector3(0, 0, 0.5)));
             success &= m_shaderResourceGroups[0]->SetConstant(m_colorConstantIndex, AZ::Vector4(1.0, 0, 0, 1.0));
             AZ_Warning(QueryExample::SampleName, success, "Failed to set SRG Constant data");
@@ -128,8 +128,8 @@ namespace AtomSampleViewer
             AZ_Warning(QueryExample::SampleName, success, "Failed to set SRG Constant data");
         }
         {
-            auto scaleMatrix = AZ::Matrix4x4::CreateScale(AZ::Vector3(0.2, 0.2, 0.2));
-            [[maybe_unused]] bool success = m_shaderResourceGroups[2]->SetConstant(m_objectMatrixConstantIndex, scaleMatrix * AZ::Matrix4x4::CreateTranslation(AZ::Vector3(0, 0, 0.49)));
+            auto scaleMatrix = AZ::Matrix4x4::CreateScale(AZ::Vector3(0.2f, 0.2f, 0.2f));
+            [[maybe_unused]] bool success = m_shaderResourceGroups[2]->SetConstant(m_objectMatrixConstantIndex, scaleMatrix * AZ::Matrix4x4::CreateTranslation(AZ::Vector3(0, 0, 0.49f)));
             AZ_Warning(QueryExample::SampleName, success, "Failed to set SRG Constant data");
         }
 
