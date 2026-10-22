@@ -183,7 +183,7 @@ namespace AtomSampleViewer
         AZ::Data::Asset<AZ::RPI::ShaderAsset> m_image3dShaderAsset;
         AZ::RHI::Ptr<AZ::RHI::ShaderResourceGroupLayout> m_image3dSrgLayout;
 
-        AZ::RHI::GeometryView m_geometryView;
+        AZ::RHI::GeometryView m_geometryView{ AZ::RHI::MultiDevice::AllDevices };
 
         // shader input indices
         AZ::RHI::ShaderInputImageIndex m_imageInputIndex;

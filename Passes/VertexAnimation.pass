@@ -1,0 +1,37 @@
+{
+  "Type": "JsonSerialization",
+  "Version": 1,
+  "ClassName": "PassAsset",
+  "ClassData": {
+      "PassTemplate": {
+          "Name": "VertexAnimationTemplate",
+          "PassClass": "VertexAnimationPass",
+          "Slots": [
+              {
+                  "Name": "SourceData",
+                  "ShaderInputName": "m_sourceVertexData",
+                  "SlotType": "Input",
+                  "ScopeAttachmentUsage": "Shader"
+              },
+              {
+                  "Name": "TargetData",
+                  "ShaderInputName": "m_targetVertexData",
+                  "SlotType": "InputOutput",
+                  "ScopeAttachmentUsage": "Shader"
+              },
+              {
+                "Name": "InstanceOffsetData",
+                "ShaderInputName": "m_instanceOffsetData",
+                "SlotType": "Input",
+                "ScopeAttachmentUsage": "Shader"
+              }
+          ],
+          "PassData": {
+              "$type": "ComputePassData",
+              "ShaderAsset": {
+                  "FilePath": "Shaders/VertexAnimation.shader"
+              }
+           }
+        }
+    }
+}

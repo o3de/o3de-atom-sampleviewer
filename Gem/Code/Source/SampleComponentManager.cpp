@@ -68,12 +68,14 @@
 #include <RHI/XRExampleComponent.h>
 #include <RHI/TrianglesConstantBufferExampleComponent.h>
 #include <RHI/BindlessPrototypeExampleComponent.h>
+#include <RHI/RayTracingClusterExampleComponent.h>
 #include <RHI/RayTracingExampleComponent.h>
 #include <RHI/MatrixAlignmentTestExampleComponent.h>
 #include <RHI/VariableRateShadingExampleComponent.h>
 
 #include <Performance/100KDrawable_SingleView_ExampleComponent.h>
 #include <Performance/100KDraw_10KDrawable_MultiView_ExampleComponent.h>
+#include <Performance/RayTracingVertexAnimationExampleComponent.h>
 
 #include <AreaLightExampleComponent.h>
 #include <AssetLoadTestComponent.h>
@@ -98,6 +100,7 @@
 #include <MultiSceneExampleComponent.h>
 #include <ParallaxMappingExampleComponent.h>
 #include <RayTracingIntersectionShaderExampleComponent.h>
+#include <RayTracingVertexFormatExampleComponent.h>
 #include <RenderTargetTextureExampleComponent.h>
 #include <SceneReloadSoakTestComponent.h>
 #include <ShadowExampleComponent.h>
@@ -136,6 +139,7 @@
 #include <AzFramework/Scene/SceneSystemInterface.h>
 
 #include <Passes/RayTracingAmbientOcclusionPass.h>
+#include <Passes/VertexAnimationPass.h>
 
 #include <Utils/Utils.h>
 
@@ -256,7 +260,7 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::GetRequiredServices(AZ::ComponentDescriptor::DependencyArrayType& required)
     {
-        required.push_back(AZ_CRC("PrototypeLmbrCentralService", 0xe35e6de0));
+        required.push_back(AZ_CRC_CE("PrototypeLmbrCentralService"));
     }
 
     void SampleComponentManager::GetProvidedServices(AZ::ComponentDescriptor::DependencyArrayType& provided)
@@ -266,7 +270,7 @@ namespace AtomSampleViewer
 
     void SampleComponentManager::GetDependentServices(AZ::ComponentDescriptor::DependencyArrayType& dependent)
     {
-        dependent.push_back(AZ_CRC("AzFrameworkConfigurationSystemComponentService", 0xcc49c96e)); // Ensures a scene is created for the GameEntityContext
+        dependent.push_back(AZ_CRC_CE("AzFrameworkConfigurationSystemComponentService")); // Ensures a scene is created for the GameEntityContext
     }
 
     AZStd::vector<SampleEntry> SampleComponentManager::GetSamples()
@@ -287,6 +291,7 @@ namespace AtomSampleViewer
             NewRHISample<MultiGPUExampleComponent>("MultiGPU", []() { return AZ::RHI::RHISystemInterface::Get()->GetDeviceCount() >= 2; }),
             NewRHISample<MultiViewportSwapchainComponent>("MultiViewportSwapchainComponent", [] { return IsMultiViewportSwapchainSampleSupported(); }),
             NewRHISample<QueryExampleComponent>("Queries"),
+            NewRHISample<RayTracingClusterExampleComponent>("RayTracingCluster", []() { return Utils::GetRHIDevice()->GetFeatures().m_rayTracingClas; }),
             NewRHISample<RayTracingExampleComponent>("RayTracing", []() {return Utils::GetRHIDevice()->GetFeatures().m_rayTracing; }),
             NewRHISample<SphericalHarmonicsExampleComponent>("SphericalHarmonics"),
             NewRHISample<StencilExampleComponent>("Stencil"),
@@ -315,6 +320,7 @@ namespace AtomSampleViewer
             NewRPISample<MultiRenderPipelineExampleComponent>("MultiRenderPipeline"),
             NewRPISample<MultiSceneExampleComponent>("MultiScene"),
             NewRPISample<MultiViewSingleSceneAuxGeomExampleComponent>("MultiViewSingleSceneAuxGeom"),
+            NewRPISample<RayTracingVertexFormatExampleComponent>("RayTracingVertexFormat", []() { return Utils::GetRHIDevice()->GetFeatures().m_rayTracing; }),
             NewRPISample<ReadbackExampleComponent>("Readback"),
             NewRPISample<RenderTargetTextureExampleComponent>("RenderTargetTexture"),
             NewRPISample<RootConstantsExampleComponent>("RootConstants"),
@@ -342,6 +348,7 @@ namespace AtomSampleViewer
             NewFeaturesSample<TransparencyExampleComponent>("Transparency"),
             NewPerfSample<_100KDrawableExampleComponent>("100KDrawable_SingleView"),
             NewPerfSample<_100KDraw10KDrawableExampleComponent>("100KDraw_10KDrawable_MultiView"),
+            NewPerfSample<RayTracingVertexAnimationExampleComponent>("RayTracingVertexAnimation", []() { return Utils::GetRHIDevice()->GetFeatures().m_rayTracing; }),
         };
     }
 
@@ -408,6 +415,7 @@ namespace AtomSampleViewer
         AZ_Assert(passSystem, "Cannot get the pass system.");
 
         passSystem->AddPassCreator(Name("RayTracingAmbientOcclusionPass"), &AZ::Render::RayTracingAmbientOcclusionPass::Create);
+        passSystem->AddPassCreator(Name("VertexAnimationPass"), &AZ::Render::VertexAnimationPass::Create);
     }
 
     void SampleComponentManager::ActivateInternal()

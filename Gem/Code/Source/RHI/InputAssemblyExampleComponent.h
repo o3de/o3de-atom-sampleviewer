@@ -65,7 +65,7 @@ namespace AtomSampleViewer
         // -------------------------------------------------
         // Input Assembly buffer and its Streams/Index Views
         // -------------------------------------------------
-        AZ::RHI::GeometryView m_geometryView[2];
+        AZStd::fixed_vector<AZ::RHI::GeometryView, 2> m_geometryView{ 2, AZ::RHI::GeometryView{ AZ::RHI::MultiDevice::AllDevices } };
         AZ::RHI::InputStreamLayout m_inputStreamLayout;
 
         AZ::RHI::Ptr<AZ::RHI::BufferPool> m_inputAssemblyBufferPool;

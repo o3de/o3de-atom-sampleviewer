@@ -56,7 +56,7 @@ namespace AtomSampleViewer
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_indexBuffer;
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_positionBuffer;
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_uvBuffer;
-        AZ::RHI::GeometryView m_geometryView;
+        AZ::RHI::GeometryView m_geometryView{ AZ::RHI::MultiDevice::AllDevices };
 
         AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_pipelineState;
         AZ::Data::Instance<AZ::RPI::ShaderResourceGroup> m_shaderResourceGroup;

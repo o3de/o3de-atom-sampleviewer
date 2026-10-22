@@ -172,7 +172,7 @@ namespace AtomSampleViewer
         ImGui::Spacing();
 
         ImGui::Text("Entity Scale");
-        latticeChanged |= ScriptableImGui::SliderFloat("##EntityScale", &m_entityScale, 0.01, s_entityScaleMax);
+        latticeChanged |= ScriptableImGui::SliderFloat("##EntityScale", &m_entityScale, 0.01f, s_entityScaleMax);
 
         if (latticeChanged)
         {

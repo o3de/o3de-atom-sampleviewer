@@ -101,7 +101,7 @@ namespace AtomSampleViewer
             AZStd::array<uint16_t, 6> m_indices;
         };
         AZ::RHI::InputStreamLayout m_quadInputStreamLayout;
-        AZ::RHI::GeometryView m_geometryView;
+        AZ::RHI::GeometryView m_geometryView{ AZ::RHI::MultiDevice::AllDevices };
 
         AZStd::array<AZ::Data::Instance<AZ::RPI::ShaderResourceGroup>, 3> m_shaderResourceGroups;
         AZ::RHI::ShaderInputConstantIndex m_objectMatrixConstantIndex;

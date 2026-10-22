@@ -137,7 +137,7 @@ namespace AtomSampleViewer
         // Buffer for the IA of the full screen quad.
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_inputAssemblyBuffer;
         // Geometry view for the full screen quad.
-        AZ::RHI::GeometryView m_geometryView;
+        AZ::RHI::GeometryView m_geometryView{ AZ::RHI::MultiDevice::AllDevices };
         // Layout of the full screen quad.
         AZ::RHI::InputStreamLayout m_inputStreamLayout;
 

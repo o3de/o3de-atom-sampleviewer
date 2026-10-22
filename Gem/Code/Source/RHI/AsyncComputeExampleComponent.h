@@ -122,7 +122,8 @@ namespace AtomSampleViewer
         // Quad related variables
         AZ::RHI::Ptr<AZ::RHI::BufferPool> m_quadBufferPool;
         AZ::RHI::Ptr<AZ::RHI::Buffer> m_quadInputAssemblyBuffer;
-        AZStd::array<AZ::RHI::GeometryView, NumScopes> m_geometryViews;
+        AZStd::fixed_vector<AZ::RHI::GeometryView, NumScopes> m_geometryViews{ NumScopes,
+                                                                               AZ::RHI::GeometryView{ AZ::RHI::MultiDevice::AllDevices } };
 
         // Terrain related variables
         AZStd::array<AZ::RHI::ConstPtr<AZ::RHI::PipelineState>, NumScopes> m_terrainPipelineStates;
