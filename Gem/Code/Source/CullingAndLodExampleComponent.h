@@ -104,7 +104,7 @@ namespace AtomSampleViewer
 
         // GUI
         ImGuiSidebar m_imguiSidebar;
-        float m_directionalLightPitch = -1.22;
+        float m_directionalLightPitch = -1.22f;
         float m_directionalLightYaw = 0.7f;
         float m_directionalLightIntensity = 4.f;
         float m_diskLightIntensity = 2000.f;

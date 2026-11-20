@@ -234,8 +234,8 @@ namespace AtomSampleViewer
 
     void TextureMapExampleComponent::InitTexture1DBufferView()
     {
-        AZ::Matrix3x3 transform = AZ::Matrix3x3::CreateScale(AZ::Vector3(0.02, 0.02, 1));
-        SetVertexPositionTransform(m_positions.data(), 0, transform, -0.9, -0.8);
+        AZ::Matrix3x3 transform = AZ::Matrix3x3::CreateScale(AZ::Vector3(0.02f, 0.02f, 1));
+        SetVertexPositionTransform(m_positions.data(), 0, transform, -0.9f, -0.8f);
 
         SetVertexUV(m_uvs.data(), 0, 0.0f, 0.0f);
         SetVertexUV(m_uvs.data(), 1, 0.0f, 0.0f);
@@ -269,7 +269,7 @@ namespace AtomSampleViewer
 
     void TextureMapExampleComponent::InitTexture1DArrayBufferView()
     {
-        SetVertexPositionArray(m_positions.data(), 0.02, -0.7, -0.8);
+        SetVertexPositionArray(m_positions.data(), 0.02f, -0.7f, -0.8f);
 
         SetVertexUV(m_uvs.data(), 0,     0.0f, 0.0f);
         SetVertexUV(m_uvs.data(), 1,     0.0f, 0.0f);
@@ -308,7 +308,7 @@ namespace AtomSampleViewer
 
     void TextureMapExampleComponent::InitTexture2DArrayBufferView()
     {
-        SetVertexPositionArray(m_positions.data(), 0.05, -0.4, -0.8);
+        SetVertexPositionArray(m_positions.data(), 0.05f, -0.4f, -0.8f);
         SetVertexUVWArray(m_uvws.data(), s_arraySize);
         SetVertexIndexRectsCounterClock(m_indices.data(), 18);
 
@@ -332,7 +332,7 @@ namespace AtomSampleViewer
 
     void TextureMapExampleComponent::InitCubemapBufferView()
     {
-        SetVertexPositionCubemap(m_positions.data(), 0, 0.0, -0.8);
+        SetVertexPositionCubemap(m_positions.data(), 0, 0.f, -0.8f);
         SetVertexUVWCubemap(m_uvws.data());
         SetVertexIndexRectsCounterClock(m_indices.data(), 36);
 
@@ -356,9 +356,9 @@ namespace AtomSampleViewer
 
     void TextureMapExampleComponent::InitCubemapArrayBufferView()
     {
-        SetVertexPositionCubemap(m_positions.data(), 0, 0.4, -0.8);
-        SetVertexPositionCubemap(m_positions.data(), 24, 0.4, -0.2);
-        SetVertexPositionCubemap(m_positions.data(), 48, 0.4, 0.4);
+        SetVertexPositionCubemap(m_positions.data(), 0, 0.4f, -0.8f);
+        SetVertexPositionCubemap(m_positions.data(), 24, 0.4f, -0.2f);
+        SetVertexPositionCubemap(m_positions.data(), 48, 0.4f, 0.4f);
         SetVertexUVWXCubemapArray(m_uvwxs.data(), s_arraySize);
         SetVertexIndexRectsCounterClock(m_indices.data(), 108);
 
@@ -382,7 +382,7 @@ namespace AtomSampleViewer
 
     void TextureMapExampleComponent::InitTexture3DBufferView()
     {
-        SetVertexPositionArray(m_positions.data(), 0.05, 0.8, -0.8);
+        SetVertexPositionArray(m_positions.data(), 0.05f, 0.8f, -0.8f);
 
         SetVertexUVW(m_uvws.data(), 0, 0.0f, 0.0f, 0.05f);
         SetVertexUVW(m_uvws.data(), 1, 0.0f, 1.0f, 0.05f);
@@ -772,7 +772,7 @@ namespace AtomSampleViewer
 
     void TextureMapExampleComponent::SetVertexPositionCubemap(VertexPosition* positionBuffer, int bufferIndex, float translateX, float translateY)
     {
-        AZ::Matrix3x3 transform = AZ::Matrix3x3::CreateScale(AZ::Vector3(0.05, 0.05, 1));
+        AZ::Matrix3x3 transform = AZ::Matrix3x3::CreateScale(AZ::Vector3(0.05f, 0.05f, 1));
 
         SetVertexPositionTransform(positionBuffer, bufferIndex + 0, transform, translateX, translateY);
         SetVertexPositionTransform(positionBuffer, bufferIndex + 4, transform, translateX, translateY + 0.1f);

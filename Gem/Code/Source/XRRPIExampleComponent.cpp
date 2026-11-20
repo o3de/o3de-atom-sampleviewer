@@ -26,7 +26,7 @@ namespace AtomSampleViewer
 {
     static const float ControllerOffsetScale = 2.0f;
     static const float ViewOrientationScale = 10.0f;
-    static const float PixelToDegree = 1.0 / 360.0f;
+    static const float PixelToDegree = 1.0f / 360.0f;
 
     void XRRPIExampleComponent::Reflect(AZ::ReflectContext* context)
     {

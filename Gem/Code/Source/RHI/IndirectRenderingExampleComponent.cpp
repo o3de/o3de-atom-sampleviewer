@@ -447,8 +447,8 @@ namespace AtomSampleViewer
         indirectBufferWriter->Shutdown();
 
         auto viewDescriptor = RHI::BufferViewDescriptor::CreateStructured(0, s_maxNumberOfObjects, commandsStride);
-        m_sourceIndirectBufferView = m_sourceIndirectBuffer->BuildBufferView(viewDescriptor);
-                  
+        m_sourceIndirectBufferView = m_sourceIndirectBuffer->GetBufferView(viewDescriptor);
+
         if(!m_sourceIndirectBufferView.get())
         {
             AZ_Assert(false, "Fail to initialize Indirect Buffer View");
@@ -515,7 +515,7 @@ namespace AtomSampleViewer
         m_instancesData.resize(s_maxNumberOfObjects);
         for (InstanceData& data : m_instancesData)
         {
-            float scale = GetRandomFloat(0.01, 0.1f);
+            float scale = GetRandomFloat(0.01f, 0.1f);
             data.m_offset = AZ::Vector4(GetRandomFloat(-4.0f, -2.0f), GetRandomFloat(-1.f, 1.f), GetRandomFloat(0.f, 1.f), 0.f);
             data.m_scale = AZ::Vector4(scale, scale, 1.f, 0.f);
             data.m_color = AZ::Color(GetRandomFloat(0.5f, 1.0f), GetRandomFloat(0.5f, 1.0f), GetRandomFloat(0.5f, 1.0f), 1.0f);
@@ -540,8 +540,8 @@ namespace AtomSampleViewer
         m_instancesBufferPool->InitBuffer(request);
 
         auto descriptor = RHI::BufferViewDescriptor::CreateStructured(0, static_cast<uint32_t>(m_instancesData.size()), sizeof(InstanceData));
-        m_instancesDataBufferView = m_instancesDataBuffer->BuildBufferView(descriptor);
-                  
+        m_instancesDataBufferView = m_instancesDataBuffer->GetBufferView(descriptor);
+
         if(!m_instancesDataBufferView.get())
         {
             AZ_Assert(false, "Fail to initialize Instances Data Buffer View");
@@ -878,7 +878,7 @@ namespace AtomSampleViewer
         using namespace AZ;
 
         m_numObjects = s_maxNumberOfObjects / 2;
-        m_geometryViews.resize(m_numObjects);
+        m_geometryViews.resize(m_numObjects, RHI::GeometryView(RHI::MultiDevice::AllDevices));
 
         RHI::Ptr<RHI::Device> device = Utils::GetRHIDevice();
 

@@ -14,14 +14,14 @@ ShaderResourceGroupSemantic SRG_PerGroup
     FrequencyId = 0;
 };
 
-struct MaterialInfo
+struct BaseMaterialInfo
 {
     float4 m_color;
 };
 
 ShaderResourceGroup MaterialGroupSrg : SRG_PerGroup
 {
-    MaterialInfo m_materials[10];
+    BaseMaterialInfo m_materials[10];
 }
 
 rootconstant float4x4 s_objectMatrix;

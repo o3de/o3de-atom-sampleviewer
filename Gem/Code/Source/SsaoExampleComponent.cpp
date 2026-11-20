@@ -390,7 +390,7 @@ namespace AtomSampleViewer
         Camera::CameraRequestBus::Event(GetCameraEntityId(), &Camera::CameraRequestBus::Events::SetFarClipDistance, 200.0f);
         Debug::NoClipControllerRequestBus::Event(GetCameraEntityId(), &Debug::NoClipControllerRequestBus::Events::SetPosition, Vector3(5.0f, 0.0f, 5.0f));
         Debug::NoClipControllerRequestBus::Event(GetCameraEntityId(), &Debug::NoClipControllerRequestBus::Events::SetHeading, DegToRad(90.0f));
-        Debug::NoClipControllerRequestBus::Event(GetCameraEntityId(), &Debug::NoClipControllerRequestBus::Events::SetPitch, DegToRad(-11.936623));
+        Debug::NoClipControllerRequestBus::Event(GetCameraEntityId(), &Debug::NoClipControllerRequestBus::Events::SetPitch, DegToRad(-11.936623f));
     }
 
     // --- Events ---

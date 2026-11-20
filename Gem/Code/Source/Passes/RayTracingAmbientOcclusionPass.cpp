@@ -88,17 +88,13 @@ namespace AZ
                 GetPathName().GetCStr(), rayGenerationShaderFilePath);
                         
             RHI::RayTracingPipelineStateDescriptor descriptor;
-            descriptor.Build()
-                ->PipelineState(m_globalPipelineState.get())
-                ->ShaderLibrary(rayGenerationShaderDescriptor)
-                ->RayGenerationShaderName(AZ::Name("AoRayGen"))
-                ->ShaderLibrary(missShaderDescriptor)
-                ->MissShaderName(AZ::Name("AoMiss"))
-                ->ShaderLibrary(hitShaderDescriptor)
-                ->ClosestHitShaderName(AZ::Name("AoClosestHit"))
-                ->HitGroup(AZ::Name("ClosestHitGroup"))
-                ->ClosestHitShaderName(AZ::Name("AoClosestHit"))
-                ;
+            descriptor.m_pipelineState = m_globalPipelineState.get();
+
+            descriptor.AddRayGenerationShaderLibrary(rayGenerationShaderDescriptor, Name("AoRayGen"));
+            descriptor.AddMissShaderLibrary(missShaderDescriptor, Name("AoMiss"));
+            descriptor.AddClosestHitShaderLibrary(hitShaderDescriptor, Name("AoClosestHit"));
+
+            descriptor.AddHitGroup(Name("ClosestHitGroup"), Name("AoClosestHit"));
 
             // create the ray tracing pipeline state object
             m_rayTracingPipelineState = aznew RHI::RayTracingPipelineState;
@@ -125,11 +121,11 @@ namespace AZ
                 m_rayTracingShaderTable->Init(RHI::MultiDevice::AllDevices, rayTracingBufferPools);
 
                 AZStd::shared_ptr<RHI::RayTracingShaderTableDescriptor> descriptor = AZStd::make_shared<RHI::RayTracingShaderTableDescriptor>();
-                descriptor->Build(AZ::Name("RayTracingAOShaderTable"), m_rayTracingPipelineState)
-                    ->RayGenerationRecord(AZ::Name("AoRayGen"))
-                    ->MissRecord(AZ::Name("AoMiss"))
-                    ->HitGroupRecord(AZ::Name("ClosestHitGroup"))
-                    ;
+                descriptor->m_name = Name("RayTracingAOShaderTable");
+                descriptor->m_rayTracingPipelineState = m_rayTracingPipelineState;
+                descriptor->m_rayGenerationRecord.emplace_back(Name("AoRayGen"));
+                descriptor->m_missRecords.emplace_back(Name("AoMiss"));
+                descriptor->m_hitGroupRecords.emplace_back(Name("ClosestHitGroup"));
 
                 m_rayTracingShaderTable->Build(descriptor);
             }
@@ -167,7 +163,7 @@ namespace AZ
                 RHI::BufferViewDescriptor bufferViewDescriptor = RHI::BufferViewDescriptor::CreateRayTracingTLAS(tlasBufferByteCount);
 
                 bufferIndex = srgLayout->FindShaderInputBufferIndex(AZ::Name("m_scene"));
-                m_shaderResourceGroup->SetBufferView(bufferIndex, tlasBuffer->BuildBufferView(bufferViewDescriptor).get());
+                m_shaderResourceGroup->SetBufferView(bufferIndex, tlasBuffer->GetBufferView(bufferViewDescriptor).get());
             }
 
             // Bind constants

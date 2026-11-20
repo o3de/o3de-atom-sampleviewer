@@ -110,7 +110,7 @@ namespace AtomSampleViewer
         AZ::RHI::AttachmentId m_positionAttachmentId;
         AZ::RHI::AttachmentId m_depthStencilAttachmentId;
 
-        AZ::RHI::GeometryView m_compositeGeometryView;
+        AZ::RHI::GeometryView m_compositeGeometryView{ AZ::RHI::MultiDevice::AllDevices };
 
         AZ::EntityId m_cameraEntityId;
         AzFramework::EntityContextId m_entityContextId;

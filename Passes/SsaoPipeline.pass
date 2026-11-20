@@ -254,6 +254,13 @@
                                 "Pass": "DebugWhiteTexture",
                                 "Attachment": "Output"
                             }
+                        },
+                        {
+                            "LocalSlot": "DepthLinear",
+                            "AttachmentRef": {
+                                "Pass": "DepthPrePass",
+                                "Attachment": "DepthLinear"
+                            }
                         }
                     ]
                 },

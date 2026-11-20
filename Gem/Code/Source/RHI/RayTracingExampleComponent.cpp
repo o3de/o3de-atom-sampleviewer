@@ -209,7 +209,7 @@ namespace AtomSampleViewer
         AZ_Assert(result == RHI::ResultCode::Success, "Failed to initialize output image");
 
         m_outputImageViewDescriptor = RHI::ImageViewDescriptor::Create(RHI::Format::R8G8B8A8_UNORM, 0, 0);
-        m_outputImageView = m_outputImage->BuildImageView(m_outputImageViewDescriptor);
+        m_outputImageView = m_outputImage->GetImageView(m_outputImageViewDescriptor);
         AZ_Assert(m_outputImageView.get(), "Failed to create output image view");
         AZ_Assert(m_outputImageView->GetDeviceImageView(RHI::MultiDevice::DefaultDeviceIndex)->IsFullView(), "Image View initialization IsFullView() failed");
     }
@@ -269,8 +269,8 @@ namespace AtomSampleViewer
         AZ_Assert(m_closestHitGradientShader, "Failed to load closest hit gradient shader");
 
         auto closestHitGradientShaderVariant = m_closestHitGradientShader->GetVariant(RPI::ShaderAsset::RootShaderVariantStableId);
-        RHI::PipelineStateDescriptorForRayTracing closestHitGradiantShaderDescriptor;
-        closestHitGradientShaderVariant.ConfigurePipelineState(closestHitGradiantShaderDescriptor);
+        RHI::PipelineStateDescriptorForRayTracing closestHitGradientShaderDescriptor;
+        closestHitGradientShaderVariant.ConfigurePipelineState(closestHitGradientShaderDescriptor);
 
         // load closest hit solid shader
         const char* closestHitSolidShaderFilePath = "Shaders/RHI/RayTracingClosestHitSolid.azshader";
@@ -288,21 +288,16 @@ namespace AtomSampleViewer
 
         // build the ray tracing pipeline state descriptor
         RHI::RayTracingPipelineStateDescriptor descriptor;
-        descriptor.Build()
-            ->PipelineState(m_globalPipelineState.get())
-            ->ShaderLibrary(rayGenerationShaderDescriptor)
-                ->RayGenerationShaderName(AZ::Name("RayGenerationShader"))
-            ->ShaderLibrary(missShaderDescriptor)
-                ->MissShaderName(AZ::Name("MissShader"))
-            ->ShaderLibrary(closestHitGradiantShaderDescriptor)
-                ->ClosestHitShaderName(AZ::Name("ClosestHitGradientShader"))
-            ->ShaderLibrary(closestHitSolidShaderDescriptor)
-                ->ClosestHitShaderName(AZ::Name("ClosestHitSolidShader"))
-            ->HitGroup(AZ::Name("HitGroupGradient"))
-                ->ClosestHitShaderName(AZ::Name("ClosestHitGradientShader"))
-            ->HitGroup(AZ::Name("HitGroupSolid"))
-                ->ClosestHitShaderName(AZ::Name("ClosestHitSolidShader"));
-    
+        descriptor.m_pipelineState = m_globalPipelineState.get();
+
+        descriptor.AddRayGenerationShaderLibrary(rayGenerationShaderDescriptor, Name("RayGenerationShader"));
+        descriptor.AddMissShaderLibrary(missShaderDescriptor, Name("MissShader"));
+        descriptor.AddClosestHitShaderLibrary(closestHitGradientShaderDescriptor, Name("ClosestHitGradientShader"));
+        descriptor.AddClosestHitShaderLibrary(closestHitSolidShaderDescriptor, Name("ClosestHitSolidShader"));
+
+        descriptor.AddHitGroup(Name("HitGroupGradient"), Name("ClosestHitGradientShader"));
+        descriptor.AddHitGroup(Name("HitGroupSolid"), Name("ClosestHitSolidShader"));
+
         // create the ray tracing pipeline state object
         m_rayTracingPipelineState = aznew RHI::RayTracingPipelineState;
         m_rayTracingPipelineState->Init(RHI::MultiDevice::AllDevices, descriptor);
@@ -342,12 +337,11 @@ namespace AtomSampleViewer
                 };
 
                 RHI::RayTracingBlasDescriptor triangleBlasDescriptor;
-                triangleBlasDescriptor.Build()
-                    ->Geometry()
-                        ->VertexFormat(RHI::Format::R32G32B32_FLOAT)
-                        ->VertexBuffer(triangleVertexBufferView)
-                        ->IndexBuffer(triangleIndexBufferView)
-                ;
+
+                RHI::RayTracingGeometry& triangleBlasGeometry = triangleBlasDescriptor.m_geometries.emplace_back();
+                triangleBlasGeometry.m_vertexFormat = RHI::VertexFormat::R32G32B32_FLOAT;
+                triangleBlasGeometry.m_vertexBuffer = triangleVertexBufferView;
+                triangleBlasGeometry.m_indexBuffer = triangleIndexBufferView;
 
                 m_triangleRayTracingBlas->CreateBuffers(RHI::MultiDevice::AllDevices, &triangleBlasDescriptor, *m_rayTracingBufferPools);
             }
@@ -372,12 +366,11 @@ namespace AtomSampleViewer
                 };
 
                 RHI::RayTracingBlasDescriptor rectangleBlasDescriptor;
-                rectangleBlasDescriptor.Build()
-                    ->Geometry()
-                        ->VertexFormat(RHI::Format::R32G32B32_FLOAT)
-                        ->VertexBuffer(rectangleVertexBufferView)
-                        ->IndexBuffer(rectangleIndexBufferView)
-                ;
+
+                RHI::RayTracingGeometry& rectangleBlasGeometry = rectangleBlasDescriptor.m_geometries.emplace_back();
+                rectangleBlasGeometry.m_vertexFormat = RHI::VertexFormat::R32G32B32_FLOAT;
+                rectangleBlasGeometry.m_vertexBuffer = rectangleVertexBufferView;
+                rectangleBlasGeometry.m_indexBuffer = rectangleIndexBufferView;
 
                 m_rectangleRayTracingBlas->CreateBuffers(RHI::MultiDevice::AllDevices, &rectangleBlasDescriptor, *m_rayTracingBufferPools);
             }
@@ -402,31 +395,44 @@ namespace AtomSampleViewer
             rectangleTransform.MultiplyByUniformScale(100.0f);
 
             // create the TLAS
-            RHI::RayTracingTlasDescriptor tlasDescriptor;
-            tlasDescriptor.Build()
-                ->Instance()
-                    ->InstanceID(0)
-                    ->HitGroupIndex(0)
-                    ->Blas(m_triangleRayTracingBlas)
-                    ->Transform(triangleTransform1)
-                ->Instance()
-                    ->InstanceID(1)
-                    ->HitGroupIndex(1)
-                    ->Blas(m_triangleRayTracingBlas)
-                    ->Transform(triangleTransform2)
-                ->Instance()
-                    ->InstanceID(2)
-                    ->HitGroupIndex(2)
-                    ->Blas(m_triangleRayTracingBlas)
-                    ->Transform(triangleTransform3)
-                ->Instance()
-                    ->InstanceID(3)
-                    ->HitGroupIndex(3)
-                    ->Blas(m_rectangleRayTracingBlas)
-                    ->Transform(rectangleTransform)
-                ;
+            auto deviceMask = RHI::MultiDevice::AllDevices;
+            AZStd::unordered_map<int, RHI::DeviceRayTracingTlasDescriptor> tlasDescriptor;
+            RHI::MultiDeviceObject::IterateDevices(
+                deviceMask,
+                [&](int deviceIndex)
+                {
+                    {
+                        auto& tlasInstance = tlasDescriptor[deviceIndex].m_instances.emplace_back();
+                        tlasInstance.m_instanceID = 0;
+                        tlasInstance.m_hitGroupIndex = 0;
+                        tlasInstance.m_blas = m_triangleRayTracingBlas->GetDeviceRayTracingBlas(deviceIndex);
+                        tlasInstance.m_transform = triangleTransform1;
+                    }
+                    {
+                        auto& tlasInstance = tlasDescriptor[deviceIndex].m_instances.emplace_back();
+                        tlasInstance.m_instanceID = 1;
+                        tlasInstance.m_hitGroupIndex = 1;
+                        tlasInstance.m_blas = m_triangleRayTracingBlas->GetDeviceRayTracingBlas(deviceIndex);
+                        tlasInstance.m_transform = triangleTransform2;
+                    }
+                    {
+                        auto& tlasInstance = tlasDescriptor[deviceIndex].m_instances.emplace_back();
+                        tlasInstance.m_instanceID = 2;
+                        tlasInstance.m_hitGroupIndex = 2;
+                        tlasInstance.m_blas = m_triangleRayTracingBlas->GetDeviceRayTracingBlas(deviceIndex);
+                        tlasInstance.m_transform = triangleTransform3;
+                    }
+                    {
+                        auto& tlasInstance = tlasDescriptor[deviceIndex].m_instances.emplace_back();
+                        tlasInstance.m_instanceID = 3;
+                        tlasInstance.m_hitGroupIndex = 3;
+                        tlasInstance.m_blas = m_rectangleRayTracingBlas->GetDeviceRayTracingBlas(deviceIndex);
+                        tlasInstance.m_transform = rectangleTransform;
+                    }
+                    return true;
+                });
 
-            m_rayTracingTlas->CreateBuffers(RHI::MultiDevice::AllDevices, &tlasDescriptor, *m_rayTracingBufferPools);
+            m_rayTracingTlas->CreateBuffers(deviceMask, tlasDescriptor, *m_rayTracingBufferPools);
 
             m_tlasBufferViewDescriptor = RHI::BufferViewDescriptor::CreateRaw(0, (uint32_t)m_rayTracingTlas->GetTlasBuffer()->GetDescriptor().m_byteCount);
 
@@ -450,7 +456,9 @@ namespace AtomSampleViewer
             commandList->BuildBottomLevelAccelerationStructure(*m_triangleRayTracingBlas->GetDeviceRayTracingBlas(context.GetDeviceIndex()));
             commandList->BuildBottomLevelAccelerationStructure(*m_rectangleRayTracingBlas->GetDeviceRayTracingBlas(context.GetDeviceIndex()));
             commandList->BuildTopLevelAccelerationStructure(
-                *m_rayTracingTlas->GetDeviceRayTracingTlas(context.GetDeviceIndex()), { m_triangleRayTracingBlas->GetDeviceRayTracingBlas(context.GetDeviceIndex()).get(), m_rectangleRayTracingBlas->GetDeviceRayTracingBlas(context.GetDeviceIndex()).get() });
+                *m_rayTracingTlas->GetDeviceRayTracingTlas(context.GetDeviceIndex()),
+                { m_triangleRayTracingBlas->GetDeviceRayTracingBlas(context.GetDeviceIndex()).get(), m_rectangleRayTracingBlas->GetDeviceRayTracingBlas(context.GetDeviceIndex()).get() },
+                {});
         };
 
         m_scopeProducers.emplace_back(
@@ -511,7 +519,7 @@ namespace AtomSampleViewer
 
                 uint32_t tlasBufferByteCount = aznumeric_cast<uint32_t>(m_rayTracingTlas->GetTlasBuffer()->GetDescriptor().m_byteCount);
                 RHI::BufferViewDescriptor bufferViewDescriptor = RHI::BufferViewDescriptor::CreateRayTracingTLAS(tlasBufferByteCount);
-                m_globalSrg->SetBufferView(tlasConstantIndex, m_rayTracingTlas->GetTlasBuffer()->BuildBufferView(bufferViewDescriptor).get());
+                m_globalSrg->SetBufferView(tlasConstantIndex, m_rayTracingTlas->GetTlasBuffer()->GetBufferView(bufferViewDescriptor).get());
 
                 RHI::ShaderInputImageIndex outputConstantIndex;
                 FindShaderInputIndex(&outputConstantIndex, m_globalSrg, AZ::Name{ "m_output" }, RayTracingExampleName);
@@ -562,14 +570,14 @@ namespace AtomSampleViewer
 
                 // update the ray tracing shader table
                 AZStd::shared_ptr<RHI::RayTracingShaderTableDescriptor> descriptor = AZStd::make_shared<RHI::RayTracingShaderTableDescriptor>();
-                descriptor->Build(AZ::Name("RayTracingExampleShaderTable"), m_rayTracingPipelineState)
-                    ->RayGenerationRecord(AZ::Name("RayGenerationShader"))
-                    ->MissRecord(AZ::Name("MissShader"))
-                    ->HitGroupRecord(AZ::Name("HitGroupGradient")) // triangle1
-                    ->HitGroupRecord(AZ::Name("HitGroupGradient")) // triangle2
-                    ->HitGroupRecord(AZ::Name("HitGroupSolid")) // triangle3
-                    ->HitGroupRecord(AZ::Name("HitGroupSolid")) // rectangle
-                    ;
+                descriptor->m_name = AZ::Name("RayTracingExampleShaderTable");
+                descriptor->m_rayTracingPipelineState = m_rayTracingPipelineState;
+                descriptor->m_rayGenerationRecord.emplace_back(AZ::Name("RayGenerationShader"));
+                descriptor->m_missRecords.emplace_back(AZ::Name("MissShader"));
+                descriptor->m_hitGroupRecords.emplace_back(AZ::Name("HitGroupGradient")); // triangle1
+                descriptor->m_hitGroupRecords.emplace_back(AZ::Name("HitGroupGradient")); // triangle2
+                descriptor->m_hitGroupRecords.emplace_back(AZ::Name("HitGroupSolid")); // triangle3
+                descriptor->m_hitGroupRecords.emplace_back(AZ::Name("HitGroupSolid")); // rectangle
 
                 m_rayTracingShaderTable->Build(descriptor);
             }

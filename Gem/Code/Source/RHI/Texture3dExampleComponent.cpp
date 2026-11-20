@@ -108,8 +108,8 @@ namespace AtomSampleViewer
             RHI::ImageViewDescriptor imageViewDescriptor = {};
             imageViewDescriptor = RHI::ImageViewDescriptor::Create(format, 0, 0);
             imageViewDescriptor.m_overrideBindFlags = RHI::ImageBindFlags::ShaderRead;
-            
-            m_imageView = m_image->BuildImageView(imageViewDescriptor);
+
+            m_imageView = m_image->GetImageView(imageViewDescriptor);
             m_imageView->SetName(Name("Texture3DView"));
             if(!m_imageView.get())
             {
@@ -206,7 +206,7 @@ namespace AtomSampleViewer
                 m_shaderResourceGroup->Compile();
             };
 
-            const auto executeFunction = [=]([[maybe_unused]] const RHI::FrameGraphExecuteContext& context, [[maybe_unused]] const ScopeData& scopeData)
+            const auto executeFunction = [this]([[maybe_unused]] const RHI::FrameGraphExecuteContext& context, [[maybe_unused]] const ScopeData& scopeData)
             {
                 RHI::CommandList* commandList = context.GetCommandList();
 

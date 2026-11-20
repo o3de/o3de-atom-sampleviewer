@@ -86,7 +86,7 @@ namespace AtomSampleViewer
         AZ::RPI::DynamicDrawInterface* m_dynamicDraw = nullptr;
 
         // render related data
-        AZ::RHI::GeometryView m_geometryView;
+        AZ::RHI::GeometryView m_geometryView{ AZ::RHI::MultiDevice::AllDevices };
         AZ::RHI::ConstPtr<AZ::RHI::PipelineState> m_pipelineState;
         AZ::RHI::DrawListTag m_drawListTag;
         AZ::Data::Asset<AZ::RPI::ShaderAsset> m_shaderAsset;

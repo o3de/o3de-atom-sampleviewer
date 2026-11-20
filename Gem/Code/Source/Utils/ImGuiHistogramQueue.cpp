@@ -98,7 +98,7 @@ namespace AtomSampleViewer
         }
 
         // Draw moving average of values first
-        ImGui::PushStyleColor(ImGuiCol_PlotLines, ImVec4(0.6, 0.8, 0.9, 1.0));
+        ImGui::PushStyleColor(ImGuiCol_PlotLines, ImVec4(0.6f, 0.8f, 0.9f, 1.0f));
         ImGui::PlotLines("##Average", &m_averageLog[0], int32_t(m_averageLog.size()), 0, nullptr, 0.0f, m_displayedAverage * 2.0f, ImVec2(400, 50));
         ImGui::PopStyleColor();
 

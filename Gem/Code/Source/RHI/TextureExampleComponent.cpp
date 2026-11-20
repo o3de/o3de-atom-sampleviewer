@@ -221,7 +221,7 @@ namespace AtomSampleViewer
                 }
             };
 
-            const auto executeFunction = [=](const RHI::FrameGraphExecuteContext& context, [[maybe_unused]] const ScopeData& scopeData)
+            const auto executeFunction = [this](const RHI::FrameGraphExecuteContext& context, [[maybe_unused]] const ScopeData& scopeData)
             {
                 RHI::CommandList* commandList = context.GetCommandList();
 
